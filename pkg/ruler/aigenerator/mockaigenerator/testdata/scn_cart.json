@@ -1,0 +1,23 @@
+{
+  "match": { "alertname": "CartServiceLatencyHigh", "service_name": "cartservice" },
+  "strategy": {
+    "contractVersion": "ds.ai_strategy.v1",
+    "strategyId": "mock-cart-001",
+    "incidentId": "INC-CART",
+    "alertFingerprint": "fp-cart",
+    "status": "ready",
+    "language": "ko-KR",
+    "sopId": "SOP-CART-001",
+    "sopVersion": "2026-05-20.1",
+    "headline": "Cart 서비스 p99 지연 급증. Redis 캐시 응답 지연이 유력합니다.",
+    "hypotheses": [
+      {"rank":1,"text":"Redis hot key/cache stall로 cart read latency 증가","confidence":"medium","evidenceRefs":["metric:cart_p99","trace:redis-getex"]}
+    ],
+    "firstActions": [
+      {"text":"Redis 캐시 hit-ratio dashboard 확인 후 hot-key eviction","sopStepRef":"SOP-CART-001#1","requiresHumanApproval":true}
+    ],
+    "confidence": "medium",
+    "limitations": ["mock response"],
+    "audit": {"promptVersion":"mock-v1","model":"mock-ai","generatedAt":"2026-05-20T09:00:00Z","redactionApplied":true}
+  }
+}

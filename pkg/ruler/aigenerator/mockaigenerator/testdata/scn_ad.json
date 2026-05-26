@@ -1,0 +1,23 @@
+{
+  "match": { "alertname": "AdServiceCPUSat", "service_name": "adservice" },
+  "strategy": {
+    "contractVersion": "ds.ai_strategy.v1",
+    "strategyId": "mock-ad-001",
+    "incidentId": "INC-AD",
+    "alertFingerprint": "fp-ad",
+    "status": "ready",
+    "language": "ko-KR",
+    "sopId": "SOP-AD-001",
+    "sopVersion": "2026-05-20.1",
+    "headline": "Ad 서비스 CPU saturation. 강제 GC 루프 가능성을 우선 점검합니다.",
+    "hypotheses": [
+      {"rank":1,"text":"수동 GC 실행이 반복되며 CPU 점유","confidence":"medium","evidenceRefs":["metric:adservice_cpu","trace:jvm-gc"]}
+    ],
+    "firstActions": [
+      {"text":"JVM GC dashboard 및 manualGc feature flag 상태 확인","sopStepRef":"SOP-AD-001#1","requiresHumanApproval":true}
+    ],
+    "confidence": "medium",
+    "limitations": ["mock response"],
+    "audit": {"promptVersion":"mock-v1","model":"mock-ai","generatedAt":"2026-05-20T09:00:00Z","redactionApplied":true}
+  }
+}

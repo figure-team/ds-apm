@@ -1,0 +1,93 @@
+.runbook-card {
+	border: 1px solid #d9d9d9;
+	border-radius: 4px;
+	padding: 16px;
+	margin-bottom: 16px;
+	background-color: #fff;
+
+	&__header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 12px;
+
+		h3 {
+			margin: 0;
+			font-size: 16px;
+			font-weight: 600;
+		}
+	}
+
+	&__meta {
+		font-size: 12px;
+		color: #666;
+		margin-bottom: 12px;
+
+		code {
+			background-color: #f5f5f5;
+			padding: 2px 6px;
+			border-radius: 3px;
+			font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+		}
+	}
+
+	&__description {
+		font-size: 14px;
+		color: #333;
+		margin-bottom: 12px;
+		margin-top: 0;
+	}
+
+	&__script {
+		background-color: #f5f5f5;
+		border: 1px solid #e8e8e8;
+		border-radius: 4px;
+		padding: 12px;
+		margin-bottom: 12px;
+		overflow-x: auto;
+		max-height: 200px;
+		overflow-y: auto;
+
+		pre {
+			margin: 0;
+			font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+			font-size: 12px;
+			color: #333;
+
+			code {
+				background-color: transparent;
+				padding: 0;
+				color: inherit;
+			}
+		}
+	}
+
+	&__actions {
+		display: flex;
+		gap: 8px;
+		flex-wrap: wrap;
+
+		button {
+			margin: 0;
+		}
+	}
+}
+
+.runbooks-section {
+	&__header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 16px;
+
+		h2 {
+			margin: 0;
+			font-size: 20px;
+			font-weight: 600;
+		}
+	}
+
+	&__list {
+		margin-top: 16px;
+	}
+}

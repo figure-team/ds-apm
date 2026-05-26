@@ -1,0 +1,35 @@
+{
+  "contractVersion": "ds.sop_document.v1",
+  "sopId": "SOP-AD-001",
+  "version": "2026-05-20.1",
+  "title": "Ad CPU saturation",
+  "checksum": "sha256:793c0a5e7cb349ecda1d192d3be384fc6368ba2882b9a4c7a7e4b03fdc7256b7",
+  "source": {
+    "type": "managed_markdown",
+    "sourceId": "src-managed-markdown-default"
+  },
+  "bodyMarkdown": "# Ad CPU saturation\n\n1. JVM GC dashboard 확인\n2. manualGc feature flag 상태 확인\n3. CPU 사용률과 GC 빈도 추이 확인",
+  "displayUrl": "https://kb.example/sop/SOP-AD-001",
+  "ownerTeam": "ads",
+  "approvalStatus": "approved",
+  "tenantScope": {
+    "projectIds": [
+      "customer-a"
+    ],
+    "environments": [
+      "prod"
+    ]
+  },
+  "tags": [
+    "adservice",
+    "prod",
+    "warning"
+  ],
+  "updatedAt": "2026-05-20T00:00:00Z",
+  "securityContext": {
+    "serviceAccountProfile": "ds-sop-reader",
+    "secretRefVisible": false,
+    "browserCredentialsUsed": false,
+    "redactionApplied": true
+  }
+}

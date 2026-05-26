@@ -1,0 +1,10 @@
+{
+  "title": "Rolling restart payment-service",
+  "description": "## When to use\nUse when Payment API 5xx rate spikes and pod logs show stuck DB connections or OOM.\n\n## What it does\nRolling restart of the payment-service deployment, then waits for rollout to complete.\n\n## Verify after running\n- Error rate drops in Payments dashboard\n- `kubectl rollout status` returns success\n",
+  "executableScript": "#!/bin/bash\nset -euo pipefail\nkubectl rollout restart deploy/payment-service -n prod\nkubectl rollout status deploy/payment-service -n prod --timeout=120s\n",
+  "status": "approved",
+  "confidence": 1.0,
+  "aiDraftedBy": "",
+  "sourceErrorExamples": [],
+  "updatedBy": "demo-seed"
+}

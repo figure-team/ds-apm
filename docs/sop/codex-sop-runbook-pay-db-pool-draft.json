@@ -1,0 +1,13 @@
+{
+  "title": "Payment DB connection pool 고갈 완화",
+  "description": "## 사용 조건\nPayment API 5xx가 증가하고 payment-service log에 DB connection pool timeout 또는 too many connections 오류가 반복될 때 사용한다.\n\n## 수행 작업\n현재 payment-service pod log에서 connection pool 오류를 확인하고, deployment를 rolling restart해서 고착된 connection 상태를 해소한다. 재시작 후에도 오류가 지속되면 DB max connection과 application pool 설정을 별도로 점검한다.\n\n## 실행 후 검증\n- Payment API 5xx 비율이 감소한다\n- DB connection timeout log가 새로 증가하지 않는다\n- `kubectl rollout status`가 success를 반환한다\n",
+  "executableScript": "#!/bin/bash\nset -euo pipefail\nkubectl logs -n prod deploy/payment-service --tail=200 | grep -Ei 'connection pool|too many connections|timeout' || true\nkubectl rollout restart deploy/payment-service -n prod\nkubectl rollout status deploy/payment-service -n prod --timeout=120s\n",
+  "status": "draft",
+  "confidence": 0.72,
+  "aiDraftedBy": "mock-runbook-drafter",
+  "sourceErrorExamples": [
+    "payment-service: failed to acquire db connection: context deadline exceeded",
+    "payment-service: pq: remaining connection slots are reserved"
+  ],
+  "updatedBy": "ai"
+}

@@ -1,0 +1,17 @@
+# Canonical seed rows for ds_ai_strategy_history.
+# Schema: pkg/sqlmigration/078_add_ds_apm_stores.go
+# Domain: pkg/types/ruletypes/ai_strategy_history.go (AIStrategyHistoryRecord)
+#
+# Regenerate the JSON in `payload` by running:
+#   FIXTURE_GEN=1 go test ./pkg/types/ruletypes/ -run TestFixtureGen_Print -v
+# and copying the printed blocks.
+- org_id: org-1
+  incident_id: inc-1
+  alert_fingerprint: fp-1
+  contract_version: ds.ai_strategy_history.v1
+  payload: "{\"contractVersion\":\"ds.ai_strategy_history.v1\",\"incidentId\":\"inc-1\",\"alertFingerprint\":\"fp-1\",\"strategyId\":\"strat-inc-1\",\"status\":\"unavailable\",\"confidence\":\"low\",\"generatedAt\":\"2026-05-20T09:00:00Z\",\"strategy\":{\"contractVersion\":\"ds.ai_strategy.v1\",\"strategyId\":\"strat-inc-1\",\"incidentId\":\"inc-1\",\"alertFingerprint\":\"fp-1\",\"status\":\"unavailable\",\"language\":\"ko-KR\",\"confidence\":\"low\",\"limitations\":[\"test\"],\"audit\":{\"promptVersion\":\"ds-ir-ko-v1\",\"model\":\"deterministic-local\",\"generatedAt\":\"2026-05-20T09:00:00Z\",\"redactionApplied\":true}}}"
+- org_id: org-A
+  incident_id: inc-1
+  alert_fingerprint: fp-abc
+  contract_version: ds.ai_strategy_history.v1
+  payload: "{\"contractVersion\":\"ds.ai_strategy_history.v1\",\"incidentId\":\"inc-1\",\"alertFingerprint\":\"fp-abc\",\"strategyId\":\"strat-inc-1\",\"status\":\"unavailable\",\"confidence\":\"low\",\"generatedAt\":\"2026-05-20T09:00:00Z\",\"strategy\":{\"contractVersion\":\"ds.ai_strategy.v1\",\"strategyId\":\"strat-inc-1\",\"incidentId\":\"inc-1\",\"alertFingerprint\":\"fp-abc\",\"status\":\"unavailable\",\"language\":\"ko-KR\",\"confidence\":\"low\",\"limitations\":[\"test\"],\"audit\":{\"promptVersion\":\"ds-ir-ko-v1\",\"model\":\"deterministic-local\",\"generatedAt\":\"2026-05-20T09:00:00Z\",\"redactionApplied\":true}}}"

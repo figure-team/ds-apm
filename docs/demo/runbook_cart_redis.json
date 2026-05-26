@@ -1,0 +1,10 @@
+{
+  "title": "Flush cart-service Redis cache",
+  "description": "## When to use\nUse when cart latency spikes above 2s and Redis hit-rate falls but the cluster is healthy.\n\n## What it does\nFlushes the cart-service Redis keys (FLUSHDB on db 0) and restarts the cart-service pods so they re-warm.\n\n## Verify after running\n- p95 cart latency returns under 500ms\n- Redis memory usage drops\n",
+  "executableScript": "#!/bin/bash\nset -euo pipefail\nkubectl exec -n prod statefulset/cart-redis -- redis-cli FLUSHDB\nkubectl rollout restart deploy/cart-service -n prod\nkubectl rollout status deploy/cart-service -n prod --timeout=120s\n",
+  "status": "approved",
+  "confidence": 1.0,
+  "aiDraftedBy": "",
+  "sourceErrorExamples": [],
+  "updatedBy": "demo-seed"
+}

@@ -1,0 +1,10 @@
+{
+  "sopId": "SOP-CART-001",
+  "version": "2026-05-20.1",
+  "errorExamples": [
+    "cartservice p99 latency exceeded 2s; redis GETEX timeout",
+    "redis hit ratio dropped below 70 percent",
+    "cartservice trace shows repeated redis command timeout",
+    "cartservice logs show redis pool exhausted"
+  ]
+}

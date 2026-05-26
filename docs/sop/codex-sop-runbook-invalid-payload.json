@@ -1,0 +1,10 @@
+{
+  "title": "   ",
+  "description": "이 payload는 validation 실패를 확인하기 위한 예시다.",
+  "executableScript": "#!/bin/bash\nset -euo pipefail\necho invalid\n",
+  "status": "running",
+  "confidence": 1.2,
+  "aiDraftedBy": "",
+  "sourceErrorExamples": [],
+  "updatedBy": "codex-validation-case"
+}

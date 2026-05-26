@@ -1,0 +1,7 @@
+{
+  "sopId": "SOP-CART-001",
+  "version": "",
+  "errorExamples": [
+    "cartservice p99 latency exceeded 2s; redis GETEX timeout"
+  ]
+}

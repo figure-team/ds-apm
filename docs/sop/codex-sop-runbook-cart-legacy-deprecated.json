@@ -1,0 +1,10 @@
+{
+  "title": "Legacy cart-service full pod delete",
+  "description": "## 사용 조건\n이 runbook은 예전 데모에서 사용하던 절차이며 현재는 권장하지 않는다. Redis cache 문제를 해결하기 위해 cart-service pod를 직접 삭제하는 방식이라 rollout 상태 추적과 재현성이 떨어진다.\n\n## 대체 절차\n`runbook_cart_redis.json`를 사용한다. 해당 runbook은 Redis cache flush 후 deployment rolling restart와 rollout status 확인까지 포함한다.\n\n## 보관 이유\nDeprecated 상태가 UI와 API에서 어떻게 보이는지 확인하기 위한 예시다.\n",
+  "executableScript": "#!/bin/bash\nset -euo pipefail\nkubectl delete pod -n prod -l app=cart-service\n",
+  "status": "deprecated",
+  "confidence": 1.0,
+  "aiDraftedBy": "",
+  "sourceErrorExamples": [],
+  "updatedBy": "demo-seed"
+}

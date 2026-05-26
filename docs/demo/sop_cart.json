@@ -1,0 +1,35 @@
+{
+  "contractVersion": "ds.sop_document.v1",
+  "sopId": "SOP-CART-001",
+  "version": "2026-05-20.1",
+  "title": "Cart latency surge",
+  "checksum": "sha256:4381614714f510813ff98b93168ed6bba3c644961a8cdefaa86812226ee3cd30",
+  "source": {
+    "type": "managed_markdown",
+    "sourceId": "src-managed-markdown-default"
+  },
+  "bodyMarkdown": "# Cart latency surge\n\n1. Redis 캐시 hit-ratio dashboard 확인\n2. hot key 발견 시 eviction\n3. cart read latency p99 추이 확인",
+  "displayUrl": "https://kb.example/sop/SOP-CART-001",
+  "ownerTeam": "cart",
+  "approvalStatus": "approved",
+  "tenantScope": {
+    "projectIds": [
+      "customer-a"
+    ],
+    "environments": [
+      "prod"
+    ]
+  },
+  "tags": [
+    "cartservice",
+    "prod",
+    "critical"
+  ],
+  "updatedAt": "2026-05-20T00:00:00Z",
+  "securityContext": {
+    "serviceAccountProfile": "ds-sop-reader",
+    "secretRefVisible": false,
+    "browserCredentialsUsed": false,
+    "redactionApplied": true
+  }
+}

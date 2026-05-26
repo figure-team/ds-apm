@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Codex DS-APM Use Case 최종본</title>
+<style>
+  :root {
+    --bg: #f7f8fb;
+    --panel: #ffffff;
+    --ink: #172033;
+    --muted: #647084;
+    --line: #d9dee8;
+    --blue: #2563eb;
+    --green: #12805c;
+    --amber: #b7791f;
+    --red: #b42318;
+    --purple: #6d28d9;
+    --shadow: 0 8px 24px rgba(18, 32, 58, 0.08);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Pretendard, Roboto, sans-serif;
+    line-height: 1.55;
+  }
+
+  header {
+    background: #121827;
+    color: #f8fafc;
+    padding: 28px 32px 24px;
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 28px;
+    letter-spacing: 0;
+  }
+
+  header p {
+    max-width: 980px;
+    margin: 10px 0 0;
+    color: #cbd5e1;
+    font-size: 14px;
+  }
+
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding: 12px 32px;
+    background: rgba(255, 255, 255, 0.94);
+    border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(8px);
+  }
+
+  nav a, nav button {
+    appearance: none;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  nav button.active {
+    background: var(--blue);
+    color: #fff;
+    border-color: var(--blue);
+  }
+
+  main {
+    padding: 24px 32px 48px;
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  section {
+    margin: 0 0 28px;
+  }
+
+  h2 {
+    font-size: 20px;
+    margin: 0 0 12px;
+  }
+
+  h3 {
+    font-size: 16px;
+    margin: 0 0 8px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  .summary {
+    display: grid;
+    grid-template-columns: minmax(260px, 1.2fr) minmax(280px, 2fr);
+    gap: 16px;
+  }
+
+  .actor-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .actor {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    background: #fbfcff;
+  }
+
+  .actor strong {
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .actor span {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .flow {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(120px, 1fr));
+    gap: 8px;
+    align-items: stretch;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .flow .step {
+    min-height: 92px;
+    position: relative;
+    border: 1px solid var(--line);
+    background: #fbfcff;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+  }
+
+  .flow .step::after {
+    content: "->";
+    position: absolute;
+    right: -15px;
+    top: 36px;
+    color: var(--muted);
+  }
+
+  .flow .step:last-child::after { content: ""; }
+
+  .step .id {
+    display: inline-block;
+    font-weight: 700;
+    color: var(--blue);
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .step strong {
+    display: block;
+    font-size: 13px;
+  }
+
+  .step small {
+    color: var(--muted);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  th, td {
+    padding: 10px 11px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+    font-size: 13px;
+  }
+
+  th {
+    background: #eef2f7;
+    font-size: 12px;
+    color: #334155;
+  }
+
+  tr:last-child td { border-bottom: 0; }
+
+  .badge {
+    display: inline-block;
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .high { background: #dbeafe; color: #1d4ed8; }
+  .mid { background: #fef3c7; color: #92400e; }
+  .partial { background: #ffedd5; color: #9a3412; }
+  .platform { background: #dcfce7; color: #166534; }
+  .gap { background: #fee2e2; color: #991b1b; }
+
+  .uc-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .uc-card header {
+    background: transparent;
+    color: var(--ink);
+    padding: 0;
+  }
+
+  .uc-card .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .uc-card ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+
+  .uc-card li {
+    margin: 4px 0;
+    font-size: 13px;
+  }
+
+  .routes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 12px;
+  }
+
+  details {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel);
+    box-shadow: var(--shadow);
+  }
+
+  summary {
+    cursor: pointer;
+    padding: 12px 14px;
+    font-weight: 700;
+  }
+
+  details .body {
+    border-top: 1px solid var(--line);
+    padding: 12px 14px 14px;
+  }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    color: #0f172a;
+    background: #eef2f7;
+    border: 1px solid #d7deea;
+    border-radius: 5px;
+    padding: 2px 5px;
+  }
+
+  pre {
+    overflow-x: auto;
+    background: #111827;
+    color: #e5e7eb;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 12px;
+  }
+
+  .callout {
+    border-left: 4px solid var(--blue);
+    background: #eef6ff;
+    padding: 12px 14px;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .gap-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .gap-card {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel);
+    padding: 14px;
+  }
+
+  .gap-card strong {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .gap-card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .search {
+    margin-left: auto;
+    min-width: 220px;
+    max-width: 320px;
+    flex: 1;
+  }
+
+  .search input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font: inherit;
+    font-size: 13px;
+  }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 900px) {
+    header, nav, main { padding-left: 18px; padding-right: 18px; }
+    .summary { grid-template-columns: 1fr; }
+    .flow { grid-template-columns: repeat(8, 160px); }
+    .search { margin-left: 0; min-width: 100%; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Codex DS-APM Use Case 최종본</h1>
+  <p>Claude의 운영자 라이프사이클과 Codex의 SOP/Runbook 유스케이스를 통합한 최종 HTML이다. 사용자 목표, 커버리지, route, 갭을 한 화면에서 탐색할 수 있게 구성했다.</p>
+</header>
+
+<nav>
+  <a href="#overview">개요</a>
+  <a href="#lifecycle">라이프사이클</a>
+  <a href="#usecases">유스케이스</a>
+  <a href="#rules">상태/안전</a>
+  <a href="#routes">Routes</a>
+  <a href="#gaps">갭</a>
+  <button type="button" data-filter="all" class="active">전체</button>
+  <button type="button" data-filter="높음">높음</button>
+  <button type="button" data-filter="중간">중간</button>
+  <button type="button" data-filter="부분">부분</button>
+  <button type="button" data-filter="플랫폼 의존">플랫폼 의존</button>
+  <label class="search">
+    <input id="search" type="search" placeholder="유스케이스, route, 갭 검색" />
+  </label>
+</nav>
+
+<main>
+  <section id="overview" class="summary">
+    <div class="panel">
+      <h2>병합 기준</h2>
+      <p>유스케이스는 “사용자가 시스템으로 달성하려는 목표”만 다룬다. 장애별 절차, curl smoke test, fixture 설명은 <code>docs/sop/</code>로 분리했다.</p>
+      <div class="callout">
+        등록되지 않은 에러 패턴은 UC3의 하위 흐름으로 다룬다. 관련 SOP를 찾고, runbook이 없으면 AI draft를 만들되 자동 저장/실행하지 않는다.
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>액터</h2>
+      <div class="actor-list">
+        <div class="actor"><strong>운영자 / SRE</strong><span>SOP, Runbook, AI 설정, 알림 대응 자산을 만들고 incident 중 대응 절차를 확보한다.</span></div>
+        <div class="actor"><strong>뷰어</strong><span>등록된 알림, SOP, Runbook, AI 전략 이력을 조회한다.</span></div>
+        <div class="actor"><strong>알림 시스템</strong><span>alert rule 발화와 dispatch 흐름을 통해 incident context를 만든다.</span></div>
+        <div class="actor"><strong>LLM Provider</strong><span>AI 전략과 Runbook draft를 생성한다.</span></div>
+        <div class="actor"><strong>SigNoz 관측 기능</strong><span>trace, log, metric, dashboard, service map으로 진단 근거를 제공한다.</span></div>
+        <div class="actor"><strong>Pilot SOP 소스</strong><span>managed markdown 같은 외부 SOP 원천을 제공한다.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="lifecycle" class="panel">
+    <h2>라이프사이클</h2>
+    <div class="flow" id="flow"></div>
+  </section>
+
+  <section id="usecases">
+    <h2>유스케이스 목록</h2>
+    <div class="grid" id="ucGrid"></div>
+  </section>
+
+  <section id="rules" class="panel">
+    <h2>상태와 안전 규칙</h2>
+    <div class="grid">
+      <div>
+        <h3>Runbook Status</h3>
+        <p><span class="badge mid">draft</span> <span class="badge high">approved</span> <span class="badge partial">deprecated</span></p>
+        <pre>draft      -> approved
+draft      -> deprecated
+approved   -> deprecated
+approved   -> draft
+deprecated -> draft</pre>
+      </div>
+      <div>
+        <h3>금지되는 전이</h3>
+        <pre>deprecated -> approved
+same-status no-op update</pre>
+      </div>
+      <div>
+        <h3>안전 원칙</h3>
+        <ul>
+          <li>AI draft는 자동 저장되지 않는다.</li>
+          <li>Draft는 자동 실행되지 않는다.</li>
+          <li>Approved runbook도 시스템이 직접 실행하지 않는다.</li>
+          <li>Deprecated runbook은 기본 목록에 노출하지 않는다.</li>
+          <li>잘못된 입력은 저장 전에 거절한다.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="routes">
+    <h2>Route 대응표</h2>
+    <div class="routes" id="routesGrid"></div>
+  </section>
+
+  <section id="gaps">
+    <h2>갭 클러스터</h2>
+    <div class="gap-grid">
+      <div class="gap-card"><strong>실행/자동조치</strong><p>UC5. Runbook은 문서와 copy 대상이다. 실행 오케스트레이션은 다음 단계다.</p></div>
+      <div class="gap-card"><strong>협업/통지</strong><p>UC6. on-call, ChatOps, status page, escalation은 별도 설계가 필요하다.</p></div>
+      <div class="gap-card"><strong>Incident 객체</strong><p>UC6, UC7, UC8. timeline, 종료 상태, postmortem, action item을 연결하려면 1급 incident 모델이 필요하다.</p></div>
+      <div class="gap-card"><strong>변경 상관</strong><p>UC4, UC8. 배포/설정 변경 이력과 incident history가 진단 정확도를 높인다.</p></div>
+      <div class="gap-card"><strong>반복 패턴 분석</strong><p>UC8. 등록되지 않은 에러가 반복되는지 집계하는 기능은 아직 없다.</p></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const usecases = [
+  {
+    id: "UC1",
+    title: "대응 자산을 사전 정비한다",
+    actor: "운영자 / SRE",
+    responsibility: "alert, SOP, runbook, AI 설정, downtime을 준비한다",
+    coverage: "높음",
+    actions: ["alert rule 생성", "알림 템플릿 preview", "SOP 등록/version 관리", "Runbook 수동 등록", "AI Runbook draft 검토", "AI provider/model 설정", "점검 downtime 등록"],
+    routes: ["POST /api/v2/ds/sop/documents", "POST /api/v2/ds/sop/documents/{sopId}/versions/{version}/runbooks", "PUT /api/v2/ds/ai/config", "POST /api/v2/ds/ai/config/test"],
+    gaps: ["온콜/에스컬레이션 정책 없음", "서비스 카탈로그/소유자 모델 제한적", "SLO/에러버짓 확인 필요"]
+  },
+  {
+    id: "UC2",
+    title: "이상을 탐지하고 통지받는다",
+    actor: "알림 시스템, 운영자",
+    responsibility: "alert 발화와 AI 전략 생성을 연결한다",
+    coverage: "중간",
+    actions: ["alert rule 발화 확인", "labels/severity/service 확인", "AI 전략 또는 preview 확인", "대시보드 이상 징후 확인"],
+    routes: ["GET /api/v2/rules", "POST /api/v2/rules/test", "POST /api/v2/rules/notification_template/preview", "POST /api/v2/ds/ai/strategy/preview", "GET /api/v2/ds/ai/strategy/history/latest"],
+    gaps: ["ML anomaly detection 소유 불명확", "중복 알림 그룹핑과 noise suppression 제한적"]
+  },
+  {
+    id: "UC3",
+    title: "분류하고 대응 절차를 확보한다",
+    actor: "운영자 / SRE",
+    responsibility: "관련 SOP/runbook을 찾고 없는 절차는 draft로 만든다",
+    coverage: "높음",
+    actions: ["alert label로 SOP 조회", "SOP version의 runbook 조회", "status별 runbook 구분", "error example으로 AI draft 생성", "등록되지 않은 에러 패턴을 draft 지식으로 남김"],
+    routes: ["POST /api/v2/ds/sop/bindings/preview", "GET /api/v2/ds/sop/documents", "GET /api/v2/ds/sop/documents/{sopId}/versions/{version}/runbooks", "POST /api/v2/ds/runbooks/draft"],
+    gaps: ["비즈니스 영향도 산정 없음", "과거 유사 incident 검색 제한적"],
+    note: "등록되지 않은 에러는 관련 SOP를 찾고, runbook이 없으면 AI draft를 만든다. 반환 후보는 자동 저장하지 않는다."
+  },
+  {
+    id: "UC4",
+    title: "근본 원인을 진단한다",
+    actor: "운영자 / SRE",
+    responsibility: "SigNoz 관측 근거와 AI 전략을 사용한다",
+    coverage: "플랫폼 의존",
+    actions: ["trace/span 분석", "log 검색과 상관", "metric 시계열 확인", "service dependency 추적", "AI strategy preview 참고"],
+    routes: ["POST /api/v2/ds/ai/strategy/preview"],
+    gaps: ["배포/변경 이력 상관 없음", "과거 incident timeline 자동 비교 없음"]
+  },
+  {
+    id: "UC5",
+    title: "인시던트를 완화·조치한다",
+    actor: "운영자 / SRE",
+    responsibility: "SOP/runbook을 읽고 수동 조치한다",
+    coverage: "부분",
+    actions: ["SOP 열람", "approved runbook 열람", "script 복사", "외부 shell/control plane에서 직접 실행", "임시완화 후 runbook 수정", "downtime으로 알림 감소"],
+    routes: ["GET /api/v2/ds/sop/documents/{sopId}/versions/{version}/runbooks/{runbookId}", "PUT /api/v2/ds/sop/documents/{sopId}/versions/{version}/runbooks/{runbookId}", "POST /api/v1/downtime_schedules"],
+    gaps: ["자동 restart/scale/rollback 없음", "feature flag 또는 traffic control plane 직접 제어 없음", "auto-exec은 v0.1 범위 아님"]
+  },
+  {
+    id: "UC6",
+    title: "인시던트 컨텍스트를 인계한다",
+    actor: "운영자 / SRE",
+    responsibility: "SOP, runbook, AI 전략을 묶어 전달한다",
+    coverage: "부분",
+    actions: ["SOP link 공유", "runbook 상태와 선택 절차 공유", "AI strategy headline/first actions/hypotheses 공유", "alert labels와 tenant scope 전달"],
+    routes: ["POST /api/v2/rules/notification_template/preview"],
+    gaps: ["incident timeline 객체 없음", "교대 노트/ChatOps/on-call escalation 없음", "외부 status page 연동 없음"]
+  },
+  {
+    id: "UC7",
+    title: "복구를 확인하고 종료한다",
+    actor: "운영자 / SRE",
+    responsibility: "metric/alert/downtime 상태로 복구를 확인한다",
+    coverage: "중간",
+    actions: ["metric 정상화 확인", "alert 해제 확인", "downtime 종료/유지 판단", "SOP/runbook 개선 대상으로 남김"],
+    routes: ["GET /api/v1/downtime_schedules", "PUT /api/v1/downtime_schedules/{id}"],
+    gaps: ["incident 종료 상태를 기록하는 1급 incident 객체 없음"]
+  },
+  {
+    id: "UC8",
+    title: "회고하고 재발을 방지한다",
+    actor: "운영자 / SRE",
+    responsibility: "SOP/runbook/alert/AI 이력을 개선한다",
+    coverage: "부분",
+    actions: ["SOP 수정/version 관리", "Runbook 수정/승인/폐기", "alert threshold/template 조정", "AI strategy history 리뷰", "반복 미등록 에러를 정식 SOP/runbook으로 승격"],
+    routes: ["PUT /api/v2/ds/sop/documents/{sopId}/versions/{version}/runbooks/{runbookId}", "GET /api/v2/ds/ai/strategy/history/latest", "PUT /api/v2/rules/{id}", "PATCH /api/v2/rules/{id}"],
+    gaps: ["postmortem 작성/관리 없음", "action item 추적 없음", "반복 incident trend 분석 없음"]
+  }
+];
+
+const routeGroups = [
+  ["Alert Rule", [
+    ["규칙 목록", "GET /api/v2/rules", "View"],
+    ["규칙 조회", "GET /api/v2/rules/{id}", "View"],
+    ["규칙 생성", "POST /api/v2/rules", "Edit"],
+    ["규칙 수정", "PUT /api/v2/rules/{id}", "Edit"],
+    ["규칙 삭제", "DELETE /api/v2/rules/{id}", "Edit"],
+    ["규칙 패치", "PATCH /api/v2/rules/{id}", "Edit"],
+    ["규칙 테스트", "POST /api/v2/rules/test", "Edit"],
+    ["알림 템플릿 프리뷰", "POST /api/v2/rules/notification_template/preview", "Edit"]
+  ]],
+  ["SOP", [
+    ["SOP 문서 생성", "POST /api/v2/ds/sop/documents", "Edit"],
+    ["SOP 문서 목록", "GET /api/v2/ds/sop/documents", "View"],
+    ["SOP 문서 조회", "GET /api/v2/ds/sop/documents/{sopId}", "View"],
+    ["SOP 버전 조회", "GET /api/v2/ds/sop/documents/{sopId}/versions/{version}", "View"],
+    ["SOP 바인딩 프리뷰", "POST /api/v2/ds/sop/bindings/preview", "View"],
+    ["Pilot 소스 목록", "GET /api/v2/ds/sop/sources", "View"],
+    ["Pilot 소스 헬스", "GET /api/v2/ds/sop/sources/{id}/health", "View"]
+  ]],
+  ["Runbook", [
+    ["Runbook 목록", "GET /api/v2/ds/sop/documents/{sopId}/versions/{version}/runbooks", "View"],
+    ["Runbook 조회", "GET /api/v2/ds/sop/documents/{sopId}/versions/{version}/runbooks/{runbookId}", "View"],
+    ["Runbook 생성", "POST /api/v2/ds/sop/documents/{sopId}/versions/{version}/runbooks", "Edit"],
+    ["Runbook 수정", "PUT /api/v2/ds/sop/documents/{sopId}/versions/{version}/runbooks/{runbookId}", "Edit"],
+    ["Runbook 삭제", "DELETE /api/v2/ds/sop/documents/{sopId}/versions/{version}/runbooks/{runbookId}", "Edit"],
+    ["Runbook LLM 초안 생성", "POST /api/v2/ds/runbooks/draft", "Edit"]
+  ]],
+  ["AI", [
+    ["AI 전략 프리뷰", "POST /api/v2/ds/ai/strategy/preview", "View"],
+    ["최신 AI 전략 이력", "GET /api/v2/ds/ai/strategy/history/latest", "View"],
+    ["AI 설정 조회", "GET /api/v2/ds/ai/config", "View"],
+    ["AI 설정 수정", "PUT /api/v2/ds/ai/config", "Edit"],
+    ["AI 설정 테스트", "POST /api/v2/ds/ai/config/test", "Edit"]
+  ]],
+  ["Downtime", [
+    ["Downtime 목록", "GET /api/v1/downtime_schedules", "View"],
+    ["Downtime 조회", "GET /api/v1/downtime_schedules/{id}", "View"],
+    ["Downtime 생성", "POST /api/v1/downtime_schedules", "Edit"],
+    ["Downtime 수정", "PUT /api/v1/downtime_schedules/{id}", "Edit"],
+    ["Downtime 삭제", "DELETE /api/v1/downtime_schedules/{id}", "Edit"]
+  ]]
+];
+
+function badgeClass(coverage) {
+  return coverage === "높음" ? "high" :
+    coverage === "중간" ? "mid" :
+    coverage === "플랫폼 의존" ? "platform" : "partial";
+}
+
+function renderUsecases() {
+  const flow = document.getElementById("flow");
+  const grid = document.getElementById("ucGrid");
+  flow.innerHTML = "";
+  grid.innerHTML = "";
+
+  for (const uc of usecases) {
+    const step = document.createElement("div");
+    step.className = "step searchable";
+    step.dataset.coverage = uc.coverage;
+    step.dataset.text = `${uc.id} ${uc.title} ${uc.actor} ${uc.responsibility} ${uc.coverage}`;
+    step.innerHTML = `<span class="id">${uc.id}</span><strong>${uc.title}</strong><small>${uc.coverage}</small>`;
+    step.addEventListener("click", () => document.getElementById(uc.id).scrollIntoView({ behavior: "smooth" }));
+    flow.appendChild(step);
+
+    const card = document.createElement("article");
+    card.className = "panel uc-card searchable";
+    card.id = uc.id;
+    card.dataset.coverage = uc.coverage;
+    card.dataset.text = `${uc.id} ${uc.title} ${uc.actor} ${uc.responsibility} ${uc.coverage} ${uc.actions.join(" ")} ${uc.routes.join(" ")} ${uc.gaps.join(" ")}`;
+    card.innerHTML = `
+      <header>
+        <h3>${uc.id}. ${uc.title}</h3>
+        <div class="meta">
+          <span class="badge ${badgeClass(uc.coverage)}">${uc.coverage}</span>
+          <span class="badge">${uc.actor}</span>
+        </div>
+      </header>
+      <p>${uc.responsibility}</p>
+      ${uc.note ? `<div class="callout">${uc.note}</div>` : ""}
+      <strong>포함되는 사용자 행위</strong>
+      <ul>${uc.actions.map(item => `<li>${item}</li>`).join("")}</ul>
+      <strong>주요 route</strong>
+      <ul>${uc.routes.map(item => `<li><code>${item}</code></li>`).join("")}</ul>
+      <strong>갭</strong>
+      <ul>${uc.gaps.map(item => `<li>${item}</li>`).join("")}</ul>
+    `;
+    grid.appendChild(card);
+  }
+}
+
+function renderRoutes() {
+  const root = document.getElementById("routesGrid");
+  root.innerHTML = "";
+  for (const [group, rows] of routeGroups) {
+    const details = document.createElement("details");
+    details.open = group === "Runbook" || group === "SOP";
+    details.className = "searchable";
+    details.dataset.text = `${group} ${rows.map(row => row.join(" ")).join(" ")}`;
+    details.innerHTML = `
+      <summary>${group}</summary>
+      <div class="body">
+        <table>
+          <thead><tr><th>유스케이스</th><th>Method · Path</th><th>권한</th></tr></thead>
+          <tbody>${rows.map(([name, path, auth]) => `
+            <tr>
+              <td>${name}</td>
+              <td><code>${path}</code></td>
+              <td><span class="badge ${auth === "View" ? "high" : "partial"}">${auth}</span></td>
+            </tr>`).join("")}</tbody>
+        </table>
+      </div>
+    `;
+    root.appendChild(details);
+  }
+}
+
+function applyFilters() {
+  const active = document.querySelector("nav button.active").dataset.filter;
+  const query = document.getElementById("search").value.trim().toLowerCase();
+  for (const el of document.querySelectorAll(".searchable")) {
+    const coverageOk = active === "all" || el.dataset.coverage === active || !el.dataset.coverage;
+    const queryOk = !query || (el.dataset.text || "").toLowerCase().includes(query);
+    el.classList.toggle("hidden", !(coverageOk && queryOk));
+  }
+}
+
+renderUsecases();
+renderRoutes();
+
+document.querySelectorAll("nav button[data-filter]").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("nav button[data-filter]").forEach(b => b.classList.remove("active"));
+    button.classList.add("active");
+    applyFilters();
+  });
+});
+
+document.getElementById("search").addEventListener("input", applyFilters);
+</script>
+</body>
+</html>

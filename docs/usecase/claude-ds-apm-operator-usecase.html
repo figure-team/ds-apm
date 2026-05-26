@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DS-APM 운영자 Use Case · 커버리지</title>
+<style>
+  :root{
+    --bg:#0b1120; --panel:#0f172a; --ink:#e2e8f0; --muted:#94a3b8; --line:#334155;
+    --accent:#22d3ee;
+    --apm:#3b82f6; --apm-bg:#1e3a8a; --sn:#22c55e; --sn-bg:#14532d;
+    --gap:#ef4444; --gap-bg:#7f1d1d; --part:#f59e0b; --part-bg:#78350f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Pretendard,Roboto,sans-serif}
+  header.top{padding:22px 28px 8px;border-bottom:1px solid var(--line)}
+  header.top h1{margin:0;font-size:20px;letter-spacing:-.01em}
+  header.top p{margin:6px 0 0;color:var(--muted);font-size:13px;max-width:900px;line-height:1.55}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 28px;
+    border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,17,32,.92);
+    backdrop-filter:blur(6px);z-index:50}
+  .chip{font-size:12px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);
+    background:var(--panel);color:var(--muted);cursor:pointer;user-select:none;transition:.15s}
+  .chip:hover{border-color:var(--accent);color:var(--ink)}
+  .chip.dim{opacity:.38}
+  .chip[data-v="apm"].on{background:var(--apm-bg);border-color:var(--apm);color:#dbeafe}
+  .chip[data-v="sn"].on{background:var(--sn-bg);border-color:var(--sn);color:#dcfce7}
+  .chip[data-v="gap"].on{background:var(--gap-bg);border-color:var(--gap);color:#fee2e2}
+  .toolbar .sep{width:1px;height:18px;background:var(--line);margin:0 4px}
+  .hint{margin-left:auto;color:var(--muted);font-size:12px}
+
+  .stage{position:relative;padding:26px;display:grid;
+    grid-template-columns:160px 1fr 170px;gap:24px;align-items:start}
+  svg.wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+  .col{display:flex;flex-direction:column;gap:16px;position:relative;z-index:2}
+  .actor{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 10px;
+    text-align:center;cursor:default;transition:.15s}
+  .actor.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+  .actor svg{display:block;margin:0 auto 8px}
+  .actor b{font-size:12.5px;display:block}
+  .actor span{font-size:10.5px;color:var(--muted)}
+  .actor.ext{border-style:dashed}
+
+  .system{position:relative;z-index:2;border:2px solid var(--apm);border-radius:18px;padding:16px;
+    background:linear-gradient(180deg,rgba(59,130,246,.06),transparent)}
+  .system>h2{margin:2px 4px 14px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--muted);font-weight:600}
+  .ucgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+  .uc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 14px;
+    cursor:pointer;transition:.15s;position:relative;overflow:hidden}
+  .uc:hover{transform:translateY(-2px);border-color:var(--accent)}
+  .uc.faded{opacity:.2}
+  .uc .num{font-size:10.5px;color:var(--muted);letter-spacing:.08em;font-weight:700}
+  .uc h3{margin:3px 0 4px;font-size:14px;line-height:1.25}
+  .uc .goal{font-size:11.5px;color:var(--muted);line-height:1.4;min-height:32px}
+  .verdict{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:7px;margin-top:6px}
+  .v-own{background:var(--apm-bg);color:#dbeafe} .v-plat{background:var(--sn-bg);color:#dcfce7}
+  .v-part{background:var(--part-bg);color:#fed7aa} .v-mix{background:#334155;color:#e2e8f0}
+  .star{color:#fbbf24}
+  .bar{display:flex;height:7px;border-radius:5px;overflow:hidden;margin-top:10px;background:#020617}
+  .bar i{display:block;height:100%}
+  .bar .b-apm{background:var(--apm)} .bar .b-sn{background:var(--sn)} .bar .b-gap{background:var(--gap)}
+  .cnt{display:flex;gap:9px;margin-top:7px;font-size:10.5px;color:var(--muted)}
+  .cnt b{font-weight:700}
+  .dotapm{color:var(--apm)} .dotsn{color:var(--sn)} .dotgap{color:var(--gap)}
+
+  .drawer{position:fixed;right:0;top:0;height:100vh;width:380px;background:#0d1426;
+    border-left:1px solid var(--line);transform:translateX(102%);transition:.22s;z-index:100;
+    padding:22px;overflow:auto;box-shadow:-12px 0 40px rgba(0,0,0,.4)}
+  .drawer.open{transform:none}
+  .drawer .x{position:absolute;right:16px;top:14px;color:var(--muted);cursor:pointer;font-size:20px}
+  .drawer .num{font-size:11px;color:var(--muted);letter-spacing:.08em}
+  .drawer h4{margin:4px 0 6px;font-size:18px;line-height:1.3}
+  .drawer .goal{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:14px}
+  .meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+  .meta span{font-size:11px;border:1px solid var(--line);border-radius:999px;padding:3px 9px}
+  .steps{list-style:none;padding:0;margin:0}
+  .steps li{display:flex;gap:9px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line);font-size:12.5px;line-height:1.35}
+  .sdot{width:9px;height:9px;border-radius:3px;margin-top:4px;flex:0 0 auto}
+  .s-apm{background:var(--apm)} .s-sn{background:var(--sn)} .s-gap{background:var(--gap)}
+  .steps .note{color:var(--muted);font-size:11px}
+  .steps .warn{color:var(--part)}
+
+  footer{padding:18px 28px 44px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);line-height:1.7}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-top:6px}
+  .legend i{font-style:normal;display:inline-flex;align-items:center;gap:6px}
+  .sw{width:13px;height:13px;border-radius:4px;display:inline-block}
+  code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;background:#020617;
+    border:1px solid var(--line);border-radius:6px;padding:2px 6px}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>DS-APM 운영자 Use Case (User-goal) · 커버리지 맵</h1>
+  <p>운영자의 <b>목표 단위 유스케이스</b>는 인시던트 라이프사이클을 따라 좌→우로 흐릅니다. 각 UC 카드의 막대는
+     그 목표를 이루는 <b>스텝들이 어디서 처리되는지</b>(🟦 우리 / 🟩 SigNoz / 🟥 공백)를 한 줄로 보여줍니다 —
+     빨간 비중이 큰 UC가 곧 제품 갭. UC를 <b>클릭</b>하면 스텝별 상세가 열립니다.</p>
+</header>
+
+<div class="toolbar" id="toolbar">
+  <span class="chip on" data-all="1">전체</span>
+  <span class="sep"></span>
+  <span class="chip on" data-v="apm">🟦 DS-APM</span>
+  <span class="chip on" data-v="sn">🟩 SigNoz</span>
+  <span class="chip on" data-v="gap">🟥 공백</span>
+  <span class="sep"></span>
+  <span class="chip" id="gaps-only">🔴 갭만 보기</span>
+  <span class="hint">UC hover → 연계 액터 / click → 스텝 상세</span>
+</div>
+
+<div class="stage" id="stage">
+  <svg class="wires" id="wires"></svg>
+  <div class="col" id="actors-left"></div>
+  <div class="system">
+    <h2>DS-APM 인시던트 핸드오프 · 운영자 목표</h2>
+    <div class="ucgrid" id="ucgrid"></div>
+  </div>
+  <div class="col" id="actors-right"></div>
+</div>
+
+<div class="drawer" id="drawer"><div class="x" onclick="closeDrawer()">✕</div><div id="db"></div></div>
+
+<footer>
+  <div class="legend">
+    <i><span class="sw" style="background:var(--apm)"></span> DS-APM (우리)</i>
+    <i><span class="sw" style="background:var(--sn)"></span> SigNoz 플랫폼</i>
+    <i><span class="sw" style="background:var(--gap)"></span> 공백 (갭)</i>
+    <i><span class="warn" style="color:var(--part)">⚠️</span> 확인필요/부분</i>
+    <i>★ 제품 정체성·강점 UC</i>
+  </div>
+  <div style="margin-top:10px">스텝 50개: 🟦22 · 🟩9 · 🟥19 (⚠️4) · 출처 <code>pkg/ruler/*</code>, <code>pkg/apiserver/signozapiserver/ruler.go</code></div>
+</footer>
+
+<script>
+const ACTORS=[
+  {id:"OP",side:"left",icon:"human",name:"운영자 / SRE",sub:"primary",ext:false},
+  {id:"DISP",side:"left",icon:"bolt",name:"알림 시스템",sub:"trigger",ext:false},
+  {id:"LLM",side:"right",icon:"bot",name:"LLM Provider",sub:"Claude·Codex",ext:true},
+  {id:"SN",side:"right",icon:"chart",name:"SigNoz 관측",sub:"platform",ext:true},
+  {id:"SRC",side:"right",icon:"cloud",name:"Pilot SOP 소스",sub:"markdown",ext:true},
+];
+const VERDICT={own:{c:"v-own",t:"🟦 우리 주도"},plat:{c:"v-plat",t:"🟩 플랫폼 주도"},
+  part:{c:"v-part",t:"🟧 부분 (갭)"},mix:{c:"v-mix",t:"⬜ 커버됨"}};
+
+const UCS=[
+  {id:"U1",n:"UC 1",title:"대응 자산을 사전 정비한다",verdict:"own",
+   goal:"알림 규칙·SOP·런북·AI·다운타임을 미리 갖춰 인시던트에 대비한다.",
+   actors:["OP"],inc:["LLM","SRC"],steps:[
+    {s:"apm",t:"알림 규칙·임계값 정의",n:"Alert Rule"},
+    {s:"apm",t:"알림 템플릿 표준화",n:"알림 템플릿 프리뷰"},
+    {s:"apm",t:"SOP 작성·버전 관리",n:"SOP 문서/버전"},
+    {s:"apm",t:"런북 작성(수동)",n:"런북 생성/수정"},
+    {s:"apm",t:"런북 LLM 초안 생성",n:"런북 draft · LLM"},
+    {s:"apm",t:"AI provider/모델 설정",n:"AI 설정"},
+    {s:"apm",t:"점검 다운타임 등록",n:"Downtime 스케줄"},
+    {s:"sn",t:"골든시그널 대시보드 구성",n:"SigNoz 대시보드"},
+    {s:"gap",t:"온콜·에스컬레이션 정책",n:"없음"},
+    {s:"gap",t:"서비스 카탈로그/소유자(CMDB)",n:"없음"},
+    {s:"gap",t:"SLO/에러버짓 정의",n:"SigNoz 확인필요",w:1}]},
+  {id:"U2",n:"UC 2",title:"이상을 탐지하고 통지받는다",verdict:"mix",
+   goal:"임계값 초과·이상 징후를 포착하고 적시에 통지받는다.",
+   actors:["OP","DISP"],inc:["LLM"],steps:[
+    {s:"apm",t:"임계값 초과 알림 수신",n:"Alert Rule 발화"},
+    {s:"apm",t:"dispatch 시 AI 전략 자동 생성",n:"dispatchhook · LLM"},
+    {s:"sn",t:"대시보드 이상 시각 확인",n:"SigNoz 대시보드"},
+    {s:"sn",t:"예외/에러 급증 포착",n:"SigNoz Exceptions"},
+    {s:"gap",t:"ML 기반 이상탐지",n:"anomaly 확인필요",w:1}]},
+  {id:"U3",n:"UC 3",title:"분류하고 대응 절차를 확보한다",verdict:"own",star:1,
+   goal:"알림을 분류하고, 바로 실행 가능한 대응 절차(SOP·런북·전략)를 확보한다.",
+   actors:["OP"],inc:["LLM","SN"],steps:[
+    {s:"apm",t:"알림↔관련 SOP 자동 매칭",n:"SOP 바인딩"},
+    {s:"apm",t:"알림에서 즉시 런북 초안",n:"RunbookDraftFromError · LLM"},
+    {s:"sn",t:"영향 서비스 식별",n:"서비스 맵"},
+    {s:"gap",t:"심각도/비즈니스 영향 판단",n:"영향도 산정 없음"},
+    {s:"gap",t:"중복 알림 그룹핑·노이즈 억제",n:"dedup 미흡",w:1}]},
+  {id:"U4",n:"UC 4",title:"근본 원인을 진단한다",verdict:"plat",
+   goal:"텔레메트리로 장애의 근본 원인을 추적한다.",
+   actors:["OP"],inc:["SN","LLM"],steps:[
+    {s:"sn",t:"트레이스/스팬 분석",n:"SigNoz APM"},
+    {s:"sn",t:"로그 검색·상관",n:"SigNoz Logs"},
+    {s:"sn",t:"메트릭 시계열 분석",n:"SigNoz Metrics"},
+    {s:"sn",t:"서비스 의존성 추적",n:"서비스 맵"},
+    {s:"apm",t:"AI 근본원인·전략 제안",n:"AI 전략 프리뷰 · LLM"},
+    {s:"gap",t:"배포·변경 이력 상관",n:"변경 추적 없음"},
+    {s:"gap",t:"과거 유사 인시던트 검색",n:"이력 저장소 없음"}]},
+  {id:"U5",n:"UC 5",title:"인시던트를 완화·조치한다",verdict:"part",
+   goal:"절차를 따라 장애를 완화하고 실제 조치를 적용한다.",
+   actors:["OP"],inc:[],steps:[
+    {s:"apm",t:"관련 SOP/런북 열람",n:"SOP/런북 조회"},
+    {s:"apm",t:"임시완화 후 런북 갱신",n:"런북 수정"},
+    {s:"apm",t:"대응 중 알림 뮤트",n:"Downtime(부분)",w:1},
+    {s:"gap",t:"실제 조치 자동실행(재시작/스케일/롤백)",n:"오케스트레이션 없음 — 핵심 갭"},
+    {s:"gap",t:"트래픽 차단·feature flag",n:"제어평면 연동 없음"}]},
+  {id:"U6",n:"UC 6",title:"인시던트 컨텍스트를 인계한다",verdict:"part",star:1,
+   goal:"교대·팀 간에 현재 상태와 대응 맥락을 넘긴다. (제품 정체성)",
+   actors:["OP"],inc:[],steps:[
+    {s:"apm",t:"핸드오프 컨텍스트 전달(SOP/런북/AI전략)",n:"SOP+런북+AI 묶음"},
+    {s:"apm",t:"표준 통지 발송",n:"알림 템플릿"},
+    {s:"gap",t:"구조화 교대 노트·인시던트 타임라인",n:"타임라인 객체 없음"},
+    {s:"gap",t:"에스컬레이션·페이징",n:"온콜/페이징 없음"},
+    {s:"gap",t:"인시던트 채널·ChatOps",n:"연동 없음"},
+    {s:"gap",t:"외부 상태페이지",n:"없음"}]},
+  {id:"U7",n:"UC 7",title:"복구를 확인하고 종료한다",verdict:"mix",
+   goal:"정상 복구를 확인하고 인시던트를 마감한다.",
+   actors:["OP"],inc:["SN"],steps:[
+    {s:"sn",t:"메트릭으로 복구 확인",n:"SigNoz 대시보드"},
+    {s:"apm",t:"알림 해제 확인",n:"Alert Rule 상태"},
+    {s:"apm",t:"다운타임 종료",n:"Downtime"},
+    {s:"gap",t:"인시던트 종료·상태 기록",n:"인시던트 객체 없음"}]},
+  {id:"U8",n:"UC 8",title:"회고하고 재발을 방지한다",verdict:"part",
+   goal:"사후 분석으로 자산을 개선하고 재발을 막는다.",
+   actors:["OP"],inc:[],steps:[
+    {s:"apm",t:"런북/SOP 개선 반영",n:"런북/SOP 수정+버전"},
+    {s:"apm",t:"알림 규칙 튜닝(오탐↓)",n:"Alert Rule 수정"},
+    {s:"apm",t:"AI 전략 이력 리뷰",n:"AI 전략 이력"},
+    {s:"gap",t:"포스트모템 작성·관리",n:"도구 없음"},
+    {s:"gap",t:"인시던트 타임라인 자동 수집",n:"없음"},
+    {s:"gap",t:"액션아이템 추적",n:"없음"},
+    {s:"gap",t:"반복 인시던트 트렌드 분석",n:"없음"}]},
+];
+const UC={}; UCS.forEach(u=>UC[u.id]=u);
+
+const ICONS={
+  human:`<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="1.6"><circle cx="12" cy="7" r="3.2"/><path d="M5 21c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>`,
+  bot:`<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="1.6"><rect x="5" y="8" width="14" height="10" rx="2.5"/><path d="M12 8V4M9 13h.01M15 13h.01M3 13h2M19 13h2"/></svg>`,
+  cloud:`<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="1.6"><path d="M7 18a4 4 0 0 1 .5-8 5 5 0 0 1 9.6 1.5A3.5 3.5 0 0 1 17 18H7Z"/></svg>`,
+  bolt:`<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="1.6"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>`,
+  chart:`<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="1.6"><path d="M3 3v18h18"/><path d="M7 15l3-4 3 3 4-6"/></svg>`,
+};
+
+function renderActors(){
+  ACTORS.forEach(a=>{
+    const el=document.createElement("div");
+    el.className="actor"+(a.ext?" ext":""); el.id="actor-"+a.id;
+    el.innerHTML=ICONS[a.icon]+`<b>${a.name}</b><span>${a.sub}</span>`;
+    document.getElementById(a.side==="left"?"actors-left":"actors-right").appendChild(el);
+  });
+}
+function counts(u){const c={apm:0,sn:0,gap:0};u.steps.forEach(s=>c[s.s]++);return c;}
+function renderUCs(){
+  const grid=document.getElementById("ucgrid");
+  UCS.forEach(u=>{
+    const c=counts(u),tot=u.steps.length;
+    const v=VERDICT[u.verdict];
+    const el=document.createElement("div");
+    el.className="uc"; el.id="uc-"+u.id;
+    el.innerHTML=`<div class="num">${u.n}</div>
+      <h3>${u.title}${u.star?' <span class="star">★</span>':''}</h3>
+      <div class="goal">${u.goal}</div>
+      <span class="verdict ${v.c}">${v.t}</span>
+      <div class="bar">
+        <i class="b-apm" style="width:${c.apm/tot*100}%"></i>
+        <i class="b-sn" style="width:${c.sn/tot*100}%"></i>
+        <i class="b-gap" style="width:${c.gap/tot*100}%"></i>
+      </div>
+      <div class="cnt"><span class="dotapm">●</span><b>${c.apm}</b>
+        <span class="dotsn">●</span><b>${c.sn}</b>
+        <span class="dotgap">●</span><b>${c.gap}</b></div>`;
+    el.addEventListener("mouseenter",()=>hoverUC(u.id));
+    el.addEventListener("mouseleave",clearFocus);
+    el.addEventListener("click",()=>openDrawer(u.id));
+    grid.appendChild(el);
+  });
+}
+
+// wires
+const wires=document.getElementById("wires");
+function clearWires(){while(wires.firstChild)wires.removeChild(wires.firstChild);}
+function pt(el,side){
+  const s=document.getElementById("stage").getBoundingClientRect();
+  const r=el.getBoundingClientRect();
+  const y=r.top-s.top+r.height/2;
+  const x=side==="right"?r.right-s.left:side==="left"?r.left-s.left:r.left-s.left+r.width/2;
+  return {x,y};
+}
+function curve(p1,p2,color,dash){
+  const dx=Math.abs(p2.x-p1.x),c=Math.max(40,dx*0.5);
+  const path=document.createElementNS("http://www.w3.org/2000/svg","path");
+  path.setAttribute("d",`M ${p1.x} ${p1.y} C ${p1.x+(p2.x>p1.x?c:-c)} ${p1.y}, ${p2.x+(p2.x>p1.x?-c:c)} ${p2.y}, ${p2.x} ${p2.y}`);
+  path.setAttribute("fill","none");path.setAttribute("stroke",color);
+  path.setAttribute("stroke-width","1.7");path.setAttribute("opacity",".9");
+  if(dash)path.setAttribute("stroke-dasharray","5 4");
+  wires.appendChild(path);
+}
+function cssvar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()||"#888";}
+function hoverUC(id){
+  clearWires();
+  const u=UC[id],ucEl=document.getElementById("uc-"+id);
+  document.querySelectorAll(".uc").forEach(e=>{if(!e.classList.contains("hidden"))e.classList.toggle("faded",e.id!=="uc-"+id);});
+  ucEl.classList.remove("faded");
+  u.actors.forEach(a=>{
+    const ae=document.getElementById("actor-"+a);ae.classList.add("active");
+    curve(pt(ae,"right"),pt(ucEl,"left"),cssvar("--accent"),false);
+  });
+  (u.inc||[]).forEach(a=>{
+    const ae=document.getElementById("actor-"+a);ae.classList.add("active");
+    curve(pt(ucEl,"right"),pt(ae,"left"),cssvar("--accent"),true);
+  });
+}
+function clearFocus(){
+  clearWires();
+  document.querySelectorAll(".uc").forEach(e=>e.classList.remove("faded"));
+  document.querySelectorAll(".actor").forEach(e=>e.classList.remove("active"));
+}
+
+// drawer
+function openDrawer(id){
+  const u=UC[id],v=VERDICT[u.verdict];
+  const actorNames=u.actors.map(a=>ACTORS.find(x=>x.id===a).name);
+  const incNames=(u.inc||[]).map(a=>ACTORS.find(x=>x.id===a).name);
+  const stepHtml=u.steps.map(s=>`<li><span class="sdot s-${s.s}"></span>
+     <div><div>${s.t} ${s.w?'<span class="warn">⚠️</span>':''}</div>
+     <div class="note">${s.n}</div></div></li>`).join("");
+  document.getElementById("db").innerHTML=`
+    <div class="num">${u.n}</div>
+    <h4>${u.title} ${u.star?'<span class="star">★</span>':''}</h4>
+    <div class="goal">${u.goal}</div>
+    <span class="verdict ${v.c}">${v.t}</span>
+    <div class="meta" style="margin-top:14px">
+      <span>액터: ${actorNames.join(", ")}</span>
+      ${incNames.length?`<span>«include»: ${incNames.join(", ")}</span>`:""}
+    </div>
+    <ul class="steps">${stepHtml}</ul>`;
+  document.getElementById("drawer").classList.add("open");
+}
+function closeDrawer(){document.getElementById("drawer").classList.remove("open");}
+
+// filters
+let gapsOnly=false;
+function applyFilters(){
+  const on={apm:q("apm"),sn:q("sn"),gap:q("gap")};
+  document.querySelectorAll(".uc").forEach(el=>{
+    const u=UC[el.id.slice(3)];
+    let show;
+    if(gapsOnly){ show=u.steps.some(s=>s.s==="gap"); }
+    else { show=u.steps.some(s=>on[s.s]); }
+    el.style.display=show?"":"none";
+  });
+  clearFocus();
+}
+function q(v){return document.querySelector(`[data-v="${v}"]`).classList.contains("on");}
+document.querySelectorAll('[data-v]').forEach(c=>c.addEventListener("click",()=>{
+  c.classList.toggle("on");c.classList.toggle("dim");gapsOnly=false;
+  document.getElementById("gaps-only").classList.remove("on");applyFilters();
+}));
+document.querySelector('[data-all]').addEventListener("click",()=>{
+  document.querySelectorAll('[data-v]').forEach(c=>{c.classList.add("on");c.classList.remove("dim");});
+  gapsOnly=false;document.getElementById("gaps-only").classList.remove("on");applyFilters();
+});
+document.getElementById("gaps-only").addEventListener("click",function(){
+  gapsOnly=!gapsOnly;this.classList.toggle("on",gapsOnly);applyFilters();
+});
+
+renderActors();renderUCs();
+window.addEventListener("resize",clearWires);
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer();});
+</script>
+</body>
+</html>

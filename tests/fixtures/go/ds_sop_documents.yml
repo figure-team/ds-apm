@@ -1,0 +1,56 @@
+# Canonical seed rows for ds_sop_documents.
+# Schema: pkg/sqlmigration/078_add_ds_apm_stores.go
+# Domain: pkg/types/ruletypes/sop_document.go (SOPDocument)
+#
+# Regenerate the JSON in `payload` by running:
+#   FIXTURE_GEN=1 go test ./pkg/types/ruletypes/ -run TestFixtureGen_Print -v
+# and copying the printed blocks.
+- org_id: org-1
+  sop_id: S1
+  version: v1
+  contract_version: ds.sop_document.v1
+  title: T-S1
+  updated_at: "2026-05-20T09:00:00Z"
+  payload: "{\"contractVersion\":\"ds.sop_document.v1\",\"sopId\":\"S1\",\"title\":\"T-S1\",\"version\":\"v1\",\"checksum\":\"\",\"source\":{\"type\":\"\",\"sourceId\":\"\"},\"bodyMarkdown\":\"## step 1\\nbody\",\"ownerTeam\":\"\",\"approvalStatus\":\"\",\"tenantScope\":{\"projectIds\":[\"p\"],\"environments\":[\"prod\"]},\"updatedAt\":\"2026-05-20T09:00:00Z\",\"securityContext\":{\"serviceAccountProfile\":\"\",\"secretRefVisible\":false,\"browserCredentialsUsed\":false,\"redactionApplied\":false}}"
+- org_id: org-1
+  sop_id: S1
+  version: v2
+  contract_version: ds.sop_document.v1
+  title: T-S1
+  updated_at: "2026-05-20T09:00:00Z"
+  payload: "{\"contractVersion\":\"ds.sop_document.v1\",\"sopId\":\"S1\",\"title\":\"T-S1\",\"version\":\"v2\",\"checksum\":\"\",\"source\":{\"type\":\"\",\"sourceId\":\"\"},\"bodyMarkdown\":\"## step 1\\nbody\",\"ownerTeam\":\"\",\"approvalStatus\":\"\",\"tenantScope\":{\"projectIds\":[\"p\"],\"environments\":[\"prod\"]},\"updatedAt\":\"2026-05-20T09:00:00Z\",\"securityContext\":{\"serviceAccountProfile\":\"\",\"secretRefVisible\":false,\"browserCredentialsUsed\":false,\"redactionApplied\":false}}"
+- org_id: org-A
+  sop_id: S1
+  version: v1
+  contract_version: ds.sop_document.v1
+  title: org-A doc
+  updated_at: "2026-05-20T09:00:00Z"
+  payload: "{\"contractVersion\":\"ds.sop_document.v1\",\"sopId\":\"S1\",\"title\":\"org-A doc\",\"version\":\"v1\",\"checksum\":\"\",\"source\":{\"type\":\"\",\"sourceId\":\"\"},\"bodyMarkdown\":\"## step 1\\nbody\",\"ownerTeam\":\"\",\"approvalStatus\":\"\",\"tenantScope\":{\"projectIds\":[\"p\"],\"environments\":[\"prod\"]},\"updatedAt\":\"2026-05-20T09:00:00Z\",\"securityContext\":{\"serviceAccountProfile\":\"\",\"secretRefVisible\":false,\"browserCredentialsUsed\":false,\"redactionApplied\":false}}"
+- org_id: org-B
+  sop_id: S1
+  version: v1
+  contract_version: ds.sop_document.v1
+  title: org-B doc
+  updated_at: "2026-05-20T09:00:00Z"
+  payload: "{\"contractVersion\":\"ds.sop_document.v1\",\"sopId\":\"S1\",\"title\":\"org-B doc\",\"version\":\"v1\",\"checksum\":\"\",\"source\":{\"type\":\"\",\"sourceId\":\"\"},\"bodyMarkdown\":\"## step 1\\nbody\",\"ownerTeam\":\"\",\"approvalStatus\":\"\",\"tenantScope\":{\"projectIds\":[\"p\"],\"environments\":[\"prod\"]},\"updatedAt\":\"2026-05-20T09:00:00Z\",\"securityContext\":{\"serviceAccountProfile\":\"\",\"secretRefVisible\":false,\"browserCredentialsUsed\":false,\"redactionApplied\":false}}"
+- org_id: customer-a
+  sop_id: SOP-PAY-001
+  version: 2026-05-20.1
+  contract_version: ds.sop_document.v1
+  title: Payment 5xx surge
+  updated_at: "2026-05-20T09:00:00Z"
+  payload: "{\"contractVersion\":\"ds.sop_document.v1\",\"sopId\":\"SOP-PAY-001\",\"title\":\"Payment 5xx surge\",\"version\":\"2026-05-20.1\",\"checksum\":\"\",\"source\":{\"type\":\"\",\"sourceId\":\"\"},\"bodyMarkdown\":\"## step 1\\n결제 성공률 dashboard와 PG timeout log 확인\",\"ownerTeam\":\"\",\"approvalStatus\":\"\",\"tenantScope\":{\"projectIds\":[\"customer-a\"],\"environments\":[\"prod\"]},\"updatedAt\":\"2026-05-20T09:00:00Z\",\"securityContext\":{\"serviceAccountProfile\":\"\",\"secretRefVisible\":false,\"browserCredentialsUsed\":false,\"redactionApplied\":false}}"
+- org_id: customer-a
+  sop_id: SOP-CART-001
+  version: 2026-05-20.1
+  contract_version: ds.sop_document.v1
+  title: Cart latency surge
+  updated_at: "2026-05-20T09:00:00Z"
+  payload: "{\"contractVersion\":\"ds.sop_document.v1\",\"sopId\":\"SOP-CART-001\",\"title\":\"Cart latency surge\",\"version\":\"2026-05-20.1\",\"checksum\":\"\",\"source\":{\"type\":\"\",\"sourceId\":\"\"},\"bodyMarkdown\":\"## step 1\\nRedis cache hit-ratio 확인\",\"ownerTeam\":\"\",\"approvalStatus\":\"\",\"tenantScope\":{\"projectIds\":[\"customer-a\"],\"environments\":[\"prod\"]},\"updatedAt\":\"2026-05-20T09:00:00Z\",\"securityContext\":{\"serviceAccountProfile\":\"\",\"secretRefVisible\":false,\"browserCredentialsUsed\":false,\"redactionApplied\":false}}"
+- org_id: customer-a
+  sop_id: SOP-AD-001
+  version: 2026-05-20.1
+  contract_version: ds.sop_document.v1
+  title: Ad CPU saturation
+  updated_at: "2026-05-20T09:00:00Z"
+  payload: "{\"contractVersion\":\"ds.sop_document.v1\",\"sopId\":\"SOP-AD-001\",\"title\":\"Ad CPU saturation\",\"version\":\"2026-05-20.1\",\"checksum\":\"\",\"source\":{\"type\":\"\",\"sourceId\":\"\"},\"bodyMarkdown\":\"## step 1\\nJVM GC dashboard 확인\",\"ownerTeam\":\"\",\"approvalStatus\":\"\",\"tenantScope\":{\"projectIds\":[\"customer-a\"],\"environments\":[\"prod\"]},\"updatedAt\":\"2026-05-20T09:00:00Z\",\"securityContext\":{\"serviceAccountProfile\":\"\",\"secretRefVisible\":false,\"browserCredentialsUsed\":false,\"redactionApplied\":false}}"

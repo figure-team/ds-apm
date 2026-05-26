@@ -1,0 +1,10 @@
+{
+  "title": "Reduce adservice JVM GC pressure",
+  "description": "## 사용 조건\nadservice CPU가 80% 이상으로 유지되고 JVM GC metric에서 반복적인 full GC 또는 allocation pressure가 보일 때 사용한다.\n\n## 수행 작업\n최근 GC log와 pod 상태를 확인하고, flagd가 사용 가능하면 manual GC mitigation flag를 켠 뒤 adservice deployment를 rolling restart해서 비정상 pod를 교체한다.\n\n## 실행 후 검증\n- adservice CPU가 70% 아래로 내려간다\n- Full GC 빈도가 감소한다\n- `kubectl rollout status`가 success를 반환한다\n",
+  "executableScript": "#!/bin/bash\nset -euo pipefail\nkubectl logs -n prod deploy/adservice --tail=200 | grep -Ei 'gc|outofmemory|allocation' || true\nkubectl exec -n prod deploy/flagd -- flagd set manualGc true || true\nkubectl rollout restart deploy/adservice -n prod\nkubectl rollout status deploy/adservice -n prod --timeout=120s\n",
+  "status": "approved",
+  "confidence": 1.0,
+  "aiDraftedBy": "",
+  "sourceErrorExamples": [],
+  "updatedBy": "demo-seed"
+}
