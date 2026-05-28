@@ -1,0 +1,2179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DS-APM 기능명세서 (SRS)</title>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#FAF9F5',
+      primaryTextColor: '#141413',
+      primaryBorderColor: '#D1CFC5',
+      lineColor: '#87867F',
+      secondaryColor: '#E3DACC',
+      tertiaryColor: '#F0EEE6'
+    },
+    fontFamily: 'ui-sans-serif, system-ui, sans-serif'
+  });
+</script>
+<style>
+/* DS-APM 공통 디자인 토큰 — _shared/design-tokens.css 인라인 */
+:root {
+  --ivory:#FAF9F5;
+  --slate:#141413;
+  --clay:#D97757;
+  --oat:#E3DACC;
+  --olive:#788C5D;
+  --sky:#6A8CAF;
+  --g100:#F0EEE6;
+  --g300:#D1CFC5;
+  --g500:#87867F;
+  --g700:#3D3D3A;
+  --serif: ui-serif, Georgia, 'Times New Roman', serif;
+  --sans:  system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono:  ui-monospace, 'SF Mono', Menlo, Monaco, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--ivory);
+  color: var(--g700);
+  font-family: var(--sans);
+  line-height: 1.55;
+  padding: 56px 32px 120px;
+  -webkit-font-smoothing: antialiased;
+}
+.page { max-width: 1120px; margin: 0 auto; }
+
+h1 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(38px, 5.4vw, 62px);
+  color: var(--slate);
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 26px;
+  color: var(--slate);
+  letter-spacing: -0.01em;
+}
+h3 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--slate);
+  margin: 16px 0 8px;
+}
+h4 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--g700);
+  margin: 12px 0 6px;
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--g500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+
+.sec-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 8px;
+  margin-top: 64px;
+  flex-wrap: wrap;
+}
+.sec-head .num {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--oat);
+  color: var(--slate);
+  padding: 3px 9px;
+  border-radius: 8px;
+}
+.sec-intro {
+  font-size: 14.5px;
+  color: var(--g500);
+  max-width: 720px;
+  margin-bottom: 28px;
+}
+
+p { margin: 10px 0; font-size: 15px; }
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.summary .cell {
+  border: 1.5px solid var(--g300);
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+}
+.summary .cell .k {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--g500);
+  text-transform: uppercase;
+}
+.summary .cell .v {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--slate);
+  margin-top: 4px;
+}
+.summary .cell .v.accent { color: var(--clay); }
+
+@media (max-width: 720px) {
+  .summary { grid-template-columns: repeat(2, 1fr); }
+}
+
+.sev {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+.sev.high { background: #F3D9CC; color: #8A3B1E; }
+.sev.med  { background: var(--oat); color: var(--slate); }
+.sev.low  { background: #E4E9DC; color: #4B5C39; }
+
+.q {
+  border-left: 4px solid var(--clay);
+  border-radius: 10px;
+  padding: 14px 18px;
+  background: #fff;
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+code, pre {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+pre {
+  background: var(--g100);
+  border: 1.5px solid var(--g300);
+  border-radius: 10px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  margin: 12px 0;
+  white-space: pre;
+}
+code {
+  background: var(--g100);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+pre code {
+  background: transparent;
+  padding: 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+}
+th, td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--g300);
+  vertical-align: top;
+}
+th {
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--slate);
+  background: var(--g100);
+}
+
+/* Sticky TOC sidebar */
+.toc-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 48px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.toc {
+  position: sticky;
+  top: 32px;
+  align-self: start;
+  border: 1.5px solid var(--g300);
+  border-radius: 12px;
+  background: #fff;
+  padding: 16px;
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+}
+.toc .label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--g500);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  letter-spacing: 0.04em;
+}
+.toc .group-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--g500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 14px;
+  margin-bottom: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--g300);
+}
+.toc ol { list-style: none; padding: 0; margin: 0; }
+.toc li { font-size: 13px; padding: 4px 0; }
+.toc a { color: var(--g700); text-decoration: none; border-bottom: none; }
+.toc a:hover { color: var(--clay); }
+
+@media (max-width: 960px) {
+  .toc-page { grid-template-columns: 1fr; }
+  .toc { position: static; max-height: none; }
+}
+
+html { scroll-behavior: smooth; }
+
+a {
+  color: var(--clay);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 150ms;
+}
+a:hover { border-bottom-color: var(--clay); }
+
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin-bottom: 4px; font-size: 15px; }
+
+blockquote {
+  border-left: 3px solid var(--g300);
+  padding: 8px 16px;
+  margin: 12px 0;
+  color: var(--g700);
+  font-style: italic;
+  background: #fff;
+}
+
+.mermaid {
+  background: #fff;
+  border: 1.5px solid var(--g300);
+  border-radius: 10px;
+  padding: 16px;
+  margin: 16px 0;
+  text-align: center;
+}
+
+.tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--g100);
+  color: var(--g700);
+  margin-right: 6px;
+}
+.tag.id { color: var(--clay); border: 1px solid var(--g300); background: #fff; }
+
+.status-pill {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.status-pill.implemented { background: #E4E9DC; color: #4B5C39; }
+.status-pill.mvp { background: var(--oat); color: var(--slate); }
+.status-pill.pending { background: #F3D9CC; color: #8A3B1E; }
+.status-pill.draft { background: var(--g100); color: var(--g500); }
+
+/* Module section */
+section.module {
+  margin-top: 80px;
+  padding-top: 32px;
+  border-top: 1.5px solid var(--g300);
+}
+section.module:first-of-type { border-top: none; padding-top: 0; }
+section.module .module-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+section.module .module-head h2 {
+  font-size: 30px;
+}
+section.module .module-head .module-id {
+  font-family: var(--mono);
+  font-size: 14px;
+  background: var(--oat);
+  color: var(--slate);
+  padding: 3px 10px;
+  border-radius: 8px;
+}
+
+/* Subsection (F*.N) */
+.subsec {
+  margin-top: 28px;
+}
+.subsec h3 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+  color: var(--slate);
+  margin: 24px 0 10px;
+  border-bottom: 1px solid var(--g300);
+  padding-bottom: 4px;
+}
+
+/* Print / PDF */
+@page { size: A4; margin: 18mm 15mm; }
+
+@media print {
+  body { background: #fff; padding: 0; }
+  .page, .toc-page { max-width: 100%; display: block; }
+  .toc { display: none; }
+  section.module { break-before: page; page-break-before: page; }
+  section.module:first-of-type { break-before: auto; page-break-before: auto; }
+  .summary .cell, .q,
+  pre, table, svg, .mermaid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  aside, .toc { position: static; }
+  a::after { content: " (" attr(href) ")"; font-size: 10px; color: #888; }
+}
+</style>
+</head>
+<body>
+<div class="toc-page">
+<main class="page">
+
+<header>
+<div class="eyebrow">DS-APM · ISO/IEC/IEEE 29148-lite + Spec by Example · 2026-05-29</div>
+<h1>DS-APM 기능명세서 (SRS)</h1>
+<p class="sec-intro">9 모듈 (F0~F8). Cockburn UC와 PMI WBS에 traceability ID로 연결.</p>
+</header>
+
+<blockquote>
+<p><strong>템플릿</strong>: ISO/IEC/IEEE 29148:2018 경량형 + Specification by Example (Gherkin acceptance criteria)<br>
+<strong>표기 컨벤션</strong>: <code>shall</code> = "~해야 한다", REQ-X.X / NF-X.X 고유 ID<br>
+<strong>상태</strong>: 본문 작성 완료. 모듈별 상세는 §3 안에 임베드된 F0~F8.</p>
+</blockquote>
+
+<!-- ============================= §1 Introduction ============================= -->
+<section id="sec1">
+<div class="sec-head"><span class="num">§1</span><h2>Introduction</h2></div>
+
+<div class="subsec">
+<h3 id="sec1-1">§1.1 Purpose</h3>
+<p>본 문서는 DS-APM이 SigNoz community 빌드 위에서 <strong>Incident → SOP runbook → Operator handoff</strong> 흐름을 자동화하기 위해 요구하는 기능·비기능 요구사항을 정의해야 한다. 산출물은 ISO/IEC/IEEE 29148:2018의 SRS 템플릿을 POC 단계에 맞게 경량화(<code>§1, §2, §3, §4, §5</code>)한 형태이며, 각 기능 요구사항은 Specification by Example의 Living Documentation 원칙에 따라 Gherkin acceptance criteria로 보강된다 (각 모듈 F* §F*.7).</p>
+<p>본 문서는 산출물 4종 중 하나로, <a href="../01-overview/overview.html">arc42 Overview</a>, <a href="../02-usecase/usecase.html">Use Case 카탈로그</a>, <a href="../04-wbs/wbs.html">WBS</a>와 traceability ID로 연결된다.</p>
+</div>
+
+<div class="subsec">
+<h3 id="sec1-2">§1.2 Document Conventions</h3>
+<ul>
+<li>요구사항은 모두 <code>shall</code> = "~해야 한다" 사용</li>
+<li>ID 컨벤션: <code>REQ-F{모듈}.{번호}</code> (functional), <code>NF-{모듈}.{번호}</code> (non-functional)</li>
+<li>Gherkin acceptance criteria는 영문 (godog 호환)</li>
+<li>본문 한국어, 코드/필드명/ID 영문</li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="sec1-3">§1.3 Intended Audience</h3>
+<table>
+<thead><tr><th>독자</th><th>사용 목적</th></tr></thead>
+<tbody>
+<tr><td><strong>운영자 (Operator)</strong></td><td>UC-001~003에서 자신이 담당하는 단계(draft 검수, DLQ replay)의 정확한 응답 시간·실패 fallback 정책 확인</td></tr>
+<tr><td><strong>SRE</strong></td><td>NF-* 비기능 요건(p95 latency, DLQ persistence, redaction coverage) 충족 여부 확인 + meta-alert 정책 (F3, F7, F8)</td></tr>
+<tr><td><strong>Platform Admin</strong></td><td>tenant policy / AI strategy / audit sink / DLQ sink의 운영 설정 (F0, F4, F5)</td></tr>
+<tr><td><strong>Security</strong></td><td>PII redaction policy (F7), HMAC follow-up (NF-5.3.1), tenant 격리 NFR (NF-F1.1, NF-F4.*)</td></tr>
+<tr><td><strong>개발자</strong></td><td>각 모듈의 인터페이스·데이터 모델·예외 처리 (각 F* §2~§6) + acceptance Gherkin (§*.7)</td></tr>
+<tr><td><strong>감리·QA</strong></td><td>traceability matrix와 ID 정합성 검증 (<code>_shared/traceability.md</code>)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="subsec">
+<h3 id="sec1-4">§1.4 Product Scope</h3>
+<ul>
+<li><strong>In Scope</strong>: DS-APM 확장 레이어 (incident handoff, SOP grounding, AI runbook, notification dispatch, PII redaction, DLQ/replay) — F0~F8 9개 모듈 전부.</li>
+<li><strong>Out of Scope</strong>: SigNoz upstream 기능 자체, Enterprise 모듈(<code>ee/</code>, <code>cmd/enterprise/</code>), vector retrieval 기반 SOP grounding (현재 explicit-label binding만), Redis 기반 idempotency cache (현재 파일 기반 JSONL), y2i 관련 기능 (영구 비활성화).</li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="sec1-5">§1.5 References</h3>
+<ul>
+<li><code>../_foundation/baseline.md</code> — 11 커밋·100 파일·+12,632 LOC 변경 표면 + 커밋 ↔ 모듈 매핑</li>
+<li><code>../_foundation/research-skills-a-methods.md</code> §3 — ISO/IEC/IEEE 29148-lite + Spec by Example 채택 근거</li>
+<li><code>../_foundation/research-skills-c-domain.md</code> — Alertmanager v4 / PagerDuty Events v2 / Slack Block Kit / MS Teams Adaptive Card v1.4 / DLQ + idempotency / PII OTel processor</li>
+<li><code>../_shared/traceability.md</code> — 진실의 원천: UC × F × WBS 매트릭스</li>
+<li><code>../_shared/glossary.md</code> — 31개 용어</li>
+</ul>
+</div>
+</section>
+
+<!-- ============================= §2 Overall Description ============================= -->
+<section id="sec2">
+<div class="sec-head"><span class="num">§2</span><h2>Overall Description</h2></div>
+
+<div class="subsec">
+<h3 id="sec2-1">§2.1 Product Perspective</h3>
+<p>DS-APM은 <strong>SigNoz community 빌드의 확장 레이어</strong>다. 별도 서비스가 아니라 SigNoz의 <code>pkg/alertmanager/</code>, <code>pkg/ruler/</code>, <code>pkg/types/ruletypes/</code>, <code>cmd/community/</code>에 직접 흡수된 Go-native MVP이며, SigNoz 없이는 동작하지 않는다 (ADR-001).</p>
+<table>
+<thead><tr><th>의존 대상</th><th>역할</th><th>변경 가능성</th></tr></thead>
+<tbody>
+<tr><td><strong>SigNoz Ruler</strong></td><td>alert evaluation + firing</td><td>upstream API 변경 시 DS-APM 영향 — 모니터링 필요 (R-6)</td></tr>
+<tr><td><strong>SigNoz Alertmanager (<code>dispatch.Dispatcher</code>)</strong></td><td>dispatcher hot path</td><td>F6은 이를 wrapping해서 <code>aiHook</code> + <code>dlqSink</code>를 끼워넣음</td></tr>
+<tr><td><strong>SigNoz <code>notify.Stage</code></strong></td><td>채널별 notification stage</td><td>5채널 어댑터 (Slack / Teams v2 / PagerDuty / Webhook / Email)를 패치</td></tr>
+<tr><td><strong>SigNoz ClickHouse 연결</strong></td><td>observability backend</td><td>DS-APM은 metrics/logs sink로만 활용, 직접 schema 변경 안 함</td></tr>
+</tbody>
+</table>
+<p>fork 프레이밍 <strong>금지</strong> — DS-APM은 SigNoz의 fork가 아니라 같은 코드라인 위의 흡수 확장이다 (메모리 정책 "var/signoz는 우리 코드").</p>
+</div>
+
+<div class="subsec">
+<h3 id="sec2-2">§2.2 Product Features (high-level)</h3>
+<p>→ §3 (모듈별 상세). F0~F8 9 모듈 = WBS-1.0~1.5 6 components.</p>
+</div>
+
+<div class="subsec">
+<h3 id="sec2-3">§2.3 User Classes</h3>
+<table>
+<thead><tr><th>Class</th><th>식별</th><th>DS-APM 상호작용</th></tr></thead>
+<tbody>
+<tr><td><strong>운영자 (Operator)</strong></td><td>on-call rotation 등재</td><td>UC-001 draft 검수 (단계 6~7), UC-002 DLQ replay (단계 6~7), UC-003 degraded mode 알림 수신</td></tr>
+<tr><td><strong>SRE</strong></td><td>service ownership</td><td>meta-alert 수신 (F3 fail-open / F7 redaction spike / F8 DLQ depth), 자격증명 회전 escalation (UC-003 7a)</td></tr>
+<tr><td><strong>Platform Admin</strong></td><td>tenant·정책 권한</td><td>tenant policy 등록 (F4), AI strategy 활성화 (F2), audit/DLQ sink 운영 설정 (F0, F5, F8)</td></tr>
+<tr><td><strong>Security</strong></td><td>감사 권한</td><td>PII redaction 정책 검토 (F7), HMAC 정책 결정 (NF-5.3.1 — open), tenant 격리 production-readiness 평가 (R-3)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="subsec">
+<h3 id="sec2-4">§2.4 Operating Environment</h3>
+<table>
+<thead><tr><th>카테고리</th><th>요구사항</th></tr></thead>
+<tbody>
+<tr><td><strong>Runtime</strong></td><td>Go 1.x (SigNoz community 호환 버전). 단일 binary <code>cmd/community/</code>.</td></tr>
+<tr><td><strong>Storage (SQL)</strong></td><td>PostgreSQL (bun ORM). SOP store는 마이그레이션 078의 <code>ds_sop_documents</code> 테이블 사용 (F1).</td></tr>
+<tr><td><strong>Storage (Observability)</strong></td><td>ClickHouse — SigNoz upstream 그대로. DS-APM은 schema 변경 안 함.</td></tr>
+<tr><td><strong>Storage (Cache, optional)</strong></td><td>Redis — 현재 idempotency cache로 미사용. ledger는 파일 기반 (F8). future R-7 follow-up.</td></tr>
+<tr><td><strong>LLM Provider</strong></td><td>HTTP-accessible. 자체 호스팅 모델 또는 외부 SaaS (OpenAI, Anthropic, Bedrock 등). 401/403/429 응답을 표준 status code로 반환해야 함 (F3, UC-003).</td></tr>
+<tr><td><strong>File system</strong></td><td><code>var/audit/pilot-events.jsonl</code> (audit), <code>var/dlq/*.jsonl</code> (DLQ) 50 MiB rotation. fsync 정책으로 프로세스 crash 시 1초 이내 마지막 N개 entry 손실 허용 (MVP).</td></tr>
+<tr><td><strong>OS / Container</strong></td><td>Linux container. SigNoz upstream과 동일 base image.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="subsec">
+<h3 id="sec2-5">§2.5 Design and Implementation Constraints</h3>
+<table>
+<thead><tr><th>ID</th><th>제약</th></tr></thead>
+<tbody>
+<tr><td><strong>C-1</strong></td><td>Go 언어로 작성해야 한다 (Python <code>ds_apm_poc</code> 폐기, ADR-001).</td></tr>
+<tr><td><strong>C-2</strong></td><td>SigNoz upstream의 internal API (<code>dispatch.Dispatcher</code>, <code>notify.Stage</code>, <code>provider.Alerts</code>)를 직접 사용해야 한다. wrapping은 허용.</td></tr>
+<tr><td><strong>C-3</strong></td><td>Enterprise 모듈(<code>ee/</code>, <code>cmd/enterprise/</code>)에는 변경을 가하지 않아야 한다 — 별도 라이선스.</td></tr>
+<tr><td><strong>C-4</strong></td><td>Multi-tenant 격리·PII 처리는 <strong>production-ready 아님</strong> (README 명시). 본 SRS의 모든 NFR은 MVP 기준이며, production hardening은 별도 milestone에서.</td></tr>
+<tr><td><strong>C-5</strong></td><td>DS-APM 산출물은 <code>figure-team/ds-apm</code> 공개 스냅샷에 single squash commit으로 노출되지만, 실제 작업 히스토리는 <code>workspace_archive/ds-apm/var/signoz</code> nested repo에서 관리된다. nested repo의 자체 <code>.git</code> 확인이 모든 변경의 필수 절차다 (R-1).</td></tr>
+<tr><td><strong>C-6</strong></td><td>y2i 관련 기능은 영구 비활성화 (메모리 정책). WBS에서도 명시적 OUT OF SCOPE.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="subsec">
+<h3 id="sec2-6">§2.6 User Documentation</h3>
+<ul>
+<li>운영자/SRE 대상 운영 가이드는 본 산출물 범위 밖. 본 SRS는 시스템 외부 인터페이스·NFR을 정의한다.</li>
+<li>Acceptance Gherkin은 각 모듈 F* §F*.7에서 godog 호환 형태로 제공.</li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="sec2-7">§2.7 Assumptions and Dependencies</h3>
+<table>
+<thead><tr><th>가정</th><th>영향 시나리오</th></tr></thead>
+<tbody>
+<tr><td>SigNoz community build가 OpenTelemetry-네이티브로 alert label과 resource attribute를 보존해야 한다.</td><td>OTel attribute drop 시 SOP grounding key가 누락되어 UC-001 5a Extension으로 전이</td></tr>
+<tr><td>Alertmanager webhook v4 스키마가 안정적이어야 한다 (<code>alertname</code>, <code>status</code>, <code>fingerprint</code>, <code>labels</code>, <code>annotations.runbook_url</code>, <code>generatorURL</code>).</td><td>스키마 변경 시 UC-001 단계 1의 schema validation reject 증가 (Extension 2a)</td></tr>
+<tr><td>LLM Provider가 표준 HTTP status code (200 / 401 / 403 / 429 / 5xx)를 일관되게 반환해야 한다.</td><td>비표준 응답 시 UC-003의 fail-open 분류가 흔들림 (research §13.4)</td></tr>
+<tr><td>운영자 1인 이상이 on-call rotation에 등재돼 있어야 한다.</td><td>미등재 시 UC-001 단계 6 (draft 검수) 진행 불가 → SOP raw fallback으로 degrade</td></tr>
+<tr><td>디스크 쓰기 가능 + sufficient space (audit/DLQ 각 50 MiB rotation 기준).</td><td>쓰기 불가 시 F0.5 fail-open (audit) / UC-002 4a Extension (DLQ)</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ============================= §3 System Features ============================= -->
+<section id="sec3">
+<div class="sec-head"><span class="num">§3</span><h2>System Features (모듈별 상세)</h2></div>
+<p class="sec-intro">F0~F8 9 모듈. 각 모듈은 동일 템플릿: §F*.1 개요 / §F*.2 인터페이스 / §F*.3 데이터 모델 / §F*.4 상태 전이 / §F*.5 예외 / §F*.6 NFR / §F*.7 Acceptance (Gherkin) / §F*.8 Traceability.</p>
+
+<table>
+<thead><tr><th>ID</th><th>모듈</th><th>상태</th><th>커밋</th></tr></thead>
+<tbody>
+<tr><td><a href="#F0">F0</a></td><td>Foundation / Pilot scaffolding</td><td><span class="status-pill implemented">implemented</span></td><td><code>026863650</code></td></tr>
+<tr><td><a href="#F1">F1</a></td><td>SOP Grounding &amp; Store</td><td><span class="status-pill implemented">implemented</span></td><td><code>72944ecac</code>, <code>c7f4fd330</code></td></tr>
+<tr><td><a href="#F2">F2</a></td><td>AI Runbook Drafting (with history)</td><td><span class="status-pill implemented">implemented</span></td><td><code>cb29d2a59</code></td></tr>
+<tr><td><a href="#F3">F3</a></td><td>AI Quota Controls (fail-open)</td><td><span class="status-pill implemented">implemented</span></td><td><code>a6757136e</code></td></tr>
+<tr><td><a href="#F4">F4</a></td><td>Multi-tenant Scope</td><td><span class="status-pill mvp">implemented-mvp</span></td><td><code>3fa604e03</code></td></tr>
+<tr><td><a href="#F5">F5</a></td><td>Audit (SOP access &amp; dispatch)</td><td><span class="status-pill implemented">implemented</span></td><td><code>8a55208ef</code></td></tr>
+<tr><td><a href="#F6">F6</a></td><td>Notification Dispatch (5 채널)</td><td><span class="status-pill implemented">implemented</span></td><td><code>5c036c806</code></td></tr>
+<tr><td><a href="#F7">F7</a></td><td>PII Redaction</td><td><span class="status-pill mvp">implemented-mvp</span></td><td><code>3e9dfa557</code></td></tr>
+<tr><td><a href="#F8">F8</a></td><td>DLQ + Replay</td><td><span class="status-pill implemented">implemented</span></td><td><code>ade174bb8</code>, <code>91b9ff5db</code></td></tr>
+</tbody>
+</table>
+
+<!-- ====== F0 ====== -->
+<section class="module" id="F0">
+<div class="module-head">
+<span class="module-id">F0</span>
+<h2>Foundation / Pilot Scaffolding</h2>
+<span class="status-pill implemented">implemented</span>
+</div>
+<blockquote><p><strong>상태</strong>: 구현 완료<br>DS-APM 네이티브 MVP의 토대 — pilot contract, managed markdown, community 진입점 통합.</p></blockquote>
+
+<div class="subsec">
+<h3 id="F0-1">§F0.1 개요</h3>
+<p>본 모듈은 DS-APM이 SigNoz community build 위에서 동작하기 위해 필요한 <strong>계약(contract) 정의·진입점·기본 sink 등록</strong>을 담당한다. 핵심은 다음 세 가지다.</p>
+<ol>
+<li><strong>Pilot Contract 정의</strong> — SOP source / health / audit / service account / configuration 5종 contract의 버전 문자열과 enum, validator를 한 곳에 모은다 (<code>pilot_contract.go</code>).</li>
+<li><strong>Managed Markdown SOP source</strong> — DS-APM이 v0.1에서 지원하는 유일한 SOP source kind. 운영자가 markdown 본문을 직접 등록하는 minimal path.</li>
+<li><strong>Community 진입점</strong> — <code>cmd/community/main.go</code>가 부팅 시 pilot audit JSONL sink를 등록한다 (F5와 연결).</li>
+</ol>
+<p>본 모듈은 다른 F1~F8 모듈이 의존하는 contract 식별자(<code>ContractVersion</code> 문자열)와 enum(<code>PilotSOPSourceKind*</code>, <code>PilotAuditOutcome*</code> 등)을 모두 export한다.</p>
+</div>
+
+<div class="subsec">
+<h3 id="F0-2">§F0.2 인터페이스</h3>
+<p>진입점은 <code>cmd/community/main.go</code>의 <code>main()</code> 함수다.</p>
+<pre><code class="language-go">func main() {
+    logger := instrumentation.NewLogger(instrumentation.Config{...})
+
+    if jsonlSink, err := ruletypes.NewPilotAuditEventJSONLSink(
+        "var/audit/pilot-events.jsonl",
+        ruletypes.DefaultPilotAuditJSONLMaxSizeBytes,
+    ); err != nil {
+        zap.L().Warn("pilot audit JSONL sink init failed; falling back to nop", zap.Error(err))
+    } else {
+        ruletypes.RegisterPilotAuditEventSink(jsonlSink)
+    }
+
+    registerServer(cmd.RootCmd, logger)
+    cmd.RegisterGenerate(cmd.RootCmd, logger)
+    cmd.Execute(logger)
+}</code></pre>
+<p>검증 인터페이스는 <code>pilot_contract.go</code>의 다섯 validator 함수:</p>
+<pre><code class="language-go">func ValidatePilotSOPSourceCatalog(resp PilotSOPSourceCatalogResponse) error
+func ValidatePilotSOPSourceHealth(resp PilotSOPSourceHealthResponse) error
+func ValidatePilotAuditEvent(event PilotAuditEvent) error
+func ValidatePilotServiceAccountProfile(profile PilotServiceAccountProfile) error
+func ValidatePilotConfiguration(config PilotConfiguration) error</code></pre>
+</div>
+
+<div class="subsec">
+<h3 id="F0-3">§F0.3 데이터 모델</h3>
+<p>핵심 contract 버전 (전부 frozen string):</p>
+<table>
+<thead><tr><th>Constant</th><th>값</th></tr></thead>
+<tbody>
+<tr><td><code>PilotSOPSourceCatalogContractVersion</code></td><td><code>ds-apm.sop-source-catalog.v1</code></td></tr>
+<tr><td><code>PilotSOPSourceHealthContractVersion</code></td><td><code>ds-apm.sop-source-health.v1</code></td></tr>
+<tr><td><code>PilotAuditEventContractVersion</code></td><td><code>ds-apm.audit-event.v1</code></td></tr>
+<tr><td><code>PilotServiceAccountProfileContractVersion</code></td><td><code>ds-apm.service-account-profile.v1</code></td></tr>
+<tr><td><code>PilotConfigurationContractVersion</code></td><td><code>ds-apm.pilot-configuration.v1</code></td></tr>
+</tbody>
+</table>
+<p>주요 struct (요약):</p>
+<pre><code class="language-go">type PilotSOPSource struct {
+    SourceID, DisplayName, Kind, AuthMode, Status string
+    LastHealthCheckAt, LastSyncAt                 string
+    Capabilities                                  PilotSOPSourceCapabilities
+    ServiceAccountProfile                         string
+    SecretRefVisible                              bool   // 항상 false
+    ConfiguredBy                                  string
+    Warnings                                      []string
+}
+
+type PilotManagedMarkdownDocument struct {
+    SOPID, Version, Title, BodyMarkdown, DisplayURL, UpdatedAt string
+    Tags                                                       []string
+}
+
+type PilotConfiguration struct {
+    ContractVersion, ProjectID, Environment, ServiceName string
+    SelectedSources                                       []PilotSelectedSource
+    AllowedCapabilities                                   PilotAllowedCapabilities
+    AuditMode                                             string  // required | deferred | disabled
+    Enabled                                               bool
+    RolloutID                                             string
+}</code></pre>
+<p>SOP source kind enum: <code>url_registry | managed_markdown | git_markdown | confluence | notion | sharepoint | custom_connector</code>. <strong>v0.1에서는 <code>managed_markdown</code> 외 모두 미구현.</strong></p>
+<p>Body markdown 상한: <code>PilotSOPFetchBodyMarkdownMaxBytes = 256 KiB</code>.</p>
+</div>
+
+<div class="subsec">
+<h3 id="F0-4">§F0.4 상태 전이</h3>
+<p>해당 없음. 본 모듈은 contract 정의·진입점·sink 등록만 담당하며, runtime state machine을 보유하지 않는다.</p>
+</div>
+
+<div class="subsec">
+<h3 id="F0-5">§F0.5 예외 및 복구</h3>
+<ul>
+<li><strong>JSONL sink 초기화 실패</strong> — <code>cmd/community/main.go</code>는 fail-open. <code>zap.L().Warn(...)</code> 후 default <code>NopPilotAuditEventSink</code>로 진행한다. 서버 부팅은 절대 막지 않는다 (운영 가용성 우선).</li>
+<li><strong>Contract validation 실패</strong> — validator는 <code>errors.Join(errs...)</code>로 모든 위반을 한꺼번에 보고. 호출자가 fail-closed/fail-open을 선택.</li>
+<li><strong>Secret-like 값 검출</strong> — <code>hasPilotSecretLikeValue()</code>가 <code>token=</code>, <code>client_secret</code>, <code>api_key</code>, JWT-like 패턴 등을 contract 응답에서 차단. 위반 시 validation error 반환.</li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="F0-6">§F0.6 비기능 요건 (NFR)</h3>
+<ul>
+<li><strong>NF-F0.1</strong> 시스템은 contract version 문자열을 절대 자동 변경하지 않아야 한다 (downstream desync 방지).</li>
+<li><strong>NF-F0.2</strong> Audit sink 등록 실패는 서버 부팅을 막지 않아야 한다 (fail-open).</li>
+<li><strong>NF-F0.3</strong> 모든 browser-visible response (<code>SecretRefVisible</code>, <code>CredentialDetailsVisible</code>, <code>BrowserCredentialsUsed</code>)는 항상 <code>false</code>여야 한다.</li>
+<li><strong>NF-F0.4</strong> Body markdown payload는 256 KiB를 초과하지 않아야 한다.</li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="F0-7">§F0.7 Acceptance Criteria (Gherkin)</h3>
+<pre><code class="language-gherkin">Feature: Foundation contract validation
+  Background:
+    Given the DS-APM contract package is initialized
+
+  Scenario: Pilot SOP source catalog rejects credential leakage
+    Given a PilotSOPSource with secretRefVisible set to true
+    When ValidatePilotSOPSourceCatalog is called
+    Then the validator returns an error mentioning "secretRefVisible"
+
+  Scenario: Audit JSONL sink failure does not abort boot
+    Given the audit log directory is read-only
+    When the community main() initializes the JSONL sink
+    Then the warning is logged and NopPilotAuditEventSink remains active
+    And the server proceeds to register commands</code></pre>
+</div>
+
+<div class="subsec">
+<h3 id="F0-8">§F0.8 Traceability</h3>
+<ul>
+<li>Implements UC: UC-001</li>
+<li>Covered by WBS: WBS-1.0</li>
+<li>Source: <code>cmd/community/</code>, <code>pkg/types/ruletypes/pilot_contract.go</code>, <code>pkg/types/ruletypes/pilot_managed_markdown.go</code></li>
+<li>Commits: <code>026863650</code></li>
+</ul>
+</div>
+</section>
+
+<!-- ====== F1 ====== -->
+<section class="module" id="F1">
+<div class="module-head">
+<span class="module-id">F1</span>
+<h2>SOP Grounding &amp; Store</h2>
+<span class="status-pill implemented">implemented</span>
+</div>
+<blockquote><p><strong>상태</strong>: 구현 완료<br>SigNoz alert 라벨을 사전 등록된 SOP 문서에 매칭(grounding)하고, SOP를 SQL 백엔드에 영속화하는 모듈.</p></blockquote>
+
+<div class="subsec">
+<h3 id="F1-1">§F1.1 개요</h3>
+<p>본 모듈은 incident이 발생했을 때 "어떤 SOP를 적용할지"를 결정하는 <strong>Grounding 로직</strong>과, SOP 본문을 영속화하는 <strong>Store 로직</strong>으로 구성된다.</p>
+<p>Grounding은 alert label <code>signoz_pilot_sop_id</code>를 1차 키로 사용하는 <strong>explicit-label binding</strong>이다. (Vector retrieval은 아직 도입 전 — v0.1은 명시적 라벨 기반.) Tenant scope (<code>project_id</code> × <code>environment</code>)가 일치하지 않으면 차단되며, <code>approval_status</code> 가 <code>disabled</code>이면 disabled 상태로 반환된다.</p>
+<p>Store는 <code>SOPStore</code> 인터페이스를 통해 추상화되며, 현재 구현은 PostgreSQL 위 bun ORM 기반 <code>sqlsopstore</code>다. 모든 read/write는 <code>orgID</code>로 partition된다 — cross-tenant lookup은 <code>ErrSOPDocumentNotFound</code>로 통일되어 반환되므로 호출자는 "다른 tenant에 존재하는지" 추론할 수 없다.</p>
+</div>
+
+<div class="subsec">
+<h3 id="F1-2">§F1.2 인터페이스</h3>
+<pre><code class="language-go">// pkg/types/ruletypes/sop_store.go
+type SOPStore interface {
+    Upsert(ctx context.Context, orgID string, doc SOPDocument) error
+    Get(ctx context.Context, orgID, sopID, version string) (SOPDocument, error)
+    GetLatest(ctx context.Context, orgID, sopID string) (SOPDocument, error)
+    List(ctx context.Context, orgID string) ([]SOPDocument, error)
+    Delete(ctx context.Context, orgID, sopID, version string) error
+    UpsertRunbook(ctx context.Context, orgID, sopID, version string, rb Runbook) error
+    DeleteRunbook(ctx context.Context, orgID, sopID, version, runbookID string) error
+}
+
+var ErrSOPDocumentNotFound = errors.New("sop document not found")</code></pre>
+<p>Grounding 진입점 (<code>pkg/types/ruletypes/sop_document.go</code>):</p>
+<pre><code class="language-go">func PreviewSOPDocumentBinding(
+    docs []SOPDocument,
+    req SOPBindingPreviewRequest,
+) (SOPBindingPreviewResponse, error)</code></pre>
+</div>
+
+<div class="subsec">
+<h3 id="F1-3">§F1.3 데이터 모델</h3>
+<pre><code class="language-go">type SOPDocument struct {
+    ContractVersion string                    // "ds.sop_document.v1"
+    SOPID           string
+    Title           string
+    Version         string
+    Checksum        string                    // "sha256:&lt;hex&gt;"
+    Source          SOPDocumentSource         // {Type, SourceID}
+    BodyMarkdown    string                    // 최대 256 KiB
+    DisplayURL      string                    // optional, safeDisplayURL 검사
+    OwnerTeam       string
+    ApprovalStatus  string                    // draft|approved|deprecated|disabled
+    TenantScope     PilotTenantScope          // {ProjectIDs[], Environments[]}, "*" 허용
+    Tags            []string
+    Runbooks        []Runbook
+    UpdatedAt       string
+    SecurityContext PilotAuditSecurityContext
+}
+
+type SOPBindingPreviewResponse struct {
+    ContractVersion string   // "ds.sop_binding.v1"
+    Status          string   // bound|missing|disabled|forbidden
+    Resolution      string   // explicit_label|no_match
+    SOPID, Version, Title, SourceID string
+    Warnings        []string
+}</code></pre>
+<p>SQL backing table (<code>sqlsopstore.NewSOPStore</code>): 마이그레이션 078의 <code>ds_sop_documents</code>. Bun ORM 기반 <code>StorableSOPDocument</code> row가 <code>(org_id, sop_id, version)</code> 복합 키로 upsert된다.</p>
+<blockquote><p><strong>주의</strong> — <code>SOPStore.GetLatest</code>는 version DESC 문자열 정렬이다. caller는 <code>v01</code>, <code>v02</code> 같이 zero-pad된 lexicographically-sortable version을 사용해야 한다 (<code>v10 &lt; v2</code>).</p></blockquote>
+</div>
+
+<div class="subsec">
+<h3 id="F1-4">§F1.4 상태 전이</h3>
+<pre class="mermaid">
+stateDiagram-v2
+    [*] --> Draft : Upsert (approvalStatus=draft)
+    Draft --> Approved : operator approves
+    Approved --> Deprecated : new version published
+    Approved --> Disabled : operator disables
+    Draft --> Disabled : operator disables
+    Disabled --> Approved : operator re-enables
+    Deprecated --> [*] : Delete
+    Disabled --> [*] : Delete
+</pre>
+<p>Binding 결과 상태: <code>bound</code> (정상) / <code>missing</code> (sop_id label 없음 또는 store에 없음) / <code>forbidden</code> (tenant scope mismatch) / <code>disabled</code> (approvalStatus=disabled).</p>
+</div>
+
+<div class="subsec">
+<h3 id="F1-5">§F1.5 예외 및 복구</h3>
+<table>
+<thead><tr><th>경로</th><th>처리</th></tr></thead>
+<tbody>
+<tr><td><code>sop_id</code> label 누락</td><td><code>status=missing</code>, <code>resolution=no_match</code>, 경고 <code>"sop_id label is not set"</code></td></tr>
+<tr><td>Store에 SOP 없음</td><td><code>status=missing</code>, <code>resolution=explicit_label</code>, 경고 <code>"sop document was not found"</code></td></tr>
+<tr><td><code>project_id</code> 또는 <code>environment</code> label 누락</td><td><code>status=missing</code>, 경고 <code>SOPTenantPolicyMissingLabelsWarning</code></td></tr>
+<tr><td>Tenant scope mismatch</td><td><code>status=forbidden</code>, 경고 <code>SOPTenantPolicyDeniedWarning</code></td></tr>
+<tr><td><code>approvalStatus=disabled</code></td><td><code>status=disabled</code>, 경고 <code>"sop document is disabled"</code></td></tr>
+<tr><td>Cross-tenant <code>Get</code></td><td><code>ErrSOPDocumentNotFound</code> (다른 tenant 존재 여부 누설 금지)</td></tr>
+<tr><td>BodyMarkdown &gt; 256 KiB</td><td>validation error</td></tr>
+<tr><td>BodyMarkdown이 markdown처럼 보이지 않음 (HTML/PDF/ZIP magic)</td><td>validation error</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="subsec">
+<h3 id="F1-6">§F1.6 비기능 요건 (NFR)</h3>
+<ul>
+<li><strong>NF-F1.1</strong> Cross-tenant lookup은 반드시 <code>ErrSOPDocumentNotFound</code>로 통일되어야 한다 (존재 누설 금지).</li>
+<li><strong>NF-F1.2</strong> <code>UpsertRunbook</code>은 read-modify-write를 단일 transaction 안에서 수행해야 한다 (concurrent caller의 interleave 방지).</li>
+<li><strong>NF-F1.3</strong> SOPDocument checksum은 <code>sha256:&lt;hex&gt;</code> 포맷이어야 한다.</li>
+<li><strong>NF-F1.4</strong> <code>DisplayURL</code>은 <code>http</code>/<code>https</code>만 허용되며 sensitive query parameter는 자동 제거되어야 한다 (<code>safeDisplayURL</code>).</li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="F1-7">§F1.7 Acceptance Criteria (Gherkin)</h3>
+<pre><code class="language-gherkin">Feature: SOP grounding by explicit label
+  Background:
+    Given a SOPStore containing document "SOP-PAY-5xx" version "v01" approved for project "p-prod"
+
+  Scenario: Bound to explicit label
+    Given an alert with labels project_id="p-prod", environment="production", signoz_pilot_sop_id="SOP-PAY-5xx"
+    When PreviewSOPDocumentBinding runs
+    Then the response status is "bound"
+    And the resolution is "explicit_label"
+    And the bound version is "v01"
+
+  Scenario: Cross-tenant lookup is opaque
+    Given an alert with labels project_id="p-other", environment="production", signoz_pilot_sop_id="SOP-PAY-5xx"
+    When PreviewSOPDocumentBinding runs
+    Then the response status is "forbidden"
+    And the warning contains "sop document is outside requested tenant scope"
+
+  Scenario: Disabled SOP is reported but not delivered
+    Given the SOP "SOP-PAY-5xx" has approvalStatus "disabled"
+    When PreviewSOPDocumentBinding runs against a matching alert
+    Then the response status is "disabled"
+    And the warning contains "sop document is disabled"</code></pre>
+</div>
+
+<div class="subsec">
+<h3 id="F1-8">§F1.8 Traceability</h3>
+<ul>
+<li>Implements UC: UC-001 (단계 4), UC-003 (전제)</li>
+<li>Covered by WBS: WBS-1.1</li>
+<li>Source: <code>pkg/ruler/sopstore/sqlsopstore/sop.go</code>, <code>pkg/types/ruletypes/sop_document.go</code></li>
+<li>Commits: <code>72944ecac</code>, <code>c7f4fd330</code></li>
+</ul>
+</div>
+</section>
+
+<!-- ====== F2 ====== -->
+<section class="module" id="F2">
+<div class="module-head">
+<span class="module-id">F2</span>
+<h2>AI Runbook Drafting (with history)</h2>
+<span class="status-pill implemented">implemented</span>
+</div>
+<blockquote><p><strong>상태</strong>: 구현 완료<br>bound된 SOP를 컨텍스트로 LLM이 incident 대응 strategy + runbook draft를 생성하고, 결과를 <code>ai_strategy_history</code>에 기록한다.</p></blockquote>
+
+<div class="subsec">
+<h3 id="F2-1">§F2.1 개요</h3>
+<p>본 모듈은 두 개의 별도 컴포넌트로 구성된다.</p>
+<ol>
+<li><strong>AIStrategyGenerator</strong> — alert label + bound SOP를 입력으로 받아 <code>AIStrategy</code> (가설 / 첫 조치 / customer update draft / vendor request draft)를 출력. <code>local</code> (deterministic, 외부 호출 없음) / <code>mock</code> (fixture 기반 데모) / <code>llm</code> (Claude / Codex × API / CLI 4조합) provider 지원.</li>
+<li><strong>RunbookDrafter</strong> — SOP + 에러 예시를 입력으로 받아 <code>Runbook</code> draft를 출력. LLM 또는 mock 구현.</li>
+</ol>
+<p>운영자 검수가 끝나면 <code>AIStrategyHistoryStore</code>에 record를 best-effort upsert해서 동일 incident 재발 시 lookup이 가능하도록 한다. <strong>모든 strategy output은 <code>requiresHumanApproval=true</code> 이며 자동 실행 주장(<code>자동 재시작</code>, <code>automatically restarted</code> 등) 패턴은 validator가 차단한다.</strong></p>
+</div>
+
+<div class="subsec">
+<h3 id="F2-2">§F2.2 인터페이스</h3>
+<pre><code class="language-go">// pkg/types/ruletypes
+type AIStrategyGenerator interface {
+    Generate(ctx context.Context, req AIStrategyRequest) (AIStrategy, error)
+}
+
+type RunbookDrafter interface {
+    Draft(ctx context.Context, req RunbookDraftRequest) (Runbook, error)
+}
+
+type AIStrategyHistoryStore interface {
+    Upsert(ctx context.Context, orgID string, record AIStrategyHistoryRecord) error
+    Lookup(ctx context.Context, orgID string, req AIStrategyHistoryLookupRequest) (AIStrategyHistoryRecord, bool, error)
+}
+
+// pkg/ruler/aigenerator/aigenerator.go
+func New(cfg Config) (ruletypes.AIStrategyGenerator, error)
+func NewRunbookDrafter(cfg Config) ruletypes.RunbookDrafter</code></pre>
+<p>Provider 선택: <code>cfg.Provider ∈ {"", "local", "mock", "llm"}</code>. <code>llm</code>일 때 <code>LLMProvider ∈ {claude, codex}</code> × <code>LLMTransport ∈ {api, cli}</code> 4조합.</p>
+</div>
+
+<div class="subsec">
+<h3 id="F2-3">§F2.3 데이터 모델</h3>
+<pre><code class="language-go">type AIStrategyRequest struct {
+    StrategyID       string
+    IncidentID       string
+    AlertFingerprint string
+    Language         string                // default "ko-KR"
+    Labels           map[string]string
+    Annotations      map[string]string
+    SOPDocument      SOPDocument
+    EvidenceRefs     []AIEvidenceRef
+    PromptVersion    string                // default "ds-ir-ko-v1"
+    Model            string
+    Controls         AIStrategyControls    // quota / timeout budget
+    GeneratedAt      string
+}
+
+type AIStrategy struct {
+    ContractVersion     string          // "ds.ai_strategy.v1"
+    StrategyID          string
+    IncidentID          string
+    AlertFingerprint    string
+    Status              string          // ready|unavailable|timeout|blocked_by_policy
+                                        // |quota_exhausted|sop_missing
+                                        // |evidence_unavailable|low_confidence
+    Language            string
+    SOPID, SOPVersion   string
+    Headline            string
+    Hypotheses          []AIHypothesis
+    FirstActions        []AIFirstAction // 모두 RequiresHumanApproval=true
+    CustomerUpdateDraft string
+    VendorRequestDraft  string
+    Confidence          string          // high|medium|low
+    EvidenceRefs        []AIEvidenceRef
+    Limitations         []string
+    Audit               AIStrategyAudit // promptVersion, model, generatedAt,
+                                        // quota*, timeout*, redactionApplied
+}
+
+type AIStrategyHistoryRecord struct {
+    ContractVersion  string  // "ds.ai_strategy_history.v1"
+    IncidentID       string
+    AlertFingerprint string
+    StrategyID, Status, SOPID, SOPVersion, Confidence, GeneratedAt string
+    Strategy         AIStrategy
+}</code></pre>
+<p>History lookup key: <code>incident\x00&lt;incidentID&gt;</code> 또는 <code>fingerprint\x00&lt;alertFingerprint&gt;</code> 중 하나 이상 필수.</p>
+</div>
+
+<div class="subsec">
+<h3 id="F2-4">§F2.4 상태 전이</h3>
+<pre class="mermaid">
+stateDiagram-v2
+    [*] --> pending : Generate(req)
+    pending --> ready : SOP bound + evidence available
+    pending --> sop_missing : SOPDocument empty
+    pending --> blocked_by_policy : tenant scope mismatch / validation fail
+    pending --> evidence_unavailable : EvidenceRefs empty (SOP bound)
+    pending --> unavailable : ProviderEnabled=false
+    pending --> quota_exhausted : QuotaUsed >= QuotaLimit
+    pending --> timeout : ExecutionElapsed > TimeoutBudget
+    ready --> approved : operator approves
+    ready --> rejected : operator rejects
+    approved --> archived : history record upserted
+</pre>
+</div>
+
+<div class="subsec">
+<h3 id="F2-5">§F2.5 예외 및 복구</h3>
+<table>
+<thead><tr><th>경로</th><th>처리</th></tr></thead>
+<tbody>
+<tr><td>LLM provider 5xx / timeout</td><td><code>Status=timeout</code>, <code>Limitations=["AI strategy generation exceeded the configured timeout budget."]</code></td></tr>
+<tr><td>Quota 초과 (<code>QuotaUsed &gt;= QuotaLimit</code>)</td><td><code>Status=quota_exhausted</code>, fail-open (F3 참조)</td></tr>
+<tr><td>License 불허 (<code>LicenseAllowed=false</code>)</td><td><code>Status=blocked_by_policy</code>, <code>Limitations=["AI strategy generation is not licensed for this tenant."]</code></td></tr>
+<tr><td>Provider disabled (<code>ProviderEnabled=false</code>)</td><td><code>Status=unavailable</code>, <code>Limitations=["AI provider is disabled by tenant or deployment controls."]</code></td></tr>
+<tr><td>SOP 미바인딩</td><td><code>Status=sop_missing</code>, headline "연결된 SOP 문서가 없어 기본 알림만 전송합니다."</td></tr>
+<tr><td>Evidence 0건</td><td><code>Status=evidence_unavailable</code>, SOP 1단계 안내만 포함</td></tr>
+<tr><td>자동 실행 주장 패턴 검출 (<code>자동 재시작</code>, <code>automatically restarted</code>, <code>재시작했습니다</code> 등)</td><td>validator가 거부</td></tr>
+<tr><td>History upsert 실패</td><td>dispatch hook에서 <code>WarnContext</code>만 남기고 dispatch는 계속 진행</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="subsec">
+<h3 id="F2-6">§F2.6 비기능 요건 (NFR)</h3>
+<ul>
+<li><strong>NF-F2.1</strong> Dispatch hook 호출 시 generator timeout은 기본 1초 (<code>DefaultGenerateTimeout</code>). dispatcher hot path를 절대 막지 않아야 한다.</li>
+<li><strong>NF-F2.2</strong> 모든 <code>FirstAction.RequiresHumanApproval</code>은 <code>true</code>여야 한다 (validator가 강제).</li>
+<li><strong>NF-F2.3</strong> <code>audit.redactionApplied</code>는 반드시 <code>true</code>여야 strategy 출력이 사용될 수 있다.</li>
+<li><strong>NF-F2.4</strong> <code>StrategyID</code>가 비어 있으면 <code>deterministicAIStrategyID()</code>가 <code>sha256(incidentID || fingerprint || sopID || sopVersion)</code>의 앞 16 hex로 생성 — 동일 입력은 동일 ID.</li>
+<li><strong>NF-F2.5</strong> History record의 <code>IncidentID</code>, <code>StrategyID</code>, <code>Status</code>, <code>Confidence</code>, <code>GeneratedAt</code>은 embedded <code>Strategy</code>와 정확히 일치해야 한다 (validator가 강제).</li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="F2-7">§F2.7 Acceptance Criteria (Gherkin)</h3>
+<pre><code class="language-gherkin">Feature: AI runbook drafting with SOP grounding
+  Background:
+    Given the AIStrategyGenerator is configured with provider "local"
+    And a SOPDocument "SOP-PAY-5xx" is bound to the request
+
+  Scenario: Ready strategy with evidence
+    Given the request carries at least one evidence ref
+    And the tenant labels match the SOP scope
+    When Generate is called
+    Then the strategy status is "ready"
+    And every first action has RequiresHumanApproval set to true
+    And the audit.redactionApplied flag is true
+
+  Scenario: SOP missing yields fallback notice
+    Given the request SOPDocument is empty
+    When Generate is called
+    Then the strategy status is "sop_missing"
+    And the headline mentions "연결된 SOP 문서가 없어"
+
+  Scenario: Automatic-operation claim is rejected
+    Given a hypothesis text containing "자동 재시작"
+    When ValidateAIStrategy is called
+    Then validation fails with "must not claim automatic operational execution"
+
+  Scenario: History record requires matching strategy fields
+    Given an AIStrategyHistoryRecord whose Strategy.IncidentID differs from the record IncidentID
+    When ValidateAIStrategyHistoryRecord is called
+    Then validation fails mentioning "strategy.incidentId: must match"</code></pre>
+</div>
+
+<div class="subsec">
+<h3 id="F2-8">§F2.8 Traceability</h3>
+<ul>
+<li>Implements UC: UC-001 (단계 5), UC-003 (degraded path)</li>
+<li>Covered by WBS: WBS-1.2</li>
+<li>Source: <code>pkg/ruler/aigenerator/</code>, <code>pkg/ruler/runbookdrafter/llmrunbookdrafter/</code>, <code>pkg/types/ruletypes/ai_strategy*.go</code></li>
+<li>Commits: <code>cb29d2a59</code></li>
+</ul>
+</div>
+</section>
+
+<!-- ====== F3 ====== -->
+<section class="module" id="F3">
+<div class="module-head">
+<span class="module-id">F3</span>
+<h2>AI Quota Controls (fail-open)</h2>
+<span class="status-pill implemented">implemented</span>
+</div>
+<blockquote><p><strong>상태</strong>: 구현 완료<br>LLM provider disabled / license 불허 / quota 초과 / timeout 초과 시 fail-open 정책으로 SOP 원문 fallback. 알람 전달 자체는 절대 막지 않는다.</p></blockquote>
+
+<div class="subsec">
+<h3 id="F3-1">§F3.1 개요</h3>
+<p>DS-APM의 운영 원칙은 <strong>"AI는 보조, 알람은 항상 전달"</strong>. 본 모듈은 AI 경로가 실패해도 dispatcher가 멈추지 않도록 다음 두 가지를 책임진다.</p>
+<ol>
+<li><strong>StoreAware generator</strong> — per-org <code>AIConfig</code>를 cache + lookup. 미설정·암호화 실패·잘못된 provider 선택 시 <code>envFallback</code> (서버 부팅 시 env로 구성된 generator)로 자동 fallback.</li>
+<li><strong>Dispatch hook의 fail-graceful 정책</strong> — hook은 <code>error</code>를 절대 반환하지 않는다. SOP list 실패 / unbound / generator timeout / history upsert 실패 모두 입력 annotations 그대로 반환. dispatcher는 알람 전달을 계속 진행한다.</li>
+</ol>
+<p>추가로 strategy 자체에 quota / timeout / license / provider-enabled 4종 control이 박혀 있고, 위반 시 <code>Status=quota_exhausted|timeout|blocked_by_policy|unavailable</code> 중 하나로 안전하게 degrade된다 (F2.5 참조).</p>
+</div>
+
+<div class="subsec">
+<h3 id="F3-2">§F3.2 인터페이스</h3>
+<pre><code class="language-go">// pkg/ruler/aigenerator/storeaware.go
+type StoreAware struct { /* cache + store + envFallback */ }
+
+func NewStoreAware(
+    store ruletypes.AIConfigStore,
+    cipher *secretbox.Cipher,
+    envFallback ruletypes.AIStrategyGenerator,
+) *StoreAware
+
+func (s *StoreAware) Generate(ctx context.Context, req ruletypes.AIStrategyRequest) (ruletypes.AIStrategy, error)
+func (s *StoreAware) GeneratorFor(cfg ruletypes.AIConfig) (ruletypes.AIStrategyGenerator, error)
+func (s *StoreAware) Invalidate(orgID string)
+
+// pkg/ruler/aigenerator/dispatchhook/hook.go
+type Hook struct { /* sopStore + aiHistoryStore + generator + timeout */ }
+const DefaultGenerateTimeout = time.Second
+
+func (h *Hook) Apply(
+    ctx context.Context, orgID, incidentID, alertFingerprint string,
+    labels, annotations map[string]string,
+) map[string]string  // 절대 error 반환하지 않음</code></pre>
+</div>
+
+<div class="subsec">
+<h3 id="F3-3">§F3.3 데이터 모델</h3>
+<pre><code class="language-go">type AIStrategyControls struct {
+    ProviderEnabled        *bool   // nil → 검사 안 함
+    LicenseAllowed         *bool
+    QuotaLimit             int64   // 0 → 검사 안 함
+    QuotaUsed              int64
+    TimeoutBudgetMillis    int64   // 0 → 검사 안 함
+    ExecutionElapsedMillis int64
+}
+
+type AIStrategyAudit struct {
+    PromptVersion          string
+    Model                  string
+    GeneratedAt            string
+    RedactionApplied       bool
+    QuotaLimit             *int64  // 사용 시 strategy.Audit에 기록
+    QuotaUsed              *int64
+    QuotaRemaining         *int64
+    TimeoutBudgetMillis    *int64
+    ExecutionElapsedMillis *int64
+}</code></pre>
+<p>Limitation 문구 (constant):</p>
+<table>
+<thead><tr><th>Constant</th><th>값</th></tr></thead>
+<tbody>
+<tr><td><code>AIProviderDisabledLimitation</code></td><td>"AI provider is disabled by tenant or deployment controls."</td></tr>
+<tr><td><code>AILicenseUnavailableLimitation</code></td><td>"AI strategy generation is not licensed for this tenant."</td></tr>
+<tr><td><code>AIQuotaExhaustedLimitation</code></td><td>"AI strategy quota is exhausted for this period."</td></tr>
+<tr><td><code>AITimeoutBudgetExceededLimitation</code></td><td>"AI strategy generation exceeded the configured timeout budget."</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="subsec">
+<h3 id="F3-4">§F3.4 상태 전이</h3>
+<pre class="mermaid">
+stateDiagram-v2
+    [*] --> Normal
+    Normal --> Degraded_ProviderDisabled : ProviderEnabled=false
+    Normal --> Degraded_License : LicenseAllowed=false
+    Normal --> Degraded_Quota : QuotaUsed >= QuotaLimit
+    Normal --> Degraded_Timeout : Elapsed > Budget
+    Normal --> Degraded_Generator : generator returns error
+    Normal --> Degraded_StoreLookup : AIConfigStore.Get fails
+    Degraded_StoreLookup --> envFallback : StoreAware.Generate
+    Degraded_Generator --> annotations_unchanged : dispatch hook
+    Degraded_Quota --> Normal : next period
+</pre>
+</div>
+
+<div class="subsec">
+<h3 id="F3-5">§F3.5 예외 및 복구</h3>
+<table>
+<thead><tr><th>경로</th><th>처리</th></tr></thead>
+<tbody>
+<tr><td>Per-org <code>AIConfig</code> 미설정</td><td><code>StoreAware.Generate</code> → <code>envFallback.Generate</code></td></tr>
+<tr><td><code>cipher.DecryptFunc()</code> 실패</td><td><code>envFallback.Generate</code> (cached gen 미생성)</td></tr>
+<tr><td>UI에서 mock provider 선택</td><td><code>buildFromAIConfig</code> 명시적 error → <code>envFallback.Generate</code></td></tr>
+<tr><td><code>aigenerator.New()</code> factory error</td><td><code>dispatchhook</code> 미설치 (server boot 시), runtime 영향 없음</td></tr>
+<tr><td><code>sopStore.List</code> 실패</td><td>hook이 input annotations 그대로 반환 + WarnLog</td></tr>
+<tr><td>Binding이 <code>bound</code>가 아님</td><td>입력 annotations 그대로 반환 (조용히)</td></tr>
+<tr><td><code>generator.Generate</code> 1초 timeout</td><td>입력 annotations 그대로 반환 + WarnLog</td></tr>
+<tr><td><code>aiHistoryStore.Upsert</code> 실패</td><td>dispatch는 계속, WarnLog만</td></tr>
+</tbody>
+</table>
+<p>핵심 원칙: <strong>dispatcher hot path에서 어떤 실패도 알람 전달을 막지 않는다.</strong></p>
+</div>
+
+<div class="subsec">
+<h3 id="F3-6">§F3.6 비기능 요건 (NFR)</h3>
+<ul>
+<li><strong>NF-F3.1</strong> Dispatch hook의 generator timeout은 <code>DefaultGenerateTimeout = 1s</code> 이하. dispatcher latency budget 보호.</li>
+<li><strong>NF-F3.2</strong> Hook은 절대 <code>error</code>를 반환하지 않는다 (<code>map[string]string</code> 단일 반환값).</li>
+<li><strong>NF-F3.3</strong> <code>StoreAware</code>는 per-org generator를 <code>RWMutex</code> 보호된 map으로 캐시한다. PUT to config endpoint 시 <code>Invalidate(orgID)</code> 호출 필수.</li>
+<li><strong>NF-F3.4</strong> Fail-open 판정 후에도 <code>strategy.Audit.QuotaLimit</code>/<code>QuotaUsed</code>/<code>QuotaRemaining</code> 필드는 기록되어 감사 가능해야 한다.</li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="F3-7">§F3.7 Acceptance Criteria (Gherkin)</h3>
+<pre><code class="language-gherkin">Feature: AI quota controls fail open
+  Scenario: Quota exhaustion does not block dispatch
+    Given AIStrategyRequest with Controls.QuotaLimit=10 and QuotaUsed=10
+    When GenerateLocalAIStrategy runs
+    Then strategy.Status equals "quota_exhausted"
+    And strategy.Limitations contains "AI strategy quota is exhausted for this period."
+    And strategy.Audit.QuotaRemaining points to 0
+
+  Scenario: License denial degrades strategy but not delivery
+    Given AIStrategyRequest with Controls.LicenseAllowed=false
+    When GenerateLocalAIStrategy runs
+    Then strategy.Status equals "blocked_by_policy"
+    And strategy.Confidence equals "low"
+
+  Scenario: Generator timeout returns input annotations unchanged
+    Given a dispatch hook whose generator sleeps longer than the timeout
+    When Hook.Apply runs against an alert
+    Then the returned annotations equal the input annotations
+    And a warn-level log line "ai dispatch hook: generate failed" is emitted
+
+  Scenario: Store lookup failure falls back to env generator
+    Given a StoreAware whose AIConfigStore.Get returns an error
+    When Generate is called
+    Then the envFallback generator handles the request</code></pre>
+</div>
+
+<div class="subsec">
+<h3 id="F3-8">§F3.8 Traceability</h3>
+<ul>
+<li>Implements UC: UC-003</li>
+<li>Covered by WBS: WBS-1.2</li>
+<li>Source: <code>pkg/ruler/aigenerator/storeaware.go</code>, <code>pkg/ruler/aigenerator/dispatchhook/hook.go</code></li>
+<li>Commits: <code>a6757136e</code></li>
+</ul>
+</div>
+</section>
+
+<!-- ====== F4 ====== -->
+<section class="module" id="F4">
+<div class="module-head">
+<span class="module-id">F4</span>
+<h2>Multi-tenant Scope</h2>
+<span class="status-pill mvp">implemented-mvp</span>
+</div>
+<blockquote><p><strong>상태</strong>: 구현 완료 (early MVP)<br>SOP / AI strategy 접근을 <code>project_id × environment</code> tenant scope로 필터링.<br><strong>README 경고</strong>: production-ready 아님. label-based filter 수준이며 row-level security가 아니다.</p></blockquote>
+
+<div class="subsec">
+<h3 id="F4-1">§F4.1 개요</h3>
+<p>본 모듈은 SOP grounding과 AI strategy generation 단계에서 alert label에 박힌 tenant identity (<code>project_id</code>, <code>environment</code>)가 SOP document의 <code>TenantScope</code>와 일치하는지 검사한다. 매칭 정책은 <strong>단순 list 포함 + 와일드카드 <code>"*"</code></strong> 지원이며, 매칭 실패 시:</p>
+<ul>
+<li>SOP grounding → <code>SOPBindingStatusForbidden</code> 반환</li>
+<li>Managed markdown fetch → <code>PilotSOPFetchStatusDenied</code> + audit outcome <code>denied</code></li>
+<li>AI strategy generation → <code>AIStrategyStatusBlockedByPolicy</code></li>
+</ul>
+<p><strong>production-readiness 격차</strong> (README 명시):</p>
+<ul>
+<li>DB row-level security 없음 — <code>SOPStore</code>가 <code>orgID</code> partition만 강제, tenant scope는 application layer filter</li>
+<li><code>project_id</code> label spoofing 방어 없음 — alertmanager가 신뢰 가능한 source인지에 의존</li>
+<li><code>Environments</code> list의 와일드카드 <code>"*"</code>는 단순 string match. 정규식·glob 미지원</li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="F4-2">§F4.2 인터페이스</h3>
+<pre><code class="language-go">// pkg/types/ruletypes/tenant_policy.go
+func PilotTenantFromLabels(labels map[string]string) PilotAuditTenant
+func PilotTenantIsComplete(tenant PilotAuditTenant) bool
+func PilotTenantScopeAllows(scope PilotTenantScope, tenant PilotAuditTenant) bool
+
+const (
+    SOPTenantPolicyMissingLabelsWarning = "project_id and environment labels are required for SOP tenant policy"
+    SOPTenantPolicyDeniedWarning        = "sop document is outside requested tenant scope"
+)</code></pre>
+</div>
+
+<div class="subsec">
+<h3 id="F4-3">§F4.3 데이터 모델</h3>
+<pre><code class="language-go">type PilotAuditTenant struct {
+    ProjectID   string  // label "project_id" — trim된 값
+    Environment string  // label "environment"
+}
+
+type PilotTenantScope struct {
+    ProjectIDs   []string  // "*" 허용
+    Environments []string  // "*" 허용
+}</code></pre>
+<p>매칭 규칙 (<code>PilotTenantScopeAllows</code>):</p>
+<pre><code class="language-go">return PilotTenantIsComplete(tenant) &amp;&amp;
+    contains(scope.ProjectIDs,   tenant.ProjectID)  &amp;&amp;
+    contains(scope.Environments, tenant.Environment)
+// contains: 정확 일치 또는 candidate == "*"</code></pre>
+<p>Normalization (<code>normalizePilotTenantScope</code>): trim + 빈 값 제거 + 중복 제거. 둘 다 최소 1개 entry 필수 (validator).</p>
+</div>
+
+<div class="subsec">
+<h3 id="F4-4">§F4.4 상태 전이</h3>
+<p>해당 없음. 본 모듈은 stateless predicate.</p>
+</div>
+
+<div class="subsec">
+<h3 id="F4-5">§F4.5 예외 및 복구</h3>
+<table>
+<thead><tr><th>경로</th><th>처리</th></tr></thead>
+<tbody>
+<tr><td><code>project_id</code> 또는 <code>environment</code> label 누락</td><td><code>PilotTenantIsComplete()=false</code> → 모든 scope 검사 deny</td></tr>
+<tr><td>Scope mismatch</td><td><code>forbidden</code> / <code>denied</code> / <code>blocked_by_policy</code> 중 호출자가 매핑한 상태로 반환</td></tr>
+<tr><td>Scope에 <code>ProjectIDs=[]</code> 또는 <code>Environments=[]</code></td><td>validator가 거부 (<code>"must include at least one"</code>)</td></tr>
+<tr><td><code>"*"</code> 와일드카드</td><td>모든 값과 일치로 처리</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="subsec">
+<h3 id="F4-6">§F4.6 비기능 요건 (NFR)</h3>
+<ul>
+<li><strong>NF-F4.1</strong> Tenant scope 위반 시 호출자에게 SOP 존재 여부를 누설하지 않아야 한다 (cross-tenant <code>Get</code>은 <code>ErrSOPDocumentNotFound</code>로 통일 — F1.6 참조).</li>
+<li><strong>NF-F4.2</strong> Tenant scope 매칭은 stateless하고 deterministic해야 한다 — 같은 입력은 같은 결과.</li>
+<li><strong>NF-F4.3</strong> Production 등급 격리에는 (a) DB row-level security 또는 (b) JWT-derived tenant claim 검증이 필요하다. 현재 MVP는 둘 다 미구현.</li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="F4-7">§F4.7 Acceptance Criteria (Gherkin)</h3>
+<pre><code class="language-gherkin">Feature: Multi-tenant scope enforcement
+  Background:
+    Given a SOPDocument with TenantScope { ProjectIDs: ["p-prod"], Environments: ["production"] }
+
+  Scenario: Exact match is allowed
+    Given an alert with labels project_id="p-prod", environment="production"
+    When PilotTenantScopeAllows is called
+    Then the result is true
+
+  Scenario: Wildcard environment matches any
+    Given a SOPDocument with Environments ["*"]
+    And an alert with environment="staging"
+    When PilotTenantScopeAllows is called
+    Then the result is true
+
+  Scenario: Missing project_id label denies access
+    Given an alert with environment="production" and no project_id label
+    When PilotTenantScopeAllows is called
+    Then the result is false
+
+  Scenario: Cross-tenant lookup does not reveal existence
+    Given a SOP exists for tenant "p-prod"
+    When tenant "p-other" issues SOPStore.Get
+    Then ErrSOPDocumentNotFound is returned</code></pre>
+</div>
+
+<div class="subsec">
+<h3 id="F4-8">§F4.8 Traceability</h3>
+<ul>
+<li>Implements UC: UC-001 (전제)</li>
+<li>Covered by WBS: WBS-1.0</li>
+<li>Source: <code>pkg/types/ruletypes/tenant_policy.go</code></li>
+<li>Commits: <code>3fa604e03</code></li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="F4-9">§F4.9 Open Items</h3>
+<p>README에 명시된 production-readiness 격차:</p>
+<ul>
+<li>DB row-level security 도입 (현재 application-layer filter)</li>
+<li>JWT-derived tenant claim 검증 (현재 alertmanager 신뢰)</li>
+<li><code>Environments</code> glob/regex 지원 (현재 plain string + <code>"*"</code>만)</li>
+</ul>
+</div>
+</section>
+
+<!-- ====== F5 ====== -->
+<section class="module" id="F5">
+<div class="module-head">
+<span class="module-id">F5</span>
+<h2>Audit (SOP access &amp; dispatch)</h2>
+<span class="status-pill implemented">implemented</span>
+</div>
+<blockquote><p><strong>상태</strong>: 구현 완료<br>SOP 검색·preview·fetch, evidence 수집, AI summary 요청/결과를 JSONL로 영속 기록한다. 정책은 best-effort — sink 실패는 원 operation을 막지 않는다.</p></blockquote>
+
+<div class="subsec">
+<h3 id="F5-1">§F5.1 개요</h3>
+<p>본 모듈은 <code>PilotAuditEventSink</code> 추상화와 두 구현(<code>NopPilotAuditEventSink</code> default, <code>PilotAuditEventJSONLSink</code> 운영용)을 제공한다.</p>
+<p>운영 sink는 newline-delimited JSON을 로컬 파일에 append하고, 50 MiB 임계치마다 timestamped sibling으로 rotate한다 (<code>&lt;path&gt;.20260528T120000.000000000Z</code>). 기본 경로는 <code>cmd/community/main.go</code>에서 등록한 <code>var/audit/pilot-events.jsonl</code>.</p>
+<p>이벤트 타입은 8종으로 고정 (<code>sop.search | sop.preview | sop.fetch | sop.health_check | evidence.collect_request | evidence.collect_result | ai.summary_request | ai.summary_result</code>). 결과(outcome)는 <code>allowed | denied | redacted | failed | deferred</code> 5종. <strong>모든 이벤트는 validation 통과 후에만 기록되며, validation 실패는 dropped (caller에 error 전파 X).</strong></p>
+</div>
+
+<div class="subsec">
+<h3 id="F5-2">§F5.2 인터페이스</h3>
+<pre><code class="language-go">// pkg/types/ruletypes/pilot_audit_sink.go
+type PilotAuditEventSink interface {
+    Record(ctx context.Context, event PilotAuditEvent) error
+}
+
+type NopPilotAuditEventSink struct{}
+
+func RegisterPilotAuditEventSink(sink PilotAuditEventSink)  // nil → reset to Nop
+func CurrentPilotAuditEventSink() PilotAuditEventSink
+func DispatchPilotAuditEvent(ctx context.Context, event PilotAuditEvent) error
+
+// pkg/types/ruletypes/pilot_audit_sink_jsonl.go
+const DefaultPilotAuditJSONLMaxSizeBytes int64 = 50 * 1024 * 1024
+
+type PilotAuditEventJSONLSink struct { /* path + maxSizeBytes + mutex */ }
+
+func NewPilotAuditEventJSONLSink(path string, maxSizeBytes int64) (*PilotAuditEventJSONLSink, error)</code></pre>
+</div>
+
+<div class="subsec">
+<h3 id="F5-3">§F5.3 데이터 모델</h3>
+<pre><code class="language-go">type PilotAuditEvent struct {
+    ContractVersion string                    // "ds-apm.audit-event.v1"
+    EventID         string
+    EventType       string                    // sop.*/evidence.*/ai.* 중 1
+    OccurredAt      string                    // RFC3339
+    Actor           PilotAuditActor           // {Kind, ID, DisplayName}
+    Tenant          PilotAuditTenant          // {ProjectID, Environment}
+    Resource        PilotAuditResource        // {Kind, SourceID?, SOPID?, Version?}
+    Action          string
+    Outcome         string                    // allowed|denied|redacted|failed|deferred
+    Reason          string                    // denied/failed/deferred 시 필수
+    RequestContext  PilotAuditRequestContext  // {AlertRuleID, IncidentID, ServiceName, Severity}
+    SecurityContext PilotAuditSecurityContext // {ServiceAccountProfile, SecretRefVisible=false,
+                                              //  BrowserCredentialsUsed=false, RedactionApplied}
+}
+
+type PilotAuditActor struct {
+    Kind        string  // user | system | service_account
+    ID          string
+    DisplayName string
+}</code></pre>
+<p><strong>Security invariants</strong> (<code>ValidatePilotAuditEvent</code> 강제):</p>
+<ul>
+<li><code>securityContext.secretRefVisible</code> 반드시 <code>false</code></li>
+<li><code>securityContext.browserCredentialsUsed</code> 반드시 <code>false</code></li>
+<li><code>securityContext.serviceAccountProfile</code> non-empty</li>
+<li><code>requestContext.incidentId</code>, <code>requestContext.serviceName</code> non-empty</li>
+<li><code>eventType</code>가 <code>sop.*</code> prefix면 <code>resource.sourceId</code> non-empty</li>
+</ul>
+<p>JSONL line 포맷: <code>json.Marshal(event) + '\n'</code>.</p>
+</div>
+
+<div class="subsec">
+<h3 id="F5-4">§F5.4 상태 전이</h3>
+<pre class="mermaid">
+stateDiagram-v2
+    [*] --> Validated : ValidatePilotAuditEvent passes
+    [*] --> Dropped : validation fails (WarnLog, no error to caller)
+    Validated --> Marshalled : json.Marshal
+    Marshalled --> RotationCheck : mu.Lock + Stat
+    RotationCheck --> Rotated : current+incoming > maxSizeBytes
+    RotationCheck --> Appended : within threshold
+    Rotated --> Appended : fresh file opened
+    Appended --> [*]
+</pre>
+</div>
+
+<div class="subsec">
+<h3 id="F5-5">§F5.5 예외 및 복구</h3>
+<table>
+<thead><tr><th>경로</th><th>처리</th></tr></thead>
+<tbody>
+<tr><td>Validation 실패</td><td><code>zap.L().Warn(...)</code> 후 <code>nil</code> 반환 (caller block 금지)</td></tr>
+<tr><td><code>path == ""</code> 또는 <code>maxSizeBytes &lt;= 0</code></td><td><code>NewPilotAuditEventJSONLSink</code>가 error 반환</td></tr>
+<tr><td><code>os.MkdirAll</code> 실패</td><td>error 전파</td></tr>
+<tr><td>파일 stat 실패</td><td>error 전파</td></tr>
+<tr><td>Rotation 시 <code>os.Rename</code> 실패</td><td>error 전파 (file은 그대로 유지)</td></tr>
+<tr><td>Write 실패 (디스크 full 등)</td><td>error 전파 — caller가 best-effort로 무시 가능</td></tr>
+<tr><td>Sink 미등록</td><td><code>NopPilotAuditEventSink</code> (no-op, 항상 <code>nil</code>)</td></tr>
+</tbody>
+</table>
+<p><code>DispatchPilotAuditEvent</code>는 sink의 error를 그대로 반환하지만, <strong>호출 컨벤션은 best-effort</strong> — pilot 호출자는 이 error를 무시하고 원 operation을 계속 진행한다.</p>
+</div>
+
+<div class="subsec">
+<h3 id="F5-6">§F5.6 비기능 요건 (NFR)</h3>
+<ul>
+<li><strong>NF-F5.1</strong> Sink는 thread-safe해야 한다 (<code>sync.Mutex</code> 또는 <code>sync.RWMutex</code>).</li>
+<li><strong>NF-F5.2</strong> Rotation은 빈 파일을 절대 rotate하지 않아야 한다 (zero-byte rotated file 방지).</li>
+<li><strong>NF-F5.3</strong> Default rotation threshold는 50 MiB (<code>DefaultPilotAuditJSONLMaxSizeBytes</code>).</li>
+<li><strong>NF-F5.4</strong> 모든 audit event는 JSON으로 직렬화 가능해야 한다 (binary payload 금지).</li>
+<li><strong>NF-F5.5</strong> SOP access/fetch path의 audit event 누락률은 0%여야 한다 (in-process best-effort 범위 내). validation drop은 metric으로 집계 가능해야 한다.</li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="F5-7">§F5.7 Acceptance Criteria (Gherkin)</h3>
+<pre><code class="language-gherkin">Feature: Pilot audit event sink
+  Background:
+    Given a PilotAuditEventJSONLSink at "/tmp/pilot-audit.jsonl" with rotation threshold 1024 bytes
+
+  Scenario: Valid event is appended as one JSONL line
+    Given a valid PilotAuditEvent with EventType "sop.fetch" and Outcome "allowed"
+    When Record is called
+    Then the file contains a single JSON object followed by newline
+    And the object's eventType field equals "sop.fetch"
+
+  Scenario: Invalid event is silently dropped
+    Given a PilotAuditEvent with empty EventID
+    When Record is called
+    Then no error is returned
+    And the warning "pilot audit event invalid; dropping" is logged
+    And the file size remains unchanged
+
+  Scenario: Rotation preserves prior contents
+    Given a sink whose active file already contains 1000 bytes
+    And an incoming event whose serialized size pushes total above 1024 bytes
+    When Record is called
+    Then the prior file is renamed to a "&lt;path&gt;.&lt;timestamp&gt;" sibling
+    And a fresh primary file holds the new event
+
+  Scenario: Denied outcome must carry a reason
+    Given a PilotAuditEvent with Outcome "denied" and empty Reason
+    When ValidatePilotAuditEvent is called
+    Then validation fails mentioning "reason: field is required"</code></pre>
+</div>
+
+<div class="subsec">
+<h3 id="F5-8">§F5.8 Traceability</h3>
+<ul>
+<li>Implements UC: UC-001 (단계 10), UC-002, UC-003</li>
+<li>Covered by WBS: WBS-1.0</li>
+<li>Source: <code>pkg/types/ruletypes/pilot_audit_sink.go</code>, <code>pkg/types/ruletypes/pilot_audit_sink_jsonl.go</code></li>
+<li>Commits: <code>8a55208ef</code></li>
+</ul>
+</div>
+</section>
+
+<!-- ====== F6 ====== -->
+<section class="module" id="F6">
+<div class="module-head">
+<span class="module-id">F6</span>
+<h2>Notification Dispatch (5 채널)</h2>
+<span class="status-pill implemented">implemented</span>
+</div>
+<blockquote><p><strong>상태</strong>: 구현 완료<br>SOP / AI strategy annotation을 5개 채널(Slack, MS Teams v2, PagerDuty, Webhook, Email)로 dispatch한다. dispatcher hot path에서 AI hook을 호출하고, 실패 시 DLQ로 분기 (F8).</p></blockquote>
+
+<div class="subsec">
+<h3 id="F6-1">§F6.1 개요</h3>
+<p>본 모듈은 Prometheus Alertmanager의 <code>dispatch.Dispatcher</code>를 wrapping해서 DS-APM 고유의 두 가지를 끼워넣는다.</p>
+<ol>
+<li><strong>AI dispatch hook</strong> — <code>aggrGroup.run()</code>이 flush할 때 알람별로 <code>dispatchhook.Hook.Apply()</code> 호출 → SOP grounding → AI strategy 생성 → annotations에 머지. 입력 annotations는 mutation되지 않고 새 map 반환 (caller가 cheap identity 비교 가능).</li>
+<li><strong>DLQ wire</strong> — terminal notify failure를 <code>dlq.Sink</code>에 best-effort write (F8).</li>
+</ol>
+<p>채널은 5종 모두 SigNoz upstream에 본래 존재하던 path를 패치한다 — DS-APM의 SOP/AI annotation을 channel-specific payload로 변환하는 책임은 각 채널 adapter + <code>alertmanagertemplate</code> 안에. Template variable은 <code>$incident.{project_id|sop_id|ai_headline|ai_first_actions|...}</code> 22종 (<code>knownIncidentTemplateFields</code>).</p>
+</div>
+
+<div class="subsec">
+<h3 id="F6-2">§F6.2 인터페이스</h3>
+<pre><code class="language-go">// pkg/alertmanager/alertmanagerserver/dispatcher.go
+type Dispatcher struct { /* 내부 상태 + dlqSink + aiHook */ }
+
+func NewDispatcher(
+    ap provider.Alerts, r *dispatch.Route, s notify.Stage,
+    mk types.GroupMarker, to func(time.Duration) time.Duration,
+    lim Limits, l *slog.Logger, m *DispatcherMetrics,
+    n nfmanager.NotificationManager, orgID string,
+    dlqSink dlq.Sink, aiHook *dispatchhook.Hook,
+) *Dispatcher
+
+func (d *Dispatcher) Run()
+func (d *Dispatcher) Stop()
+func (d *Dispatcher) Groups(routeFilter, alertFilter) (AlertGroups, map[model.Fingerprint][]string)
+
+// pkg/types/ruletypes/notification_template_preview.go
+func PreviewNotificationTemplate(
+    ctx context.Context, req PreviewNotificationTemplateRequest,
+) (*PreviewNotificationTemplateResponse, error)
+
+func MissingIncidentTemplateVariables(template string) []string</code></pre>
+</div>
+
+<div class="subsec">
+<h3 id="F6-3">§F6.3 데이터 모델</h3>
+<pre><code class="language-go">type AlertGroup struct {
+    Alerts   types.AlertSlice
+    Labels   model.LabelSet
+    Receiver string
+    GroupKey string
+    RouteID  string
+    Renotify time.Duration
+}
+
+type PreviewNotificationTemplateRequest struct {
+    Template    string
+    Labels      map[string]string
+    Annotations map[string]string
+    Value       string  // default "0"
+    Threshold   string  // default "0"
+}</code></pre>
+<p><code>knownIncidentTemplateFields</code> (22개) — template <code>$incident.{key}</code> 형태로 참조 가능:</p>
+<table>
+<thead><tr><th>Group</th><th>Keys</th></tr></thead>
+<tbody>
+<tr><td>Tenant</td><td><code>project_id</code>, <code>environment</code>, <code>service_name</code>, <code>owner_team</code>, <code>severity</code></td></tr>
+<tr><td>Impact</td><td><code>impact_summary</code>, <code>next_action</code>, <code>vendor_request</code>, <code>customer_update</code></td></tr>
+<tr><td>SOP</td><td><code>sop_id</code>, <code>sop_url</code>, <code>sop_source</code>, <code>sop_title</code>, <code>sop_version</code>, <code>sop_binding_id</code></td></tr>
+<tr><td>AI</td><td><code>ai_strategy_id</code>, <code>ai_strategy_status</code>, <code>ai_headline</code>, <code>ai_first_actions</code>, <code>ai_confidence</code>, <code>ai_limitations</code>, <code>ai_evidence_refs</code></td></tr>
+</tbody>
+</table>
+
+<h4>채널별 canonical → 채널 payload 매핑</h4>
+<table>
+<thead><tr><th>Canonical 필드</th><th>Slack (Block Kit)</th><th>MS Teams v2 (Adaptive Card)</th><th>PagerDuty (Events API v2)</th><th>Webhook (JSON)</th><th>Email</th></tr></thead>
+<tbody>
+<tr><td><code>severity</code></td><td>header prefix <code>[SEV-x]</code></td><td>TextBlock size=Large</td><td><code>payload.severity</code></td><td><code>severity</code> field</td><td>Subject prefix</td></tr>
+<tr><td><code>service_name</code></td><td>section field</td><td>FactSet entry</td><td><code>payload.component</code></td><td><code>service</code> field</td><td>Body header</td></tr>
+<tr><td><code>sop_url</code></td><td>actions button</td><td><code>Action.OpenUrl</code></td><td><code>payload.custom_details.runbook_url</code></td><td><code>sop_url</code> field</td><td>inline link</td></tr>
+<tr><td><code>ai_headline</code></td><td>section mrkdwn</td><td>TextBlock wrap</td><td><code>payload.summary</code></td><td><code>ai_headline</code> field</td><td>Body</td></tr>
+<tr><td><code>ai_first_actions</code></td><td>section mrkdwn (line-joined)</td><td>TextBlock wrap</td><td><code>payload.custom_details.ai_first_actions</code></td><td>array</td><td>Body bullet</td></tr>
+<tr><td><code>ai_confidence</code></td><td>section field</td><td>FactSet entry</td><td><code>payload.custom_details.ai_confidence</code></td><td>field</td><td>Body header</td></tr>
+</tbody>
+</table>
+<blockquote><p>MS Teams 제약 (research §7.2 §13.4): <code>Action.Submit</code>은 incoming webhook에서 작동하지 않음. v0.1은 <code>Action.OpenUrl</code>만 사용.</p></blockquote>
+</div>
+
+<div class="subsec">
+<h3 id="F6-4">§F6.4 상태 전이</h3>
+<pre class="mermaid">
+stateDiagram-v2
+    [*] --> Received : alerts.Subscribe yields alertWrapper
+    Received --> Matched : notificationManager.Match returns channels
+    Matched --> Grouped : processAlert assigns to aggrGroup
+    Grouped --> Pending : aggrGroup.next timer
+    Pending --> AIHookApplied : applyAIHook(d.aiHook, ...)
+    AIHookApplied --> NotifyStage : d.stage.Exec(ctx, alerts...)
+    NotifyStage --> Delivered : err == nil (2xx)
+    NotifyStage --> TerminalFailure : err != nil && !ctx.Canceled
+    NotifyStage --> Canceled : ctx.Err() == context.Canceled
+    TerminalFailure --> DLQEnqueued : dlqSink != nil
+    TerminalFailure --> Logged : dlqSink == nil
+    DLQEnqueued --> [*]
+    Delivered --> [*]
+    Canceled --> [*]
+</pre>
+</div>
+
+<div class="subsec">
+<h3 id="F6-5">§F6.5 예외 및 복구</h3>
+<table>
+<thead><tr><th>경로</th><th>처리</th></tr></thead>
+<tbody>
+<tr><td><code>notificationManager.Match</code> 실패</td><td><code>ErrorContext</code> + continue (다음 alert 처리)</td></tr>
+<tr><td>Aggregation group 한도 초과</td><td><code>metrics.aggrGroupLimitReached.Inc()</code> + <code>ErrorContext</code>. 신규 group 생성 차단.</td></tr>
+<tr><td><code>aiHook == nil</code></td><td>hook 건너뛰기 (pre-DS-APM 동작)</td></tr>
+<tr><td><code>aiHook.Apply</code> 내부 실패</td><td>annotations 그대로 — F3.5 참조</td></tr>
+<tr><td><code>notify.Stage.Exec</code> ctx Canceled</td><td><code>DebugContext</code> (config reload / shutdown 정상 경로)</td></tr>
+<tr><td><code>notify.Stage.Exec</code> terminal error</td><td><code>recordTerminalFailure</code> → DLQ enqueue (F8)</td></tr>
+<tr><td>DLQ marshal 실패</td><td>empty payload로 DLQ entry 생성 + <code>WarnContext</code></td></tr>
+<tr><td>Template expand 실패</td><td><code>PreviewNotificationTemplate</code> error 반환 (caller가 처리)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="subsec">
+<h3 id="F6-6">§F6.6 비기능 요건 (NFR)</h3>
+<ul>
+<li><strong>NF-F6.1</strong> AI hook 적용은 dispatcher hot path에서 동기적으로 일어나며 1초(<code>DefaultGenerateTimeout</code>)를 초과하지 않아야 한다.</li>
+<li><strong>NF-F6.2</strong> Maintenance ticker는 30초 주기로 empty aggregation group을 GC한다.</li>
+<li><strong>NF-F6.3</strong> Renotify interval은 per-rule <code>NotificationConfig.Renotify.{RenotifyInterval, NoDataInterval}</code>에서 가져온다.</li>
+<li><strong>NF-F6.4</strong> Template variable이 <code>knownIncidentTemplateFields</code>에 없으면 <code>MissingIncidentTemplateVariables</code>가 prefix-qualified 이름으로 보고한다 (정렬됨).</li>
+<li><strong>NF-F6.5</strong> 채널 dispatch 실패는 dispatcher 자체를 중단시키지 않아야 한다 — error는 항상 log + (선택적으로) DLQ로 흡수.</li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="F6-7">§F6.7 Acceptance Criteria (Gherkin)</h3>
+<pre><code class="language-gherkin">Feature: Notification dispatch with AI hook
+  Background:
+    Given a Dispatcher constructed with a non-nil aiHook and a non-nil dlqSink
+    And the notificationManager matches the alert to receiver "ops-slack"
+
+  Scenario: Successful dispatch merges AI annotations
+    Given the AI strategy hook returns merged annotations containing "ai_headline"
+    When the aggrGroup flushes
+    Then notify.Stage.Exec receives an alert whose Annotations include ai_headline
+    And recordTerminalFailure is not invoked
+
+  Scenario: Terminal failure is persisted to DLQ
+    Given notify.Stage.Exec returns a non-canceled error
+    When the aggrGroup flushes
+    Then dlqSink.Write is called with an Entry whose Channel equals "ops-slack"
+    And the entry's EventID equals the alert fingerprint
+
+  Scenario: Context cancellation is treated as graceful shutdown
+    Given notify.Stage.Exec returns context.Canceled
+    When the aggrGroup flushes
+    Then the failure is logged at debug level
+    And dlqSink.Write is not invoked
+
+  Scenario: Unknown template variable is reported
+    Given a template containing "$incident.foo_bar"
+    When MissingIncidentTemplateVariables runs
+    Then the result contains "incident_foo_bar"</code></pre>
+</div>
+
+<div class="subsec">
+<h3 id="F6-8">§F6.8 Traceability</h3>
+<ul>
+<li>Implements UC: UC-001 (단계 8), UC-002 (실패 분기)</li>
+<li>Covered by WBS: WBS-1.3</li>
+<li>Source: <code>pkg/alertmanager/alertmanagernotify/{slack,msteamsv2,pagerduty,webhook,email}/</code>, <code>pkg/alertmanager/alertmanagerserver/dispatcher.go</code>, <code>pkg/types/ruletypes/notification_template_preview.go</code></li>
+<li>Commits: <code>5c036c806</code></li>
+</ul>
+</div>
+</section>
+
+<!-- ====== F7 ====== -->
+<section class="module" id="F7">
+<div class="module-head">
+<span class="module-id">F7</span>
+<h2>PII Redaction</h2>
+<span class="status-pill mvp">implemented-mvp</span>
+</div>
+<blockquote><p><strong>상태</strong>: 구현 완료 (early MVP)<br>Incident payload 내 email / KR phone / long unmarked secret / sensitive URL query를 redaction.<br><strong>README 경고</strong>: production-ready 아님. 본 모듈은 DS-APM ingress의 단일 지점 redaction이며, OpenTelemetry Collector 단계의 가장 이른 redaction (권장 위치)은 아직 미적용.</p></blockquote>
+
+<div class="subsec">
+<h3 id="F7-1">§F7.1 개요</h3>
+<p>본 모듈은 incident payload (Slack / MSTeams / PagerDuty / webhook / email로 흘러나가는 사용자-가시 필드)에서 4종 sensitive pattern을 redaction한다.</p>
+<table>
+<thead><tr><th>카테고리</th><th>전략</th><th>결과 토큰</th></tr></thead>
+<tbody>
+<tr><td>Email 주소</td><td>regex replace</td><td><code>[redacted-email]</code></td></tr>
+<tr><td>한국 모바일 번호 (<code>010xxxx</code>, <code>+82-10-xxx</code> 등)</td><td>regex replace</td><td><code>[redacted-phone]</code></td></tr>
+<tr><td>Long unmarked secret (32+ chars alnum/<code>_</code>/<code>-</code>)</td><td>regex replace</td><td><code>[redacted-secret]</code></td></tr>
+<tr><td>Bearer token / <code>client_secret</code>/<code>api_key</code>/<code>password</code> marker / JWT-like</td><td>전체 값 drop</td><td><code>[redacted]</code></td></tr>
+<tr><td>URL query 안의 sensitive key (<code>access_token</code>, <code>api_key</code>, <code>bearer</code>, …)</td><td>parameter delete (key 보존, value 제거)</td><td>sanitized URL</td></tr>
+</tbody>
+</table>
+<p>OpenTelemetry security 가이드(§9 in research-skills-c-domain.md)의 4-processor 정책(<code>Attributes / Filter / Redaction / Transform</code>)에 비추어 보면, 현재 구현은 <strong>DS-APM ingress 단계의 <code>Transform</code> (regex) + 부분적 <code>Attributes</code> (URL key drop)에 해당</strong>. 가장 이른 단계인 instrumentation / OTel Collector 적용은 아직 없음.</p>
+</div>
+
+<div class="subsec">
+<h3 id="F7-2">§F7.2 인터페이스</h3>
+<pre><code class="language-go">// pkg/types/alertmanagertypes/incident_payload.go
+const RedactedIncidentValue = "[redacted]"
+
+func BuildSafeIncidentInfo(labels, annotations template.KV) IncidentInfo
+func SanitizeIncidentInfo(info IncidentInfo) IncidentInfo
+func SanitizeIncidentValue(value string) string
+
+func IncidentInfoFields(info IncidentInfo) []IncidentField     // sanitize 후 non-empty만
+func IncidentInfoDetails(info IncidentInfo) map[string]string  // sanitize 후 key→value map</code></pre>
+<p><code>SanitizeIncidentValue</code> 처리 순서:</p>
+<ol>
+<li>URL 파싱 시도 — <code>http</code>/<code>https</code>만 허용, <code>User</code> info drop, sensitive query key drop</li>
+<li>값 전체가 secret-looking (<code>bearer </code>, <code>-----begin </code>, JWT, marker 포함) → <code>[redacted]</code> 전체 치환</li>
+<li>Email regex replace</li>
+<li>KR phone regex replace</li>
+<li>Long secret regex replace</li>
+</ol>
+</div>
+
+<div class="subsec">
+<h3 id="F7-3">§F7.3 데이터 모델</h3>
+<pre><code class="language-go">type IncidentField struct {
+    Key   string
+    Title string
+    Value string  // 항상 sanitized
+    Short bool
+}
+
+// Sanitize 대상 필드 (22개, IncidentInfo struct):
+//   ProjectID, Environment, ServiceName, OwnerTeam, Severity,
+//   ImpactSummary, NextAction, VendorRequest, CustomerUpdate,
+//   SopID, SopURL, SopSource, SopTitle, SopVersion, SopBindingID,
+//   AIStrategyID, AIStrategyStatus, AIHeadline, AIFirstActions,
+//   AIConfidence, AILimitations, AIEvidenceRefs</code></pre>
+<p>Regex 패턴 (compiled once):</p>
+<pre><code class="language-go">incidentValueEmailPattern        = regexp.MustCompile(`\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b`)
+incidentValueKoreanMobilePattern = regexp.MustCompile(`(?:\+?82[-\s]?)?0?1[016789][-)\s]?\d{3,4}[-\s]?\d{4}`)
+incidentValueLongSecretPattern   = regexp.MustCompile(`\b[A-Za-z0-9_\-]{32,}\b`)
+incidentJWTLikePattern           = regexp.MustCompile(`\beyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{10,}\b`)</code></pre>
+<p>URL sensitive keys: <code>access_token | api_key | apikey | auth | authorization | bearer | client_secret | password | secret | token</code>.</p>
+</div>
+
+<div class="subsec">
+<h3 id="F7-4">§F7.4 파이프라인 위치</h3>
+<ul>
+<li><strong>현재 (v0.1)</strong> — DS-APM ingress 단일 지점. <code>BuildSafeIncidentInfo</code> / <code>SanitizeIncidentInfo</code>가 channel template 직전에 호출됨.</li>
+<li><strong>권장 (research §9.1)</strong> — <code>instrumentation &gt; OTel Collector &gt; DS-APM ingress</code> 3단 방어. 가장 이른 단계가 최선.</li>
+<li><strong>OTel Collector processor 매핑 (미구현, 권장)</strong>:</li>
+</ul>
+<table>
+<thead><tr><th>Category</th><th>OTel Processor</th><th>DS-APM 대응</th></tr></thead>
+<tbody>
+<tr><td>Email / Phone / Long secret regex</td><td><code>transform</code></td><td><code>SanitizeIncidentValue</code> (현재)</td></tr>
+<tr><td>Sensitive URL query</td><td><code>attributes</code> (delete)</td><td><code>sanitizeIncidentURL</code> (현재)</td></tr>
+<tr><td>Bearer / JWT 전체 drop</td><td><code>redaction</code> (allowlist)</td><td>secret-looking check (현재)</td></tr>
+<tr><td>잠재적 sensitive span 차단</td><td><code>filter</code></td><td>미구현</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="subsec">
+<h3 id="F7-5">§F7.5 예외 및 복구</h3>
+<table>
+<thead><tr><th>경로</th><th>처리</th></tr></thead>
+<tbody>
+<tr><td>입력 값 empty</td><td>그대로 반환</td></tr>
+<tr><td>URL 파싱 실패 또는 non-http(s) scheme</td><td>URL 처리 skip, 일반 regex만 적용</td></tr>
+<tr><td>Secret-looking 패턴 매칭</td><td>값 전체를 <code>[redacted]</code>로 교체 (early return)</td></tr>
+<tr><td>Regex 매칭 0건</td><td>값 그대로 반환</td></tr>
+<tr><td><code>IncidentInfoFields</code> 호출 시 모든 필드 empty</td><td>empty slice (<code>[]IncidentField{}</code>)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="subsec">
+<h3 id="F7-6">§F7.6 비기능 요건 (NFR)</h3>
+<ul>
+<li><strong>NF-F7.1</strong> Redaction 적용은 channel adapter 호출 <strong>이전</strong>에 완료되어야 한다 (sanitized value만 외부로 나감).</li>
+<li><strong>NF-F7.2</strong> Regex 패턴은 컴파일 1회 + global var (allocation 0).</li>
+<li><strong>NF-F7.3</strong> Email / phone / long secret redaction은 <strong>부분 치환</strong> (값의 나머지 보존). Secret-looking 검출은 <strong>전체 drop</strong>.</li>
+<li><strong>NF-F7.4</strong> URL의 <code>User</code> info는 항상 제거되어야 한다 (e.g., <code>https://user:pw@host</code> → <code>https://host</code>).</li>
+<li><strong>NF-F7.5</strong> Redaction rate metric (per-category count)을 노출해서 threshold 초과 시 meta-alert 트리거 가능해야 한다 — 현재 미구현, follow-up.</li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="F7-7">§F7.7 Acceptance Criteria (Gherkin)</h3>
+<pre><code class="language-gherkin">Feature: Incident payload PII redaction
+  Scenario: Email is replaced with placeholder
+    Given a field value "Contact ops@example.com for details"
+    When SanitizeIncidentValue is called
+    Then the result equals "Contact [redacted-email] for details"
+
+  Scenario: Korean mobile number is redacted
+    Given a field value "긴급 010-1234-5678"
+    When SanitizeIncidentValue is called
+    Then the result equals "긴급 [redacted-phone]"
+
+  Scenario: Bearer token replaces the entire value
+    Given a field value "Authorization: Bearer abcdefghij"
+    When SanitizeIncidentValue is called
+    Then the result equals "[redacted]"
+
+  Scenario: Sensitive URL query is dropped but URL is preserved
+    Given a field value "https://signoz.example.com/api?token=xyz&amp;svc=payment"
+    When SanitizeIncidentValue is called
+    Then the result does not contain "token="
+    And the result contains "svc=payment"
+
+  Scenario: Long alnum secret is redacted
+    Given a field value "key=AKIAIOSFODNN7EXAMPLEKEYABCDEFGHIJKL"
+    When SanitizeIncidentValue is called
+    Then the result contains "[redacted-secret]"</code></pre>
+</div>
+
+<div class="subsec">
+<h3 id="F7-8">§F7.8 Traceability</h3>
+<ul>
+<li>Implements UC: UC-001 (단계 3)</li>
+<li>Covered by WBS: WBS-1.4</li>
+<li>Source: <code>pkg/types/alertmanagertypes/incident_payload.go</code></li>
+<li>Commits: <code>3e9dfa557</code></li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="F7-9">§F7.9 Open Items</h3>
+<p>production-readiness 강화 (README 경고):</p>
+<ul>
+<li>OTel Collector 단계 (<code>transform</code>/<code>redaction</code>/<code>filter</code> processor) 도입</li>
+<li>Redaction rate metric 노출 + threshold 초과 시 meta-alert</li>
+<li>카테고리 확장 (credit card, IP truncation, generic user_id hashing 등 — research-skills-c-domain.md §9.2)</li>
+<li>Hash 전략의 reversibility 검토 (입력 공간 작으면 hash도 안전하지 않음 — OTel 가이드)</li>
+</ul>
+</div>
+</section>
+
+<!-- ====== F8 ====== -->
+<section class="module" id="F8">
+<div class="module-head">
+<span class="module-id">F8</span>
+<h2>DLQ + Idempotent Replay</h2>
+<span class="status-pill implemented">implemented</span>
+</div>
+<blockquote><p><strong>상태</strong>: 구현 완료 (HMAC 정책 미해결 — <code>open_items</code> 참조)<br>Terminal notify-stage 실패를 JSONL DLQ에 best-effort 영속화하고, replay 시 ledger로 중복 dispatch를 방지한다.</p></blockquote>
+
+<div class="q">HMAC 정책 follow-up — NF-5.3.1</div>
+
+<div class="subsec">
+<h3 id="F8-1">§F8.1 개요</h3>
+<p>본 모듈은 Python orchestrator의 <code>RetryingSink / DLQSink / replay_dlq</code> trio를 Go로 재구현한 것이다. 두 컴포넌트로 구성된다.</p>
+<ol>
+<li><strong><code>JSONLDeadLetterSink</code></strong> — Dispatcher가 terminal notify failure(2xx 아닌 응답 + context not canceled)를 잡으면 <code>Entry</code>를 newline-delimited JSON으로 append. 50 MiB 임계치마다 timestamped sibling으로 rotate.</li>
+<li><strong><code>ReplayLedger</code></strong> — append-only set of <code>EventID</code>. open 시 파일 스캔으로 in-memory set 재구성. Replay loop은 <code>MarkIfNew</code>가 <code>true</code>일 때만 재전송 → crash mid-batch에서도 idempotent.</li>
+</ol>
+<p>Dispatcher hot path에서 DLQ write는 best-effort: <code>sink.Write</code> 실패 시 <code>WarnContext</code>만 남기고 알람 자체는 계속 흐른다. <strong>미해결</strong>: replay 시 payload 무결성/위변조 방지를 위한 HMAC 정책 미정 (NF-5.3.1, <code>open_items</code>).</p>
+</div>
+
+<div class="subsec">
+<h3 id="F8-2">§F8.2 인터페이스</h3>
+<pre><code class="language-go">// pkg/alertmanager/alertmanagernotify/dlq/dlq.go
+type Entry struct {
+    EventID  string    `json:"event_id"`
+    Channel  string    `json:"channel"`
+    Payload  []byte    `json:"payload"`
+    FailedAt time.Time `json:"failed_at"`
+    Reason   string    `json:"reason,omitempty"`
+}
+
+type Sink interface {
+    Write(e *Entry) error
+}
+
+type JSONLDeadLetterSink struct { /* path + rotateBytes + mutex + file handle */ }
+
+func NewJSONLDeadLetterSink(path string, rotateBytes int64) (*JSONLDeadLetterSink, error)
+func (s *JSONLDeadLetterSink) Write(e *Entry) error
+func (s *JSONLDeadLetterSink) Close() error
+
+const DefaultJSONLDeadLetterMaxSizeBytes int64 = 50 * 1024 * 1024
+
+// pkg/alertmanager/alertmanagernotify/dlq/ledger.go
+type ReplayLedger struct { /* seen map + file + bufio.Writer */ }
+
+func NewReplayLedger(path string) (*ReplayLedger, error)
+func (l *ReplayLedger) MarkIfNew(eventID string) bool
+func (l *ReplayLedger) Has(eventID string) bool
+func (l *ReplayLedger) Close() error</code></pre>
+</div>
+
+<div class="subsec">
+<h3 id="F8-3">§F8.3 데이터 모델</h3>
+<p>DLQ entry 1건 = JSON 1줄. 예:</p>
+<pre><code class="language-json">{
+  "event_id":"abc123fingerprint",
+  "channel":"ops-slack",
+  "payload":"&lt;base64 of marshalled []*types.Alert&gt;",
+  "failed_at":"2026-05-29T03:21:55.123Z",
+  "reason":"slack: 5xx persistent"
+}</code></pre>
+<p>Ledger 1줄 = <code>EventID</code> 문자열. 빈 줄은 무시. 1 MiB per line scanner buffer.</p>
+
+<h4>Idempotency Key (권장)</h4>
+<p>Dispatcher가 현재 사용하는 <code>EventID</code>는 alert fingerprint 단일 값이다 (<code>alerts[0].Fingerprint().String()</code>). research-skills-c-domain.md §10.2가 권장하는 형식은 <code>sha256(alert.fingerprint || channel.id || dispatch.round_no)</code>. 현재 구현은 fingerprint만 사용 — 동일 alert가 여러 채널로 갈 때 entry는 <code>Channel</code> 필드로 구분되지만 ledger 키는 fingerprint뿐이라 한 채널이 idempotent하면 다른 채널도 skip된다. <strong><code>(fingerprint, channel)</code> 튜플로 ledger 키 확장이 follow-up.</strong></p>
+</div>
+
+<div class="subsec">
+<h3 id="F8-4">§F8.4 상태 전이</h3>
+<pre class="mermaid">
+stateDiagram-v2
+    [*] --> NotifyAttempt
+    NotifyAttempt --> Delivered : stage.Exec returns nil
+    NotifyAttempt --> Canceled : ctx.Err() == context.Canceled
+    NotifyAttempt --> TerminalFail : err != nil && !canceled
+    TerminalFail --> DLQWritten : dlqSink.Write success
+    TerminalFail --> DLQWriteFailed : dlqSink.Write error → WarnLog
+    TerminalFail --> NoDLQ : dlqSink == nil → log only
+    DLQWritten --> ReplayPending : operator triggers replay
+    ReplayPending --> Skipped : ledger.MarkIfNew == false
+    ReplayPending --> Redelivered : ledger.MarkIfNew == true → notify retry
+    Redelivered --> Delivered : 2xx
+    Redelivered --> TerminalFail : 다시 실패 → DLQ에 새 entry
+    Canceled --> [*]
+    Delivered --> [*]
+    Skipped --> [*]
+</pre>
+</div>
+
+<div class="subsec">
+<h3 id="F8-5">§F8.5 예외 및 복구</h3>
+<table>
+<thead><tr><th>경로</th><th>처리</th></tr></thead>
+<tbody>
+<tr><td><code>notify.Stage.Exec</code> ctx Canceled</td><td><code>DebugContext</code> (정상 종료), DLQ write 안 함</td></tr>
+<tr><td><code>dlqSink == nil</code></td><td>DLQ 비활성. terminal failure는 log만</td></tr>
+<tr><td><code>json.Marshal(alerts)</code> 실패</td><td>empty payload로 entry 생성 + <code>WarnContext("dlq: failed to marshal alerts payload")</code></td></tr>
+<tr><td><code>dlqSink.Write</code> 실패</td><td><code>WarnContext("dlq: failed to persist terminal failure")</code> — dispatcher는 계속</td></tr>
+<tr><td>Sink가 closed (<code>s.f == nil</code>)</td><td><code>Write</code> error 반환</td></tr>
+<tr><td>Rotation <code>os.Rename</code> 실패</td><td>best-effort reopen primary; error 전파</td></tr>
+<tr><td>Ledger 파일 corruption</td><td><code>bufio.Scanner</code> error → <code>NewReplayLedger</code>가 error 반환</td></tr>
+<tr><td>Ledger write 실패</td><td><code>MarkIfNew</code>가 <code>false</code> 반환 — caller는 재전송 skip (safe default)</td></tr>
+<tr><td>Empty <code>EventID</code></td><td><code>MarkIfNew=false</code> — 재전송 안 함 (저장도 안 함)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="subsec">
+<h3 id="F8-6">§F8.6 비기능 요건 (NFR)</h3>
+<ul>
+<li><strong>NF-F8.1</strong> DLQ persistence는 <strong>best-effort</strong> — dispatcher hot path를 절대 막지 않아야 한다.</li>
+<li><strong>NF-F8.2</strong> Default rotation threshold는 50 MiB (<code>DefaultJSONLDeadLetterMaxSizeBytes</code>), pilot audit sink와 동일 컨벤션.</li>
+<li><strong>NF-F8.3</strong> Rotation은 빈 파일을 절대 rotate하지 않아야 한다 (zero-byte sibling 방지).</li>
+<li><strong>NF-F8.4</strong> <code>ReplayLedger.MarkIfNew</code>는 idempotent + durable해야 한다 — 동일 <code>EventID</code>로 두 번 호출 시 두 번째는 <code>false</code>, 그리고 process restart 후에도 일관성 유지.</li>
+<li><strong>NF-F8.5</strong> Sink + Ledger 모두 <code>sync.Mutex</code> 보호 — concurrent caller 안전.</li>
+<li><strong>NF-F8.6</strong> Scanner buffer는 1 MiB per line — pathological entry로 ledger가 silently truncate되지 않아야 한다.</li>
+<li><strong>NF-5.3.1 (open)</strong> Replay payload는 HMAC으로 서명되어야 한다. 정책 미정 — <code>open_items</code> 참조.</li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="F8-7">§F8.7 Acceptance Criteria (Gherkin)</h3>
+<pre><code class="language-gherkin">Feature: Dead-letter queue and idempotent replay
+  Background:
+    Given a Dispatcher whose dlqSink is a JSONLDeadLetterSink at "/tmp/dlq.jsonl"
+    And a ReplayLedger at "/tmp/dlq.ledger"
+
+  Scenario: Terminal failure produces one DLQ entry per channel
+    Given notify.Stage.Exec returns a non-canceled error for receiver "ops-slack"
+    When recordTerminalFailure runs
+    Then the DLQ file contains a JSON line with channel "ops-slack"
+    And the entry's event_id equals the alert fingerprint
+    And the entry's reason matches the underlying error string
+
+  Scenario: Context cancellation never enqueues a DLQ entry
+    Given notify.Stage.Exec returns context.Canceled
+    When the aggregation group flushes
+    Then dlqSink.Write is not called
+    And the DLQ file size is unchanged
+
+  Scenario: Replay is skipped for previously processed event
+    Given a ReplayLedger containing event_id "abc123"
+    When MarkIfNew("abc123") is invoked
+    Then it returns false
+    And no extra line is appended to the ledger
+
+  Scenario: Replay marks a new event durably
+    Given a fresh ReplayLedger
+    When MarkIfNew("xyz789") is invoked
+    Then it returns true
+    And the ledger file ends with the line "xyz789"
+    And reopening the ledger preserves the seen entry
+
+  Scenario: Rotation preserves prior contents
+    Given an active DLQ file already at 50 MiB
+    When the next Entry pushes the size above the threshold
+    Then the file is renamed to a "&lt;path&gt;.&lt;timestamp&gt;" sibling
+    And the new entry lives in a fresh primary file</code></pre>
+</div>
+
+<div class="subsec">
+<h3 id="F8-8">§F8.8 Traceability</h3>
+<ul>
+<li>Implements UC: UC-002</li>
+<li>Covered by WBS: WBS-1.5</li>
+<li>Source: <code>pkg/alertmanager/alertmanagernotify/dlq/{dlq.go,ledger.go}</code>, <code>pkg/alertmanager/alertmanagerserver/dispatcher.go</code></li>
+<li>Commits: <code>ade174bb8</code>, <code>91b9ff5db</code></li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="F8-9">§F8.9 Open Items</h3>
+<ul>
+<li><strong>HMAC 정책 follow-up</strong> — replay 시 payload 무결성·재전송 위변조 방지를 위한 서명 정책 미정 (NF-5.3.1).</li>
+<li><strong>Idempotency 키 확장</strong> — 현재 <code>EventID = alert.fingerprint</code>만 사용. research §10.2 권장 <code>sha256(fingerprint || channel.id || round_no)</code>로의 이행이 권장됨.</li>
+<li><strong>Replay loop</strong> — operator-facing replay CLI/UI는 본 모듈 범위 밖. ledger는 redelivery에 필요한 idempotency 기반만 제공.</li>
+</ul>
+</div>
+</section>
+
+</section>
+
+<!-- ============================= §4 External Interface Requirements ============================= -->
+<section id="sec4">
+<div class="sec-head"><span class="num">§4</span><h2>External Interface Requirements</h2></div>
+
+<div class="subsec">
+<h3 id="sec4-1">§4.1 User Interfaces</h3>
+<table>
+<thead><tr><th>UI</th><th>역할</th><th>현 구현</th><th>Open Item</th></tr></thead>
+<tbody>
+<tr><td><strong>운영자 draft 검수 화면</strong></td><td>UC-001 단계 6~7. <code>approval_status: pending → approved/rejected</code> 전이.</td><td>SigNoz UI in-app (현재 구현). <code>frontend/src</code>, <code>frontend/public</code> 변경 영역 일부.</td><td><strong>TODO (partial: frontend 변경 영역 파일별 식별 미완료 — R-5, traceability.md §6 open item)</strong></td></tr>
+<tr><td><strong>DLQ 조회·replay UI/CLI</strong></td><td>UC-002 단계 6~7. DLQ entry 조회, manual replay 발행, bulk replay.</td><td>CLI/UI 인터페이스는 F8 모듈 범위 밖. ledger와 sink만 제공 (F8.9 open).</td><td>follow-up</td></tr>
+<tr><td><strong>AI strategy / tenant policy 관리 화면</strong></td><td>F2, F4의 admin 인터페이스.</td><td>현재 in-app 화면 일부. 정확한 매핑 미확정.</td><td>follow-up</td></tr>
+<tr><td><strong>Slack interactive approve button</strong></td><td>UC-001 단계 6 alternate (Slack에서 직접 approve).</td><td><strong>미구현</strong>. Teams는 <code>Action.Submit</code> 제약으로 영구 미지원 (research §7.2).</td><td>follow-up</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="subsec">
+<h3 id="sec4-2">§4.2 Hardware Interfaces</h3>
+<p>N/A — DS-APM은 컨테이너 software-only.</p>
+</div>
+
+<div class="subsec">
+<h3 id="sec4-3">§4.3 Software Interfaces</h3>
+<table>
+<thead><tr><th>인터페이스</th><th>방향</th><th>프로토콜 / API</th><th>비고</th></tr></thead>
+<tbody>
+<tr><td><strong>SigNoz Ruler API</strong></td><td>DS-APM ↔ Ruler</td><td>Go internal — <code>pkg/apiserver/signozapiserver/ruler.go</code> (+182), <code>pkg/ruler/signozruler/handler.go</code> (+467)</td><td>F1, F2 wiring</td></tr>
+<tr><td><strong>SigNoz Alertmanager (<code>dispatch.Dispatcher</code>)</strong></td><td>DS-APM → Dispatcher hot path</td><td>Go internal — <code>pkg/alertmanager/alertmanagerserver/dispatcher.go</code> wrapping (+56)</td><td>F6, F8</td></tr>
+<tr><td><strong>OTel Collector</strong></td><td>inbound</td><td>OpenTelemetry resource semantic attribute carry-through</td><td>research §4.1 — <code>service.name</code>, <code>deployment.environment</code>, <code>k8s.*</code> 등 자동 전파</td></tr>
+<tr><td><strong>LLM Provider</strong></td><td>outbound</td><td>HTTP / JSON. POST <code>/chat</code> (or equivalent). status code: 200 / 401 / 403 / 429 / 5xx</td><td>UC-003 fail-open 분기의 트리거</td></tr>
+<tr><td><strong>ClickHouse</strong></td><td>DS-APM → CK</td><td>SigNoz upstream observability path 그대로 (metrics, logs)</td><td>schema 변경 없음</td></tr>
+<tr><td><strong>PostgreSQL (bun ORM)</strong></td><td>DS-APM ↔ DB</td><td>bun ORM, table <code>ds_sop_documents</code> (마이그레이션 078). 복합 키 <code>(org_id, sop_id, version)</code></td><td>F1 SOP store</td></tr>
+<tr><td><strong>Redis</strong></td><td>(planned)</td><td>TTL-native cache — idempotency ledger 후속</td><td>현재 미사용, F8 R-7 follow-up</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="subsec">
+<h3 id="sec4-4">§4.4 Communications Interfaces</h3>
+
+<h4>Inbound</h4>
+<table>
+<thead><tr><th>ID</th><th>인터페이스</th><th>스키마</th></tr></thead>
+<tbody>
+<tr><td><strong>COMM-IN-1</strong></td><td>Alertmanager webhook v4</td><td><code>POST /webhook</code> body: <code>{receiver, status, alerts[], groupLabels, commonLabels, externalURL, version=4, groupKey}</code>. 각 alert는 <code>status</code>, <code>labels</code>, <code>annotations</code>, <code>startsAt</code>, <code>endsAt</code>, <code>generatorURL</code>, <code>fingerprint</code>. (research §5.2 참조)</td></tr>
+</tbody>
+</table>
+
+<h4>Outbound (5 채널)</h4>
+<table>
+<thead><tr><th>ID</th><th>채널</th><th>프로토콜 / 스키마</th><th>제약</th></tr></thead>
+<tbody>
+<tr><td><strong>COMM-OUT-1</strong></td><td>Slack</td><td>Incoming Webhook + Block Kit (<code>blocks: [header, section, divider, actions]</code>)</td><td>username/icon override 불가</td></tr>
+<tr><td><strong>COMM-OUT-2</strong></td><td>MS Teams v2</td><td>Adaptive Card v1.4 (<code>type: AdaptiveCard, body: [TextBlock, FactSet]</code>)</td><td><code>Action.OpenUrl</code>만 지원. <code>Action.Submit</code> 작동 안 함 (research §7.2). v0.1은 양방향 버튼 미지원.</td></tr>
+<tr><td><strong>COMM-OUT-3</strong></td><td>PagerDuty</td><td>Events API v2 (<code>routing_key</code>, <code>event_action: trigger</code>, <code>dedup_key</code>, <code>payload</code>)</td><td><code>dedup_key</code>는 DS-APM의 idempotency_key와 1:1 매핑</td></tr>
+<tr><td><strong>COMM-OUT-4</strong></td><td>Generic Webhook</td><td>JSON POST. 자유 schema.</td><td><code>severity</code>, <code>service</code>, <code>sop_url</code>, <code>ai_*</code> 필드 포함</td></tr>
+<tr><td><strong>COMM-OUT-5</strong></td><td>Email</td><td>SMTP MIME</td><td>Subject prefix에 <code>[SEV-x]</code>. SMTP queue가 자체 retry 보유</td></tr>
+</tbody>
+</table>
+<p>채널별 retry 정책은 UC-002 Sub-Variations 참조: Slack max 3회/1s base, Teams v2 max 3회/2s base, PagerDuty max 5회 (dedup 활용), Webhook max 3회/1s, Email max 2회/5s.</p>
+</div>
+</section>
+
+<!-- ============================= §5 Other Nonfunctional Requirements ============================= -->
+<section id="sec5">
+<div class="sec-head"><span class="num">§5</span><h2>Other Nonfunctional Requirements</h2></div>
+
+<div class="subsec">
+<h3 id="sec5-1">§5.1 Performance</h3>
+<ul>
+<li><strong>NF-5.1.1</strong> 시스템은 Alertmanager webhook 수신 → 채널 2xx 응답까지 p95 latency 30초를 초과하지 않아야 한다 (운영자 approve 시간 제외). (arc42 QS-PERF-1)</li>
+<li><strong>NF-5.1.2</strong> 시스템은 dispatcher hot path의 AI hook 호출을 동기적으로 처리하되 p95 latency 1초 (<code>DefaultGenerateTimeout</code>)를 초과하지 않아야 한다. (F6 NF-F6.1)</li>
+<li><strong>NF-5.1.3</strong> 시스템은 LLM 응답 수신 → fail-open 결정까지 p95 latency 1초를 초과하지 않아야 한다. (UC-003 NFR)</li>
+<li><strong>NF-5.1.4</strong> 시스템은 fail-open 발동 → SOP raw fallback의 Dispatcher 전달까지 p95 latency 3초를 초과하지 않아야 한다. (UC-003 NFR)</li>
+<li><strong>NF-5.1.5</strong> 시스템은 dispatcher maintenance ticker로 30초 주기 empty aggregation group GC를 수행해야 한다. (F6 NF-F6.2)</li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="sec5-2">§5.2 Safety</h3>
+<ul>
+<li><strong>NF-5.2.1 (Fail-open over silent drop)</strong> LLM Provider 실패는 절대 운영자에게 silent drop으로 나타나지 않아야 한다. fallback dispatch 또는 meta-alert 중 하나는 반드시 발화해야 한다. (UC-003 Minimal Guarantee)</li>
+<li><strong>NF-5.2.2 (PII before AI)</strong> AI Engine에 도달하기 전 페이로드의 PII (email, phone, 16자 이상 secret)는 100% redact돼야 한다. PII가 redact되지 않은 페이로드는 절대 AI Engine·외부 채널로 송신되지 않아야 한다. (UC-001 Minimal Guarantee, F7)</li>
+<li><strong>NF-5.2.3 (Audit boot fail-open)</strong> Audit sink 등록 실패는 서버 부팅을 막지 않아야 한다. (F0 NF-F0.2)</li>
+<li><strong>NF-5.2.4 (Dispatcher robustness)</strong> 채널 dispatch 실패는 dispatcher 자체를 중단시키지 않아야 한다. error는 항상 log + (선택적으로) DLQ로 흡수돼야 한다. (F6 NF-F6.5)</li>
+<li><strong>NF-5.2.5 (DLQ best-effort)</strong> DLQ persistence는 best-effort로, dispatcher hot path를 절대 막지 않아야 한다. sink write 실패는 <code>WarnContext</code> 로깅 후 dispatcher가 계속 진행해야 한다. (F8 NF-F8.1)</li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="sec5-3">§5.3 Security</h3>
+<ul>
+<li><strong>NF-5.3.1 (HMAC — OPEN)</strong> Replay payload는 HMAC으로 서명되어야 한다. <strong>정책 미정 — open follow-up</strong> (F8 <code>open_items</code>, traceability.md §6, R-2). 본 항목이 미해결인 한 production-ready 선언 불가.</li>
+<li><strong>NF-5.3.2 (TLS)</strong> 모든 outbound 채널 호출 (5채널 + LLM Provider)은 TLS 1.2 이상으로 수행돼야 한다.</li>
+<li><strong>NF-5.3.3 (Secret management)</strong> SOP source 자격증명은 contract response에 노출되지 않아야 한다. <code>SecretRefVisible</code>, <code>CredentialDetailsVisible</code>, <code>BrowserCredentialsUsed</code>는 항상 <code>false</code>여야 한다 (F0 NF-F0.3). pilot contract validator가 <code>token=</code>, <code>client_secret</code>, <code>api_key</code>, JWT-like 패턴을 차단해야 한다 (F0.5).</li>
+<li><strong>NF-5.3.4 (Cross-tenant opaqueness)</strong> Cross-tenant SOP/strategy lookup은 <code>ErrSOPDocumentNotFound</code>로 통일되어 존재 누설 없이 반환돼야 한다 (F1 NF-F1.1, F4).</li>
+<li><strong>NF-5.3.5 (Display URL safety)</strong> <code>DisplayURL</code>은 <code>http</code>/<code>https</code>만 허용되며 sensitive query parameter는 자동 제거돼야 한다 (<code>safeDisplayURL</code>, F1 NF-F1.4).</li>
+<li><strong>NF-5.3.6 (Contract version frozen)</strong> Contract version 문자열은 절대 자동 변경되지 않아야 한다 — downstream desync 방지 (F0 NF-F0.1).</li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="sec5-4">§5.4 Software Quality Attributes</h3>
+<p>arc42 §10 Quality Tree와 cross-reference. 본 절은 SRS-side ID로 다시 묶은 것.</p>
+<ul>
+<li><strong>NF-5.4.1 (Reliability — dispatch 손실 0)</strong> 모든 재시도가 실패하더라도 원본 페이로드와 시도 이력은 손실 없이 DLQ에 보존돼야 한다 (UC-002 Minimal Guarantee, arc42 QS-REL-1).</li>
+<li><strong>NF-5.4.2 (Reliability — idempotency)</strong> 동일 <code>(alert.fingerprint, channel.id, dispatch.round_no)</code> 튜플 기준 중복 dispatch는 0건이어야 한다. (UC-001 NFR, arc42 QS-REL-2). 단, 현 구현은 <code>EventID = alert.fingerprint</code>만 사용 — <code>(fingerprint, channel)</code> 튜플 확장은 F8 follow-up.</li>
+<li><strong>NF-5.4.3 (Maintainability — audit)</strong> Dispatch / draft / SOP 접근 / fail-open 발동 1건당 audit row 1건 이상이 영속 기록돼야 하며, 누락률은 0%여야 한다. (arc42 QS-MNT-1)</li>
+<li><strong>NF-5.4.4 (Maintainability — <code>pkg/</code> 1:1 매핑)</strong> WBS Level 2의 6 컴포넌트는 <code>pkg/</code> 디렉토리에 1:1로 매핑돼야 한다. (WBS index §WBS Tree)</li>
+<li><strong>NF-5.4.5 (Availability — single region MVP)</strong> Ingress 99.9% 가용성 목표 (single-region MVP). multi-region failover는 본 SRS 범위 밖.</li>
+</ul>
+</div>
+
+<div class="subsec">
+<h3 id="sec5-5">§5.5 Business Rules</h3>
+<ul>
+<li><strong>NF-5.5.1 (정보 손실 0)</strong> 운영자가 받는 알람에서 alert payload + SOP 본문 정보 손실은 0건이어야 한다. AI draft 부정확함보다 silent drop이 더 나쁘다 (UC-003 NFR).</li>
+<li><strong>NF-5.5.2 (Blameless culture)</strong> Audit log는 reproducibility 토대로만 사용돼야 하며, 개인 책임 추궁 목적으로 사용되지 않아야 한다 (SRE Postmortem Culture, research-skills-c-domain.md §1.4).</li>
+<li><strong>NF-5.5.3 (Handoff acknowledgment)</strong> 운영자 교대 시 명시적 인수와 firm acknowledgment 수신 전까지 콜에서 나가지 않아야 한다 (PagerDuty Incident Command 모델, research §1.2). 본 룰은 운영 프로세스 권고로, DS-APM 시스템은 audit trail로만 지원.</li>
+<li><strong>NF-5.5.4 (90일 SOP staleness)</strong> SOP의 <code>staleness_days</code>가 90일을 초과하면 grounding 결과를 보류하고 운영자에게 raw alert만 전달해야 한다 (UC-001 5a Extension, F1).</li>
+<li><strong>NF-5.5.5 (SEV-2 이상 = major incident)</strong> SEV-2 이상은 모두 major incident로 다루며 PagerDuty paging + Slack/Teams broadcast 동시 발송해야 한다 (UC-001 Sub-Variations, research §2.2).</li>
+</ul>
+</div>
+</section>
+
+<!-- ============================= Traceability ============================= -->
+<section id="trace">
+<div class="sec-head"><span class="num">⛓</span><h2>Traceability</h2></div>
+<p>→ <code>../_shared/traceability.md</code></p>
+<table>
+<thead><tr><th>차원</th><th>매핑</th></tr></thead>
+<tbody>
+<tr><td>F0~F8 ↔ UC-001~003</td><td>traceability.md §1 (Feature × UC)</td></tr>
+<tr><td>F0~F8 ↔ WBS-1.0~1.5</td><td>traceability.md §2 (Feature × WBS Component)</td></tr>
+<tr><td>UC-001~003 ↔ WBS-1.0~1.5</td><td>traceability.md §3 (Use Case × WBS)</td></tr>
+<tr><td>11 commits ↔ F0~F8 ↔ WBS-1.0~1.5</td><td>traceability.md §4 (역사 추적)</td></tr>
+<tr><td>Open items (HMAC, frontend, archive 자료)</td><td>traceability.md §6</td></tr>
+</tbody>
+</table>
+</section>
+
+</main>
+
+<aside class="toc">
+<div class="label">Contents</div>
+<ol>
+<li><a href="#sec1">§1 Introduction</a></li>
+<li><a href="#sec2">§2 Overall Description</a></li>
+<li><a href="#sec3">§3 System Features</a></li>
+<li><a href="#sec4">§4 External Interface</a></li>
+<li><a href="#sec5">§5 Other NFR</a></li>
+<li><a href="#trace">⛓ Traceability</a></li>
+</ol>
+<div class="group-label">Modules (F0~F8)</div>
+<ol>
+<li><a href="#F0">F0 · Foundation</a></li>
+<li><a href="#F1">F1 · SOP Grounding</a></li>
+<li><a href="#F2">F2 · AI Drafting</a></li>
+<li><a href="#F3">F3 · AI Quota</a></li>
+<li><a href="#F4">F4 · Multi-tenant</a></li>
+<li><a href="#F5">F5 · Audit</a></li>
+<li><a href="#F6">F6 · Notification</a></li>
+<li><a href="#F7">F7 · PII Redaction</a></li>
+<li><a href="#F8">F8 · DLQ + Replay</a></li>
+</ol>
+<div class="group-label">Cross-Deliverable</div>
+<ol>
+<li><a href="../01-overview/overview.html">Overview</a></li>
+<li><a href="../02-usecase/usecase.html">Use Case</a></li>
+<li><a href="../04-wbs/wbs.html">WBS</a></li>
+</ol>
+</aside>
+
+</div>
+</body>
+</html>

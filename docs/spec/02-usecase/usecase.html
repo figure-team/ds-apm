@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DS-APM Use Case 카탈로그</title>
+<style>
+/* DS-APM 산출물 공통 디자인 토큰
+ * 출처: docs/spec/_foundation/research-skills-b-html.md §5.1~5.10
+ * Anthropic Claude 브랜드 팔레트 + 시스템 폰트 + html-effectiveness 패턴
+ * Self-contained, zero deps, light-only (다크모드는 v2 follow-up)
+ */
+
+:root {
+  /* Color tokens (html-effectiveness 팔레트) */
+  --ivory:#FAF9F5;
+  --slate:#141413;
+  --clay:#D97757;
+  --oat:#E3DACC;
+  --olive:#788C5D;
+  --sky:#6A8CAF;
+  --g100:#F0EEE6;
+  --g300:#D1CFC5;
+  --g500:#87867F;
+  --g700:#3D3D3A;
+
+  /* Font stacks */
+  --serif: ui-serif, Georgia, 'Times New Roman', serif;
+  --sans:  system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono:  ui-monospace, 'SF Mono', Menlo, Monaco, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--ivory);
+  color: var(--g700);
+  font-family: var(--sans);
+  line-height: 1.55;
+  padding: 56px 32px 120px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page { max-width: 1120px; margin: 0 auto; }
+
+/* ========== Headings ========== */
+h1 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(38px, 5.4vw, 62px);
+  color: var(--slate);
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 26px;
+  color: var(--slate);
+  letter-spacing: -0.01em;
+}
+h3 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--slate);
+  margin-bottom: 8px;
+  margin-top: 24px;
+}
+h4 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--g700);
+  margin-bottom: 6px;
+  margin-top: 16px;
+}
+
+p { margin: 8px 0; }
+
+/* ========== Eyebrow ========== */
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--g500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+
+/* ========== Section head ========== */
+.sec-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 8px;
+  margin-top: 64px;
+}
+.sec-head .num {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--oat);
+  color: var(--slate);
+  padding: 3px 9px;
+  border-radius: 8px;
+}
+.sec-intro {
+  font-size: 14.5px;
+  color: var(--g500);
+  max-width: 720px;
+  margin-bottom: 28px;
+}
+
+/* ========== UC section card ========== */
+section.uc {
+  margin-top: 80px;
+  padding-top: 24px;
+  border-top: 1.5px solid var(--g300);
+}
+section.uc .uc-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+section.uc .uc-head .uc-id {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--oat);
+  color: var(--slate);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+section.uc .uc-head h2 {
+  font-size: 28px;
+  flex: 1 1 auto;
+}
+section.uc .uc-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 13px;
+  color: var(--g500);
+  margin-bottom: 16px;
+}
+section.uc .uc-meta .meta-k {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--g500);
+}
+section.uc .uc-meta .meta-v {
+  color: var(--slate);
+  margin-left: 6px;
+}
+section.uc blockquote.lede {
+  border-left: 4px solid var(--clay);
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 12px 0 20px;
+  font-style: normal;
+  color: var(--g700);
+}
+
+/* ========== Code ========== */
+code, pre {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+pre {
+  background: var(--g100);
+  border: 1.5px solid var(--g300);
+  border-radius: 10px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+code {
+  background: var(--g100);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+pre code {
+  background: transparent;
+  padding: 0;
+}
+
+/* ========== Tables ========== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+}
+th, td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--g300);
+  vertical-align: top;
+}
+th {
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--slate);
+  background: var(--g100);
+}
+td.center, th.center { text-align: center; }
+
+/* ========== Sticky TOC sidebar ========== */
+.toc-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 48px;
+}
+.toc {
+  position: sticky;
+  top: 32px;
+  align-self: start;
+  border: 1.5px solid var(--g300);
+  border-radius: 12px;
+  background: #fff;
+  padding: 16px;
+}
+.toc .label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--g500);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.toc ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  counter-reset: m;
+}
+.toc li {
+  font-size: 13px;
+  padding: 6px 0;
+  line-height: 1.35;
+}
+.toc a {
+  color: var(--g700);
+  text-decoration: none;
+  border-bottom: none;
+}
+.toc a:hover { color: var(--clay); }
+
+@media (max-width: 960px) {
+  .toc-page { grid-template-columns: 1fr; }
+  .toc { position: static; }
+}
+
+html { scroll-behavior: smooth; }
+
+/* ========== Links ========== */
+a {
+  color: var(--clay);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 150ms;
+}
+a:hover { border-bottom-color: var(--clay); }
+
+/* ========== Lists ========== */
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin-bottom: 4px; }
+li > ul, li > ol { margin: 4px 0 4px 20px; }
+
+/* ========== Blockquote ========== */
+blockquote {
+  border-left: 3px solid var(--g300);
+  padding: 8px 16px;
+  margin: 12px 0;
+  color: var(--g700);
+  font-style: italic;
+}
+
+/* ========== Mermaid container ========== */
+.mermaid {
+  background: #fff;
+  border: 1.5px solid var(--g300);
+  border-radius: 10px;
+  padding: 16px;
+  margin: 16px 0;
+  text-align: center;
+  font-family: var(--sans);
+}
+
+/* ========== Inline tags / chips ========== */
+.tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--g100);
+  color: var(--g700);
+  margin-right: 6px;
+}
+.tag.id { color: var(--clay); border: 1px solid var(--g300); background: #fff; }
+
+/* ========== Status pill ========== */
+.status-pill {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.status-pill.implemented { background: #E4E9DC; color: #4B5C39; }
+.status-pill.mvp { background: var(--oat); color: var(--slate); }
+.status-pill.pending { background: #F3D9CC; color: #8A3B1E; }
+.status-pill.draft { background: var(--g100); color: var(--g500); }
+
+/* ========== Print / PDF ========== */
+@page { size: A4; margin: 18mm 15mm; }
+
+@media print {
+  body { background: #fff; padding: 0; }
+  .page, .toc-page { max-width: 100%; display: block; }
+  .toc { display: none; }
+  section.uc { break-before: page; page-break-before: page; }
+  section.uc:first-of-type { break-before: auto; page-break-before: auto; }
+  pre, table, svg, .mermaid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  details > summary { list-style: none; }
+  details:not([open]) > *:not(summary) { display: none; }
+  aside, .toc { position: static; }
+  a::after { content: " (" attr(href) ")"; font-size: 10px; color: #888; }
+}
+</style>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#FAF9F5',
+      primaryTextColor: '#141413',
+      primaryBorderColor: '#D1CFC5',
+      lineColor: '#87867F',
+      secondaryColor: '#E3DACC',
+      tertiaryColor: '#F0EEE6'
+    },
+    fontFamily: 'ui-sans-serif, system-ui, sans-serif'
+  });
+</script>
+</head>
+<body>
+<div class="page toc-page">
+<main>
+
+<header>
+  <div class="eyebrow">DS-APM · Cockburn Fully Dressed + UML Sequence · 2026-05-29</div>
+  <h1>DS-APM Use Case 카탈로그</h1>
+  <p class="sec-intro">3개 Use Case (UC-001 Golden Path + UC-002 DLQ Failure + UC-003 LLM Fail-open). 모든 UC는 Cockburn User-goal level.</p>
+</header>
+
+<section id="catalog">
+  <div class="sec-head">
+    <span class="num">00</span>
+    <h2>Catalog</h2>
+  </div>
+  <p class="sec-intro">
+    <strong>템플릿</strong>: Cockburn Fully Dressed (메인 골격) + Gherkin (복잡한 에러 케이스) + UML Sequence Diagram (<code>alt</code>/<code>break</code> 프래그먼트).
+    <strong>Level 통일</strong>: 모든 UC는 Cockburn <strong>User-goal (Sea) level</strong>.
+    <strong>상태</strong>: 본문 작성 완료. UC-001~003 cases 파일 채워짐.
+  </p>
+
+  <h3>Use Case 일람</h3>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>제목</th><th>유형</th><th>Primary Actor</th><th>상태</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a href="#UC-001">UC-001</a></td>
+        <td>Incident에서 채널 전달까지 (Golden Path)</td>
+        <td>golden path</td>
+        <td>운영자</td>
+        <td><span class="status-pill implemented">implemented</span></td>
+      </tr>
+      <tr>
+        <td><a href="#UC-002">UC-002</a></td>
+        <td>채널 전달 실패 → DLQ → Replay</td>
+        <td>failure path</td>
+        <td>운영자 / 시스템</td>
+        <td><span class="status-pill implemented">implemented</span></td>
+      </tr>
+      <tr>
+        <td><a href="#UC-003">UC-003</a></td>
+        <td>LLM 인증 실패 → quota fail-open → SOP 원문 fallback</td>
+        <td>failure path</td>
+        <td>시스템</td>
+        <td><span class="status-pill implemented">implemented</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>액터 매트릭스</h3>
+  <p>행 = actor, 열 = Use Case. 셀 의미: <strong>P</strong> = Primary, <strong>S</strong> = Supporting, <strong>—</strong> = 관여 없음.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Actor</th>
+        <th>분류</th>
+        <th class="center">UC-001 Golden Path</th>
+        <th class="center">UC-002 DLQ Failure</th>
+        <th class="center">UC-003 LLM Fail-open</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>운영자 (Operator)</strong></td><td>사람</td><td class="center">P</td><td class="center">P</td><td class="center">S (degraded 알림 수신)</td></tr>
+      <tr><td><strong>SRE</strong></td><td>사람</td><td class="center">—</td><td class="center">S (DLQ depth meta-alert)</td><td class="center">S (자격증명 회전, fail-open storm escalation)</td></tr>
+      <tr><td><strong>SigNoz / Alertmanager</strong></td><td>시스템</td><td class="center">S (alert source)</td><td class="center">—</td><td class="center">—</td></tr>
+      <tr><td><strong>DS-APM Ingress</strong></td><td>시스템</td><td class="center">S</td><td class="center">—</td><td class="center">—</td></tr>
+      <tr><td><strong>PII Redactor (F7)</strong></td><td>시스템</td><td class="center">S</td><td class="center">—</td><td class="center">—</td></tr>
+      <tr><td><strong>Multi-tenant Scope (F4)</strong></td><td>시스템</td><td class="center">S</td><td class="center">—</td><td class="center">—</td></tr>
+      <tr><td><strong>SOP Store (F1)</strong></td><td>시스템</td><td class="center">S</td><td class="center">—</td><td class="center">S (raw fallback fetch)</td></tr>
+      <tr><td><strong>AI Engine (F2)</strong></td><td>시스템</td><td class="center">S</td><td class="center">—</td><td class="center">S</td></tr>
+      <tr><td><strong>AI Quota Controller (F3)</strong></td><td>시스템</td><td class="center">—</td><td class="center">—</td><td class="center"><strong>P</strong> (fail-open 결정)</td></tr>
+      <tr><td><strong>LLM Provider</strong></td><td>외부</td><td class="center">S</td><td class="center">—</td><td class="center">S (실패 트리거)</td></tr>
+      <tr><td><strong>Dispatcher (F6)</strong></td><td>시스템</td><td class="center">S</td><td class="center">S</td><td class="center">S</td></tr>
+      <tr><td><strong>Channel (Slack / Teams / PD / Webhook / Email)</strong></td><td>외부</td><td class="center">S</td><td class="center">S (실패 트리거)</td><td class="center">S</td></tr>
+      <tr><td><strong>DLQ JSONL Sink (F8)</strong></td><td>시스템</td><td class="center">—</td><td class="center">S</td><td class="center">—</td></tr>
+      <tr><td><strong>Replay Ledger (F8)</strong></td><td>시스템</td><td class="center">—</td><td class="center">S</td><td class="center">—</td></tr>
+      <tr><td><strong>Audit Sink (F5)</strong></td><td>시스템</td><td class="center">S</td><td class="center">S</td><td class="center">S</td></tr>
+    </tbody>
+  </table>
+  <p>UML use case diagram 1장 (액터 스틱맨 + UC 타원 + 매트릭스 위 cell <code>P</code>/<code>S</code> 매핑)은 HTML 빌드 단계에서 별도 SVG 렌더링.</p>
+
+  <h3>다이어그램 표준</h3>
+  <ul>
+    <li><strong>Swimlane Sequence</strong>: SigNoz / Ingress / AI Engine / Operator / Dispatcher / Channel (5~6 lane)</li>
+    <li><strong>State Machine</strong>: Alert lifecycle (<code>received → grounded → draft_pending → approved → dispatching → delivered / failed_dlq / replayed</code>)</li>
+    <li><strong>Activity Diagram</strong>: 분기 많은 sad path (필요 시)</li>
+  </ul>
+  <p>각 UC 파일에 Mermaid <code>sequenceDiagram</code> 1장 + <code>stateDiagram-v2</code> 1장 임베드. UC-003은 sequenceDiagram에 <code>alt/else</code> 프래그먼트로 401/403/429 vs 5xx vs malformed 분기를 한 장에 그림.</p>
+
+  <h3>공통 가정 (Background Given)</h3>
+  <p>모든 UC에 공통으로 적용되는 환경 조건. 각 UC의 Preconditions 위에 implicit하게 깔린다.</p>
+  <ol>
+    <li><strong>SigNoz Ruler alert rule 활성</strong> — 대상 alert rule이 평가 중이고, <code>for</code> hold 시간 경과 시 firing 상태로 전이해야 한다.</li>
+    <li><strong>Alertmanager webhook v4 호환</strong> — 페이로드는 <code>alertname</code>, <code>severity</code>, <code>status</code>, <code>startsAt</code>, <code>labels</code>, <code>annotations.runbook_url</code>, <code>fingerprint</code>, <code>generatorURL</code> 8개 필수 필드를 갖는다 (research §13.1).</li>
+    <li><strong>대상 채널 1개 이상 등록·healthy</strong> — Slack / MS Teams v2 / PagerDuty / Webhook / Email 중 1+ 채널이 적어도 직전 health check를 통과한 상태.</li>
+    <li><strong>SOP store 인덱싱 완료</strong> — 대응 SOP 1건 이상이 <code>approval_status: approved</code>이고 <code>staleness_days ≤ 90</code>. SOP는 explicit-label binding (<code>signoz_pilot_sop_id</code>)으로 매칭된다 (F1.1).</li>
+    <li><strong>AI Strategy 활성 + Quota Controller 정상</strong> — 해당 tenant에 대해 AI Strategy 1건이 active이고, Quota Controller는 fail-open 정책으로 설정 (UC-003 분기에서 활용).</li>
+    <li><strong>PII Redactor 활성</strong> — <code>pkg/types/alertmanagertypes/incident_payload.go</code>의 redactor가 AI Engine 호출 직전에 항상 호출 가능 상태.</li>
+    <li><strong>Tenant Policy 적용</strong> — <code>project_id</code> × <code>environment</code> 기반 tenant scope이 적용되어 cross-tenant SOP/strategy leakage가 차단된 상태 (F4, NF-F1.1).</li>
+    <li><strong>Audit JSONL sink 등록</strong> — <code>cmd/community/main.go</code>가 부팅 시 <code>var/audit/pilot-events.jsonl</code>을 등록한 상태. 실패 시 <code>NopPilotAuditEventSink</code> fallback (F0 NF-F0.2).</li>
+    <li><strong>DLQ JSONL sink + Replay Ledger</strong> — 디스크 쓰기 가능 상태. UC-002에서 본격 활용.</li>
+    <li><strong>운영자 1인 이상 on-call</strong> — UC-001 단계 7의 draft 승인을 담당할 운영자가 rotation에 등재.</li>
+  </ol>
+  <p>상기 가정이 깨지면 각 UC의 Extension으로 분기 (e.g., UC-001 4a tenant policy 미발견, UC-002 4a DLQ sink 쓰기 실패).</p>
+
+  <h3>Traceability</h3>
+  <ul>
+    <li>Use Cases → Features → WBS 매트릭스: <a href="../_shared/traceability.md"><code>../_shared/traceability.md</code></a></li>
+    <li>UC-001 ←→ F0, F1, F2, F4, F5, F6, F7 / WBS-1.0~1.4</li>
+    <li>UC-002 ←→ F6, F8 / WBS-1.3, 1.5 (UC-001 단계 8 Extension <code>8a</code>로부터 진입)</li>
+    <li>UC-003 ←→ F2, F3 / WBS-1.2 (UC-001 단계 5 Extension <code>5b</code>로부터 진입). F1은 raw fallback fetch의 전제로 참여.</li>
+  </ul>
+  <p><strong>관련 산출물</strong>: <a href="../01-overview/overview.html">Overview</a> · <a href="../03-functional-spec/functional-spec.html">Functional Spec</a> · <a href="../04-wbs/wbs.html">WBS</a></p>
+</section>
+
+<!-- ============================================================ -->
+<!-- UC-001 -->
+<!-- ============================================================ -->
+<section id="UC-001" class="uc">
+  <div class="uc-head">
+    <span class="uc-id">UC-001</span>
+    <h2>Incident에서 채널 전달까지 (Golden Path)</h2>
+    <span class="status-pill implemented">implemented</span>
+  </div>
+  <div class="uc-meta">
+    <span><span class="meta-k">Level</span><span class="meta-v">User-goal (Sea)</span></span>
+    <span><span class="meta-k">Scope</span><span class="meta-v">DS-APM System</span></span>
+    <span><span class="meta-k">Primary Actor</span><span class="meta-v">운영자 (Operator)</span></span>
+    <span><span class="meta-k">Priority</span><span class="meta-v">P1</span></span>
+  </div>
+  <blockquote class="lede">
+    <strong>상태</strong>: 구현 완료. SigNoz가 Alertmanager-compatible webhook으로 firing alert를 전달하면, DS-APM이 PII redaction → SOP grounding → AI runbook drafting → 운영자 승인 → 채널 dispatch까지 직렬 처리하는 정상 흐름.
+  </blockquote>
+
+  <h3>메타</h3>
+  <ul>
+    <li><strong>Level</strong>: User-goal (Sea)</li>
+    <li><strong>Scope</strong>: DS-APM System</li>
+    <li><strong>Primary Actor</strong>: 운영자 (Operator)</li>
+    <li><strong>Supporting Actors</strong>: SigNoz, DS-APM Ingress, PII Redactor, AI Engine, Dispatcher, 채널 5종(Slack / MS Teams v2 / PagerDuty / Webhook / Email)</li>
+  </ul>
+
+  <h3>Trigger</h3>
+  <p>SigNoz Ruler가 평가한 알람이 <code>for</code> hold 시간을 초과하여 firing 상태로 전이되고, Alertmanager가 <code>PaymentService5xxHigh</code> (severity=critical, status=firing) 알람을 DS-APM webhook 엔드포인트로 POST해야 한다.</p>
+
+  <h3>Preconditions</h3>
+  <ul>
+    <li>SigNoz Ruler에서 대상 alert rule이 활성화돼 있어야 한다.</li>
+    <li>알람 페이로드는 Prometheus Alertmanager v4 스키마(<code>alertname</code>, <code>severity</code>, <code>status</code>, <code>startsAt</code>, <code>labels</code>, <code>annotations.runbook_url</code>, <code>fingerprint</code>, <code>generatorURL</code>)를 만족해야 한다.</li>
+    <li>대응 SOP 1건 이상이 SOP store(<code>sop_document_file_store</code>)에 인덱싱·published 상태여야 하며 <code>staleness_days ≤ 90</code>이어야 한다.</li>
+    <li>대상 테넌트의 AI Strategy가 활성화돼 있고, quota controller가 정상 모드여야 한다.</li>
+    <li>Dispatch 대상 채널 1개 이상이 등록·healthy 상태여야 한다 (Slack / MS Teams v2 / PagerDuty / Webhook / Email 중).</li>
+    <li>운영자 1인 이상이 on-call rotation에 등재돼 있어야 한다.</li>
+  </ul>
+
+  <h3>Success Guarantee (정상 종료 보장)</h3>
+  <ul>
+    <li>알람은 운영자가 승인한 AI runbook draft와 함께 등록된 모든 healthy 채널에 전달돼야 한다.</li>
+    <li>모든 dispatch 시도는 <code>idempotency_key = sha256(alert.fingerprint || channel.id || dispatch.round_no)</code>로 식별되며, 동일 키로의 중복 dispatch는 발생하지 않아야 한다.</li>
+    <li>Audit log(<code>F5</code>)에 <code>correlation_id</code>, <code>alert.fingerprint</code>, <code>tenant_id</code>, <code>draft_id</code>, <code>approved_by</code>, <code>dispatch_id</code> 전부가 영속 기록돼야 한다.</li>
+    <li>AI Engine에 도달하기 전에 페이로드의 PII(이메일, 전화, 16자 이상 secret)는 100% redact돼야 한다.</li>
+  </ul>
+
+  <h3>Minimal Guarantee (실패 시 최소 보장)</h3>
+  <ul>
+    <li>어느 단계에서 실패하든 알람 수신 사실 자체와 <code>correlation_id</code>는 Audit log에 남아야 한다.</li>
+    <li>PII가 redact되지 않은 페이로드는 절대 AI Engine·외부 채널로 송신되지 않아야 한다.</li>
+    <li>채널 dispatch가 실패하면 <a href="#UC-002">UC-002</a>(DLQ 흐름)로 분기하여 원본 페이로드와 시도 이력이 보존돼야 한다.</li>
+    <li>LLM 호출이 실패하면 <a href="#UC-003">UC-003</a>(fail-open)로 분기하여 SOP 원문이 그대로 운영자에게 도달해야 한다.</li>
+  </ul>
+
+  <h3>Main Success Scenario</h3>
+  <ol>
+    <li>SigNoz Alertmanager가 firing 페이로드를 DS-APM Ingress webhook으로 POST해야 한다 (<code>status=firing</code>, <code>alertname</code>, <code>severity</code>, <code>fingerprint</code>, <code>annotations.runbook_url</code> 포함).</li>
+    <li>DS-APM Ingress는 페이로드를 검증하고 <code>correlation_id</code>를 부여한 뒤 <code>alertmanagertypes.IncidentPayload</code>로 정규화해야 한다.</li>
+    <li>PII Redactor(F7)가 이메일·전화·16자 이상 secret 패턴을 마스킹하고 <code>redaction_applied=true</code>와 categories를 페이로드에 stamping해야 한다.</li>
+    <li>Multi-tenant Scope(F4)가 <code>tenant_id</code>를 결정하고 해당 테넌트의 SOP/AI strategy만 노출하도록 컨텍스트를 제한해야 한다.</li>
+    <li>AI Engine(F1·F2)이 <code>annotations.runbook_url</code> 및 alert labels를 키로 SOP store에서 1건 이상의 runbook을 retrieve하고, 그 본문을 grounding context로 LLM에 전달하여 draft를 생성한다 (<code>draft_id</code>, <code>citations[]</code>, <code>model.{name,version,temperature}</code>, <code>prompt_template_id</code> 기록).</li>
+    <li>AI Strategy History(F2)에 draft 메타가 append되고, 운영자에게 검수 요청 알림이 발송돼야 한다 (<code>approval_status=pending</code>).</li>
+    <li>운영자가 draft를 검토하고 approve해야 한다 (<code>approval_status=approved</code>, <code>approved_by</code>, <code>approved_at</code> 기록).</li>
+    <li>Dispatcher(F6)가 승인된 draft + SOP context를 채널별 adapter(Slack Block Kit / MS Teams Adaptive Card v1.4 / PagerDuty Events API v2 / Webhook JSON / Email MIME)로 변환하여 전송해야 한다.</li>
+    <li>각 채널이 2xx를 응답하면 dispatch state가 <code>delivered</code>로 전이돼야 한다.</li>
+    <li>Audit sink(F5)가 <code>correlation_id</code>, <code>dispatch_id[]</code>, <code>idempotency_key[]</code>, <code>last_status_code</code>를 영속 기록하여 traceability matrix를 닫아야 한다.</li>
+  </ol>
+
+  <h3>Extensions</h3>
+  <ul>
+    <li><strong>2a. 페이로드 스키마 위반</strong> (<code>alertname</code> 또는 <code>fingerprint</code> 누락)
+      <ul>
+        <li>2a1. Ingress는 400 Bad Request 응답하고 페이로드를 처리하지 않아야 한다.</li>
+        <li>2a2. 메트릭 <code>ds_apm_ingress_schema_reject_total</code>을 증가시키고 운영자에 meta-alert를 발송해야 한다.</li>
+      </ul>
+    </li>
+    <li><strong>3a. PII redactor 패턴 매칭 실패</strong> (regex panic 또는 timeout)
+      <ul>
+        <li>3a1. Redactor는 fail-closed로 동작하여 페이로드를 quarantine queue로 보내고 AI Engine 호출을 차단해야 한다.</li>
+        <li>3a2. 운영자에 "PII redaction failure" alert를 raw alert와 함께 전달해야 한다 (원본 페이로드 노출 금지).</li>
+      </ul>
+    </li>
+    <li><strong>3b. Redaction rate spike</strong> (분당 임계치 초과)
+      <ul>
+        <li>3b1. Audit sink가 meta-alert를 발행하고 SRE에 통지한다 — 새 코드 경로에서 PII가 새고 있을 가능성.</li>
+      </ul>
+    </li>
+    <li><strong>4a. Tenant policy 미발견 또는 비활성</strong>
+      <ul>
+        <li>4a1. Ingress는 422 Unprocessable Entity를 응답하고 알람을 drop하지 않은 채 quarantine해야 한다.</li>
+        <li>4a2. SRE에 "tenant policy not found" alert를 발송한다.</li>
+      </ul>
+    </li>
+    <li><strong>5a. SOP retrieval 0건</strong> (<code>runbook_url</code> 미해석 또는 SOP staleness &gt; 90일)
+      <ul>
+        <li>5a1. Draft 생성을 보류하고 운영자에 raw alert + "SOP 없음" 표시를 전달해야 한다.</li>
+        <li>5a2. 본 흐름은 UC-001의 degraded 종료로 간주하며 UC-003과 별개로 처리한다.</li>
+      </ul>
+    </li>
+    <li><strong>5b. LLM Provider 401/403/429</strong> → <strong><a href="#UC-003">UC-003</a></strong> 분기
+      <ul>
+        <li>5b1. AI Engine은 Quota controller의 fail-open 결정을 따라야 한다.</li>
+        <li>5b2. Draft 대신 SOP 원문이 단계 8의 입력이 된다.</li>
+      </ul>
+    </li>
+    <li><strong>5c. LLM Provider 5xx (일시적)</strong>
+      <ul>
+        <li>5c1. Exponential backoff로 최대 3회 재시도해야 한다 (fail-open 발동 안 함).</li>
+        <li>5c2. 3회 모두 실패 시 <a href="#UC-003">UC-003</a> fail-open으로 전이한다.</li>
+      </ul>
+    </li>
+    <li><strong>7a. 운영자가 draft reject</strong>
+      <ul>
+        <li>7a1. <code>approval_status=rejected</code>, <code>rejection_reason</code> 기록.</li>
+        <li>7a2. SOP 원문을 fallback으로 dispatch하거나 운영자가 수동 편집 후 재승인하는 sub-flow로 들어간다.</li>
+      </ul>
+    </li>
+    <li><strong>7b. Approval timeout</strong> (SEV-1: 5min, SEV-2: 15min 초과)
+      <ul>
+        <li>7b1. Draft는 <code>approval_status=expired</code>로 마킹.</li>
+        <li>7b2. SOP 원문 fallback dispatch로 전이.</li>
+      </ul>
+    </li>
+    <li><strong>8a. 채널 4xx/5xx 응답</strong> → <strong><a href="#UC-002">UC-002</a></strong> 분기
+      <ul>
+        <li>8a1. 4xx(non-429)는 즉시 DLQ enqueue.</li>
+        <li>8a2. 5xx 또는 429는 exponential backoff + jitter로 재시도 후 모두 실패 시 DLQ enqueue.</li>
+      </ul>
+    </li>
+    <li><strong>8b. 채널 일부만 실패</strong> (멀티 채널 fan-out)
+      <ul>
+        <li>8b1. 실패 채널만 <a href="#UC-002">UC-002</a>로 분기, 성공 채널은 <code>delivered</code>로 종결.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h3>Sub-Variations</h3>
+  <ul>
+    <li><strong>채널 종류</strong>: Slack(Incoming Webhook + Block Kit) / MS Teams v2(Adaptive Card v1.4, <code>Action.OpenUrl</code>만 지원) / PagerDuty(Events API v2, <code>dedup_key</code>=<code>idempotency_key</code>) / Generic Webhook(JSON POST) / Email(SMTP MIME). 페이로드 매핑은 F6 명세 §Channel Adapter 참조.</li>
+    <li><strong>Severity</strong>: SEV-1~SEV-5. SEV-2 이상은 PagerDuty paging + Slack/Teams broadcast 동시 발송. SEV-3 이하는 ticket-queue 채널만.</li>
+    <li><strong>알람 타입</strong>: metric / log / trace / exception / anomaly (SigNoz 5종). 본 UC는 타입 무관 동일 흐름.</li>
+    <li><strong>테넌트 격리 모드</strong>: shared vector store + tenant_id filter (현재 구현) vs. dedicated vector store (미구현).</li>
+    <li><strong>운영자 승인 채널</strong>: SigNoz UI in-app (현재 구현) vs. Slack interactive button (미구현 — Teams는 <code>Action.Submit</code> 제약으로 영구 미지원).</li>
+  </ul>
+
+  <h3>Non-functional</h3>
+  <ul>
+    <li><strong>Latency</strong>: Ingress webhook 수신 → 채널 2xx 응답까지 p95 ≤ 30s (운영자 approve 시간 제외, AI draft 단계까지 p95 ≤ 8s).</li>
+    <li><strong>PII redaction coverage</strong>: AI Engine 호출 직전 페이로드 기준 100% (email/phone/long-secret 카테고리).</li>
+    <li><strong>Idempotency</strong>: <code>(alert.fingerprint, channel.id, dispatch.round_no)</code> 튜플 기준 중복 dispatch 0건. TTL은 최대 retry window의 2배 이상.</li>
+    <li><strong>Audit completeness</strong>: dispatch 1건당 audit row 1건 이상, 누락률 0%.</li>
+    <li><strong>Tenant isolation</strong>: cross-tenant SOP leakage 0건 (테스트로 검증).</li>
+    <li><strong>Availability</strong>: Ingress 99.9% (single-region MVP 기준), DLQ 영속화로 dispatch 손실 0건 목표.</li>
+  </ul>
+
+  <h3>Diagrams</h3>
+  <h4>시퀀스 다이어그램 — Alert → Channel 직렬 흐름</h4>
+  <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    participant SN as SigNoz<br/>(Alertmanager)
+    participant IN as DS-APM Ingress
+    participant PII as PII Redactor
+    participant AI as AI Engine
+    participant OP as Operator
+    participant DS as Dispatcher
+    participant CH as Channel<br/>(Slack/Teams/PD/Webhook/Email)
+
+    SN->>IN: POST /webhook<br/>{alertname, severity, fingerprint,<br/>annotations.runbook_url, status=firing}
+    IN->>IN: 스키마 검증 + correlation_id 부여
+    IN->>PII: IncidentPayload (raw)
+    PII->>PII: email/phone/long-secret 마스킹
+    PII-->>IN: IncidentPayload (redacted,<br/>redaction_applied=true)
+    IN->>AI: redacted payload + tenant_id
+    AI->>AI: SOP retrieval<br/>(runbook_url, labels)
+    AI->>AI: LLM 호출<br/>(grounding context)
+    AI-->>OP: draft 검수 요청<br/>(draft_id, citations[])
+    OP->>AI: approve (approved_by, approved_at)
+    AI->>DS: approved draft + SOP context
+    DS->>DS: 채널별 adapter 변환<br/>+ idempotency_key 생성
+    DS->>CH: 채널 페이로드 전송
+    CH-->>DS: 2xx 응답
+    DS-->>IN: dispatch_id, state=delivered
+    IN->>IN: Audit log 기록<br/>(correlation_id, dispatch_id[])
+  </pre>
+
+  <h4>상태 머신 — Alert Lifecycle</h4>
+  <pre class="mermaid">
+stateDiagram-v2
+    [*] --> received: Ingress가 webhook 수신
+    received --> redacted: PII Redactor 통과
+    redacted --> grounded: SOP retrieval 성공
+    grounded --> draft_pending: AI draft 생성
+    draft_pending --> approved: 운영자 approve
+    draft_pending --> rejected: 운영자 reject
+    draft_pending --> expired: approval timeout
+    approved --> dispatching: Dispatcher 진입
+    rejected --> dispatching: SOP 원문 fallback
+    expired --> dispatching: SOP 원문 fallback
+    dispatching --> delivered: 채널 2xx
+    dispatching --> failed_dlq: 채널 4xx/5xx (UC-002)
+    delivered --> [*]
+    failed_dlq --> [*]: UC-002로 위임
+  </pre>
+
+  <h3>Related Information</h3>
+  <ul>
+    <li><strong>Priority</strong>: P1</li>
+    <li><strong>Frequency</strong>: 운영 환경에서 일 평균 SEV-1~SEV-3 알람 수에 비례 (TBD — 운영 메트릭 확정 후 갱신)</li>
+    <li><strong>Open Issues</strong>: HMAC 정책 follow-up (F8 dispatch 서명, traceability §6 참조)</li>
+  </ul>
+
+  <h3>Traceability</h3>
+  <ul>
+    <li><strong>Implements features</strong>: F0 (Foundation), F1 (SOP Grounding &amp; Store), F2 (AI Drafting), F4 (Multi-tenant Scope), F5 (Audit), F6 (Notification Dispatch), F7 (PII Redaction)</li>
+    <li><strong>Related WBS</strong>: WBS-1.0 (Foundation), WBS-1.1 (SOP), WBS-1.2 (AI), WBS-1.3 (Notification), WBS-1.4 (PII)</li>
+    <li><strong>Linked sad-path UCs</strong>: <a href="#UC-002">UC-002</a> (단계 8 채널 실패), <a href="#UC-003">UC-003</a> (단계 5 LLM auth/quota 실패)</li>
+  </ul>
+</section>
+
+<!-- ============================================================ -->
+<!-- UC-002 -->
+<!-- ============================================================ -->
+<section id="UC-002" class="uc">
+  <div class="uc-head">
+    <span class="uc-id">UC-002</span>
+    <h2>채널 전달 실패 → DLQ → Replay</h2>
+    <span class="status-pill implemented">implemented</span>
+  </div>
+  <div class="uc-meta">
+    <span><span class="meta-k">Level</span><span class="meta-v">User-goal (Sea)</span></span>
+    <span><span class="meta-k">Scope</span><span class="meta-v">DS-APM System</span></span>
+    <span><span class="meta-k">Primary Actor</span><span class="meta-v">운영자 (Operator)</span></span>
+    <span><span class="meta-k">Priority</span><span class="meta-v">P1</span></span>
+  </div>
+  <blockquote class="lede">
+    <strong>상태</strong>: 구현 완료. 메신저/페이저 webhook이 4xx/5xx로 응답할 때 retry → DLQ → 운영자 manual replay 흐름. <a href="#UC-001">UC-001</a> 단계 8의 Extension <code>8a</code>로부터 진입한다.
+  </blockquote>
+
+  <h3>메타</h3>
+  <ul>
+    <li><strong>Level</strong>: User-goal (Sea)</li>
+    <li><strong>Scope</strong>: DS-APM System</li>
+    <li><strong>Primary Actor</strong>: 운영자 (Operator)</li>
+    <li><strong>Supporting Actors</strong>: Dispatcher, 채널(Slack / MS Teams v2 / PagerDuty / Webhook / Email 중 1+), DLQ store(JSONL sink), Audit sink</li>
+  </ul>
+
+  <h3>Trigger</h3>
+  <p>UC-001 단계 8에서 Dispatcher가 채널 webhook을 호출했을 때, 채널이 4xx (non-429) 즉시 실패 또는 5xx/429 일시적 실패를 응답해야 한다 (HTTP 응답 코드 + 본문 또는 transport timeout).</p>
+
+  <h3>Preconditions</h3>
+  <ul>
+    <li>UC-001의 단계 1~7이 통과돼 있어야 한다 (PII redaction, SOP grounding, draft 승인 완료).</li>
+    <li><code>idempotency_key = sha256(alert.fingerprint || channel.id || dispatch.round_no)</code>가 dispatch 시도 전에 생성·기록돼 있어야 한다.</li>
+    <li>DLQ JSONL sink가 쓰기 가능 상태(디스크 가용·rotation 정상)여야 한다.</li>
+    <li>Replay ledger가 활성화돼 있어야 한다 (idempotent replay 보장 위한 dedup store).</li>
+    <li>운영자가 DLQ entry를 조회·replay 가능한 인터페이스(UI 또는 CLI)에 접근 권한이 있어야 한다.</li>
+  </ul>
+
+  <h3>Success Guarantee</h3>
+  <ul>
+    <li>실패한 dispatch 1건은 원본 페이로드 + 모든 시도 timestamp + 응답 코드 + 에러 메시지를 포함한 DLQ entry 1건으로 영속화돼야 한다.</li>
+    <li>운영자의 manual replay는 새 <code>dispatch.round_no</code>로 새 <code>idempotency_key</code>를 생성하여, 채널 측에서 중복 알람으로 보이지 않거나(PagerDuty <code>dedup_key</code> 병합) 명시적 round_no 차이로 식별 가능해야 한다.</li>
+    <li>Replay 성공 시 DLQ entry는 <code>resolved</code>로 마킹되며 audit log에 <code>replay_of_dispatch_id</code>가 기록돼야 한다.</li>
+  </ul>
+
+  <h3>Minimal Guarantee</h3>
+  <ul>
+    <li>모든 재시도가 실패하더라도 원본 페이로드와 시도 이력은 손실 없이 DLQ에 보존돼야 한다 (dispatch 손실 0건).</li>
+    <li>운영자에는 최소 1회 fallback 알림이 발송돼 DLQ에 entry가 쌓인 사실을 인지할 수 있어야 한다.</li>
+    <li>중복 dispatch는 동일 <code>idempotency_key</code>로 2회 이상 발생하지 않아야 한다 (replay ledger가 차단).</li>
+  </ul>
+
+  <h3>Main Success Scenario</h3>
+  <ol>
+    <li>Dispatcher가 채널 webhook을 호출하고 4xx (non-429) 또는 5xx/429 응답 또는 transport timeout을 수신해야 한다.</li>
+    <li>Dispatcher는 응답을 분류한다 — 4xx(non-429)는 즉시 DLQ 분기, 5xx/429/timeout은 재시도 분기로 보낸다.</li>
+    <li>재시도 분기에서는 exponential backoff + jitter로 최대 N회(채널별 정책) 재시도해야 한다 (<code>attempt_no</code> 증가, <code>last_attempt_at</code>/<code>last_status_code</code>/<code>last_error</code> 기록).</li>
+    <li>재시도 N회가 모두 실패하면 Dispatcher는 DLQ JSONL sink에 entry를 append해야 한다 (<code>payload_rendered</code>, attempts 배열, <code>idempotency_key</code>, <code>state=dlq</code>, <code>dlq_enqueued_at</code>).</li>
+    <li>Dispatcher는 운영자에게 fallback 알림을 발송해야 한다 ("DLQ entry enqueued: {alert.fingerprint}, channel={channel.id}").</li>
+    <li>운영자는 DLQ 인터페이스에서 entry를 조회하고 원본 페이로드·시도 이력·에러를 검수해야 한다.</li>
+    <li>운영자가 채널 측 정상화를 확인한 뒤 manual replay 명령을 발행해야 한다.</li>
+    <li>Dispatcher는 <code>dispatch.round_no</code>를 +1 증가시켜 새 <code>idempotency_key</code>를 생성하고, replay ledger에 dedup 체크 후 채널로 재전송해야 한다.</li>
+    <li>채널이 2xx를 응답하면 DLQ entry는 <code>resolved</code>로 마킹되고, audit log에 <code>replay_of_dispatch_id</code>가 기록돼야 한다.</li>
+    <li>UC는 성공 종료된다.</li>
+  </ol>
+
+  <h3>Extensions</h3>
+  <ul>
+    <li><strong>1a. 채널 응답이 429 (Rate Limited)</strong>
+      <ul>
+        <li>1a1. <code>Retry-After</code> 헤더 존재 시 그 값을 backoff base로 사용해야 한다.</li>
+        <li>1a2. 그 외는 5xx와 동일 정책(exponential backoff + jitter).</li>
+      </ul>
+    </li>
+    <li><strong>2a. 4xx 응답이 401/403</strong> (인증/권한)
+      <ul>
+        <li>2a1. 즉시 DLQ enqueue (재시도해도 동일 결과).</li>
+        <li>2a2. SRE에 "channel auth failure" meta-alert를 발송해야 한다 (채널 자격증명 회전 필요).</li>
+      </ul>
+    </li>
+    <li><strong>3a. Transport timeout 또는 connection refused</strong>
+      <ul>
+        <li>3a1. 5xx와 동일 재시도 정책 적용.</li>
+        <li>3a2. <code>last_status_code=0</code>, <code>last_error=&lt;transport reason&gt;</code> 기록.</li>
+      </ul>
+    </li>
+    <li><strong>3b. 재시도 도중 채널이 2xx 응답</strong>
+      <ul>
+        <li>3b1. dispatch state를 <code>delivered</code>로 전이, DLQ enqueue 하지 않는다.</li>
+        <li>3b2. <a href="#UC-001">UC-001</a> 단계 9로 복귀.</li>
+      </ul>
+    </li>
+    <li><strong>4a. DLQ sink 쓰기 실패</strong> (디스크 가득 / 권한 오류)
+      <ul>
+        <li>4a1. Dispatcher는 in-memory backlog로 entry를 버퍼링하고 SRE에 critical meta-alert 발송.</li>
+        <li>4a2. Audit log에 "DLQ sink unavailable" 기록.</li>
+      </ul>
+    </li>
+    <li><strong>6a. DLQ entry가 stale</strong> (e.g., 알람 자체가 자동 resolved)
+      <ul>
+        <li>6a1. 운영자는 entry를 manual discard할 수 있어야 한다 (<code>state=discarded</code>, <code>discard_reason</code> 기록).</li>
+        <li>6a2. UC는 discard로 종료.</li>
+      </ul>
+    </li>
+    <li><strong>7a. Replay에서도 실패</strong>
+      <ul>
+        <li>7a1. <code>round_no</code>를 추가로 증가시켜 다시 DLQ에 새 entry로 append해야 한다 (기존 entry는 <code>state=replay_failed</code>).</li>
+        <li>7a2. 운영자에 escalation 알림 발송 (반복 실패 N회 초과 시 SEV-2 meta-alert).</li>
+      </ul>
+    </li>
+    <li><strong>8a. Replay ledger 중복 차단</strong> (동일 idempotency_key가 이미 delivered 상태)
+      <ul>
+        <li>8a1. Replay는 no-op로 처리하고 운영자에 "이미 전달됨" 응답해야 한다.</li>
+      </ul>
+    </li>
+    <li><strong>8b. 운영자가 bulk replay 요청</strong> (여러 DLQ entry 동시)
+      <ul>
+        <li>8b1. Dispatcher는 entry별로 round_no 독립 증가 후 순차/병렬 replay해야 한다.</li>
+        <li>8b2. 결과를 entry별로 보고 (성공/실패/no-op).</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h3>Sub-Variations</h3>
+  <ul>
+    <li><strong>채널별 retry 정책</strong>:
+      <ul>
+        <li>Slack: max 3회, base 1s</li>
+        <li>MS Teams v2: max 3회, base 2s (incoming webhook은 throttling 엄격)</li>
+        <li>PagerDuty: max 5회, <code>dedup_key</code> 활용 — 채널 측 자체 병합</li>
+        <li>Generic Webhook: max 3회, base 1s</li>
+        <li>Email (SMTP): max 2회, base 5s (SMTP queue가 별도 retry 보유)</li>
+      </ul>
+    </li>
+    <li><strong>DLQ 저장 백엔드</strong>: JSONL 파일 sink (현재 구현) / Redis Streams (미구현) / Kafka topic (미구현).</li>
+    <li><strong>Replay 트리거</strong>: UI 버튼 / CLI 명령 (현재 구현) / 자동 스케줄 replay (미구현).</li>
+    <li><strong>HMAC 서명</strong>: replay 시 페이로드 서명 정책 미해결 (open item, traceability §6).</li>
+  </ul>
+
+  <h3>Non-functional</h3>
+  <ul>
+    <li><strong>DLQ 영속성</strong>: JSONL sink with size-based rotation, fsync 정책 채택. 프로세스 crash 시 1초 이내 마지막 N개 entry 손실 허용 (MVP).</li>
+    <li><strong>Replay idempotency</strong>: ledger TTL &gt; 채널별 최대 retry window × 2.</li>
+    <li><strong>Operator MTTR</strong>: DLQ entry enqueue → replay 시작까지 운영자 인지·결정 시간 별도 (UC 범위 외), Dispatcher 측 replay round-trip은 p95 ≤ 10s.</li>
+    <li><strong>DLQ depth alert</strong>: depth &gt; 임계치 시 meta-alert 발행 (SRE).</li>
+    <li><strong>Audit completeness</strong>: replay 1회당 audit row 1건 (<code>replay_of_dispatch_id</code> 포함).</li>
+  </ul>
+
+  <h3>Diagrams</h3>
+  <h4>시퀀스 다이어그램 — Failure → DLQ → Replay</h4>
+  <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    participant DS as Dispatcher
+    participant CH as Channel
+    participant DLQ as DLQ Store<br/>(JSONL sink)
+    participant OP as Operator
+    participant LED as Replay Ledger
+
+    DS->>CH: dispatch (round_no=1, idempotency_key=K1)
+    alt 채널 4xx (non-429)
+        CH-->>DS: 4xx + body
+        DS->>DLQ: enqueue entry<br/>(payload, attempts=[1], last_error)
+    else 채널 5xx / 429 / timeout
+        loop attempt 1..N (backoff + jitter)
+            CH-->>DS: 5xx / 429 / timeout
+            DS->>DS: sleep(backoff_i + jitter)
+            DS->>CH: retry (same round_no, same K1)
+        end
+        break 모든 시도 실패
+            DS->>DLQ: enqueue entry<br/>(payload, attempts=[1..N], last_error)
+        end
+    end
+    DLQ-->>OP: fallback 알림<br/>"DLQ entry enqueued"
+    OP->>DLQ: entry 조회 + 원인 검수
+    OP->>DS: manual replay 명령
+    DS->>DS: round_no=2, idempotency_key=K2
+    DS->>LED: dedup check (K2)
+    LED-->>DS: not delivered
+    DS->>CH: replay dispatch (K2)
+    CH-->>DS: 2xx
+    DS->>DLQ: mark entry resolved<br/>(replay_of_dispatch_id)
+    DS->>LED: K2 → delivered
+  </pre>
+
+  <h4>상태 머신 — DLQ Entry Lifecycle</h4>
+  <pre class="mermaid">
+stateDiagram-v2
+    [*] --> pending: dispatch 시도 시작
+    pending --> retrying: 5xx / 429 / timeout
+    pending --> dlq: 4xx (non-429) 즉시
+    retrying --> retrying: backoff + 재시도
+    retrying --> delivered: 재시도 중 2xx
+    retrying --> dlq: max attempts 초과
+    dlq --> replayed: 운영자 manual replay 성공
+    dlq --> discarded: 운영자 discard (stale)
+    dlq --> replay_failed: replay 실패<br/>(round_no++ 후 새 entry)
+    replay_failed --> dlq: 새 round로 재enqueue
+    replayed --> resolved
+    delivered --> resolved
+    resolved --> [*]
+    discarded --> [*]
+  </pre>
+
+  <h3>Related Information</h3>
+  <ul>
+    <li><strong>Priority</strong>: P1</li>
+    <li><strong>Frequency</strong>: 채널 SLA에 의존 (PagerDuty 99.9%, Slack/Teams 99.x). 일 평균 dispatch 대비 DLQ 비율을 메트릭으로 추적해야 한다.</li>
+    <li><strong>Open Issues</strong>: HMAC 정책 미해결 (traceability §6) — replay 페이로드 서명·검증 정책 확정 필요.</li>
+  </ul>
+
+  <h3>Traceability</h3>
+  <ul>
+    <li><strong>Implements features</strong>: F6 (Notification Dispatch), F8 (DLQ + Replay)</li>
+    <li><strong>Related WBS</strong>: WBS-1.3 (Notification), WBS-1.5 (DLQ)</li>
+    <li><strong>Parent UC</strong>: <a href="#UC-001">UC-001</a> (단계 8 Extension <code>8a</code>/<code>8b</code>로 진입)</li>
+    <li><strong>Audit</strong>: F5 (Audit) — dispatch·replay 양쪽 모두 기록</li>
+  </ul>
+</section>
+
+<!-- ============================================================ -->
+<!-- UC-003 -->
+<!-- ============================================================ -->
+<section id="UC-003" class="uc">
+  <div class="uc-head">
+    <span class="uc-id">UC-003</span>
+    <h2>LLM 인증 실패 → quota fail-open → SOP 원문 fallback</h2>
+    <span class="status-pill implemented">implemented</span>
+  </div>
+  <div class="uc-meta">
+    <span><span class="meta-k">Level</span><span class="meta-v">User-goal (Sea)</span></span>
+    <span><span class="meta-k">Scope</span><span class="meta-v">DS-APM System</span></span>
+    <span><span class="meta-k">Primary Actor</span><span class="meta-v">시스템 (Quota Controller)</span></span>
+    <span><span class="meta-k">Priority</span><span class="meta-v">P2</span></span>
+  </div>
+  <blockquote class="lede">
+    <strong>상태</strong>: 구현 완료. LLM Provider가 401/403/429를 응답할 때 AI quota controller가 fail-open으로 동작하여, AI 가공 없이 SOP 원문을 그대로 Dispatcher에 넘겨 운영자에게 도달시키는 흐름. <a href="#UC-001">UC-001</a> 단계 5의 Extension <code>5b</code>로부터 진입한다.
+  </blockquote>
+
+  <h3>메타</h3>
+  <ul>
+    <li><strong>Level</strong>: User-goal (Sea)</li>
+    <li><strong>Scope</strong>: DS-APM System</li>
+    <li><strong>Primary Actor</strong>: 시스템 (DS-APM Quota Controller — 자동 결정)</li>
+    <li><strong>Supporting Actors</strong>: AI Engine, LLM Provider, Dispatcher, Operator (degraded mode 알림 수신자), SRE (meta-alert 수신자)</li>
+  </ul>
+
+  <h3>Trigger</h3>
+  <p>UC-001 단계 5에서 AI Engine이 LLM Provider에 draft 생성을 요청했을 때, LLM Provider가 401 Unauthorized / 403 Forbidden / 429 Too Many Requests 중 하나를 응답해야 한다 (API key 만료, 정책 거부, quota 초과 등).</p>
+
+  <h3>Preconditions</h3>
+  <ul>
+    <li>UC-001 단계 1~4가 통과돼 있어야 한다 (PII redaction 완료, SOP retrieval 성공으로 <code>runbook_ids[]</code> ≥ 1).</li>
+    <li>AI Quota controller(F3)가 fail-open 정책으로 설정돼 있어야 한다.</li>
+    <li>SOP 원문이 dispatch-ready 포맷(Markdown body + citations)으로 SOP store에서 즉시 fetch 가능해야 한다.</li>
+    <li>SRE meta-alert 채널이 별도로 등록·healthy 상태여야 한다 (degraded mode 알림용).</li>
+  </ul>
+
+  <h3>Success Guarantee (정상 종료 보장)</h3>
+  <ul>
+    <li>알람은 AI draft 없이 SOP 원문 그대로 채널에 전달돼야 한다 (<code>draft_id</code> 대신 <code>fallback_source=sop_raw</code>로 마킹).</li>
+    <li>SRE 채널에 "LLM auth/quota failure → fail-open activated" meta-alert가 별도로 발송돼야 한다 (provider HTTP status, error body, 영향받은 tenant_id 포함).</li>
+    <li>Audit log에 fail-open 발동 사실, 트리거 status code, fallback 모드가 영속 기록돼야 한다 (<code>fail_open_triggered=true</code>, <code>llm_status_code</code>, <code>degraded_mode=sop_raw</code>).</li>
+    <li>AI Strategy History(F2)에는 <code>draft_id=null</code>, <code>degraded=true</code> 기록이 append돼야 한다.</li>
+  </ul>
+
+  <h3>Minimal Guarantee (실패 시에도 보장)</h3>
+  <ul>
+    <li>운영자는 최소한 raw alert + SOP 원문 + 원본 <code>annotations.runbook_url</code> 링크를 수신해야 한다 (정보 손실 0).</li>
+    <li>LLM provider 실패는 절대 운영자에게 침묵 실패(silent drop)로 나타나지 않아야 한다 — fallback 또는 meta-alert 중 하나는 반드시 발화.</li>
+    <li>Fail-open 발동 자체가 실패하더라도 raw alert는 UC-001의 일반 dispatch 경로로 전달돼야 한다.</li>
+  </ul>
+
+  <h3>Main Success Scenario</h3>
+  <ol>
+    <li>AI Engine이 LLM Provider에 prompt + grounding context를 POST 요청해야 한다 (UC-001 단계 5의 LLM 호출 부분).</li>
+    <li>LLM Provider가 401 / 403 / 429 응답을 반환해야 한다 (<code>status_code</code>, <code>error.code</code>, <code>error.message</code> 포함).</li>
+    <li>Quota controller(F3)가 응답을 분류한다 — 401/403은 auth failure, 429는 quota exhaustion으로 매핑하고 fail-open 모드 진입을 결정해야 한다.</li>
+    <li>AI Engine은 LLM 호출을 중단하고, SOP store에서 단계 4 retrieval 결과(<code>runbook_ids[]</code>)에 해당하는 원문을 fetch하여 draft 자리에 그대로 채워야 한다 (<code>body_markdown=sop.body</code>, <code>fallback_source=sop_raw</code>, <code>citations[]</code>는 retrieval 결과 그대로 유지).</li>
+    <li>AI Strategy History(F2)에 degraded entry를 append하고, Dispatcher(F6)에 SOP 원문 페이로드를 넘겨 UC-001 단계 8~10에 해당하는 dispatch를 수행해야 한다 (운영자 승인 단계 6~7은 정책에 따라 자동 통과하거나 별도 channel에서 사후 알림으로 처리).</li>
+    <li>별도 SRE 채널로 "LLM auth/quota failure" meta-alert를 발송해야 한다 (provider, status_code, tenant_id, fingerprint, 발생 시각, 영향 알람 수).</li>
+    <li>Audit sink(F5)가 <code>fail_open_triggered=true</code>, <code>llm_status_code</code>, <code>degraded_mode=sop_raw</code>, <code>correlation_id</code>를 영속 기록해야 한다.</li>
+  </ol>
+
+  <h3>Extensions</h3>
+  <ul>
+    <li><strong>2a. LLM 응답이 5xx 또는 transport timeout</strong>
+      <ul>
+        <li>2a1. Quota controller는 fail-open을 발동하지 않고 exponential backoff로 최대 3회 재시도해야 한다.</li>
+        <li>2a2. 3회 모두 실패하면 fail-open으로 전이 (본 UC의 단계 4부터 재진입).</li>
+      </ul>
+    </li>
+    <li><strong>2b. LLM 응답이 200이지만 본문이 비어있거나 schema 위반</strong>
+      <ul>
+        <li>2b1. AI Engine은 응답을 reject하고 fail-open과 동일하게 SOP 원문 fallback으로 전이.</li>
+        <li>2b2. Meta-alert 카테고리는 "LLM malformed response"로 별도 분류.</li>
+      </ul>
+    </li>
+    <li><strong>3a. Quota controller가 fail-closed 정책으로 설정된 경우</strong> (운영 정책 변경 시)
+      <ul>
+        <li>3a1. Fail-open 발동하지 않고 알람을 dispatch 보류 상태로 둔다.</li>
+        <li>3a2. 운영자에 "AI degraded — manual intervention required" 알림 발송.</li>
+        <li>3a3. 본 UC는 이 분기에서 종료 (fail-closed는 별도 정책 UC로 분리 검토).</li>
+      </ul>
+    </li>
+    <li><strong>4a. SOP retrieval 결과가 이미 stale</strong> (단계 4에서 통과했으나 fetch 시점에 stale)
+      <ul>
+        <li>4a1. AI Engine은 raw alert만 dispatch에 넘긴다 (<code>fallback_source=raw_alert</code>).</li>
+        <li>4a2. 운영자에 "SOP stale, raw alert only" 표시.</li>
+      </ul>
+    </li>
+    <li><strong>4b. SOP store fetch 자체 실패</strong> (스토리지 장애)
+      <ul>
+        <li>4b1. Raw alert만 dispatch에 넘기고 SRE에 critical meta-alert 발송.</li>
+        <li>4b2. UC-001의 단계 10(audit) 까지는 수행해야 한다.</li>
+      </ul>
+    </li>
+    <li><strong>5a. Dispatcher가 채널 4xx/5xx 응답</strong> → <strong><a href="#UC-002">UC-002</a></strong> 분기
+      <ul>
+        <li>5a1. SOP 원문 페이로드도 일반 dispatch와 동일하게 DLQ enqueue 대상.</li>
+      </ul>
+    </li>
+    <li><strong>6a. SRE 메타 알림 채널 자체가 실패</strong>
+      <ul>
+        <li>6a1. Dispatcher는 정규 운영자 채널에 meta-alert를 fan-out하여 silent failure를 방지해야 한다.</li>
+        <li>6a2. Audit log에 "meta-alert delivery degraded" 기록.</li>
+      </ul>
+    </li>
+    <li><strong>7a. Fail-open 발동 빈도가 임계치 초과</strong> (분당 N회)
+      <ul>
+        <li>7a1. SRE에 "fail-open storm" critical meta-alert 발송 — LLM provider 광역 장애 또는 자격증명 일괄 만료 가능성.</li>
+        <li>7a2. 운영자/플랫폼 팀에 자격증명 회전·provider 상태 확인 요청 escalation.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h3>Sub-Variations</h3>
+  <ul>
+    <li><strong>LLM Provider 종류</strong>: 자체 호스팅 모델 / 외부 SaaS (OpenAI, Anthropic, Bedrock 등) — status code 매핑 동일하나 retry header(<code>x-ratelimit-reset</code>) 활용 여부 차이.</li>
+    <li><strong>Fail-open 모드 산출물</strong>:
+      <ul>
+        <li><code>sop_raw</code> (현재 구현 기본): SOP 본문 그대로</li>
+        <li><code>sop_summary</code> (미구현): SOP 첫 N 문자 / TL;DR 섹션만</li>
+        <li><code>raw_alert_only</code>: SOP 자체도 없을 때</li>
+      </ul>
+    </li>
+    <li><strong>Meta-alert 채널 분리</strong>: 별도 Slack 채널(#ds-apm-alerts) / 별도 PagerDuty service / 둘 다 fan-out.</li>
+    <li><strong>운영자 승인 단계의 처리</strong>: degraded mode에서는 (a) 승인 생략 자동 dispatch, (b) 짧은 timeout(예: 60s)으로 승인 요청 후 timeout 시 자동 dispatch — 운영 정책으로 선택.</li>
+  </ul>
+
+  <h3>Non-functional</h3>
+  <ul>
+    <li><strong>Fail-open 결정 latency</strong>: LLM 응답 수신 → fallback 결정까지 p95 ≤ 1s.</li>
+    <li><strong>Fail-open → Dispatcher 전달 latency</strong>: p95 ≤ 3s (SOP fetch 포함).</li>
+    <li><strong>Meta-alert delivery</strong>: fail-open 발동 후 SRE 채널 도달까지 p95 ≤ 10s.</li>
+    <li><strong>Information loss tolerance</strong>: 0 — 운영자가 받는 알람에서 alert payload와 SOP 본문 모두 누락 없어야 한다.</li>
+    <li><strong>정책 명시</strong>: degraded라도 정보 전달 우선. AI draft 부정확함보다 침묵 실패(silent drop)가 더 나쁘다.</li>
+    <li><strong>Audit completeness</strong>: fail-open 1회당 audit row 1건, <code>fail_open_triggered=true</code> flag로 grep 가능.</li>
+  </ul>
+
+  <h3>Diagrams</h3>
+  <h4>시퀀스 다이어그램 — LLM Fail-open → SOP Raw Fallback</h4>
+  <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    participant AI as AI Engine
+    participant LLM as LLM Provider
+    participant QC as Quota Controller
+    participant SOP as SOP Store
+    participant DS as Dispatcher
+    participant CH as Channel
+    participant SRE as SRE Meta-alert<br/>Channel
+
+    AI->>LLM: POST /chat<br/>(prompt + grounding context)
+    alt 401 / 403 / 429
+        LLM-->>AI: 401/403/429 + error body
+        AI->>QC: classify(status, error)
+        QC-->>AI: decision = fail_open<br/>(reason: auth | quota)
+        AI->>SOP: fetch(runbook_ids[])
+        SOP-->>AI: sop.body (raw markdown)
+        AI->>DS: payload {<br/>  fallback_source=sop_raw,<br/>  body_markdown=sop.body,<br/>  draft_id=null,<br/>  degraded=true<br/>}
+        DS->>CH: 채널 페이로드 전송
+        CH-->>DS: 2xx
+        AI->>SRE: meta-alert<br/>(provider, status_code,<br/>tenant_id, fingerprint)
+        AI->>AI: Audit log<br/>(fail_open_triggered=true)
+    else 5xx / timeout
+        LLM-->>AI: 5xx / timeout
+        AI->>AI: backoff retry × 3
+        Note over AI,LLM: 모두 실패 시<br/>위 fail_open 분기로 재진입
+    else 2xx + malformed
+        LLM-->>AI: 200 + invalid body
+        AI->>AI: reject response
+        Note over AI,SOP: SOP raw fallback<br/>경로로 재진입<br/>(meta-alert 카테고리:<br/>"LLM malformed")
+    end
+  </pre>
+
+  <h3>Related Information</h3>
+  <ul>
+    <li><strong>Priority</strong>: P2</li>
+    <li><strong>Frequency</strong>: LLM provider 가용성·quota 정책에 의존. 자격증명 회전 주기·trial quota 소진 시점에 spike 가능.</li>
+    <li><strong>Open Issues</strong>: fail-open vs fail-closed 정책 재검토 가능성 (보안 민감 테넌트에서 fail-closed 요구 가능성 검토 필요).</li>
+  </ul>
+
+  <h3>Traceability</h3>
+  <ul>
+    <li><strong>Implements features</strong>: F2 (AI Runbook Drafting — history degraded entry), F3 (AI Quota Controls — fail-open 결정)</li>
+    <li><strong>Related WBS</strong>: WBS-1.2 (AI)</li>
+    <li><strong>Parent UC</strong>: <a href="#UC-001">UC-001</a> (단계 5 Extension <code>5b</code>로 진입)</li>
+    <li><strong>Sibling sad-path</strong>: <a href="#UC-002">UC-002</a> (degraded dispatch가 채널 실패 시 UC-002로 재분기 가능)</li>
+    <li><strong>Audit</strong>: F5 (Audit) — <code>fail_open_triggered=true</code> flag로 영속 기록</li>
+  </ul>
+</section>
+
+</main>
+
+<aside class="toc">
+  <div class="label">Contents</div>
+  <ol>
+    <li><a href="#catalog">Catalog (index)</a></li>
+    <li><a href="#UC-001">UC-001 · Incident에서 채널 전달까지</a></li>
+    <li><a href="#UC-002">UC-002 · 채널 전달 실패 → DLQ → Replay</a></li>
+    <li><a href="#UC-003">UC-003 · LLM 인증 실패 → quota fail-open</a></li>
+  </ol>
+</aside>
+
+</div>
+</body>
+</html>
