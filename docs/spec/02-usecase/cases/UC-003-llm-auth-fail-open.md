@@ -4,9 +4,9 @@ title: LLM 인증 실패 → quota fail-open → SOP 원문 fallback
 type: usecase
 level: User-goal
 scope: DS-APM System
-status: implemented
-primary_actor: 시스템 (DS-APM)
-supporting_actors: [AI Engine, LLM Provider, Dispatcher, Operator]
+status: planned
+primary_actor: 시스템 (AIOpsAgent)
+supporting_actors: [AI 초안 매니저, LLM Provider, 알림 디스패처, Operator]
 implements_features: [F2, F3]
 related_wbs: [WBS-1.2]
 priority: P2
@@ -15,14 +15,14 @@ updated: 2026-05-29
 
 # UC-003 — LLM 인증 실패 → quota fail-open → SOP 원문 fallback
 
-> **상태**: 구현 완료
-> LLM Provider가 401/403/429를 응답할 때 AI quota controller가 fail-open으로 동작하여, AI 가공 없이 SOP 원문을 그대로 Dispatcher에 넘겨 운영자에게 도달시키는 흐름. UC-001 단계 5의 Extension `5b`로부터 진입한다.
+> **상태**: 착수 예정 (착수보고 기준)
+> LLM Provider가 401/403/429를 응답할 때 AI quota controller가 fail-open으로 동작하여, AI 가공 없이 SOP 원문을 그대로 알림 디스패처에 넘겨 운영자에게 도달시키도록 설계된 흐름. UC-001 단계 5의 Extension `5b`로부터 진입하도록 설계된다.
 
 ## 메타
 - **Level**: User-goal (Sea)
 - **Scope**: DS-APM System
-- **Primary Actor**: 시스템 (DS-APM Quota Controller — 자동 결정)
-- **Supporting Actors**: AI Engine, LLM Provider, Dispatcher, Operator (degraded mode 알림 수신자), SRE (meta-alert 수신자)
+- **Primary Actor**: 시스템 (AIOpsAgent Quota Controller — 자동 결정)
+- **Supporting Actors**: AI 초안 매니저, LLM Provider, 알림 디스패처, Operator (degraded mode 알림 수신자), SRE (meta-alert 수신자)
 
 ## Trigger
 UC-001 단계 5에서 AI Engine이 LLM Provider에 draft 생성을 요청했을 때, LLM Provider가 401 Unauthorized / 403 Forbidden / 429 Too Many Requests 중 하나를 응답해야 한다 (API key 만료, 정책 거부, quota 초과 등).
@@ -45,11 +45,11 @@ UC-001 단계 5에서 AI Engine이 LLM Provider에 draft 생성을 요청했을 
 - Fail-open 발동 자체가 실패하더라도 raw alert는 UC-001의 일반 dispatch 경로로 전달돼야 한다.
 
 ## Main Success Scenario
-1. AI Engine이 LLM Provider에 prompt + grounding context를 POST 요청해야 한다 (UC-001 단계 5의 LLM 호출 부분).
+1. AI 초안 매니저가 LLM Provider에 prompt + grounding context를 POST 요청해야 한다 (UC-001 단계 5의 LLM 호출 부분).
 2. LLM Provider가 401 / 403 / 429 응답을 반환해야 한다 (`status_code`, `error.code`, `error.message` 포함).
-3. Quota controller(F3)가 응답을 분류한다 — 401/403은 auth failure, 429는 quota exhaustion으로 매핑하고 fail-open 모드 진입을 결정해야 한다.
-4. AI Engine은 LLM 호출을 중단하고, SOP store에서 단계 4 retrieval 결과(`runbook_ids[]`)에 해당하는 원문을 fetch하여 draft 자리에 그대로 채워야 한다 (`body_markdown=sop.body`, `fallback_source=sop_raw`, `citations[]`는 retrieval 결과 그대로 유지).
-5. AI Strategy History(F2)에 degraded entry를 append하고, Dispatcher(F6)에 SOP 원문 페이로드를 넘겨 UC-001 단계 8~10에 해당하는 dispatch를 수행해야 한다 (운영자 승인 단계 6~7은 정책에 따라 자동 통과하거나 별도 channel에서 사후 알림으로 처리).
+3. AI Quota 컨트롤러(F3)가 응답을 분류한다 — 401/403은 auth failure, 429는 quota exhaustion으로 매핑하고 fail-open 모드 진입을 결정해야 한다.
+4. AI 초안 매니저는 LLM 호출을 중단하고, SOP store에서 단계 4 retrieval 결과(`runbook_ids[]`)에 해당하는 원문을 fetch하여 draft 자리에 그대로 채워야 한다 (`body_markdown=sop.body`, `fallback_source=sop_raw`, `citations[]`는 retrieval 결과 그대로 유지).
+5. AI Strategy History(F2)에 degraded entry를 append하고, 알림 디스패처(F6)에 SOP 원문 페이로드를 넘겨 UC-001 단계 8~10에 해당하는 dispatch를 수행해야 한다 (운영자 승인 단계 6~7은 정책에 따라 자동 통과하거나 별도 channel에서 사후 알림으로 처리).
 6. 별도 SRE 채널로 "LLM auth/quota failure" meta-alert를 발송해야 한다 (provider, status_code, tenant_id, fingerprint, 발생 시각, 영향 알람 수).
 7. Audit sink(F5)가 `fail_open_triggered=true`, `llm_status_code`, `degraded_mode=sop_raw`, `correlation_id`를 영속 기록해야 한다.
 
@@ -90,7 +90,7 @@ UC-001 단계 5에서 AI Engine이 LLM Provider에 draft 생성을 요청했을 
 ## Sub-Variations
 - **LLM Provider 종류**: 자체 호스팅 모델 / 외부 SaaS (OpenAI, Anthropic, Bedrock 등) — status code 매핑 동일하나 retry header(`x-ratelimit-reset`) 활용 여부 차이.
 - **Fail-open 모드 산출물**:
-  - `sop_raw` (현재 구현 기본): SOP 본문 그대로
+  - `sop_raw` (착수 후 기본 구현 예정): SOP 본문 그대로
   - `sop_summary` (미구현): SOP 첫 N 문자 / TL;DR 섹션만
   - `raw_alert_only`: SOP 자체도 없을 때
 - **Meta-alert 채널 분리**: 별도 Slack 채널(#ds-apm-alerts) / 별도 PagerDuty service / 둘 다 fan-out.
@@ -148,7 +148,7 @@ sequenceDiagram
 - **Open Issues**: fail-open vs fail-closed 정책 재검토 가능성 (보안 민감 테넌트에서 fail-closed 요구 가능성 검토 필요).
 
 ## Traceability
-- **Implements features**: F2 (AI Runbook Drafting — history degraded entry), F3 (AI Quota Controls — fail-open 결정)
+- **Implements features**: F2 (AI 초안 매니저 — history degraded entry), F3 (AI Quota 컨트롤러 — fail-open 결정)
 - **Related WBS**: WBS-1.2 (AI)
 - **Parent UC**: UC-001 (단계 5 Extension `5b`로 진입)
 - **Sibling sad-path**: UC-002 (degraded dispatch가 채널 실패 시 UC-002로 재분기 가능)

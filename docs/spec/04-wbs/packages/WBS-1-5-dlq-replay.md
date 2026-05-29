@@ -1,23 +1,23 @@
 ---
 id: WBS-1.5
-title: DLQ + Replay
+title: DLQ 재처리 서비스 (DLQ Replay Service)
 parent: WBS-1
-status: implemented-hmac-pending
+status: planned
 covers_features: [F8]
 source_paths:
   - pkg/alertmanager/alertmanagerserver/dispatcher.go
   - pkg/alertmanager/alertmanagerserver/dispatcher_dlq_test.go
 acceptance: pending
-estimated_effort: completed
+estimated_effort: TBD
 commits: [ade174bb8, 91b9ff5db]
 updated: 2026-05-29
 open_items:
   - HMAC 정책 follow-up (NF-5.3.1)
 ---
 
-# WBS-1.5 — DLQ + Replay
+# WBS-1.5 — DLQ 재처리 서비스 (DLQ Replay Service)
 
-> **상태**: 구현 완료 (HMAC 정책 미해결)
+> **상태**: 착수 예정 (HMAC 정책 결정 필요)
 
 ## Deliverable
 JSONL 기반 dead-letter store with rotation (`pkg/alertmanager/alertmanagernotify/dlq`), idempotent replay ledger, dispatcher와의 와이어업 (`dispatcher.go`). 채널 4xx/5xx/429 실패 시 incident envelope을 DLQ로 enqueue하고, 재시도 시 ledger를 통해 중복 dispatch를 차단해야 한다.
@@ -33,11 +33,11 @@ JSONL 기반 dead-letter store with rotation (`pkg/alertmanager/alertmanagernoti
 TBD (TBC)
 
 ## Estimated Effort
-완료 (커밋 `ade174bb8`, `91b9ff5db`)
+TBD
 
 ## Dependencies
-- WBS-1.0 Foundation (audit sink 재사용, JSONL 패턴 공유)
-- WBS-1.3 Notification Dispatcher (실패 분기 수신)
+- WBS-1.0 공통 기반 모듈 (audit sink 재사용, JSONL 패턴 공유)
+- WBS-1.3 알림 디스패처 (실패 분기 수신)
 
 ## Verification
 - `pkg/alertmanager/alertmanagerserver/dispatcher_dlq_test.go`

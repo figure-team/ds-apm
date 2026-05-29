@@ -1,8 +1,8 @@
 ---
 id: WBS-1.3
-title: Notification Dispatcher
+title: 알림 디스패처 (Notification Dispatcher)
 parent: WBS-1
-status: implemented
+status: planned
 covers_features: [F6]
 source_paths:
   - pkg/alertmanager/alertmanagernotify/slack/
@@ -14,14 +14,14 @@ source_paths:
   - pkg/alertmanager/alertmanagertemplate/
   - pkg/types/ruletypes/notification_template_preview.go
 acceptance: pending
-estimated_effort: completed
+estimated_effort: TBD
 commits: [5c036c806]
 updated: 2026-05-29
 ---
 
-# WBS-1.3 — Notification Dispatcher
+# WBS-1.3 — 알림 디스패처 (Notification Dispatcher)
 
-> **상태**: 구현 완료
+> **상태**: 착수 예정 (착수보고 기준)
 
 ## Deliverable
 채널 독립 dispatcher (`alertmanagerserver/dispatcher.go`), 5개 채널 adapter (Slack / MS Teams v2 / PagerDuty / Webhook / Email), 알람·SOP·AI draft를 통합한 템플릿 시스템 (`alertmanagertemplate`), 운영자용 템플릿 미리보기 (`notification_template_preview`). SOP/AI 컨텍스트가 포함된 incident 메시지를 채널별 페이로드로 정규화·전송해야 한다.
@@ -37,12 +37,12 @@ updated: 2026-05-29
 TBD (TBC)
 
 ## Estimated Effort
-완료 (커밋 `5c036c806`)
+TBD
 
 ## Dependencies
-- WBS-1.0 Foundation (audit sink)
-- WBS-1.1 SOP Engine (grounding 컨텍스트)
-- WBS-1.2 AI Drafter (draft 본문)
+- WBS-1.0 공통 기반 모듈 (audit sink)
+- WBS-1.1 SOP 그라운딩 서비스 (grounding 컨텍스트)
+- WBS-1.2 AI 초안 매니저 (draft 본문)
 
 ## Verification
 - `pkg/alertmanager/alertmanagernotify/slack/slack_test.go`

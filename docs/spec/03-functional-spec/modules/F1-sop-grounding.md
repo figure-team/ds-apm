@@ -1,7 +1,7 @@
 ---
 id: F1
 title: SOP Grounding & Store
-status: implemented
+status: planned
 commits: [72944ecac, c7f4fd330]
 source_paths:
   - pkg/ruler/sopstore/
@@ -16,7 +16,7 @@ updated: 2026-05-29
 
 # F1 — SOP Grounding & Store
 
-> **상태**: 구현 완료
+> **상태**: 착수 예정 (착수보고 기준)
 > SigNoz alert 라벨을 사전 등록된 SOP 문서에 매칭(grounding)하고, SOP를 SQL 백엔드에 영속화하는 모듈.
 
 ## F1.1 개요

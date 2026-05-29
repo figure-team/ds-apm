@@ -308,6 +308,7 @@ blockquote {
 }
 .status-pill.implemented { background: #E4E9DC; color: #4B5C39; }
 .status-pill.mvp { background: var(--oat); color: var(--slate); }
+.status-pill.planned { background: #DCE2EA; color: #3E4B5C; }
 .status-pill.pending { background: #F3D9CC; color: #8A3B1E; }
 .status-pill.draft { background: var(--g100); color: var(--g500); }
 
@@ -393,7 +394,7 @@ section.module .module-head .module-id {
 
 <div class="subsec">
 <h3 id="sec1-1">§1.1 Purpose</h3>
-<p>본 문서는 DS-APM이 SigNoz community 빌드 위에서 <strong>Incident → SOP runbook → Operator handoff</strong> 흐름을 자동화하기 위해 요구하는 기능·비기능 요구사항을 정의해야 한다. 산출물은 ISO/IEC/IEEE 29148:2018의 SRS 템플릿을 POC 단계에 맞게 경량화(<code>§1, §2, §3, §4, §5</code>)한 형태이며, 각 기능 요구사항은 Specification by Example의 Living Documentation 원칙에 따라 Gherkin acceptance criteria로 보강된다 (각 모듈 F* §F*.7).</p>
+<p>본 문서는 AIOpsAgent가 SigNoz community 빌드 위에서 <strong>Incident → SOP runbook → Operator handoff</strong> 흐름을 자동화하기 위해 요구하는 기능·비기능 요구사항을 정의해야 한다. 산출물은 ISO/IEC/IEEE 29148:2018의 SRS 템플릿을 POC 단계에 맞게 경량화(<code>§1, §2, §3, §4, §5</code>)한 형태이며, 각 기능 요구사항은 Specification by Example의 Living Documentation 원칙에 따라 Gherkin acceptance criteria로 보강된다 (각 모듈 F* §F*.7).</p>
 <p>본 문서는 산출물 4종 중 하나로, <a href="../01-overview/overview.html">arc42 Overview</a>, <a href="../02-usecase/usecase.html">Use Case 카탈로그</a>, <a href="../04-wbs/wbs.html">WBS</a>와 traceability ID로 연결된다.</p>
 </div>
 
@@ -425,7 +426,7 @@ section.module .module-head .module-id {
 <div class="subsec">
 <h3 id="sec1-4">§1.4 Product Scope</h3>
 <ul>
-<li><strong>In Scope</strong>: DS-APM 확장 레이어 (incident handoff, SOP grounding, AI runbook, notification dispatch, PII redaction, DLQ/replay) — F0~F8 9개 모듈 전부.</li>
+<li><strong>In Scope</strong>: AIOpsAgent (incident handoff, SOP grounding, AI runbook, notification dispatch, PII redaction, DLQ/replay) — F0~F8 9개 모듈 전부.</li>
 <li><strong>Out of Scope</strong>: SigNoz upstream 기능 자체, Enterprise 모듈(<code>ee/</code>, <code>cmd/enterprise/</code>), vector retrieval 기반 SOP grounding (현재 explicit-label binding만), Redis 기반 idempotency cache (현재 파일 기반 JSONL), y2i 관련 기능 (영구 비활성화).</li>
 </ul>
 </div>
@@ -433,7 +434,7 @@ section.module .module-head .module-id {
 <div class="subsec">
 <h3 id="sec1-5">§1.5 References</h3>
 <ul>
-<li><code>../_foundation/baseline.md</code> — 11 커밋·100 파일·+12,632 LOC 변경 표면 + 커밋 ↔ 모듈 매핑</li>
+<li><code>../_foundation/baseline.md</code> — 사전 PoC 단계의 변경 표면 + 커밋 ↔ 모듈 매핑 (내부 audit 자료)</li>
 <li><code>../_foundation/research-skills-a-methods.md</code> §3 — ISO/IEC/IEEE 29148-lite + Spec by Example 채택 근거</li>
 <li><code>../_foundation/research-skills-c-domain.md</code> — Alertmanager v4 / PagerDuty Events v2 / Slack Block Kit / MS Teams Adaptive Card v1.4 / DLQ + idempotency / PII OTel processor</li>
 <li><code>../_shared/traceability.md</code> — 진실의 원천: UC × F × WBS 매트릭스</li>
@@ -448,17 +449,17 @@ section.module .module-head .module-id {
 
 <div class="subsec">
 <h3 id="sec2-1">§2.1 Product Perspective</h3>
-<p>DS-APM은 <strong>SigNoz community 빌드의 확장 레이어</strong>다. 별도 서비스가 아니라 SigNoz의 <code>pkg/alertmanager/</code>, <code>pkg/ruler/</code>, <code>pkg/types/ruletypes/</code>, <code>cmd/community/</code>에 직접 흡수된 Go-native MVP이며, SigNoz 없이는 동작하지 않는다 (ADR-001).</p>
+<p><strong>AIOpsAgent</strong>는 SigNoz Community 빌드의 알림 처리 경로에 운영 자동화(SOP 그라운딩·AI 초안·DLQ 재처리) 단계를 추가하는 확장 모듈 그룹이다. SigNoz의 <code>pkg/alertmanager/</code>, <code>pkg/ruler/</code>, <code>pkg/types/ruletypes/</code>, <code>cmd/community/</code>에 통합된 Go-native MVP이며, SigNoz 없이는 동작하지 않는다 (ADR-001).</p>
 <table>
 <thead><tr><th>의존 대상</th><th>역할</th><th>변경 가능성</th></tr></thead>
 <tbody>
-<tr><td><strong>SigNoz Ruler</strong></td><td>alert evaluation + firing</td><td>upstream API 변경 시 DS-APM 영향 — 모니터링 필요 (R-6)</td></tr>
-<tr><td><strong>SigNoz Alertmanager (<code>dispatch.Dispatcher</code>)</strong></td><td>dispatcher hot path</td><td>F6은 이를 wrapping해서 <code>aiHook</code> + <code>dlqSink</code>를 끼워넣음</td></tr>
+<tr><td><strong>SigNoz Ruler</strong></td><td>alert evaluation + firing</td><td>upstream API 변경 시 AIOpsAgent 영향 — 모니터링 필요 (R-6)</td></tr>
+<tr><td><strong>SigNoz Alertmanager (<code>dispatch.Dispatcher</code>)</strong></td><td>dispatcher hot path</td><td>F6은 <code>dispatch.Dispatcher</code>를 wrapping해서 <code>aiHook</code> + <code>dlqSink</code>를 연결</td></tr>
 <tr><td><strong>SigNoz <code>notify.Stage</code></strong></td><td>채널별 notification stage</td><td>5채널 어댑터 (Slack / Teams v2 / PagerDuty / Webhook / Email)를 패치</td></tr>
-<tr><td><strong>SigNoz ClickHouse 연결</strong></td><td>observability backend</td><td>DS-APM은 metrics/logs sink로만 활용, 직접 schema 변경 안 함</td></tr>
+<tr><td><strong>SigNoz ClickHouse 연결</strong></td><td>observability backend</td><td>AIOpsAgent는 metrics/logs sink로만 활용, 직접 schema 변경 안 함</td></tr>
 </tbody>
 </table>
-<p>fork 프레이밍 <strong>금지</strong> — DS-APM은 SigNoz의 fork가 아니라 같은 코드라인 위의 흡수 확장이다 (메모리 정책 "var/signoz는 우리 코드").</p>
+<p>fork 프레이밍 <strong>금지</strong> — AIOpsAgent는 SigNoz의 fork가 아니라 같은 코드라인 위의 확장이다 (메모리 정책 "var/signoz는 우리 코드").</p>
 </div>
 
 <div class="subsec">
@@ -469,7 +470,7 @@ section.module .module-head .module-id {
 <div class="subsec">
 <h3 id="sec2-3">§2.3 User Classes</h3>
 <table>
-<thead><tr><th>Class</th><th>식별</th><th>DS-APM 상호작용</th></tr></thead>
+<thead><tr><th>Class</th><th>식별</th><th>AIOpsAgent 상호작용</th></tr></thead>
 <tbody>
 <tr><td><strong>운영자 (Operator)</strong></td><td>on-call rotation 등재</td><td>UC-001 draft 검수 (단계 6~7), UC-002 DLQ replay (단계 6~7), UC-003 degraded mode 알림 수신</td></tr>
 <tr><td><strong>SRE</strong></td><td>service ownership</td><td>meta-alert 수신 (F3 fail-open / F7 redaction spike / F8 DLQ depth), 자격증명 회전 escalation (UC-003 7a)</td></tr>
@@ -486,7 +487,7 @@ section.module .module-head .module-id {
 <tbody>
 <tr><td><strong>Runtime</strong></td><td>Go 1.x (SigNoz community 호환 버전). 단일 binary <code>cmd/community/</code>.</td></tr>
 <tr><td><strong>Storage (SQL)</strong></td><td>PostgreSQL (bun ORM). SOP store는 마이그레이션 078의 <code>ds_sop_documents</code> 테이블 사용 (F1).</td></tr>
-<tr><td><strong>Storage (Observability)</strong></td><td>ClickHouse — SigNoz upstream 그대로. DS-APM은 schema 변경 안 함.</td></tr>
+<tr><td><strong>Storage (Observability)</strong></td><td>ClickHouse — SigNoz upstream 그대로. AIOpsAgent는 schema 변경 안 함.</td></tr>
 <tr><td><strong>Storage (Cache, optional)</strong></td><td>Redis — 현재 idempotency cache로 미사용. ledger는 파일 기반 (F8). future R-7 follow-up.</td></tr>
 <tr><td><strong>LLM Provider</strong></td><td>HTTP-accessible. 자체 호스팅 모델 또는 외부 SaaS (OpenAI, Anthropic, Bedrock 등). 401/403/429 응답을 표준 status code로 반환해야 함 (F3, UC-003).</td></tr>
 <tr><td><strong>File system</strong></td><td><code>var/audit/pilot-events.jsonl</code> (audit), <code>var/dlq/*.jsonl</code> (DLQ) 50 MiB rotation. fsync 정책으로 프로세스 crash 시 1초 이내 마지막 N개 entry 손실 허용 (MVP).</td></tr>
@@ -541,15 +542,15 @@ section.module .module-head .module-id {
 <table>
 <thead><tr><th>ID</th><th>모듈</th><th>상태</th><th>커밋</th></tr></thead>
 <tbody>
-<tr><td><a href="#F0">F0</a></td><td>Foundation / Pilot scaffolding</td><td><span class="status-pill implemented">implemented</span></td><td><code>026863650</code></td></tr>
-<tr><td><a href="#F1">F1</a></td><td>SOP Grounding &amp; Store</td><td><span class="status-pill implemented">implemented</span></td><td><code>72944ecac</code>, <code>c7f4fd330</code></td></tr>
-<tr><td><a href="#F2">F2</a></td><td>AI Runbook Drafting (with history)</td><td><span class="status-pill implemented">implemented</span></td><td><code>cb29d2a59</code></td></tr>
-<tr><td><a href="#F3">F3</a></td><td>AI Quota Controls (fail-open)</td><td><span class="status-pill implemented">implemented</span></td><td><code>a6757136e</code></td></tr>
-<tr><td><a href="#F4">F4</a></td><td>Multi-tenant Scope</td><td><span class="status-pill mvp">implemented-mvp</span></td><td><code>3fa604e03</code></td></tr>
-<tr><td><a href="#F5">F5</a></td><td>Audit (SOP access &amp; dispatch)</td><td><span class="status-pill implemented">implemented</span></td><td><code>8a55208ef</code></td></tr>
-<tr><td><a href="#F6">F6</a></td><td>Notification Dispatch (5 채널)</td><td><span class="status-pill implemented">implemented</span></td><td><code>5c036c806</code></td></tr>
-<tr><td><a href="#F7">F7</a></td><td>PII Redaction</td><td><span class="status-pill mvp">implemented-mvp</span></td><td><code>3e9dfa557</code></td></tr>
-<tr><td><a href="#F8">F8</a></td><td>DLQ + Replay</td><td><span class="status-pill implemented">implemented</span></td><td><code>ade174bb8</code>, <code>91b9ff5db</code></td></tr>
+<tr><td><a href="#F0">F0</a></td><td>공통 기반 모듈 (Foundation Core) / Pilot Scaffolding</td><td><span class="status-pill planned">planned</span></td><td><code>026863650</code></td></tr>
+<tr><td><a href="#F1">F1</a></td><td>SOP Grounding &amp; Store</td><td><span class="status-pill planned">planned</span></td><td><code>72944ecac</code>, <code>c7f4fd330</code></td></tr>
+<tr><td><a href="#F2">F2</a></td><td>AI Runbook Drafting (with history)</td><td><span class="status-pill planned">planned</span></td><td><code>cb29d2a59</code></td></tr>
+<tr><td><a href="#F3">F3</a></td><td>AI Quota Controls (fail-open)</td><td><span class="status-pill planned">planned</span></td><td><code>a6757136e</code></td></tr>
+<tr><td><a href="#F4">F4</a></td><td>Multi-tenant Scope</td><td><span class="status-pill planned">planned</span></td><td><code>3fa604e03</code></td></tr>
+<tr><td><a href="#F5">F5</a></td><td>Audit (SOP access &amp; dispatch)</td><td><span class="status-pill planned">planned</span></td><td><code>8a55208ef</code></td></tr>
+<tr><td><a href="#F6">F6</a></td><td>Notification Dispatch (5 채널)</td><td><span class="status-pill planned">planned</span></td><td><code>5c036c806</code></td></tr>
+<tr><td><a href="#F7">F7</a></td><td>PII Redaction</td><td><span class="status-pill planned">planned</span></td><td><code>3e9dfa557</code></td></tr>
+<tr><td><a href="#F8">F8</a></td><td>DLQ + Replay</td><td><span class="status-pill planned">planned</span></td><td><code>ade174bb8</code>, <code>91b9ff5db</code></td></tr>
 </tbody>
 </table>
 
@@ -557,17 +558,17 @@ section.module .module-head .module-id {
 <section class="module" id="F0">
 <div class="module-head">
 <span class="module-id">F0</span>
-<h2>Foundation / Pilot Scaffolding</h2>
-<span class="status-pill implemented">implemented</span>
+<h2>공통 기반 모듈 (Foundation Core) / Pilot Scaffolding</h2>
+<span class="status-pill planned">planned</span>
 </div>
-<blockquote><p><strong>상태</strong>: 구현 완료<br>DS-APM 네이티브 MVP의 토대 — pilot contract, managed markdown, community 진입점 통합.</p></blockquote>
+<blockquote><p><strong>상태</strong>: 착수 예정 (착수보고 기준)<br>AIOpsAgent 네이티브 MVP의 토대 — pilot contract, managed markdown, community 진입점 통합.</p></blockquote>
 
 <div class="subsec">
 <h3 id="F0-1">§F0.1 개요</h3>
-<p>본 모듈은 DS-APM이 SigNoz community build 위에서 동작하기 위해 필요한 <strong>계약(contract) 정의·진입점·기본 sink 등록</strong>을 담당한다. 핵심은 다음 세 가지다.</p>
+<p>본 모듈은 AIOpsAgent가 SigNoz community build 위에서 동작하기 위해 필요한 <strong>계약(contract) 정의·진입점·기본 sink 등록</strong>을 담당한다. 핵심은 다음 세 가지다.</p>
 <ol>
 <li><strong>Pilot Contract 정의</strong> — SOP source / health / audit / service account / configuration 5종 contract의 버전 문자열과 enum, validator를 한 곳에 모은다 (<code>pilot_contract.go</code>).</li>
-<li><strong>Managed Markdown SOP source</strong> — DS-APM이 v0.1에서 지원하는 유일한 SOP source kind. 운영자가 markdown 본문을 직접 등록하는 minimal path.</li>
+<li><strong>Managed Markdown SOP source</strong> — AIOpsAgent가 v0.1에서 지원하는 유일한 SOP source kind. 운영자가 markdown 본문을 직접 등록하는 minimal path.</li>
 <li><strong>Community 진입점</strong> — <code>cmd/community/main.go</code>가 부팅 시 pilot audit JSONL sink를 등록한다 (F5와 연결).</li>
 </ol>
 <p>본 모듈은 다른 F1~F8 모듈이 의존하는 contract 식별자(<code>ContractVersion</code> 문자열)와 enum(<code>PilotSOPSourceKind*</code>, <code>PilotAuditOutcome*</code> 등)을 모두 export한다.</p>
@@ -699,9 +700,9 @@ type PilotConfiguration struct {
 <div class="module-head">
 <span class="module-id">F1</span>
 <h2>SOP Grounding &amp; Store</h2>
-<span class="status-pill implemented">implemented</span>
+<span class="status-pill planned">planned</span>
 </div>
-<blockquote><p><strong>상태</strong>: 구현 완료<br>SigNoz alert 라벨을 사전 등록된 SOP 문서에 매칭(grounding)하고, SOP를 SQL 백엔드에 영속화하는 모듈.</p></blockquote>
+<blockquote><p><strong>상태</strong>: 착수 예정 (착수보고 기준)<br>SigNoz alert 라벨을 사전 등록된 SOP 문서에 매칭(grounding)하고, SOP를 SQL 백엔드에 영속화하는 모듈.</p></blockquote>
 
 <div class="subsec">
 <h3 id="F1-1">§F1.1 개요</h3>
@@ -847,9 +848,9 @@ stateDiagram-v2
 <div class="module-head">
 <span class="module-id">F2</span>
 <h2>AI Runbook Drafting (with history)</h2>
-<span class="status-pill implemented">implemented</span>
+<span class="status-pill planned">planned</span>
 </div>
-<blockquote><p><strong>상태</strong>: 구현 완료<br>bound된 SOP를 컨텍스트로 LLM이 incident 대응 strategy + runbook draft를 생성하고, 결과를 <code>ai_strategy_history</code>에 기록한다.</p></blockquote>
+<blockquote><p><strong>상태</strong>: 착수 예정 (착수보고 기준)<br>bound된 SOP를 컨텍스트로 LLM이 incident 대응 strategy + runbook draft를 생성하고, 결과를 <code>ai_strategy_history</code>에 기록한다.</p></blockquote>
 
 <div class="subsec">
 <h3 id="F2-1">§F2.1 개요</h3>
@@ -1026,13 +1027,13 @@ stateDiagram-v2
 <div class="module-head">
 <span class="module-id">F3</span>
 <h2>AI Quota Controls (fail-open)</h2>
-<span class="status-pill implemented">implemented</span>
+<span class="status-pill planned">planned</span>
 </div>
-<blockquote><p><strong>상태</strong>: 구현 완료<br>LLM provider disabled / license 불허 / quota 초과 / timeout 초과 시 fail-open 정책으로 SOP 원문 fallback. 알람 전달 자체는 절대 막지 않는다.</p></blockquote>
+<blockquote><p><strong>상태</strong>: 착수 예정 (착수보고 기준)<br>LLM provider disabled / license 불허 / quota 초과 / timeout 초과 시 fail-open 정책으로 SOP 원문 fallback. 알람 전달 자체는 절대 막지 않는다.</p></blockquote>
 
 <div class="subsec">
 <h3 id="F3-1">§F3.1 개요</h3>
-<p>DS-APM의 운영 원칙은 <strong>"AI는 보조, 알람은 항상 전달"</strong>. 본 모듈은 AI 경로가 실패해도 dispatcher가 멈추지 않도록 다음 두 가지를 책임진다.</p>
+<p>AIOpsAgent의 운영 원칙은 <strong>"AI는 보조, 알람은 항상 전달"</strong>. 본 모듈은 AI 경로가 실패해도 dispatcher가 멈추지 않도록 다음 두 가지를 책임진다.</p>
 <ol>
 <li><strong>StoreAware generator</strong> — per-org <code>AIConfig</code>를 cache + lookup. 미설정·암호화 실패·잘못된 provider 선택 시 <code>envFallback</code> (서버 부팅 시 env로 구성된 generator)로 자동 fallback.</li>
 <li><strong>Dispatch hook의 fail-graceful 정책</strong> — hook은 <code>error</code>를 절대 반환하지 않는다. SOP list 실패 / unbound / generator timeout / history upsert 실패 모두 입력 annotations 그대로 반환. dispatcher는 알람 전달을 계속 진행한다.</li>
@@ -1188,9 +1189,9 @@ stateDiagram-v2
 <div class="module-head">
 <span class="module-id">F4</span>
 <h2>Multi-tenant Scope</h2>
-<span class="status-pill mvp">implemented-mvp</span>
+<span class="status-pill planned">planned</span>
 </div>
-<blockquote><p><strong>상태</strong>: 구현 완료 (early MVP)<br>SOP / AI strategy 접근을 <code>project_id × environment</code> tenant scope로 필터링.<br><strong>README 경고</strong>: production-ready 아님. label-based filter 수준이며 row-level security가 아니다.</p></blockquote>
+<blockquote><p><strong>상태</strong>: 착수 예정 (착수보고 기준)<br>SOP / AI strategy 접근을 <code>project_id × environment</code> tenant scope로 필터링.<br><strong>README 경고</strong>: production-ready 아님. label-based filter 수준이며 row-level security가 아니다.</p></blockquote>
 
 <div class="subsec">
 <h3 id="F4-1">§F4.1 개요</h3>
@@ -1321,9 +1322,9 @@ type PilotTenantScope struct {
 <div class="module-head">
 <span class="module-id">F5</span>
 <h2>Audit (SOP access &amp; dispatch)</h2>
-<span class="status-pill implemented">implemented</span>
+<span class="status-pill planned">planned</span>
 </div>
-<blockquote><p><strong>상태</strong>: 구현 완료<br>SOP 검색·preview·fetch, evidence 수집, AI summary 요청/결과를 JSONL로 영속 기록한다. 정책은 best-effort — sink 실패는 원 operation을 막지 않는다.</p></blockquote>
+<blockquote><p><strong>상태</strong>: 착수 예정 (착수보고 기준)<br>SOP 검색·preview·fetch, evidence 수집, AI summary 요청/결과를 JSONL로 영속 기록한다. 정책은 best-effort — sink 실패는 원 operation을 막지 않는다.</p></blockquote>
 
 <div class="subsec">
 <h3 id="F5-1">§F5.1 개요</h3>
@@ -1478,18 +1479,18 @@ stateDiagram-v2
 <div class="module-head">
 <span class="module-id">F6</span>
 <h2>Notification Dispatch (5 채널)</h2>
-<span class="status-pill implemented">implemented</span>
+<span class="status-pill planned">planned</span>
 </div>
-<blockquote><p><strong>상태</strong>: 구현 완료<br>SOP / AI strategy annotation을 5개 채널(Slack, MS Teams v2, PagerDuty, Webhook, Email)로 dispatch한다. dispatcher hot path에서 AI hook을 호출하고, 실패 시 DLQ로 분기 (F8).</p></blockquote>
+<blockquote><p><strong>상태</strong>: 착수 예정 (착수보고 기준)<br>SOP / AI strategy annotation을 5개 채널(Slack, MS Teams v2, PagerDuty, Webhook, Email)로 dispatch한다. dispatcher hot path에서 AI hook을 호출하고, 실패 시 DLQ로 분기 (F8).</p></blockquote>
 
 <div class="subsec">
 <h3 id="F6-1">§F6.1 개요</h3>
-<p>본 모듈은 Prometheus Alertmanager의 <code>dispatch.Dispatcher</code>를 wrapping해서 DS-APM 고유의 두 가지를 끼워넣는다.</p>
+<p>본 모듈은 Prometheus Alertmanager의 <code>dispatch.Dispatcher</code>를 wrapping해서 다음 두 가지를 끼워넣는다.</p>
 <ol>
 <li><strong>AI dispatch hook</strong> — <code>aggrGroup.run()</code>이 flush할 때 알람별로 <code>dispatchhook.Hook.Apply()</code> 호출 → SOP grounding → AI strategy 생성 → annotations에 머지. 입력 annotations는 mutation되지 않고 새 map 반환 (caller가 cheap identity 비교 가능).</li>
 <li><strong>DLQ wire</strong> — terminal notify failure를 <code>dlq.Sink</code>에 best-effort write (F8).</li>
 </ol>
-<p>채널은 5종 모두 SigNoz upstream에 본래 존재하던 path를 패치한다 — DS-APM의 SOP/AI annotation을 channel-specific payload로 변환하는 책임은 각 채널 adapter + <code>alertmanagertemplate</code> 안에. Template variable은 <code>$incident.{project_id|sop_id|ai_headline|ai_first_actions|...}</code> 22종 (<code>knownIncidentTemplateFields</code>).</p>
+<p>채널은 5종 모두 SigNoz upstream에 본래 존재하던 path를 패치한다 — SOP/AI annotation을 channel-specific payload로 변환하는 책임은 각 채널 adapter + <code>alertmanagertemplate</code> 안에. Template variable은 <code>$incident.{project_id|sop_id|ai_headline|ai_first_actions|...}</code> 22종 (<code>knownIncidentTemplateFields</code>).</p>
 </div>
 
 <div class="subsec">
@@ -1589,7 +1590,7 @@ stateDiagram-v2
 <tbody>
 <tr><td><code>notificationManager.Match</code> 실패</td><td><code>ErrorContext</code> + continue (다음 alert 처리)</td></tr>
 <tr><td>Aggregation group 한도 초과</td><td><code>metrics.aggrGroupLimitReached.Inc()</code> + <code>ErrorContext</code>. 신규 group 생성 차단.</td></tr>
-<tr><td><code>aiHook == nil</code></td><td>hook 건너뛰기 (pre-DS-APM 동작)</td></tr>
+<tr><td><code>aiHook == nil</code></td><td>hook 건너뛰기 (AIOpsAgent 미설치 시 동작)</td></tr>
 <tr><td><code>aiHook.Apply</code> 내부 실패</td><td>annotations 그대로 — F3.5 참조</td></tr>
 <tr><td><code>notify.Stage.Exec</code> ctx Canceled</td><td><code>DebugContext</code> (config reload / shutdown 정상 경로)</td></tr>
 <tr><td><code>notify.Stage.Exec</code> terminal error</td><td><code>recordTerminalFailure</code> → DLQ enqueue (F8)</td></tr>
@@ -1657,9 +1658,9 @@ stateDiagram-v2
 <div class="module-head">
 <span class="module-id">F7</span>
 <h2>PII Redaction</h2>
-<span class="status-pill mvp">implemented-mvp</span>
+<span class="status-pill planned">planned</span>
 </div>
-<blockquote><p><strong>상태</strong>: 구현 완료 (early MVP)<br>Incident payload 내 email / KR phone / long unmarked secret / sensitive URL query를 redaction.<br><strong>README 경고</strong>: production-ready 아님. 본 모듈은 DS-APM ingress의 단일 지점 redaction이며, OpenTelemetry Collector 단계의 가장 이른 redaction (권장 위치)은 아직 미적용.</p></blockquote>
+<blockquote><p><strong>상태</strong>: 착수 예정 (착수보고 기준)<br>Incident payload 내 email / KR phone / long unmarked secret / sensitive URL query를 redaction.<br><strong>README 경고</strong>: production-ready 아님. 본 모듈은 AIOpsAgent ingress의 단일 지점 redaction이며, OpenTelemetry Collector 단계의 가장 이른 redaction (권장 위치)은 아직 미적용.</p></blockquote>
 
 <div class="subsec">
 <h3 id="F7-1">§F7.1 개요</h3>
@@ -1674,7 +1675,7 @@ stateDiagram-v2
 <tr><td>URL query 안의 sensitive key (<code>access_token</code>, <code>api_key</code>, <code>bearer</code>, …)</td><td>parameter delete (key 보존, value 제거)</td><td>sanitized URL</td></tr>
 </tbody>
 </table>
-<p>OpenTelemetry security 가이드(§9 in research-skills-c-domain.md)의 4-processor 정책(<code>Attributes / Filter / Redaction / Transform</code>)에 비추어 보면, 현재 구현은 <strong>DS-APM ingress 단계의 <code>Transform</code> (regex) + 부분적 <code>Attributes</code> (URL key drop)에 해당</strong>. 가장 이른 단계인 instrumentation / OTel Collector 적용은 아직 없음.</p>
+<p>OpenTelemetry security 가이드(§9 in research-skills-c-domain.md)의 4-processor 정책(<code>Attributes / Filter / Redaction / Transform</code>)에 비추어 보면, 현재 구현은 <strong>AIOpsAgent ingress 단계의 <code>Transform</code> (regex) + 부분적 <code>Attributes</code> (URL key drop)에 해당</strong>. 가장 이른 단계인 instrumentation / OTel Collector 적용은 아직 없음.</p>
 </div>
 
 <div class="subsec">
@@ -1724,12 +1725,12 @@ incidentJWTLikePattern           = regexp.MustCompile(`\beyJ[A-Za-z0-9_-]{20,}\.
 <div class="subsec">
 <h3 id="F7-4">§F7.4 파이프라인 위치</h3>
 <ul>
-<li><strong>현재 (v0.1)</strong> — DS-APM ingress 단일 지점. <code>BuildSafeIncidentInfo</code> / <code>SanitizeIncidentInfo</code>가 channel template 직전에 호출됨.</li>
-<li><strong>권장 (research §9.1)</strong> — <code>instrumentation &gt; OTel Collector &gt; DS-APM ingress</code> 3단 방어. 가장 이른 단계가 최선.</li>
+<li><strong>현재 (v0.1)</strong> — AIOpsAgent ingress 단일 지점. <code>BuildSafeIncidentInfo</code> / <code>SanitizeIncidentInfo</code>가 channel template 직전에 호출됨.</li>
+<li><strong>권장 (research §9.1)</strong> — <code>instrumentation &gt; OTel Collector &gt; AIOpsAgent ingress</code> 3단 방어. 가장 이른 단계가 최선.</li>
 <li><strong>OTel Collector processor 매핑 (미구현, 권장)</strong>:</li>
 </ul>
 <table>
-<thead><tr><th>Category</th><th>OTel Processor</th><th>DS-APM 대응</th></tr></thead>
+<thead><tr><th>Category</th><th>OTel Processor</th><th>AIOpsAgent 대응</th></tr></thead>
 <tbody>
 <tr><td>Email / Phone / Long secret regex</td><td><code>transform</code></td><td><code>SanitizeIncidentValue</code> (현재)</td></tr>
 <tr><td>Sensitive URL query</td><td><code>attributes</code> (delete)</td><td><code>sanitizeIncidentURL</code> (현재)</td></tr>
@@ -1821,9 +1822,9 @@ incidentJWTLikePattern           = regexp.MustCompile(`\beyJ[A-Za-z0-9_-]{20,}\.
 <div class="module-head">
 <span class="module-id">F8</span>
 <h2>DLQ + Idempotent Replay</h2>
-<span class="status-pill implemented">implemented</span>
+<span class="status-pill planned">planned</span>
 </div>
-<blockquote><p><strong>상태</strong>: 구현 완료 (HMAC 정책 미해결 — <code>open_items</code> 참조)<br>Terminal notify-stage 실패를 JSONL DLQ에 best-effort 영속화하고, replay 시 ledger로 중복 dispatch를 방지한다.</p></blockquote>
+<blockquote><p><strong>상태</strong>: 착수 예정 (HMAC 정책 결정 필요)<br>Terminal notify-stage 실패를 JSONL DLQ에 best-effort 영속화하고, replay 시 ledger로 중복 dispatch를 방지한다.</p></blockquote>
 
 <div class="q">HMAC 정책 follow-up — NF-5.3.1</div>
 
@@ -2019,7 +2020,7 @@ stateDiagram-v2
 
 <div class="subsec">
 <h3 id="sec4-2">§4.2 Hardware Interfaces</h3>
-<p>N/A — DS-APM은 컨테이너 software-only.</p>
+<p>N/A — AIOpsAgent는 컨테이너 software-only.</p>
 </div>
 
 <div class="subsec">
@@ -2027,12 +2028,12 @@ stateDiagram-v2
 <table>
 <thead><tr><th>인터페이스</th><th>방향</th><th>프로토콜 / API</th><th>비고</th></tr></thead>
 <tbody>
-<tr><td><strong>SigNoz Ruler API</strong></td><td>DS-APM ↔ Ruler</td><td>Go internal — <code>pkg/apiserver/signozapiserver/ruler.go</code> (+182), <code>pkg/ruler/signozruler/handler.go</code> (+467)</td><td>F1, F2 wiring</td></tr>
-<tr><td><strong>SigNoz Alertmanager (<code>dispatch.Dispatcher</code>)</strong></td><td>DS-APM → Dispatcher hot path</td><td>Go internal — <code>pkg/alertmanager/alertmanagerserver/dispatcher.go</code> wrapping (+56)</td><td>F6, F8</td></tr>
+<tr><td><strong>SigNoz Ruler API</strong></td><td>AIOpsAgent ↔ Ruler</td><td>Go internal — <code>pkg/apiserver/signozapiserver/ruler.go</code> (+182), <code>pkg/ruler/signozruler/handler.go</code> (+467)</td><td>F1, F2 wiring</td></tr>
+<tr><td><strong>SigNoz Alertmanager (<code>dispatch.Dispatcher</code>)</strong></td><td>AIOpsAgent → Dispatcher hot path</td><td>Go internal — <code>pkg/alertmanager/alertmanagerserver/dispatcher.go</code> wrapping (+56)</td><td>F6, F8</td></tr>
 <tr><td><strong>OTel Collector</strong></td><td>inbound</td><td>OpenTelemetry resource semantic attribute carry-through</td><td>research §4.1 — <code>service.name</code>, <code>deployment.environment</code>, <code>k8s.*</code> 등 자동 전파</td></tr>
 <tr><td><strong>LLM Provider</strong></td><td>outbound</td><td>HTTP / JSON. POST <code>/chat</code> (or equivalent). status code: 200 / 401 / 403 / 429 / 5xx</td><td>UC-003 fail-open 분기의 트리거</td></tr>
-<tr><td><strong>ClickHouse</strong></td><td>DS-APM → CK</td><td>SigNoz upstream observability path 그대로 (metrics, logs)</td><td>schema 변경 없음</td></tr>
-<tr><td><strong>PostgreSQL (bun ORM)</strong></td><td>DS-APM ↔ DB</td><td>bun ORM, table <code>ds_sop_documents</code> (마이그레이션 078). 복합 키 <code>(org_id, sop_id, version)</code></td><td>F1 SOP store</td></tr>
+<tr><td><strong>ClickHouse</strong></td><td>AIOpsAgent → CK</td><td>SigNoz upstream observability path 그대로 (metrics, logs)</td><td>schema 변경 없음</td></tr>
+<tr><td><strong>PostgreSQL (bun ORM)</strong></td><td>AIOpsAgent ↔ DB</td><td>bun ORM, table <code>ds_sop_documents</code> (마이그레이션 078). 복합 키 <code>(org_id, sop_id, version)</code></td><td>F1 SOP store</td></tr>
 <tr><td><strong>Redis</strong></td><td>(planned)</td><td>TTL-native cache — idempotency ledger 후속</td><td>현재 미사용, F8 R-7 follow-up</td></tr>
 </tbody>
 </table>
@@ -2055,7 +2056,7 @@ stateDiagram-v2
 <tbody>
 <tr><td><strong>COMM-OUT-1</strong></td><td>Slack</td><td>Incoming Webhook + Block Kit (<code>blocks: [header, section, divider, actions]</code>)</td><td>username/icon override 불가</td></tr>
 <tr><td><strong>COMM-OUT-2</strong></td><td>MS Teams v2</td><td>Adaptive Card v1.4 (<code>type: AdaptiveCard, body: [TextBlock, FactSet]</code>)</td><td><code>Action.OpenUrl</code>만 지원. <code>Action.Submit</code> 작동 안 함 (research §7.2). v0.1은 양방향 버튼 미지원.</td></tr>
-<tr><td><strong>COMM-OUT-3</strong></td><td>PagerDuty</td><td>Events API v2 (<code>routing_key</code>, <code>event_action: trigger</code>, <code>dedup_key</code>, <code>payload</code>)</td><td><code>dedup_key</code>는 DS-APM의 idempotency_key와 1:1 매핑</td></tr>
+<tr><td><strong>COMM-OUT-3</strong></td><td>PagerDuty</td><td>Events API v2 (<code>routing_key</code>, <code>event_action: trigger</code>, <code>dedup_key</code>, <code>payload</code>)</td><td><code>dedup_key</code>는 AIOpsAgent의 idempotency_key와 1:1 매핑</td></tr>
 <tr><td><strong>COMM-OUT-4</strong></td><td>Generic Webhook</td><td>JSON POST. 자유 schema.</td><td><code>severity</code>, <code>service</code>, <code>sop_url</code>, <code>ai_*</code> 필드 포함</td></tr>
 <tr><td><strong>COMM-OUT-5</strong></td><td>Email</td><td>SMTP MIME</td><td>Subject prefix에 <code>[SEV-x]</code>. SMTP queue가 자체 retry 보유</td></tr>
 </tbody>
@@ -2119,7 +2120,7 @@ stateDiagram-v2
 <ul>
 <li><strong>NF-5.5.1 (정보 손실 0)</strong> 운영자가 받는 알람에서 alert payload + SOP 본문 정보 손실은 0건이어야 한다. AI draft 부정확함보다 silent drop이 더 나쁘다 (UC-003 NFR).</li>
 <li><strong>NF-5.5.2 (Blameless culture)</strong> Audit log는 reproducibility 토대로만 사용돼야 하며, 개인 책임 추궁 목적으로 사용되지 않아야 한다 (SRE Postmortem Culture, research-skills-c-domain.md §1.4).</li>
-<li><strong>NF-5.5.3 (Handoff acknowledgment)</strong> 운영자 교대 시 명시적 인수와 firm acknowledgment 수신 전까지 콜에서 나가지 않아야 한다 (PagerDuty Incident Command 모델, research §1.2). 본 룰은 운영 프로세스 권고로, DS-APM 시스템은 audit trail로만 지원.</li>
+<li><strong>NF-5.5.3 (Handoff acknowledgment)</strong> 운영자 교대 시 명시적 인수와 firm acknowledgment 수신 전까지 콜에서 나가지 않아야 한다 (PagerDuty Incident Command 모델, research §1.2). 본 룰은 운영 프로세스 권고로, AIOpsAgent는 audit trail로만 지원.</li>
 <li><strong>NF-5.5.4 (90일 SOP staleness)</strong> SOP의 <code>staleness_days</code>가 90일을 초과하면 grounding 결과를 보류하고 운영자에게 raw alert만 전달해야 한다 (UC-001 5a Extension, F1).</li>
 <li><strong>NF-5.5.5 (SEV-2 이상 = major incident)</strong> SEV-2 이상은 모두 major incident로 다루며 PagerDuty paging + Slack/Teams broadcast 동시 발송해야 한다 (UC-001 Sub-Variations, research §2.2).</li>
 </ul>
@@ -2136,7 +2137,7 @@ stateDiagram-v2
 <tr><td>F0~F8 ↔ UC-001~003</td><td>traceability.md §1 (Feature × UC)</td></tr>
 <tr><td>F0~F8 ↔ WBS-1.0~1.5</td><td>traceability.md §2 (Feature × WBS Component)</td></tr>
 <tr><td>UC-001~003 ↔ WBS-1.0~1.5</td><td>traceability.md §3 (Use Case × WBS)</td></tr>
-<tr><td>11 commits ↔ F0~F8 ↔ WBS-1.0~1.5</td><td>traceability.md §4 (역사 추적)</td></tr>
+<tr><td>F0~F8 ↔ WBS-1.0~1.5 (커밋 매핑은 traceability.md §4 참조)</td><td>traceability.md §4 (역사 추적)</td></tr>
 <tr><td>Open items (HMAC, frontend, archive 자료)</td><td>traceability.md §6</td></tr>
 </tbody>
 </table>
@@ -2156,7 +2157,7 @@ stateDiagram-v2
 </ol>
 <div class="group-label">Modules (F0~F8)</div>
 <ol>
-<li><a href="#F0">F0 · Foundation</a></li>
+<li><a href="#F0">F0 · 공통 기반 모듈</a></li>
 <li><a href="#F1">F1 · SOP Grounding</a></li>
 <li><a href="#F2">F2 · AI Drafting</a></li>
 <li><a href="#F3">F3 · AI Quota</a></li>

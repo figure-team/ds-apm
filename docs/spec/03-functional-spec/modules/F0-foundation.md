@@ -1,7 +1,7 @@
 ---
 id: F0
-title: Foundation / Pilot Scaffolding
-status: implemented
+title: 공통 기반 모듈 (Foundation Core) / Pilot Scaffolding
+status: planned
 commits: [026863650]
 source_paths:
   - cmd/community/
@@ -12,17 +12,17 @@ covered_by_wbs: [WBS-1.0]
 updated: 2026-05-29
 ---
 
-# F0 — Foundation / Pilot Scaffolding
+# F0 — 공통 기반 모듈 (Foundation Core) / Pilot Scaffolding
 
-> **상태**: 구현 완료
-> DS-APM 네이티브 MVP의 토대 — pilot contract, managed markdown, community 진입점 통합.
+> **상태**: 착수 예정 (착수보고 기준)
+> AIOpsAgent 네이티브 MVP의 토대 — pilot contract, managed markdown, community 진입점 통합.
 
 ## F0.1 개요
 
-본 모듈은 DS-APM이 SigNoz community build 위에서 동작하기 위해 필요한 **계약(contract) 정의·진입점·기본 sink 등록**을 담당한다. 핵심은 다음 세 가지다.
+본 모듈은 AIOpsAgent가 SigNoz community build 위에서 동작하기 위해 필요한 **계약(contract) 정의·진입점·기본 sink 등록**을 담당한다. 핵심은 다음 세 가지다.
 
 1. **Pilot Contract 정의** — SOP source / health / audit / service account / configuration 5종 contract의 버전 문자열과 enum, validator를 한 곳에 모은다 (`pilot_contract.go`).
-2. **Managed Markdown SOP source** — DS-APM이 v0.1에서 지원하는 유일한 SOP source kind. 운영자가 markdown 본문을 직접 등록하는 minimal path.
+2. **Managed Markdown SOP source** — AIOpsAgent가 v0.1에서 지원하는 유일한 SOP source kind. 운영자가 markdown 본문을 직접 등록하는 minimal path.
 3. **Community 진입점** — `cmd/community/main.go`가 부팅 시 pilot audit JSONL sink를 등록한다 (F5와 연결).
 
 본 모듈은 다른 F1~F8 모듈이 의존하는 contract 식별자(`ContractVersion` 문자열)와 enum(`PilotSOPSourceKind*`, `PilotAuditOutcome*` 등)을 모두 export한다.

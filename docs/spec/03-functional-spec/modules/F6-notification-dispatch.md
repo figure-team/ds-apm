@@ -1,7 +1,7 @@
 ---
 id: F6
 title: Notification Dispatch (5 채널)
-status: implemented
+status: planned
 commits: [5c036c806]
 source_paths:
   - pkg/alertmanager/alertmanagernotify/slack/
@@ -19,17 +19,17 @@ updated: 2026-05-29
 
 # F6 — Notification Dispatch
 
-> **상태**: 구현 완료
+> **상태**: 착수 예정 (착수보고 기준)
 > SOP / AI strategy annotation을 5개 채널(Slack, MS Teams v2, PagerDuty, Webhook, Email)로 dispatch한다. dispatcher hot path에서 AI hook을 호출하고, 실패 시 DLQ로 분기 (F8).
 
 ## F6.1 개요
 
-본 모듈은 Prometheus Alertmanager의 `dispatch.Dispatcher`를 wrapping해서 DS-APM 고유의 두 가지를 끼워넣는다.
+본 모듈은 Prometheus Alertmanager의 `dispatch.Dispatcher`를 wrapping해서 다음 두 가지를 끼워넣는다.
 
 1. **AI dispatch hook** — `aggrGroup.run()`이 flush할 때 알람별로 `dispatchhook.Hook.Apply()` 호출 → SOP grounding → AI strategy 생성 → annotations에 머지. 입력 annotations는 mutation되지 않고 새 map 반환 (caller가 cheap identity 비교 가능).
 2. **DLQ wire** — terminal notify failure를 `dlq.Sink`에 best-effort write (F8).
 
-채널은 5종 모두 SigNoz upstream에 본래 존재하던 path를 패치한다 — DS-APM의 SOP/AI annotation을 channel-specific payload로 변환하는 책임은 각 채널 adapter + `alertmanagertemplate` 안에. Template variable은 `$incident.{project_id|sop_id|ai_headline|ai_first_actions|...}` 22종 (`knownIncidentTemplateFields`).
+채널은 5종 모두 SigNoz upstream에 본래 존재하던 path를 패치한다 — SOP/AI annotation을 channel-specific payload로 변환하는 책임은 각 채널 adapter + `alertmanagertemplate` 안에. Template variable은 `$incident.{project_id|sop_id|ai_headline|ai_first_actions|...}` 22종 (`knownIncidentTemplateFields`).
 
 ## F6.2 인터페이스
 
@@ -126,7 +126,7 @@ stateDiagram-v2
 |---|---|
 | `notificationManager.Match` 실패 | `ErrorContext` + continue (다음 alert 처리) |
 | Aggregation group 한도 초과 | `metrics.aggrGroupLimitReached.Inc()` + `ErrorContext`. 신규 group 생성 차단. |
-| `aiHook == nil` | hook 건너뛰기 (pre-DS-APM 동작) |
+| `aiHook == nil` | hook 건너뛰기 (AIOpsAgent 미설치 시 동작) |
 | `aiHook.Apply` 내부 실패 | annotations 그대로 — F3.5 참조 |
 | `notify.Stage.Exec` ctx Canceled | `DebugContext` (config reload / shutdown 정상 경로) |
 | `notify.Stage.Exec` terminal error | `recordTerminalFailure` → DLQ enqueue (F8) |

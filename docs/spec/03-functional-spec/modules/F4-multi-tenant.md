@@ -1,7 +1,7 @@
 ---
 id: F4
 title: Multi-tenant Scope
-status: implemented-mvp
+status: planned
 commits: [3fa604e03]
 source_paths:
   - pkg/types/ruletypes/tenant_policy.go
@@ -13,7 +13,7 @@ caveats: "README 명시: 멀티테넌트 격리 production-ready 아님 — labe
 
 # F4 — Multi-tenant Scope
 
-> **상태**: 구현 완료 (early MVP)
+> **상태**: 착수 예정 (착수보고 기준)
 > SOP / AI strategy 접근을 `project_id × environment` tenant scope로 필터링.
 > **README 경고**: production-ready 아님. label-based filter 수준이며 row-level security가 아니다.
 

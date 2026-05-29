@@ -17,9 +17,9 @@ updated: 2026-05-29
 
 | ID | 제목 | 유형 | Primary Actor | 상태 |
 |---|---|---|---|---|
-| [UC-001](cases/UC-001-incident-to-channel.md) | Incident에서 채널 전달까지 (Golden Path) | golden path | 운영자 | implemented |
-| [UC-002](cases/UC-002-channel-failure-dlq.md) | 채널 전달 실패 → DLQ → Replay | failure path | 운영자 / 시스템 | implemented |
-| [UC-003](cases/UC-003-llm-auth-fail-open.md) | LLM 인증 실패 → quota fail-open → SOP 원문 fallback | failure path | 시스템 | implemented |
+| [UC-001](cases/UC-001-incident-to-channel.md) | Incident에서 채널 전달까지 (Golden Path) | golden path | 운영자 | planned |
+| [UC-002](cases/UC-002-channel-failure-dlq.md) | 채널 전달 실패 → DLQ → Replay | failure path | 운영자 / 시스템 | planned |
+| [UC-003](cases/UC-003-llm-auth-fail-open.md) | LLM 인증 실패 → quota fail-open → SOP 원문 fallback | failure path | 시스템 | planned |
 
 ## 액터 매트릭스
 
@@ -30,8 +30,8 @@ updated: 2026-05-29
 | **운영자 (Operator)** | 사람 | P | P | S (degraded 알림 수신) |
 | **SRE** | 사람 | — | S (DLQ depth meta-alert) | S (자격증명 회전, fail-open storm escalation) |
 | **SigNoz / Alertmanager** | 시스템 | S (alert source) | — | — |
-| **DS-APM Ingress** | 시스템 | S | — | — |
-| **PII Redactor (F7)** | 시스템 | S | — | — |
+| **AIOpsAgent Ingress** | 시스템 | S | — | — |
+| **PII 마스킹 필터 (F7)** | 시스템 | S | — | — |
 | **Multi-tenant Scope (F4)** | 시스템 | S | — | — |
 | **SOP Store (F1)** | 시스템 | S | — | S (raw fallback fetch) |
 | **AI Engine (F2)** | 시스템 | S | — | S |
@@ -61,7 +61,7 @@ UML use case diagram 1장 (액터 스틱맨 + UC 타원 + 매트릭스 위 cell 
 3. **대상 채널 1개 이상 등록·healthy** — Slack / MS Teams v2 / PagerDuty / Webhook / Email 중 1+ 채널이 적어도 직전 health check를 통과한 상태.
 4. **SOP store 인덱싱 완료** — 대응 SOP 1건 이상이 `approval_status: approved`이고 `staleness_days ≤ 90`. SOP는 explicit-label binding (`signoz_pilot_sop_id`)으로 매칭된다 (F1.1).
 5. **AI Strategy 활성 + Quota Controller 정상** — 해당 tenant에 대해 AI Strategy 1건이 active이고, Quota Controller는 fail-open 정책으로 설정 (UC-003 분기에서 활용).
-6. **PII Redactor 활성** — `pkg/types/alertmanagertypes/incident_payload.go`의 redactor가 AI Engine 호출 직전에 항상 호출 가능 상태.
+6. **PII 마스킹 필터 활성** — `pkg/types/alertmanagertypes/incident_payload.go`의 redactor가 AI 초안 매니저 호출 직전에 항상 호출 가능 상태.
 7. **Tenant Policy 적용** — `project_id` × `environment` 기반 tenant scope이 적용되어 cross-tenant SOP/strategy leakage가 차단된 상태 (F4, NF-F1.1).
 8. **Audit JSONL sink 등록** — `cmd/community/main.go`가 부팅 시 `var/audit/pilot-events.jsonl`을 등록한 상태. 실패 시 `NopPilotAuditEventSink` fallback (F0 NF-F0.2).
 9. **DLQ JSONL sink + Replay Ledger** — 디스크 쓰기 가능 상태. UC-002에서 본격 활용.

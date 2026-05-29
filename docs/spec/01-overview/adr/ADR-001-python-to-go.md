@@ -31,22 +31,22 @@ DS-APM 초기 prototype은 `workspace_archive/ds-apm`의 Python orchestrator (`d
 
 ## Decision
 
-Python `ds_apm_poc` 런타임을 **폐기**하고, DS-APM의 모든 기능(F0~F8)을 **SigNoz community 코드베이스에 Go-native MVP로 흡수**한다. DS-APM은 별도 서비스가 아니라 SigNoz community 빌드 위의 **확장 레이어**로 존재한다. fork 프레이밍 (`SigNoz fork`)은 쓰지 않으며, `pkg/alertmanager/`, `pkg/ruler/`, `pkg/types/ruletypes/`, `cmd/community/` 등 기존 패키지에 직접 변경을 가한다.
+Python `ds_apm_poc` 런타임을 **폐기**하고, AIOpsAgent의 모든 기능(F0~F8)을 **SigNoz community 코드베이스에 Go-native MVP로 구현**한다. `pkg/alertmanager/`, `pkg/ruler/`, `pkg/types/ruletypes/`, `cmd/community/` 등 기존 패키지에 직접 변경을 가하는 방식으로 통합한다.
 
-운영 코드는 `workspace_archive/ds-apm/var/signoz` nested repo(`ds-apm/native-mvp-foundation` 브랜치, fork base `feea9e9b3` 이후 11 커밋)에 위치하며 `figure-team/ds-apm`에 single squash commit으로 공개 스냅샷이 노출된다.
+운영 코드는 `workspace_archive/ds-apm/var/signoz` nested repo(`ds-apm/native-mvp-foundation` 브랜치, fork base `feea9e9b3` 이후 사전 PoC 검토 분기)에 위치하며 `figure-team/ds-apm`에 공개 스냅샷이 노출된다.
 
 ## Consequences
 
 ### Positive
 - **Single binary 배포** — `cmd/community` 1개 진입점만 부팅·롤백. 운영 surface가 절반으로 축소.
-- **OTel-native** — SigNoz가 OpenTelemetry resource semantic attribute를 그대로 캐리하므로, DS-APM의 alert payload는 instrumentation에서 dispatcher까지 schema-mapping 없이 흐른다.
-- **Alertmanager 5채널 재사용** — Slack / MS Teams v2 / PagerDuty / Webhook / Email 어댑터를 0줄에서 다시 짤 필요가 없고, DS-APM의 SOP/AI annotation을 기존 채널 template hook에 끼워넣는 형태로 흡수 (F6).
+- **OTel-native** — SigNoz가 OpenTelemetry resource semantic attribute를 그대로 캐리하므로, AIOpsAgent의 alert payload는 instrumentation에서 dispatcher까지 schema-mapping 없이 흐른다.
+- **Alertmanager 5채널 재사용** — Slack / MS Teams v2 / PagerDuty / Webhook / Email 어댑터를 0줄에서 다시 짤 필요가 없고, AIOpsAgent의 SOP/AI annotation을 기존 채널 template hook에 연결하는 방식으로 통합 (F6).
 - **Dispatch hot path 단순화** — Python bridge가 처리하던 retry/DLQ를 Alertmanager dispatcher hot path 안의 `aiHook` + `dlqSink`로 통합 (F6, F8). DLQ는 별도 큐 백엔드 없이 JSONL sink로 구현 (`ade174bb8`).
 - **Interface drift 종결** — alert payload, idempotency key, audit event 3개의 contract version 문자열을 `pilot_contract.go` 한 곳에서 frozen string으로 export하여 두 시스템 간 desync 가능성을 제거.
 
 ### Negative
 - **SigNoz upstream 종속** — community 빌드의 internal API (e.g., `dispatch.Dispatcher`, `notify.Stage`) 변경 시 DS-APM도 영향 받음. upstream merge 비용 발생.
-- **Go 재작성 비용** — Python `ds_apm_poc`의 SOP grounding / AI drafting / quota / PII / DLQ 모듈 약 100 파일, **+12,632 LOC** 신규 작성 (baseline §3).
+- **Go 재작성 비용** — Python `ds_apm_poc`의 SOP grounding / AI drafting / quota / PII / DLQ 모듈에 대한 **상당한 재작성 비용** (모듈 단위 신규 작성 — 사전 검토에서 추정, [`baseline.md`](../../_foundation/baseline.md) 참조).
 - **Nested repo 운영 위험** — 운영 fork가 `workspace_archive/ds-apm/var/signoz`라는 nested 위치에 있어, 상위 repo (`workspace_archive/ds-apm`)에서 `git status`만 보면 변경이 가려진다. 메모리 항목 "var/signoz는 우리 코드" 정책으로 항상 nested repo의 자체 `.git`도 확인해야 한다.
 - **Enterprise 모듈 경계** — `ee/`, `cmd/enterprise/`는 SigNoz Enterprise License 적용이므로 DS-APM 산출물 범위 밖. community 빌드에만 머무는 자기 제약이 생긴다.
 
@@ -68,5 +68,5 @@ Python `ds_apm_poc` 런타임을 **폐기**하고, DS-APM의 모든 기능(F0~F8
 - Archive 브랜치: `orchestrator-to-signoz-migration` (`workspace_archive/ds-apm`)
 - 마이그레이션 종결 커밋 (archive): `bc7e491 docs(migration): close orchestrator-to-signoz migration with verification evidence`
 - DS-APM 시작 커밋: `026863650 feat(ds-apm): add native mvp foundation pilot scaffolding`
-- 변경 표면: 100 파일, +12,632 / -110 LOC ([`../../_foundation/baseline.md`](../../_foundation/baseline.md) §3)
+- 변경 표면: 사전 검토 결과 ([`../../_foundation/baseline.md`](../../_foundation/baseline.md) 참조)
 - 메모리 항목: "var/signoz는 우리 코드 (nested repo)" — fork 프레이밍 금지 + nested repo 자체 `.git` 확인 정책

@@ -1,7 +1,7 @@
 ---
 id: F2
 title: AI Runbook Drafting (with history)
-status: implemented
+status: planned
 commits: [cb29d2a59]
 source_paths:
   - pkg/ruler/aigenerator/
@@ -17,7 +17,7 @@ updated: 2026-05-29
 
 # F2 — AI Runbook Drafting (with history)
 
-> **상태**: 구현 완료
+> **상태**: 착수 예정 (착수보고 기준)
 > bound된 SOP를 컨텍스트로 LLM이 incident 대응 strategy + runbook draft를 생성하고, 결과를 `ai_strategy_history`에 기록한다.
 
 ## F2.1 개요

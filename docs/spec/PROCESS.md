@@ -3,7 +3,7 @@ id: SPEC-PROCESS
 title: Spec Documents — Process & Rules
 type: process
 status: living
-updated: 2026-05-28
+updated: 2026-05-29
 ---
 
 # Spec Documents — Process & Rules
@@ -37,7 +37,7 @@ updated: 2026-05-28
 
 | # | 항목 | 결정 |
 |---|---|---|
-| 1 | WBS Lv2 골격 | **Component-oriented** (Foundation / SOP / AI / Notification / PII / DLQ). Phase 시간선은 부록 `appendix-phases.md`로만 |
+| 1 | WBS Lv2 골격 | **Component-oriented** (공통 기반 모듈 / SOP 그라운딩 서비스 / AI 초안 매니저 / 알림 디스패처 / PII 마스킹 필터 / DLQ 재처리 서비스). Phase 시간선은 부록 `appendix-phases.md`로만 |
 | 2 | 상세 에러 케이스 2건 | **UC-002** (Channel 4xx/5xx → DLQ → Replay), **UC-003** (LLM auth/quota fail-open → SOP fallback) |
 | 3 | 언어 톤 | 본문 한국어 + ID/코드 스키마 영문. `shall` → "~해야 한다" 일관 |
 | 4 | Gherkin 키워드 | **영문** (`Given/When/Then`) — godog 호환 |
@@ -132,11 +132,11 @@ open_items: [...]                # 선택: 미해결 follow-up
 id: WBS-1.N
 title: ...
 parent: WBS-1
-status: implemented | implemented-mvp | implemented-{caveat}-pending | draft
+status: implemented | implemented-mvp | implemented-{caveat}-pending | planned | draft
 covers_features: [Fx, Fy]        # _shared/traceability.md §2와 일치
 source_paths: [pkg/...]
 acceptance: pending | passed
-estimated_effort: completed | <hours>
+estimated_effort: completed | TBD | <hours>
 commits: [...]
 updated: YYYY-MM-DD
 ---

@@ -385,6 +385,7 @@ blockquote {
 .status-pill.implemented { background: #E4E9DC; color: #4B5C39; }
 .status-pill.mvp { background: var(--oat); color: var(--slate); }
 .status-pill.pending { background: #F3D9CC; color: #8A3B1E; }
+.status-pill.planned { background: #DCE2EA; color: #3E4B5C; }
 .status-pill.draft { background: var(--g100); color: var(--g500); }
 
 /* ========== WBS package header ========== */
@@ -486,7 +487,7 @@ pre.tree {
     </div>
     <div class="cell">
       <div class="k">Status</div>
-      <div class="v">M-1 achieved</div>
+      <div class="v">Phase 0 진입 예정</div>
     </div>
   </div>
 
@@ -505,12 +506,12 @@ pre.tree {
     <pre class="mermaid">
 flowchart TD
   R["WBS-1<br/>DS-APM Project (root)"]
-  R --> W0["WBS-1.0<br/>Foundation<br/><i>F0, F4, F5</i>"]
-  R --> W1["WBS-1.1<br/>SOP Engine<br/><i>F1</i>"]
-  R --> W2["WBS-1.2<br/>AI Drafter<br/><i>F2, F3</i>"]
-  R --> W3["WBS-1.3<br/>Notification Dispatcher<br/><i>F6</i>"]
-  R --> W4["WBS-1.4<br/>PII Redactor<br/><i>F7</i>"]
-  R --> W5["WBS-1.5<br/>DLQ + Replay<br/><i>F8</i>"]
+  R --> W0["WBS-1.0<br/>공통 기반 모듈<br/>(Foundation Core)<br/><i>F0, F4, F5</i>"]
+  R --> W1["WBS-1.1<br/>SOP 그라운딩 서비스<br/>(SOP Grounding Service)<br/><i>F1</i>"]
+  R --> W2["WBS-1.2<br/>AI 초안 매니저<br/>(AI Drafter Manager)<br/><i>F2, F3</i>"]
+  R --> W3["WBS-1.3<br/>알림 디스패처<br/>(Notification Dispatcher)<br/><i>F6</i>"]
+  R --> W4["WBS-1.4<br/>PII 마스킹 필터<br/>(PII Masking Filter)<br/><i>F7</i>"]
+  R --> W5["WBS-1.5<br/>DLQ 재처리 서비스<br/>(DLQ Replay Service)<br/><i>F8</i>"]
     </pre>
 
     <details class="expand">
@@ -518,17 +519,17 @@ flowchart TD
       <div class="body">
 <pre class="tree">
 WBS-1   DS-APM Project (root)
-├─ WBS-1.0  Foundation                — pilot contract, managed markdown, audit sink, tenant policy
+├─ WBS-1.0  공통 기반 모듈 (Foundation Core)              — pilot contract, managed markdown, audit sink, tenant policy
 │           Covers: F0, F4, F5
-├─ WBS-1.1  SOP Engine                — SOP store, grounding, file persistence
+├─ WBS-1.1  SOP 그라운딩 서비스 (SOP Grounding Service)   — SOP store, grounding, file persistence
 │           Covers: F1
-├─ WBS-1.2  AI Drafter                — runbook drafter, AI generator, quota controls, strategy history
+├─ WBS-1.2  AI 초안 매니저 (AI Drafter Manager)          — runbook drafter, AI generator, quota controls, strategy history
 │           Covers: F2, F3
-├─ WBS-1.3  Notification Dispatcher   — 5 채널 adapter + dispatcher
+├─ WBS-1.3  알림 디스패처 (Notification Dispatcher)      — 5 채널 adapter + dispatcher
 │           Covers: F6
-├─ WBS-1.4  PII Redactor              — incident payload redaction
+├─ WBS-1.4  PII 마스킹 필터 (PII Masking Filter)         — incident payload redaction
 │           Covers: F7
-└─ WBS-1.5  DLQ + Replay              — JSONL DLQ, idempotent replay ledger
+└─ WBS-1.5  DLQ 재처리 서비스 (DLQ Replay Service)       — JSONL DLQ, idempotent replay ledger
             Covers: F8
 </pre>
       </div>
@@ -549,43 +550,43 @@ WBS-1   DS-APM Project (root)
       <tbody>
         <tr>
           <td><code>WBS-1.0</code></td>
-          <td>Foundation</td>
-          <td><span class="status-pill implemented">implemented</span></td>
+          <td>공통 기반 모듈 (Foundation Core)</td>
+          <td><span class="status-pill planned">planned</span></td>
           <td>F0, F4, F5</td>
           <td><a href="#WBS-1.0">§04</a></td>
         </tr>
         <tr>
           <td><code>WBS-1.1</code></td>
-          <td>SOP Engine</td>
-          <td><span class="status-pill implemented">implemented</span></td>
+          <td>SOP 그라운딩 서비스 (SOP Grounding Service)</td>
+          <td><span class="status-pill planned">planned</span></td>
           <td>F1</td>
           <td><a href="#WBS-1.1">§05</a></td>
         </tr>
         <tr>
           <td><code>WBS-1.2</code></td>
-          <td>AI Drafter</td>
-          <td><span class="status-pill implemented">implemented</span></td>
+          <td>AI 초안 매니저 (AI Drafter Manager)</td>
+          <td><span class="status-pill planned">planned</span></td>
           <td>F2, F3</td>
           <td><a href="#WBS-1.2">§06</a></td>
         </tr>
         <tr>
           <td><code>WBS-1.3</code></td>
-          <td>Notification Dispatcher</td>
-          <td><span class="status-pill implemented">implemented</span></td>
+          <td>알림 디스패처 (Notification Dispatcher)</td>
+          <td><span class="status-pill planned">planned</span></td>
           <td>F6</td>
           <td><a href="#WBS-1.3">§07</a></td>
         </tr>
         <tr>
           <td><code>WBS-1.4</code></td>
-          <td>PII Redactor</td>
-          <td><span class="status-pill mvp">implemented (MVP)</span></td>
+          <td>PII 마스킹 필터 (PII Masking Filter)</td>
+          <td><span class="status-pill planned">planned</span></td>
           <td>F7</td>
           <td><a href="#WBS-1.4">§08</a></td>
         </tr>
         <tr>
           <td><code>WBS-1.5</code></td>
-          <td>DLQ + Replay</td>
-          <td><span class="status-pill pending">HMAC pending</span></td>
+          <td>DLQ 재처리 서비스 (DLQ Replay Service)</td>
+          <td><span class="status-pill planned">planned</span></td>
           <td>F8</td>
           <td><a href="#WBS-1.5">§09</a></td>
         </tr>
@@ -600,7 +601,7 @@ WBS-1   DS-APM Project (root)
     </div>
     <div class="q muted">
       <ul>
-        <li><strong>SigNoz upstream 기능 자체</strong> — DS-APM은 위에 얹은 layer</li>
+        <li><strong>SigNoz upstream 기능 자체</strong> — AIOpsAgent 범위 밖</li>
         <li><strong>Enterprise 모듈</strong> (<code>ee/</code>, <code>cmd/enterprise/</code>) — 별도 라이선스</li>
         <li><strong>y2i 관련 기능</strong> — 영구 비활성화 (메모리 정책)</li>
       </ul>
@@ -616,11 +617,11 @@ WBS-1   DS-APM Project (root)
 
     <div class="milestones">
       <div class="milestone">
-        <div class="when">M-1<br/>2026-05-19</div>
-        <div class="dot-col"><span class="dot done"></span><span class="line"></span></div>
+        <div class="when">M-1<br/>TBD</div>
+        <div class="dot-col"><span class="dot"></span><span class="line"></span></div>
         <div class="body">
-          <h3>POC MVP 완료</h3>
-          <p>11 commits / 100 files / +12,632 LOC. F0~F8 9 모듈 전부 <code>status: implemented</code>, UC-001~003 본문·시퀀스·NFR 작성. WBS-1.0 ~ WBS-1.5 전부 의존.</p>
+          <h3>착수 시점 (M-1)</h3>
+          <p>F0~F8 9 모듈 정의, UC-001~003 본문·시퀀스·NFR 작성, 산출물 4종 합의. WBS-1.0 ~ WBS-1.5 전부 의존.</p>
         </div>
       </div>
       <div class="milestone">
@@ -652,18 +653,18 @@ WBS-1   DS-APM Project (root)
   <section id="WBS-1.0" class="wbs-pkg">
     <div class="sec-head">
       <span class="num">04</span>
-      <h2>WBS-1.0 — Foundation</h2>
+      <h2>WBS-1.0 — 공통 기반 모듈 (Foundation Core)</h2>
     </div>
     <div class="pkg-head">
       <span class="tag id">WBS-1.0</span>
-      <span class="status-pill implemented">implemented</span>
+      <span class="status-pill planned">planned</span>
       <span class="tag">F0</span><span class="tag">F4</span><span class="tag">F5</span>
     </div>
 
-    <blockquote><strong>상태</strong>: 구현 완료</blockquote>
+    <blockquote><strong>상태</strong>: 착수 예정 (착수보고 기준)</blockquote>
 
     <h3>Deliverable</h3>
-    <p>Pilot 계약 스키마 (<code>pilot_contract</code>), 관리형 markdown 페이로드 (<code>pilot_managed_markdown</code>), 테넌트 격리 정책 (<code>tenant_policy</code>), 감사 sink 추상화 및 JSONL 구현 (<code>pilot_audit_sink</code>, <code>pilot_audit_sink_jsonl</code>), community 진입점 와이어업. DS-APM의 하위 컴포넌트 모두가 공유하는 기반 타입·정책·감사 통로를 제공해야 한다.</p>
+    <p>Pilot 계약 스키마 (<code>pilot_contract</code>), 관리형 markdown 페이로드 (<code>pilot_managed_markdown</code>), 테넌트 격리 정책 (<code>tenant_policy</code>), 감사 sink 추상화 및 JSONL 구현 (<code>pilot_audit_sink</code>, <code>pilot_audit_sink_jsonl</code>), community 진입점 와이어업. AIOpsAgent의 하위 컴포넌트 모두가 공유하는 기반 타입·정책·감사 통로를 제공해야 한다.</p>
 
     <h3>Acceptance Criteria</h3>
     <ul class="checklist">
@@ -684,7 +685,7 @@ WBS-1   DS-APM Project (root)
       </div>
       <div>
         <div class="k">Dependencies</div>
-        <div class="v">없음 (DS-APM 컴포넌트 루트, SigNoz upstream 진입점에만 의존)</div>
+        <div class="v">없음 (AIOpsAgent 모듈 그룹 루트, SigNoz upstream 진입점에만 의존)</div>
       </div>
     </div>
 
@@ -724,15 +725,15 @@ WBS-1   DS-APM Project (root)
   <section id="WBS-1.1" class="wbs-pkg">
     <div class="sec-head">
       <span class="num">05</span>
-      <h2>WBS-1.1 — SOP Engine</h2>
+      <h2>WBS-1.1 — SOP 그라운딩 서비스 (SOP Grounding Service)</h2>
     </div>
     <div class="pkg-head">
       <span class="tag id">WBS-1.1</span>
-      <span class="status-pill implemented">implemented</span>
+      <span class="status-pill planned">planned</span>
       <span class="tag">F1</span>
     </div>
 
-    <blockquote><strong>상태</strong>: 구현 완료</blockquote>
+    <blockquote><strong>상태</strong>: 착수 예정 (착수보고 기준)</blockquote>
 
     <h3>Deliverable</h3>
     <p>SOP store 인터페이스 (<code>sopstore.Store</code>), SQL 구현체 (<code>sqlsopstore</code>), 파일 영속화 구현체 (<code>sop_document_file_store</code>), SOP 문서 도메인 타입 (<code>sop_document</code>) 및 미리보기 타입 (<code>sop_preview</code>), runbook handler의 SOP 조회/등록 라우트. Alert와 업로드된 SOP를 결합(grounding)하는 검색 표면을 제공해야 한다.</p>
@@ -756,7 +757,7 @@ WBS-1   DS-APM Project (root)
       </div>
       <div>
         <div class="k">Dependencies</div>
-        <div class="v"><a href="#WBS-1.0">WBS-1.0</a> Foundation (pilot contract, audit sink, tenant policy)</div>
+        <div class="v"><a href="#WBS-1.0">WBS-1.0</a> 공통 기반 모듈 (pilot contract, audit sink, tenant policy)</div>
       </div>
     </div>
 
@@ -787,15 +788,15 @@ WBS-1   DS-APM Project (root)
   <section id="WBS-1.2" class="wbs-pkg">
     <div class="sec-head">
       <span class="num">06</span>
-      <h2>WBS-1.2 — AI Drafter</h2>
+      <h2>WBS-1.2 — AI 초안 매니저 (AI Drafter Manager)</h2>
     </div>
     <div class="pkg-head">
       <span class="tag id">WBS-1.2</span>
-      <span class="status-pill implemented">implemented</span>
+      <span class="status-pill planned">planned</span>
       <span class="tag">F2</span><span class="tag">F3</span>
     </div>
 
-    <blockquote><strong>상태</strong>: 구현 완료</blockquote>
+    <blockquote><strong>상태</strong>: 착수 예정 (착수보고 기준)</blockquote>
 
     <h3>Deliverable</h3>
     <p>LLM 기반 runbook drafter (<code>llmrunbookdrafter</code>), AI generator 추상화 (<code>aigenerator</code> + <code>llmaigenerator</code> + <code>mockaigenerator</code>), store-aware generator wrapper, dispatch hook 통합, quota 제어 (fail-open) 및 AI strategy/strategy history 영속 타입. SOP grounding 결과를 입력으로 받아 채널 dispatch 직전까지 사용할 runbook 초안을 생성해야 한다.</p>
@@ -820,7 +821,7 @@ WBS-1   DS-APM Project (root)
       </div>
       <div>
         <div class="k">Dependencies</div>
-        <div class="v"><a href="#WBS-1.0">WBS-1.0</a> Foundation (audit sink, tenant policy)<br/><a href="#WBS-1.1">WBS-1.1</a> SOP Engine (grounding 입력)</div>
+        <div class="v"><a href="#WBS-1.0">WBS-1.0</a> 공통 기반 모듈 (audit sink, tenant policy)<br/><a href="#WBS-1.1">WBS-1.1</a> SOP 그라운딩 서비스 (grounding 입력)</div>
       </div>
     </div>
 
@@ -863,15 +864,15 @@ WBS-1   DS-APM Project (root)
   <section id="WBS-1.3" class="wbs-pkg">
     <div class="sec-head">
       <span class="num">07</span>
-      <h2>WBS-1.3 — Notification Dispatcher</h2>
+      <h2>WBS-1.3 — 알림 디스패처 (Notification Dispatcher)</h2>
     </div>
     <div class="pkg-head">
       <span class="tag id">WBS-1.3</span>
-      <span class="status-pill implemented">implemented</span>
+      <span class="status-pill planned">planned</span>
       <span class="tag">F6</span>
     </div>
 
-    <blockquote><strong>상태</strong>: 구현 완료</blockquote>
+    <blockquote><strong>상태</strong>: 착수 예정 (착수보고 기준)</blockquote>
 
     <h3>Deliverable</h3>
     <p>채널 독립 dispatcher (<code>alertmanagerserver/dispatcher.go</code>), 5개 채널 adapter (Slack / MS Teams v2 / PagerDuty / Webhook / Email), 알람·SOP·AI draft를 통합한 템플릿 시스템 (<code>alertmanagertemplate</code>), 운영자용 템플릿 미리보기 (<code>notification_template_preview</code>). SOP/AI 컨텍스트가 포함된 incident 메시지를 채널별 페이로드로 정규화·전송해야 한다.</p>
@@ -896,7 +897,7 @@ WBS-1   DS-APM Project (root)
       </div>
       <div>
         <div class="k">Dependencies</div>
-        <div class="v"><a href="#WBS-1.0">WBS-1.0</a> Foundation (audit sink)<br/><a href="#WBS-1.1">WBS-1.1</a> SOP Engine (grounding 컨텍스트)<br/><a href="#WBS-1.2">WBS-1.2</a> AI Drafter (draft 본문)</div>
+        <div class="v"><a href="#WBS-1.0">WBS-1.0</a> 공통 기반 모듈 (audit sink)<br/><a href="#WBS-1.1">WBS-1.1</a> SOP 그라운딩 서비스 (grounding 컨텍스트)<br/><a href="#WBS-1.2">WBS-1.2</a> AI 초안 매니저 (draft 본문)</div>
       </div>
     </div>
 
@@ -930,15 +931,15 @@ WBS-1   DS-APM Project (root)
   <section id="WBS-1.4" class="wbs-pkg">
     <div class="sec-head">
       <span class="num">08</span>
-      <h2>WBS-1.4 — PII Redactor</h2>
+      <h2>WBS-1.4 — PII 마스킹 필터 (PII Masking Filter)</h2>
     </div>
     <div class="pkg-head">
       <span class="tag id">WBS-1.4</span>
-      <span class="status-pill mvp">implemented (MVP)</span>
+      <span class="status-pill planned">planned</span>
       <span class="tag">F7</span>
     </div>
 
-    <blockquote><strong>상태</strong>: 구현 완료 (MVP) — <strong>경고</strong>: README 기준 production-ready 아님, 강화 follow-up 필요.</blockquote>
+    <blockquote><strong>상태</strong>: 착수 예정 (착수보고 기준) — <strong>경고</strong>: README 기준 production-ready 아님, 강화 follow-up 필요.</blockquote>
 
     <h3>Deliverable</h3>
     <p>Incident payload 직렬화 단계의 PII redaction 유틸리티. email 주소, 한국 휴대전화 번호(KR phone), unmarked long secret (예: 토큰/키 패턴) 3 카테고리에 대해 마스킹 처리해야 한다. 채널 dispatch 직전 단계에서 invocation 되어 모든 5개 채널 페이로드에 일관 적용되어야 한다.</p>
@@ -961,7 +962,7 @@ WBS-1   DS-APM Project (root)
       </div>
       <div>
         <div class="k">Dependencies</div>
-        <div class="v"><a href="#WBS-1.0">WBS-1.0</a> Foundation (incident payload 타입)</div>
+        <div class="v"><a href="#WBS-1.0">WBS-1.0</a> 공통 기반 모듈 (incident payload 타입)</div>
       </div>
     </div>
 
@@ -992,15 +993,15 @@ WBS-1   DS-APM Project (root)
   <section id="WBS-1.5" class="wbs-pkg">
     <div class="sec-head">
       <span class="num">09</span>
-      <h2>WBS-1.5 — DLQ + Replay</h2>
+      <h2>WBS-1.5 — DLQ 재처리 서비스 (DLQ Replay Service)</h2>
     </div>
     <div class="pkg-head">
       <span class="tag id">WBS-1.5</span>
-      <span class="status-pill pending">HMAC pending</span>
+      <span class="status-pill planned">planned</span>
       <span class="tag">F8</span>
     </div>
 
-    <blockquote><strong>상태</strong>: 구현 완료 (HMAC 정책 미해결)</blockquote>
+    <blockquote><strong>상태</strong>: 착수 예정 (HMAC 정책 결정 필요)</blockquote>
 
     <h3>Deliverable</h3>
     <p>JSONL 기반 dead-letter store with rotation (<code>pkg/alertmanager/alertmanagernotify/dlq</code>), idempotent replay ledger, dispatcher와의 와이어업 (<code>dispatcher.go</code>). 채널 4xx/5xx/429 실패 시 incident envelope을 DLQ로 enqueue하고, 재시도 시 ledger를 통해 중복 dispatch를 차단해야 한다.</p>
@@ -1025,7 +1026,7 @@ WBS-1   DS-APM Project (root)
       </div>
       <div>
         <div class="k">Dependencies</div>
-        <div class="v"><a href="#WBS-1.0">WBS-1.0</a> Foundation (audit sink 재사용, JSONL 패턴 공유)<br/><a href="#WBS-1.3">WBS-1.3</a> Notification Dispatcher (실패 분기 수신)</div>
+        <div class="v"><a href="#WBS-1.0">WBS-1.0</a> 공통 기반 모듈 (audit sink 재사용, JSONL 패턴 공유)<br/><a href="#WBS-1.3">WBS-1.3</a> 알림 디스패처 (실패 분기 수신)</div>
       </div>
     </div>
 

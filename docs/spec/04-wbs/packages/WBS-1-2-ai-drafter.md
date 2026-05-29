@@ -1,8 +1,8 @@
 ---
 id: WBS-1.2
-title: AI Drafter
+title: AI 초안 매니저 (AI Drafter Manager)
 parent: WBS-1
-status: implemented
+status: planned
 covers_features: [F2, F3]
 source_paths:
   - pkg/ruler/aigenerator/
@@ -14,14 +14,14 @@ source_paths:
   - pkg/types/ruletypes/ai_strategy.go
   - pkg/types/ruletypes/ai_strategy_history.go
 acceptance: pending
-estimated_effort: completed
+estimated_effort: TBD
 commits: [a6757136e, cb29d2a59]
 updated: 2026-05-29
 ---
 
-# WBS-1.2 — AI Drafter
+# WBS-1.2 — AI 초안 매니저 (AI Drafter Manager)
 
-> **상태**: 구현 완료
+> **상태**: 착수 예정 (착수보고 기준)
 
 ## Deliverable
 LLM 기반 runbook drafter (`llmrunbookdrafter`), AI generator 추상화 (`aigenerator` + `llmaigenerator` + `mockaigenerator`), store-aware generator wrapper, dispatch hook 통합, quota 제어 (fail-open) 및 AI strategy/strategy history 영속 타입. SOP grounding 결과를 입력으로 받아 채널 dispatch 직전까지 사용할 runbook 초안을 생성해야 한다.
@@ -37,11 +37,11 @@ LLM 기반 runbook drafter (`llmrunbookdrafter`), AI generator 추상화 (`aigen
 TBD (TBC)
 
 ## Estimated Effort
-완료 (커밋 `a6757136e`, `cb29d2a59`)
+TBD
 
 ## Dependencies
-- WBS-1.0 Foundation (audit sink, tenant policy)
-- WBS-1.1 SOP Engine (grounding 입력)
+- WBS-1.0 공통 기반 모듈 (audit sink, tenant policy)
+- WBS-1.1 SOP 그라운딩 서비스 (grounding 입력)
 
 ## Verification
 - `pkg/ruler/aigenerator/llmaigenerator/llm_test.go`

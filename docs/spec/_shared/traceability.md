@@ -3,7 +3,7 @@ id: TRACEABILITY
 title: UC × Feature × WBS Traceability Matrix
 type: traceability
 status: living
-updated: 2026-05-28
+updated: 2026-05-29
 ---
 
 # Traceability Matrix
@@ -27,7 +27,7 @@ updated: 2026-05-28
 
 ## 2. Feature × WBS Component
 
-| Feature | WBS-1.0 Foundation | WBS-1.1 SOP | WBS-1.2 AI | WBS-1.3 Notif | WBS-1.4 PII | WBS-1.5 DLQ |
+| Feature | WBS-1.0 공통 기반 모듈 | WBS-1.1 SOP 그라운딩 서비스 | WBS-1.2 AI 초안 매니저 | WBS-1.3 알림 디스패처 | WBS-1.4 PII 마스킹 필터 | WBS-1.5 DLQ 재처리 서비스 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
 | F0 | ✓ | | | | | |
 | F1 | | ✓ | | | | |

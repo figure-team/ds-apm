@@ -1,8 +1,8 @@
 ---
 id: WBS-1.0
-title: Foundation
+title: 공통 기반 모듈 (Foundation Core)
 parent: WBS-1
-status: implemented
+status: planned
 covers_features: [F0, F4, F5]
 source_paths:
   - cmd/community/
@@ -12,17 +12,17 @@ source_paths:
   - pkg/types/ruletypes/pilot_audit_sink.go
   - pkg/types/ruletypes/pilot_audit_sink_jsonl.go
 acceptance: pending
-estimated_effort: completed
+estimated_effort: TBD
 commits: [026863650, 8a55208ef, 3fa604e03]
 updated: 2026-05-29
 ---
 
-# WBS-1.0 — Foundation
+# WBS-1.0 — 공통 기반 모듈 (Foundation Core)
 
-> **상태**: 구현 완료
+> **상태**: 착수 예정 (착수보고 기준)
 
 ## Deliverable
-Pilot 계약 스키마 (`pilot_contract`), 관리형 markdown 페이로드 (`pilot_managed_markdown`), 테넌트 격리 정책 (`tenant_policy`), 감사 sink 추상화 및 JSONL 구현 (`pilot_audit_sink`, `pilot_audit_sink_jsonl`), community 진입점 와이어업. DS-APM의 하위 컴포넌트 모두가 공유하는 기반 타입·정책·감사 통로를 제공해야 한다.
+Pilot 계약 스키마 (`pilot_contract`), 관리형 markdown 페이로드 (`pilot_managed_markdown`), 테넌트 격리 정책 (`tenant_policy`), 감사 sink 추상화 및 JSONL 구현 (`pilot_audit_sink`, `pilot_audit_sink_jsonl`), community 진입점 와이어업. AIOpsAgent의 하위 컴포넌트 모두가 공유하는 기반 타입·정책·감사 통로를 제공해야 한다.
 
 ## Acceptance Criteria
 - [ ] F0.7 acceptance Gherkin pass — pilot contract 직렬화·검증 및 managed markdown 라운드트립
@@ -34,10 +34,10 @@ Pilot 계약 스키마 (`pilot_contract`), 관리형 markdown 페이로드 (`pil
 TBD (TBC)
 
 ## Estimated Effort
-완료 (커밋 `026863650`, `8a55208ef`, `3fa604e03`)
+TBD
 
 ## Dependencies
-없음 (DS-APM 컴포넌트 루트, SigNoz upstream 진입점에만 의존)
+없음 (AIOpsAgent 모듈 그룹 루트, SigNoz upstream 진입점에만 의존)
 
 ## Verification
 - `pkg/types/ruletypes/pilot_contract_test.go`

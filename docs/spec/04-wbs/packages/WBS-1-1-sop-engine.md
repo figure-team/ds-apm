@@ -1,8 +1,8 @@
 ---
 id: WBS-1.1
-title: SOP Engine
+title: SOP 그라운딩 서비스 (SOP Grounding Service)
 parent: WBS-1
-status: implemented
+status: planned
 covers_features: [F1]
 source_paths:
   - pkg/ruler/sopstore/
@@ -11,14 +11,14 @@ source_paths:
   - pkg/types/ruletypes/sop_document.go
   - pkg/types/ruletypes/sop_preview.go
 acceptance: pending
-estimated_effort: completed
+estimated_effort: TBD
 commits: [72944ecac, c7f4fd330]
 updated: 2026-05-29
 ---
 
-# WBS-1.1 — SOP Engine
+# WBS-1.1 — SOP 그라운딩 서비스 (SOP Grounding Service)
 
-> **상태**: 구현 완료
+> **상태**: 착수 예정 (착수보고 기준)
 
 ## Deliverable
 SOP store 인터페이스 (`sopstore.Store`), SQL 구현체 (`sqlsopstore`), 파일 영속화 구현체 (`sop_document_file_store`), SOP 문서 도메인 타입 (`sop_document`) 및 미리보기 타입 (`sop_preview`), runbook handler의 SOP 조회/등록 라우트. Alert와 업로드된 SOP를 결합(grounding)하는 검색 표면을 제공해야 한다.
@@ -33,10 +33,10 @@ SOP store 인터페이스 (`sopstore.Store`), SQL 구현체 (`sqlsopstore`), 파
 TBD (TBC)
 
 ## Estimated Effort
-완료 (커밋 `72944ecac`, `c7f4fd330`)
+TBD
 
 ## Dependencies
-- WBS-1.0 Foundation (pilot contract, audit sink, tenant policy)
+- WBS-1.0 공통 기반 모듈 (pilot contract, audit sink, tenant policy)
 
 ## Verification
 - `pkg/ruler/sopstore/sqlsopstore/sop_test.go`

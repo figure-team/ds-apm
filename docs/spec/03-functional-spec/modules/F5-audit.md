@@ -1,7 +1,7 @@
 ---
 id: F5
 title: Audit (SOP access & dispatch)
-status: implemented
+status: planned
 commits: [8a55208ef]
 source_paths:
   - pkg/types/ruletypes/pilot_audit_sink.go
@@ -13,7 +13,7 @@ updated: 2026-05-29
 
 # F5 — Audit (SOP access & dispatch)
 
-> **상태**: 구현 완료
+> **상태**: 착수 예정 (착수보고 기준)
 > SOP 검색·preview·fetch, evidence 수집, AI summary 요청/결과를 JSONL로 영속 기록한다. 정책은 best-effort — sink 실패는 원 operation을 막지 않는다.
 
 ## F5.1 개요

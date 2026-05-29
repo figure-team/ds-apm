@@ -6,10 +6,10 @@ status: historical
 updated: 2026-05-28
 ---
 
-# 부록 A. Phase 시간선 (역사 추적용)
+# 부록 A. Phase 시간선 (역사 추적용) — (착수 전 사전 작업 기록)
 
-> 이 문서는 11개 DS-APM 커밋의 **시간 순 분할**이다.
-> 메인 WBS(`index.md`)는 component-oriented이고, 이 부록은 어떤 순서로 만들어졌는지의 기록.
+> 이 문서는 DS-APM 사전 POC 과정의 **시간 순 분할**이다. (착수보고 기준 참고 자료)
+> 메인 WBS(`index.md`)는 component-oriented이고, 이 부록은 어떤 순서로 작업이 진행됐는지의 기록.
 > 새 작업 분류 시에는 component WBS를 우선 사용할 것.
 
 ## 베이스라인

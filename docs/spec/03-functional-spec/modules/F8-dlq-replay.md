@@ -1,7 +1,7 @@
 ---
 id: F8
 title: DLQ + Idempotent Replay
-status: implemented
+status: planned
 commits: [ade174bb8, 91b9ff5db]
 source_paths:
   - pkg/alertmanager/alertmanagerserver/dispatcher.go
@@ -17,7 +17,7 @@ open_items:
 
 # F8 — DLQ + Idempotent Replay
 
-> **상태**: 구현 완료 (HMAC 정책 미해결 — `open_items` 참조)
+> **상태**: 착수 예정 (HMAC 정책 결정 필요)
 > Terminal notify-stage 실패를 JSONL DLQ에 best-effort 영속화하고, replay 시 ledger로 중복 dispatch를 방지한다.
 
 ## F8.1 개요
