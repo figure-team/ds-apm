@@ -38,6 +38,19 @@ updated: 2026-06-02
 - [ ] 채널 4xx/5xx 실패 시 WBS-1.5 DLQ로 분기되어야 한다 (UC-002)
 - [ ] dispatch 이벤트는 WBS-1.0 audit sink로 기록되어야 한다
 
+## Work Package 일정 (일 단위)
+
+> 영업일(주5일) 기준, 공휴일 미반영. 의존성 순서: 인터페이스·타입 → 구현 → 통합·검증.
+
+| WP ID | 작업명 | 선행 | 시작일 | 종료일 | 기간(영업일) |
+|---|---|---|---|---|---|
+| 1.3.1 | Dispatcher wrapping | 1.2.6 | 2026-07-13 | 2026-07-15 | 3 |
+| 1.3.2 | AI context propagation | 1.3.1 | 2026-07-16 | 2026-07-20 | 3 |
+| 1.3.3 | Slack + MS Teams v2 adapter | 1.3.2 | 2026-07-21 | 2026-07-23 | 3 |
+| 1.3.4 | PagerDuty adapter | 1.3.3 | 2026-07-24 | 2026-07-27 | 2 |
+| 1.3.5 | Webhook + Email adapter | 1.3.4 | 2026-07-28 | 2026-07-29 | 2 |
+| 1.3.6 | 5채널 통합 라우팅·전송 검증 | 1.3.5 | 2026-07-30 | 2026-07-31 | 2 |
+
 ## Work Packages (Lv3)
 
 ### WBS-1.3.1 — Dispatcher wrapping (`dispatch.Dispatcher`)
@@ -45,6 +58,7 @@ updated: 2026-06-02
 - **Deliverable**: `alertmanagerserver/dispatcher.go` — `dlqSink` + `aiHook` 필드를 갖는 `Dispatcher` struct 및 `NewDispatcher` 생성자. `aggrGroup.run()` flush 경로에 `applyAIHook` 진입점 삽입. DLQ terminal-failure wire 포함.
 - **Acceptance**: `NewDispatcher`에 `aiHook == nil` 전달 시 hook skip; terminal error 발생 시 `dlqSink.Write` 호출됨; dispatcher goroutine이 context cancel에 정상 종료됨 (F6.7 Gherkin 3개 scenario pass)
 - **Source**: `pkg/alertmanager/alertmanagerserver/dispatcher.go`
+- **일정**: 2026-07-13 ~ 2026-07-15 (3영업일, 선행: 1.2.6)
 - **Effort**: TBD
 
 ### WBS-1.3.2 — AI context propagation 로직
@@ -52,6 +66,7 @@ updated: 2026-06-02
 - **Deliverable**: `dispatchhook.Hook.Apply()` 호출 + annotations 머지 로직. 입력 annotations 불변(새 map 반환). `knownIncidentTemplateFields` 22종 정의 및 `MissingIncidentTemplateVariables` 유효성 검사.
 - **Acceptance**: `Apply()` 반환 map에 `ai_headline` 포함; 원본 annotations 불변 확인; unknown variable `$incident.foo_bar` → `MissingIncidentTemplateVariables` 결과에 `incident_foo_bar` 포함 (F6.7 Gherkin scenario 4 pass)
 - **Source**: `pkg/alertmanager/alertmanagerserver/dispatcher.go`, `pkg/types/ruletypes/notification_template_preview.go`
+- **일정**: 2026-07-16 ~ 2026-07-20 (3영업일, 선행: 1.3.1)
 - **Effort**: TBD
 
 ### WBS-1.3.3 — Slack + MS Teams v2 adapter
@@ -59,6 +74,7 @@ updated: 2026-06-02
 - **Deliverable**: Slack Block Kit 페이로드 빌더 (`severity` → `[SEV-x]` prefix, `sop_url` → actions button, `ai_headline`/`ai_first_actions` → section mrkdwn). MS Teams v2 Adaptive Card 빌더 (`Action.OpenUrl`만 사용, `Action.Submit` 제외).
 - **Acceptance**: 두 채널 모두 mock provider에 대해 페이로드 스키마 유효; `ai_headline` 본문 포함; MS Teams `Action.Submit` 미사용 확인
 - **Source**: `pkg/alertmanager/alertmanagernotify/slack/`, `pkg/alertmanager/alertmanagernotify/msteamsv2/`
+- **일정**: 2026-07-21 ~ 2026-07-23 (3영업일, 선행: 1.3.2)
 - **Effort**: TBD
 
 ### WBS-1.3.4 — PagerDuty adapter
@@ -66,6 +82,7 @@ updated: 2026-06-02
 - **Deliverable**: PagerDuty Events API v2 페이로드 빌더. `severity` → `payload.severity`, `service_name` → `payload.component`, `ai_headline` → `payload.summary`, `sop_url`/`ai_first_actions`/`ai_confidence` → `payload.custom_details`.
 - **Acceptance**: mock provider에 페이로드 스키마 유효; severity 매핑 4단계(`critical`/`error`/`warning`/`info`) 정확; `custom_details.runbook_url` 필드 포함
 - **Source**: `pkg/alertmanager/alertmanagernotify/pagerduty/`
+- **일정**: 2026-07-24 ~ 2026-07-27 (2영업일, 선행: 1.3.3)
 - **Effort**: TBD
 
 ### WBS-1.3.5 — Webhook + Email adapter
@@ -73,6 +90,7 @@ updated: 2026-06-02
 - **Deliverable**: 일반 JSON Webhook 빌더 (`severity`, `service`, `sop_url`, `ai_headline`, `ai_first_actions` array 포함). SMTP Email 빌더 (subject prefix `[SEV-x]`, body에 `ai_headline` + bullet list `ai_first_actions`, inline `sop_url`).
 - **Acceptance**: 두 채널 모두 mock provider에 페이로드/MIME 스키마 유효; Email subject에 severity prefix 포함; Webhook `ai_first_actions` 필드가 array 타입
 - **Source**: `pkg/alertmanager/alertmanagernotify/webhook/`, `pkg/alertmanager/alertmanagernotify/email/`
+- **일정**: 2026-07-28 ~ 2026-07-29 (2영업일, 선행: 1.3.4)
 - **Effort**: TBD
 
 ### WBS-1.3.6 — 5채널 통합 라우팅·전송 검증 (Integration & Fault Tolerance)
@@ -80,6 +98,7 @@ updated: 2026-06-02
 - **Deliverable**: 5채널 fan-out 통합 테스트 스위트. 단일 alert에서 5채널 동시 dispatch, partial failure(1개 이상 채널 4xx/5xx) 시 성공 채널 결과 보존 + 실패 채널 DLQ 분기 검증. `recordTerminalFailure` → `dlqSink.Write` 경로 E2E 커버 포함.
 - **Acceptance**: 5채널 전체 성공 시나리오 pass; 채널 1개 terminal error 시 나머지 4채널 전달 완료 + DLQ entry 1건 생성 확인; context cancel 시 DLQ 기록 없이 graceful 종료 확인 (F6.7 Gherkin 전 scenario pass)
 - **Source**: `pkg/alertmanager/alertmanagerserver/dispatcher.go`, `pkg/alertmanager/alertmanagernotify/{slack,msteamsv2,pagerduty,webhook,email}/`
+- **일정**: 2026-07-30 ~ 2026-07-31 (2영업일, 선행: 1.3.5)
 - **Effort**: TBD
 
 ## Owner

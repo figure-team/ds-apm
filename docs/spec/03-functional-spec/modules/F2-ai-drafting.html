@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F2 — AI Runbook Drafting (with history)</title>
+<style>
+:root {
+  --ivory:#FAF9F5; --slate:#141413; --clay:#D97757; --oat:#E3DACC;
+  --olive:#788C5D; --sky:#6A8CAF; --g100:#F0EEE6; --g300:#D1CFC5;
+  --g500:#87867F; --g700:#3D3D3A;
+  --serif: ui-serif, Georgia, 'Times New Roman', serif;
+  --sans:  system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono:  ui-monospace, 'SF Mono', Menlo, Monaco, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--ivory); color: var(--g700); font-family: var(--sans); line-height: 1.55; padding: 56px 32px 120px; -webkit-font-smoothing: antialiased; }
+.page { max-width: 1120px; margin: 0 auto; }
+h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(38px, 5.4vw, 62px); color: var(--slate); letter-spacing: -0.02em; margin-bottom: 16px; }
+h2 { font-family: var(--serif); font-weight: 500; font-size: 26px; color: var(--slate); letter-spacing: -0.01em; margin-top: 56px; }
+h2:first-of-type { margin-top: 32px; }
+h3 { font-family: var(--sans); font-weight: 600; font-size: 18px; color: var(--slate); margin-bottom: 8px; margin-top: 32px; }
+h4 { font-family: var(--sans); font-weight: 600; font-size: 15px; color: var(--g700); margin-bottom: 6px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; color: var(--g500); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px; }
+p { margin-bottom: 12px; }
+a { color: var(--clay); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 150ms; }
+a:hover { border-bottom-color: var(--clay); }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin-bottom: 4px; }
+blockquote { border-left: 3px solid var(--g300); padding: 8px 16px; margin: 12px 0; color: var(--g700); font-style: italic; }
+code, pre { font-family: var(--mono); font-size: 13px; }
+pre { background: var(--g100); border: 1.5px solid var(--g300); border-radius: 10px; padding: 12px 16px; overflow-x: auto; margin: 12px 0; }
+code { background: var(--g100); padding: 1px 6px; border-radius: 4px; }
+pre code { background: transparent; padding: 0; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--g300); vertical-align: top; }
+th { font-family: var(--sans); font-weight: 600; color: var(--slate); background: var(--g100); }
+.mermaid { background: #fff; border: 1.5px solid var(--g300); border-radius: 10px; padding: 16px; margin: 16px 0; text-align: center; }
+.status-pill { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 10px; border-radius: 999px; text-transform: uppercase; font-weight: 600; }
+.status-pill.planned { background: #DCE2EA; color: #3E4B5C; }
+html { scroll-behavior: smooth; }
+@page { size: A4; margin: 18mm 15mm; }
+@media print {
+  body { background: #fff; padding: 0; }
+  pre, table { break-inside: avoid; page-break-inside: avoid; }
+  a::after { content: " (" attr(href) ")"; font-size: 10px; color: #888; }
+}
+</style>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#FAF9F5', primaryTextColor: '#141413',
+      primaryBorderColor: '#D1CFC5', lineColor: '#87867F',
+      secondaryColor: '#E3DACC', tertiaryColor: '#F0EEE6'
+    },
+    fontFamily: 'ui-sans-serif, system-ui, sans-serif'
+  });
+</script>
+</head>
+<body>
+<div class="page">
+
+<div class="eyebrow">DS-APM · 기능명세서 · F2 · 2026-06-02</div>
+<h1>F2 — AI Runbook Drafting (with history)</h1>
+
+<p><span class="status-pill planned">planned</span></p>
+
+<blockquote>
+<p><strong>상태</strong>: 착수 예정 (착수보고 기준)<br>
+bound된 SOP를 컨텍스트로 LLM이 incident 대응 strategy + runbook draft를 생성하고, 결과를 <code>ai_strategy_history</code>에 기록한다.</p>
+</blockquote>
+
+<h2 id="f2-1">F2.1 개요</h2>
+<p>본 모듈은 두 개의 별도 컴포넌트로 구성된다.</p>
+<ol>
+<li><strong>AIStrategyGenerator</strong> — alert label + bound SOP를 입력으로 받아 <code>AIStrategy</code> (가설 / 첫 조치 / customer update draft / vendor request draft)를 출력. <code>local</code> (deterministic, 외부 호출 없음) / <code>mock</code> (fixture 기반 데모) / <code>llm</code> (Claude / Codex × API / CLI 4조합) provider 지원.</li>
+<li><strong>RunbookDrafter</strong> — SOP + 에러 예시를 입력으로 받아 <code>Runbook</code> draft를 출력. LLM 또는 mock 구현.</li>
+</ol>
+<p>운영자 검수가 끝나면 <code>AIStrategyHistoryStore</code>에 record를 best-effort upsert해서 동일 incident 재발 시 lookup이 가능하도록 한다. <strong>모든 strategy output은 <code>requiresHumanApproval=true</code> 이며 자동 실행 주장(<code>자동 재시작</code>, <code>automatically restarted</code> 등) 패턴은 validator가 차단한다.</strong></p>
+
+<h2 id="f2-2">F2.2 인터페이스</h2>
+<pre><code>// pkg/types/ruletypes
+type AIStrategyGenerator interface {
+    Generate(ctx context.Context, req AIStrategyRequest) (AIStrategy, error)
+}
+
+type RunbookDrafter interface {
+    Draft(ctx context.Context, req RunbookDraftRequest) (Runbook, error)
+}
+
+type AIStrategyHistoryStore interface {
+    Upsert(ctx context.Context, orgID string, record AIStrategyHistoryRecord) error
+    Lookup(ctx context.Context, orgID string, req AIStrategyHistoryLookupRequest) (AIStrategyHistoryRecord, bool, error)
+}
+
+// pkg/ruler/aigenerator/aigenerator.go
+func New(cfg Config) (ruletypes.AIStrategyGenerator, error)
+func NewRunbookDrafter(cfg Config) ruletypes.RunbookDrafter</code></pre>
+<p>Provider 선택: <code>cfg.Provider ∈ {"", "local", "mock", "llm"}</code>. <code>llm</code>일 때 <code>LLMProvider ∈ {claude, codex}</code> × <code>LLMTransport ∈ {api, cli}</code> 4조합.</p>
+
+<h2 id="f2-3">F2.3 데이터 모델</h2>
+<pre><code>type AIStrategyRequest struct {
+    StrategyID       string
+    IncidentID       string
+    AlertFingerprint string
+    Language         string                // default "ko-KR"
+    Labels           map[string]string
+    Annotations      map[string]string
+    SOPDocument      SOPDocument
+    EvidenceRefs     []AIEvidenceRef
+    PromptVersion    string                // default "ds-ir-ko-v1"
+    Model            string
+    Controls         AIStrategyControls    // quota / timeout budget
+    GeneratedAt      string
+}
+
+type AIStrategy struct {
+    ContractVersion     string          // "ds.ai_strategy.v1"
+    StrategyID          string
+    IncidentID          string
+    AlertFingerprint    string
+    Status              string          // ready|unavailable|timeout|blocked_by_policy
+                                        // |quota_exhausted|sop_missing
+                                        // |evidence_unavailable|low_confidence
+    Language            string
+    SOPID, SOPVersion   string
+    Headline            string
+    Hypotheses          []AIHypothesis
+    FirstActions        []AIFirstAction // 모두 RequiresHumanApproval=true
+    CustomerUpdateDraft string
+    VendorRequestDraft  string
+    Confidence          string          // high|medium|low
+    EvidenceRefs        []AIEvidenceRef
+    Limitations         []string
+    Audit               AIStrategyAudit // promptVersion, model, generatedAt,
+                                        // quota*, timeout*, redactionApplied
+}
+
+type AIStrategyHistoryRecord struct {
+    ContractVersion  string  // "ds.ai_strategy_history.v1"
+    IncidentID       string
+    AlertFingerprint string
+    StrategyID, Status, SOPID, SOPVersion, Confidence, GeneratedAt string
+    Strategy         AIStrategy
+}</code></pre>
+<p>History lookup key: <code>incident\x00&lt;incidentID&gt;</code> 또는 <code>fingerprint\x00&lt;alertFingerprint&gt;</code> 중 하나 이상 필수.</p>
+
+<h2 id="f2-4">F2.4 상태 전이</h2>
+<pre class="mermaid">
+stateDiagram-v2
+    [*] --> pending : Generate(req)
+    pending --> ready : SOP bound + evidence available
+    pending --> sop_missing : SOPDocument empty
+    pending --> blocked_by_policy : tenant scope mismatch / validation fail
+    pending --> evidence_unavailable : EvidenceRefs empty (SOP bound)
+    pending --> unavailable : ProviderEnabled=false
+    pending --> quota_exhausted : QuotaUsed >= QuotaLimit
+    pending --> timeout : ExecutionElapsed > TimeoutBudget
+    ready --> approved : operator approves
+    ready --> rejected : operator rejects
+    approved --> archived : history record upserted
+</pre>
+
+<h2 id="f2-5">F2.5 예외 및 복구</h2>
+<table>
+<thead><tr><th>경로</th><th>처리</th></tr></thead>
+<tbody>
+<tr><td>LLM provider 5xx / timeout</td><td><code>Status=timeout</code>, <code>Limitations=["AI strategy generation exceeded the configured timeout budget."]</code></td></tr>
+<tr><td>Quota 초과 (<code>QuotaUsed &gt;= QuotaLimit</code>)</td><td><code>Status=quota_exhausted</code>, fail-open (F3 참조)</td></tr>
+<tr><td>License 불허 (<code>LicenseAllowed=false</code>)</td><td><code>Status=blocked_by_policy</code>, <code>Limitations=["AI strategy generation is not licensed for this tenant."]</code></td></tr>
+<tr><td>Provider disabled (<code>ProviderEnabled=false</code>)</td><td><code>Status=unavailable</code>, <code>Limitations=["AI provider is disabled by tenant or deployment controls."]</code></td></tr>
+<tr><td>SOP 미바인딩</td><td><code>Status=sop_missing</code>, headline "연결된 SOP 문서가 없어 기본 알림만 전송합니다."</td></tr>
+<tr><td>Evidence 0건</td><td><code>Status=evidence_unavailable</code>, SOP 1단계 안내만 포함</td></tr>
+<tr><td>자동 실행 주장 패턴 검출 (<code>자동 재시작</code>, <code>automatically restarted</code>, <code>재시작했습니다</code> 등)</td><td>validator가 거부</td></tr>
+<tr><td>History upsert 실패</td><td>dispatch hook에서 <code>WarnContext</code>만 남기고 dispatch는 계속 진행</td></tr>
+</tbody>
+</table>
+
+<h2 id="f2-6">F2.6 비기능 요건 (NFR)</h2>
+<ul>
+<li><strong>NF-F2.1</strong> Dispatch hook 호출 시 generator timeout은 기본 1초 (<code>DefaultGenerateTimeout</code>). dispatcher hot path를 절대 막지 않아야 한다.</li>
+<li><strong>NF-F2.2</strong> 모든 <code>FirstAction.RequiresHumanApproval</code>은 <code>true</code>여야 한다 (validator가 강제).</li>
+<li><strong>NF-F2.3</strong> <code>audit.redactionApplied</code>는 반드시 <code>true</code>여야 strategy 출력이 사용될 수 있다.</li>
+<li><strong>NF-F2.4</strong> <code>StrategyID</code>가 비어 있으면 <code>deterministicAIStrategyID()</code>가 <code>sha256(incidentID || fingerprint || sopID || sopVersion)</code>의 앞 16 hex로 생성 — 동일 입력은 동일 ID.</li>
+<li><strong>NF-F2.5</strong> History record의 <code>IncidentID</code>, <code>StrategyID</code>, <code>Status</code>, <code>Confidence</code>, <code>GeneratedAt</code>은 embedded <code>Strategy</code>와 정확히 일치해야 한다 (validator가 강제).</li>
+</ul>
+
+<h2 id="f2-7">F2.7 Acceptance Criteria (Gherkin)</h2>
+<pre><code>Feature: AI runbook drafting with SOP grounding
+  Background:
+    Given the AIStrategyGenerator is configured with provider "local"
+    And a SOPDocument "SOP-PAY-5xx" is bound to the request
+
+  Scenario: Ready strategy with evidence
+    Given the request carries at least one evidence ref
+    And the tenant labels match the SOP scope
+    When Generate is called
+    Then the strategy status is "ready"
+    And every first action has RequiresHumanApproval set to true
+    And the audit.redactionApplied flag is true
+
+  Scenario: SOP missing yields fallback notice
+    Given the request SOPDocument is empty
+    When Generate is called
+    Then the strategy status is "sop_missing"
+    And the headline mentions "연결된 SOP 문서가 없어"
+
+  Scenario: Automatic-operation claim is rejected
+    Given a hypothesis text containing "자동 재시작"
+    When ValidateAIStrategy is called
+    Then validation fails with "must not claim automatic operational execution"
+
+  Scenario: History record requires matching strategy fields
+    Given an AIStrategyHistoryRecord whose Strategy.IncidentID differs from the record IncidentID
+    When ValidateAIStrategyHistoryRecord is called
+    Then validation fails mentioning "strategy.incidentId: must match"</code></pre>
+
+<h2 id="f2-8">F2.8 Traceability</h2>
+<ul>
+<li>Implements UC: UC-001 (단계 5), UC-003 (degraded path)</li>
+<li>Covered by WBS: WBS-1.2</li>
+<li>Source: <code>pkg/ruler/aigenerator/</code>, <code>pkg/ruler/runbookdrafter/llmrunbookdrafter/</code>, <code>pkg/types/ruletypes/ai_strategy*.go</code></li>
+<li>Commits: <code>cb29d2a59</code></li>
+</ul>
+
+</div>
+</body>
+</html>

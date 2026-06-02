@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WBS-1.4 — PII 마스킹 필터 (PII Masking Filter)</title>
+<style>
+:root {
+  --ivory:#FAF9F5;
+  --slate:#141413;
+  --clay:#D97757;
+  --oat:#E3DACC;
+  --olive:#788C5D;
+  --sky:#6A8CAF;
+  --g100:#F0EEE6;
+  --g300:#D1CFC5;
+  --g500:#87867F;
+  --g700:#3D3D3A;
+  --serif: ui-serif, Georgia, 'Times New Roman', serif;
+  --sans:  system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono:  ui-monospace, 'SF Mono', Menlo, Monaco, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--ivory);
+  color: var(--g700);
+  font-family: var(--sans);
+  line-height: 1.55;
+  padding: 56px 32px 120px;
+  -webkit-font-smoothing: antialiased;
+}
+.page { max-width: 1120px; margin: 0 auto; }
+h1 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(38px, 5.4vw, 62px);
+  color: var(--slate);
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 26px;
+  color: var(--slate);
+  letter-spacing: -0.01em;
+  margin-top: 56px;
+}
+h2:first-of-type { margin-top: 32px; }
+h3 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--slate);
+  margin-top: 32px;
+  margin-bottom: 8px;
+}
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--g500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+.warn-block {
+  border-left: 4px solid var(--clay);
+  background: #FFF5F0;
+  border-radius: 0 10px 10px 0;
+  padding: 12px 18px;
+  margin: 16px 0;
+  font-size: 14px;
+  color: var(--slate);
+}
+code, pre { font-family: var(--mono); font-size: 13px; }
+pre {
+  background: var(--g100);
+  border: 1.5px solid var(--g300);
+  border-radius: 10px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+code { background: var(--g100); padding: 1px 6px; border-radius: 4px; }
+pre code { background: transparent; padding: 0; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+}
+th, td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--g300);
+  vertical-align: top;
+}
+th { font-family: var(--sans); font-weight: 600; color: var(--slate); background: var(--g100); }
+blockquote {
+  border-left: 3px solid var(--g300);
+  padding: 8px 16px;
+  margin: 12px 0;
+  color: var(--g700);
+  font-style: italic;
+}
+a { color: var(--clay); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 150ms; }
+a:hover { border-bottom-color: var(--clay); }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin-bottom: 4px; }
+p { margin-bottom: 12px; }
+html { scroll-behavior: smooth; }
+@page { size: A4; margin: 18mm 15mm; }
+@media print {
+  body { background: #fff; padding: 0; }
+  .page { max-width: 100%; }
+  pre, table { break-inside: avoid; page-break-inside: avoid; }
+  a::after { content: " (" attr(href) ")"; font-size: 10px; color: #888; }
+}
+</style>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#FAF9F5', primaryTextColor: '#141413',
+      primaryBorderColor: '#D1CFC5', lineColor: '#87867F',
+      secondaryColor: '#E3DACC', tertiaryColor: '#F0EEE6'
+    },
+    fontFamily: 'ui-sans-serif, system-ui, sans-serif'
+  });
+</script>
+</head>
+<body>
+<div class="page">
+
+<div class="eyebrow">DS-APM · WBS-1.4 · 2026-06-02</div>
+<h1>WBS-1.4 — PII 마스킹 필터 (PII Masking Filter)</h1>
+
+<blockquote>
+<p><strong>상태</strong>: 착수 예정 (착수보고 기준)<br>
+<strong>일정</strong>: 2026-07-13 ~ 2026-07-24 (2주, WBS-1.3과 병렬)</p>
+</blockquote>
+
+<div class="warn-block">
+<strong>경고</strong>: README 기준 production-ready 아님 — 강화 follow-up 필요
+</div>
+
+<h2 id="deliverable">Deliverable</h2>
+<p>Incident payload 직렬화 단계의 PII redaction 유틸리티. email 주소, 한국 휴대전화 번호(KR phone), unmarked long secret (예: 토큰/키 패턴) 3 카테고리에 대해 마스킹 처리해야 한다. 채널 dispatch 직전 단계에서 invocation 되어 모든 5개 채널 페이로드에 일관 적용되어야 한다.</p>
+
+<h2 id="acceptance">Acceptance Criteria</h2>
+<ul>
+  <li>[ ] F7.7 acceptance Gherkin pass — email / KR phone / long secret 패턴이 마스킹되어야 한다</li>
+  <li>[ ] redaction 후에도 incident 식별자(alertname, fingerprint 등)는 유지되어야 한다</li>
+  <li>[ ] redaction 미적용 페이로드는 dispatch 경로로 넘어가지 않아야 한다 (정책상 hard gate)</li>
+</ul>
+
+<h2 id="schedule">Work Package 일정 (일 단위)</h2>
+<blockquote>
+<p>영업일(주5일) 기준, 공휴일 미반영. 의존성 순서: 인터페이스·타입 → 구현 → 통합·검증.</p>
+</blockquote>
+
+<table>
+  <thead><tr><th>WP ID</th><th>작업명</th><th>선행</th><th>시작일</th><th>종료일</th><th>기간(영업일)</th></tr></thead>
+  <tbody>
+    <tr><td>1.4.1</td><td>Redaction rule engine</td><td>1.0.6</td><td>2026-07-13</td><td>2026-07-14</td><td>2</td></tr>
+    <tr><td>1.4.2</td><td>Incident payload redaction 적용</td><td>1.4.1</td><td>2026-07-15</td><td>2026-07-16</td><td>2</td></tr>
+    <tr><td>1.4.3</td><td>Audit sink 연동</td><td>1.4.2</td><td>2026-07-17</td><td>2026-07-20</td><td>2</td></tr>
+    <tr><td>1.4.4</td><td>Tenant별 룰 확장 훅</td><td>1.4.3</td><td>2026-07-21</td><td>2026-07-22</td><td>2</td></tr>
+    <tr><td>1.4.5</td><td>OTel Collector 단 이동 검토</td><td>1.4.4</td><td>2026-07-23</td><td>2026-07-24</td><td>2</td></tr>
+  </tbody>
+</table>
+
+<h2 id="work-packages">Work Packages (Lv3)</h2>
+
+<h3 id="wp-1-4-1">WBS-1.4.1 — Redaction rule engine (Rule Engine)</h3>
+<ul>
+  <li><strong>Deliverable</strong>: email / KR phone / long secret / JWT-like / URL sensitive key 5종 정규식 패턴 및 마스킹 포맷 구현체</li>
+  <li><strong>Acceptance</strong>:
+    <ul>
+      <li><code>SanitizeIncidentValue</code> 단위 테스트: F7.7 Gherkin 5 시나리오 전부 통과</li>
+      <li>패턴은 패키지 초기화 시 1회 컴파일(allocation 0) — NF-F7.2 충족</li>
+    </ul>
+  </li>
+  <li><strong>Source</strong>: <code>pkg/types/alertmanagertypes/incident_payload.go</code></li>
+  <li><strong>일정</strong>: 2026-07-13 ~ 2026-07-14 (2영업일, 선행: 1.0.6)</li>
+  <li><strong>Effort</strong>: TBD</li>
+</ul>
+
+<h3 id="wp-1-4-2">WBS-1.4.2 — Incident payload redaction 적용 (<code>incident_payload</code>)</h3>
+<ul>
+  <li><strong>Deliverable</strong>: <code>BuildSafeIncidentInfo</code> / <code>SanitizeIncidentInfo</code> 호출이 channel adapter 직전에 hard gate로 삽입된 상태 — 모든 5개 채널(Slack / MSTeams / PagerDuty / webhook / email) 동일 경로 통과</li>
+  <li><strong>Acceptance</strong>:
+    <ul>
+      <li>redaction 미적용 페이로드가 dispatch 경로로 넘어가지 않음 (hard gate)</li>
+      <li>incident 식별자(<code>alertname</code>, <code>fingerprint</code> 등) 마스킹 후에도 보존됨</li>
+      <li>통합 테스트: channel adapter stub 기준 sanitized value만 수신</li>
+    </ul>
+  </li>
+  <li><strong>Source</strong>: <code>pkg/types/alertmanagertypes/incident_payload.go</code></li>
+  <li><strong>일정</strong>: 2026-07-15 ~ 2026-07-16 (2영업일, 선행: 1.4.1)</li>
+  <li><strong>Effort</strong>: TBD</li>
+</ul>
+
+<h3 id="wp-1-4-3">WBS-1.4.3 — Audit sink 연동 (Audit Sink Integration)</h3>
+<ul>
+  <li><strong>Deliverable</strong>: 마스킹 전 원본 카테고리 정보와 마스킹 후 결과를 audit 기록으로 남기는 sink — F5(Audit Trail)와 cross-cut</li>
+  <li><strong>Acceptance</strong>:
+    <ul>
+      <li>redacted_count(category별) 카운터가 audit 로그에 기록됨 — NF-F7.5 기초 충족</li>
+      <li>audit 기록에 원본 값이 포함되지 않음 (카테고리·필드명·카운트만)</li>
+    </ul>
+  </li>
+  <li><strong>Source</strong>: <code>pkg/types/alertmanagertypes/incident_payload.go</code> (카운터 훅 추가 위치 TBD)</li>
+  <li><strong>일정</strong>: 2026-07-17 ~ 2026-07-20 (2영업일, 선행: 1.4.2)</li>
+  <li><strong>Effort</strong>: TBD</li>
+</ul>
+
+<h3 id="wp-1-4-4">WBS-1.4.4 — Tenant별 룰 확장 훅 (Tenant-Scoped Rule Extension Hook)</h3>
+<ul>
+  <li><strong>Deliverable</strong>: 향후 tenant별 추가 패턴(카드번호·주민번호·커스텀 regex 등)을 주입할 수 있는 인터페이스 골격 — 현재는 글로벌 룰만 활성화, OTel Collector 단계 이동 검토 시 기반으로 활용</li>
+  <li><strong>Acceptance</strong>:
+    <ul>
+      <li><code>RedactionRuleSet</code> 인터페이스(또는 등가 구조체) 정의 존재</li>
+      <li>글로벌 기본 룰셋이 기존 동작과 동일하게 통과</li>
+      <li>tenant override 진입점에 TODO/OpenItem 주석 포함(구현 stub 허용)</li>
+    </ul>
+  </li>
+  <li><strong>Source</strong>: <code>pkg/types/alertmanagertypes/</code> (신규 파일 또는 기존 확장)</li>
+  <li><strong>일정</strong>: 2026-07-21 ~ 2026-07-22 (2영업일, 선행: 1.4.3)</li>
+  <li><strong>Effort</strong>: TBD</li>
+</ul>
+
+<h3 id="wp-1-4-5">WBS-1.4.5 — OTel Collector 단 이동 검토 (Collector-Stage Migration Scaffold)</h3>
+<ul>
+  <li><strong>Deliverable</strong>: Collector processor 단 redaction 이동 가능성을 평가하는 설계 메모 및 stub — 착수 후 결정 사항, 본 work package는 scaffolding only / decision pending</li>
+  <li><strong>Acceptance</strong>:
+    <ul>
+      <li>Collector processor 매핑 분석 문서(ADR 또는 설계 메모) 존재 — <code>transform</code> / <code>redaction</code> / <code>filter</code> 프로세서 대응표 포함</li>
+      <li>AIOpsAgent ingress 단 유지 vs Collector 이동 트레이드오프 정리</li>
+      <li>구현 착수 여부는 WBS-1.4.5 검토 완료 후 결정 (현 단계 코드 변경 없음)</li>
+    </ul>
+  </li>
+  <li><strong>Source</strong>: 설계 메모 (<code>docs/spec/</code> 또는 ADR 디렉터리), <code>pkg/types/alertmanagertypes/</code> (착수 시 참조)</li>
+  <li><strong>일정</strong>: 2026-07-23 ~ 2026-07-24 (2영업일, 선행: 1.4.4)</li>
+  <li><strong>Effort</strong>: TBD</li>
+</ul>
+
+<h2 id="owner">Owner</h2>
+<p>TBD (TBC)</p>
+
+<h2 id="effort">Estimated Effort</h2>
+<p>TBD</p>
+
+<h2 id="dependencies">Dependencies</h2>
+<ul>
+  <li>WBS-1.0 공통 기반 모듈 (incident payload 타입)</li>
+</ul>
+
+<h2 id="verification">Verification</h2>
+<ul>
+  <li><code>pkg/types/alertmanagertypes/incident_payload_test.go</code></li>
+</ul>
+
+<h2 id="covers">Covers Features</h2>
+<ul>
+  <li>F7 PII Redaction</li>
+</ul>
+
+<h2 id="source-paths">Source Paths</h2>
+<ul>
+  <li><code>pkg/types/alertmanagertypes/incident_payload.go</code></li>
+</ul>
+
+<h2 id="open-items">Open Items</h2>
+<ul>
+  <li>production-readiness 강화 — 카테고리 추가 (주민등록번호·여권번호·카드번호 등), false positive/negative 측정</li>
+  <li>redaction 단계를 OTel Collector processor 단으로 이동시켜 source-of-truth에 가깝게 처리할지 검토</li>
+  <li>redaction metric 노출 (redacted_count by category) 추가 검토</li>
+</ul>
+
+</div>
+</body>
+</html>

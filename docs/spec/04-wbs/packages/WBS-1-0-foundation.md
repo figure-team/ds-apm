@@ -35,6 +35,19 @@ Pilot 계약 스키마 (`pilot_contract`), 관리형 markdown 페이로드 (`pil
 - [ ] F5.7 acceptance Gherkin pass — SOP / draft / dispatch 이벤트가 audit sink로 기록되어야 한다
 - [ ] community 바이너리 부팅 시 pilot contract와 audit sink가 의존성 그래프에 등록됨
 
+## Work Package 일정 (일 단위)
+
+> 영업일(주5일) 기준, 공휴일 미반영. 의존성 순서: 인터페이스·타입 → 구현 → 통합·검증.
+
+| WP ID | 작업명 | 선행 | 시작일 | 종료일 | 기간(영업일) |
+|---|---|---|---|---|---|
+| 1.0.1 | Pilot 계약 스키마 | — | 2026-05-25 | 2026-05-27 | 3 |
+| 1.0.2 | 관리형 Markdown 페이로드 | 1.0.1 | 2026-05-28 | 2026-06-01 | 3 |
+| 1.0.3 | 테넌트 격리 정책 | 1.0.2 | 2026-06-02 | 2026-06-04 | 3 |
+| 1.0.4 | 감사 Sink 추상화 | 1.0.3 | 2026-06-05 | 2026-06-08 | 2 |
+| 1.0.5 | JSONL 감사 Sink 구현 | 1.0.4 | 2026-06-09 | 2026-06-10 | 2 |
+| 1.0.6 | community 진입점 와이어업 | 1.0.5 | 2026-06-11 | 2026-06-12 | 2 |
+
 ## Work Packages (Lv3)
 
 ### WBS-1.0.1 — Pilot 계약 스키마 (pilot_contract)
@@ -45,6 +58,7 @@ Pilot 계약 스키마 (`pilot_contract`), 관리형 markdown 페이로드 (`pil
   - Contract version 상수는 절대 자동 변경되지 않음 (NF-F0.1)
   - validator가 `errors.Join`으로 모든 위반을 한꺼번에 보고
 - **Source**: `pkg/types/ruletypes/pilot_contract.go`
+- **일정**: 2026-05-25 ~ 2026-05-27 (3영업일, 선행: —)
 - **Effort**: TBD
 
 ### WBS-1.0.2 — 관리형 Markdown 페이로드 (pilot_managed_markdown)
@@ -55,6 +69,7 @@ Pilot 계약 스키마 (`pilot_contract`), 관리형 markdown 페이로드 (`pil
   - body markdown이 256 KiB 초과 시 validation error 반환 (NF-F0.4)
   - `managed_markdown` 외 kind는 미구현 상태로 문서화됨 (F0.3 enum 주석)
 - **Source**: `pkg/types/ruletypes/pilot_managed_markdown.go`
+- **일정**: 2026-05-28 ~ 2026-06-01 (3영업일, 선행: 1.0.1)
 - **Effort**: TBD
 
 ### WBS-1.0.3 — 테넌트 격리 정책 (tenant_policy)
@@ -65,6 +80,7 @@ Pilot 계약 스키마 (`pilot_contract`), 관리형 markdown 페이로드 (`pil
   - `Environments=["*"]` 와일드카드 시 임의 environment 허용 (F4.7 Scenario 2)
   - `project_id` label 누락 시 `PilotTenantIsComplete()=false` → 접근 거부 (F4.7 Scenario 3)
 - **Source**: `pkg/types/ruletypes/tenant_policy.go`
+- **일정**: 2026-06-02 ~ 2026-06-04 (3영업일, 선행: 1.0.2)
 - **Effort**: TBD
 
 ### WBS-1.0.4 — 감사 Sink 추상화 (pilot_audit_sink)
@@ -75,6 +91,7 @@ Pilot 계약 스키마 (`pilot_contract`), 관리형 markdown 페이로드 (`pil
   - `DispatchPilotAuditEvent`는 sink error를 반환하되, 호출자는 best-effort로 무시 가능 (F5.5 convention)
   - SOP access/fetch path에서 audit event 누락률 0% (NF-F5.5, in-process 범위)
 - **Source**: `pkg/types/ruletypes/pilot_audit_sink.go`
+- **일정**: 2026-06-05 ~ 2026-06-08 (2영업일, 선행: 1.0.3)
 - **Effort**: TBD
 
 ### WBS-1.0.5 — JSONL 감사 Sink 구현 (pilot_audit_sink_jsonl)
@@ -85,6 +102,7 @@ Pilot 계약 스키마 (`pilot_contract`), 관리형 markdown 페이로드 (`pil
   - 무효 이벤트(empty EventID 등) → error 없이 silent drop + warn log (F5.7 Scenario 2)
   - 활성 파일이 임계치 초과 시 rename → fresh 파일에 신규 이벤트 기록 (F5.7 Scenario 3)
 - **Source**: `pkg/types/ruletypes/pilot_audit_sink_jsonl.go`
+- **일정**: 2026-06-09 ~ 2026-06-10 (2영업일, 선행: 1.0.4)
 - **Effort**: TBD
 
 ### WBS-1.0.6 — community 진입점 와이어업 (cmd/community)
@@ -95,6 +113,7 @@ Pilot 계약 스키마 (`pilot_contract`), 관리형 markdown 페이로드 (`pil
   - 부팅 성공 시 pilot contract와 audit sink가 의존성 그래프에 등록됨 (WBS-1.0 Acceptance Criteria 마지막 항목)
   - `main()` 내 sink 등록이 `registerServer` 호출 전에 완료됨 (순서 보장)
 - **Source**: `cmd/community/`
+- **일정**: 2026-06-11 ~ 2026-06-12 (2영업일, 선행: 1.0.5)
 - **Effort**: TBD
 
 ## Owner

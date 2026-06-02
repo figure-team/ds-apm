@@ -1,103 +1,427 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DS-APM 실사용 시나리오 (요약본)</title>
-<style>
-/* DS-APM 공통 디자인 토큰 (research-skills-b-html.md §5.1) */
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DS-APM 요약본 — Use Case</title><style>
+/* DS-APM 산출물 공통 디자인 토큰
+ * 출처: docs/spec/_foundation/research-skills-b-html.md §5.1~5.10
+ * Anthropic Claude 브랜드 팔레트 + 시스템 폰트 + html-effectiveness 패턴
+ * Self-contained, zero deps, light-only (다크모드는 v2 follow-up)
+ */
+
 :root {
-  --ivory:#FAF9F5; --slate:#141413; --clay:#D97757; --oat:#E3DACC;
-  --olive:#788C5D; --sky:#6A8CAF;
-  --g100:#F0EEE6; --g300:#D1CFC5; --g500:#87867F; --g700:#3D3D3A;
+  /* Color tokens (html-effectiveness 팔레트) */
+  --ivory:#FAF9F5;
+  --slate:#141413;
+  --clay:#D97757;
+  --oat:#E3DACC;
+  --olive:#788C5D;
+  --sky:#6A8CAF;
+  --g100:#F0EEE6;
+  --g300:#D1CFC5;
+  --g500:#87867F;
+  --g700:#3D3D3A;
+
+  /* Font stacks */
   --serif: ui-serif, Georgia, 'Times New Roman', serif;
   --sans:  system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --mono:  ui-monospace, 'SF Mono', Menlo, Monaco, monospace;
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  background: var(--ivory); color: var(--g700);
-  font-family: var(--sans); line-height: 1.6;
+  background: var(--ivory);
+  color: var(--g700);
+  font-family: var(--sans);
+  line-height: 1.55;
   padding: 56px 32px 120px;
   -webkit-font-smoothing: antialiased;
 }
-.page { max-width: 880px; margin: 0 auto; }
+
+.page { max-width: 1120px; margin: 0 auto; }
+
+/* ========== Headings ========== */
 h1 {
-  font-family: var(--serif); font-weight: 500;
-  font-size: clamp(34px, 5vw, 50px); color: var(--slate);
-  letter-spacing: -0.02em; margin-bottom: 16px;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(38px, 5.4vw, 62px);
+  color: var(--slate);
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
 }
 h2 {
-  font-family: var(--serif); font-weight: 500;
-  font-size: 26px; color: var(--slate);
-  letter-spacing: -0.01em; margin-top: 64px; margin-bottom: 14px;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 26px;
+  color: var(--slate);
+  letter-spacing: -0.01em;
 }
 h3 {
-  font-family: var(--sans); font-weight: 600;
-  font-size: 17px; color: var(--slate); margin: 28px 0 10px;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--slate);
+  margin-bottom: 8px;
 }
+h4 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--g700);
+  margin-bottom: 6px;
+}
+
+/* ========== Eyebrow ========== */
 .eyebrow {
-  font-family: var(--mono); font-size: 12px; color: var(--g500);
-  text-transform: uppercase; letter-spacing: 0.04em;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--g500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   margin-bottom: 12px;
 }
-.intro {
-  font-size: 15.5px; color: var(--g700);
-  border-left: 4px solid var(--clay);
-  background: #fff;
-  padding: 16px 22px;
-  border-radius: 0 10px 10px 0;
-  margin: 24px 0 40px;
+
+/* ========== Section head ========== */
+.sec-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 8px;
+  margin-top: 64px;
 }
-.intro p { margin-bottom: 6px; }
-.intro p:last-child { margin-bottom: 0; }
-.intro strong { color: var(--slate); }
-table {
-  width: 100%; border-collapse: collapse;
-  margin: 16px 0; font-size: 14.5px; background: #fff;
-  border-radius: 10px; overflow: hidden;
+.sec-head .num {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--oat);
+  color: var(--slate);
+  padding: 3px 9px;
+  border-radius: 8px;
+}
+.sec-intro {
+  font-size: 14.5px;
+  color: var(--g500);
+  max-width: 720px;
+  margin-bottom: 28px;
+}
+
+/* ========== Summary 4-cell grid (Overview, F module NFR) ========== */
+.summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.summary .cell {
   border: 1.5px solid var(--g300);
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+}
+.summary .cell .k {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--g500);
+  text-transform: uppercase;
+}
+.summary .cell .v {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--slate);
+  margin-top: 4px;
+}
+.summary .cell .v.accent { color: var(--clay); }
+
+@media (max-width: 720px) {
+  .summary { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ========== Milestone timeline (WBS) ========== */
+.milestones { display: flex; flex-direction: column; }
+.milestone {
+  display: grid;
+  grid-template-columns: 120px 28px 1fr;
+  gap: 0 18px;
+}
+.milestone .when {
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--g500);
+  padding-top: 4px;
+}
+.milestone .dot-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.milestone .dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--clay);
+  margin-top: 4px;
+}
+.milestone .dot.done {
+  background: var(--olive);
+  border-color: var(--olive);
+}
+.milestone .line {
+  width: 2px;
+  flex: 1;
+  background: var(--g300);
+  margin: 4px 0;
+}
+.milestone:last-child .line { display: none; }
+.milestone .body { padding-bottom: 36px; }
+
+/* ========== Severity badge ========== */
+.sev {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+.sev.high { background: #F3D9CC; color: #8A3B1E; }
+.sev.med  { background: var(--oat); color: var(--slate); }
+.sev.low  { background: #E4E9DC; color: #4B5C39; }
+
+/* ========== Open question / risk card ========== */
+.q {
+  border-left: 4px solid var(--clay);
+  border-radius: 10px;
+  padding: 16px 20px;
+  background: #fff;
+  margin-bottom: 12px;
+}
+
+/* ========== Risks/exception table (3-col grid) ========== */
+.risks { display: flex; flex-direction: column; gap: 8px; }
+.risks .row {
+  display: grid;
+  grid-template-columns: 2fr 80px 3fr;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1.5px solid var(--g300);
+  border-radius: 10px;
+  background: #fff;
+}
+.risks .row .cell { font-size: 13.5px; }
+
+/* ========== Code ========== */
+code, pre {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+pre {
+  background: var(--g100);
+  border: 1.5px solid var(--g300);
+  border-radius: 10px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+code {
+  background: var(--g100);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+pre code {
+  background: transparent;
+  padding: 0;
+}
+
+/* ========== Tables ========== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
 }
 th, td {
-  text-align: left; padding: 10px 14px;
-  border-bottom: 1px solid var(--g300); vertical-align: top;
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--g300);
+  vertical-align: top;
 }
-tr:last-child td { border-bottom: none; }
 th {
-  font-family: var(--sans); font-weight: 600;
-  color: var(--slate); background: var(--g100);
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--slate);
+  background: var(--g100);
+}
+
+/* ========== Details (collapsible) ========== */
+details.expand {
+  border: 1.5px solid var(--g300);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  background: #fff;
+}
+details.expand summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--slate);
+}
+details.expand[open] { background: var(--g100); }
+details.expand .body {
+  margin-top: 12px;
   font-size: 13.5px;
+  color: var(--g700);
 }
-td strong { color: var(--slate); }
-ol, ul { margin: 12px 0 12px 24px; }
-li { margin-bottom: 6px; font-size: 15px; color: var(--g700); }
-p { margin-bottom: 12px; font-size: 15px; color: var(--g700); }
-p strong, li strong { color: var(--slate); }
-code {
-  font-family: var(--mono); font-size: 13px;
-  background: var(--g100); padding: 1px 6px; border-radius: 4px;
+
+/* ========== Sticky TOC sidebar ========== */
+.toc-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 48px;
 }
+.toc {
+  position: sticky;
+  top: 32px;
+  align-self: start;
+  border: 1.5px solid var(--g300);
+  border-radius: 12px;
+  background: #fff;
+  padding: 16px;
+}
+.toc .label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--g500);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.toc ol {
+  list-style: none;
+  padding: 0;
+}
+.toc li {
+  font-size: 13px;
+  padding: 6px 0;
+}
+.toc a {
+  color: var(--g700);
+  text-decoration: none;
+}
+.toc a:hover { color: var(--clay); }
+
+@media (max-width: 960px) {
+  .toc-page { grid-template-columns: 1fr; }
+  .toc { position: static; }
+}
+
+html { scroll-behavior: smooth; }
+
+/* ========== Links ========== */
 a {
-  color: var(--clay); text-decoration: none;
+  color: var(--clay);
+  text-decoration: none;
   border-bottom: 1px solid transparent;
   transition: border-color 150ms;
 }
 a:hover { border-bottom-color: var(--clay); }
+
+/* ========== Lists ========== */
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin-bottom: 4px; }
+
+/* ========== Blockquote ========== */
 blockquote {
   border-left: 3px solid var(--g300);
-  padding: 8px 18px;
-  margin: 16px 0;
+  padding: 8px 16px;
+  margin: 12px 0;
   color: var(--g700);
-  background: #fff;
-  border-radius: 0 8px 8px 0;
   font-style: italic;
-  font-size: 15px;
 }
+
+/* ========== Mermaid container ========== */
 .mermaid {
-  background: #fff; border: 1.5px solid var(--g300);
-  border-radius: 10px; padding: 24px 16px; margin: 20px 0;
+  background: #fff;
+  border: 1.5px solid var(--g300);
+  border-radius: 10px;
+  padding: 16px;
+  margin: 16px 0;
   text-align: center;
 }
+
+/* ========== Inline tags / chips ========== */
+.tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--g100);
+  color: var(--g700);
+  margin-right: 6px;
+}
+.tag.id { color: var(--clay); border: 1px solid var(--g300); background: #fff; }
+
+/* ========== Status pill ========== */
+.status-pill {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.status-pill.implemented { background: #E4E9DC; color: #4B5C39; }
+.status-pill.mvp { background: var(--oat); color: var(--slate); }
+.status-pill.pending { background: #F3D9CC; color: #8A3B1E; }
+.status-pill.draft { background: var(--g100); color: var(--g500); }
+.status-pill.planned { background: #DCE2EA; color: #3E4B5C; }
+
+/* ========== Print / PDF ========== */
+@page { size: A4; margin: 18mm 15mm; }
+
+@media print {
+  body { background: #fff; padding: 0; }
+  .page, .toc-page { max-width: 100%; }
+  section { break-before: page; page-break-before: page; }
+  section:first-of-type { break-before: auto; page-break-before: auto; }
+  .milestone, .summary .cell, .q, .risks .row,
+  pre, table, svg, .mermaid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  details > summary { list-style: none; }
+  details:not([open]) > *:not(summary) { display: none; }
+  aside, .toc { position: static; }
+  a::after { content: " (" attr(href) ")"; font-size: 10px; color: #888; }
+}
+
+/* ===== 요약본(00-brief) 전용 추가 클래스 ===== */
+h2 { margin-top: 56px; }
+h2:first-of-type { margin-top: 32px; }
+.intro {
+  font-size: 15.5px; color: var(--g700);
+  border-left: 4px solid var(--clay); background: #fff;
+  padding: 16px 22px; border-radius: 0 10px 10px 0; margin: 24px 0 40px;
+}
+.intro p { margin-bottom: 6px; font-size: 15px; }
+.intro p:last-child { margin-bottom: 0; }
+.intro strong { color: var(--slate); }
+.channels { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 20px; }
+.channels .chip {
+  display: inline-block; font-family: var(--mono); font-size: 12.5px;
+  font-weight: 600; padding: 6px 14px; border-radius: 999px;
+  background: var(--oat); color: var(--slate);
+}
+.footnote {
+  margin-top: 80px; padding-top: 20px; border-top: 1px solid var(--g300);
+  font-size: 13.5px; color: var(--g500); font-style: italic;
+}
+.status-done {
+  display: inline-block; font-family: var(--mono); font-size: 11px;
+  padding: 2px 8px; border-radius: 6px; font-weight: 600;
+  background: #E4E9DC; color: #4B5C39; margin-left: 6px; vertical-align: middle;
+}
+p { margin-bottom: 12px; }
+
+/* ===== Scenario card (brief-usecase 전용 표현 보존) ===== */
 .scenario {
   border-left: 6px solid var(--g300);
   background: #fff;
@@ -112,7 +436,7 @@ blockquote {
 .scenario.s2 { border-left-color: var(--clay); }
 .scenario.s3 { border-left-color: var(--sky); }
 .scenario h2 { margin-top: 0; }
-.scenario .tag {
+.scenario .s-tag {
   display: inline-block;
   font-family: var(--mono); font-size: 11px;
   padding: 3px 10px; border-radius: 999px;
@@ -120,9 +444,10 @@ blockquote {
   text-transform: uppercase; letter-spacing: 0.04em;
   margin-bottom: 12px;
 }
-.scenario.s1 .tag { background: #E4E9DC; color: #4B5C39; }
-.scenario.s2 .tag { background: #F3D9CC; color: #8A3B1E; }
-.scenario.s3 .tag { background: #DDE6EE; color: #2F4A66; }
+.scenario.s1 .s-tag { background: #E4E9DC; color: #4B5C39; }
+.scenario.s2 .s-tag { background: #F3D9CC; color: #8A3B1E; }
+.scenario.s3 .s-tag { background: #DDE6EE; color: #2F4A66; }
+.scenario h3 { margin-top: 28px; }
 .callout {
   background: var(--g100);
   border-radius: 10px;
@@ -131,21 +456,10 @@ blockquote {
   font-size: 14.5px;
 }
 .callout strong { color: var(--slate); }
-.footnote {
-  margin-top: 80px; padding-top: 20px;
-  border-top: 1px solid var(--g300);
-  font-size: 13.5px; color: var(--g500); font-style: italic;
-}
-@page { size: A4; margin: 18mm 15mm; }
 @media print {
-  body { background: #fff; padding: 0; }
-  .page { max-width: 100%; }
-  table, .mermaid, .scenario, .callout, blockquote {
-    break-inside: avoid; page-break-inside: avoid;
-  }
-  .scenario { break-before: page; page-break-before: page; }
+  .scenario { break-before: page; page-break-before: page; break-inside: auto; }
   .scenario:first-of-type { break-before: auto; page-break-before: auto; }
-  a::after { content: " (" attr(href) ")"; font-size: 10px; color: #888; }
+  .callout { break-inside: avoid; page-break-inside: avoid; }
 }
 </style>
 <script type="module">
@@ -154,301 +468,147 @@ blockquote {
     startOnLoad: true,
     theme: 'base',
     themeVariables: {
-      primaryColor: '#FAF9F5',
-      primaryTextColor: '#141413',
-      primaryBorderColor: '#D1CFC5',
-      lineColor: '#87867F',
-      secondaryColor: '#E3DACC',
-      tertiaryColor: '#F0EEE6'
+      primaryColor: '#FAF9F5', primaryTextColor: '#141413',
+      primaryBorderColor: '#D1CFC5', lineColor: '#87867F',
+      secondaryColor: '#E3DACC', tertiaryColor: '#F0EEE6'
     },
     fontFamily: 'ui-sans-serif, system-ui, sans-serif'
   });
 </script>
-</head>
-<body>
+</head><body>
 <div class="page">
 
-<div class="eyebrow">DS-APM · 요약본 Use Case · 2026-06-02</div>
-<h1>DS-APM 실사용 시나리오 (요약본)</h1>
+<div class="eyebrow">DS-APM · 요약본 · Use Case · 2026-06-02</div>
+<h1>DS-APM 실사용 시나리오</h1>
 
-<div class="intro">
-  <p><strong>대상</strong>: 팀장 · 매니저 · 의사결정자.</p>
-  <p><strong>읽는 시간</strong>: 약 10~15분.</p>
-  <p><strong>목적</strong>: DS-APM이 실제 새벽 장애 상황에서 어떻게 동작하는지 세 가지 대표 장면으로 보입니다. 개발 디테일은 모두 걷어내고 "누가, 무엇을, 어떻게"만 남겼습니다.</p>
+<div class="intro"><p>새벽 결제 5xx 장애 한 상황에서 <strong>세 가지 결말</strong> — 정상 · 메신저 실패 · AI 실패. "누가·무엇을·어떻게"만 남겼습니다. 운영자는 어느 경우에도 <strong>판단·승인</strong>만 하고, 정보는 누락되지 않습니다.</p></div>
+
+<div class="summary">
+  <div class="cell"><div class="k">시나리오</div><div class="v accent">3종</div></div>
+  <div class="cell"><div class="k">참여자</div><div class="v">운영자·SRE·시스템</div></div>
+  <div class="cell"><div class="k">핵심 약속</div><div class="v">무손실</div></div>
+  <div class="cell"><div class="k">외부 출구</div><div class="v">5채널·LLM</div></div>
 </div>
 
-<h2>개요</h2>
-
-<div class="callout">
-  <strong>AIOpsAgent</strong>는 SigNoz Community 빌드의 알림 처리 경로에 운영 자동화(SOP 그라운딩·AI 초안·DLQ 재처리) 단계를 추가하는 확장 모듈 그룹입니다. SigNoz Alertmanager의 dispatcher 경로에 SOP(Standard Operating Procedure, 운영 절차서)/AI/DLQ(Dead Letter Queue, 미전송 사장 큐) 단계를 삽입하는 방식으로 동작합니다. 아래 시퀀스 다이어그램의 "시스템" lane 안에서 일어나는 일은 모두 같은 프로세스 안의 함수 호출이고, 외부 HTTP 호출은 출구의 5채널(Slack/MS Teams/PagerDuty/Webhook/Email)과 LLM(Large Language Model, 대규모 언어 모델) API뿐입니다.
-</div>
-
-<p>새벽 3시. 결제 시스템에 5xx 오류가 임계치를 넘어 알람이 발화하는 동일한 상황에서 세 가지 결말이 가능합니다.</p>
-
+<h2>세 가지 시나리오</h2>
 <table>
-  <thead><tr><th style="width:22%">시나리오</th><th style="width:28%">한 줄 요약</th><th>무엇이 일어나나</th></tr></thead>
+  <thead><tr><th style="width:22%">시나리오</th><th>한 줄</th><th style="width:14%">약속</th></tr></thead>
   <tbody>
-    <tr>
-      <td><strong>시나리오 1<br/>정상 흐름</strong></td>
-      <td>장애 발생 → 협업 도구(메신저) 발송까지 약 30초</td>
-      <td>시스템이 절차서를 찾아 AI 초안과 함께 운영 담당자에게 띄우고, 운영 담당자가 한 번 승인하면 5채널 동시 발송</td>
-    </tr>
-    <tr>
-      <td><strong>시나리오 2<br/>메신저 전송 실패</strong></td>
-      <td>메신저가 안 받으면 보관함에 모아 두고 운영 담당자가 재전송</td>
-      <td>일시 장애로 메신저가 안 받을 때 자동 재시도 → 그래도 안 되면 보관함(DLQ)에 보존 → 운영 담당자가 직접 다시 발송</td>
-    </tr>
-    <tr>
-      <td><strong>시나리오 3<br/>AI가 답을 못 줄 때</strong></td>
-      <td>AI 인증 실패·quota 초과 시 절차서 원문 그대로 발송</td>
-      <td>외부 AI가 응답을 거부하면 가공 없이 절차서 원문 그대로 운영 담당자에게 도달 — 침묵하지 않습니다</td>
-    </tr>
+    <tr><td><strong>1 · 정상</strong></td><td>장애 → 메신저 도달 약 30초. SOP+AI 초안 함께, 운영자 승인 1회 → 5채널 동시 발송</td><td>30초</td></tr>
+    <tr><td><strong>2 · 메신저 실패</strong></td><td>일시 장애 시 자동 재시도 → 실패분 보관함(DLQ) 보존 → 운영자 재전송(중복 차단)</td><td>무손실</td></tr>
+    <tr><td><strong>3 · AI 실패</strong></td><td>LLM 인증/quota 실패 시 SOP 원문 그대로 발송. 침묵 안 함</td><td>대응 지속</td></tr>
   </tbody>
 </table>
 
-<p>등장하는 참여자(Actor)는 세 부류입니다.</p>
+<h2>더 보기 (필요할 때만 펼치기)</h2>
+<div class="more">
 
-<ul>
-  <li><strong>운영 담당자 (당직 운영자, on-call)</strong> — 새벽 알람을 받는 당직자입니다. AIOpsAgent가 반복 노동을 덜어 주는 대신, <strong>판단과 승인</strong>은 그대로 남습니다.</li>
-  <li><strong>SRE</strong> — 운영 안정성 담당입니다. 보관함이 차오르거나 AI가 광역 실패하면 SRE에게 별도 메타 알람이 발송됩니다.</li>
-  <li><strong>시스템 (SigNoz + AIOpsAgent)</strong> — SigNoz Ruler·Alertmanager와 AIOpsAgent 모듈이 함께 동작합니다. Alertmanager가 알람을 발화시키면 AIOpsAgent가 받아 절차서를 찾고, 외부 LLM에 초안을 요청하고, 협업 도구(메신저)로 발송하는 일까지 자동 수행합니다.</li>
-</ul>
-
-<h2>누가 무엇을 하나</h2>
-
-<p>각 시나리오에서 누가 어떤 역할을 맡는지 한 장으로 정리.</p>
-
-<table>
-  <thead>
-    <tr>
-      <th style="width:16%">역할</th>
-      <th>시나리오 1 (정상)</th>
-      <th>시나리오 2 (메신저 실패)</th>
-      <th>시나리오 3 (AI 실패)</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>운영 담당자</strong></td>
-      <td>알람과 AI 초안을 검토하고 <strong>한 번 승인</strong></td>
-      <td>보관함의 미발송 건을 확인하고 <strong>재전송 명령</strong></td>
-      <td>절차서 원문을 받아 그대로 대응 시작</td>
-    </tr>
-    <tr>
-      <td><strong>SRE</strong></td>
-      <td>관여 없음</td>
-      <td>보관함 적재량이 임계치를 넘으면 별도 알람 수신</td>
-      <td>AI가 인증 실패·광역 장애일 때 별도 알람 수신, 자격증명 회전</td>
-    </tr>
-    <tr>
-      <td><strong>시스템</strong></td>
-      <td>알람 수신 → 절차서 매칭 → AI 초안 → 5채널 발송</td>
-      <td>메신저 실패 자동 감지 → 재시도 → 보관함 적재 → 재전송 처리</td>
-      <td>AI 실패 자동 감지 → 절차서 원문으로 대체 발송</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>운영 담당자의 핵심 책임 — <strong>이 알람이 진짜인지, 이 조치가 맞는지 판단</strong> — 은 어느 시나리오에서도 시스템이 대체하지 않습니다.</p>
-
-<div class="scenario s1">
-  <span class="tag">시나리오 1 · Golden Path</span>
-  <h2>시나리오 1 — 정상 시나리오</h2>
-
-  <h3>한 줄 요약</h3>
-  <p>장애가 발생한 시점부터 운영 담당자가 검토한 메시지가 5개 협업 도구(메신저) 채널에 도달하기까지 <strong>약 30초</strong>입니다. 운영 담당자의 손이 들어가는 부분은 "검토하고 승인" 한 번뿐입니다.</p>
-
-  <h3>운영 담당자 입장에서 본 흐름</h3>
-  <p>새벽 3시. 운영 담당자의 폰이 울립니다. 평소와 다른 점은 메시지 내용입니다.</p>
-  <ol>
-    <li><strong>알람 도착</strong> — SigNoz Alertmanager가 알람을 발화시키면 AIOpsAgent가 받습니다. "결제 5xx 오류 임계치 초과"라는 한 줄에 그치지 않고, <strong>관련 절차서</strong>와 <strong>AI가 정리한 3단계 조치 초안</strong>(예: 게이트웨이 확인 → 최근 배포 확인 → 롤백)이 함께 도달합니다. 위키를 뒤지지 않아도 됩니다.</li>
-    <li><strong>검토</strong> — 운영 담당자는 절차서가 맞는 것인지, 초안이 합리적인지 5초간 검토합니다.</li>
-    <li><strong>한 번 승인</strong> — "approve"를 누릅니다.</li>
-    <li><strong>자동 발송</strong> — Slack 채널, MS Teams 채널, PagerDuty escalation(상위 전파), 공용 Webhook, Email 그룹까지 5채널에 동시에 같은 메시지가 도달합니다. 이 5채널이 <strong>유일한 외부 HTTP/SMTP 출구</strong>입니다.</li>
-    <li><strong>본격 대응</strong> — 운영 담당자는 곧바로 절차서 1단계로 진입합니다.</li>
-  </ol>
-  <p>여기까지가 <strong>약 30초</strong>입니다. 이전 같으면 절차서를 찾는 데에만 2~5분이 소요되었습니다.</p>
-
-  <h3>시퀀스 다이어그램 (단순화)</h3>
-  <pre class="mermaid">
+<details class="expand" open><summary>시나리오 1 — 정상 (Golden Path)</summary><div class="body">
+<div class="item"><span class="lab">1 알람</span><span class="txt">Alertmanager 발화 → AIOpsAgent 수신. "결제 5xx 초과" + 관련 SOP + AI 3단계 초안(게이트웨이→배포 확인→롤백) 함께 도달. 위키 안 뒤짐.</span></div>
+<div class="item"><span class="lab">2 승인</span><span class="txt">운영자가 5초 검토 후 "approve" 한 번.</span></div>
+<div class="item"><span class="lab">3 발송</span><span class="txt">Slack·Teams·PagerDuty·Webhook·Email 5채널 동시 도달(유일한 외부 출구). 운영자는 곧장 1단계 진입.</span></div>
+<pre class="mermaid">
 sequenceDiagram
     autonumber
-    participant EXT as 외부 텔레메트리<br/>(OTLP)
-    participant SYS as 시스템<br/>(SigNoz + AIOpsAgent)
-    participant OP as 운영 담당자
-    participant LLM as LLM API<br/>(외부)
-    participant MSG as 협업 도구(메신저)<br/>(Slack/MS Teams/PagerDuty/Webhook/Email)
-
-    EXT->>SYS: OTLP 텔레메트리 (외부 입력)
-    Note over SYS: 내부:<br/>Ruler 평가 → Alertmanager 발화<br/>→ AIOpsAgent Ingress → PII 마스킹<br/>→ SOP 그라운딩
-    SYS->>LLM: AI 초안 작성 요청 (외부 HTTPS)
+    participant EXT as 외부 텔레메트리(OTLP)
+    participant SYS as 시스템(SigNoz+AIOpsAgent)
+    participant OP as 운영자
+    participant LLM as LLM API(외부)
+    participant MSG as 5채널(Slack/Teams/PD/Webhook/Email)
+    EXT->>SYS: OTLP 텔레메트리
+    Note over SYS: Ruler 평가 → Alertmanager 발화 → Ingress → PII 마스킹 → SOP 매칭
+    SYS->>LLM: AI 초안 요청 (HTTPS)
     LLM-->>SYS: 3단계 조치 초안
-    SYS->>OP: 알람 + 절차서 + 초안 통합 발송 (UI)
+    SYS->>OP: 알람 + SOP + 초안 통합 발송
     OP->>SYS: 검토 후 "승인" 한 번
-    SYS->>MSG: 5채널 동시 발송 (외부 HTTP/SMTP)
+    SYS->>MSG: 5채널 동시 발송 (HTTP/SMTP)
     MSG-->>SYS: 전송 완료
-    Note over SYS: 내부: 누가 언제 무엇을 승인했는지 감사 로그 기록
-  </pre>
+    Note over SYS: 감사 로그 기록
+</pre>
+<p style="color:var(--g500);font-size:13px"><strong>예외</strong> · SOP 못 찾으면 원본 알람만 / PII 마스킹 실패 시 발송 중단 / 운영자 무응답(긴급 5분·일반 15분) 시 SOP 원문 자동 발송 — 침묵 안 함.</p>
+</div></details>
 
-  <h3>잘못되면 어떻게 되나</h3>
-  <p>정상 흐름이지만 곁가지로 빠질 수 있는 경우입니다.</p>
-  <ul>
-    <li><strong>절차서를 못 찾을 때</strong> — 운영 담당자에게 "절차서 없음" 표시와 함께 원본 알람만 도달합니다. 운영 담당자가 수동으로 대응합니다.</li>
-    <li><strong>개인정보 마스킹이 실패할 때</strong> — 시스템은 발송을 <strong>중단</strong>합니다 (실수로 개인정보를 외부에 노출하지 않도록). 운영 담당자에게는 "PII(Personally Identifiable Information, 개인 식별 정보) 처리 실패" 알람이 전달됩니다.</li>
-    <li><strong>운영 담당자가 거부할 때</strong> — 초안이 부적절하면 운영 담당자는 거부할 수 있고, 절차서 원문이 대신 발송되거나 운영 담당자가 직접 편집 후 재승인합니다.</li>
-    <li><strong>운영 담당자가 정해진 시간 안에 응답 못 할 때</strong> (긴급 5분 / 일반 15분) — 시스템은 절차서 원문을 자동 발송합니다. <strong>침묵하지 않습니다.</strong></li>
-  </ul>
-</div>
-
-<div class="scenario s2">
-  <span class="tag">시나리오 2 · DLQ Failure</span>
-  <h2>시나리오 2 — 메신저 전송 실패</h2>
-
-  <h3>메신저가 안 받으면</h3>
-  <p>같은 알람을 처리하던 중, 발송 시점에 <strong>외부 Slack API가 일시 장애</strong>라고 가정합니다. 외부 메신저가 응답하지 않는데도 운영 담당자가 그 사실을 모르면, 새벽 장애가 침묵 속에 묻혀 버립니다.</p>
-  <p>AIOpsAgent가 다음 순서로 대응합니다. 보관함(DLQ)은 JSONL 파일 sink입니다.</p>
-  <ol>
-    <li><strong>자동 재시도</strong> — 시스템이 1초 → 2초 → 4초 간격으로 최대 3회 자동 재시도합니다. 일시 장애라면 이 단계에서 대부분 회복됩니다.</li>
-    <li><strong>보관함 적재</strong> — 3회 모두 실패하면 <strong>원본 알람·시도 이력·실패 사유</strong>를 보관함(DLQ JSONL 파일)에 보존합니다. 시스템이 임의로 버리지 않습니다.</li>
-    <li><strong>운영 담당자 알람</strong> — "보관함에 1건 적재됨" 알람을 운영 담당자에게 보냅니다. 보관함이 차오른 사실 자체는 침묵하지 않습니다.</li>
-    <li><strong>운영 담당자 재전송</strong> — 운영 담당자가 Slack 정상화를 확인한 뒤 보관함 화면에서 <strong>"재전송" 한 번</strong>을 누릅니다.</li>
-    <li><strong>중복 방지 확인 후 발송</strong> — 시스템은 이미 전달된 메시지인지 자동 확인하고, 중복이 아니면 새로 발송합니다. 운영 담당자가 같은 알람을 두 번 보내는 사고를 차단합니다.</li>
-  </ol>
-
-  <div class="callout">
-    <strong>핵심 약속</strong> — 정보 손실 0. 외부 메신저가 안 받았다고 알람이 사라지지 않습니다. 보관함이라는 그물이 모든 실패를 받아 냅니다.
-  </div>
-
-  <h3>시퀀스 다이어그램 (단순화)</h3>
-  <pre class="mermaid">
+<details class="expand"><summary>시나리오 2 — 메신저 전송 실패</summary><div class="body">
+<div class="item"><span class="lab">재시도</span><span class="txt">1→2→4초 간격 최대 3회. 일시 장애면 대부분 회복.</span></div>
+<div class="item"><span class="lab">보관함</span><span class="txt">3회 실패 시 원본·시도이력·사유를 DLQ(JSONL 파일)에 보존. 임의 폐기 없음.</span></div>
+<div class="item"><span class="lab">알람</span><span class="txt">"보관함 1건 적재" 운영자에게 알림.</span></div>
+<div class="item"><span class="lab">재전송</span><span class="txt">정상화 확인 후 "재전송" 한 번 → 중복 차단 후 발송.</span></div>
+<pre class="mermaid">
 sequenceDiagram
     autonumber
-    participant SYS as 시스템<br/>(SigNoz + AIOpsAgent)
-    participant MSG as 외부 협업 도구(메신저)<br/>(Slack/MS Teams/PagerDuty/Webhook/Email)
-    participant OP as 운영 담당자
-
-    SYS->>MSG: 발송 시도 1회차 (외부 HTTP/SMTP)
+    participant SYS as 시스템
+    participant MSG as 5채널(외부)
+    participant OP as 운영자
+    SYS->>MSG: 발송 시도 1회차
     MSG-->>SYS: 실패 응답
-    Note over SYS,MSG: 자동 재시도 3회 (1초 → 2초 → 4초)
-    Note over SYS: 내부:<br/>최종 실패 → DLQ JSONL 파일에 적재
-    SYS->>OP: "보관함에 1건 적재됨" 알람 (UI)
-    OP->>SYS: 보관함 조회 + "재전송" 명령
-    Note over SYS: 내부: 재전송 원장(replay ledger) 조회 → 중복 차단
-    SYS->>MSG: 신규 발송 (외부 HTTP/SMTP)
-    MSG-->>SYS: 정상 응답
-    Note over SYS: 내부: DLQ 항목 "해결됨" 마킹 + 재전송 이력 기록
-  </pre>
+    Note over SYS,MSG: 자동 재시도 3회 (1·2·4초)
+    Note over SYS: 최종 실패 → DLQ(JSONL)에 적재
+    SYS->>OP: "보관함 1건 적재" 알람
+    OP->>SYS: 보관함 조회 + "재전송"
+    Note over SYS: replay ledger 조회 → 중복 차단
+    SYS->>MSG: 신규 발송
+    MSG-->>SYS: 정상
+    Note over SYS: DLQ "해결됨" + 재전송 이력
+</pre>
+<p style="color:var(--g500);font-size:13px"><strong>핵심</strong> · 무손실 — 외부 메신저가 안 받아도 알람은 사라지지 않음. <strong>예외</strong> · 보관함 쓰기 실패 시 SRE critical + 메모리 버퍼 / 재전송도 실패 시 escalation.</p>
+</div></details>
 
-  <h3>잘못되면 어떻게 되나</h3>
-  <ul>
-    <li><strong>보관함 자체가 가득 차거나 쓰기 실패</strong> — SRE에게 critical 알람이 발송됩니다. 시스템은 임시 메모리에 버퍼링합니다.</li>
-    <li><strong>재전송도 실패</strong> — 새 시도 이력이 보관함에 다시 적재되고, 운영 담당자에게 escalation(상위 보고) 알람이 발송됩니다 (반복 실패가 일정 횟수를 넘으면 SEV-2 수준).</li>
-    <li><strong>알람 자체가 자동 해소된 경우</strong> — 운영 담당자는 보관함 항목을 "버림"으로 처리할 수 있습니다.</li>
-    <li><strong>운영 담당자가 한꺼번에 여러 건 재전송</strong> — 보관함 화면에서 다중 선택 후 일괄 재전송이 가능합니다. 시스템이 각 건을 독립적으로 처리합니다.</li>
-  </ul>
-</div>
-
-<div class="scenario s3">
-  <span class="tag">시나리오 3 · LLM Fail-open</span>
-  <h2>시나리오 3 — AI가 답을 못 줄 때</h2>
-
-  <h3>AI가 인증 실패하거나 quota 초과면</h3>
-  <p>AIOpsAgent는 외부 LLM API(OpenAI, Anthropic 등)에 HTTPS로 초안을 요청합니다. 그런데 그 외부 LLM이 <strong>인증을 거부</strong>(API key 만료)하거나 <strong>quota를 다 써서</strong> 응답을 안 줄 수 있습니다. 이때 운영 담당자가 새벽 장애 대응을 받지 못하면 안 됩니다.</p>
-  <p>AIOpsAgent는 이런 상황을 위해 <strong>장애 시 통과(fail-open) — 열려서 실패하는</strong> 정책을 채택했습니다. 장애 시 통과(fail-open) 결정은 AI 초안 매니저(AI Drafter Manager) 안의 quota controller가 판단합니다.</p>
-
-  <h3>장애 시 통과(fail-open) 정책의 의미</h3>
-  <blockquote>"AI가 답을 못 주어도, 운영 담당자에게는 <strong>절차서 원문 그대로</strong> 전달한다. 한 자도 빠뜨리지 않는다."</blockquote>
-  <p>운영 담당자 입장에서는 다음과 같이 보입니다.</p>
-  <ul>
-    <li>평소처럼 알람이 도달합니다. 절차서도 함께 도달합니다.</li>
-    <li>다만 메시지에 <strong>"AI 초안 없음, 절차서 원문 사용"</strong> 이라는 작은 표시가 붙습니다.</li>
-    <li>운영 담당자는 절차서를 보고 그대로 따라갑니다. AI 초안이 없을 뿐 대응에 필요한 정보는 모두 도달합니다.</li>
-  </ul>
-  <p>동시에 시스템은 <strong>SRE에게 별도 알람</strong>을 발송합니다 — "외부 LLM이 인증 실패했다, API key를 갱신해 달라"는 메타 알람. 운영 담당자는 새벽 장애 대응을 멈추지 않고, SRE는 별도로 AI 문제를 해결합니다.</p>
-
-  <div class="callout">
-    <strong>핵심 약속</strong> — AI 실패가 운영 담당자 대응의 정지를 만들지 않습니다. AI 초안이 보너스라면, 절차서는 본체입니다.
-  </div>
-
-  <h3>시퀀스 다이어그램 (단순화)</h3>
-  <pre class="mermaid">
+<details class="expand"><summary>시나리오 3 — AI가 답을 못 줄 때 (fail-open)</summary><div class="body">
+<p>외부 LLM이 인증 거부(key 만료)·quota 초과로 응답을 안 주면, quota controller가 <strong>fail-open</strong> 판정 → <strong>SOP 원문 그대로</strong> 발송("AI 초안 없음" 표시). 동시에 SRE에 "LLM 인증 실패, key 갱신" 메타 알람.</p>
+<pre class="mermaid">
 sequenceDiagram
     autonumber
-    participant SYS as 시스템<br/>(SigNoz + AIOpsAgent)
-    participant LLM as 외부 LLM API<br/>(OpenAI / Anthropic)
-    participant OP as 운영 담당자
+    participant SYS as 시스템
+    participant LLM as 외부 LLM API
+    participant OP as 운영자
     participant SRE as SRE
-    participant MSG as 외부 협업 도구(메신저)
-
-    SYS->>LLM: 초안 작성 요청 (외부 HTTPS)
+    participant MSG as 5채널(외부)
+    SYS->>LLM: 초안 요청 (HTTPS)
     LLM-->>SYS: 인증 실패 / quota 초과
-    Note over SYS: 내부:<br/>quota controller가 장애 시 통과(fail-open) 판정<br/>→ AI 호출 중단<br/>→ 절차서 원문 조회 (file store)
-    SYS->>MSG: 절차서 원문 그대로 발송 (외부 HTTP/SMTP)<br/>("AI 초안 없음" 표시)
-    MSG->>OP: 운영 담당자에게 정보 도달
-    SYS->>SRE: 별도 메타 알람 (외부 채널)<br/>("LLM 인증 실패, key 갱신 요청")
-    Note over SYS: 내부: 실패 사유 감사 로그 기록
-  </pre>
+    Note over SYS: quota controller fail-open 판정 → SOP 원문 조회
+    SYS->>MSG: SOP 원문 그대로 발송 ("AI 초안 없음" 표시)
+    MSG->>OP: 운영자에게 정보 도달
+    SYS->>SRE: 메타 알람 ("LLM 인증 실패, key 갱신")
+    Note over SYS: 실패 사유 감사 기록
+</pre>
+<p style="color:var(--g500);font-size:13px"><strong>핵심</strong> · AI 초안은 보너스, SOP는 본체. AI 실패가 대응을 멈추지 않음. <strong>예외</strong> · SOP 조회도 실패 시 원본 알람만+SRE critical / AI 광역 실패(분당 N회↑) 시 플랫폼팀 동시 알람.</p>
+</div></details>
 
-  <h3>잘못되면 어떻게 되나</h3>
-  <ul>
-    <li><strong>절차서 조회도 실패</strong> — 원본 알람만이라도 운영 담당자에게 도달합니다. SRE에게 critical 알람이 발송됩니다.</li>
-    <li><strong>AI가 빈 응답·이상 형식</strong>으로 답할 때 — 마찬가지로 절차서 원문 대체 흐름으로 처리합니다.</li>
-    <li><strong>SRE 알람 채널도 실패</strong> — 시스템이 운영 담당자에게 SRE 알람을 같이 띄워 침묵 실패를 막습니다.</li>
-    <li><strong>AI 실패가 너무 자주 발생</strong> (분당 N회 초과) — "AI 광역 장애 의심" 메타 알람이 SRE와 플랫폼 팀에게 동시 발송됩니다.</li>
-  </ul>
+<details class="expand"><summary>누가 무엇을 하나 (역할 × 시나리오)</summary><div class="body">
+<table>
+  <thead><tr><th>역할</th><th>1 정상</th><th>2 메신저 실패</th><th>3 AI 실패</th></tr></thead>
+  <tbody>
+    <tr><td><strong>운영자</strong></td><td>검토 후 승인 1회</td><td>보관함 확인 후 재전송</td><td>SOP 원문 받아 대응</td></tr>
+    <tr><td><strong>SRE</strong></td><td>관여 없음</td><td>보관함 임계 초과 시 알람</td><td>LLM 실패 알람 + key 회전</td></tr>
+    <tr><td><strong>시스템</strong></td><td>수신→매칭→초안→발송</td><td>실패 감지→재시도→보관→재전송</td><td>실패 감지→SOP 원문 대체</td></tr>
+  </tbody>
+</table>
+<p style="color:var(--g500);font-size:13px">운영자의 핵심 책임(진짜 알람인지·조치가 맞는지 판단)은 어느 시나리오에서도 시스템이 대체하지 않습니다.</p>
+</div></details>
+
+<details class="expand"><summary>공통 가정 (운영 점검 항목)</summary><div class="body">
+<div class="item"><span class="lab">알람 규칙</span><span class="txt">SigNoz 규칙 활성·평가 중</span></div>
+<div class="item"><span class="lab">채널</span><span class="txt">5채널 중 1개 이상 health check 통과</span></div>
+<div class="item"><span class="lab">SOP</span><span class="txt">90일 이내 최신, 1건 이상 등록</span></div>
+<div class="item"><span class="lab">AI 자격</span><span class="txt">유효(없어도 시나리오 3으로 graceful degrade)</span></div>
+<div class="item"><span class="lab">PII 마스킹</span><span class="txt">외부 호출 직전 항상 동작, 실패 시 발송 중단</span></div>
+<div class="item"><span class="lab">on-call</span><span class="txt">당직 1인 이상, 무응답 시 SOP 원문 자동 발송</span></div>
+</div></details>
+
 </div>
-
-<h2>공통 가정 (이게 있어야 동작합니다)</h2>
-
-<p>세 시나리오 모두 다음 조건이 갖춰져야 정상 동작합니다. 운영 환경 점검 시 체크 항목입니다.</p>
-
-<ol>
-  <li><strong>SigNoz 알람 규칙이 활성</strong> — 대상 알람 규칙이 평가 중이고, 임계 시간 경과 시 발화 상태로 전환되어야 합니다.</li>
-  <li><strong>협업 도구(메신저) 채널이 1개 이상 정상 가동</strong> — Slack / MS Teams / PagerDuty / Webhook / Email 중 최소 1개가 직전 health check를 통과한 상태여야 합니다.</li>
-  <li><strong>절차서가 최신 (90일 이내)</strong> — 절차서 저장소에 대응 절차가 1건 이상 등록되어 있고, 작성된 지 90일을 넘기지 않아야 합니다.</li>
-  <li><strong>AI 외부 서비스 자격증명 유효</strong> (없어도 시나리오 3으로 단계적 축소(graceful degrade) — 절차서 원문이 대신 도달).</li>
-  <li><strong>개인정보 마스킹이 켜져 있음</strong> — 외부 AI에 페이로드를 넘기기 직전 항상 동작해야 합니다. 마스킹 실패 시 시스템은 발송을 중단합니다.</li>
-  <li><strong>당직 운영자(on-call)가 당직 순번에 1인 이상 등재</strong> — 승인 단계를 담당할 인력이 있어야 합니다 (정해진 시간 안에 응답이 없으면 시스템이 절차서 원문을 자동 발송합니다).</li>
-</ol>
 
 <h2>관련 산출물</h2>
-
-<p>같은 시나리오를 더 깊이 보고 싶으면 다음 자료를 참고하실 수 있습니다.</p>
-
 <table>
-  <thead><tr><th style="width:30%">자료</th><th style="width:20%">누가 보나</th><th>무엇이 다른가</th></tr></thead>
+  <thead><tr><th style="width:26%">자료</th><th>무엇이 다른가</th><th style="width:16%">링크</th></tr></thead>
   <tbody>
-    <tr>
-      <td><a href="../02-usecase/index.md"><strong>상세본 Use Case 산출물</strong></a></td>
-      <td>개발자 · QA</td>
-      <td>유스케이스 표준 템플릿 Cockburn Fully Dressed. 단계별 검증 항목·예외 분기·시퀀스 다이어그램·상태 머신 포함</td>
-    </tr>
-    <tr>
-      <td><a href="brief.html"><strong>한장 브리핑</strong></a></td>
-      <td>팀장 (5분)</td>
-      <td>DS-APM 전체를 1페이지로</td>
-    </tr>
-    <tr>
-      <td><a href="brief-overview.html"><strong>개요 브리핑</strong></a></td>
-      <td>팀장 (20~30분)</td>
-      <td>배경·문제·해결 방식·위험·다음 단계 종합</td>
-    </tr>
-    <tr>
-      <td><a href="brief-spec.html"><strong>기능명세 브리핑</strong></a></td>
-      <td>팀장 / PM</td>
-      <td>6개 컴포넌트별로 무엇이 가능한지</td>
-    </tr>
-    <tr>
-      <td><a href="brief-wbs.html"><strong>WBS 브리핑</strong></a></td>
-      <td>PM</td>
-      <td>6개 컴포넌트 착수 계획 + 의사결정 사항</td>
-    </tr>
+    <tr><td><strong>상세본 Use Case</strong></td><td>Cockburn 표준 — 단계 검증·예외 분기·시퀀스·상태 머신</td><td><a href="../02-usecase/index.html">index</a></td></tr>
+    <tr><td>UC-001/002/003</td><td>개별 케이스 상세</td><td><a href="../02-usecase/cases/UC-001-incident-to-channel.html">001</a> · <a href="../02-usecase/cases/UC-002-channel-failure-dlq.html">002</a> · <a href="../02-usecase/cases/UC-003-llm-auth-fail-open.html">003</a></td></tr>
+    <tr><td><strong>한장 브리핑</strong></td><td>전체 1페이지</td><td><a href="brief.html">brief</a></td></tr>
+    <tr><td>개요·기능명세·WBS 요약</td><td>—</td><td><a href="brief-overview.html">ov</a> · <a href="brief-spec.html">spec</a> · <a href="brief-wbs.html">wbs</a></td></tr>
   </tbody>
 </table>
 
-<div class="footnote">
-  본 문서는 <a href="../02-usecase/index.md">상세본 Use Case 산출물</a>을 운영 담당자 시선으로 재구성한 것입니다. 기술 식별자는 모두 제거하고, 흐름의 의미만 남겼습니다.
-</div>
+<div class="footnote">상세본 Use Case를 운영자 시선으로 재구성한 요약입니다. 기술 식별자는 걷어내고 흐름의 의미만 남겼습니다.</div>
 
 </div>
 </body>

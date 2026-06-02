@@ -3,132 +3,435 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DS-APM 시스템 개요 (요약본)</title>
+<title>DS-APM 요약본 — Overview</title>
 <style>
-/* DS-APM 공통 디자인 토큰 (research-skills-b-html.md §5.1) */
+/* DS-APM 산출물 공통 디자인 토큰
+ * 출처: docs/spec/_foundation/research-skills-b-html.md §5.1~5.10
+ * Anthropic Claude 브랜드 팔레트 + 시스템 폰트 + html-effectiveness 패턴
+ * Self-contained, zero deps, light-only (다크모드는 v2 follow-up)
+ */
+
 :root {
-  --ivory:#FAF9F5; --slate:#141413; --clay:#D97757; --oat:#E3DACC;
-  --olive:#788C5D; --sky:#6A8CAF;
-  --g100:#F0EEE6; --g300:#D1CFC5; --g500:#87867F; --g700:#3D3D3A;
+  /* Color tokens (html-effectiveness 팔레트) */
+  --ivory:#FAF9F5;
+  --slate:#141413;
+  --clay:#D97757;
+  --oat:#E3DACC;
+  --olive:#788C5D;
+  --sky:#6A8CAF;
+  --g100:#F0EEE6;
+  --g300:#D1CFC5;
+  --g500:#87867F;
+  --g700:#3D3D3A;
+
+  /* Font stacks */
   --serif: ui-serif, Georgia, 'Times New Roman', serif;
   --sans:  system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --mono:  ui-monospace, 'SF Mono', Menlo, Monaco, monospace;
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  background: var(--ivory); color: var(--g700);
-  font-family: var(--sans); line-height: 1.6;
+  background: var(--ivory);
+  color: var(--g700);
+  font-family: var(--sans);
+  line-height: 1.55;
   padding: 56px 32px 120px;
   -webkit-font-smoothing: antialiased;
 }
-.page { max-width: 880px; margin: 0 auto; }
+
+.page { max-width: 1120px; margin: 0 auto; }
+
+/* ========== Headings ========== */
 h1 {
-  font-family: var(--serif); font-weight: 500;
-  font-size: clamp(34px, 5vw, 50px); color: var(--slate);
-  letter-spacing: -0.02em; margin-bottom: 16px;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(38px, 5.4vw, 62px);
+  color: var(--slate);
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
 }
 h2 {
-  font-family: var(--serif); font-weight: 500;
-  font-size: 24px; color: var(--slate);
-  letter-spacing: -0.01em; margin-top: 56px; margin-bottom: 12px;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 26px;
+  color: var(--slate);
+  letter-spacing: -0.01em;
 }
 h3 {
-  font-family: var(--sans); font-weight: 600;
-  font-size: 17px; color: var(--slate); margin: 24px 0 8px;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--slate);
+  margin-bottom: 8px;
 }
+h4 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--g700);
+  margin-bottom: 6px;
+}
+
+/* ========== Eyebrow ========== */
 .eyebrow {
-  font-family: var(--mono); font-size: 12px; color: var(--g500);
-  text-transform: uppercase; letter-spacing: 0.04em;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--g500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   margin-bottom: 12px;
 }
-.intro {
-  font-size: 15.5px; color: var(--g700);
-  border-left: 4px solid var(--clay);
-  background: #fff;
-  padding: 16px 22px;
-  border-radius: 0 10px 10px 0;
-  margin: 24px 0 40px;
+
+/* ========== Section head ========== */
+.sec-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 8px;
+  margin-top: 64px;
 }
-.intro p { margin-bottom: 6px; }
-.intro p:last-child { margin-bottom: 0; }
-.intro strong { color: var(--slate); }
+.sec-head .num {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--oat);
+  color: var(--slate);
+  padding: 3px 9px;
+  border-radius: 8px;
+}
+.sec-intro {
+  font-size: 14.5px;
+  color: var(--g500);
+  max-width: 720px;
+  margin-bottom: 28px;
+}
+
+/* ========== Summary 4-cell grid (Overview, F module NFR) ========== */
+.summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.summary .cell {
+  border: 1.5px solid var(--g300);
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+}
+.summary .cell .k {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--g500);
+  text-transform: uppercase;
+}
+.summary .cell .v {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--slate);
+  margin-top: 4px;
+}
+.summary .cell .v.accent { color: var(--clay); }
+
+@media (max-width: 720px) {
+  .summary { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ========== Milestone timeline (WBS) ========== */
+.milestones { display: flex; flex-direction: column; }
+.milestone {
+  display: grid;
+  grid-template-columns: 120px 28px 1fr;
+  gap: 0 18px;
+}
+.milestone .when {
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--g500);
+  padding-top: 4px;
+}
+.milestone .dot-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.milestone .dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--clay);
+  margin-top: 4px;
+}
+.milestone .dot.done {
+  background: var(--olive);
+  border-color: var(--olive);
+}
+.milestone .line {
+  width: 2px;
+  flex: 1;
+  background: var(--g300);
+  margin: 4px 0;
+}
+.milestone:last-child .line { display: none; }
+.milestone .body { padding-bottom: 36px; }
+
+/* ========== Severity badge ========== */
+.sev {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+.sev.high { background: #F3D9CC; color: #8A3B1E; }
+.sev.med  { background: var(--oat); color: var(--slate); }
+.sev.low  { background: #E4E9DC; color: #4B5C39; }
+
+/* ========== Open question / risk card ========== */
+.q {
+  border-left: 4px solid var(--clay);
+  border-radius: 10px;
+  padding: 16px 20px;
+  background: #fff;
+  margin-bottom: 12px;
+}
+
+/* ========== Risks/exception table (3-col grid) ========== */
+.risks { display: flex; flex-direction: column; gap: 8px; }
+.risks .row {
+  display: grid;
+  grid-template-columns: 2fr 80px 3fr;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1.5px solid var(--g300);
+  border-radius: 10px;
+  background: #fff;
+}
+.risks .row .cell { font-size: 13.5px; }
+
+/* ========== Code ========== */
+code, pre {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+pre {
+  background: var(--g100);
+  border: 1.5px solid var(--g300);
+  border-radius: 10px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+code {
+  background: var(--g100);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+pre code {
+  background: transparent;
+  padding: 0;
+}
+
+/* ========== Tables ========== */
 table {
-  width: 100%; border-collapse: collapse;
-  margin: 16px 0; font-size: 14.5px; background: #fff;
-  border-radius: 10px; overflow: hidden;
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
   border: 1.5px solid var(--g300);
 }
 th, td {
-  text-align: left; padding: 10px 14px;
-  border-bottom: 1px solid var(--g300); vertical-align: top;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--g300);
+  vertical-align: top;
 }
 tr:last-child td { border-bottom: none; }
 th {
-  font-family: var(--sans); font-weight: 600;
-  color: var(--slate); background: var(--g100);
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--slate);
+  background: var(--g100);
   font-size: 13.5px;
 }
 td strong { color: var(--slate); }
-.summary {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 14px; margin: 28px 0 40px;
+
+/* ========== Details (collapsible) ========== */
+details.expand {
+  border: 1.5px solid var(--g300);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  background: #fff;
 }
-.summary .cell {
-  border: 1.5px solid var(--g300); border-radius: 12px;
-  padding: 14px 16px; background: #fff;
+details.expand summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--slate);
 }
-.summary .cell .k {
-  font-family: var(--mono); font-size: 10.5px;
-  color: var(--g500); text-transform: uppercase;
-  letter-spacing: 0.05em;
+details.expand[open] { background: var(--g100); }
+details.expand .body {
+  margin-top: 12px;
+  font-size: 13.5px;
+  color: var(--g700);
 }
-.summary .cell .v {
-  font-family: var(--serif); font-size: 20px;
-  color: var(--slate); margin-top: 6px; line-height: 1.3;
+
+/* ========== Sticky TOC sidebar ========== */
+.toc-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 48px;
 }
-.summary .cell .v.accent { color: var(--clay); }
-@media (max-width: 720px) { .summary { grid-template-columns: repeat(2, 1fr); } }
-ol, ul { margin: 12px 0 12px 24px; }
-li { margin-bottom: 6px; font-size: 15px; color: var(--g700); }
-p { margin-bottom: 12px; font-size: 15px; color: var(--g700); }
-p strong, li strong { color: var(--slate); }
-code {
-  font-family: var(--mono); font-size: 13px;
-  background: var(--g100); padding: 1px 6px; border-radius: 4px;
+.toc {
+  position: sticky;
+  top: 32px;
+  align-self: start;
+  border: 1.5px solid var(--g300);
+  border-radius: 12px;
+  background: #fff;
+  padding: 16px;
 }
+.toc .label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--g500);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.toc ol {
+  list-style: none;
+  padding: 0;
+}
+.toc li {
+  font-size: 13px;
+  padding: 6px 0;
+}
+.toc a {
+  color: var(--g700);
+  text-decoration: none;
+}
+.toc a:hover { color: var(--clay); }
+
+@media (max-width: 960px) {
+  .toc-page { grid-template-columns: 1fr; }
+  .toc { position: static; }
+}
+
+html { scroll-behavior: smooth; }
+
+/* ========== Links ========== */
 a {
-  color: var(--clay); text-decoration: none;
+  color: var(--clay);
+  text-decoration: none;
   border-bottom: 1px solid transparent;
   transition: border-color 150ms;
 }
 a:hover { border-bottom-color: var(--clay); }
+
+/* ========== Lists ========== */
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin-bottom: 4px; }
+
+/* ========== Blockquote ========== */
+blockquote {
+  border-left: 3px solid var(--g300);
+  padding: 8px 16px;
+  margin: 12px 0;
+  color: var(--g700);
+  font-style: italic;
+}
+
+/* ========== Mermaid container ========== */
 .mermaid {
-  background: #fff; border: 1.5px solid var(--g300);
-  border-radius: 10px; padding: 24px 16px; margin: 20px 0;
+  background: #fff;
+  border: 1.5px solid var(--g300);
+  border-radius: 10px;
+  padding: 16px;
+  margin: 16px 0;
   text-align: center;
 }
-.channels {
-  display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 20px;
-}
-.channels .chip {
+
+/* ========== Inline tags / chips ========== */
+.tag {
   display: inline-block;
-  font-family: var(--mono); font-size: 12.5px; font-weight: 600;
-  padding: 6px 14px; border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--g100);
+  color: var(--g700);
+  margin-right: 6px;
+}
+.tag.id { color: var(--clay); border: 1px solid var(--g300); background: #fff; }
+
+/* ========== Status pill ========== */
+.status-pill {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.status-pill.implemented { background: #E4E9DC; color: #4B5C39; }
+.status-pill.mvp { background: var(--oat); color: var(--slate); }
+.status-pill.pending { background: #F3D9CC; color: #8A3B1E; }
+.status-pill.draft { background: var(--g100); color: var(--g500); }
+.status-pill.planned { background: #DCE2EA; color: #3E4B5C; }
+
+/* ========== Print / PDF ========== */
+@page { size: A4; margin: 18mm 15mm; }
+
+@media print {
+  body { background: #fff; padding: 0; }
+  .page, .toc-page { max-width: 100%; }
+  section { break-before: page; page-break-before: page; }
+  section:first-of-type { break-before: auto; page-break-before: auto; }
+  .milestone, .summary .cell, .q, .risks .row,
+  pre, table, svg, .mermaid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  details > summary { list-style: none; }
+  details:not([open]) > *:not(summary) { display: none; }
+  aside, .toc { position: static; }
+  a::after { content: " (" attr(href) ")"; font-size: 10px; color: #888; }
+}
+
+/* ===== 요약본(00-brief) 전용 추가 클래스 ===== */
+h2 { margin-top: 56px; }
+h2:first-of-type { margin-top: 32px; }
+.intro {
+  font-size: 15.5px; color: var(--g700);
+  border-left: 4px solid var(--clay); background: #fff;
+  padding: 16px 22px; border-radius: 0 10px 10px 0; margin: 24px 0 40px;
+}
+.intro p { margin-bottom: 6px; font-size: 15px; }
+.intro p:last-child { margin-bottom: 0; }
+.intro strong { color: var(--slate); }
+.channels { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 20px; }
+.channels .chip {
+  display: inline-block; font-family: var(--mono); font-size: 12.5px;
+  font-weight: 600; padding: 6px 14px; border-radius: 999px;
   background: var(--oat); color: var(--slate);
 }
 .footnote {
-  margin-top: 80px; padding-top: 20px;
-  border-top: 1px solid var(--g300);
+  margin-top: 80px; padding-top: 20px; border-top: 1px solid var(--g300);
   font-size: 13.5px; color: var(--g500); font-style: italic;
 }
 .status-done {
   display: inline-block; font-family: var(--mono); font-size: 11px;
   padding: 2px 8px; border-radius: 6px; font-weight: 600;
-  background: #E4E9DC; color: #4B5C39;
-  margin-left: 6px; vertical-align: middle;
+  background: #E4E9DC; color: #4B5C39; margin-left: 6px; vertical-align: middle;
 }
-.status-pill { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 10px; border-radius: 999px; text-transform: uppercase; font-weight: 600; vertical-align: middle; }
-.status-pill.planned { background: #DCE2EA; color: #3E4B5C; }
 .callout {
   border: 1.5px solid var(--g300);
   background: #fff;
@@ -143,13 +446,8 @@ a:hover { border-bottom-color: var(--clay); }
   color: var(--g500); text-transform: uppercase;
   letter-spacing: 0.05em; margin-bottom: 6px;
 }
-@page { size: A4; margin: 18mm 15mm; }
-@media print {
-  body { background: #fff; padding: 0; }
-  .page { max-width: 100%; }
-  table, .summary .cell, .mermaid, .callout { break-inside: avoid; page-break-inside: avoid; }
-  a::after { content: " (" attr(href) ")"; font-size: 10px; color: #888; }
-}
+p { margin-bottom: 12px; font-size: 15px; color: var(--g700); }
+p strong, li strong { color: var(--slate); }
 </style>
 <script type="module">
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
@@ -157,12 +455,9 @@ a:hover { border-bottom-color: var(--clay); }
     startOnLoad: true,
     theme: 'base',
     themeVariables: {
-      primaryColor: '#FAF9F5',
-      primaryTextColor: '#141413',
-      primaryBorderColor: '#D1CFC5',
-      lineColor: '#87867F',
-      secondaryColor: '#E3DACC',
-      tertiaryColor: '#F0EEE6'
+      primaryColor: '#FAF9F5', primaryTextColor: '#141413',
+      primaryBorderColor: '#D1CFC5', lineColor: '#87867F',
+      secondaryColor: '#E3DACC', tertiaryColor: '#F0EEE6'
     },
     fontFamily: 'ui-sans-serif, system-ui, sans-serif'
   });
@@ -171,193 +466,121 @@ a:hover { border-bottom-color: var(--clay); }
 <body>
 <div class="page">
 
-<div class="eyebrow">DS-APM · 요약본 Overview · 2026-06-02</div>
-<h1>DS-APM 시스템 개요 (요약본)</h1>
+<div class="eyebrow">DS-APM · 요약본 · Overview · 2026-06-02</div>
+<h1>DS-APM 시스템 개요</h1>
 
-<div class="intro">
-  <p><strong>대상</strong>: 팀장 · 매니저 · 의사결정자.</p>
-  <p><strong>목적</strong>: 상세본 Overview(아키텍처 표준 템플릿 arc42 v9.0)를 비개발자 관점으로 압축하여 비즈니스 가치, 시스템 경계, 위험, 아키텍처 결정 사항(ADR)만 정리합니다.</p>
-  <p><strong>읽는 시간</strong>: 약 10분. 기술 상세가 필요한 경우 본문 마지막의 상세본 산출물을 참조해 주십시오.</p>
-</div>
-
-<h2>1. 개요</h2>
+<div class="intro"><p>SigNoz 알림 경로에 <strong>SOP 매칭 · AI 초안 · 실패 재처리</strong> 단계를 더한 확장 모듈 그룹. 운영자는 검토·승인만 합니다. 아래는 시스템 경계 · 구성 · 품질 목표 요지입니다.</p></div>
 
 <div class="summary">
   <div class="cell"><div class="k">현 상태</div><div class="v accent">착수 예정</div></div>
-  <div class="cell"><div class="k">구성 요소</div><div class="v">6개 예정</div></div>
-  <div class="cell"><div class="k">채널</div><div class="v">5채널</div></div>
-  <div class="cell"><div class="k">다음 결정</div><div class="v">HMAC 등 4건</div></div>
+  <div class="cell"><div class="k">구성</div><div class="v">6 컴포넌트</div></div>
+  <div class="cell"><div class="k">외부 통신</div><div class="v">입구1·출구2</div></div>
+  <div class="cell"><div class="k">추후 진행</div><div class="v">4건</div></div>
 </div>
 
-<table>
-  <thead><tr><th style="width:24%">항목</th><th>요지</th></tr></thead>
-  <tbody>
-    <tr><td><strong>정체</strong></td><td>SigNoz Community 빌드의 알림 처리 경로에 운영 자동화(SOP 그라운딩·AI 초안·DLQ 재처리) 단계를 추가하는 확장 모듈 그룹</td></tr>
-    <tr><td><strong>푸는 문제</strong></td><td>운영 담당자가 새벽 알람을 받고 SOP(Standard Operating Procedure, 운영 절차서)를 찾아 협업 도구(메신저)로 발송하는 5~15분의 반복 업무를 30초 수준으로 단축</td></tr>
-    <tr><td><strong>현 상태</strong></td><td>착수 예정(planned) — 사전 PoC 검증 완료, 6개 구성 요소 착수 후 구축 예정</td></tr>
-    <tr><td><strong>다음 결정</strong></td><td>보안 정책(HMAC) · 다중 테넌트 격리 시점 · 개인 식별 정보 처리 단계 이동</td></tr>
-    <tr><td><strong>다음 단계</strong></td><td>M-2 Production Readiness — 팀장 의사결정 후 확정</td></tr>
-  </tbody>
-</table>
-
-<p><strong>AIOpsAgent</strong>는 SigNoz Community 빌드의 알림 처리 경로에 운영 자동화(SOP 그라운딩·AI 초안·DLQ 재처리) 단계를 추가하는 확장 모듈 그룹입니다. SigNoz Alertmanager의 발송 핵심 경로(dispatcher hot path)에 AIOpsAgent 처리 단계를 삽입하여 <strong>개인 식별 정보를 마스킹하고, 운영 절차서(SOP)를 자동 매칭하고, AI에게 초안을 작성시키고, 운영 담당자 검토를 거쳐 5채널 동시 발송</strong>을 수행합니다. 운영 담당자의 핵심 책임(판단·승인)은 그대로 유지하고 반복 업무만 제거하는 구조입니다.</p>
-
-<p><strong>7단계 처리 자동화 흐름</strong>: 장애 감지 → 알람 수신 → 개인 식별 정보 마스킹 → SOP 매칭 → AI 초안 → 운영 담당자 승인 → 5채널 발송.</p>
-
-<h2>2. 시스템 경계 — 누구와 무엇을 주고받는가</h2>
-
-<p>AIOpsAgent는 SigNoz Community 빌드 안에 내장된 확장 모듈 그룹입니다. "시스템 경계"는 <strong>SigNoz 바이너리(AIOpsAgent 포함)의 바깥쪽</strong> 기준으로 도식화합니다. 실제 외부와의 통신은 입구 1종(OTel/OTLP(OpenTelemetry/OpenTelemetry Protocol, 관측 표준) 텔레메트리)과 출구 2종(LLM(Large Language Model, 대규모 언어 모델) API, 5채널) 그리고 운영 담당자/SRE 인력뿐입니다. 그 외 모든 구성 요소 간 흐름은 같은 프로세스 안의 함수 호출입니다.</p>
-
+<h2>시스템 경계</h2>
+<p>외부 HTTP는 <strong>입구 1종(OTel 텔레메트리)·출구 2종(LLM API·5채널)</strong>뿐. SigNoz Alertmanager → AIOpsAgent는 같은 프로세스 안의 함수 호출(Webhook 아님)입니다.</p>
 <pre class="mermaid">
 flowchart LR
     OTEL["외부 텔레메트리<br/>(OTel/OTLP)"]
-    OP["운영 담당자<br/>(on-call)"]
-    SRE["SRE 담당"]
+    OP["운영자<br/>(on-call)"]
+    SRE["SRE"]
     LLM["LLM Provider<br/>(외부 API)"]
     CH["5 채널<br/>(Slack/Teams/PD/Webhook/Email)"]
-
     subgraph SIGNOZ["SigNoz Community"]
         direction TB
-        COLL["SigNoz Collector"]
-        RULER["SigNoz Ruler"]
+        COLL["Collector"]
+        RULER["Ruler"]
         AM["Alertmanager"]
-        subgraph AIOPSAGENT["AIOpsAgent (확장 모듈 그룹)"]
+        subgraph AIOPSAGENT["AIOpsAgent"]
             direction TB
             ING["Ingress"]
-            PIIR["PII 마스킹 필터"]
-            SOPENG["SOP 그라운딩 서비스"]
-            AIENG["AI 초안 매니저"]
-            DISP["알림 디스패처"]
-            DLQ["DLQ 재처리 서비스"]
+            PIIR["PII 마스킹"]
+            SOPENG["SOP 그라운딩"]
+            AIENG["AI 초안"]
+            DISP["디스패처"]
+            DLQ["DLQ 재처리"]
         end
         COLL --> RULER --> AM --> ING --> PIIR --> AIENG
         SOPENG -.-> AIENG
-        AIENG --> DISP
-        DISP --> DLQ
+        AIENG --> DISP --> DLQ
     end
-
     OTEL --> COLL
-    OP <-->|승인| AIENG
-    SRE <-.meta-alert.- DLQ
+    AIENG <-->|승인| OP
+    DLQ -. meta-alert .-> SRE
     AIENG -->|HTTPS| LLM
     DISP -->|HTTP/SMTP| CH
 </pre>
 
+<h2>구성 — 6 컴포넌트</h2>
+<p>6개 모듈의 합 = AIOpsAgent 전체 (누락·중복 없음). 각 모듈은 WBS와 1:1.</p>
 <table>
-  <thead><tr><th style="width:32%">경계</th><th style="width:18%">방향</th><th>무엇을 주고받나</th></tr></thead>
+  <thead><tr><th style="width:34%">컴포넌트</th><th>책임</th></tr></thead>
   <tbody>
-    <tr><td><strong>외부 → SigNoz 바이너리 (Collector)</strong></td><td>입력</td><td>OTel/OTLP 텔레메트리 (외부 HTTP/gRPC)</td></tr>
-    <tr><td><strong>SigNoz Alertmanager → AIOpsAgent</strong></td><td>내부 함수 호출</td><td>같은 프로세스 안의 함수 호출 (Webhook 아님)</td></tr>
-    <tr><td><strong>SOP 그라운딩 서비스 ↔ AI 초안 매니저</strong></td><td>내부 함수 호출</td><td>알람-SOP 자동 매칭 결과</td></tr>
-    <tr><td><strong>AIOpsAgent → LLM Provider</strong></td><td>출력 (외부)</td><td>SOP를 컨텍스트로 초안 요청 (HTTPS)</td></tr>
-    <tr><td><strong>AIOpsAgent ↔ 운영 담당자</strong></td><td>양방향</td><td>검수 요청 / 승인·반려</td></tr>
-    <tr><td><strong>AIOpsAgent → 5채널</strong></td><td>출력 (외부)</td><td>승인된 알림 동시 발송 (HTTP/SMTP)</td></tr>
-    <tr><td><strong>AIOpsAgent → SRE</strong></td><td>알림</td><td>AI 실패·DLQ(Dead Letter Queue, 미전송 사장 큐) 적재 등 메타 알람</td></tr>
+    <tr><td><strong>공통 기반 모듈</strong></td><td>공통 타입 · 감사 기록 · 테넌트 정책</td></tr>
+    <tr><td><strong>SOP 그라운딩 서비스</strong></td><td>SOP 저장 + 알람-SOP 자동 매칭</td></tr>
+    <tr><td><strong>AI 초안 매니저</strong></td><td>LLM 초안 + 이력 + 사용량 제어(실패 시 SOP 원문)</td></tr>
+    <tr><td><strong>알림 디스패처</strong></td><td>5채널 동시 발송 + AI 본문 머지</td></tr>
+    <tr><td><strong>PII 마스킹 필터</strong></td><td>입구 단계 개인정보 마스킹</td></tr>
+    <tr><td><strong>DLQ 재처리 서비스</strong></td><td>발송 실패 보존 + 중복 없는 재발송</td></tr>
   </tbody>
 </table>
 
-<div class="channels">
-  <span class="chip">Slack</span>
-  <span class="chip">MS Teams</span>
-  <span class="chip">PagerDuty</span>
-  <span class="chip">Webhook</span>
-  <span class="chip">Email</span>
+<h2>품질 목표</h2>
+<table>
+  <thead><tr><th style="width:24%">목표</th><th>의미</th><th style="width:24%">측정</th></tr></thead>
+  <tbody>
+    <tr><td><strong>무손실</strong></td><td>어떤 실패에서도 알람·SOP는 누락 없이 도달</td><td>누락 0건</td></tr>
+    <tr><td><strong>30초 발송</strong></td><td>장애 → 메신저 도달 (승인 시간 제외)</td><td>p95 ≤ 30초</td></tr>
+    <tr><td><strong>실행 이력 감사</strong></td><td>누가 언제 무엇을(승인·발송·재처리) 전부 영속 기록</td><td>기록 누락률 0%</td></tr>
+  </tbody>
+</table>
+
+<h2>더 보기 (필요할 때만 펼치기)</h2>
+<div class="more">
+
+<details class="expand" open><summary>경계 — 무엇을 주고받나</summary><div class="body">
+<div class="item"><span class="lab">입구</span><span class="txt">외부 → Collector: OTel/OTLP 텔레메트리 (외부 HTTP/gRPC)</span></div>
+<div class="item"><span class="lab">내부</span><span class="txt">Alertmanager → AIOpsAgent, SOP↔AI: 같은 프로세스 함수 호출 (Webhook 아님)</span></div>
+<div class="item"><span class="lab">출구 LLM</span><span class="txt">AIOpsAgent → LLM Provider: SOP 컨텍스트로 초안 요청 (HTTPS)</span></div>
+<div class="item"><span class="lab">출구 채널</span><span class="txt">AIOpsAgent → 5채널: 승인된 알림 동시 발송 (HTTP/SMTP)</span></div>
+<div class="item"><span class="lab">사람</span><span class="txt">운영자(검수·승인) · SRE(AI 실패·DLQ 적재 meta-alert)</span></div>
+<div class="item"><span class="lab">범위 밖</span><span class="txt">SigNoz 자체 기능 · Enterprise 모듈 · 외부용 vector 검색</span></div>
+</div></details>
+
+<details class="expand"><summary>통합 방식 결정 (ADR-001)</summary><div class="body">
+<p>초기 Python 오케스트레이터(<code>ds_apm_poc</code>)+SigNoz bridge 구조는 두 런타임 운영·중복 구현·스키마 어긋남 문제가 있었습니다. <strong>2026-05-19 결정: Python 폐기 → SigNoz Go 바이너리에 내장된 확장 모듈로 구현</strong>. 단일 운영·배포 표면 절반·5채널 자산 재사용. 상세는 <a href="../01-overview/adr/ADR-001-python-to-go.html">ADR-001</a>.</p>
+</div></details>
+
+<details class="expand"><summary>알려진 위험 4가지</summary><div class="body">
+<div class="item"><span class="lab">R-1 보안</span><span class="txt">HMAC 서명 정책 미정 — 재발송 위변조 검증. 추후 결정.</span></div>
+<div class="item"><span class="lab">R-2 격리</span><span class="txt">다중 테넌트 격리 production-ready 미달. 내부 단일 운영엔 영향 없음.</span></div>
+<div class="item"><span class="lab">R-3 보안</span><span class="txt">PII 마스킹 입구 1점. Collector 단 이동 검토.</span></div>
+<div class="item"><span class="lab">R-4 안정성</span><span class="txt"><strong>이미 해소</strong> — LLM 실패 시 SOP 원문 발송(fail-open), 손실 없음.</span></div>
+</div></details>
+
+<details class="expand"><summary>이해관계자별 책임</summary><div class="body">
+<div class="item"><span class="lab">운영자</span><span class="txt">AI 초안 검수·승인, 발송 모니터링, 실패 시 수동 재발송</span></div>
+<div class="item"><span class="lab">SRE</span><span class="txt">시스템 이상 알람 수신 + 자격증명 회전</span></div>
+<div class="item"><span class="lab">Platform Admin</span><span class="txt">테넌트 정책 등록, AI 전략 활성화, 감사 sink 설정</span></div>
+<div class="item"><span class="lab">Security</span><span class="txt">PII·HMAC·테넌트 격리 정책 검토</span></div>
+</div></details>
+
 </div>
 
-<p><strong>핵심</strong>: 실제 외부 HTTP 호출은 <strong>LLM API + 5채널</strong> 2종에 한정됩니다. SigNoz Alertmanager → AIOpsAgent 사이는 같은 프로세스 안의 함수 호출이며 Webhook이 아닙니다.</p>
-
-<p><strong>범위 밖</strong>: SigNoz 자체 기능, SigNoz Enterprise 모듈, 외부 고객사용 별도 vector 검색 기능.</p>
-
-<h2>3. 내부 구성 — 6개 구성 요소</h2>
-
-<p>AIOpsAgent는 6개 모듈로 나뉘어 있습니다. 각 모듈은 독립된 책임을 가지며, 작업분해(WBS) 단위와 1:1로 매핑됩니다.</p>
-
+<h2>관련 산출물</h2>
 <table>
-  <thead><tr><th style="width:30%">구성 요소</th><th>책임</th><th style="width:22%">비유</th></tr></thead>
+  <thead><tr><th style="width:26%">산출물</th><th>용도</th><th style="width:16%">링크</th></tr></thead>
   <tbody>
-    <tr><td><strong>공통 기반 모듈 (Foundation Core)</strong></td><td>공통 타입·감사 기록·테넌트 정책 검증</td><td>빌딩의 기초·골조</td></tr>
-    <tr><td><strong>SOP 그라운딩 서비스 (SOP Grounding Service)</strong></td><td>운영 절차서(SOP) 저장 + 알람-SOP 자동 매칭</td><td>사서·라이브러리</td></tr>
-    <tr><td><strong>AI 초안 매니저 (AI Drafter Manager)</strong></td><td>LLM 초안 생성 + 이력 관리 + 사용량 제어 (실패 시 안전 회피)</td><td>비서·초안 작성자</td></tr>
-    <tr><td><strong>알림 디스패처 (Notification Dispatcher)</strong></td><td>5채널 동시 발송 + AI 초안 본문 머지</td><td>우체국·집배원</td></tr>
-    <tr><td><strong>PII 마스킹 필터 (PII Masking Filter)</strong></td><td>입구 단계에서 PII(Personally Identifiable Information, 개인 식별 정보) 마스킹 (이메일·전화·긴 비밀값)</td><td>검문소</td></tr>
-    <tr><td><strong>DLQ 재처리 서비스 (DLQ Replay Service)</strong></td><td>발송 실패 영속 보존 + 중복 없는 재발송</td><td>보험·블랙박스</td></tr>
+    <tr><td><strong>한장 브리핑</strong></td><td>5분 전체 파악</td><td><a href="brief.html">brief</a></td></tr>
+    <tr><td><strong>요약본 Use Case</strong></td><td>시나리오 3종</td><td><a href="brief-usecase.html">usecase</a></td></tr>
+    <tr><td><strong>요약본 기능명세</strong></td><td>6 컴포넌트 요지</td><td><a href="brief-spec.html">spec</a></td></tr>
+    <tr><td><strong>요약본 WBS</strong></td><td>일정·마일스톤</td><td><a href="brief-wbs.html">wbs</a></td></tr>
+    <tr><td><strong>상세본 Overview</strong></td><td>arc42 v9.0 전체</td><td><a href="../01-overview/index.html">index</a></td></tr>
   </tbody>
 </table>
 
-<p><strong>100% 검증</strong>: 위 6개 구성 요소의 합 = AIOpsAgent 전체. 누락 영역 없음, 중복 영역 없음.</p>
-
-<h2>4. 품질 목표 (3대)</h2>
-
-<p>운영 약속으로서의 정량 지표 3개입니다. 이 3가지가 깨지면 AIOpsAgent는 신뢰받을 수 없습니다.</p>
-
-<table>
-  <thead><tr><th style="width:22%">목표</th><th>의미</th><th style="width:23%">측정 기준</th></tr></thead>
-  <tbody>
-    <tr><td><strong>정보 손실 0</strong></td><td>어떤 실패 상황에서도 운영 담당자는 알람과 SOP를 수신합니다. silent drop 없음.</td><td>drop 건수 0</td></tr>
-    <tr><td><strong>30초 안 발송</strong></td><td>장애 발생 → 메신저 도달까지 평균 30초 이내 (운영 담당자 승인 시간 제외)</td><td>p95 지연 ≤ 30초</td></tr>
-    <tr><td><strong>100% 감사 기록</strong></td><td>누가 언제 무엇을 수행했는지 모두 영속 기록</td><td>감사 누락률 0%</td></tr>
-  </tbody>
-</table>
-
-<p>세 목표는 <a href="brief.html">한장 브리핑</a>과 동일하며, 상세본 Overview의 QG-1·QG-2·QG-3과 정확히 일치합니다.</p>
-
-<h2>5. 통합 방식 결정 (ADR-001)</h2>
-
-<div class="callout">
-  <div class="label">ADR-001 · Accepted (2026-05-19)</div>
-  <p>초기 시제품(PoC)은 Python 오케스트레이터(<code>ds_apm_poc</code>)와 SigNoz를 bridge로 연결하는 구조였습니다. 두 런타임(Python + Go)을 모두 모니터링·배포해야 했고, bridge가 재시도·DLQ·메신저 발송·SOP 저장을 중복 구현하는 문제가 발생했습니다. alert 페이로드 스키마가 두 시스템 간 미세하게 어긋나기 시작한 것도 주요 원인이었습니다.</p>
-  <p><strong>결정</strong>: Python 런타임을 폐기하고, AIOpsAgent의 모든 처리 단계를 SigNoz Community Go 코드라인에 내장된 확장 모듈로 구현합니다. SigNoz Alertmanager의 발송 핵심 경로(dispatcher hot path)에 SOP 그라운딩·AI 초안·DLQ 단계를 삽입하는 방식입니다.</p>
-  <p><strong>얻은 것</strong>: Go 바이너리 단일 운영, 배포·롤백 표면 절반 축소, Alertmanager가 이미 보유한 5채널 발송 자산을 그대로 활용, 두 시스템 간 스키마 어긋남 해소.</p>
-  <p><strong>감수할 것</strong>: SigNoz upstream의 내부 변경 영향, 6개 구성 요소를 Go로 재작성하는 공수.</p>
-</div>
-
-<h2>6. 알려진 위험</h2>
-
-<p>착수 후 production-readiness까지 4개의 격차를 순차적으로 해소할 예정입니다.</p>
-
-<table>
-  <thead><tr><th style="width:8%">#</th><th style="width:30%">위험</th><th>비즈니스 영향</th></tr></thead>
-  <tbody>
-    <tr><td><strong>R-1</strong></td><td>HMAC(Hash-based Message Authentication Code, 메시지 인증 코드) 서명 정책 미정</td><td>알림 재발송 시 위변조 검증 불가 — 보안 follow-up 필요</td></tr>
-    <tr><td><strong>R-2</strong></td><td>다중 테넌트 격리가 production-ready 아님</td><td>여러 고객사를 한 인스턴스로 운영할 경우 격리 강화 필요. 내부 단일 테넌트 운영에는 영향 없음</td></tr>
-    <tr><td><strong>R-3</strong></td><td>개인 식별 정보(PII) 마스킹이 입구 1점에만 적용</td><td>OpenTelemetry Collector 단으로 이동 검토 권장</td></tr>
-    <tr><td><strong>R-4</strong></td><td>외부 LLM 의존</td><td><strong>이미 해결됨</strong> — LLM 실패 시 SOP 원문 그대로 전달(장애 시 통과(fail-open)). 정보 손실 0 보장</td></tr>
-  </tbody>
-</table>
-
-<p>R-1·R-2·R-3은 <a href="brief.html">한장 브리핑</a> §10에 의사결정 요청 사항(D-1·D-2·D-3)으로 함께 정리되어 있습니다.</p>
-
-<h2>7. 이해관계자별 책임</h2>
-
-<table>
-  <thead><tr><th style="width:24%">역할</th><th>책임</th></tr></thead>
-  <tbody>
-    <tr><td><strong>운영 담당자 (당직 운영자, on-call)</strong></td><td>AI 초안 검수·승인, 발송 결과 모니터링, 발송 실패 시 수동 재발송</td></tr>
-    <tr><td><strong>SRE</strong></td><td>시스템 이상 알람(AI 실패·DLQ 적재 급증) 수신 + 자격증명 회전</td></tr>
-    <tr><td><strong>Platform Admin</strong></td><td>테넌트 정책 등록, AI 전략 활성화, 감사 sink 설정</td></tr>
-    <tr><td><strong>Security</strong></td><td>개인 식별 정보 마스킹 정책·HMAC 정책·테넌트 격리 검토</td></tr>
-  </tbody>
-</table>
-
-<h2>8. 관련 산출물</h2>
-
-<table>
-  <thead><tr><th style="width:28%">산출물</th><th style="width:32%">누가 보나</th><th>링크</th></tr></thead>
-  <tbody>
-    <tr><td><strong>한장 브리핑</strong></td><td>5분 안에 전체 상황 파악</td><td><a href="brief.html">brief.html</a></td></tr>
-    <tr><td><strong>요약본 Use Case</strong></td><td>시나리오 3종 (정상·실패·AI 다운)</td><td><a href="brief-usecase.html">brief-usecase.html</a></td></tr>
-    <tr><td><strong>요약본 기능명세</strong></td><td>구성 요소 6개 요지</td><td><a href="brief-spec.html">brief-spec.html</a></td></tr>
-    <tr><td><strong>요약본 WBS</strong></td><td>작업 진행 상황·마일스톤</td><td><a href="brief-wbs.html">brief-wbs.html</a></td></tr>
-    <tr><td><strong>상세본 Overview</strong></td><td>arc42 v9.0 전체 (아키텍처·품질 시나리오)</td><td><a href="../01-overview/index.md">index.md</a></td></tr>
-  </tbody>
-</table>
-
-<p>본 개요는 상세본 Overview를 비기술 청중에 맞춰 압축한 것입니다. 상세 내용이 필요한 부분은 위 링크를 참조해 주십시오.</p>
-
-<div class="footnote">
-  본 산출물은 개발 디테일 없이도 의사결정에 필요한 정보만 담았습니다.
-  추가 문의는 <a href="brief.html">한장 브리핑</a> 또는 <a href="../01-overview/index.md">상세본 Overview</a> 참조.
-</div>
+<div class="footnote">핵심만 담은 요약입니다. 세부는 "더 보기" 또는 상세본 Overview를 참조하세요.</div>
 
 </div>
 </body>

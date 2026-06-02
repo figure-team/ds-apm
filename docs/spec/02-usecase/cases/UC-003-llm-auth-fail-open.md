@@ -40,7 +40,7 @@ UC-001 단계 5에서 AI Engine이 LLM Provider에 draft 생성을 요청했을 
 - AI Strategy History(F2)에는 `draft_id=null`, `degraded=true` 기록이 append돼야 한다.
 
 ## Minimal Guarantee (실패 시에도 보장)
-- 운영자는 최소한 raw alert + SOP 원문 + 원본 `annotations.runbook_url` 링크를 수신해야 한다 (정보 손실 0).
+- 운영자는 최소한 raw alert + SOP 원문 + 원본 `annotations.runbook_url` 링크를 수신해야 한다 (무손실).
 - LLM provider 실패는 절대 운영자에게 침묵 실패(silent drop)로 나타나지 않아야 한다 — fallback 또는 meta-alert 중 하나는 반드시 발화.
 - Fail-open 발동 자체가 실패하더라도 raw alert는 UC-001의 일반 dispatch 경로로 전달돼야 한다.
 

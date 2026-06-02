@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F8 — DLQ + Idempotent Replay</title>
+<style>
+:root {
+  --ivory:#FAF9F5; --slate:#141413; --clay:#D97757; --oat:#E3DACC;
+  --olive:#788C5D; --sky:#6A8CAF; --g100:#F0EEE6; --g300:#D1CFC5;
+  --g500:#87867F; --g700:#3D3D3A;
+  --serif: ui-serif, Georgia, 'Times New Roman', serif;
+  --sans:  system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono:  ui-monospace, 'SF Mono', Menlo, Monaco, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--ivory); color: var(--g700); font-family: var(--sans); line-height: 1.55; padding: 56px 32px 120px; -webkit-font-smoothing: antialiased; }
+.page { max-width: 1120px; margin: 0 auto; }
+h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(38px, 5.4vw, 62px); color: var(--slate); letter-spacing: -0.02em; margin-bottom: 16px; }
+h2 { font-family: var(--serif); font-weight: 500; font-size: 26px; color: var(--slate); letter-spacing: -0.01em; margin-top: 56px; }
+h2:first-of-type { margin-top: 32px; }
+h3 { font-family: var(--sans); font-weight: 600; font-size: 18px; color: var(--slate); margin-bottom: 8px; margin-top: 32px; }
+h4 { font-family: var(--sans); font-weight: 600; font-size: 15px; color: var(--g700); margin-bottom: 6px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; color: var(--g500); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px; }
+p { margin-bottom: 12px; }
+a { color: var(--clay); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 150ms; }
+a:hover { border-bottom-color: var(--clay); }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin-bottom: 4px; }
+blockquote { border-left: 3px solid var(--g300); padding: 8px 16px; margin: 12px 0; color: var(--g700); font-style: italic; }
+code, pre { font-family: var(--mono); font-size: 13px; }
+pre { background: var(--g100); border: 1.5px solid var(--g300); border-radius: 10px; padding: 12px 16px; overflow-x: auto; margin: 12px 0; }
+code { background: var(--g100); padding: 1px 6px; border-radius: 4px; }
+pre code { background: transparent; padding: 0; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--g300); vertical-align: top; }
+th { font-family: var(--sans); font-weight: 600; color: var(--slate); background: var(--g100); }
+.mermaid { background: #fff; border: 1.5px solid var(--g300); border-radius: 10px; padding: 16px; margin: 16px 0; text-align: center; }
+.status-pill { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 10px; border-radius: 999px; text-transform: uppercase; font-weight: 600; }
+.status-pill.planned { background: #DCE2EA; color: #3E4B5C; }
+html { scroll-behavior: smooth; }
+@page { size: A4; margin: 18mm 15mm; }
+@media print {
+  body { background: #fff; padding: 0; }
+  pre, table { break-inside: avoid; page-break-inside: avoid; }
+  a::after { content: " (" attr(href) ")"; font-size: 10px; color: #888; }
+}
+</style>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#FAF9F5', primaryTextColor: '#141413',
+      primaryBorderColor: '#D1CFC5', lineColor: '#87867F',
+      secondaryColor: '#E3DACC', tertiaryColor: '#F0EEE6'
+    },
+    fontFamily: 'ui-sans-serif, system-ui, sans-serif'
+  });
+</script>
+</head>
+<body>
+<div class="page">
+
+<div class="eyebrow">DS-APM · 기능명세서 · F8 · 2026-06-02</div>
+<h1>F8 — DLQ + Idempotent Replay</h1>
+
+<p><span class="status-pill planned">planned</span></p>
+
+<blockquote>
+<p><strong>상태</strong>: 착수 예정 (HMAC 정책 결정 필요)<br>
+Terminal notify-stage 실패를 JSONL DLQ에 best-effort 영속화하고, replay 시 ledger로 중복 dispatch를 방지한다.</p>
+</blockquote>
+
+<h2 id="f8-1">F8.1 개요</h2>
+<p>본 모듈은 Python orchestrator의 <code>RetryingSink / DLQSink / replay_dlq</code> trio를 Go로 재구현한 것이다. 두 컴포넌트로 구성된다.</p>
+<ol>
+<li><strong><code>JSONLDeadLetterSink</code></strong> — Dispatcher가 terminal notify failure(2xx 아닌 응답 + context not canceled)를 잡으면 <code>Entry</code>를 newline-delimited JSON으로 append. 50 MiB 임계치마다 timestamped sibling으로 rotate.</li>
+<li><strong><code>ReplayLedger</code></strong> — append-only set of <code>EventID</code>. open 시 파일 스캔으로 in-memory set 재구성. Replay loop은 <code>MarkIfNew</code>가 <code>true</code>일 때만 재전송 → crash mid-batch에서도 idempotent.</li>
+</ol>
+<p>Dispatcher hot path에서 DLQ write는 best-effort: <code>sink.Write</code> 실패 시 <code>WarnContext</code>만 남기고 알람 자체는 계속 흐른다. <strong>미해결</strong>: replay 시 payload 무결성/위변조 방지를 위한 HMAC 정책 미정 (NF-5.3.1, <code>open_items</code>).</p>
+
+<h2 id="f8-2">F8.2 인터페이스</h2>
+<pre><code>// pkg/alertmanager/alertmanagernotify/dlq/dlq.go
+type Entry struct {
+    EventID  string    `json:"event_id"`
+    Channel  string    `json:"channel"`
+    Payload  []byte    `json:"payload"`
+    FailedAt time.Time `json:"failed_at"`
+    Reason   string    `json:"reason,omitempty"`
+}
+
+type Sink interface {
+    Write(e *Entry) error
+}
+
+type JSONLDeadLetterSink struct { /* path + rotateBytes + mutex + file handle */ }
+
+func NewJSONLDeadLetterSink(path string, rotateBytes int64) (*JSONLDeadLetterSink, error)
+func (s *JSONLDeadLetterSink) Write(e *Entry) error
+func (s *JSONLDeadLetterSink) Close() error
+
+const DefaultJSONLDeadLetterMaxSizeBytes int64 = 50 * 1024 * 1024
+
+// pkg/alertmanager/alertmanagernotify/dlq/ledger.go
+type ReplayLedger struct { /* seen map + file + bufio.Writer */ }
+
+func NewReplayLedger(path string) (*ReplayLedger, error)
+func (l *ReplayLedger) MarkIfNew(eventID string) bool
+func (l *ReplayLedger) Has(eventID string) bool
+func (l *ReplayLedger) Close() error</code></pre>
+
+<h2 id="f8-3">F8.3 데이터 모델</h2>
+<p>DLQ entry 1건 = JSON 1줄. 예:</p>
+<pre><code>{
+  "event_id":"abc123fingerprint",
+  "channel":"ops-slack",
+  "payload":"&lt;base64 of marshalled []*types.Alert&gt;",
+  "failed_at":"2026-05-29T03:21:55.123Z",
+  "reason":"slack: 5xx persistent"
+}</code></pre>
+<p>Ledger 1줄 = <code>EventID</code> 문자열. 빈 줄은 무시. 1 MiB per line scanner buffer.</p>
+
+<h3>Idempotency Key (권장)</h3>
+<p>Dispatcher가 현재 사용하는 <code>EventID</code>는 alert fingerprint 단일 값이다 (<code>alerts[0].Fingerprint().String()</code>). 권장 형식은 <code>sha256(alert.fingerprint || channel.id || dispatch.round_no)</code>. 현재 구현은 fingerprint만 사용 — 동일 alert가 여러 채널로 갈 때 entry는 <code>Channel</code> 필드로 구분되지만 ledger 키는 fingerprint뿐이라 한 채널이 idempotent하면 다른 채널도 skip된다. <strong><code>(fingerprint, channel)</code> 튜플로 ledger 키 확장이 follow-up.</strong></p>
+
+<h2 id="f8-4">F8.4 상태 전이</h2>
+<pre class="mermaid">
+stateDiagram-v2
+    [*] --> NotifyAttempt
+    NotifyAttempt --> Delivered : stage.Exec returns nil
+    NotifyAttempt --> Canceled : ctx.Err() == context.Canceled
+    NotifyAttempt --> TerminalFail : err != nil && !canceled
+    TerminalFail --> DLQWritten : dlqSink.Write success
+    TerminalFail --> DLQWriteFailed : dlqSink.Write error
+    TerminalFail --> NoDLQ : dlqSink == nil
+    DLQWritten --> ReplayPending : operator triggers replay
+    ReplayPending --> Skipped : ledger.MarkIfNew == false
+    ReplayPending --> Redelivered : ledger.MarkIfNew == true
+    Redelivered --> Delivered : 2xx
+    Redelivered --> TerminalFail : 다시 실패
+    Canceled --> [*]
+    Delivered --> [*]
+    Skipped --> [*]
+</pre>
+
+<h2 id="f8-5">F8.5 예외 및 복구</h2>
+<table>
+<thead><tr><th>경로</th><th>처리</th></tr></thead>
+<tbody>
+<tr><td><code>notify.Stage.Exec</code> ctx Canceled</td><td><code>DebugContext</code> (정상 종료), DLQ write 안 함</td></tr>
+<tr><td><code>dlqSink == nil</code></td><td>DLQ 비활성. terminal failure는 log만</td></tr>
+<tr><td><code>json.Marshal(alerts)</code> 실패</td><td>empty payload로 entry 생성 + <code>WarnContext("dlq: failed to marshal alerts payload")</code></td></tr>
+<tr><td><code>dlqSink.Write</code> 실패</td><td><code>WarnContext("dlq: failed to persist terminal failure")</code> — dispatcher는 계속</td></tr>
+<tr><td>Sink가 closed (<code>s.f == nil</code>)</td><td><code>Write</code> error 반환</td></tr>
+<tr><td>Rotation <code>os.Rename</code> 실패</td><td>best-effort reopen primary; error 전파</td></tr>
+<tr><td>Ledger 파일 corruption</td><td><code>bufio.Scanner</code> error → <code>NewReplayLedger</code>가 error 반환</td></tr>
+<tr><td>Ledger write 실패</td><td><code>MarkIfNew</code>가 <code>false</code> 반환 — caller는 재전송 skip (safe default)</td></tr>
+<tr><td>Empty <code>EventID</code></td><td><code>MarkIfNew=false</code> — 재전송 안 함 (저장도 안 함)</td></tr>
+</tbody>
+</table>
+
+<h2 id="f8-6">F8.6 비기능 요건 (NFR)</h2>
+<ul>
+<li><strong>NF-F8.1</strong> DLQ persistence는 <strong>best-effort</strong> — dispatcher hot path를 절대 막지 않아야 한다.</li>
+<li><strong>NF-F8.2</strong> Default rotation threshold는 50 MiB (<code>DefaultJSONLDeadLetterMaxSizeBytes</code>), pilot audit sink와 동일 컨벤션.</li>
+<li><strong>NF-F8.3</strong> Rotation은 빈 파일을 절대 rotate하지 않아야 한다 (zero-byte sibling 방지).</li>
+<li><strong>NF-F8.4</strong> <code>ReplayLedger.MarkIfNew</code>는 idempotent + durable해야 한다 — 동일 <code>EventID</code>로 두 번 호출 시 두 번째는 <code>false</code>, 그리고 process restart 후에도 일관성 유지.</li>
+<li><strong>NF-F8.5</strong> Sink + Ledger 모두 <code>sync.Mutex</code> 보호 — concurrent caller 안전.</li>
+<li><strong>NF-F8.6</strong> Scanner buffer는 1 MiB per line — pathological entry로 ledger가 silently truncate되지 않아야 한다.</li>
+<li><strong>NF-5.3.1 (open)</strong> Replay payload는 HMAC으로 서명되어야 한다. 정책 미정 — <code>open_items</code> 참조.</li>
+</ul>
+
+<h2 id="f8-7">F8.7 Acceptance Criteria (Gherkin)</h2>
+<pre><code>Feature: Dead-letter queue and idempotent replay
+  Background:
+    Given a Dispatcher whose dlqSink is a JSONLDeadLetterSink at "/tmp/dlq.jsonl"
+    And a ReplayLedger at "/tmp/dlq.ledger"
+
+  Scenario: Terminal failure produces one DLQ entry per channel
+    Given notify.Stage.Exec returns a non-canceled error for receiver "ops-slack"
+    When recordTerminalFailure runs
+    Then the DLQ file contains a JSON line with channel "ops-slack"
+    And the entry's event_id equals the alert fingerprint
+    And the entry's reason matches the underlying error string
+
+  Scenario: Context cancellation never enqueues a DLQ entry
+    Given notify.Stage.Exec returns context.Canceled
+    When the aggregation group flushes
+    Then dlqSink.Write is not called
+    And the DLQ file size is unchanged
+
+  Scenario: Replay is skipped for previously processed event
+    Given a ReplayLedger containing event_id "abc123"
+    When MarkIfNew("abc123") is invoked
+    Then it returns false
+    And no extra line is appended to the ledger
+
+  Scenario: Replay marks a new event durably
+    Given a fresh ReplayLedger
+    When MarkIfNew("xyz789") is invoked
+    Then it returns true
+    And the ledger file ends with the line "xyz789"
+    And reopening the ledger preserves the seen entry
+
+  Scenario: Rotation preserves prior contents
+    Given an active DLQ file already at 50 MiB
+    When the next Entry pushes the size above the threshold
+    Then the file is renamed to a "&lt;path&gt;.&lt;timestamp&gt;" sibling
+    And the new entry lives in a fresh primary file</code></pre>
+
+<h2 id="f8-8">F8.8 Traceability</h2>
+<ul>
+<li>Implements UC: UC-002</li>
+<li>Covered by WBS: WBS-1.5</li>
+<li>Source: <code>pkg/alertmanager/alertmanagernotify/dlq/{dlq.go,ledger.go}</code>, <code>pkg/alertmanager/alertmanagerserver/dispatcher.go</code></li>
+<li>Commits: <code>ade174bb8</code>, <code>91b9ff5db</code></li>
+</ul>
+
+<h2 id="f8-9">F8.9 Open Items</h2>
+<ul>
+<li><strong>HMAC 정책 follow-up</strong> — replay 시 payload 무결성·재전송 위변조 방지를 위한 서명 정책 미정 (NF-5.3.1).</li>
+<li><strong>Idempotency 키 확장</strong> — 현재 <code>EventID = alert.fingerprint</code>만 사용. 권장 <code>sha256(fingerprint || channel.id || round_no)</code>로의 이행이 권장됨.</li>
+<li><strong>Replay loop</strong> — operator-facing replay CLI/UI는 본 모듈 범위 밖. ledger는 redelivery에 필요한 idempotency 기반만 제공.</li>
+</ul>
+
+</div>
+</body>
+</html>

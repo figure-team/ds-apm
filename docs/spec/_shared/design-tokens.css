@@ -371,6 +371,7 @@ blockquote {
 .status-pill.mvp { background: var(--oat); color: var(--slate); }
 .status-pill.pending { background: #F3D9CC; color: #8A3B1E; }
 .status-pill.draft { background: var(--g100); color: var(--g500); }
+.status-pill.planned { background: #DCE2EA; color: #3E4B5C; }
 
 /* ========== Print / PDF ========== */
 @page { size: A4; margin: 18mm 15mm; }

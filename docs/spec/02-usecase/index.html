@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DS-APM 한장 브리핑</title>
+<title>DS-APM Use Case 카탈로그</title>
 <style>
 /* DS-APM 산출물 공통 디자인 토큰
  * 출처: docs/spec/_foundation/research-skills-b-html.md §5.1~5.10
@@ -470,142 +470,94 @@ details.expand[open] summary::before { content: "▾ "; }
 <body>
 <div class="page">
 
-<div class="eyebrow">DS-APM · 요약 브리핑 · 2026-06-02</div>
-<h1>DS-APM 요약 브리핑</h1>
+<div class="eyebrow">DS-APM · Use Case 카탈로그 · 2026-06-02</div>
+<h1>DS-APM Use Case 카탈로그</h1>
 
-<div class="intro">
-  <p>SigNoz 알림 경로에 <strong>SOP 자동 매칭 · AI 초안 · 실패 재처리</strong> 단계를 더해, 새벽 알람 대응의 반복 노동(5~15분)을 <strong>30초</strong>로 줄이는 확장 모듈 그룹. 운영자는 검토·승인만 합니다.</p>
-</div>
+<blockquote>
+<p><strong>템플릿</strong>: Cockburn Fully Dressed (메인 골격) + Gherkin (복잡한 에러 케이스) + UML Sequence Diagram (<code>alt</code>/<code>break</code> 프래그먼트)</p>
+<p><strong>Level 통일</strong>: 모든 UC는 Cockburn <strong>User-goal (Sea) level</strong></p>
+<p><strong>상태</strong>: 본문 작성 완료. UC-001~003 cases 파일 채워짐.</p>
+</blockquote>
 
-<div class="summary">
-  <div class="cell"><div class="k">현 상태</div><div class="v accent">착수 예정</div></div>
-  <div class="cell"><div class="k">구성</div><div class="v">6 컴포넌트</div></div>
-  <div class="cell"><div class="k">발송 채널</div><div class="v">5채널</div></div>
-  <div class="cell"><div class="k">추후 진행</div><div class="v">4건</div></div>
-</div>
+<h2 id="usecase-list">Use Case 일람</h2>
 
-<h2>처리 흐름</h2>
-<pre class="mermaid">
-flowchart LR
-    OTEL["외부 텔레메트리"]
-    subgraph SIGNOZ["SigNoz Community"]
-        direction LR
-        A["1 장애 감지"]
-        B["2 알람 발화"]
-        subgraph AIOPSAGENT["AIOpsAgent"]
-            direction LR
-            C["3 개인정보 마스킹"]
-            D["4 SOP 매칭"]
-            E["5 AI 초안"]
-            F["6 운영자 승인"]
-            G["7 채널 발송"]
-        end
-        A --> B --> C --> D --> E --> F --> G
-    end
-    OTEL --> A
-    G -->|"HTTP/SMTP"| CH["5채널"]
-</pre>
-<div class="channels">
-  <span class="chip">Slack</span><span class="chip">MS Teams</span><span class="chip">PagerDuty</span><span class="chip">Webhook</span><span class="chip">Email</span>
-</div>
-
-<h2>품질 목표</h2>
 <table>
-  <thead><tr><th style="width:24%">목표</th><th>의미</th><th style="width:24%">측정</th></tr></thead>
+  <thead>
+    <tr><th>ID</th><th>제목</th><th>유형</th><th>Primary Actor</th><th>상태</th></tr>
+  </thead>
   <tbody>
-    <tr><td><strong>무손실</strong></td><td>어떤 실패에서도 알람·SOP는 누락 없이 도달</td><td>누락 0건</td></tr>
-    <tr><td><strong>30초 발송</strong></td><td>장애 → 메신저 도달 (승인 시간 제외)</td><td>p95 ≤ 30초</td></tr>
-    <tr><td><strong>실행 이력 감사</strong></td><td>누가 언제 무엇을 했는지(승인·발송·재처리) 전부 영속 기록</td><td>기록 누락률 0%</td></tr>
+    <tr><td><a href="cases/UC-001-incident-to-channel.html">UC-001</a></td><td>Incident에서 채널 전달까지 (Golden Path)</td><td>golden path</td><td>운영자</td><td><span class="status-pill planned">planned</span></td></tr>
+    <tr><td><a href="cases/UC-002-channel-failure-dlq.html">UC-002</a></td><td>채널 전달 실패 → DLQ → Replay</td><td>failure path</td><td>운영자 / 시스템</td><td><span class="status-pill planned">planned</span></td></tr>
+    <tr><td><a href="cases/UC-003-llm-auth-fail-open.html">UC-003</a></td><td>LLM 인증 실패 → quota fail-open → SOP 원문 fallback</td><td>failure path</td><td>시스템</td><td><span class="status-pill planned">planned</span></td></tr>
   </tbody>
 </table>
 
-<h2>일정</h2>
+<h2 id="actor-matrix">액터 매트릭스</h2>
+
+<p>행 = actor, 열 = Use Case. 셀 의미: <strong>P</strong> = Primary, <strong>S</strong> = Supporting, <strong>—</strong> = 관여 없음.</p>
+
 <table>
-  <thead><tr><th style="width:26%">마일스톤</th><th style="width:16%">목표일</th><th>내용</th></tr></thead>
+  <thead>
+    <tr><th>Actor</th><th>분류</th><th style="text-align:center">UC-001 Golden Path</th><th style="text-align:center">UC-002 DLQ Failure</th><th style="text-align:center">UC-003 LLM Fail-open</th></tr>
+  </thead>
   <tbody>
-    <tr><td><strong>M-1 기반</strong></td><td>2026-06-12</td><td>공통 기반 모듈 · 산출물 4종 합의</td></tr>
-    <tr><td><strong>M-2 도메인 엔진</strong></td><td>2026-07-10</td><td>SOP 그라운딩 + AI 초안 (E2E)</td></tr>
-    <tr><td><strong>M-3 전달·안전</strong></td><td>2026-07-31</td><td>5채널 발송 + PII 마스킹 (E2E)</td></tr>
-    <tr><td><strong>M-4 신뢰성·Beta</strong></td><td>2026-08-21</td><td>DLQ 재처리 · HMAC 결정 · 운영 UI/CLI</td></tr>
-    <tr><td><strong>M-5 운영 준비</strong></td><td>2026-08-28</td><td>안정화 · 테넌트 격리 · PII Collector · HMAC 검증</td></tr>
+    <tr><td><strong>운영자 (Operator)</strong></td><td>사람</td><td style="text-align:center">P</td><td style="text-align:center">P</td><td style="text-align:center">S (degraded 알림 수신)</td></tr>
+    <tr><td><strong>SRE</strong></td><td>사람</td><td style="text-align:center">—</td><td style="text-align:center">S (DLQ depth meta-alert)</td><td style="text-align:center">S (자격증명 회전, fail-open storm escalation)</td></tr>
+    <tr><td><strong>SigNoz / Alertmanager</strong></td><td>시스템</td><td style="text-align:center">S (alert source)</td><td style="text-align:center">—</td><td style="text-align:center">—</td></tr>
+    <tr><td><strong>AIOpsAgent Ingress</strong></td><td>시스템</td><td style="text-align:center">S</td><td style="text-align:center">—</td><td style="text-align:center">—</td></tr>
+    <tr><td><strong>PII 마스킹 필터 (F7)</strong></td><td>시스템</td><td style="text-align:center">S</td><td style="text-align:center">—</td><td style="text-align:center">—</td></tr>
+    <tr><td><strong>Multi-tenant Scope (F4)</strong></td><td>시스템</td><td style="text-align:center">S</td><td style="text-align:center">—</td><td style="text-align:center">—</td></tr>
+    <tr><td><strong>SOP Store (F1)</strong></td><td>시스템</td><td style="text-align:center">S</td><td style="text-align:center">—</td><td style="text-align:center">S (raw fallback fetch)</td></tr>
+    <tr><td><strong>AI Engine (F2)</strong></td><td>시스템</td><td style="text-align:center">S</td><td style="text-align:center">—</td><td style="text-align:center">S</td></tr>
+    <tr><td><strong>AI Quota Controller (F3)</strong></td><td>시스템</td><td style="text-align:center">—</td><td style="text-align:center">—</td><td style="text-align:center"><strong>P</strong> (fail-open 결정)</td></tr>
+    <tr><td><strong>LLM Provider</strong></td><td>외부</td><td style="text-align:center">S</td><td style="text-align:center">—</td><td style="text-align:center">S (실패 트리거)</td></tr>
+    <tr><td><strong>Dispatcher (F6)</strong></td><td>시스템</td><td style="text-align:center">S</td><td style="text-align:center">S</td><td style="text-align:center">S</td></tr>
+    <tr><td><strong>Channel (Slack / Teams / PD / Webhook / Email)</strong></td><td>외부</td><td style="text-align:center">S</td><td style="text-align:center">S (실패 트리거)</td><td style="text-align:center">S</td></tr>
+    <tr><td><strong>DLQ JSONL Sink (F8)</strong></td><td>시스템</td><td style="text-align:center">—</td><td style="text-align:center">S</td><td style="text-align:center">—</td></tr>
+    <tr><td><strong>Replay Ledger (F8)</strong></td><td>시스템</td><td style="text-align:center">—</td><td style="text-align:center">S</td><td style="text-align:center">—</td></tr>
+    <tr><td><strong>Audit Sink (F5)</strong></td><td>시스템</td><td style="text-align:center">S</td><td style="text-align:center">S</td><td style="text-align:center">S</td></tr>
   </tbody>
 </table>
 
-<h2>더 보기 (필요할 때만 펼치기)</h2>
-<div class="more">
+<p>UML use case diagram 1장 (액터 스틱맨 + UC 타원 + 매트릭스 위 cell <code>P</code>/<code>S</code> 매핑)은 HTML 빌드 단계에서 별도 SVG 렌더링.</p>
 
-<details class="expand" open><summary>배경 — 왜 필요한가</summary><div class="body">
-<p>새벽 알람 한 줄을 받으면 운영자는 ① 의미 분석 → ② SOP 문서 탐색(위키·노션·드라이브 산재) → ③ 메신저 수동 공유(5채널) → ④ 조치 순으로 움직입니다. 조치 시작까지 평균 <strong>5~15분</strong>, 새벽 휴먼 에러는 주간 대비 <strong>2~3배</strong>(Google SRE Book Ch.12). AIOpsAgent는 ①~③을 자동화하고 운영자는 검토·승인만 합니다.</p>
-</div></details>
+<h2 id="diagram-standard">다이어그램 표준</h2>
 
-<details class="expand" open><summary>동작 시나리오 — 대표 3가지</summary><div class="body">
-<p style="color:var(--g500);font-size:13px;margin:0 0 8px">전체 흐름 중 <strong>대표 3개만 추렸습니다</strong>. 상세는 Use Case 상세본(UC-001~003) 참조.</p>
-<div class="item"><span class="lab">A · 정상</span><span class="txt">결제 5xx 알람 → 마스킹 → SOP 자동 매칭 → AI 3단계 초안 → 운영자 승인 1회 → Slack·Teams·PagerDuty 동시 발송. <strong>약 30초</strong>.</span></div>
-<div class="item"><span class="lab">B · 발송실패</span><span class="txt">Slack 일시 장애 → 지수 백오프 3회 재시도 → 실패 시 DLQ에 원본 보존 → 운영자가 정상화 후 수동 재발송(새 idempotency key). <strong>무손실</strong>.</span></div>
-<div class="item"><span class="lab">C · AI실패</span><span class="txt">LLM quota 소진(401) → fail-open 전환 → AI 초안 대신 <strong>SOP 원문 그대로</strong> 발송 + SRE 채널에 키 갱신 알림. 대응 중단 없음.</span></div>
-</div></details>
+<ul>
+  <li><strong>Swimlane Sequence</strong>: SigNoz / Ingress / AI Engine / Operator / Dispatcher / Channel (5~6 lane)</li>
+  <li><strong>State Machine</strong>: Alert lifecycle (<code>received → grounded → draft_pending → approved → dispatching → delivered / failed_dlq / replayed</code>)</li>
+  <li><strong>Activity Diagram</strong>: 분기 많은 sad path (필요 시)</li>
+</ul>
 
-<details class="expand" open><summary>비즈니스 효과 (예상)</summary><div class="body">
-<table>
-  <thead><tr><th>지표</th><th>이전</th><th>적용 후</th></tr></thead>
-  <tbody>
-    <tr><td>알람 → 조치 시작</td><td>5~15분</td><td>30초~2분</td></tr>
-    <tr><td>SOP 찾기</td><td>2~5분</td><td>0초 (자동)</td></tr>
-    <tr><td>발송 누락률</td><td>~5%</td><td>0%</td></tr>
-    <tr><td>감사 완전성</td><td>부분적</td><td>100%</td></tr>
-  </tbody>
-</table>
-<p>정성: 야간 부담·온보딩 시간 감소, 블레임리스 회고 데이터 자동 축적.</p>
-</div></details>
+<p>각 UC 파일에 Mermaid <code>sequenceDiagram</code> 1장 + <code>stateDiagram-v2</code> 1장 임베드. UC-003은 sequenceDiagram에 <code>alt/else</code> 프래그먼트로 401/403/429 vs 5xx vs malformed 분기를 한 장에 그림.</p>
 
-<details class="expand" open><summary>기술 스택 · 통합 방식(ADR-001)</summary><div class="body">
-<div class="item"><span class="lab">베이스</span><span class="txt">SigNoz Community (MIT, OpenTelemetry 네이티브)</span></div>
-<div class="item"><span class="lab">언어·저장</span><span class="txt">Go · PostgreSQL(SOP·감사) + JSONL(DLQ)</span></div>
-<div class="item"><span class="lab">AI·채널</span><span class="txt">외부 LLM(Provider 무관) · 5채널 표준 API</span></div>
-<div class="item"><span class="lab">ADR-001</span><span class="txt">Python 폐기 → SigNoz Go 내장 모듈로 통합 결정 (2026-05-19). 상세는 별도 문서 — <a href="../01-overview/adr/ADR-001-python-to-go.html">ADR-001</a>.</span></div>
-</div></details>
+<h2 id="background-given">공통 가정 (Background Given)</h2>
 
-<details class="expand"><summary>알려진 위험 4가지</summary><div class="body">
-<div class="item"><span class="lab">R-1 보안</span><span class="txt">HMAC 서명 정책 미정 — 재발송 위변조 검증. M-4 결정(D-1).</span></div>
-<div class="item"><span class="lab">R-2 격리</span><span class="txt">다중 테넌트 격리 production-ready 미달. 내부 단일 운영엔 영향 없음. 외부 온보딩 시 강화(D-2).</span></div>
-<div class="item"><span class="lab">R-3 보안</span><span class="txt">PII 처리 현재 입구 1회. 모범 사례는 Collector 단. M-5 검토(D-3).</span></div>
-<div class="item"><span class="lab">R-4 안정성</span><span class="txt">외부 LLM 의존 — <strong>이미 해소</strong>. fail-open으로 SOP 원문 발송, 손실 없음(D-4 정책 선택지).</span></div>
-</div></details>
+<p>모든 UC에 공통으로 적용되는 환경 조건. 각 UC의 Preconditions 위에 implicit하게 깔린다.</p>
 
-<details class="expand"><summary>용어 빠른 풀이</summary><div class="body">
-<div class="item"><span class="lab">SOP</span><span class="txt">운영 절차서</span></div>
-<div class="item"><span class="lab">DLQ</span><span class="txt">발송 실패 메시지를 보관하는 대기열</span></div>
-<div class="item"><span class="lab">fail-open</span><span class="txt">보호장치 실패 시 정지 대신 축소 모드로 지속</span></div>
-<div class="item"><span class="lab">idempotency</span><span class="txt">중복 처리 방지 식별자</span></div>
-<div class="item"><span class="lab">HMAC</span><span class="txt">위변조 방지 서명</span></div>
-<div class="item"><span class="lab">OTel</span><span class="txt">관측 데이터(metric·log·trace) 표준</span></div>
-<div class="item"><span class="lab">PII</span><span class="txt">개인 식별 정보</span></div>
-<div class="item"><span class="lab">tenant</span><span class="txt">격리 단위(고객사·팀)</span></div>
-<div class="item"><span class="lab">on-call</span><span class="txt">1차 당직 운영자</span></div>
-<p>전체 용어집(31개): <a href="../_shared/glossary.html">glossary.md</a></p>
-</div></details>
+<ol>
+  <li><strong>SigNoz Ruler alert rule 활성</strong> — 대상 alert rule이 평가 중이고, <code>for</code> hold 시간 경과 시 firing 상태로 전이해야 한다.</li>
+  <li><strong>Alertmanager webhook v4 호환</strong> — 페이로드는 <code>alertname</code>, <code>severity</code>, <code>status</code>, <code>startsAt</code>, <code>labels</code>, <code>annotations.runbook_url</code>, <code>fingerprint</code>, <code>generatorURL</code> 8개 필수 필드를 갖는다 (research §13.1).</li>
+  <li><strong>대상 채널 1개 이상 등록·healthy</strong> — Slack / MS Teams v2 / PagerDuty / Webhook / Email 중 1+ 채널이 적어도 직전 health check를 통과한 상태.</li>
+  <li><strong>SOP store 인덱싱 완료</strong> — 대응 SOP 1건 이상이 <code>approval_status: approved</code>이고 <code>staleness_days ≤ 90</code>. SOP는 explicit-label binding (<code>signoz_pilot_sop_id</code>)으로 매칭된다 (F1.1).</li>
+  <li><strong>AI Strategy 활성 + Quota Controller 정상</strong> — 해당 tenant에 대해 AI Strategy 1건이 active이고, Quota Controller는 fail-open 정책으로 설정 (UC-003 분기에서 활용).</li>
+  <li><strong>PII 마스킹 필터 활성</strong> — <code>pkg/types/alertmanagertypes/incident_payload.go</code>의 redactor가 AI 초안 매니저 호출 직전에 항상 호출 가능 상태.</li>
+  <li><strong>Tenant Policy 적용</strong> — <code>project_id</code> × <code>environment</code> 기반 tenant scope이 적용되어 cross-tenant SOP/strategy leakage가 차단된 상태 (F4, NF-F1.1).</li>
+  <li><strong>Audit JSONL sink 등록</strong> — <code>cmd/community/main.go</code>가 부팅 시 <code>var/audit/pilot-events.jsonl</code>을 등록한 상태. 실패 시 <code>NopPilotAuditEventSink</code> fallback (F0 NF-F0.2).</li>
+  <li><strong>DLQ JSONL sink + Replay Ledger</strong> — 디스크 쓰기 가능 상태. UC-002에서 본격 활용.</li>
+  <li><strong>운영자 1인 이상 on-call</strong> — UC-001 단계 7의 draft 승인을 담당할 운영자가 rotation에 등재.</li>
+</ol>
 
-</div>
+<p>상기 가정이 깨지면 각 UC의 Extension으로 분기 (e.g., UC-001 4a tenant policy 미발견, UC-002 4a DLQ sink 쓰기 실패).</p>
 
-<h2>상세본 4종</h2>
-<table>
-  <thead><tr><th style="width:22%">산출물</th><th>용도</th><th style="width:18%">링크</th></tr></thead>
-  <tbody>
-    <tr><td><strong>Overview</strong></td><td>아키텍처·시스템 경계</td><td><a href="../01-overview/index.html">index.md</a></td></tr>
-    <tr><td><strong>Use Case</strong></td><td>정상 흐름 + 실패 시나리오 2건</td><td><a href="../02-usecase/index.html">index.md</a></td></tr>
-    <tr><td><strong>기능명세</strong></td><td>모듈 인터페이스 + Gherkin</td><td><a href="../03-functional-spec/index.html">index.md</a></td></tr>
-    <tr><td><strong>WBS</strong></td><td>작업 분해 + 일정 + 마일스톤</td><td><a href="../04-wbs/index.html">index.md</a></td></tr>
-  </tbody>
-</table>
+<h2 id="traceability">Traceability</h2>
 
-<details class="expand" id="decisions"><summary>추후 진행 사항 (4건)</summary><div class="body">
-<div class="item"><span class="lab">D-1 HMAC</span><span class="txt">재발송 서명 정책 — (a) M-4 도입 / (b) 외부 고객사 직전 / (c) 보안팀 별도 검토</span></div>
-<div class="item"><span class="lab">D-2 격리</span><span class="txt">다중 테넌트 격리 시점 — (a) M-5 포함 / (b) 외부 1호 확정 후 / (c) 내부 단일 운영 시 보류</span></div>
-<div class="item"><span class="lab">D-3 PII</span><span class="txt">Collector 단 이동 — (a) M-5 포함 / (b) 병행 트랙 / (c) M-5 이후 후순위</span></div>
-<div class="item"><span class="lab">D-4 정책</span><span class="txt">fail-open vs fail-closed — (a) 현행 fail-open / (b) 테넌트별 선택 / (c) 보안 테넌트 fail-closed</span></div>
-</div></details>
-
-<div class="footnote">핵심만 담은 요약입니다. 세부는 "더 보기"를 펼치거나 상세본 4종을 참조하세요.</div>
+<ul>
+  <li>Use Cases → Features → WBS 매트릭스: <a href="../_shared/traceability.html">traceability</a></li>
+  <li>UC-001 ←→ F0, F1, F2, F4, F5, F6, F7 / WBS-1.0~1.4</li>
+  <li>UC-002 ←→ F6, F8 / WBS-1.3, 1.5 (UC-001 단계 8 Extension <code>8a</code>로부터 진입)</li>
+  <li>UC-003 ←→ F2, F3 / WBS-1.2 (UC-001 단계 5 Extension <code>5b</code>로부터 진입). F1은 raw fallback fetch의 전제로 참여.</li>
+</ul>
 
 </div>
 </body>

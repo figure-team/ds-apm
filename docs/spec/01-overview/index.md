@@ -34,7 +34,7 @@ Enterprise 모듈(`ee/`, `cmd/enterprise/`)은 본 산출물 범위 밖이다.
 
 | # | 품질 목표 | 정량 시나리오 |
 |---|---|---|
-| **QG-1** | **정보 손실 0** | LLM 실패·채널 실패 등 어떤 degraded mode에서도 운영자가 받는 알람에서 alert payload + SOP 본문이 누락되지 않아야 한다. silent drop 0건. |
+| **QG-1** | **무손실** | LLM 실패·채널 실패 등 어떤 degraded mode에서도 운영자가 받는 알람에서 alert payload + SOP 본문이 누락되지 않아야 한다. silent drop 0건. |
 | **QG-2** | **Dispatch p95 latency ≤ 30s** | Ingress webhook 수신 → 채널 2xx 응답까지 p95 30초 이하 (운영자 approve 시간 제외). AI hook 자체는 p95 ≤ 1s. |
 | **QG-3** | **Audit completeness 100%** | dispatch / draft / SOP 접근 / fail-open 발동 1건당 audit row 1건 이상. 누락률 0%. blameless culture 유지를 위한 reproducibility 토대. |
 
@@ -68,7 +68,7 @@ flowchart LR
     CH -->|운영자 후속 대응| OP
 ```
 
-비즈니스 흐름: 관측 시스템이 incident을 감지하면, AIOpsAgent가 사전 등록된 SOP를 grounding 컨텍스트로 사용해 AI runbook draft를 만든다. 운영자는 draft를 검수해 approve/reject하고, dispatch는 5채널로 fan-out된다. 정보 손실 0과 audit completeness 100%가 비즈니스 책임선의 핵심.
+비즈니스 흐름: 관측 시스템이 incident을 감지하면, AIOpsAgent가 사전 등록된 SOP를 grounding 컨텍스트로 사용해 AI runbook draft를 만든다. 운영자는 draft를 검수해 approve/reject하고, dispatch는 5채널로 fan-out된다. 무손실과 audit completeness 100%가 비즈니스 책임선의 핵심.
 
 ### §3.2 기술 컨텍스트
 
@@ -210,7 +210,7 @@ AIOpsAgent Quality
 ├─ Reliability
 │  ├─ DLQ persistence durability (dispatch 손실 0건)
 │  ├─ Idempotency: (fingerprint, channel, round_no) 튜플 기준 중복 dispatch 0건
-│  └─ Fail-open 정보 손실 0 (QG-1)
+│  └─ Fail-open 무손실 (QG-1)
 ├─ Security
 │  ├─ PII 100% redaction before AI Engine (QG-3 의존)
 │  ├─ HMAC 서명 정책 (NF-5.3.1 — open)

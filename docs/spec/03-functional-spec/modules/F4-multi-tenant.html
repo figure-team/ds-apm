@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F4 — Multi-tenant Scope</title>
+<style>
+:root {
+  --ivory:#FAF9F5; --slate:#141413; --clay:#D97757; --oat:#E3DACC;
+  --olive:#788C5D; --sky:#6A8CAF; --g100:#F0EEE6; --g300:#D1CFC5;
+  --g500:#87867F; --g700:#3D3D3A;
+  --serif: ui-serif, Georgia, 'Times New Roman', serif;
+  --sans:  system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono:  ui-monospace, 'SF Mono', Menlo, Monaco, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--ivory); color: var(--g700); font-family: var(--sans); line-height: 1.55; padding: 56px 32px 120px; -webkit-font-smoothing: antialiased; }
+.page { max-width: 1120px; margin: 0 auto; }
+h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(38px, 5.4vw, 62px); color: var(--slate); letter-spacing: -0.02em; margin-bottom: 16px; }
+h2 { font-family: var(--serif); font-weight: 500; font-size: 26px; color: var(--slate); letter-spacing: -0.01em; margin-top: 56px; }
+h2:first-of-type { margin-top: 32px; }
+h3 { font-family: var(--sans); font-weight: 600; font-size: 18px; color: var(--slate); margin-bottom: 8px; margin-top: 32px; }
+h4 { font-family: var(--sans); font-weight: 600; font-size: 15px; color: var(--g700); margin-bottom: 6px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; color: var(--g500); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px; }
+p { margin-bottom: 12px; }
+a { color: var(--clay); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 150ms; }
+a:hover { border-bottom-color: var(--clay); }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin-bottom: 4px; }
+blockquote { border-left: 3px solid var(--g300); padding: 8px 16px; margin: 12px 0; color: var(--g700); font-style: italic; }
+code, pre { font-family: var(--mono); font-size: 13px; }
+pre { background: var(--g100); border: 1.5px solid var(--g300); border-radius: 10px; padding: 12px 16px; overflow-x: auto; margin: 12px 0; }
+code { background: var(--g100); padding: 1px 6px; border-radius: 4px; }
+pre code { background: transparent; padding: 0; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--g300); vertical-align: top; }
+th { font-family: var(--sans); font-weight: 600; color: var(--slate); background: var(--g100); }
+.mermaid { background: #fff; border: 1.5px solid var(--g300); border-radius: 10px; padding: 16px; margin: 16px 0; text-align: center; }
+.status-pill { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 10px; border-radius: 999px; text-transform: uppercase; font-weight: 600; }
+.status-pill.planned { background: #DCE2EA; color: #3E4B5C; }
+html { scroll-behavior: smooth; }
+@page { size: A4; margin: 18mm 15mm; }
+@media print {
+  body { background: #fff; padding: 0; }
+  pre, table { break-inside: avoid; page-break-inside: avoid; }
+  a::after { content: " (" attr(href) ")"; font-size: 10px; color: #888; }
+}
+</style>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#FAF9F5', primaryTextColor: '#141413',
+      primaryBorderColor: '#D1CFC5', lineColor: '#87867F',
+      secondaryColor: '#E3DACC', tertiaryColor: '#F0EEE6'
+    },
+    fontFamily: 'ui-sans-serif, system-ui, sans-serif'
+  });
+</script>
+</head>
+<body>
+<div class="page">
+
+<div class="eyebrow">DS-APM · 기능명세서 · F4 · 2026-06-02</div>
+<h1>F4 — Multi-tenant Scope</h1>
+
+<p><span class="status-pill planned">planned</span></p>
+
+<blockquote>
+<p><strong>상태</strong>: 착수 예정 (착수보고 기준)<br>
+SOP / AI strategy 접근을 <code>project_id × environment</code> tenant scope로 필터링.<br>
+<strong>README 경고</strong>: production-ready 아님. label-based filter 수준이며 row-level security가 아니다.</p>
+</blockquote>
+
+<h2 id="f4-1">F4.1 개요</h2>
+<p>본 모듈은 SOP grounding과 AI strategy generation 단계에서 alert label에 박힌 tenant identity (<code>project_id</code>, <code>environment</code>)가 SOP document의 <code>TenantScope</code>와 일치하는지 검사한다. 매칭 정책은 <strong>단순 list 포함 + 와일드카드 <code>"*"</code></strong> 지원이며, 매칭 실패 시:</p>
+<ul>
+<li>SOP grounding → <code>SOPBindingStatusForbidden</code> 반환</li>
+<li>Managed markdown fetch → <code>PilotSOPFetchStatusDenied</code> + audit outcome <code>denied</code></li>
+<li>AI strategy generation → <code>AIStrategyStatusBlockedByPolicy</code></li>
+</ul>
+<p><strong>production-readiness 격차</strong> (README 명시):</p>
+<ul>
+<li>DB row-level security 없음 — <code>SOPStore</code>가 <code>orgID</code> partition만 강제, tenant scope는 application layer filter</li>
+<li><code>project_id</code> label spoofing 방어 없음 — alertmanager가 신뢰 가능한 source인지에 의존</li>
+<li><code>Environments</code> list의 와일드카드 <code>"*"</code>는 단순 string match. 정규식·glob 미지원</li>
+</ul>
+
+<h2 id="f4-2">F4.2 인터페이스</h2>
+<pre><code>// pkg/types/ruletypes/tenant_policy.go
+func PilotTenantFromLabels(labels map[string]string) PilotAuditTenant
+func PilotTenantIsComplete(tenant PilotAuditTenant) bool
+func PilotTenantScopeAllows(scope PilotTenantScope, tenant PilotAuditTenant) bool
+
+const (
+    SOPTenantPolicyMissingLabelsWarning = "project_id and environment labels are required for SOP tenant policy"
+    SOPTenantPolicyDeniedWarning        = "sop document is outside requested tenant scope"
+)</code></pre>
+
+<h2 id="f4-3">F4.3 데이터 모델</h2>
+<pre><code>type PilotAuditTenant struct {
+    ProjectID   string  // label "project_id" — trim된 값
+    Environment string  // label "environment"
+}
+
+type PilotTenantScope struct {
+    ProjectIDs   []string  // "*" 허용
+    Environments []string  // "*" 허용
+}</code></pre>
+<p>매칭 규칙 (<code>PilotTenantScopeAllows</code>):</p>
+<pre><code>return PilotTenantIsComplete(tenant) &amp;&amp;
+    contains(scope.ProjectIDs,   tenant.ProjectID)  &amp;&amp;
+    contains(scope.Environments, tenant.Environment)
+// contains: 정확 일치 또는 candidate == "*"</code></pre>
+<p>Normalization (<code>normalizePilotTenantScope</code>): trim + 빈 값 제거 + 중복 제거. 둘 다 최소 1개 entry 필수 (validator).</p>
+
+<h2 id="f4-4">F4.4 상태 전이</h2>
+<p>해당 없음. 본 모듈은 stateless predicate.</p>
+
+<h2 id="f4-5">F4.5 예외 및 복구</h2>
+<table>
+<thead><tr><th>경로</th><th>처리</th></tr></thead>
+<tbody>
+<tr><td><code>project_id</code> 또는 <code>environment</code> label 누락</td><td><code>PilotTenantIsComplete()=false</code> → 모든 scope 검사 deny</td></tr>
+<tr><td>Scope mismatch</td><td><code>forbidden</code> / <code>denied</code> / <code>blocked_by_policy</code> 중 호출자가 매핑한 상태로 반환</td></tr>
+<tr><td>Scope에 <code>ProjectIDs=[]</code> 또는 <code>Environments=[]</code></td><td>validator가 거부 (<code>"must include at least one"</code>)</td></tr>
+<tr><td><code>"*"</code> 와일드카드</td><td>모든 값과 일치로 처리</td></tr>
+</tbody>
+</table>
+
+<h2 id="f4-6">F4.6 비기능 요건 (NFR)</h2>
+<ul>
+<li><strong>NF-F4.1</strong> Tenant scope 위반 시 호출자에게 SOP 존재 여부를 누설하지 않아야 한다 (cross-tenant <code>Get</code>은 <code>ErrSOPDocumentNotFound</code>로 통일 — F1.6 참조).</li>
+<li><strong>NF-F4.2</strong> Tenant scope 매칭은 stateless하고 deterministic해야 한다 — 같은 입력은 같은 결과.</li>
+<li><strong>NF-F4.3</strong> Production 등급 격리에는 (a) DB row-level security 또는 (b) JWT-derived tenant claim 검증이 필요하다. 현재 MVP는 둘 다 미구현.</li>
+</ul>
+
+<h2 id="f4-7">F4.7 Acceptance Criteria (Gherkin)</h2>
+<pre><code>Feature: Multi-tenant scope enforcement
+  Background:
+    Given a SOPDocument with TenantScope { ProjectIDs: ["p-prod"], Environments: ["production"] }
+
+  Scenario: Exact match is allowed
+    Given an alert with labels project_id="p-prod", environment="production"
+    When PilotTenantScopeAllows is called
+    Then the result is true
+
+  Scenario: Wildcard environment matches any
+    Given a SOPDocument with Environments ["*"]
+    And an alert with environment="staging"
+    When PilotTenantScopeAllows is called
+    Then the result is true
+
+  Scenario: Missing project_id label denies access
+    Given an alert with environment="production" and no project_id label
+    When PilotTenantScopeAllows is called
+    Then the result is false
+
+  Scenario: Cross-tenant lookup does not reveal existence
+    Given a SOP exists for tenant "p-prod"
+    When tenant "p-other" issues SOPStore.Get
+    Then ErrSOPDocumentNotFound is returned</code></pre>
+
+<h2 id="f4-8">F4.8 Traceability</h2>
+<ul>
+<li>Implements UC: UC-001 (전제)</li>
+<li>Covered by WBS: WBS-1.0</li>
+<li>Source: <code>pkg/types/ruletypes/tenant_policy.go</code></li>
+<li>Commits: <code>3fa604e03</code></li>
+</ul>
+
+<h2 id="f4-9">F4.9 Open Items</h2>
+<p>README에 명시된 production-readiness 격차:</p>
+<ul>
+<li>DB row-level security 도입 (현재 application-layer filter)</li>
+<li>JWT-derived tenant claim 검증 (현재 alertmanager 신뢰)</li>
+<li><code>Environments</code> glob/regex 지원 (현재 plain string + <code>"*"</code>만)</li>
+</ul>
+
+</div>
+</body>
+</html>

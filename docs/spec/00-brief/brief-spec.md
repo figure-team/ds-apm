@@ -234,7 +234,7 @@ flowchart TB
 |---|---|---|---|
 | **성능 (Performance)** | 알람 → 협업 도구(메신저) 도달 95퍼센타일 30초 이내 | p95 latency ≤ 30s (운영 담당자 승인 시간 제외) | 새벽 알람의 5~15분 노동을 30초로 단축 |
 | **보안 (Security)** | 외부로 나가는 페이로드의 PII 누출 0%, 자격증명 노출 0% | 카테고리별 가림 패턴 일치 + 자격증명 노출 차단 검증기 통과 | AI 초안 매니저·외부 채널 모두 정제(sanitize)된 값만 사용 |
-| **신뢰성 (Reliability)** | 모든 재시도 실패 후에도 원본 알림 정보 손실 0건 | DLQ 영속 보존 + 재전송 중복 0건 | "정보 손실 0" — 무성 유실(silent drop)이 가장 나쁘다는 운영 원칙 |
+| **신뢰성 (Reliability)** | 모든 재시도 실패 후에도 원본 알림 정보 손실 0건 | DLQ 영속 보존 + 재전송 중복 0건 | "무손실" — 무성 유실(silent drop)이 가장 나쁘다는 운영 원칙 |
 
 비고: **개인정보 마스킹**(컴포넌트 5)과 **DLQ + 재전송**(컴포넌트 6)은 **운영 환경 적용 미흡(production-readiness 격차)**이 있습니다.
 - 마스킹은 입구 단일 지점에서만 적용 — OTel Collector 단으로 이동 권장 (README 경고)
@@ -247,13 +247,13 @@ flowchart TB
 | 산출물 | 대상 독자 | 링크 |
 |---|---|---|
 | **종합 브리핑** (배경·시나리오·의사결정 요청) | 팀장·매니저·의사결정자 | [brief.html](brief.html) |
-| **Overview** | 신규 멤버·외부 컨설턴트·감사 — 아키텍처와 시스템 경계 | [../01-overview/index.md](../01-overview/index.md) |
-| **Use Case** | QA·개발자 — 정상 흐름 + 실패 시나리오 2건 | [../02-usecase/index.md](../02-usecase/index.md) |
-| **기능명세서 (상세본)** | 개발자 — 모듈 9개 인터페이스 + BDD 시나리오 표기법(Gherkin) 기반 인수 기준(Acceptance Criteria) | [../03-functional-spec/index.md](../03-functional-spec/index.md) |
-| **WBS** | PM·일정 관리 — 작업 분해·마일스톤·의존도 | [../04-wbs/index.md](../04-wbs/index.md) |
-| 용어집 (31개 용어) | 전체 | [glossary.md](../_shared/glossary.md) |
+| **Overview** | 신규 멤버·외부 컨설턴트·감사 — 아키텍처와 시스템 경계 | [../01-overview/index.md](../01-overview/index.html) |
+| **Use Case** | QA·개발자 — 정상 흐름 + 실패 시나리오 2건 | [../02-usecase/index.md](../02-usecase/index.html) |
+| **기능명세서 (상세본)** | 개발자 — 모듈 9개 인터페이스 + BDD 시나리오 표기법(Gherkin) 기반 인수 기준(Acceptance Criteria) | [../03-functional-spec/index.md](../03-functional-spec/index.html) |
+| **WBS** | PM·일정 관리 — 작업 분해·마일스톤·의존도 | [../04-wbs/index.md](../04-wbs/index.html) |
+| 용어집 (31개 용어) | 전체 | [glossary.md](../_shared/glossary.html) |
 
 ---
 
 > 본 문서는 9개 상세 모듈(F0~F8)을 **6개 컴포넌트로 압축**한 요약본입니다.
-> 모듈별 인터페이스·데이터 구조·BDD 시나리오 표기법(Gherkin) 기반 인수 기준(Acceptance Criteria)은 [기능명세서](../03-functional-spec/index.md)를 참조하시기 바랍니다.
+> 모듈별 인터페이스·데이터 구조·BDD 시나리오 표기법(Gherkin) 기반 인수 기준(Acceptance Criteria)은 [기능명세서](../03-functional-spec/index.html)를 참조하시기 바랍니다.

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DS-APM 한장 브리핑</title>
+<title>ADR-001 — Python ds_apm_poc 폐기 → Go + SigNoz로 통합</title>
 <style>
 /* DS-APM 산출물 공통 디자인 토큰
  * 출처: docs/spec/_foundation/research-skills-b-html.md §5.1~5.10
@@ -470,142 +470,85 @@ details.expand[open] summary::before { content: "▾ "; }
 <body>
 <div class="page">
 
-<div class="eyebrow">DS-APM · 요약 브리핑 · 2026-06-02</div>
-<h1>DS-APM 요약 브리핑</h1>
+<div class="eyebrow">ADR-001 · Accepted · 2026-05-19</div>
+<h1>ADR-001 — Python ds_apm_poc 폐기 → Go + SigNoz로 통합</h1>
 
-<div class="intro">
-  <p>SigNoz 알림 경로에 <strong>SOP 자동 매칭 · AI 초안 · 실패 재처리</strong> 단계를 더해, 새벽 알람 대응의 반복 노동(5~15분)을 <strong>30초</strong>로 줄이는 확장 모듈 그룹. 운영자는 검토·승인만 합니다.</p>
-</div>
+<h2 id="status">Status</h2>
 
-<div class="summary">
-  <div class="cell"><div class="k">현 상태</div><div class="v accent">착수 예정</div></div>
-  <div class="cell"><div class="k">구성</div><div class="v">6 컴포넌트</div></div>
-  <div class="cell"><div class="k">발송 채널</div><div class="v">5채널</div></div>
-  <div class="cell"><div class="k">추후 진행</div><div class="v">4건</div></div>
-</div>
+<p><strong>Accepted</strong> (2026-05-19)</p>
 
-<h2>처리 흐름</h2>
-<pre class="mermaid">
-flowchart LR
-    OTEL["외부 텔레메트리"]
-    subgraph SIGNOZ["SigNoz Community"]
-        direction LR
-        A["1 장애 감지"]
-        B["2 알람 발화"]
-        subgraph AIOPSAGENT["AIOpsAgent"]
-            direction LR
-            C["3 개인정보 마스킹"]
-            D["4 SOP 매칭"]
-            E["5 AI 초안"]
-            F["6 운영자 승인"]
-            G["7 채널 발송"]
-        end
-        A --> B --> C --> D --> E --> F --> G
-    end
-    OTEL --> A
-    G -->|"HTTP/SMTP"| CH["5채널"]
-</pre>
-<div class="channels">
-  <span class="chip">Slack</span><span class="chip">MS Teams</span><span class="chip">PagerDuty</span><span class="chip">Webhook</span><span class="chip">Email</span>
-</div>
+<h2 id="context">Context</h2>
 
-<h2>품질 목표</h2>
-<table>
-  <thead><tr><th style="width:24%">목표</th><th>의미</th><th style="width:24%">측정</th></tr></thead>
-  <tbody>
-    <tr><td><strong>무손실</strong></td><td>어떤 실패에서도 알람·SOP는 누락 없이 도달</td><td>누락 0건</td></tr>
-    <tr><td><strong>30초 발송</strong></td><td>장애 → 메신저 도달 (승인 시간 제외)</td><td>p95 ≤ 30초</td></tr>
-    <tr><td><strong>실행 이력 감사</strong></td><td>누가 언제 무엇을 했는지(승인·발송·재처리) 전부 영속 기록</td><td>기록 누락률 0%</td></tr>
-  </tbody>
-</table>
+<p>DS-APM 초기 prototype은 <code>workspace_archive/ds-apm</code>의 Python orchestrator (<code>ds_apm_poc</code> 패키지)로 시작했다. 이 단계의 아키텍처는 다음과 같았다.</p>
 
-<h2>일정</h2>
-<table>
-  <thead><tr><th style="width:26%">마일스톤</th><th style="width:16%">목표일</th><th>내용</th></tr></thead>
-  <tbody>
-    <tr><td><strong>M-1 기반</strong></td><td>2026-06-12</td><td>공통 기반 모듈 · 산출물 4종 합의</td></tr>
-    <tr><td><strong>M-2 도메인 엔진</strong></td><td>2026-07-10</td><td>SOP 그라운딩 + AI 초안 (E2E)</td></tr>
-    <tr><td><strong>M-3 전달·안전</strong></td><td>2026-07-31</td><td>5채널 발송 + PII 마스킹 (E2E)</td></tr>
-    <tr><td><strong>M-4 신뢰성·Beta</strong></td><td>2026-08-21</td><td>DLQ 재처리 · HMAC 결정 · 운영 UI/CLI</td></tr>
-    <tr><td><strong>M-5 운영 준비</strong></td><td>2026-08-28</td><td>안정화 · 테넌트 격리 · PII Collector · HMAC 검증</td></tr>
-  </tbody>
-</table>
+<ul>
+  <li><strong>별도 프로세스 2개</strong>: SigNoz community 빌드와 Python <code>ds_apm_poc</code>가 각각 독립 컨테이너로 동작.</li>
+  <li><strong>Bridge layer</strong>: 두 시스템 사이를 잇는 Python bridge가 incident routing / SOP grounding / AI runbook drafting / retry+DLQ / notification dispatch를 직접 구현.</li>
+  <li><strong>중복 구현</strong>: Alertmanager가 이미 보유한 Slack / MS Teams / PagerDuty / Webhook / Email 5채널 dispatch를 Python에서 다시 만들어야 했고, retry budget·DLQ 인덱스도 Python 자체 자료구조로 별도 유지.</li>
+</ul>
 
-<h2>더 보기 (필요할 때만 펼치기)</h2>
-<div class="more">
+<p>이 구조는 두 가지 비용을 발생시켰다.</p>
 
-<details class="expand" open><summary>배경 — 왜 필요한가</summary><div class="body">
-<p>새벽 알람 한 줄을 받으면 운영자는 ① 의미 분석 → ② SOP 문서 탐색(위키·노션·드라이브 산재) → ③ 메신저 수동 공유(5채널) → ④ 조치 순으로 움직입니다. 조치 시작까지 평균 <strong>5~15분</strong>, 새벽 휴먼 에러는 주간 대비 <strong>2~3배</strong>(Google SRE Book Ch.12). AIOpsAgent는 ①~③을 자동화하고 운영자는 검토·승인만 합니다.</p>
-</div></details>
+<ol>
+  <li><strong>운영 비용 이중화</strong> — Go (SigNoz) + Python (ds_apm_poc) 두 런타임을 모두 모니터링·배포·롤백해야 함.</li>
+  <li><strong>Interface drift</strong> — alert payload 스키마, OTel resource attribute, idempotency key 규약이 두 시스템 간 미세하게 어긋나기 시작했고, bridge가 매번 매핑을 다시 검증해야 했음.</li>
+</ol>
 
-<details class="expand" open><summary>동작 시나리오 — 대표 3가지</summary><div class="body">
-<p style="color:var(--g500);font-size:13px;margin:0 0 8px">전체 흐름 중 <strong>대표 3개만 추렸습니다</strong>. 상세는 Use Case 상세본(UC-001~003) 참조.</p>
-<div class="item"><span class="lab">A · 정상</span><span class="txt">결제 5xx 알람 → 마스킹 → SOP 자동 매칭 → AI 3단계 초안 → 운영자 승인 1회 → Slack·Teams·PagerDuty 동시 발송. <strong>약 30초</strong>.</span></div>
-<div class="item"><span class="lab">B · 발송실패</span><span class="txt">Slack 일시 장애 → 지수 백오프 3회 재시도 → 실패 시 DLQ에 원본 보존 → 운영자가 정상화 후 수동 재발송(새 idempotency key). <strong>무손실</strong>.</span></div>
-<div class="item"><span class="lab">C · AI실패</span><span class="txt">LLM quota 소진(401) → fail-open 전환 → AI 초안 대신 <strong>SOP 원문 그대로</strong> 발송 + SRE 채널에 키 갱신 알림. 대응 중단 없음.</span></div>
-</div></details>
+<p>결정 시점(2026-05-19)에 archive 브랜치 <code>orchestrator-to-signoz-migration</code>에서 마이그레이션 작업이 완료되어 종결 커밋 <code>bc7e491 docs(migration): close orchestrator-to-signoz migration with verification evidence</code>가 기록됐다.</p>
 
-<details class="expand" open><summary>비즈니스 효과 (예상)</summary><div class="body">
-<table>
-  <thead><tr><th>지표</th><th>이전</th><th>적용 후</th></tr></thead>
-  <tbody>
-    <tr><td>알람 → 조치 시작</td><td>5~15분</td><td>30초~2분</td></tr>
-    <tr><td>SOP 찾기</td><td>2~5분</td><td>0초 (자동)</td></tr>
-    <tr><td>발송 누락률</td><td>~5%</td><td>0%</td></tr>
-    <tr><td>감사 완전성</td><td>부분적</td><td>100%</td></tr>
-  </tbody>
-</table>
-<p>정성: 야간 부담·온보딩 시간 감소, 블레임리스 회고 데이터 자동 축적.</p>
-</div></details>
+<h2 id="decision">Decision</h2>
 
-<details class="expand" open><summary>기술 스택 · 통합 방식(ADR-001)</summary><div class="body">
-<div class="item"><span class="lab">베이스</span><span class="txt">SigNoz Community (MIT, OpenTelemetry 네이티브)</span></div>
-<div class="item"><span class="lab">언어·저장</span><span class="txt">Go · PostgreSQL(SOP·감사) + JSONL(DLQ)</span></div>
-<div class="item"><span class="lab">AI·채널</span><span class="txt">외부 LLM(Provider 무관) · 5채널 표준 API</span></div>
-<div class="item"><span class="lab">ADR-001</span><span class="txt">Python 폐기 → SigNoz Go 내장 모듈로 통합 결정 (2026-05-19). 상세는 별도 문서 — <a href="../01-overview/adr/ADR-001-python-to-go.html">ADR-001</a>.</span></div>
-</div></details>
+<p>Python <code>ds_apm_poc</code> 런타임을 <strong>폐기</strong>하고, AIOpsAgent의 모든 기능(F0~F8)을 <strong>SigNoz community 코드베이스에 Go-native MVP로 구현</strong>한다. <code>pkg/alertmanager/</code>, <code>pkg/ruler/</code>, <code>pkg/types/ruletypes/</code>, <code>cmd/community/</code> 등 기존 패키지에 직접 변경을 가하는 방식으로 통합한다.</p>
 
-<details class="expand"><summary>알려진 위험 4가지</summary><div class="body">
-<div class="item"><span class="lab">R-1 보안</span><span class="txt">HMAC 서명 정책 미정 — 재발송 위변조 검증. M-4 결정(D-1).</span></div>
-<div class="item"><span class="lab">R-2 격리</span><span class="txt">다중 테넌트 격리 production-ready 미달. 내부 단일 운영엔 영향 없음. 외부 온보딩 시 강화(D-2).</span></div>
-<div class="item"><span class="lab">R-3 보안</span><span class="txt">PII 처리 현재 입구 1회. 모범 사례는 Collector 단. M-5 검토(D-3).</span></div>
-<div class="item"><span class="lab">R-4 안정성</span><span class="txt">외부 LLM 의존 — <strong>이미 해소</strong>. fail-open으로 SOP 원문 발송, 손실 없음(D-4 정책 선택지).</span></div>
-</div></details>
+<p>운영 코드는 <code>workspace_archive/ds-apm/var/signoz</code> nested repo(<code>ds-apm/native-mvp-foundation</code> 브랜치, fork base <code>feea9e9b3</code> 이후 사전 PoC 검토 분기)에 위치하며 <code>figure-team/ds-apm</code>에 공개 스냅샷이 노출된다.</p>
 
-<details class="expand"><summary>용어 빠른 풀이</summary><div class="body">
-<div class="item"><span class="lab">SOP</span><span class="txt">운영 절차서</span></div>
-<div class="item"><span class="lab">DLQ</span><span class="txt">발송 실패 메시지를 보관하는 대기열</span></div>
-<div class="item"><span class="lab">fail-open</span><span class="txt">보호장치 실패 시 정지 대신 축소 모드로 지속</span></div>
-<div class="item"><span class="lab">idempotency</span><span class="txt">중복 처리 방지 식별자</span></div>
-<div class="item"><span class="lab">HMAC</span><span class="txt">위변조 방지 서명</span></div>
-<div class="item"><span class="lab">OTel</span><span class="txt">관측 데이터(metric·log·trace) 표준</span></div>
-<div class="item"><span class="lab">PII</span><span class="txt">개인 식별 정보</span></div>
-<div class="item"><span class="lab">tenant</span><span class="txt">격리 단위(고객사·팀)</span></div>
-<div class="item"><span class="lab">on-call</span><span class="txt">1차 당직 운영자</span></div>
-<p>전체 용어집(31개): <a href="../_shared/glossary.html">glossary.md</a></p>
-</div></details>
+<h2 id="consequences">Consequences</h2>
 
-</div>
+<h3>Positive</h3>
+<ul>
+  <li><strong>Single binary 배포</strong> — <code>cmd/community</code> 1개 진입점만 부팅·롤백. 운영 surface가 절반으로 축소.</li>
+  <li><strong>OTel-native</strong> — SigNoz가 OpenTelemetry resource semantic attribute를 그대로 캐리하므로, AIOpsAgent의 alert payload는 instrumentation에서 dispatcher까지 schema-mapping 없이 흐른다.</li>
+  <li><strong>Alertmanager 5채널 재사용</strong> — Slack / MS Teams v2 / PagerDuty / Webhook / Email 어댑터를 0줄에서 다시 짤 필요가 없고, AIOpsAgent의 SOP/AI annotation을 기존 채널 template hook에 연결하는 방식으로 통합 (F6).</li>
+  <li><strong>Dispatch hot path 단순화</strong> — Python bridge가 처리하던 retry/DLQ를 Alertmanager dispatcher hot path 안의 <code>aiHook</code> + <code>dlqSink</code>로 통합 (F6, F8). DLQ는 별도 큐 백엔드 없이 JSONL sink로 구현 (<code>ade174bb8</code>).</li>
+  <li><strong>Interface drift 종결</strong> — alert payload, idempotency key, audit event 3개의 contract version 문자열을 <code>pilot_contract.go</code> 한 곳에서 frozen string으로 export하여 두 시스템 간 desync 가능성을 제거.</li>
+</ul>
 
-<h2>상세본 4종</h2>
-<table>
-  <thead><tr><th style="width:22%">산출물</th><th>용도</th><th style="width:18%">링크</th></tr></thead>
-  <tbody>
-    <tr><td><strong>Overview</strong></td><td>아키텍처·시스템 경계</td><td><a href="../01-overview/index.html">index.md</a></td></tr>
-    <tr><td><strong>Use Case</strong></td><td>정상 흐름 + 실패 시나리오 2건</td><td><a href="../02-usecase/index.html">index.md</a></td></tr>
-    <tr><td><strong>기능명세</strong></td><td>모듈 인터페이스 + Gherkin</td><td><a href="../03-functional-spec/index.html">index.md</a></td></tr>
-    <tr><td><strong>WBS</strong></td><td>작업 분해 + 일정 + 마일스톤</td><td><a href="../04-wbs/index.html">index.md</a></td></tr>
-  </tbody>
-</table>
+<h3>Negative</h3>
+<ul>
+  <li><strong>SigNoz upstream 종속</strong> — community 빌드의 internal API (e.g., <code>dispatch.Dispatcher</code>, <code>notify.Stage</code>) 변경 시 DS-APM도 영향 받음. upstream merge 비용 발생.</li>
+  <li><strong>Go 재작성 비용</strong> — Python <code>ds_apm_poc</code>의 SOP grounding / AI drafting / quota / PII / DLQ 모듈에 대한 <strong>상당한 재작성 비용</strong> (모듈 단위 신규 작성 — 사전 검토에서 추정, <a href="../../_foundation/baseline.md">baseline.md</a> 참조).</li>
+  <li><strong>Nested repo 운영 위험</strong> — 운영 fork가 <code>workspace_archive/ds-apm/var/signoz</code>라는 nested 위치에 있어, 상위 repo (<code>workspace_archive/ds-apm</code>)에서 <code>git status</code>만 보면 변경이 가려진다. 메모리 항목 "var/signoz는 우리 코드" 정책으로 항상 nested repo의 자체 <code>.git</code>도 확인해야 한다.</li>
+  <li><strong>Enterprise 모듈 경계</strong> — <code>ee/</code>, <code>cmd/enterprise/</code>는 SigNoz Enterprise License 적용이므로 DS-APM 산출물 범위 밖. community 빌드에만 머무는 자기 제약이 생긴다.</li>
+</ul>
 
-<details class="expand" id="decisions"><summary>추후 진행 사항 (4건)</summary><div class="body">
-<div class="item"><span class="lab">D-1 HMAC</span><span class="txt">재발송 서명 정책 — (a) M-4 도입 / (b) 외부 고객사 직전 / (c) 보안팀 별도 검토</span></div>
-<div class="item"><span class="lab">D-2 격리</span><span class="txt">다중 테넌트 격리 시점 — (a) M-5 포함 / (b) 외부 1호 확정 후 / (c) 내부 단일 운영 시 보류</span></div>
-<div class="item"><span class="lab">D-3 PII</span><span class="txt">Collector 단 이동 — (a) M-5 포함 / (b) 병행 트랙 / (c) M-5 이후 후순위</span></div>
-<div class="item"><span class="lab">D-4 정책</span><span class="txt">fail-open vs fail-closed — (a) 현행 fail-open / (b) 테넌트별 선택 / (c) 보안 테넌트 fail-closed</span></div>
-</div></details>
+<h2 id="alternatives">Alternatives Considered</h2>
 
-<div class="footnote">핵심만 담은 요약입니다. 세부는 "더 보기"를 펼치거나 상세본 4종을 참조하세요.</div>
+<h3>A. Python orchestrator + SigNoz bridge 유지</h3>
+<ul>
+  <li><strong>이점</strong>: 기존 Python 코드 보존, 팀 일부의 Python 숙련도 활용 가능.</li>
+  <li><strong>이유 미채택</strong>: 두 런타임 운영 비용 + bridge가 짊어진 interface drift 비용이 누적. POC 단계에서 이미 ds_apm_poc와 SigNoz alert schema가 어긋나기 시작.</li>
+</ul>
+
+<h3>B. 외부 Go 서비스로 SigNoz와 통합</h3>
+<ul>
+  <li><strong>개요</strong>: SigNoz는 그대로 두고, 별도 Go 서비스가 webhook 수신 + SOP grounding + AI drafting + 채널 dispatch를 담당.</li>
+  <li><strong>이유 미채택</strong>: Alertmanager 5채널 dispatch 코드 (Slack Block Kit, MS Teams Adaptive Card v1.4, PagerDuty Events API v2 등)를 새 서비스에서 재구현해야 함. SigNoz <code>pkg/alertmanager/alertmanagernotify/</code> 자산을 버리는 것이 손실 과다.</li>
+</ul>
+
+<h3>C. 현 상태 유지 (Python only)</h3>
+<ul>
+  <li><strong>이유 미채택</strong>: SigNoz community의 OTel-native ingress 자산을 활용하지 못함. 자체 OTel collector 운영 비용이 polynomially 증가.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul>
+  <li>메모리 항목: "Orchestrator → SigNoz 마이그레이션 (2026-05-19)" — Python ds_apm_poc 폐기 + PR #1 (DLQ 활성화 + HMAC 정책 follow-up 미해결)</li>
+  <li>Archive 브랜치: <code>orchestrator-to-signoz-migration</code> (<code>workspace_archive/ds-apm</code>)</li>
+  <li>마이그레이션 종결 커밋 (archive): <code>bc7e491 docs(migration): close orchestrator-to-signoz migration with verification evidence</code></li>
+  <li>DS-APM 시작 커밋: <code>026863650 feat(ds-apm): add native mvp foundation pilot scaffolding</code></li>
+  <li>변경 표면: 사전 검토 결과 (<a href="../../_foundation/baseline.md">../../_foundation/baseline.md</a> 참조)</li>
+  <li>메모리 항목: "var/signoz는 우리 코드 (nested repo)" — fork 프레이밍 금지 + nested repo 자체 <code>.git</code> 확인 정책</li>
+</ul>
 
 </div>
 </body>

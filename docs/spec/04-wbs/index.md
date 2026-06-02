@@ -63,23 +63,95 @@ WBS-1   DS-APM Project (root)
 | WBS-1.5 DLQ 재처리 서비스 | 3주 | 2026-08-03 | 2026-08-21 | WBS-1.3 |
 | 통합·안정화 버퍼 | 1주 | 2026-08-24 | 2026-08-28 | 전체 (E2E·HMAC 결정·검수) |
 
+### Work Package 단위 일정 (일 단위, 영업일 기준)
+
+| WP ID | 작업명 | 선행 | 시작일 | 종료일 | 기간(영업일) |
+|---|---|---|---|---|---|
+| 1.0.1 | Pilot 계약 스키마 | — | 2026-05-25 | 2026-05-27 | 3 |
+| 1.0.2 | 관리형 Markdown 페이로드 | 1.0.1 | 2026-05-28 | 2026-06-01 | 3 |
+| 1.0.3 | 테넌트 격리 정책 | 1.0.2 | 2026-06-02 | 2026-06-04 | 3 |
+| 1.0.4 | 감사 Sink 추상화 | 1.0.3 | 2026-06-05 | 2026-06-08 | 2 |
+| 1.0.5 | JSONL 감사 Sink 구현 | 1.0.4 | 2026-06-09 | 2026-06-10 | 2 |
+| 1.0.6 | community 진입점 와이어업 | 1.0.5 | 2026-06-11 | 2026-06-12 | 2 |
+| 1.1.1 | SOP Store 인터페이스 정의 | 1.0.6 | 2026-06-15 | 2026-06-17 | 3 |
+| 1.1.2 | SQL 스토어 구현체 | 1.1.1 | 2026-06-18 | 2026-06-22 | 3 |
+| 1.1.3 | 파일 영속화 구현체 | 1.1.2 | 2026-06-23 | 2026-06-25 | 3 |
+| 1.1.4 | SOP 도메인 타입 | 1.1.3 | 2026-06-26 | 2026-06-29 | 2 |
+| 1.1.5 | Grounding 로직 | 1.1.4 | 2026-06-30 | 2026-07-01 | 2 |
+| 1.1.6 | Runbook Handler SOP 라우트 | 1.1.5 | 2026-07-02 | 2026-07-03 | 2 |
+| 1.2.1 | AI Strategy 도메인 타입 | 1.0.6 | 2026-06-15 | 2026-06-18 | 4 |
+| 1.2.2 | LLM Provider 어댑터 | 1.2.1 | 2026-06-19 | 2026-06-24 | 4 |
+| 1.2.3 | Strategy 생성·persistence | 1.2.2 | 2026-06-25 | 2026-06-29 | 3 |
+| 1.2.4 | Strategy History append | 1.2.3 | 2026-06-30 | 2026-07-02 | 3 |
+| 1.2.5 | Quota Controller (fail-open) | 1.2.4 | 2026-07-03 | 2026-07-07 | 3 |
+| 1.2.6 | Dispatch Hook Integration | 1.2.5 | 2026-07-08 | 2026-07-10 | 3 |
+| 1.3.1 | Dispatcher wrapping | 1.2.6 | 2026-07-13 | 2026-07-15 | 3 |
+| 1.3.2 | AI context propagation | 1.3.1 | 2026-07-16 | 2026-07-20 | 3 |
+| 1.3.3 | Slack + MS Teams v2 adapter | 1.3.2 | 2026-07-21 | 2026-07-23 | 3 |
+| 1.3.4 | PagerDuty adapter | 1.3.3 | 2026-07-24 | 2026-07-27 | 2 |
+| 1.3.5 | Webhook + Email adapter | 1.3.4 | 2026-07-28 | 2026-07-29 | 2 |
+| 1.3.6 | 5채널 통합 라우팅·전송 검증 | 1.3.5 | 2026-07-30 | 2026-07-31 | 2 |
+| 1.4.1 | Redaction rule engine | 1.0.6 | 2026-07-13 | 2026-07-14 | 2 |
+| 1.4.2 | Incident payload redaction 적용 | 1.4.1 | 2026-07-15 | 2026-07-16 | 2 |
+| 1.4.3 | Audit sink 연동 | 1.4.2 | 2026-07-17 | 2026-07-20 | 2 |
+| 1.4.4 | Tenant별 룰 확장 훅 | 1.4.3 | 2026-07-21 | 2026-07-22 | 2 |
+| 1.4.5 | OTel Collector 단 이동 검토 | 1.4.4 | 2026-07-23 | 2026-07-24 | 2 |
+| 1.5.1 | JSONL DLQ Sink | 1.3.6 | 2026-08-03 | 2026-08-05 | 3 |
+| 1.5.2 | Idempotent Replay Ledger | 1.5.1 | 2026-08-06 | 2026-08-10 | 3 |
+| 1.5.3 | Dispatcher 통합 | 1.5.2 | 2026-08-11 | 2026-08-13 | 3 |
+| 1.5.4 | Replay API 엔드포인트 | 1.5.3 | 2026-08-14 | 2026-08-17 | 2 |
+| 1.5.5 | Replay 상태 머신 | 1.5.4 | 2026-08-18 | 2026-08-19 | 2 |
+| 1.5.6 | HMAC 정책 (scaffolding only) | 1.5.5 | 2026-08-20 | 2026-08-21 | 2 |
+
 ```mermaid
 gantt
-    title AIOpsAgent 구축 일정 (2026-05-25 ~ 08-28)
+    title AIOpsAgent WBS 일정 (work package 단위, 2026-05-25 ~ 08-28)
     dateFormat YYYY-MM-DD
     axisFormat %m-%d
-    section 기반
-    WBS-1.0 공통 기반 모듈      :w0, 2026-05-25, 3w
-    section 도메인 엔진 (병렬)
-    WBS-1.1 SOP 그라운딩 서비스 :w1, after w0, 3w
-    WBS-1.2 AI 초안 매니저      :w2, after w0, 4w
-    section 전달·안전 (병렬)
-    WBS-1.3 알림 디스패처       :w3, after w1, 3w
-    WBS-1.4 PII 마스킹 필터     :w4, after w0, 2w
-    section 신뢰성
-    WBS-1.5 DLQ 재처리 서비스   :w5, after w3, 3w
+    excludes weekends
+    section WBS-1.0 공통 기반 모듈
+    1.0.1 Pilot 계약 스키마 :t101, 2026-05-25, 3d
+    1.0.2 관리형 Markdown 페이로드 :t102, after t101, 3d
+    1.0.3 테넌트 격리 정책 :t103, after t102, 3d
+    1.0.4 감사 Sink 추상화 :t104, after t103, 2d
+    1.0.5 JSONL 감사 Sink 구현 :t105, after t104, 2d
+    1.0.6 community 진입점 와이어업 :t106, after t105, 2d
+    section WBS-1.1 SOP 그라운딩
+    1.1.1 SOP Store 인터페이스 정의 :t111, after t106, 3d
+    1.1.2 SQL 스토어 구현체 :t112, after t111, 3d
+    1.1.3 파일 영속화 구현체 :t113, after t112, 3d
+    1.1.4 SOP 도메인 타입 :t114, after t113, 2d
+    1.1.5 Grounding 로직 :t115, after t114, 2d
+    1.1.6 Runbook Handler SOP 라우트 :t116, after t115, 2d
+    section WBS-1.2 AI 초안 매니저
+    1.2.1 AI Strategy 도메인 타입 :t121, after t106, 4d
+    1.2.2 LLM Provider 어댑터 :t122, after t121, 4d
+    1.2.3 Strategy 생성·persistence :t123, after t122, 3d
+    1.2.4 Strategy History append :t124, after t123, 3d
+    1.2.5 Quota Controller (fail-open) :t125, after t124, 3d
+    1.2.6 Dispatch Hook Integration :t126, after t125, 3d
+    section WBS-1.3 알림 디스패처
+    1.3.1 Dispatcher wrapping :t131, after t126, 3d
+    1.3.2 AI context propagation :t132, after t131, 3d
+    1.3.3 Slack + MS Teams v2 adapter :t133, after t132, 3d
+    1.3.4 PagerDuty adapter :t134, after t133, 2d
+    1.3.5 Webhook + Email adapter :t135, after t134, 2d
+    1.3.6 5채널 통합 라우팅·전송 검증 :t136, after t135, 2d
+    section WBS-1.4 PII 마스킹
+    1.4.1 Redaction rule engine :t141, after t106, 2d
+    1.4.2 Incident payload redaction 적용 :t142, after t141, 2d
+    1.4.3 Audit sink 연동 :t143, after t142, 2d
+    1.4.4 Tenant별 룰 확장 훅 :t144, after t143, 2d
+    1.4.5 OTel Collector 단 이동 검토 :t145, after t144, 2d
+    section WBS-1.5 DLQ 재처리
+    1.5.1 JSONL DLQ Sink :t151, after t136, 3d
+    1.5.2 Idempotent Replay Ledger :t152, after t151, 3d
+    1.5.3 Dispatcher 통합 :t153, after t152, 3d
+    1.5.4 Replay API 엔드포인트 :t154, after t153, 2d
+    1.5.5 Replay 상태 머신 :t155, after t154, 2d
+    1.5.6 HMAC 정책 (scaffolding only) :t156, after t155, 2d
     section 통합
-    통합·안정화 버퍼           :buf, after w5, 1w
+    통합·안정화 버퍼 :tbuf, after t156, 5d
 ```
 
 ## Excluded Scope (명시적 OUT OF SCOPE)

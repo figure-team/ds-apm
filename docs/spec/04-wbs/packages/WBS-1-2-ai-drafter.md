@@ -38,6 +38,19 @@ LLM 기반 runbook drafter (`llmrunbookdrafter`), AI generator 추상화 (`aigen
 - [ ] dispatch hook이 draft 생성 결과를 WBS-1.3 dispatcher에 안전하게 전달해야 한다
 - [ ] AI 호출/실패 이벤트는 WBS-1.0의 audit sink에 기록되어야 한다
 
+## Work Package 일정 (일 단위)
+
+> 영업일(주5일) 기준, 공휴일 미반영. 의존성 순서: 인터페이스·타입 → 구현 → 통합·검증.
+
+| WP ID | 작업명 | 선행 | 시작일 | 종료일 | 기간(영업일) |
+|---|---|---|---|---|---|
+| 1.2.1 | AI Strategy 도메인 타입 | 1.0.6 | 2026-06-15 | 2026-06-18 | 4 |
+| 1.2.2 | LLM Provider 어댑터 | 1.2.1 | 2026-06-19 | 2026-06-24 | 4 |
+| 1.2.3 | Strategy 생성·persistence | 1.2.2 | 2026-06-25 | 2026-06-29 | 3 |
+| 1.2.4 | Strategy History append | 1.2.3 | 2026-06-30 | 2026-07-02 | 3 |
+| 1.2.5 | Quota Controller (fail-open) | 1.2.4 | 2026-07-03 | 2026-07-07 | 3 |
+| 1.2.6 | Dispatch Hook Integration | 1.2.5 | 2026-07-08 | 2026-07-10 | 3 |
+
 ## Work Packages (Lv3)
 
 ### WBS-1.2.1 — AI Strategy 도메인 타입 (ai_strategy / ai_strategy_history)
@@ -48,6 +61,7 @@ LLM 기반 runbook drafter (`llmrunbookdrafter`), AI generator 추상화 (`aigen
   - `ValidateAIStrategyHistoryRecord`가 embedded Strategy 필드와 record 루트 필드 불일치 시 거부한다
   - `ContractVersion` 상수가 `ds.ai_strategy.v1` / `ds.ai_strategy_history.v1`로 고정된다
 - **Source**: `pkg/types/ruletypes/ai_strategy.go`, `pkg/types/ruletypes/ai_strategy_history.go`
+- **일정**: 2026-06-15 ~ 2026-06-18 (4영업일, 선행: 1.0.6)
 - **Effort**: TBD
 
 ### WBS-1.2.2 — LLM Provider 어댑터 (llm_provider_adapter)
@@ -58,6 +72,7 @@ LLM 기반 runbook drafter (`llmrunbookdrafter`), AI generator 추상화 (`aigen
   - `llm` provider에서 LLMProvider × LLMTransport 4조합이 인스턴스화된다
   - `mock` provider 선택 시 `buildFromAIConfig`가 명시적 error를 반환해 `StoreAware`가 `envFallback`으로 전환한다
 - **Source**: `pkg/ruler/aigenerator/`, `pkg/ruler/aigenerator/llmaigenerator/`
+- **일정**: 2026-06-19 ~ 2026-06-24 (4영업일, 선행: 1.2.1)
 - **Effort**: TBD
 
 ### WBS-1.2.3 — Strategy 생성·persistence 로직 (strategy_generation)
@@ -68,6 +83,7 @@ LLM 기반 runbook drafter (`llmrunbookdrafter`), AI generator 추상화 (`aigen
   - `SOPDocument` 비어 있을 때 `Status=sop_missing`, headline 문구 포함
   - `StrategyID` 미입력 시 `sha256(incidentID || fingerprint || sopID || sopVersion)` 앞 16 hex로 결정론적 생성
 - **Source**: `pkg/ruler/aigenerator/`, `pkg/ruler/runbookdrafter/llmrunbookdrafter/`
+- **일정**: 2026-06-25 ~ 2026-06-29 (3영업일, 선행: 1.2.2)
 - **Effort**: TBD
 
 ### WBS-1.2.4 — Strategy History append 로직 (strategy_history_persistence)
@@ -78,6 +94,7 @@ LLM 기반 runbook drafter (`llmrunbookdrafter`), AI generator 추상화 (`aigen
   - Upsert 실패 시 hook이 error를 반환하지 않고 `WarnContext`만 기록한다
   - History record의 `IncidentID`, `StrategyID`, `Status`, `Confidence`, `GeneratedAt`이 embedded Strategy와 정확히 일치한다
 - **Source**: `pkg/ruler/aigenerator/storeaware.go`, `pkg/types/ruletypes/ai_strategy_history.go`
+- **일정**: 2026-06-30 ~ 2026-07-02 (3영업일, 선행: 1.2.3)
 - **Effort**: TBD
 
 ### WBS-1.2.5 — Quota Controller (fail-open) (quota_controller)
@@ -89,6 +106,7 @@ LLM 기반 runbook drafter (`llmrunbookdrafter`), AI generator 추상화 (`aigen
   - 4종 control 위반 시에도 dispatcher가 알람 전달을 계속 진행한다 (fail-open)
   - `Audit.QuotaLimit` / `QuotaUsed` / `QuotaRemaining` 필드가 fail-open 판정 후에도 감사 기록에 남는다
 - **Source**: `pkg/ruler/aigenerator/storeaware.go`, `pkg/ruler/aigenerator/dispatchhook/`
+- **일정**: 2026-07-03 ~ 2026-07-07 (3영업일, 선행: 1.2.4)
 - **Effort**: TBD
 
 ### WBS-1.2.6 — Dispatch Hook Integration (dispatch_hook_integration)
@@ -99,6 +117,7 @@ LLM 기반 runbook drafter (`llmrunbookdrafter`), AI generator 추상화 (`aigen
   - `sopStore.List` 실패 시 hook이 error를 반환하지 않고 입력 annotations 그대로 반환한다
   - `StoreAware`의 `AIConfigStore.Get` 실패 시 `envFallback.Generate`가 처리를 이어받는다
 - **Source**: `pkg/ruler/aigenerator/dispatchhook/`
+- **일정**: 2026-07-08 ~ 2026-07-10 (3영업일, 선행: 1.2.5)
 - **Effort**: TBD
 
 ## Owner

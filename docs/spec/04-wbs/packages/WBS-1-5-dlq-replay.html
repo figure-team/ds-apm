@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WBS-1.5 — DLQ 재처리 서비스 (DLQ Replay Service)</title>
+<style>
+:root {
+  --ivory:#FAF9F5;
+  --slate:#141413;
+  --clay:#D97757;
+  --oat:#E3DACC;
+  --olive:#788C5D;
+  --sky:#6A8CAF;
+  --g100:#F0EEE6;
+  --g300:#D1CFC5;
+  --g500:#87867F;
+  --g700:#3D3D3A;
+  --serif: ui-serif, Georgia, 'Times New Roman', serif;
+  --sans:  system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono:  ui-monospace, 'SF Mono', Menlo, Monaco, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--ivory);
+  color: var(--g700);
+  font-family: var(--sans);
+  line-height: 1.55;
+  padding: 56px 32px 120px;
+  -webkit-font-smoothing: antialiased;
+}
+.page { max-width: 1120px; margin: 0 auto; }
+h1 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(38px, 5.4vw, 62px);
+  color: var(--slate);
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 26px;
+  color: var(--slate);
+  letter-spacing: -0.01em;
+  margin-top: 56px;
+}
+h2:first-of-type { margin-top: 32px; }
+h3 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--slate);
+  margin-top: 32px;
+  margin-bottom: 8px;
+}
+h4 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--g700);
+  margin-bottom: 6px;
+}
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--g500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+.warn-block {
+  border-left: 4px solid var(--clay);
+  background: #FFF5F0;
+  border-radius: 0 10px 10px 0;
+  padding: 12px 18px;
+  margin: 16px 0;
+  font-size: 14px;
+  color: var(--slate);
+}
+code, pre { font-family: var(--mono); font-size: 13px; }
+pre {
+  background: var(--g100);
+  border: 1.5px solid var(--g300);
+  border-radius: 10px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+code { background: var(--g100); padding: 1px 6px; border-radius: 4px; }
+pre code { background: transparent; padding: 0; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+}
+th, td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--g300);
+  vertical-align: top;
+}
+th { font-family: var(--sans); font-weight: 600; color: var(--slate); background: var(--g100); }
+blockquote {
+  border-left: 3px solid var(--g300);
+  padding: 8px 16px;
+  margin: 12px 0;
+  color: var(--g700);
+  font-style: italic;
+}
+a { color: var(--clay); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 150ms; }
+a:hover { border-bottom-color: var(--clay); }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin-bottom: 4px; }
+p { margin-bottom: 12px; }
+html { scroll-behavior: smooth; }
+@page { size: A4; margin: 18mm 15mm; }
+@media print {
+  body { background: #fff; padding: 0; }
+  .page { max-width: 100%; }
+  pre, table { break-inside: avoid; page-break-inside: avoid; }
+  a::after { content: " (" attr(href) ")"; font-size: 10px; color: #888; }
+}
+</style>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#FAF9F5', primaryTextColor: '#141413',
+      primaryBorderColor: '#D1CFC5', lineColor: '#87867F',
+      secondaryColor: '#E3DACC', tertiaryColor: '#F0EEE6'
+    },
+    fontFamily: 'ui-sans-serif, system-ui, sans-serif'
+  });
+</script>
+</head>
+<body>
+<div class="page">
+
+<div class="eyebrow">DS-APM · WBS-1.5 · 2026-06-02</div>
+<h1>WBS-1.5 — DLQ 재처리 서비스 (DLQ Replay Service)</h1>
+
+<blockquote>
+<p><strong>상태</strong>: 착수 예정 (HMAC 정책 결정 필요)<br>
+<strong>일정</strong>: 2026-08-03 ~ 2026-08-21 (3주, WBS-1.3 완료 후)</p>
+</blockquote>
+
+<h2 id="deliverable">Deliverable</h2>
+<p>JSONL 기반 dead-letter store with rotation (<code>pkg/alertmanager/alertmanagernotify/dlq</code>), idempotent replay ledger, dispatcher와의 와이어업 (<code>dispatcher.go</code>). 채널 4xx/5xx/429 실패 시 incident envelope을 DLQ로 enqueue하고, 재시도 시 ledger를 통해 중복 dispatch를 차단해야 한다.</p>
+
+<h2 id="acceptance">Acceptance Criteria</h2>
+<ul>
+  <li>[ ] F8.8 acceptance Gherkin pass — 채널 5xx/429 시 DLQ enqueue 후 재시도 정책 적용 (UC-002)</li>
+  <li>[ ] DLQ rotation 정책에 따른 파일 분할이 동작해야 한다</li>
+  <li>[ ] replay 시 idempotency ledger가 동일 envelope의 중복 dispatch를 차단해야 한다</li>
+  <li>[ ] DLQ enqueue/replay 이벤트는 WBS-1.0 audit sink에 기록되어야 한다</li>
+  <li>[ ] <strong>HMAC 정책 결정 후</strong> envelope 서명/검증 acceptance 추가 (NF-5.3.1)</li>
+</ul>
+
+<h2 id="schedule">Work Package 일정 (일 단위)</h2>
+<blockquote>
+<p>영업일(주5일) 기준, 공휴일 미반영. 의존성 순서: 인터페이스·타입 → 구현 → 통합·검증.</p>
+</blockquote>
+
+<table>
+  <thead><tr><th>WP ID</th><th>작업명</th><th>선행</th><th>시작일</th><th>종료일</th><th>기간(영업일)</th></tr></thead>
+  <tbody>
+    <tr><td>1.5.1</td><td>JSONL DLQ Sink</td><td>1.3.6</td><td>2026-08-03</td><td>2026-08-05</td><td>3</td></tr>
+    <tr><td>1.5.2</td><td>Idempotent Replay Ledger</td><td>1.5.1</td><td>2026-08-06</td><td>2026-08-10</td><td>3</td></tr>
+    <tr><td>1.5.3</td><td>Dispatcher 통합</td><td>1.5.2</td><td>2026-08-11</td><td>2026-08-13</td><td>3</td></tr>
+    <tr><td>1.5.4</td><td>Replay API 엔드포인트</td><td>1.5.3</td><td>2026-08-14</td><td>2026-08-17</td><td>2</td></tr>
+    <tr><td>1.5.5</td><td>Replay 상태 머신</td><td>1.5.4</td><td>2026-08-18</td><td>2026-08-19</td><td>2</td></tr>
+    <tr><td>1.5.6</td><td>HMAC 정책 (scaffolding only)</td><td>1.5.5</td><td>2026-08-20</td><td>2026-08-21</td><td>2</td></tr>
+  </tbody>
+</table>
+
+<h2 id="work-packages">Work Packages (Lv3)</h2>
+
+<h3 id="wp-1-5-1">WBS-1.5.1 — JSONL DLQ Sink 구현 (JSONL Dead-Letter Sink)</h3>
+<ul>
+  <li><strong>Deliverable</strong>: <code>JSONLDeadLetterSink</code> — atomic append + 50 MiB rotation, <code>Close()</code> 포함</li>
+  <li><strong>Acceptance</strong>: DLQ 파일에 Entry가 newline-delimited JSON으로 기록된다; 50 MiB 초과 시 타임스탬프 sibling으로 rotate되고 빈 파일은 rotate하지 않는다; <code>dlqSink.Write</code> 실패 시 dispatcher hot path가 중단되지 않는다</li>
+  <li><strong>Source</strong>: <code>pkg/alertmanager/alertmanagernotify/dlq/dlq.go</code></li>
+  <li><strong>일정</strong>: 2026-08-03 ~ 2026-08-05 (3영업일, 선행: 1.3.6)</li>
+  <li><strong>Effort</strong>: TBD</li>
+</ul>
+
+<h3 id="wp-1-5-2">WBS-1.5.2 — Idempotent Replay Ledger (중복 방지 Ledger)</h3>
+<ul>
+  <li><strong>Deliverable</strong>: <code>ReplayLedger</code> — append-only EventID set, open 시 in-memory set 재구성, <code>MarkIfNew</code> / <code>Has</code> / <code>Close</code></li>
+  <li><strong>Acceptance</strong>: <code>MarkIfNew</code>가 동일 EventID 두 번째 호출에서 <code>false</code>를 반환한다; process restart 후 ledger 재구성 시 기존 seen set이 유지된다; 1 MiB scanner buffer로 pathological entry에서 silently truncate되지 않는다</li>
+  <li><strong>Source</strong>: <code>pkg/alertmanager/alertmanagernotify/dlq/ledger.go</code></li>
+  <li><strong>일정</strong>: 2026-08-06 ~ 2026-08-10 (3영업일, 선행: 1.5.1)</li>
+  <li><strong>Effort</strong>: TBD</li>
+</ul>
+
+<h3 id="wp-1-5-3">WBS-1.5.3 — Dispatcher 통합 (Dispatcher DLQ Integration)</h3>
+<ul>
+  <li><strong>Deliverable</strong>: <code>dispatcher.go</code> — channel 4xx/5xx/5xx-persistent terminal failure 시 DLQ enqueue, ctx.Canceled 제외</li>
+  <li><strong>Acceptance</strong>: <code>notify.Stage.Exec</code>가 non-canceled error 반환 시 DLQ entry가 생성된다; <code>context.Canceled</code>는 DLQ write를 호출하지 않는다; DLQ enqueue 이벤트가 WBS-1.0 audit sink에 기록된다</li>
+  <li><strong>Source</strong>: <code>pkg/alertmanager/alertmanagerserver/dispatcher.go</code></li>
+  <li><strong>일정</strong>: 2026-08-11 ~ 2026-08-13 (3영업일, 선행: 1.5.2)</li>
+  <li><strong>Effort</strong>: TBD</li>
+</ul>
+
+<h3 id="wp-1-5-4">WBS-1.5.4 — Replay API 엔드포인트 (Manual Replay Trigger API)</h3>
+<ul>
+  <li><strong>Deliverable</strong>: 운영자용 manual replay 트리거 HTTP endpoint — DLQ entry 목록 조회 + replay 시작</li>
+  <li><strong>Acceptance</strong>: endpoint 호출 시 ledger를 통해 중복 dispatch가 차단된다; replay 이벤트가 audit sink에 기록된다; 인증 없이 endpoint에 접근할 수 없다</li>
+  <li><strong>Source</strong>: <code>pkg/alertmanager/alertmanagerserver/</code> (신규 handler)</li>
+  <li><strong>일정</strong>: 2026-08-14 ~ 2026-08-17 (2영업일, 선행: 1.5.3)</li>
+  <li><strong>Effort</strong>: TBD</li>
+</ul>
+
+<h3 id="wp-1-5-5">WBS-1.5.5 — Replay 상태 머신 (Replay State Machine + Audit)</h3>
+<ul>
+  <li><strong>Deliverable</strong>: pending → replayed / failed 상태 전이 관리, audit sink 통합</li>
+  <li><strong>Acceptance</strong>: F8.4 상태 다이어그램의 모든 전이(<code>ReplayPending → Skipped</code>, <code>ReplayPending → Redelivered</code>, <code>Redelivered → TerminalFail</code>)가 테스트로 검증된다; 상태 전이마다 audit entry가 기록된다</li>
+  <li><strong>Source</strong>: <code>pkg/alertmanager/alertmanagernotify/dlq/</code></li>
+  <li><strong>일정</strong>: 2026-08-18 ~ 2026-08-19 (2영업일, 선행: 1.5.4)</li>
+  <li><strong>Effort</strong>: TBD</li>
+</ul>
+
+<h3 id="wp-1-5-6">WBS-1.5.6 — HMAC 정책 (Replay Payload Signing — NF-5.3.1)</h3>
+
+<div class="warn-block">
+<strong>Policy decision pending / scaffolding only</strong> — 구현 전 HMAC 정책 합의 필요 (open item).
+</div>
+
+<ul>
+  <li><strong>Deliverable</strong>: replay payload 서명·검증을 위한 HMAC-SHA256 정책 합의 및 scaffolding (<code>pkg/alertmanager/alertmanagernotify/dlq/hmac.go</code>)</li>
+  <li><strong>Acceptance</strong>: HMAC-SHA256 + nonce + timestamp window 정책이 팀 내 합의된다; 합의된 정책 기준으로 <code>Entry</code> 서명/검증 인터페이스 scaffolding이 존재한다; NF-5.3.1 acceptance 항목이 F8.7 Gherkin에 추가된다</li>
+  <li><strong>Source</strong>: <code>pkg/alertmanager/alertmanagernotify/dlq/</code> (신규 파일)</li>
+  <li><strong>일정</strong>: 2026-08-20 ~ 2026-08-21 (2영업일, 선행: 1.5.5)</li>
+  <li><strong>Effort</strong>: TBD</li>
+</ul>
+
+<h2 id="owner">Owner</h2>
+<p>TBD (TBC)</p>
+
+<h2 id="effort">Estimated Effort</h2>
+<p>TBD</p>
+
+<h2 id="dependencies">Dependencies</h2>
+<ul>
+  <li>WBS-1.0 공통 기반 모듈 (audit sink 재사용, JSONL 패턴 공유)</li>
+  <li>WBS-1.3 알림 디스패처 (실패 분기 수신)</li>
+</ul>
+
+<h2 id="verification">Verification</h2>
+<ul>
+  <li><code>pkg/alertmanager/alertmanagerserver/dispatcher_dlq_test.go</code></li>
+  <li><code>pkg/alertmanager/alertmanagernotify/dlq/dlq_test.go</code></li>
+  <li><code>pkg/alertmanager/alertmanagernotify/dlq/ledger_test.go</code></li>
+  <li><code>pkg/types/ruletypes/pilot_audit_sink_jsonl_test.go</code> (JSONL rotation 패턴 재사용)</li>
+</ul>
+
+<h2 id="covers">Covers Features</h2>
+<ul>
+  <li>F8 DLQ + Replay</li>
+</ul>
+
+<h2 id="source-paths">Source Paths</h2>
+<ul>
+  <li><code>pkg/alertmanager/alertmanagerserver/dispatcher.go</code></li>
+  <li><code>pkg/alertmanager/alertmanagerserver/dispatcher_dlq_test.go</code></li>
+  <li><code>pkg/alertmanager/alertmanagernotify/dlq/</code> (DLQ store + ledger 구현)</li>
+</ul>
+
+<h2 id="open-items">Open Items</h2>
+<ul>
+  <li><strong>HMAC 정책 follow-up</strong> — replay 시 envelope 서명/검증 정책 미정 (NF-5.3.1)</li>
+  <li>replay 트리거 운영 UI/CLI 노출 범위 미정 — 현재 dispatcher 내부 자동 재시도만 지원</li>
+</ul>
+
+</div>
+</body>
+</html>

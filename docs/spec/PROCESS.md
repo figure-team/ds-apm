@@ -14,7 +14,7 @@ updated: 2026-06-02
 ## 0. TL;DR — 4가지만 기억하면 됨
 
 1. 산출물 4종(Overview / Use Case / 기능명세서 / WBS)은 **현재 구현된 코드를 reverse-engineering**해서 작성. 미래 계획 아님. 단 동결 아니고 계속 진화.
-2. **Markdown이 source of truth**. **상세본(01~04)은 md-only** — HTML 빌드 안 함. **요약본(00-brief)만 HTML 유지** — 비기술 의사결정자용. HTML 직접 손대지 않는다.
+2. **Markdown = source of truth** (풍부·완전, LLM·개발자가 읽음). **상세본·요약본 모두 `.md` + `.html` 공존**. HTML은 **사람용 큐레이션 뷰**(핵심 노출 + 곁가지 접기). md↔html **1:1 동기 불필요 — 사실(숫자·날짜·명명·상태·ID) 모순만 금지**.
 3. **stable ID는 frontmatter + 파일명에 박힘** (`F1`, `UC-001`, `WBS-1.1`). 제목이 바뀌어도 ID는 유지.
 4. **`_shared/traceability.md`가 진실의 원천**. 모든 frontmatter는 이 매트릭스와 일치해야 한다.
 
@@ -29,7 +29,7 @@ updated: 2026-06-02
 | 3 | 기능명세서 (SRS) | `03-functional-spec/` | ISO/IEC/IEEE 29148-lite + Spec by Example |
 | 4 | WBS | `04-wbs/` | PMI WBS 2nd ed. (component-oriented Lv2) + Agile (Lv3+) |
 
-상세본(01~04)은 `.md` 파일이 source이자 최종 산출물(md-only). LLM·개발자는 `.md`를 직접 읽는다. HTML 빌드 대상은 요약본(`00-brief/`)만이다.
+상세본·요약본 모두 `.md`(source, 풍부)와 `.html`(사람용 뷰)가 공존한다. LLM·개발자는 `.md`를 직접 읽고, 사람은 `.html`을 본다. HTML은 md의 자동 빌드가 아니라 **큐레이션 뷰**이므로 깊이는 달라도 되고 사실만 일치하면 된다.
 
 ---
 
@@ -193,31 +193,35 @@ grep -rn "^TODO\|: TODO\|- TODO" docs/spec/
 
 ---
 
-## 8. HTML 빌드 정책
+## 8. HTML / Markdown 정책 (2026-06-02 개정)
 
-### 8.1 빌드 대상 범위 (결정 확정)
+> 이전 "상세본 md-only, HTML 빌드 안 함" 정책은 **폐기**. 2026-06-02 상세본 26종을 HTML로 생성하며 아래로 개정.
 
-| 영역 | HTML 빌드 | 이유 |
-|---|:---:|---|
-| 상세본 (`01-overview/`, `02-usecase/`, `03-functional-spec/`, `04-wbs/`) | **아님** | LLM·개발자는 `.md`를 직접 읽음. `.md` = source of truth = 최종 산출물 |
-| 요약본 (`00-brief/`) | **함** | 비기술 의사결정자 프레젠테이션용. 5종 HTML 파일 유지 |
+### 8.1 역할 분리 (핵심)
 
-- **상세본은 md-only**. 상세본 4종 HTML 파일은 삭제됐으며 재생성하지 않는다.
-- **사람은 `.md`만 편집**. HTML은 절대 직접 손대지 않음 (desync 방지).
-- `.md` → HTML 변환은 요약본(`00-brief/`)에만 명시적으로 실행.
+| | 역할 | 특성 |
+|---|---|---|
+| **`.md`** | source of truth · LLM·개발자 소비 | 풍부·완전. 데이터모델·인터페이스·전체 상세 포함 |
+| **`.html`** | 사람용 뷰 (보고·열람) | 큐레이션·슬림. 핵심 노출 + 곁가지 접기(`<details>`) |
 
-### 8.2 요약본 HTML 파일명
+- **상세본·요약본 모두 `.md` + `.html` 공존**.
+- HTML은 md의 **자동 빌드가 아니라 큐레이션 뷰**다. **깊이는 달라도 된다**(md 풍부 / html 추림). 자동 동기화 파이프라인 없음(수작업).
+- **1:1 동기 불필요. 단 사실(숫자·날짜·명명·상태·ID)은 모순 없어야** 한다.
+- 문서 간 링크: html→html은 `.html`, _foundation 등 HTML 없는 대상은 `.md` 유지.
 
-`00-brief/` 폴더 내 HTML만 유지. 파일명 예: `brief.html`, `brief-spec.html` 등 요약본 식별자 기준.
+### 8.2 빌드 베이스 (전 HTML 공통)
+- CSS: `_shared/design-tokens.css` 토큰(인라인). 5 요약본 + 26 상세본 동일 적용.
+- 다이어그램: Mermaid v11 ESM CDN 1줄(`<pre class="mermaid">`). flowchart 노드 라벨에 `()`·`/`·`+` 있으면 `ID["라벨"]` 따옴표(클라 렌더 안전). 점선 링크는 `A -. text .-> B` 형식.
+- JS: mermaid 모듈 외 외부 의존 0. self-contained.
+- 인쇄: `@media print` 포함.
 
-### 8.3 빌드 베이스 (요약본 전용)
-- CSS: `_shared/design-tokens.css` (예정 — research-skills-b-html.md §5.1 토큰 그대로)
-- 다이어그램: Mermaid v11 ESM CDN 1줄 + 인라인 SVG (자유도 필요 시)
-- JS: vanilla (외부 의존 0)
-- 인쇄 호환: `@media print` 블록 항상 포함 (research-skills-b-html.md §5.8)
+### 8.3 톤앤매너 (요약본)
+- 핵심만 노출 → 곁가지는 `<div class="more">` 안 `<details class="expand">`로 접기 → 결정/부차는 끝에 숨김.
+- 나열은 `.item`(라벨+본문 행, 점선 구분). 상세본 링크는 `.html` 포인터.
+- 기준 문서: `00-brief/brief.html`, `00-brief/brief-wbs.html`.
 
 ### 8.4 금기
-research-skills-b-html.md §6의 AI slop 회피 규칙 그대로 적용 (Tailwind CDN, Inter+그라데이션, transition all, dark/light 토글 v1 등).
+research-skills-b-html.md §6의 AI slop 회피 규칙 적용 (Tailwind CDN, Inter+그라데이션, transition all, dark/light 토글 등).
 
 ---
 
@@ -228,7 +232,7 @@ research-skills-b-html.md §6의 AI slop 회피 규칙 그대로 적용 (Tailwin
 3. **`02-usecase/cases/UC-*.md`** — Cockburn template 채움. UC-001 → 002 → 003.
 4. **`04-wbs/packages/WBS-*.md`** — Deliverable / Acceptance / Verification.
 5. **`01-overview/index.md`** — 위 자료를 요약. 마지막에 작성 (전체 합쳐야 정확).
-6. **요약본 HTML 빌드** — 상세본 완성 후 `00-brief/` 한정. `_shared/design-tokens.css` 준비 후 요약본 HTML만 생성 (상세본 HTML 빌드 안 함).
+6. **HTML 뷰 생성** — md 작성 후 `.html` 큐레이션 뷰 생성 (요약본·상세본 모두). design-tokens 토큰 인라인 + mermaid 모듈. §8 참조.
 
 ---
 

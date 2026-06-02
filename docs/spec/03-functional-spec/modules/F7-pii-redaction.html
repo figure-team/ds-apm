@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F7 — PII Redaction</title>
+<style>
+:root {
+  --ivory:#FAF9F5; --slate:#141413; --clay:#D97757; --oat:#E3DACC;
+  --olive:#788C5D; --sky:#6A8CAF; --g100:#F0EEE6; --g300:#D1CFC5;
+  --g500:#87867F; --g700:#3D3D3A;
+  --serif: ui-serif, Georgia, 'Times New Roman', serif;
+  --sans:  system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono:  ui-monospace, 'SF Mono', Menlo, Monaco, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--ivory); color: var(--g700); font-family: var(--sans); line-height: 1.55; padding: 56px 32px 120px; -webkit-font-smoothing: antialiased; }
+.page { max-width: 1120px; margin: 0 auto; }
+h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(38px, 5.4vw, 62px); color: var(--slate); letter-spacing: -0.02em; margin-bottom: 16px; }
+h2 { font-family: var(--serif); font-weight: 500; font-size: 26px; color: var(--slate); letter-spacing: -0.01em; margin-top: 56px; }
+h2:first-of-type { margin-top: 32px; }
+h3 { font-family: var(--sans); font-weight: 600; font-size: 18px; color: var(--slate); margin-bottom: 8px; margin-top: 32px; }
+h4 { font-family: var(--sans); font-weight: 600; font-size: 15px; color: var(--g700); margin-bottom: 6px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; color: var(--g500); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px; }
+p { margin-bottom: 12px; }
+a { color: var(--clay); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 150ms; }
+a:hover { border-bottom-color: var(--clay); }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin-bottom: 4px; }
+blockquote { border-left: 3px solid var(--g300); padding: 8px 16px; margin: 12px 0; color: var(--g700); font-style: italic; }
+code, pre { font-family: var(--mono); font-size: 13px; }
+pre { background: var(--g100); border: 1.5px solid var(--g300); border-radius: 10px; padding: 12px 16px; overflow-x: auto; margin: 12px 0; }
+code { background: var(--g100); padding: 1px 6px; border-radius: 4px; }
+pre code { background: transparent; padding: 0; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--g300); vertical-align: top; }
+th { font-family: var(--sans); font-weight: 600; color: var(--slate); background: var(--g100); }
+.mermaid { background: #fff; border: 1.5px solid var(--g300); border-radius: 10px; padding: 16px; margin: 16px 0; text-align: center; }
+.status-pill { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 10px; border-radius: 999px; text-transform: uppercase; font-weight: 600; }
+.status-pill.planned { background: #DCE2EA; color: #3E4B5C; }
+html { scroll-behavior: smooth; }
+@page { size: A4; margin: 18mm 15mm; }
+@media print {
+  body { background: #fff; padding: 0; }
+  pre, table { break-inside: avoid; page-break-inside: avoid; }
+  a::after { content: " (" attr(href) ")"; font-size: 10px; color: #888; }
+}
+</style>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#FAF9F5', primaryTextColor: '#141413',
+      primaryBorderColor: '#D1CFC5', lineColor: '#87867F',
+      secondaryColor: '#E3DACC', tertiaryColor: '#F0EEE6'
+    },
+    fontFamily: 'ui-sans-serif, system-ui, sans-serif'
+  });
+</script>
+</head>
+<body>
+<div class="page">
+
+<div class="eyebrow">DS-APM · 기능명세서 · F7 · 2026-06-02</div>
+<h1>F7 — PII Redaction</h1>
+
+<p><span class="status-pill planned">planned</span></p>
+
+<blockquote>
+<p><strong>상태</strong>: 착수 예정 (착수보고 기준)<br>
+Incident payload 내 email / KR phone / long unmarked secret / sensitive URL query를 redaction.<br>
+<strong>README 경고</strong>: production-ready 아님. 본 모듈은 AIOpsAgent ingress의 단일 지점 redaction이며, OpenTelemetry Collector 단계의 가장 이른 redaction (권장 위치)은 아직 미적용.</p>
+</blockquote>
+
+<h2 id="f7-1">F7.1 개요</h2>
+<p>본 모듈은 incident payload (Slack / MSTeams / PagerDuty / webhook / email로 흘러나가는 사용자-가시 필드)에서 4종 sensitive pattern을 redaction한다.</p>
+<table>
+<thead><tr><th>카테고리</th><th>전략</th><th>결과 토큰</th></tr></thead>
+<tbody>
+<tr><td>Email 주소</td><td>regex replace</td><td><code>[redacted-email]</code></td></tr>
+<tr><td>한국 모바일 번호 (<code>010xxxx</code>, <code>+82-10-xxx</code> 등)</td><td>regex replace</td><td><code>[redacted-phone]</code></td></tr>
+<tr><td>Long unmarked secret (32+ chars alnum/<code>_</code>/<code>-</code>)</td><td>regex replace</td><td><code>[redacted-secret]</code></td></tr>
+<tr><td>Bearer token / <code>client_secret</code>/<code>api_key</code>/<code>password</code> marker / JWT-like</td><td>전체 값 drop</td><td><code>[redacted]</code></td></tr>
+<tr><td>URL query 안의 sensitive key (<code>access_token</code>, <code>api_key</code>, <code>bearer</code>, …)</td><td>parameter delete (key 보존, value 제거)</td><td>sanitized URL</td></tr>
+</tbody>
+</table>
+<p>OpenTelemetry security 가이드(§9 in research-skills-c-domain.md)의 4-processor 정책(<code>Attributes / Filter / Redaction / Transform</code>)에 비추어 보면, 현재 구현은 <strong>AIOpsAgent ingress 단계의 <code>Transform</code> (regex) + 부분적 <code>Attributes</code> (URL key drop)에 해당</strong>. 가장 이른 단계인 instrumentation / OTel Collector 적용은 아직 없음.</p>
+
+<h2 id="f7-2">F7.2 인터페이스</h2>
+<pre><code>// pkg/types/alertmanagertypes/incident_payload.go
+const RedactedIncidentValue = "[redacted]"
+
+func BuildSafeIncidentInfo(labels, annotations template.KV) IncidentInfo
+func SanitizeIncidentInfo(info IncidentInfo) IncidentInfo
+func SanitizeIncidentValue(value string) string
+
+func IncidentInfoFields(info IncidentInfo) []IncidentField     // sanitize 후 non-empty만
+func IncidentInfoDetails(info IncidentInfo) map[string]string  // sanitize 후 key→value map</code></pre>
+<p><code>SanitizeIncidentValue</code> 처리 순서:</p>
+<ol>
+<li>URL 파싱 시도 — <code>http</code>/<code>https</code>만 허용, <code>User</code> info drop, sensitive query key drop</li>
+<li>값 전체가 secret-looking (<code>bearer </code>, <code>-----begin </code>, JWT, marker 포함) → <code>[redacted]</code> 전체 치환</li>
+<li>Email regex replace</li>
+<li>KR phone regex replace</li>
+<li>Long secret regex replace</li>
+</ol>
+
+<h2 id="f7-3">F7.3 데이터 모델</h2>
+<pre><code>type IncidentField struct {
+    Key   string
+    Title string
+    Value string  // 항상 sanitized
+    Short bool
+}
+
+// Sanitize 대상 필드 (22개, IncidentInfo struct):
+//   ProjectID, Environment, ServiceName, OwnerTeam, Severity,
+//   ImpactSummary, NextAction, VendorRequest, CustomerUpdate,
+//   SopID, SopURL, SopSource, SopTitle, SopVersion, SopBindingID,
+//   AIStrategyID, AIStrategyStatus, AIHeadline, AIFirstActions,
+//   AIConfidence, AILimitations, AIEvidenceRefs</code></pre>
+<p>Regex 패턴 (compiled once):</p>
+<pre><code>incidentValueEmailPattern        = regexp.MustCompile(`\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b`)
+incidentValueKoreanMobilePattern = regexp.MustCompile(`(?:\+?82[-\s]?)?0?1[016789][-)\s]?\d{3,4}[-\s]?\d{4}`)
+incidentValueLongSecretPattern   = regexp.MustCompile(`\b[A-Za-z0-9_\-]{32,}\b`)
+incidentJWTLikePattern           = regexp.MustCompile(`\beyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{10,}\b`)</code></pre>
+<p>URL sensitive keys: <code>access_token | api_key | apikey | auth | authorization | bearer | client_secret | password | secret | token</code>.</p>
+
+<h2 id="f7-4">F7.4 파이프라인 위치</h2>
+<ul>
+<li><strong>현재 (v0.1)</strong> — AIOpsAgent ingress 단일 지점. <code>BuildSafeIncidentInfo</code> / <code>SanitizeIncidentInfo</code>가 channel template 직전에 호출됨.</li>
+<li><strong>권장 (research §9.1)</strong> — <code>instrumentation &gt; OTel Collector &gt; AIOpsAgent ingress</code> 3단 방어. 가장 이른 단계가 최선.</li>
+<li><strong>OTel Collector processor 매핑 (미구현, 권장)</strong>:</li>
+</ul>
+<table>
+<thead><tr><th>Category</th><th>OTel Processor</th><th>AIOpsAgent 대응</th></tr></thead>
+<tbody>
+<tr><td>Email / Phone / Long secret regex</td><td><code>transform</code></td><td><code>SanitizeIncidentValue</code> (현재)</td></tr>
+<tr><td>Sensitive URL query</td><td><code>attributes</code> (delete)</td><td><code>sanitizeIncidentURL</code> (현재)</td></tr>
+<tr><td>Bearer / JWT 전체 drop</td><td><code>redaction</code> (allowlist)</td><td>secret-looking check (현재)</td></tr>
+<tr><td>잠재적 sensitive span 차단</td><td><code>filter</code></td><td>미구현</td></tr>
+</tbody>
+</table>
+
+<h2 id="f7-5">F7.5 예외 및 복구</h2>
+<table>
+<thead><tr><th>경로</th><th>처리</th></tr></thead>
+<tbody>
+<tr><td>입력 값 empty</td><td>그대로 반환</td></tr>
+<tr><td>URL 파싱 실패 또는 non-http(s) scheme</td><td>URL 처리 skip, 일반 regex만 적용</td></tr>
+<tr><td>Secret-looking 패턴 매칭</td><td>값 전체를 <code>[redacted]</code>로 교체 (early return)</td></tr>
+<tr><td>Regex 매칭 0건</td><td>값 그대로 반환</td></tr>
+<tr><td><code>IncidentInfoFields</code> 호출 시 모든 필드 empty</td><td>empty slice (<code>[]IncidentField{}</code>)</td></tr>
+</tbody>
+</table>
+
+<h2 id="f7-6">F7.6 비기능 요건 (NFR)</h2>
+<ul>
+<li><strong>NF-F7.1</strong> Redaction 적용은 channel adapter 호출 <strong>이전</strong>에 완료되어야 한다 (sanitized value만 외부로 나감).</li>
+<li><strong>NF-F7.2</strong> Regex 패턴은 컴파일 1회 + global var (allocation 0).</li>
+<li><strong>NF-F7.3</strong> Email / phone / long secret redaction은 <strong>부분 치환</strong> (값의 나머지 보존). Secret-looking 검출은 <strong>전체 drop</strong>.</li>
+<li><strong>NF-F7.4</strong> URL의 <code>User</code> info는 항상 제거되어야 한다 (e.g., <code>https://user:pw@host</code> → <code>https://host</code>).</li>
+<li><strong>NF-F7.5</strong> Redaction rate metric (per-category count)을 노출해서 threshold 초과 시 meta-alert 트리거 가능해야 한다 — 현재 미구현, follow-up.</li>
+</ul>
+
+<h2 id="f7-7">F7.7 Acceptance Criteria (Gherkin)</h2>
+<pre><code>Feature: Incident payload PII redaction
+  Scenario: Email is replaced with placeholder
+    Given a field value "Contact ops@example.com for details"
+    When SanitizeIncidentValue is called
+    Then the result equals "Contact [redacted-email] for details"
+
+  Scenario: Korean mobile number is redacted
+    Given a field value "긴급 010-1234-5678"
+    When SanitizeIncidentValue is called
+    Then the result equals "긴급 [redacted-phone]"
+
+  Scenario: Bearer token replaces the entire value
+    Given a field value "Authorization: Bearer abcdefghij"
+    When SanitizeIncidentValue is called
+    Then the result equals "[redacted]"
+
+  Scenario: Sensitive URL query is dropped but URL is preserved
+    Given a field value "https://signoz.example.com/api?token=xyz&amp;svc=payment"
+    When SanitizeIncidentValue is called
+    Then the result does not contain "token="
+    And the result contains "svc=payment"
+
+  Scenario: Long alnum secret is redacted
+    Given a field value "key=AKIAIOSFODNN7EXAMPLEKEYABCDEFGHIJKL"
+    When SanitizeIncidentValue is called
+    Then the result contains "[redacted-secret]"</code></pre>
+
+<h2 id="f7-8">F7.8 Traceability</h2>
+<ul>
+<li>Implements UC: UC-001 (단계 3)</li>
+<li>Covered by WBS: WBS-1.4</li>
+<li>Source: <code>pkg/types/alertmanagertypes/incident_payload.go</code></li>
+<li>Commits: <code>3e9dfa557</code></li>
+</ul>
+
+<h2 id="f7-9">F7.9 Open Items</h2>
+<p>production-readiness 강화 (README 경고):</p>
+<ul>
+<li>OTel Collector 단계 (<code>transform</code>/<code>redaction</code>/<code>filter</code> processor) 도입</li>
+<li>Redaction rate metric 노출 + threshold 초과 시 meta-alert</li>
+<li>카테고리 확장 (credit card, IP truncation, generic user_id hashing 등)</li>
+<li>Hash 전략의 reversibility 검토 (입력 공간 작으면 hash도 안전하지 않음 — OTel 가이드)</li>
+</ul>
+
+</div>
+</body>
+</html>
