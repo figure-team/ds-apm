@@ -5,7 +5,7 @@ type: overview
 template: arc42-v9.0
 status: draft
 sections_included: [§1, §3, §5, §6, §9, §10, §11, §12]
-updated: 2026-05-29
+updated: 2026-06-02
 ---
 
 # DS-APM Overview
@@ -124,7 +124,7 @@ flowchart LR
 
 ### §5.1 Lv1 — System Context
 
-AIOpsAgent는 단일 black box로서 SigNoz 위에서 다음과 상호작용한다.
+AIOpsAgent는 단일 black box로서 SigNoz 위에 올라가며, 아래 외부 시스템과 상호작용한다.
 
 | External System | 역할 |
 |---|---|

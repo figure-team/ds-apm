@@ -3,7 +3,7 @@ id: SPEC-PROCESS
 title: Spec Documents — Process & Rules
 type: process
 status: living
-updated: 2026-05-29
+updated: 2026-06-02
 ---
 
 # Spec Documents — Process & Rules
@@ -14,7 +14,7 @@ updated: 2026-05-29
 ## 0. TL;DR — 4가지만 기억하면 됨
 
 1. 산출물 4종(Overview / Use Case / 기능명세서 / WBS)은 **현재 구현된 코드를 reverse-engineering**해서 작성. 미래 계획 아님. 단 동결 아니고 계속 진화.
-2. **HTML이 최종 산출물**, **Markdown이 source of truth**. HTML 직접 손대지 않는다.
+2. **Markdown이 source of truth**. **상세본(01~04)은 md-only** — HTML 빌드 안 함. **요약본(00-brief)만 HTML 유지** — 비기술 의사결정자용. HTML 직접 손대지 않는다.
 3. **stable ID는 frontmatter + 파일명에 박힘** (`F1`, `UC-001`, `WBS-1.1`). 제목이 바뀌어도 ID는 유지.
 4. **`_shared/traceability.md`가 진실의 원천**. 모든 frontmatter는 이 매트릭스와 일치해야 한다.
 
@@ -29,7 +29,7 @@ updated: 2026-05-29
 | 3 | 기능명세서 (SRS) | `03-functional-spec/` | ISO/IEC/IEEE 29148-lite + Spec by Example |
 | 4 | WBS | `04-wbs/` | PMI WBS 2nd ed. (component-oriented Lv2) + Agile (Lv3+) |
 
-각각 self-contained HTML로 출력. 본 폴더의 `.md` 파일은 source. HTML 빌드는 별도 단계.
+상세본(01~04)은 `.md` 파일이 source이자 최종 산출물(md-only). LLM·개발자는 `.md`를 직접 읽는다. HTML 빌드 대상은 요약본(`00-brief/`)만이다.
 
 ---
 
@@ -195,18 +195,28 @@ grep -rn "^TODO\|: TODO\|- TODO" docs/spec/
 
 ## 8. HTML 빌드 정책
 
-### 8.1 기본 규칙
-- **사람은 `.md`만 편집**. HTML은 절대 직접 손대지 않음 (desync 방지)
-- HTML은 산출물(deliverable). `.md` → HTML 변환만 명시적으로 실행
-- 산출물 HTML 파일명: `{deliverable-name}.html` (예: `overview.html`, `usecase.html`)
+### 8.1 빌드 대상 범위 (결정 확정)
 
-### 8.2 빌드 베이스
+| 영역 | HTML 빌드 | 이유 |
+|---|:---:|---|
+| 상세본 (`01-overview/`, `02-usecase/`, `03-functional-spec/`, `04-wbs/`) | **아님** | LLM·개발자는 `.md`를 직접 읽음. `.md` = source of truth = 최종 산출물 |
+| 요약본 (`00-brief/`) | **함** | 비기술 의사결정자 프레젠테이션용. 5종 HTML 파일 유지 |
+
+- **상세본은 md-only**. 상세본 4종 HTML 파일은 삭제됐으며 재생성하지 않는다.
+- **사람은 `.md`만 편집**. HTML은 절대 직접 손대지 않음 (desync 방지).
+- `.md` → HTML 변환은 요약본(`00-brief/`)에만 명시적으로 실행.
+
+### 8.2 요약본 HTML 파일명
+
+`00-brief/` 폴더 내 HTML만 유지. 파일명 예: `brief.html`, `brief-spec.html` 등 요약본 식별자 기준.
+
+### 8.3 빌드 베이스 (요약본 전용)
 - CSS: `_shared/design-tokens.css` (예정 — research-skills-b-html.md §5.1 토큰 그대로)
 - 다이어그램: Mermaid v11 ESM CDN 1줄 + 인라인 SVG (자유도 필요 시)
 - JS: vanilla (외부 의존 0)
 - 인쇄 호환: `@media print` 블록 항상 포함 (research-skills-b-html.md §5.8)
 
-### 8.3 금기
+### 8.4 금기
 research-skills-b-html.md §6의 AI slop 회피 규칙 그대로 적용 (Tailwind CDN, Inter+그라데이션, transition all, dark/light 토글 v1 등).
 
 ---
@@ -218,7 +228,7 @@ research-skills-b-html.md §6의 AI slop 회피 규칙 그대로 적용 (Tailwin
 3. **`02-usecase/cases/UC-*.md`** — Cockburn template 채움. UC-001 → 002 → 003.
 4. **`04-wbs/packages/WBS-*.md`** — Deliverable / Acceptance / Verification.
 5. **`01-overview/index.md`** — 위 자료를 요약. 마지막에 작성 (전체 합쳐야 정확).
-6. **HTML 빌드** — `_shared/design-tokens.css` 준비 후 `*.html` 4개 생성.
+6. **요약본 HTML 빌드** — 상세본 완성 후 `00-brief/` 한정. `_shared/design-tokens.css` 준비 후 요약본 HTML만 생성 (상세본 HTML 빌드 안 함).
 
 ---
 
@@ -235,7 +245,7 @@ research-skills-b-html.md §6의 AI slop 회피 규칙 그대로 적용 (Tailwin
 3. **traceability.md 갱신**: 새 커밋은 §4에, 영향받는 매핑은 §1~3에
 4. **TODO 검토**: 새 코드로 채워졌으면 TODO 제거
 5. **본 PROCESS.md의 규칙 위배 없는지** 확인
-6. **HTML 재빌드** (산출물 변경이면)
+6. **요약본 HTML 재빌드** (`00-brief/` 내용이 바뀌었을 때만. 상세본 변경은 HTML 빌드 없음)
 
 ---
 

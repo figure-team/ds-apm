@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DS-APM 작업 분해 (팀장용)</title>
+<title>DS-APM 작업 분해 (요약본)</title>
 <style>
 /* DS-APM 공통 디자인 토큰 (_shared/design-tokens.css 인라인) */
 :root {
@@ -226,13 +226,13 @@ a:hover { border-bottom-color: var(--clay); }
 <body>
 <div class="page">
 
-<div class="eyebrow">DS-APM · 팀장용 WBS · 2026-05-29</div>
-<h1>DS-APM 작업 분해 (팀장용)</h1>
+<div class="eyebrow">DS-APM · 요약본 WBS · 2026-06-02</div>
+<h1>DS-APM 작업 분해 (요약본)</h1>
 
 <div class="intro">
   <p><strong>대상</strong>: 팀장 · 매니저 · 의사결정자.</p>
   <p><strong>목적</strong>: 무엇을 만들었나 · 비즈니스 가치 · 진행 상황 · 남은 일 — 4가지만 정리합니다.</p>
-  <p>개발자용 WBS(Work Breakdown Structure, 작업 분해 구조) 본문은 본 문서 하단의 링크를 참조하시기 바랍니다.</p>
+  <p>상세본 WBS(Work Breakdown Structure, 작업 분해 구조) 본문은 본 문서 하단의 링크를 참조하시기 바랍니다.</p>
 </div>
 
 <h2>1. 개요 (요약)</h2>
@@ -249,7 +249,7 @@ a:hover { border-bottom-color: var(--clay); }
 <ul>
   <li><strong>착수 예정(planned)</strong> — 착수 후 핵심 기능 흐름이 처음부터 끝까지 동작하도록 구축합니다.</li>
   <li><strong>6개 컴포넌트(Component)로 분해 예정</strong> — 공통 기반 모듈 (Foundation Core) · SOP 그라운딩 서비스 (SOP Grounding Service) · AI 초안 매니저 (AI Drafter Manager) · 알림 디스패처 (Notification Dispatcher) · PII 마스킹 필터 (PII Masking Filter) · DLQ 재처리 서비스 (DLQ Replay Service).</li>
-  <li><strong>개발자용 산출물(Deliverable) 4종 착수 후 순차 작성 예정</strong> — Overview · Use Case · 기능명세서 · WBS.</li>
+  <li><strong>상세본 산출물(Deliverable) 4종 착수 후 순차 작성 예정</strong> — Overview · Use Case · 기능명세서 · WBS.</li>
 </ul>
 
 <h2>2. 어떻게 나눴는가 (6 컴포넌트)</h2>
@@ -513,16 +513,16 @@ flowchart TD
     <tr><th style="width:30%">산출물(Deliverable)</th><th>용도</th></tr>
   </thead>
   <tbody>
-    <tr><td><a href="brief.html"><strong>비개발자 한장 브리핑</strong></a></td><td>가장 짧은 요약 (5분)</td></tr>
-    <tr><td><a href="../04-wbs/wbs.html"><strong>WBS 본문 (개발자용)</strong></a></td><td>컴포넌트별 산출물(Deliverable) / 인수 기준(Acceptance) / 선행 작업(Dependencies)</td></tr>
+    <tr><td><a href="brief.html"><strong>한장 브리핑</strong></a></td><td>가장 짧은 요약 (5분)</td></tr>
+    <tr><td><a href="../04-wbs/index.md"><strong>WBS 상세본</strong></a></td><td>컴포넌트별 산출물(Deliverable) / 인수 기준(Acceptance) / 선행 작업(Dependencies)</td></tr>
     <tr><td><a href="../04-wbs/appendix-phases.md"><strong>Phase 시간선</strong></a></td><td>Phase별 작업 순서 분할</td></tr>
-    <tr><td><a href="../02-usecase/usecase.html"><strong>Use Case</strong></a></td><td>정상 흐름 + 실패 시나리오 2건</td></tr>
-    <tr><td><a href="../03-functional-spec/functional-spec.html"><strong>기능명세서</strong></a></td><td>모듈별 인터페이스 + 인수 테스트</td></tr>
+    <tr><td><a href="../02-usecase/index.md"><strong>Use Case</strong></a></td><td>정상 흐름 + 실패 시나리오 2건</td></tr>
+    <tr><td><a href="../03-functional-spec/index.md"><strong>기능명세서</strong></a></td><td>모듈별 인터페이스 + 인수 테스트</td></tr>
   </tbody>
 </table>
 
 <div class="footnote">
-  본 브리핑은 PMI(Project Management Institute, 미국 PM 표준 기구) 표준 WBS(Work Breakdown Structure, 작업 분해 구조)의 개발자 버전을 비기술 청중용으로 압축한 것입니다.
+  본 브리핑은 PMI(Project Management Institute, 미국 PM 표준 기구) 표준 WBS(Work Breakdown Structure, 작업 분해 구조)의 상세본을 비기술 청중용으로 압축한 것입니다.
   컴포넌트별 상세 정보가 필요하면 <code>04-wbs/packages/</code> 아래 6개 파일을 참조하시면 됩니다.
 </div>
 

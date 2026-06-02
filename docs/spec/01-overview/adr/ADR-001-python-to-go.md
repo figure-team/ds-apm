@@ -6,7 +6,7 @@ date: 2026-05-19
 deciders: [team]
 supersedes: []
 superseded_by: null
-updated: 2026-05-29
+updated: 2026-06-02
 ---
 
 # ADR-001 — Python ds_apm_poc 폐기 → Go + SigNoz로 통합

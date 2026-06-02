@@ -10,7 +10,7 @@ supporting_actors: [SigNoz, AIOpsAgent Ingress, AI Engine, Dispatcher, Slack, MS
 implements_features: [F0, F1, F2, F4, F5, F6, F7]
 related_wbs: [WBS-1.0, WBS-1.1, WBS-1.2, WBS-1.3, WBS-1.4]
 priority: P1
-updated: 2026-05-29
+updated: 2026-06-02
 ---
 
 # UC-001 — Incident에서 채널 전달까지 (Golden Path)

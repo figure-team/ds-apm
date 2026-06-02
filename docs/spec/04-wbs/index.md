@@ -5,7 +5,7 @@ type: wbs-index
 template: PMI WBS 2nd ed. + Agile (hybrid)
 decomposition_logic: component-oriented
 status: draft
-updated: 2026-05-29
+updated: 2026-06-02
 ---
 
 # DS-APM WBS
@@ -49,6 +49,39 @@ WBS-1   DS-APM Project (root)
 | WBS-1.4 | PII 마스킹 필터 (PII Masking Filter) | planned | F7 | [WBS-1-4-pii-redactor.md](packages/WBS-1-4-pii-redactor.md) |
 | WBS-1.5 | DLQ 재처리 서비스 (DLQ Replay Service) | planned | F8 | [WBS-1-5-dlq-replay.md](packages/WBS-1-5-dlq-replay.md) |
 
+## 구축 일정
+
+전체 기간: **2026-05-25 ~ 2026-08-28 (약 14주)**
+
+| 컴포넌트 | 기간 | 시작 | 종료 | 의존 |
+|---|---|---|---|---|
+| WBS-1.0 공통 기반 모듈 | 3주 | 2026-05-25 | 2026-06-12 | (선행, 전체 의존) |
+| WBS-1.1 SOP 그라운딩 서비스 | 3주 | 2026-06-15 | 2026-07-03 | WBS-1.0 |
+| WBS-1.2 AI 초안 매니저 | 4주 | 2026-06-15 | 2026-07-10 | WBS-1.0 (1.1과 병렬) |
+| WBS-1.3 알림 디스패처 | 3주 | 2026-07-13 | 2026-07-31 | WBS-1.1, 1.2 |
+| WBS-1.4 PII 마스킹 필터 | 2주 | 2026-07-13 | 2026-07-24 | WBS-1.0 (1.3과 병렬) |
+| WBS-1.5 DLQ 재처리 서비스 | 3주 | 2026-08-03 | 2026-08-21 | WBS-1.3 |
+| 통합·안정화 버퍼 | 1주 | 2026-08-24 | 2026-08-28 | 전체 (E2E·HMAC 결정·검수) |
+
+```mermaid
+gantt
+    title AIOpsAgent 구축 일정 (2026-05-25 ~ 08-28)
+    dateFormat YYYY-MM-DD
+    axisFormat %m-%d
+    section 기반
+    WBS-1.0 공통 기반 모듈      :w0, 2026-05-25, 3w
+    section 도메인 엔진 (병렬)
+    WBS-1.1 SOP 그라운딩 서비스 :w1, after w0, 3w
+    WBS-1.2 AI 초안 매니저      :w2, after w0, 4w
+    section 전달·안전 (병렬)
+    WBS-1.3 알림 디스패처       :w3, after w1, 3w
+    WBS-1.4 PII 마스킹 필터     :w4, after w0, 2w
+    section 신뢰성
+    WBS-1.5 DLQ 재처리 서비스   :w5, after w3, 3w
+    section 통합
+    통합·안정화 버퍼           :buf, after w5, 1w
+```
+
 ## Excluded Scope (명시적 OUT OF SCOPE)
 
 - **SigNoz upstream 기능 자체** — AIOpsAgent 범위 밖
@@ -63,11 +96,13 @@ WBS-1   DS-APM Project (root)
 
 WBS 자체는 정적 scope 문서이며 진행률을 박지 않는다 (research-skills-a-methods.md §4.4). 다음 milestone은 시간선 부록 §A의 phase와 다르게 **production-readiness gate** 기준으로 분리한다.
 
-| Milestone | 기준 | 현재 상태 | 의존 |
-|---|---|---|---|
-| **M-1 착수 시점** | F0~F8 9 모듈 정의, UC-001~003 본문·시퀀스·NFR 작성, 산출물 4종 합의. | **예정** (Phase 0 진입) | WBS-1.0 ~ WBS-1.5 전부 |
-| **M-2 Beta GA** | HMAC 정책 결정 (NF-5.3.1) → WBS-1.5 acceptance 통과. 운영자 검수 화면 frontend 변경 영역 식별·문서화. DLQ 운영 UI/CLI 최소 1종 제공. | **TODO (partial: NF-5.3.1 미해결, frontend R-5 open)** | M-1 + ADR-003 (JSONL vs Redis) 결정 |
-| **M-3 Production-readiness** | Multi-tenant 격리 강화 (tenant policy 단위 테스트 + dedicated vector store 옵션 평가). PII Collector 적용 (OTel Attributes / Filter / Redaction / Transform processor로 ingress 이전). Redis 기반 idempotency cache로 ledger 이전 가능성 결정. HMAC 정책 운영 검증. | **미진입** | M-2 + R-3, R-4, R-7 follow-up 클리어 |
+| Milestone | 목표일 | 기준 | 현재 상태 | 의존 |
+|---|---|---|---|---|
+| **M-1 기반 완료** | 2026-06-12 | WBS-1.0 acceptance 통과. F0~F8 9 모듈 정의, UC-001~003 본문·시퀀스·NFR 작성, 산출물 4종 합의. | **예정** (Phase 0 진입) | WBS-1.0 |
+| **M-2 도메인 엔진 완료** | 2026-07-10 | WBS-1.1 + WBS-1.2 acceptance 통과. SOP grounding + AI 초안 생성 E2E 동작. | **미진입** | M-1 |
+| **M-3 전달·안전 완료** | 2026-07-31 | WBS-1.3 + WBS-1.4 acceptance 통과. 5채널 dispatch + PII 마스킹 E2E 동작. | **미진입** | M-2 |
+| **M-4 신뢰성·Beta GA** | 2026-08-21 | WBS-1.5 acceptance 통과. HMAC 정책 결정 (NF-5.3.1). DLQ 운영 UI/CLI 최소 1종 제공. Frontend 변경 영역 식별·문서화. | **미진입 (NF-5.3.1 미해결, frontend R-5 open)** | M-3 + ADR-003 결정 |
+| **M-5 Production-readiness** | 2026-08-28 | 통합·안정화 버퍼 소화. Multi-tenant 격리 강화. PII Collector 단 이동 결정. HMAC 정책 운영 검증. | **미진입** | M-4 + R-3, R-4, R-7 follow-up 클리어 |
 
 추가 milestone 후보 (현재 미일정):
 - **M-X Vector retrieval 도입** — explicit-label binding을 vector retrieval로 확장 (현재 OUT OF SCOPE).

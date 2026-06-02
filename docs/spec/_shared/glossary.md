@@ -3,7 +3,7 @@ id: GLOSSARY
 title: DS-APM 용어집
 type: glossary
 status: draft
-updated: 2026-05-29
+updated: 2026-06-02
 ---
 
 # 용어집 (Glossary)

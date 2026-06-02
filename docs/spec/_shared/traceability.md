@@ -3,7 +3,7 @@ id: TRACEABILITY
 title: UC × Feature × WBS Traceability Matrix
 type: traceability
 status: living
-updated: 2026-05-29
+updated: 2026-06-02
 ---
 
 # Traceability Matrix

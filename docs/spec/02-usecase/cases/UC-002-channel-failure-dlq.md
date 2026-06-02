@@ -10,7 +10,7 @@ supporting_actors: [Dispatcher, Channel, DLQ]
 implements_features: [F6, F8]
 related_wbs: [WBS-1.3, WBS-1.5]
 priority: P1
-updated: 2026-05-29
+updated: 2026-06-02
 ---
 
 # UC-002 — 채널 전달 실패 → DLQ → Replay

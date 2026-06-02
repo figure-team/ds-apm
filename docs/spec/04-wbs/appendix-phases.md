@@ -3,10 +3,12 @@ id: WBS-APPENDIX-PHASES
 title: WBS 부록 — Phase 시간선 (P0~P5)
 type: wbs-appendix
 status: historical
-updated: 2026-05-28
+updated: 2026-06-02
 ---
 
 # 부록 A. Phase 시간선 (역사 추적용) — (착수 전 사전 작업 기록)
+
+> **참고**: 본 부록은 사전 PoC 시간선 기록이며, 실제 구축 일정은 [index.md](index.md) §구축 일정 참조.
 
 > 이 문서는 DS-APM 사전 POC 과정의 **시간 순 분할**이다. (착수보고 기준 참고 자료)
 > 메인 WBS(`index.md`)는 component-oriented이고, 이 부록은 어떤 순서로 작업이 진행됐는지의 기록.

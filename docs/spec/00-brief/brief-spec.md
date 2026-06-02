@@ -1,15 +1,15 @@
 ---
 id: BRIEF-SPEC
-title: DS-APM 기능 명세 (팀장용)
+title: DS-APM 기능 명세 (요약본)
 type: brief-spec
-audience: 비개발자 (팀장 · 매니저 · 의사결정자)
+audience: 요약본 (의사결정용)
 status: draft
 source_artifact: SPEC-INDEX
 links_to: [BRIEF, BRIEF-OVERVIEW, BRIEF-USECASE, BRIEF-WBS, SPEC-INDEX]
-updated: 2026-05-29
+updated: 2026-06-02
 ---
 
-# DS-APM 기능 명세 (팀장용)
+# DS-APM 기능 명세 (요약본)
 
 > **대상**: 개발 디테일을 보지 않아도 되는 분 (팀장 · 매니저 · 의사결정자).
 > **읽는 시간**: 약 10~15분.
@@ -247,13 +247,13 @@ flowchart TB
 | 산출물 | 대상 독자 | 링크 |
 |---|---|---|
 | **종합 브리핑** (배경·시나리오·의사결정 요청) | 팀장·매니저·의사결정자 | [brief.html](brief.html) |
-| **Overview** | 신규 멤버·외부 컨설턴트·감사 — 아키텍처와 시스템 경계 | [overview.html](../01-overview/overview.html) |
-| **Use Case** | QA·개발자 — 정상 흐름 + 실패 시나리오 2건 | [usecase.html](../02-usecase/usecase.html) |
-| **기능명세서 (개발자용)** | 개발자 — 모듈 9개 인터페이스 + BDD 시나리오 표기법(Gherkin) 기반 인수 기준(Acceptance Criteria) | [functional-spec.html](../03-functional-spec/functional-spec.html) |
-| **WBS** | PM·일정 관리 — 작업 분해·마일스톤·의존도 | [wbs.html](../04-wbs/wbs.html) |
-| 용어집 (31개 용어, 개발자용) | 전체 | [glossary.md](../_shared/glossary.md) |
+| **Overview** | 신규 멤버·외부 컨설턴트·감사 — 아키텍처와 시스템 경계 | [../01-overview/index.md](../01-overview/index.md) |
+| **Use Case** | QA·개발자 — 정상 흐름 + 실패 시나리오 2건 | [../02-usecase/index.md](../02-usecase/index.md) |
+| **기능명세서 (상세본)** | 개발자 — 모듈 9개 인터페이스 + BDD 시나리오 표기법(Gherkin) 기반 인수 기준(Acceptance Criteria) | [../03-functional-spec/index.md](../03-functional-spec/index.md) |
+| **WBS** | PM·일정 관리 — 작업 분해·마일스톤·의존도 | [../04-wbs/index.md](../04-wbs/index.md) |
+| 용어집 (31개 용어) | 전체 | [glossary.md](../_shared/glossary.md) |
 
 ---
 
-> 본 문서는 9개 개발자용 모듈(F0~F8)을 **6개 비기술 컴포넌트로 압축**한 팀장용 요약입니다.
+> 본 문서는 9개 상세 모듈(F0~F8)을 **6개 컴포넌트로 압축**한 요약본입니다.
 > 모듈별 인터페이스·데이터 구조·BDD 시나리오 표기법(Gherkin) 기반 인수 기준(Acceptance Criteria)은 [기능명세서](../03-functional-spec/index.md)를 참조하시기 바랍니다.

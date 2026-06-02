@@ -1,15 +1,15 @@
 ---
 id: BRIEF
-title: DS-APM 비개발자 종합 브리핑
+title: DS-APM 요약 브리핑
 type: brief
-audience: 비개발자 (팀장 · 매니저 · 의사결정자)
+audience: 요약본 (의사결정용)
 read_time: 약 20~30분
 status: draft
 links_to: [OVERVIEW, USECASE-INDEX, SPEC-INDEX, WBS-INDEX]
-updated: 2026-05-29
+updated: 2026-06-02
 ---
 
-# DS-APM — 비개발자 종합 브리핑
+# DS-APM — 요약 브리핑
 
 > **대상**: 팀장 · 매니저 · 의사결정자.
 > **읽는 시간**: 약 20~30분.
@@ -209,10 +209,10 @@ flowchart LR
 | 컴포넌트 | 책임 | 진행 단계 |
 |---|---|---|
 | **공통 기반 모듈 (Foundation Core)** | 공통 타입 + 감사 적재 계층(sink) + 테넌트(tenant) 정책 | 착수 예정(planned) |
-| **SOP 그라운딩 서비스 (SOP Grounding Service)** | SOP(Standard Operating Procedure, 운영 절차서) 저장 + 알람-SOP 매칭 | 착수 예정(planned) |
+| **SOP 그라운딩 서비스 (SOP Grounding Service)** | SOP 저장 + 알람-SOP 매칭 | 착수 예정(planned) |
 | **AI 초안 매니저 (AI Drafter Manager)** | LLM 초안 생성 + 이력 관리 + quota(할당량) 제어 (장애 시 통과/fail-open) | 착수 예정(planned) |
 | **알림 디스패처 (Notification Dispatcher)** | 5채널 발송 + AI 컨텍스트 병합 | 착수 예정(planned) |
-| **PII 마스킹 필터 (PII Masking Filter)** | 입구 단계 PII(Personal Identifiable Information, 개인 식별 정보) 마스킹(redaction) | 착수 예정(planned) |
+| **PII 마스킹 필터 (PII Masking Filter)** | 입구 단계 PII 마스킹(redaction) | 착수 예정(planned) |
 | **DLQ 재처리 서비스 (DLQ Replay Service)** | 발송 실패 영속화 + 중복 방지(idempotent) 재발송 | 착수 예정(planned, HMAC 정책 결정 필요) |
 
 착수 후 **산출물 4종** (Overview · Use Case · 기능명세 · WBS)을 순차적으로 작성할 예정입니다. PDF 출력·HTML 공유가 가능하도록 설계됩니다.
@@ -294,18 +294,18 @@ M-2를 시작하려면 다음 의사결정이 필요합니다.
 | **D-3** | PII OTel Collector 이동 | (a) M-2에 포함 / (b) M-2와 병행 별도 트랙 / (c) M-3 이후로 후순위 |
 | **D-4** | 장애 시 통과(fail-open) vs 장애 시 차단(fail-closed) 정책 | (a) 현재 fail-open 유지 / (b) 테넌트별 선택 가능하도록 옵션 추가 / (c) 보안 민감 테넌트는 fail-closed 기본 |
 
-각 사안은 산출물 4종(특히 [기능명세서 §5.3 Security](../03-functional-spec/functional-spec.html))에 추적성(traceability) ID로 연결되어 있습니다. 결정 후 해당 ID의 status를 갱신하면 자동으로 반영됩니다.
+각 사안은 상세본 산출물 4종(특히 [기능명세서 §5.3 Security](../03-functional-spec/index.md))에 추적성(traceability) ID로 연결되어 있습니다. 결정 후 해당 ID의 status를 갱신하면 자동으로 반영됩니다.
 
 ---
 
-## 11. 관련 산출물 (개발자용 4종 산출물)
+## 11. 관련 산출물 (상세본 4종)
 
 | 산출물 | 대상 독자 | 링크 |
 |---|---|---|
-| **Overview** | 신규 인력 / 외부 컨설턴트 / 감사 — 아키텍처와 시스템 경계 | [overview.html](../01-overview/overview.html) |
-| **Use Case** | QA / 개발자 — 정상 흐름 + 실패 시나리오 2건 (Cockburn 표준) | [usecase.html](../02-usecase/usecase.html) |
-| **기능명세서** | 개발자 — 각 모듈 인터페이스 + Gherkin 인수 테스트 | [functional-spec.html](../03-functional-spec/functional-spec.html) |
-| **WBS** | PM / 일정 관리 — 작업 분해 + 마일스톤 + 의존도 | [wbs.html](../04-wbs/wbs.html) |
+| **Overview** | 신규 인력 / 외부 컨설턴트 / 감사 — 아키텍처와 시스템 경계 | [index.md](../01-overview/index.md) |
+| **Use Case** | QA / 개발자 — 정상 흐름 + 실패 시나리오 2건 (Cockburn 표준) | [index.md](../02-usecase/index.md) |
+| **기능명세서** | 개발자 — 각 모듈 인터페이스 + Gherkin 인수 테스트 | [index.md](../03-functional-spec/index.md) |
+| **WBS** | PM / 일정 관리 — 작업 분해 + 마일스톤 + 의존도 | [index.md](../04-wbs/index.md) |
 
 본 브리핑은 위 4종을 비기술 청중에 맞춰 요약한 것입니다. 상세 내용이 필요한 부분은 해당 산출물에서 확인하시면 됩니다.
 
@@ -330,9 +330,9 @@ M-2를 시작하려면 다음 의사결정이 필요합니다.
 | **on-call** | 알람을 1차로 받아 대응하는 당직 운영자 |
 | **escalation** | 더 높은 권한·전문성의 인력에게 사안 이관 |
 
-상세 용어집 (개발자용 31개 용어): [glossary.md](../_shared/glossary.md)
+상세 용어집 (31개 용어): [glossary.md](../_shared/glossary.md)
 
 ---
 
 > 본 브리핑은 개발 디테일 없이도 의사결정에 필요한 정보만 담았습니다.
-> 추가 문의는 산출물 4종 또는 본 문서 마지막의 용어집 링크를 참조하시기 바랍니다.
+> 추가 문의는 상세본 4종 또는 본 문서 마지막의 용어집 링크를 참조하시기 바랍니다.

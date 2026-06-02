@@ -1,15 +1,15 @@
 ---
 id: BRIEF-USECASE
-title: DS-APM 실사용 시나리오 (팀장용)
+title: DS-APM 실사용 시나리오 (요약본)
 type: brief-usecase
-audience: 비개발자 (팀장 · 매니저 · 의사결정자)
+audience: 요약본 (의사결정용)
 status: draft
 source_artifact: USECASE-INDEX
 links_to: [BRIEF, BRIEF-OVERVIEW, BRIEF-SPEC, BRIEF-WBS, USECASE-INDEX]
-updated: 2026-05-29
+updated: 2026-06-02
 ---
 
-# DS-APM 실사용 시나리오 (팀장용)
+# DS-APM 실사용 시나리오 (요약본)
 
 > **대상**: 팀장 · 매니저 · 의사결정자. **읽는 시간**: 약 10~15분.
 > **목적**: DS-APM이 실제 새벽 장애 상황에서 어떻게 동작하는지, 세 가지 대표 장면으로 보입니다. 개발 디테일은 모두 걷어내고 "누가, 무엇을, 어떻게"만 남겼습니다.
@@ -172,10 +172,10 @@ sequenceDiagram
 
 | 자료 | 누가 보나 | 무엇이 다른가 |
 |---|---|---|
-| [개발자용 Use Case 산출물](../02-usecase/usecase.html) | 개발자 · QA | 유스케이스 표준 템플릿 Cockburn Fully Dressed. 단계별 검증 항목·예외 분기·시퀀스 다이어그램·상태 머신 포함 |
+| [상세본 Use Case 산출물](../02-usecase/index.md) | 개발자 · QA | 유스케이스 표준 템플릿 Cockburn Fully Dressed. 단계별 검증 항목·예외 분기·시퀀스 다이어그램·상태 머신 포함 |
 | [한장 브리핑](brief.html) | 팀장 (5분) | DS-APM 전체를 1페이지로 |
 | [개요 브리핑](brief-overview.html) | 팀장 (20~30분) | 배경·문제·해결 방식·위험·다음 단계 종합 |
 | [기능명세 브리핑](brief-spec.html) | 팀장 / PM | 6개 컴포넌트별로 무엇이 가능한지 |
 | [WBS 브리핑](brief-wbs.html) | PM | 완료된 작업 11건 + 남은 의사결정 |
 
-> 본 문서는 [개발자용 Use Case 산출물](../02-usecase/usecase.html)을 운영 담당자 시선으로 재구성한 것입니다. 기술 식별자는 모두 제거하고, 흐름의 의미만 남겼습니다.
+> 본 문서는 [상세본 Use Case 산출물](../02-usecase/index.md)을 운영 담당자 시선으로 재구성한 것입니다. 기술 식별자는 모두 제거하고, 흐름의 의미만 남겼습니다.

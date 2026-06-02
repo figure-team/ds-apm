@@ -10,7 +10,7 @@ supporting_actors: [AI 초안 매니저, LLM Provider, 알림 디스패처, Oper
 implements_features: [F2, F3]
 related_wbs: [WBS-1.2]
 priority: P2
-updated: 2026-05-29
+updated: 2026-06-02
 ---
 
 # UC-003 — LLM 인증 실패 → quota fail-open → SOP 원문 fallback
