@@ -61,21 +61,21 @@ updated: 2026-06-08
 
 > UJ-1=골든(정상), UJ-2=DLQ 실패·복구, UJ-3=LLM fail-open, UJ-4=사전대응·자산화(로드맵). 상세 내러티브: [`../01-prd/index.md`](../01-prd/index.md) §5.
 
-## 5. 커밋 ↔ CF ↔ WBS (역사 추적)
+## 5. 코드(모듈) ↔ CF ↔ WBS (구현 매핑)
 
-| 커밋 (SHA prefix) | 메시지 요약 | CF | 구 모듈 | WBS |
-|---|---|---|---|---|
-| `026863650` | native MVP foundation pilot scaffolding | CF-6 | F0 | WBS-1.0 |
-| `72944ecac` | ground alerts in uploaded SOPs | CF-1 | F1 | WBS-1.1 |
-| `8a55208ef` | make SOP access auditable | CF-6 | F5 | WBS-1.0 |
-| `3fa604e03` | scope SOP strategy access by tenant | CF-1 (테넌트) | F4 | WBS-1.0 |
-| `a6757136e` | fail open AI quota controls | CF-2 | F3 | WBS-1.2 |
-| `cb29d2a59` | persist latest AI strategy history | CF-2 | F2 | WBS-1.2 |
-| `5c036c806` | propagate SOP AI context to channels | CF-3 | F6 | WBS-1.3 |
-| `c7f4fd330` | persist SOP documents to file | CF-1 | F1 | WBS-1.1 |
-| `3e9dfa557` | redact email/phone/long secrets in payload | CF-4 | F7 | WBS-1.4 |
-| `ade174bb8` | JSONL DLQ + idempotent replay ledger | CF-5 | F8 | WBS-1.5 |
-| `91b9ff5db` | wire DLQ into alertmanager dispatcher | CF-5 | F8 | WBS-1.5 |
+> 구현 커밋 이력은 작업용 nested repo(`var/signoz`)에 있고, 공개 `ds-apm`은 **single squash**라 개별 커밋·SHA가 없다. 코드 경로↔CF는 [`component-source-map.md`](component-source-map.md), CF↔WBS는 §2 참조.
+
+| 구 모듈(F) | 기능 | CF | WBS |
+|---|---|---|---|
+| F0 | foundation / pilot scaffolding | CF-6 | WBS-1.0 |
+| F1 | SOP grounding & store | CF-1 | WBS-1.1 |
+| F2 | AI strategy history | CF-2 | WBS-1.2 |
+| F3 | AI quota controls (fail-open) | CF-2 | WBS-1.2 |
+| F4 | multi-tenant scope | CF-1 (테넌트) | WBS-1.0 |
+| F5 | audit | CF-6 | WBS-1.0 |
+| F6 | notification dispatch | CF-3 | WBS-1.3 |
+| F7 | PII redaction | CF-4 | WBS-1.4 |
+| F8 | JSONL DLQ + replay | CF-5 | WBS-1.5 |
 
 > 마이그레이션: 078(`ds_sop_documents`·`ds_ai_strategy_history`), 079(`ds_ai_config`), 080(oauth 컬럼).
 

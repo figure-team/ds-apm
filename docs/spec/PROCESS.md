@@ -14,7 +14,7 @@ updated: 2026-06-08
 ## 0. TL;DR — 5가지만 기억하면 됨
 
 1. 산출물은 **사업 전략서(`_foundation/source-strategy-brief.md`)에서 top-down**: Vision → Target User·Jobs(JTBD) → User Journey(UJ) → Feature(CF) → FR. 코드(F0~F8)는 전략의 **현재 구현 표면**이며 FR의 *구현 근거*로 강등(FR 본문은 고객 voice).
-2. 기능명세 분해 축은 **CF(Capability Feature, 사용자 가치)**. 구 F0~F8은 코드/커밋 매핑(component-source-map)으로만 남고, 산출물 ID는 `CF-1..N` + `FR-CFn.m`.
+2. 기능명세 분해 축은 **CF(Capability Feature, 사용자 가치)**. 구 F0~F8은 코드 매핑(component-source-map)으로만 남고, 산출물 ID는 `CF-1..N` + `FR-CFn.m`.
 3. **범위 hybrid**: 구현 핵심(CF-1~6)은 FR 상세 + Given/When/Then. 미구현 로드맵(CF-7~10)은 저fidelity FR + 단계 태그.
 4. **Markdown = source of truth**. `.md`(풍부) + `.html`(사람용 큐레이션 뷰) 공존. md↔html 1:1 동기 불필요 — 사실(숫자·날짜·명명·상태·ID) 모순만 금지.
 5. **stable ID는 frontmatter + 파일명에 박힘** (`CF-1`, `WBS-1.1`, `FR-CF1.1`, `UJ-1`). 진실의 원천 = `source-strategy-brief.md`(top-down) + `_shared/traceability.md`(CF×UJ×WBS) + 코드(`component-source-map.md`).
@@ -80,9 +80,9 @@ BMAD는 영어·애자일 어휘다. 산출물 본문은 **한국 SI 문체**로
 
 1. **Atomic — 1 파일 1 개념**: CF feature 1개 = 1 파일, **스토리 1개 = 1 파일**(`04-stories/N.M.story.md`).
 2. **Stable ID를 파일명에 박기**: `CF-1`·`FR-CF1.1`·`EPIC-N`·**Story `N.M`**(`04-stories/1.1.story.md`) 영구. UJ-1~4는 PRD §5.
-3. **YAML frontmatter**: CF(status·jtbd·maps_modules·commits·source_paths·implements_uj·covered_by_wbs·fr_ids) · 에픽(covers_feature·maps_wbs·stories) · 스토리(epic·fr·covers_feature·wbs_component·status·commits).
+3. **YAML frontmatter**: CF(status·jtbd·maps_modules·source_paths·implements_uj·covered_by_wbs·fr_ids) · 에픽(covers_feature·maps_wbs·stories) · 스토리(epic·fr·covers_feature·wbs_component·status).
 4. **Single Source of Truth = Markdown**, HTML은 큐레이션 뷰. HTML 직접 편집 ✗.
-5. **코드를 ground truth로**: 각 FR의 `구현 근거` + CF의 `source_paths`/`commits`. 코드 변경 시 grep 영향 추적.
+5. **코드를 ground truth로**: 각 FR의 `구현 근거` + CF의 `source_paths`. 코드 변경 시 grep 영향 추적.
 
 ---
 
@@ -93,7 +93,7 @@ docs/spec/
 ├─ PROCESS.md                          # 본 파일
 ├─ _foundation/                        # 작업 입력 (top-down 진실원천)
 │  ├─ source-strategy-brief.md         # ★ 원본 사업 전략서 (top-down 출발점)
-│  └─ baseline.md                      # as-built 사실 기반 (커밋·LOC·diff·commit↔module)
+│  └─ baseline.md                      # as-built 사실 기반 (변경표면·LOC·모듈↔CF 매핑)
 ├─ _shared/                            # 공통 자산
 │  ├─ traceability.md                  # ★ CF × UJ × WBS 매트릭스 (매핑 진실원천)
 │  ├─ component-source-map.md          # ★ 6컴포넌트 ↔ 코드 ↔ F0~F8 (as-built, drift)
@@ -128,7 +128,6 @@ title: ...
 status: implemented | implemented-mvp | planned | draft
 jtbd: [JTBD-1, JTBD-3]            # source-strategy-brief Jobs-to-be-Done
 maps_modules: [F1, F4]            # 구 코드 단위 (component-source-map과 일치)
-commits: [SHA1, SHA2]
 source_paths: [pkg/...]
 implements_uj: [UJ-1]             # PRD §5 User Journey (traceability §1과 일치)
 covered_by_wbs: [WBS-1.N]         # traceability.md §2와 일치
@@ -168,11 +167,10 @@ covers_feature: CF-N
 fr: FR-CFn.m                      # 1 스토리 ↔ 1 FR
 wbs_component: WBS-1.x
 status: done | planned
-commits: [SHA]
 updated: YYYY-MM-DD
 ---
 ```
-> 본문 = BMAD 스토리 템플릿: `Status` · `## Story`(서술형 "{역할}는 ~한다. (목적:…)") · `## Acceptance Criteria`(FR 인수기준) · `## Tasks / Subtasks`(코드 기준 도출, AC 참조) · `## Dev Notes`(소스·커밋·테스트). 영한 혼용 금지(§2.8).
+> 본문 = BMAD 스토리 템플릿: `Status` · `## Story`(서술형 "{역할}는 ~한다. (목적:…)") · `## Acceptance Criteria`(FR 인수기준) · `## Tasks / Subtasks`(코드 기준 도출, AC 참조) · `## Dev Notes`(소스 경로·테스트). 영한 혼용 금지(§2.8).
 
 ### 5.4 ADR (Architecture 단계 진입 시) — `02-architecture/adr/ADR-NNN-*.md`
 `id / title / status / date / deciders / supersedes / superseded_by / updated`. (현재 미생성.)
@@ -181,13 +179,13 @@ updated: YYYY-MM-DD
 
 ## 6. Traceability 검증
 
-`_shared/traceability.md`가 매핑의 진실의 원천. **CF 축**으로 CF×UJ×WBS를 묶고, JTBD·커밋도 부속표로 둔다.
+`_shared/traceability.md`가 매핑의 진실의 원천. **CF 축**으로 CF×UJ×WBS를 묶고, JTBD·코드(모듈)도 부속표로 둔다.
 
 ### 6.1 검증 체크리스트 (변경 시)
 - [ ] `CF-N.md`의 `implements_uj`·`covered_by_wbs`·`fr_ids` ↔ traceability §1·§2·§6
 - [ ] `index.md` §5 UJ 목록 ↔ traceability §1·§3 (UJ는 PRD 내장)
 - [ ] `WBS-1-N.md`의 `covers_features`(CF) ↔ traceability §2
-- [ ] 새 커밋은 traceability §5에 append (CF·WBS 매핑 포함)
+- [ ] 새 코드(모듈)는 traceability §5 + component-source-map에 반영 (CF·WBS 매핑 포함)
 - [ ] `04-stories/N.M.story.md`의 `epic`·`fr` ↔ traceability §6.1 + 에픽 `stories` 목록
 
 ### 6.2 desync 시
@@ -237,8 +235,8 @@ AI slop 회피: Tailwind CDN · Inter+그라데이션 · transition all · dark/
 ## 10. 변경 시 절차 (PR/커밋 체크리스트)
 
 1. **코드 변경** → 영향 `.md`를 `source_paths`/`구현 근거` 역색인: `grep -rln "변경경로" docs/spec/`
-2. **frontmatter 갱신**: `commits:` append, `status:`, `updated:` 오늘.
-3. **traceability.md 갱신**: 새 커밋·영향 매핑(CF×UJ×WBS).
+2. **frontmatter 갱신**: `status:`, `updated:` 오늘.
+3. **traceability.md 갱신**: 영향 매핑(CF×UJ×WBS) + §5 코드(모듈)↔CF.
 4. **index §7 Coverage Map ↔ CF `fr_ids` 정합** 확인.
 5. **TODO 검토** + 본 규칙 위배 확인.
 6. **HTML 재빌드** (해당 산출물 변경 시).
@@ -248,7 +246,7 @@ AI slop 회피: Tailwind CDN · Inter+그라데이션 · transition all · dark/
 ## 11. 참조 문서
 
 - [`_foundation/source-strategy-brief.md`](_foundation/source-strategy-brief.md) — ★ 원본 사업 전략서
-- [`_foundation/baseline.md`](_foundation/baseline.md) — 11 commits / +12.6k LOC
+- [`_foundation/baseline.md`](_foundation/baseline.md) — as-built 사실 (변경표면 +12.6k LOC · 모듈↔CF)
 - [`_shared/component-source-map.md`](_shared/component-source-map.md) — 6컴포넌트↔코드↔F0~F8, drift
 - BMAD-METHOD `bmm-skills/2-plan-workflows/bmad-prd` + `3-solutioning/bmad-create-epics-and-stories`
 - 한국 SI 산출물 문체·양식 (§2.8 변환 규칙 근거): CBD SW 표준 산출물 관리 가이드(cisp.or.kr/kpmo.or.kr) · NIPA SW 산출물 작성 가이드(swbank.kr) · 행정기관 정보화사업 추진 매뉴얼(정부통합전산센터 nirs.go.kr)

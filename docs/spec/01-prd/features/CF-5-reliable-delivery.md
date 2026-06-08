@@ -4,7 +4,6 @@ title: 무유실·멱등 재처리 (DLQ + Replay)
 status: implemented-mvp
 jtbd: [JTBD-4]
 maps_modules: [F8]
-commits: [ade174bb8, 91b9ff5db]
 source_paths:
   - pkg/alertmanager/alertmanagernotify/dlq/dlq.go
   - pkg/alertmanager/alertmanagernotify/dlq/ledger.go
@@ -44,7 +43,7 @@ caveats: "replay API/UI는 범위 밖 — ledger·sink만 제공. DLQ 기본 배
   When 그룹이 flush되면
   Then DLQ에는 아무 entry도 쌓이지 않는다
   ```
-- **구현 근거**: `JSONLDeadLetterSink.Write`(`Entry{EventID,Channel,Payload,FailedAt,Reason}`, 50 MiB rotation). `recordTerminalFailure`에서 호출. ctx Canceled → skip. marshal 실패 시 empty payload + 경고. → NF-5.4.1 · `ade174bb8`, `91b9ff5db` · WBS-1.5
+- **구현 근거**: `JSONLDeadLetterSink.Write`(`Entry{EventID,Channel,Payload,FailedAt,Reason}`, 50 MiB rotation). `recordTerminalFailure`에서 호출. ctx Canceled → skip. marshal 실패 시 empty payload + 경고. → NF-5.4.1 · WBS-1.5
 
 ### FR-CF5.2 — 운영자는 재발송 시 같은 알림이 중복으로 가지 않음을 보장받는다
 - **무엇을**: 재발송 시 이미 처리한 event는 건너뛴다. 프로세스 재시작 후에도 일관성을 유지한다(crash mid-batch 멱등).
@@ -56,7 +55,7 @@ caveats: "replay API/UI는 범위 밖 — ledger·sink만 제공. DLQ 기본 배
   When 새 event "xyz789" 재발송을 시도하면
   Then 재발송되고 대장 끝에 "xyz789"가 기록되며, 대장을 다시 열어도 보존된다
   ```
-- **구현 근거**: `ReplayLedger.MarkIfNew`(append-only EventID set, open 시 파일 스캔으로 in-memory 재구성, 1 MiB scanner). `true`일 때만 재전송. empty EventID → false. → NF-5.4.2 · `ade174bb8` · WBS-1.5
+- **구현 근거**: `ReplayLedger.MarkIfNew`(append-only EventID set, open 시 파일 스캔으로 in-memory 재구성, 1 MiB scanner). `true`일 때만 재전송. empty EventID → false. → NF-5.4.2 · WBS-1.5
 
 ### FR-CF5.3 *(open)* — 보안담당자는 재발송 페이로드 위변조 방지(HMAC)를 요구한다
 - **무엇을**: 재발송 payload의 무결성·위변조 방지를 위한 HMAC 서명/검증. **정책 미정 — 미해결인 한 production-ready 선언 불가.**
@@ -108,5 +107,5 @@ stateDiagram-v2
 - JTBD: 4(안전·무유실) · User Journey: UJ-2 · NFR: NF-5.4.1·2, NF-5.3.1(open)
 - User Journey: UJ-2(단계 5~7) · WBS: WBS-1.5
 - 구 모듈: F8(DLQ + Replay)
-- Commits: `ade174bb8`, `91b9ff5db`
+- Commits: 
 - → 상위: [`../index.md`](../index.md) §7.1 · 전략: [`source-strategy-brief.md`](../../_foundation/source-strategy-brief.md) §6(자동조치 실패→rollback)

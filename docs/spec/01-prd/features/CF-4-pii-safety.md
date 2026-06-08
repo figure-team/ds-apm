@@ -4,7 +4,6 @@ title: 민감정보 비노출 (PII Safety)
 status: implemented
 jtbd: [JTBD-4]
 maps_modules: [F7]
-commits: [3e9dfa557]
 source_paths:
   - pkg/types/alertmanagertypes/incident_payload.go
 implements_uj: [UJ-1]
@@ -35,7 +34,7 @@ caveats: "AIOpsAgent ingress 단일 지점 redaction — instrumentation·OTel C
    And Bearer 토큰이 든 값은 전체가 "[redacted]"로 가려지며
    And URL에서 "token="은 제거되되 "svc=payment"는 보존된다
   ```
-- **구현 근거**: `incident_payload.go: SanitizeIncidentValue` 순서 — ① URL 파싱(http/https만, `User` info drop, sensitive query key 제거) ② secret-looking(`bearer `, JWT, marker) 전체 `[redacted]` ③ email regex ④ 국내 모바일 regex ⑤ 32+자 long secret regex. 컴파일 1회 global. URL sensitive keys: `access_token|api_key|apikey|auth|authorization|bearer|client_secret|password|secret|token`. · `3e9dfa557` · WBS-1.4
+- **구현 근거**: `incident_payload.go: SanitizeIncidentValue` 순서 — ① URL 파싱(http/https만, `User` info drop, sensitive query key 제거) ② secret-looking(`bearer `, JWT, marker) 전체 `[redacted]` ③ email regex ④ 국내 모바일 regex ⑤ 32+자 long secret regex. 컴파일 1회 global. URL sensitive keys: `access_token|api_key|apikey|auth|authorization|bearer|client_secret|password|secret|token`. · WBS-1.4
 
 ## CF-4.3 비기능 요건 (feature-specific)
 - **NF-CF4.1** 마스킹은 채널 adapter 호출 **이전**에 완료(sanitized 값만 외부로). → NF-5.2.2
@@ -61,5 +60,5 @@ caveats: "AIOpsAgent ingress 단일 지점 redaction — instrumentation·OTel C
 - JTBD: 4(안전) · User Journey: UJ-1 · NFR: NF-5.2.2
 - User Journey: UJ-1(단계 3) · WBS: WBS-1.4
 - 구 모듈: F7(PII Redaction)
-- Commits: `3e9dfa557`
+- Commits: 
 - → 상위: [`../index.md`](../index.md) §7.1 · 전략: [`source-strategy-brief.md`](../../_foundation/source-strategy-brief.md) §6(데이터 품질·안전)

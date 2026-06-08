@@ -238,3 +238,4 @@ pyrightconfig.json
 /test_interface
 .gstack/
 docs/spec/_ssg-samples/
+/CLAUDE.md
