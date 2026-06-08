@@ -1,9 +1,9 @@
-# 00. Baseline — DS-APM 산출물 작성을 위한 출발점
+# 00. Baseline — DS-APM as-built 사실 기반
 
-> 본 문서는 산출물 4종(Overview / Use Case / 기능명세서 / WBS) 작성의 **사실 기반(baseline)** 이다.
-> 산출물은 모두 HTML로 만들지만, 본 문서는 작업 입력용 메모이므로 Markdown으로 유지한다.
+> 본 문서는 산출물(현 구조: PRD→Architecture→Epic→Story→WBS)의 **as-built 사실 기반(baseline)** 이다. §1~4는 불변 사실 스냅샷, §5~6은 2026-06-08 현행화.
+> 작업 입력용 메모이므로 Markdown으로 유지한다.
 
-작성일: 2026-05-28
+작성일: 2026-05-28 (사실 스냅샷) · 현행화: 2026-06-08
 저장소: `figure-team/ds-apm` (공개 스냅샷, single squash commit)
 실제 작업 히스토리: `workspace_archive/ds-apm/var/signoz` (nested repo)
 
@@ -42,13 +42,13 @@
 | `pkg/alertmanager/alertmanagerserver/` | `dispatcher.go` (+56, DLQ 와이어), `dispatcher_dlq_test.go` (신규) |
 | `pkg/alertmanager/alertmanagertemplate/` | 템플릿 확장 |
 | `pkg/apiserver/signozapiserver/ruler.go` | API 라우트 +182 |
-| `pkg/ruler/signozruler/` | `handler.go` +467, `sop_document_file_store.go` 신규, `handler_test.go` +660 |
+| `pkg/ruler/signozruler/` | `handler.go` +467, `sop_document_file_store.go` (당시 신규, **현재 삭제됨** — §5), `handler_test.go` +660 |
 | `pkg/types/alertmanagertypes/` | `incident.go`, `incident_payload.go` (PII redaction 포함) |
 | `pkg/types/ruletypes/` (대거 신규) | `ai_strategy*`, `ai_strategy_history*`, `sop_document*`, `sop_preview*`, `pilot_contract*`, `pilot_managed_markdown*`, `pilot_audit_sink*`, `tenant_policy`, `notification_template_preview*` |
 | `pkg/query-service/rules/` | `prom_rule.go`, `threshold_rule.go` 소폭 |
 | testdata | `ds_ai_sop_demo_seed.json` |
 | `cmd/community`, `cmd/enterprise` | 진입점 통합 |
-| `frontend/src`, `frontend/public` | UI 변경 — **범위 별도 확인 필요 (Open Item #1)** |
+| `frontend/src`, `frontend/public` | UI 변경 — **범위 별도 확인 필요** (§6 open) |
 
 ## 4. 커밋 ↔ 기능 모듈 매핑
 
@@ -66,69 +66,21 @@
 | 10 | `ade174bb8` | JSONL DLQ + idempotent replay ledger | F8 DLQ + Replay |
 | 11 | `91b9ff5db` | Wire DLQ into alertmanager dispatcher | F8 DLQ + Replay |
 
-## 5. 산출물 4종 범위 락인
+> 마이그레이션: 078(`ds_sop_documents`·`ds_ai_strategy_history`), 079(`ds_ai_config`), 080(ai oauth 컬럼).
 
-### 5.1 Overview (`01-overview.html`)
-- 정체, 위치, 분기점, 표면 수치 (위 §1~§3)
-- 핵심 가치: "관측 알람 → 운영 SOP → 운영자 핸드오프" 자동화
-- 스코프 아웃: SigNoz upstream 자체 기능, Enterprise 모듈
+## 5. 현 산출물 구조 (2026-06-08 현행화)
 
-### 5.2 Use Case (`02-usecase.html`)
-- **메인 로직 흐름** (7 도메인 직렬):
-  1. SOP 업로드/그라운딩 → 2. AI runbook 초안 → 3. Quota/Tenant 보호 → 4. Strategy history 기록 → 5. 채널 dispatch → 6. PII redaction → 7. DLQ/Replay
-- **상세 케이스 2건** (이미 `docs/sop/`에 시나리오 10건 존재. 그 중 선정):
-  - **Case A (golden path)** — `case-01 payment 5xx approved`: 결제 5xx 알람 → SOP 그라운딩 → AI draft approved → 채널 dispatch
-  - **Case B (failure path)** — 후보 둘 중 택1:
-    - `case-09 runbook validation failure` → DLQ → replay
-    - `case-06 LLM auth failure` → quota fail-open → 운영자 알림
-- HTML 시각화 강점 활용: 상태 전이 다이어그램, 채널 페이로드 before/after, PII redact diff
+> §1~4는 as-built 사실(불변). 초기 "산출물 4종(Overview / Use Case / 기능명세 / WBS) HTML" 계획은 **폐기**됨. 현 구조는 BMAD 체인:
 
-### 5.3 기능명세서 (`03-spec.html`)
-8개 모듈 × 동일 템플릿 (인터페이스 / 데이터 모델 / 상태 전이 / 예외·복구 / 비기능 요건):
+- **PRD** `01-prd/`(CF·FR) → **Architecture** `02-architecture/`(C4·ERD) → **Epic** `03-epics/` → **Story** `04-stories/` → **WBS** `05-wbs/`. 규칙: [`../PROCESS.md`](../PROCESS.md).
+- 코드↔CF↔WBS 매핑·drift(예: §3의 `sop_document_file_store.go`는 당시 신규였으나 현재 삭제됨 — SOP 영속화는 DB store)는 [`../_shared/component-source-map.md`](../_shared/component-source-map.md).
+- §4의 F0~F8은 **코드 모듈 단위**(매핑용). 산출물 분해 축은 **CF(사용자 가치)** — F→CF 매핑은 [`../_shared/traceability.md`](../_shared/traceability.md) §5.
 
-| ID | 모듈 | 근거 커밋 |
-|---|---|---|
-| F0 | Foundation / Pilot scaffolding | `026863650` |
-| F1 | SOP Grounding & Store | `72944ecac`, `c7f4fd330` |
-| F2 | AI Runbook Drafting (with history) | `cb29d2a59` |
-| F3 | AI Quota Controls (fail-open) | `a6757136e` |
-| F4 | Multi-tenant Scope | `3fa604e03` |
-| F5 | Audit | `8a55208ef` |
-| F6 | Notification Dispatch (5채널) | `5c036c806` |
-| F7 | PII Redaction | `3e9dfa557` |
-| F8 | DLQ + Replay | `ade174bb8`, `91b9ff5db` |
+## 6. Open Items (현 추적 위치)
 
-### 5.4 WBS (`04-wbs.html`)
-커밋 시간선 그대로 Phase화:
-
-| Phase | 내용 | 커밋 |
-|---|---|---|
-| P0 | Foundation | `026863650` |
-| P1 | SOP Layer | `72944ecac` → `8a55208ef` → `3fa604e03` → `c7f4fd330` |
-| P2 | AI Layer | `a6757136e` → `cb29d2a59` |
-| P3 | Notification | `5c036c806` |
-| P4 | Safety (PII) | `3e9dfa557` |
-| P5 | Reliability (DLQ/Replay) | `ade174bb8` → `91b9ff5db` |
-
-각 Phase 항목: 작업 / 입력 / 산출 / 검증 / 의존 / 소요.
-
-## 6. 기존 산출물 (선검토 대상)
-
-이미 `docs/` 하위에 초안이 존재 — 본 산출물 작성 전 신뢰도/재사용 가능성 판정 필요:
-
-| 경로 | 내용 |
-|---|---|
-| `docs/usecase/claude-ds-apm-{operator-,}usecase.{md,html}` | Claude가 작성한 유즈케이스 초안 |
-| `docs/usecase/codex-sop-runbook-index.md` | Codex가 작성한 SOP 인덱스 |
-| `docs/merge_usecase/{claude,codex}-ds-apm-usecase-final.{md,html}` | 두 모델 산출 머지본 ("final"이라고 명시) |
-| `docs/sop/codex-sop-runbook-case-01 ~ case-10*` | 시나리오 10건 + JSON 페이로드 — Use Case의 상세 케이스 입력으로 활용 가능 |
-
-## 7. Open Items (산출물 작성 전 정리 필요)
-
-1. **Frontend 변경 범위** — `frontend/src`, `frontend/public` 변경 파일 목록·기능 식별 (운영자 화면 흐름이 Use Case의 핵심)
-2. **기존 산출물 재사용 판단** — `docs/usecase`·`docs/merge_usecase`·`docs/sop` 콘텐츠를 입력으로 쓸지, 무시할지
-3. **HMAC 정책 follow-up** (미해결) — DLQ replay 시 시그니처 정책이 미정. 기능명세 F8에 "미해결" 표기 필요
-4. **SigNoz/OTel/ITIL 외부 리서치** — Overview의 비교/근거, 기능명세의 업계 표준 매핑용 (context7, WebFetch)
+- **HMAC 정책**(DLQ replay 서명 미정) — Story 5.3 / PRD §9.3.
+- **Frontend 운영자 검수 화면** 변경 영역 미식별 — PRD §9.3.
+- (해결) 기존 `docs/` 초안 재사용·외부 표준(SigNoz/OTel/ITIL) 리서치 → 본 spec에 반영 완료.
 
 ---
 
@@ -138,4 +90,3 @@
 - 개인 fork (signoz): <https://github.com/suUdong/signoz>
 - 회사용 fork (signoz-product): <https://github.com/suUdong/signoz-product>
 - SigNoz upstream: <https://github.com/SigNoz/signoz>
-- HTML 효과성 참조: <https://thariqs.github.io/html-effectiveness/>

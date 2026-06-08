@@ -3,55 +3,86 @@ id: SPEC-PROCESS
 title: Spec Documents — Process & Rules
 type: process
 status: living
-updated: 2026-06-02
+updated: 2026-06-08
 ---
 
 # Spec Documents — Process & Rules
 
-> 이 파일은 `docs/spec/` 산출물 작성 시 적용되는 **모든 규칙·결정·구조**를 한 곳에 모은다.
-> CLAUDE.md는 본 파일을 가리키는 pointer만 가지며, 본 파일은 산출물 작업 시작 시점에 1회 Read하면 충분하다.
+> `docs/spec/` 산출물 작성 시 적용되는 **모든 규칙·결정·구조**를 한 곳에 모은다. CLAUDE.md는 본 파일 pointer만 가지며, 작업 시작 시 1회 Read하면 충분하다.
+> **2026-06-08 개정 (BMAD 정렬)**: 산출물을 BMAD 체인 **PRD → 에픽 → 스토리 → WBS (+ Architecture)** 로 재편했다. **사업 전략서에서 top-down**으로 derive하고, 기능명세는 **Capability Feature(CF) 축 + FR**로 분해하며, **User Journey(UJ)는 PRD에 내장**(별도 use-case 문서 폐지).
 
-## 0. TL;DR — 4가지만 기억하면 됨
+## 0. TL;DR — 5가지만 기억하면 됨
 
-1. 산출물 4종(Overview / Use Case / 기능명세서 / WBS)은 **현재 구현된 코드를 reverse-engineering**해서 작성. 미래 계획 아님. 단 동결 아니고 계속 진화.
-2. **Markdown = source of truth** (풍부·완전, LLM·개발자가 읽음). **상세본·요약본 모두 `.md` + `.html` 공존**. HTML은 **사람용 큐레이션 뷰**(핵심 노출 + 곁가지 접기). md↔html **1:1 동기 불필요 — 사실(숫자·날짜·명명·상태·ID) 모순만 금지**.
-3. **stable ID는 frontmatter + 파일명에 박힘** (`F1`, `UC-001`, `WBS-1.1`). 제목이 바뀌어도 ID는 유지.
-4. **`_shared/traceability.md`가 진실의 원천**. 모든 frontmatter는 이 매트릭스와 일치해야 한다.
-
----
-
-## 1. 산출물 4종
-
-| # | 산출물 | 위치 | 표준 |
-|---|---|---|---|
-| 1 | Overview | `01-overview/` | arc42 v9.0 + C4 |
-| 2 | Use Case | `02-usecase/` | Cockburn Fully Dressed + UML sequence + Gherkin |
-| 3 | 기능명세서 (SRS) | `03-functional-spec/` | ISO/IEC/IEEE 29148-lite + Spec by Example |
-| 4 | WBS | `04-wbs/` | PMI WBS 2nd ed. (component-oriented Lv2) + Agile (Lv3+) |
-
-상세본·요약본 모두 `.md`(source, 풍부)와 `.html`(사람용 뷰)가 공존한다. LLM·개발자는 `.md`를 직접 읽고, 사람은 `.html`을 본다. HTML은 md의 자동 빌드가 아니라 **큐레이션 뷰**이므로 깊이는 달라도 되고 사실만 일치하면 된다.
+1. 산출물은 **사업 전략서(`_foundation/source-strategy-brief.md`)에서 top-down**: Vision → Target User·Jobs(JTBD) → User Journey(UJ) → Feature(CF) → FR. 코드(F0~F8)는 전략의 **현재 구현 표면**이며 FR의 *구현 근거*로 강등(FR 본문은 고객 voice).
+2. 기능명세 분해 축은 **CF(Capability Feature, 사용자 가치)**. 구 F0~F8은 코드/커밋 매핑(component-source-map)으로만 남고, 산출물 ID는 `CF-1..N` + `FR-CFn.m`.
+3. **범위 hybrid**: 구현 핵심(CF-1~6)은 FR 상세 + Given/When/Then. 미구현 로드맵(CF-7~10)은 저fidelity FR + 단계 태그.
+4. **Markdown = source of truth**. `.md`(풍부) + `.html`(사람용 큐레이션 뷰) 공존. md↔html 1:1 동기 불필요 — 사실(숫자·날짜·명명·상태·ID) 모순만 금지.
+5. **stable ID는 frontmatter + 파일명에 박힘** (`CF-1`, `WBS-1.1`, `FR-CF1.1`, `UJ-1`). 진실의 원천 = `source-strategy-brief.md`(top-down) + `_shared/traceability.md`(CF×UJ×WBS) + 코드(`component-source-map.md`).
 
 ---
 
-## 2. 확정된 결정 (5가지)
+## 1. 산출물 (BMAD 정렬)
+
+| # | 산출물 | 위치 | 표준 | BMAD 대응 |
+|---|---|---|---|---|
+| 1 | **기능명세 (PRD)** | `01-prd/` | BMAD PRD(Vision→JTBD→UJ→Features→FR) × 29148-lite × Spec by Example | PRD |
+| 2 | **에픽/스토리** | `03-epics/` + `04-stories/` | 에픽(목표+스토리 목록) + **스토리 파일**(서술형 + 인수기준 + Tasks/Subtasks) — 애자일 작업 정의 | Epics & Stories |
+| 3 | **WBS** | `05-wbs/` | PMI WBS 2nd(component Lv2) + 일별 일정·간트 — **에픽/스토리에서 파생** | (에픽과 별도) |
+| 4 | **Architecture** | `02-architecture/` | C4 + ERD/데이터모델 | Architecture (Solutioning) — 후행 stub |
+
+- **에픽 ≠ WBS**: 에픽/스토리=애자일 작업 정의(사용자 가치), WBS=PMI 컴포넌트·일정 분해. 둘 다 PRD에서 파생, CF/컴포넌트로 매핑.
+- **User Journey(UJ)는 PRD(`01-prd/index.md` §5)에 내장** — 별도 `02-usecase/` 문서 폐지(BMAD는 journey를 PRD에 둠).
+- **01-overview / 00-brief는 별도 산출물로 만들지 않음** — 필요 시 PRD에서 파생.
+- `.md`(source) + `.html`(큐레이션 뷰) 공존. HTML은 자동 빌드 아니라 큐레이션이므로 깊이는 달라도 되고 사실만 일치.
+
+---
+
+## 2. 확정된 결정 (7가지)
 
 | # | 항목 | 결정 |
 |---|---|---|
-| 1 | WBS Lv2 골격 | **Component-oriented** (공통 기반 모듈 / SOP 그라운딩 서비스 / AI 초안 매니저 / 알림 디스패처 / PII 마스킹 필터 / DLQ 재처리 서비스). Phase 시간선은 부록 `appendix-phases.md`로만 |
-| 2 | 상세 에러 케이스 2건 | **UC-002** (Channel 4xx/5xx → DLQ → Replay), **UC-003** (LLM auth/quota fail-open → SOP fallback) |
-| 3 | 언어 톤 | 본문 한국어 + ID/코드 스키마 영문. `shall` → "~해야 한다" 일관 |
-| 4 | Gherkin 키워드 | **영문** (`Given/When/Then`) — godog 호환 |
-| 5 | arc42 버전 | **v9.0** (2025-07, §10 Quality Tree+Scenarios 재구조화 포함) |
+| 1 | **분해 방향** | **Top-down** — 전략서 Vision/JTBD/UJ → FR. 코드 역설계는 *구현 근거* 확인용. |
+| 2 | **분해 축** | **CF(사용자 가치)**. BMAD "기술 레이어 금지, 사용자 가치로 묶기". 구 F0~F8은 매핑으로만. |
+| 3 | **FR 표기** | "[액터]는 ~한다/보장받는다"(고객 voice). 코드 어휘는 `구현 근거`로 분리. testable. |
+| 4 | **범위** | **Hybrid** — 구현 CF는 FR+G/W/T 상세, 로드맵 CF는 저fidelity + 단계 태그. |
+| 5 | **산출물** | **PRD · 에픽 · 스토리 · WBS · Architecture** (`prd`/`epics`/`stories`/`wbs`/`architecture`). UJ는 PRD 내장. UseCase/Overview/Brief 폐지. |
+| 6 | 언어 / Gherkin | 본문 한국어 + ID/코드 영문. Gherkin 키워드 영문(`Given/When/Then`, godog), 스텝 한글. |
+| 7 | WBS·여정 | WBS Lv2 = component(6, CF와 1:1) + 일별 Excel 스케줄. 에러 여정 2건: **UJ-2**(채널 실패→DLQ→Replay), **UJ-3**(LLM fail-open→SOP fallback). |
+
+### 2.8 BMAD ↔ 한국 SI 용어·문체 변환 (필수)
+
+BMAD는 영어·애자일 어휘다. 산출물 본문은 **한국 SI 문체**로 변환해 쓴다 — 요구는 `shall` = "~하여야 한다", 설명은 명사·동명사 종결("~기능 제공", "~검증함"), **표 중심**(항목ID·내용·근거·검증), 구어체·경어 배제(개조식).
+
+| BMAD (영어식) | 한국 SI 용어 |
+|---|---|
+| PRD | 기능명세서 / 요구사항정의서 |
+| Vision | 추진 배경·목적 |
+| Target User / Persona | 대상 사용자 / 이해관계자 |
+| Jobs-to-be-Done | 업무 요구 / 현행 문제점 |
+| User Journey (UJ) | 업무 흐름 / 업무 시나리오 |
+| Feature (CF) | (단위)기능 / 기능 영역 |
+| Functional Requirement (FR) | 기능 요구사항 (`FR-CF`) |
+| Acceptance Criteria (Given/When/Then) | **인수 기준 / 검증 기준** |
+| Epic | 에픽 (애자일 작업 묶음 — WBS 작업 패키지와 구분) |
+| Story | 스토리 / 사용자 스토리 (서술형: 역할·요구·목적) |
+| NFR | 비기능 요구사항 |
+| Milestone | 주요 일정 / 마일스톤 |
+| Sprint / Backlog | 해당 없음 (단계·차수 / 잔여작업) |
+
+- **ID·코드는 영문 유지**(`CF-1`·`FR-CF1.1`·`WBS-1.1`·`UJ-1`), 본문·라벨·제목은 SI 문체.
+- Gherkin 키워드는 영문 유지(godog), 스텝은 한글 SI 문체.
+- **스토리 문장**: BMAD `As a / I want / So that`는 **한국어 서술형**으로 — "{역할}는 {요구}한다. (목적: {benefit})". 영한 혼용 금지.
+- 근거 표준: §11의 CBD SW 표준 산출물 가이드 · NIPA SW 산출물 작성 가이드 · 행정기관 정보화사업 추진 매뉴얼.
 
 ---
 
 ## 3. 변경 용이 구조 — 5대 원칙
 
-1. **Atomic — 1 파일 1 개념**: UC 1건 = 1 파일, 모듈 1개 = 1 파일, WBS package 1개 = 1 파일
-2. **Stable ID를 파일명에 박기**: `F1-sop-grounding.md`에서 `F1`은 영구. 제목이 "Runbook Indexing"으로 바뀌어도 `F1` 유지
-3. **YAML frontmatter로 메타데이터**: status, commits, source_paths, implements_uc/covered_by_wbs 등 모두 frontmatter
-4. **Single Source of Truth = Markdown**, HTML은 빌드 산출물. HTML 직접 편집 ✗
-5. **코드를 ground truth로 역참조**: 모든 모듈/WBS의 `source_paths` + `commits`로 실제 코드 가리킴. 코드 변경 시 grep으로 영향 산출 자동 추적
+1. **Atomic — 1 파일 1 개념**: CF feature 1개 = 1 파일, **스토리 1개 = 1 파일**(`04-stories/N.M.story.md`).
+2. **Stable ID를 파일명에 박기**: `CF-1`·`FR-CF1.1`·`EPIC-N`·**Story `N.M`**(`04-stories/1.1.story.md`) 영구. UJ-1~4는 PRD §5.
+3. **YAML frontmatter**: CF(status·jtbd·maps_modules·commits·source_paths·implements_uj·covered_by_wbs·fr_ids) · 에픽(covers_feature·maps_wbs·stories) · 스토리(epic·fr·covers_feature·wbs_component·status·commits).
+4. **Single Source of Truth = Markdown**, HTML은 큐레이션 뷰. HTML 직접 편집 ✗.
+5. **코드를 ground truth로**: 각 FR의 `구현 근거` + CF의 `source_paths`/`commits`. 코드 변경 시 grep 영향 추적.
 
 ---
 
@@ -60,213 +91,173 @@ updated: 2026-06-02
 ```
 docs/spec/
 ├─ PROCESS.md                          # 본 파일
-├─ _foundation/                        # 작업 입력 (baseline + research)
-│  ├─ baseline.md                      # 구현 현황 (커밋·LOC·diff)
-│  └─ research-skills-{a,b,c}*.md      # 표준·HTML·도메인 리서치
+├─ _foundation/                        # 작업 입력 (top-down 진실원천)
+│  ├─ source-strategy-brief.md         # ★ 원본 사업 전략서 (top-down 출발점)
+│  └─ baseline.md                      # as-built 사실 기반 (커밋·LOC·diff·commit↔module)
 ├─ _shared/                            # 공통 자산
-│  ├─ traceability.md                  # ★ 진실의 원천: UC × F × WBS 매트릭스
-│  ├─ glossary.md                      # 용어집 (anchor target)
-│  └─ design-tokens.css                # (예정) HTML 빌드 공통 CSS
-├─ 01-overview/
+│  ├─ traceability.md                  # ★ CF × UJ × WBS 매트릭스 (매핑 진실원천)
+│  ├─ component-source-map.md          # ★ 6컴포넌트 ↔ 코드 ↔ F0~F8 (as-built, drift)
+│  ├─ glossary.md · design-tokens.css   # 용어집 · HTML 토큰
+├─ 01-prd/                               # ★ PRD (BMAD)
+│  ├─ index.md                         # Vision·JTBD·SM·UJ(§5)·Feature Map·Coverage Map·NFR·Non-goals
+│  └─ features/CF-{1..N}-*.md          # CF별: 개요·FR(무엇을/Acceptance/구현근거)·NFR·예외·Open
+├─ 02-architecture/                      # ★ Architecture (C4+ERD) — 후행 stub
+│  └─ index.md
+├─ 03-epics/                             # ★ BMAD 에픽 (목표 + 스토리 목록 링크)
 │  ├─ index.md
-│  ├─ adr/ADR-NNN-*.md
-│  └─ diagrams/
-├─ 02-usecase/
-│  ├─ index.md
-│  ├─ cases/UC-NNN-*.md
-│  └─ diagrams/
-├─ 03-functional-spec/
-│  ├─ index.md
-│  └─ modules/F{0..8}-*.md
-└─ 04-wbs/
-   ├─ index.md
-   ├─ appendix-phases.md               # P0~P5 시간선 (역사)
-   └─ packages/WBS-1-{0..5}-*.md
+│  └─ epic-{1..6}-*.md                 # Epic 목표 + 스토리 표(→ 04-stories/)
+├─ 04-stories/                           # ★ BMAD 스토리 (별도 파일, 애자일 작업 정의)
+│  └─ {epic}.{story}.story.md          # 서술형 스토리 + 인수기준 + Tasks/Subtasks + Dev Notes
+└─ 05-wbs/                               # ★ PMI WBS (컴포넌트·일정, 에픽/스토리에서 파생)
+   ├─ index.md                         # 컴포넌트 트리·100%rule·스토리 일정·gantt·마일스톤
+   └─ appendix-phases.md               # 전략 로드맵 연계
 ```
+
+> 폐지: `02-usecase/`(UJ는 PRD §5로), `01-overview/`·`00-brief/`(미생성).
 
 ---
 
 ## 5. Frontmatter 스키마
 
-### 5.1 Use Case (`02-usecase/cases/UC-NNN-*.md`)
+### 5.1 Capability Feature (`01-prd/features/CF-N-*.md`)
 
 ```yaml
 ---
-id: UC-NNN                       # stable, 영구
+id: CF-N                          # CF-1..N, stable (사용자 가치 단위)
 title: ...
-type: usecase
-level: User-goal                 # Cockburn level 통일
-scope: DS-APM System
-status: implemented | draft | deprecated | planned
-primary_actor: ...
-supporting_actors: [...]
-implements_features: [F0, F1]    # _shared/traceability.md §1과 일치
-related_wbs: [WBS-1.0, WBS-1.1]  # _shared/traceability.md §3과 일치
-priority: P1 | P2 | P3 | P4
-updated: YYYY-MM-DD
----
-```
-
-### 5.2 Feature Module (`03-functional-spec/modules/FN-*.md`)
-
-```yaml
----
-id: FN                           # F0~F8, stable
-title: ...
-status: implemented | implemented-mvp | draft | deprecated | planned
-commits: [SHA1, SHA2]            # 11개 DS-APM 커밋 중 어느 것
-source_paths:                    # 실제 pkg/ 경로
-  - pkg/...
-implements_uc: [UC-NNN]          # _shared/traceability.md §1과 일치
-covered_by_wbs: [WBS-1.N]        # _shared/traceability.md §2와 일치
-updated: YYYY-MM-DD
-caveats: "..."                   # 선택: README 경고 등
-open_items: [...]                # 선택: 미해결 follow-up
----
-```
-
-### 5.3 WBS Package (`04-wbs/packages/WBS-1-N-*.md`)
-
-```yaml
----
-id: WBS-1.N
-title: ...
-parent: WBS-1
-status: implemented | implemented-mvp | implemented-{caveat}-pending | planned | draft
-covers_features: [Fx, Fy]        # _shared/traceability.md §2와 일치
+status: implemented | implemented-mvp | planned | draft
+jtbd: [JTBD-1, JTBD-3]            # source-strategy-brief Jobs-to-be-Done
+maps_modules: [F1, F4]            # 구 코드 단위 (component-source-map과 일치)
+commits: [SHA1, SHA2]
 source_paths: [pkg/...]
-acceptance: pending | passed
-estimated_effort: completed | TBD | <hours>
-commits: [...]
+implements_uj: [UJ-1]             # PRD §5 User Journey (traceability §1과 일치)
+covered_by_wbs: [WBS-1.N]         # traceability.md §2와 일치
+fr_ids: [FR-CFN.1, FR-CFN.2]      # 이 CF의 FR (index §7 Coverage Map과 일치)
 updated: YYYY-MM-DD
+caveats: "..."                    # 선택
+open_items: [...]                 # 선택
 ---
 ```
 
-### 5.4 ADR (`01-overview/adr/ADR-NNN-*.md`)
+> User Journey(UJ)는 **PRD `index.md` §5에 내장**(별도 파일·frontmatter 없음). FR 한 줄(고객 voice)+매핑은 index §7, FR별 G/W/T + 구현 근거는 CF 파일.
+
+### 5.2 에픽 (`03-epics/epic-N-*.md`)
 
 ```yaml
 ---
-id: ADR-NNN
+id: EPIC-N                        # 에픽 = 1 CF (사용자 가치)
 title: ...
-status: proposed | accepted | superseded | deprecated
-date: YYYY-MM-DD
-deciders: [...]
-supersedes: [ADR-XXX] | []
-superseded_by: ADR-XXX | null
+type: epic
+covers_feature: CF-N
+maps_wbs: WBS-1.x                 # 대응 WBS 컴포넌트
+realizes_uj: [UJ-x]
+stories: [N.1, N.2, ...]          # 소속 스토리 IDs (→ 04-stories/)
+status: implemented | implemented-mvp | planned
 updated: YYYY-MM-DD
 ---
 ```
+> 에픽 본문 = 목표(Goal) + **스토리 목록 표**(→ `04-stories/`). **스토리 본문 인라인 금지**(별도 파일).
+
+### 5.3 스토리 (`04-stories/{epic}.{story}.story.md`)
+
+```yaml
+---
+id: STORY-N.M
+epic: EPIC-N
+covers_feature: CF-N
+fr: FR-CFn.m                      # 1 스토리 ↔ 1 FR
+wbs_component: WBS-1.x
+status: done | planned
+commits: [SHA]
+updated: YYYY-MM-DD
+---
+```
+> 본문 = BMAD 스토리 템플릿: `Status` · `## Story`(서술형 "{역할}는 ~한다. (목적:…)") · `## Acceptance Criteria`(FR 인수기준) · `## Tasks / Subtasks`(코드 기준 도출, AC 참조) · `## Dev Notes`(소스·커밋·테스트). 영한 혼용 금지(§2.8).
+
+### 5.4 ADR (Architecture 단계 진입 시) — `02-architecture/adr/ADR-NNN-*.md`
+`id / title / status / date / deciders / supersedes / superseded_by / updated`. (현재 미생성.)
 
 ---
 
 ## 6. Traceability 검증
 
-`_shared/traceability.md`가 진실의 원천. 모든 stub의 frontmatter는 이 매트릭스와 일치해야 한다.
+`_shared/traceability.md`가 매핑의 진실의 원천. **CF 축**으로 CF×UJ×WBS를 묶고, JTBD·커밋도 부속표로 둔다.
 
 ### 6.1 검증 체크리스트 (변경 시)
+- [ ] `CF-N.md`의 `implements_uj`·`covered_by_wbs`·`fr_ids` ↔ traceability §1·§2·§6
+- [ ] `index.md` §5 UJ 목록 ↔ traceability §1·§3 (UJ는 PRD 내장)
+- [ ] `WBS-1-N.md`의 `covers_features`(CF) ↔ traceability §2
+- [ ] 새 커밋은 traceability §5에 append (CF·WBS 매핑 포함)
+- [ ] `04-stories/N.M.story.md`의 `epic`·`fr` ↔ traceability §6.1 + 에픽 `stories` 목록
 
-- [ ] `FN.md`의 `implements_uc` ↔ traceability.md §1 (Feature × UC)
-- [ ] `FN.md`의 `covered_by_wbs` ↔ traceability.md §2 (Feature × WBS)
-- [ ] `UC-NNN.md`의 `implements_features` ↔ traceability.md §1
-- [ ] `UC-NNN.md`의 `related_wbs` ↔ traceability.md §3 (UC × WBS)
-- [ ] `WBS-1-N.md`의 `covers_features` ↔ traceability.md §2
-- [ ] 새 커밋은 traceability.md §4 (커밋 ↔ Feature ↔ WBS)에 append
-
-### 6.2 desync 발생 시
-1. 진실의 원천(`traceability.md`)을 먼저 수정
-2. 영향받는 frontmatter들을 일괄 갱신
-3. 양방향 link (e.g., F1.md의 `implements_uc` ↔ UC-001.md의 `implements_features`) 모두 확인
+### 6.2 desync 시
+1. `traceability.md` 먼저 수정 → 2. 영향 frontmatter 일괄 갱신 → 3. 양방향 link 확인.
 
 ---
 
 ## 7. TODO 마커 규칙
 
-미작성 섹션은 `TODO` 또는 `TODO — 설명`. grep 한 번에 검출 가능:
-
-```bash
-grep -rn "^TODO\|: TODO\|- TODO" docs/spec/
-```
-
-- 작성 완료 시 TODO 토큰 모두 제거
-- 부분 작성 시 `TODO (partial: 무엇이 남았는지)`
-- 미해결 follow-up은 TODO가 아니라 frontmatter `open_items:`로 관리 (영구 추적)
+미작성은 `TODO` / `TODO — 설명` (`grep -rn "^TODO\|: TODO\|- TODO" docs/spec/`). 완료 시 제거, 부분은 `TODO (partial: 남은 것)`. 미해결 follow-up은 frontmatter `open_items:`.
 
 ---
 
-## 8. HTML / Markdown 정책 (2026-06-02 개정)
+## 8. HTML / Markdown 정책
 
-> 이전 "상세본 md-only, HTML 빌드 안 함" 정책은 **폐기**. 2026-06-02 상세본 26종을 HTML로 생성하며 아래로 개정.
-
-### 8.1 역할 분리 (핵심)
-
+### 8.1 역할 분리
 | | 역할 | 특성 |
 |---|---|---|
-| **`.md`** | source of truth · LLM·개발자 소비 | 풍부·완전. 데이터모델·인터페이스·전체 상세 포함 |
-| **`.html`** | 사람용 뷰 (보고·열람) | 큐레이션·슬림. 핵심 노출 + 곁가지 접기(`<details>`) |
+| **`.md`** | source of truth · LLM·개발자 소비 | 풍부·완전 (FR·구현 근거·전체 상세) |
+| **`.html`** | 사람용 뷰 (보고·열람) | 큐레이션·슬림 (핵심 노출 + `<details>` 접기) |
 
-- **상세본·요약본 모두 `.md` + `.html` 공존**.
-- HTML은 md의 **자동 빌드가 아니라 큐레이션 뷰**다. **깊이는 달라도 된다**(md 풍부 / html 추림). 자동 동기화 파이프라인 없음(수작업).
-- **1:1 동기 불필요. 단 사실(숫자·날짜·명명·상태·ID)은 모순 없어야** 한다.
-- 문서 간 링크: html→html은 `.html`, _foundation 등 HTML 없는 대상은 `.md` 유지.
+- 자동 빌드 아닌 큐레이션 뷰(깊이 달라도 됨). 1:1 동기 불필요, 사실 모순만 금지.
+- 링크: html→html은 `.html`, _foundation 등 HTML 없는 대상은 `.md`.
 
-### 8.2 빌드 베이스 (전 HTML 공통)
-- CSS: `_shared/design-tokens.css` 토큰(인라인). 5 요약본 + 26 상세본 동일 적용.
-- 다이어그램: Mermaid v11 ESM CDN 1줄(`<pre class="mermaid">`). flowchart 노드 라벨에 `()`·`/`·`+` 있으면 `ID["라벨"]` 따옴표(클라 렌더 안전). 점선 링크는 `A -. text .-> B` 형식.
-- JS: mermaid 모듈 외 외부 의존 0. self-contained.
-- 인쇄: `@media print` 포함.
+### 8.2 빌드 베이스
+- CSS: `_shared/design-tokens.css` 토큰(인라인). 다이어그램: Mermaid v11 ESM CDN 1줄(`<pre class="mermaid">`), 라벨에 `()`·`/`·`+` 있으면 `ID["라벨"]` 따옴표, 점선 `A -. text .-> B`. JS 외부 의존 0, `@media print` 포함.
 
 ### 8.3 톤앤매너 (요약본)
-- 핵심만 노출 → 곁가지는 `<div class="more">` 안 `<details class="expand">`로 접기 → 결정/부차는 끝에 숨김.
-- 나열은 `.item`(라벨+본문 행, 점선 구분). 상세본 링크는 `.html` 포인터.
-- 기준 문서: `00-brief/brief.html`, `00-brief/brief-wbs.html`.
+핵심만 노출 → 곁가지는 `<details class="expand">`. 나열은 `.item`. 상세 링크는 `.html`.
 
 ### 8.4 금기
-research-skills-b-html.md §6의 AI slop 회피 규칙 적용 (Tailwind CDN, Inter+그라데이션, transition all, dark/light 토글 등).
+AI slop 회피: Tailwind CDN · Inter+그라데이션 · transition all · dark/light 토글 등 금지.
 
 ---
 
-## 9. 작성 순서 권장 (TODO 채우기 우선순위)
+## 9. 작성 순서 권장
 
-1. **`_shared/glossary.md`** — 다른 문서가 모두 anchor로 참조. 용어부터.
-2. **`03-functional-spec/modules/F*.md`** — 코드(`source_paths`)를 직접 읽고 작성. F0 → F8 순.
-3. **`02-usecase/cases/UC-*.md`** — Cockburn template 채움. UC-001 → 002 → 003.
-4. **`04-wbs/packages/WBS-*.md`** — Deliverable / Acceptance / Verification.
-5. **`01-overview/index.md`** — 위 자료를 요약. 마지막에 작성 (전체 합쳐야 정확).
-6. **HTML 뷰 생성** — md 작성 후 `.html` 큐레이션 뷰 생성 (요약본·상세본 모두). design-tokens 토큰 인라인 + mermaid 모듈. §8 참조.
+1. **`_foundation/source-strategy-brief.md`** — top-down 출발점. ★ 존재.
+2. **`01-prd/index.md` + `features/CF-*.md`** — Feature Map + Coverage Map 먼저(BMAD step-02 = 승인 게이트), 그 뒤 FR 상세(step-03). ★ 완료.
+3. **`03-epics/`(에픽: 목표+스토리목록) + `04-stories/`(스토리 21: 서술형+인수기준+Tasks) + `05-wbs/`(PMI WBS: 스토리 파생 일정)** — 에픽≠WBS. ★ 완료.
+4. **`_shared/traceability.md`** — CF×UJ×WBS. ★ 완료.
+5. **HTML 뷰 생성** — PRD(index+CF×N) + WBS. §8 참조.
+6. (후행) **Architecture** — C4 + ERD/데이터모델 (BMAD Solutioning).
 
 ---
 
 ## 10. 변경 시 절차 (PR/커밋 체크리스트)
 
-1. **코드 변경** → 영향받는 `.md` 파일을 `source_paths` 역색인으로 찾기
-   ```bash
-   grep -rln "변경된_경로" docs/spec/
-   ```
-2. **frontmatter 갱신**
-   - `commits:` 새 SHA append
-   - `status:` 변경 (e.g., `draft` → `implemented`)
-   - `updated:` 오늘 날짜
-3. **traceability.md 갱신**: 새 커밋은 §4에, 영향받는 매핑은 §1~3에
-4. **TODO 검토**: 새 코드로 채워졌으면 TODO 제거
-5. **본 PROCESS.md의 규칙 위배 없는지** 확인
-6. **요약본 HTML 재빌드** (`00-brief/` 내용이 바뀌었을 때만. 상세본 변경은 HTML 빌드 없음)
+1. **코드 변경** → 영향 `.md`를 `source_paths`/`구현 근거` 역색인: `grep -rln "변경경로" docs/spec/`
+2. **frontmatter 갱신**: `commits:` append, `status:`, `updated:` 오늘.
+3. **traceability.md 갱신**: 새 커밋·영향 매핑(CF×UJ×WBS).
+4. **index §7 Coverage Map ↔ CF `fr_ids` 정합** 확인.
+5. **TODO 검토** + 본 규칙 위배 확인.
+6. **HTML 재빌드** (해당 산출물 변경 시).
 
 ---
 
-## 11. 참조 문서 (필요 시 Read)
+## 11. 참조 문서
 
-- [`_foundation/baseline.md`](_foundation/baseline.md) — 11 commits / 100 files / +12.6k LOC, fork base commit, 커밋 ↔ 모듈 매핑
-- [`_foundation/research-skills-a-methods.md`](_foundation/research-skills-a-methods.md) — arc42 / Cockburn / 29148 / PMI 깊이
-- [`_foundation/research-skills-b-html.md`](_foundation/research-skills-b-html.md) — 디자인 토큰, Mermaid, 인라인 SVG, print CSS, AI slop 회피
-- [`_foundation/research-skills-c-domain.md`](_foundation/research-skills-c-domain.md) — Google SRE / PagerDuty / OTel / Alertmanager / DLQ idempotency
-
-본 PROCESS.md는 위 4문서의 결정·요약본. 깊이 필요 시 위 4문서로 drill-down.
+- [`_foundation/source-strategy-brief.md`](_foundation/source-strategy-brief.md) — ★ 원본 사업 전략서
+- [`_foundation/baseline.md`](_foundation/baseline.md) — 11 commits / +12.6k LOC
+- [`_shared/component-source-map.md`](_shared/component-source-map.md) — 6컴포넌트↔코드↔F0~F8, drift
+- BMAD-METHOD `bmm-skills/2-plan-workflows/bmad-prd` + `3-solutioning/bmad-create-epics-and-stories`
+- 한국 SI 산출물 문체·양식 (§2.8 변환 규칙 근거): CBD SW 표준 산출물 관리 가이드(cisp.or.kr/kpmo.or.kr) · NIPA SW 산출물 작성 가이드(swbank.kr) · 행정기관 정보화사업 추진 매뉴얼(정부통합전산센터 nirs.go.kr)
 
 ---
 
 ## 12. 본 파일의 진화
 
-본 PROCESS.md도 stub들과 마찬가지로 living document.
-- 규칙 추가/변경 시 `updated:` frontmatter 갱신
-- 큰 결정 변경 시 ADR로 별도 기록 후 본 파일 참조 갱신
-- 본 파일 변경이 잦으면 CLAUDE.md의 pointer만 가리키므로 토큰 비용 없음
+- 2026-06-08: **스토리 별도 파일화 + WBS 스토리 파생**. 에픽=목표+스토리목록(slim), 스토리=`04-stories/{N.M}.story.md` 21개(서술형·인수기준·Tasks, BMAD 템플릿), WBS 항목은 에픽/스토리에서 파생(완료 항목 유지). 스토리 영한 혼용 금지(§2.8).
+- 2026-06-08: **BMAD 프레임워크 install 안 함 — 철학만 차용**. `npx bmad-method install`(`_bmad/`·dev-story→code-review 루프·`_bmad-output/`)은 *전방위 코드생성* 프레임워크라, **reverse-eng + 한국 SI 산출물** 목적엔 부적합·중복. 본 PROCESS.md가 BMAD config-of-record 역할(PRD→Feature→FR·샤딩·Spec-by-Example 인코딩). → 재도입 제안 불필요.
+- 2026-06-08: **BMAD 정렬** — 산출물 PRD(03)+WBS(04) 2종으로 축소, UJ를 PRD 내장(02-usecase 폐지), 01-overview·00-brief 미생성. Architecture는 Solutioning 단계 후행.
+- 2026-06-08(초): top-down(source-strategy-brief) + CF 축 + FR 고객 voice + hybrid 범위 전환. 구 F0~F8 모듈 축 폐기(코드 매핑으로만 잔존).

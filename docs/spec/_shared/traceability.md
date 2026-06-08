@@ -1,83 +1,156 @@
 ---
 id: TRACEABILITY
-title: UC × Feature × WBS Traceability Matrix
+title: CF × User Journey × WBS Traceability Matrix
 type: traceability
 status: living
-updated: 2026-06-02
+axis: CF (Capability Feature)
+updated: 2026-06-08
 ---
 
-# Traceability Matrix
+# Traceability Matrix (CF 축)
 
-> 산출물 4종(Overview / Use Case / 기능명세 / WBS)의 ID를 한 표로 묶는다.
-> 각 셀의 ID는 해당 파일의 frontmatter `implements_uc` / `covered_by_wbs` / `covers_features` 와 일치해야 한다 — desync 검출은 이 표가 진실의 원천.
+> BMAD 정렬: 산출물 체인 **PRD → 에픽 → 스토리 → WBS (+ Architecture)**. **User Journey(UJ)는 PRD(`01-prd/index.md` §5)에 내장** — 별도 use-case 문서 없음.
+> 각 셀 ID는 frontmatter(`implements_features`/`covers_features`/`implements_uj`)와 일치해야 한다 — desync 검출의 진실의 원천.
+> top-down 출처(JTBD/UJ): [`../_foundation/source-strategy-brief.md`](../_foundation/source-strategy-brief.md). 코드 매핑(F0~F8): [`component-source-map.md`](component-source-map.md).
 
-## 1. Feature × Use Case
+## 1. CF × User Journey
 
-| Feature | Title | UC-001 (Golden) | UC-002 (DLQ) | UC-003 (LLM fail) |
-|---|---|:---:|:---:|:---:|
-| F0 | Foundation | ✓ | | |
-| F1 | SOP Grounding & Store | ✓ | | ✓ (전제) |
-| F2 | AI Runbook Drafting | ✓ | | ✓ |
-| F3 | AI Quota Controls | | | ✓ |
-| F4 | Multi-tenant Scope | ✓ | | |
-| F5 | Audit | ✓ | ✓ | ✓ |
-| F6 | Notification Dispatch | ✓ | ✓ | |
-| F7 | PII Redaction | ✓ | | |
-| F8 | DLQ + Replay | | ✓ | |
+| CF | Title | UJ-1 골든 | UJ-2 DLQ | UJ-3 fail-open | UJ-4 로드맵 |
+|---|---|:---:|:---:|:---:|:---:|
+| CF-1 | SOP 자동 연계 + 테넌트 격리 | ✓ | | (전제)¹ | |
+| CF-2 | AI 대응 가이드 + 안전 | ✓ | | ✓ | |
+| CF-3 | 멀티채널 핸드오프 | ✓ | ✓ | | |
+| CF-4 | 민감정보 비노출 (PII) | ✓ | | | |
+| CF-5 | 무유실·멱등 재처리 (DLQ) | | ✓ | | |
+| CF-6 | 정책·감사 기반 | ✓ | ✓ | ✓ | |
+| CF-7~10 | 로드맵(이상탐지·자동조치·자산화·ITSM) | | | | ✓ |
 
-## 2. Feature × WBS Component
+> ¹ **(전제)** = 해당 UJ의 *전제*일 뿐 implements 링크 아님(frontmatter `implements_uj` 미포함). **✓ 만 implements**. CF-1은 UJ-3에서 SOP fallback 원문의 전제 역할이나, UJ-3이 구현하는 기능은 CF-2·6.
 
-| Feature | WBS-1.0 공통 기반 모듈 | WBS-1.1 SOP 그라운딩 서비스 | WBS-1.2 AI 초안 매니저 | WBS-1.3 알림 디스패처 | WBS-1.4 PII 마스킹 필터 | WBS-1.5 DLQ 재처리 서비스 |
+## 2. CF × WBS Component
+
+| CF | WBS-1.0 공통기반 | WBS-1.1 SOP | WBS-1.2 AI초안 | WBS-1.3 디스패처 | WBS-1.4 PII | WBS-1.5 DLQ |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| F0 | ✓ | | | | | |
-| F1 | | ✓ | | | | |
-| F2 | | | ✓ | | | |
-| F3 | | | ✓ | | | |
-| F4 | ✓ | | | | | |
-| F5 | ✓ | | | | | |
-| F6 | | | | ✓ | | |
-| F7 | | | | | ✓ | |
-| F8 | | | | | | ✓ |
+| CF-1 | ✓ (테넌트) | ✓ | | | | |
+| CF-2 | | | ✓ | | | |
+| CF-3 | | | | ✓ | | |
+| CF-4 | | | | | ✓ | |
+| CF-5 | | | | | | ✓ |
+| CF-6 | ✓ | | | | | |
 
-## 3. Use Case × WBS
+> 유일한 교차: CF-1의 테넌트 격리 FR(FR-CF1.3·1.4)가 코드상 공통 기반(WBS-1.0)에 위치. 나머지는 CF↔WBS 1:1.
 
-| UC | WBS-1.0 | WBS-1.1 | WBS-1.2 | WBS-1.3 | WBS-1.4 | WBS-1.5 |
+## 3. User Journey × WBS
+
+| UJ | WBS-1.0 | WBS-1.1 | WBS-1.2 | WBS-1.3 | WBS-1.4 | WBS-1.5 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| UC-001 Golden Path | ✓ | ✓ | ✓ | ✓ | ✓ | |
-| UC-002 DLQ Failure | | | | ✓ | | ✓ |
-| UC-003 LLM Fail-open | | | ✓ | | | |
+| UJ-1 골든패스 | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| UJ-2 실패·복구 | ✓ | | | ✓ | | ✓ |
+| UJ-3 fail-open | ✓ | | ✓ | | | |
 
-## 4. 커밋 ↔ Feature ↔ WBS (역사 추적)
+## 4. JTBD ↔ CF ↔ UJ (top-down)
 
-| 커밋 (SHA prefix) | 메시지 요약 | Feature | WBS |
-|---|---|---|---|
-| `026863650` | native MVP foundation pilot scaffolding | F0 | WBS-1.0 |
-| `72944ecac` | ground alerts in uploaded SOPs | F1 | WBS-1.1 |
-| `8a55208ef` | make SOP access auditable | F5 | WBS-1.0 |
-| `3fa604e03` | scope SOP strategy access by tenant | F4 | WBS-1.0 |
-| `a6757136e` | fail open AI quota controls | F3 | WBS-1.2 |
-| `cb29d2a59` | persist latest AI strategy history | F2 | WBS-1.2 |
-| `5c036c806` | propagate SOP AI context to channels | F6 | WBS-1.3 |
-| `c7f4fd330` | persist SOP documents to file | F1 | WBS-1.1 |
-| `3e9dfa557` | redact email/phone/long secrets in payload | F7 | WBS-1.4 |
-| `ade174bb8` | JSONL DLQ + idempotent replay ledger | F8 | WBS-1.5 |
-| `91b9ff5db` | wire DLQ into alertmanager dispatcher | F8 | WBS-1.5 |
-
-## 5. 검증 가이드 (desync 검출)
-
-이 표가 진실. 각 stub 파일의 frontmatter는 이 표와 일치해야 한다.
-
-검증 방법 (수동/스크립트 가능):
-1. `03-functional-spec/modules/F{n}.md`의 `implements_uc`, `covered_by_wbs` ↔ §1, §2
-2. `02-usecase/cases/UC-NNN.md`의 `implements_features`, `related_wbs` ↔ §1, §3
-3. `04-wbs/packages/WBS-1-N.md`의 `covers_features` ↔ §2
-
-frontmatter 변경 시 이 표도 함께 업데이트 (PR 체크리스트).
-
-## 6. Open / Missing 항목
-
-| 항목 | 상태 | 비고 |
+| CF | Jobs-to-be-Done | 참여 UJ |
 |---|---|---|
-| HMAC 정책 (NF-5.3.1, F8) | open | replay 서명 정책 미정 |
-| Frontend 변경 영역 | open | F6, UC-001 단계 6 (운영자 검수 화면) 매핑 미확정 |
-| 기존 `docs/_archive/` 자료 재사용 판단 | open | usecase·sop·merge_usecase 초안 |
+| CF-1 | JTBD-1, 3 | UJ-1 (UJ-3 전제) |
+| CF-2 | JTBD-2, 3, 4 | UJ-1, UJ-3 |
+| CF-3 | JTBD-1, 3 | UJ-1, UJ-2 |
+| CF-4 | JTBD-4 | UJ-1 |
+| CF-5 | JTBD-4 | UJ-2 |
+| CF-6 | JTBD-6 | UJ-1, UJ-2, UJ-3 |
+
+> UJ-1=골든(정상), UJ-2=DLQ 실패·복구, UJ-3=LLM fail-open, UJ-4=사전대응·자산화(로드맵). 상세 내러티브: [`../01-prd/index.md`](../01-prd/index.md) §5.
+
+## 5. 커밋 ↔ CF ↔ WBS (역사 추적)
+
+| 커밋 (SHA prefix) | 메시지 요약 | CF | 구 모듈 | WBS |
+|---|---|---|---|---|
+| `026863650` | native MVP foundation pilot scaffolding | CF-6 | F0 | WBS-1.0 |
+| `72944ecac` | ground alerts in uploaded SOPs | CF-1 | F1 | WBS-1.1 |
+| `8a55208ef` | make SOP access auditable | CF-6 | F5 | WBS-1.0 |
+| `3fa604e03` | scope SOP strategy access by tenant | CF-1 (테넌트) | F4 | WBS-1.0 |
+| `a6757136e` | fail open AI quota controls | CF-2 | F3 | WBS-1.2 |
+| `cb29d2a59` | persist latest AI strategy history | CF-2 | F2 | WBS-1.2 |
+| `5c036c806` | propagate SOP AI context to channels | CF-3 | F6 | WBS-1.3 |
+| `c7f4fd330` | persist SOP documents to file | CF-1 | F1 | WBS-1.1 |
+| `3e9dfa557` | redact email/phone/long secrets in payload | CF-4 | F7 | WBS-1.4 |
+| `ade174bb8` | JSONL DLQ + idempotent replay ledger | CF-5 | F8 | WBS-1.5 |
+| `91b9ff5db` | wire DLQ into alertmanager dispatcher | CF-5 | F8 | WBS-1.5 |
+
+> 마이그레이션: 078(`ds_sop_documents`·`ds_ai_strategy_history`), 079(`ds_ai_config`), 080(oauth 컬럼).
+
+## 6. FR 커버리지 (CF → FR)
+
+FR 단위 매핑은 [`../01-prd/index.md`](../01-prd/index.md) §7 Coverage Map. CF별 `fr_ids`(frontmatter)와 일치:
+
+| CF | FR | 개수 |
+|---|---|---|
+| CF-1 | FR-CF1.1~1.5 | 5 |
+| CF-2 | FR-CF2.1~2.6 | 6 |
+| CF-3 | FR-CF3.1~3.3 | 3 |
+| CF-4 | FR-CF4.1 | 1 |
+| CF-5 | FR-CF5.1~5.3 (5.3 open) | 3 |
+| CF-6 | FR-CF6.1~6.3 | 3 |
+| **구현 합** | | **21** |
+| CF-7~10 *(로드맵)* | FR-CF7.1·8.1·9.1·9.2·10.1 | 5 (저fidelity) |
+
+## 6.1 Epic × Story × FR (작업 추적)
+
+에픽/스토리 = 작업 정의 원본([`../03-epics/`](../03-epics/index.md)·[`../04-stories/`](../04-stories/)), FR = 요구. 스토리 **21건(20 done + 1 planned)**. 일정은 [`../05-wbs/index.md`](../05-wbs/index.md) §스토리 일정.
+
+| Epic | Story | 제목 | FR | 상태 |
+|---|---|---|---|---|
+| 1 | [1.1](../04-stories/1.1.story.md) | SOP 자동 연계 | FR-CF1.1 | done |
+| 1 | [1.2](../04-stories/1.2.story.md) | SOP 보관·매칭 | FR-CF1.2 | done |
+| 1 | [1.3](../04-stories/1.3.story.md) | 테넌트 격리 | FR-CF1.3 | done |
+| 1 | [1.4](../04-stories/1.4.story.md) | SOP 존재 비노출 | FR-CF1.4 | done |
+| 1 | [1.5](../04-stories/1.5.story.md) | 비활성·만료 미적용 | FR-CF1.5 | done |
+| 2 | [2.1](../04-stories/2.1.story.md) | AI 대응 가이드 생성 | FR-CF2.1 | done |
+| 2 | [2.2](../04-stories/2.2.story.md) | 전문가 없이 1차 대응 | FR-CF2.2 | done |
+| 2 | [2.3](../04-stories/2.3.story.md) | 사람 승인 강제(HITL) | FR-CF2.3 | done |
+| 2 | [2.4](../04-stories/2.4.story.md) | AI 실패에도 전달(fail-open) | FR-CF2.4 | done |
+| 2 | [2.5](../04-stories/2.5.story.md) | 사용량 제어 | FR-CF2.5 | done |
+| 2 | [2.6](../04-stories/2.6.story.md) | 과거 대응 이력 참조 | FR-CF2.6 | done |
+| 3 | [3.1](../04-stories/3.1.story.md) | SOP·AI 5채널 수신 | FR-CF3.1 | done |
+| 3 | [3.2](../04-stories/3.2.story.md) | 알림 템플릿 정의 | FR-CF3.2 | done |
+| 3 | [3.3](../04-stories/3.3.story.md) | 채널 실패 무중단 | FR-CF3.3 | done |
+| 4 | [4.1](../04-stories/4.1.story.md) | 민감정보 마스킹 | FR-CF4.1 | done |
+| 5 | [5.1](../04-stories/5.1.story.md) | 무유실 보존 | FR-CF5.1 | done |
+| 5 | [5.2](../04-stories/5.2.story.md) | 멱등 재발송 | FR-CF5.2 | done |
+| 5 | [5.3](../04-stories/5.3.story.md) | 재발송 HMAC | FR-CF5.3 | **planned (open)** |
+| 6 | [6.1](../04-stories/6.1.story.md) | 팀별 정책 설정 | FR-CF6.1 | done |
+| 6 | [6.2](../04-stories/6.2.story.md) | 행위 1건당 감사 기록 | FR-CF6.2 | done |
+| 6 | [6.3](../04-stories/6.3.story.md) | 감사 실패 무중단 | FR-CF6.3 | done |
+
+> Epic N = CF-N(1:1). Story FR = PRD §7 인수 기준. 코드 근거는 각 story Dev Notes. Epic↔WBS 컴포넌트는 §2.
+
+## 7. 검증 가이드 (desync 검출)
+
+이 표가 진실. 각 stub frontmatter는 이 표와 일치해야 한다.
+1. `01-prd/features/CF-N.md`의 `implements_uj`·`covered_by_wbs`·`fr_ids` ↔ §1·§2·§6
+2. `01-prd/index.md` §5 UJ 목록 ↔ §1·§3 (UJ는 PRD 내장)
+3. `05-wbs/index.md` 컴포넌트 트리의 Covers(CF) ↔ §2 · `03-epics/epic-N.md`의 `covers_feature` ↔ §1(에픽=CF 1:1)
+4. 새 커밋은 §5에 append (CF·WBS 매핑 포함)
+5. `04-stories/{N.M}.story.md`의 `epic`·`fr`·`covers_feature` ↔ §6.1 + 해당 `03-epics/epic-N.md`의 `stories` 목록
+
+## 8. Open / Missing 항목
+
+| 항목 | 상태 | CF | 비고 |
+|---|---|---|---|
+| HMAC 서명 정책 (NF-5.3.1, FR-CF5.5) | open | CF-5 | replay payload 서명 미정 |
+| DLQ 기본 배선 nil | open | CF-5 | `server.go` sink 주입 미연결 |
+| Idempotency 키 (fingerprint,channel) 확장 | 권장 | CF-5 | 현재 fingerprint만 |
+| Replay API/UI | 범위 밖 | CF-5 | ledger·sink만 제공 |
+| Multi-tenant RLS | non-goal(MVP) | CF-1 | label filter only |
+| PII OTel Collector 단 이동 | open | CF-4 | 현재 ingress 단일 지점 |
+| Redaction rate metric | 미구현 | CF-4 | |
+| Frontend 운영자 검수 화면 | open | CF-3 | 변경 영역 미식별 |
+| 로드맵 CF-7~10 | planned | CF-7~10 | 이상탐지·자동조치·자산화·ITSM |
+| drift: `sop_document_file_store.go` | 정정됨 | CF-1 | 코드 삭제, DB store가 영속화 |
+| drift: opsgenie 6번째 채널 | 정정됨 | CF-3 | 보강 없음, "5채널"은 보강 기준 |
+
+## 9. 미생성 (BMAD 범위 밖, 현 시점)
+
+- **01-overview / 00-brief** — 별도 산출물로 만들지 않음(필요 시 PRD에서 파생).
+- **02-usecase** — 폐지. User Journey는 PRD §5에 내장(BMAD).
+- **Architecture(ERD 등)** — BMAD Solutioning 단계로 별도 진행 예정.

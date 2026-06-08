@@ -8,8 +8,8 @@ updated: 2026-06-02
 
 # 용어집 (Glossary)
 
-> arc42 §12에 해당. 4종 산출물 어디서든 호버/anchor로 참조.
-> 본문 한국어 + 영문 키워드(`alert`, `fingerprint`, `dedup_key` 등)는 그대로 유지. baseline.md, research-skills-c-domain.md에서 확정된 사항만 정의.
+> 산출물 어디서든 호버/anchor로 참조하는 용어 정의(arc42 §12 격).
+> 본문 한국어 + 영문 키워드(`alert`, `fingerprint`, `dedup_key` 등)는 그대로 유지. baseline.md·코드에서 확정된 사항만 정의.
 
 ## A
 

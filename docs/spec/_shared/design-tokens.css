@@ -1,5 +1,5 @@
 /* DS-APM 산출물 공통 디자인 토큰
- * 출처: docs/spec/_foundation/research-skills-b-html.md §5.1~5.10
+ * 출처: PROCESS.md §8 (HTML 빌드 정책)
  * Anthropic Claude 브랜드 팔레트 + 시스템 폰트 + html-effectiveness 패턴
  * Self-contained, zero deps, light-only (다크모드는 v2 follow-up)
  */
@@ -9,6 +9,7 @@
   --ivory:#FAF9F5;
   --slate:#141413;
   --clay:#D97757;
+  --clay-ink:#B5512E;
   --oat:#E3DACC;
   --olive:#788C5D;
   --sky:#6A8CAF;
@@ -40,7 +41,7 @@ body {
 h1 {
   font-family: var(--serif);
   font-weight: 500;
-  font-size: clamp(38px, 5.4vw, 62px);
+  font-size: clamp(32px, 3.5vw, 44px);
   color: var(--slate);
   letter-spacing: -0.02em;
   margin-bottom: 16px;
@@ -314,7 +315,7 @@ html { scroll-behavior: smooth; }
 
 /* ========== Links ========== */
 a {
-  color: var(--clay);
+  color: var(--clay-ink);
   text-decoration: none;
   border-bottom: 1px solid transparent;
   transition: border-color 150ms;
