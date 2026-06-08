@@ -1,0 +1,394 @@
+/* DS-APM 산출물 공통 디자인 토큰
+ * 출처: PROCESS.md §8 (HTML 빌드 정책)
+ * Anthropic Claude 브랜드 팔레트 + 시스템 폰트 + html-effectiveness 패턴
+ * Self-contained, zero deps, light-only (다크모드는 v2 follow-up)
+ */
+
+:root {
+  /* Color tokens (html-effectiveness 팔레트) */
+  --ivory:#FAF9F5;
+  --slate:#141413;
+  --clay:#D97757;
+  --clay-ink:#B5512E;
+  --oat:#E3DACC;
+  --olive:#788C5D;
+  --sky:#6A8CAF;
+  --g100:#F0EEE6;
+  --g300:#D1CFC5;
+  --g500:#87867F;
+  --g700:#3D3D3A;
+
+  /* Font stacks */
+  --serif: ui-serif, Georgia, 'Times New Roman', serif;
+  --sans:  system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono:  ui-monospace, 'SF Mono', Menlo, Monaco, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--ivory);
+  color: var(--g700);
+  font-family: var(--sans);
+  line-height: 1.55;
+  padding: 56px 32px 120px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page { max-width: 1120px; margin: 0 auto; }
+
+/* ========== Headings ========== */
+h1 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(32px, 3.5vw, 44px);
+  color: var(--slate);
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 26px;
+  color: var(--slate);
+  letter-spacing: -0.01em;
+}
+h3 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--slate);
+  margin-bottom: 8px;
+}
+h4 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--g700);
+  margin-bottom: 6px;
+}
+
+/* ========== Eyebrow ========== */
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--g500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+
+/* ========== Section head ========== */
+.sec-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 8px;
+  margin-top: 64px;
+}
+.sec-head .num {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--oat);
+  color: var(--slate);
+  padding: 3px 9px;
+  border-radius: 8px;
+}
+.sec-intro {
+  font-size: 14.5px;
+  color: var(--g500);
+  max-width: 720px;
+  margin-bottom: 28px;
+}
+
+/* ========== Summary 4-cell grid (Overview, F module NFR) ========== */
+.summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.summary .cell {
+  border: 1.5px solid var(--g300);
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+}
+.summary .cell .k {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--g500);
+  text-transform: uppercase;
+}
+.summary .cell .v {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--slate);
+  margin-top: 4px;
+}
+.summary .cell .v.accent { color: var(--clay); }
+
+@media (max-width: 720px) {
+  .summary { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ========== Milestone timeline (WBS) ========== */
+.milestones { display: flex; flex-direction: column; }
+.milestone {
+  display: grid;
+  grid-template-columns: 120px 28px 1fr;
+  gap: 0 18px;
+}
+.milestone .when {
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--g500);
+  padding-top: 4px;
+}
+.milestone .dot-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.milestone .dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--clay);
+  margin-top: 4px;
+}
+.milestone .dot.done {
+  background: var(--olive);
+  border-color: var(--olive);
+}
+.milestone .line {
+  width: 2px;
+  flex: 1;
+  background: var(--g300);
+  margin: 4px 0;
+}
+.milestone:last-child .line { display: none; }
+.milestone .body { padding-bottom: 36px; }
+
+/* ========== Severity badge ========== */
+.sev {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+.sev.high { background: #F3D9CC; color: #8A3B1E; }
+.sev.med  { background: var(--oat); color: var(--slate); }
+.sev.low  { background: #E4E9DC; color: #4B5C39; }
+
+/* ========== Open question / risk card ========== */
+.q {
+  border-left: 4px solid var(--clay);
+  border-radius: 10px;
+  padding: 16px 20px;
+  background: #fff;
+  margin-bottom: 12px;
+}
+
+/* ========== Risks/exception table (3-col grid) ========== */
+.risks { display: flex; flex-direction: column; gap: 8px; }
+.risks .row {
+  display: grid;
+  grid-template-columns: 2fr 80px 3fr;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1.5px solid var(--g300);
+  border-radius: 10px;
+  background: #fff;
+}
+.risks .row .cell { font-size: 13.5px; }
+
+/* ========== Code ========== */
+code, pre {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+pre {
+  background: var(--g100);
+  border: 1.5px solid var(--g300);
+  border-radius: 10px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+code {
+  background: var(--g100);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+pre code {
+  background: transparent;
+  padding: 0;
+}
+
+/* ========== Tables ========== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+}
+th, td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--g300);
+  vertical-align: top;
+}
+th {
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--slate);
+  background: var(--g100);
+}
+
+/* ========== Details (collapsible) ========== */
+details.expand {
+  border: 1.5px solid var(--g300);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  background: #fff;
+}
+details.expand summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--slate);
+}
+details.expand[open] { background: var(--g100); }
+details.expand .body {
+  margin-top: 12px;
+  font-size: 13.5px;
+  color: var(--g700);
+}
+
+/* ========== Sticky TOC sidebar ========== */
+.toc-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 48px;
+}
+.toc {
+  position: sticky;
+  top: 32px;
+  align-self: start;
+  border: 1.5px solid var(--g300);
+  border-radius: 12px;
+  background: #fff;
+  padding: 16px;
+}
+.toc .label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--g500);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.toc ol {
+  list-style: none;
+  padding: 0;
+}
+.toc li {
+  font-size: 13px;
+  padding: 6px 0;
+}
+.toc a {
+  color: var(--g700);
+  text-decoration: none;
+}
+.toc a:hover { color: var(--clay); }
+
+@media (max-width: 960px) {
+  .toc-page { grid-template-columns: 1fr; }
+  .toc { position: static; }
+}
+
+html { scroll-behavior: smooth; }
+
+/* ========== Links ========== */
+a {
+  color: var(--clay-ink);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 150ms;
+}
+a:hover { border-bottom-color: var(--clay); }
+
+/* ========== Lists ========== */
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin-bottom: 4px; }
+
+/* ========== Blockquote ========== */
+blockquote {
+  border-left: 3px solid var(--g300);
+  padding: 8px 16px;
+  margin: 12px 0;
+  color: var(--g700);
+  font-style: italic;
+}
+
+/* ========== Mermaid container ========== */
+.mermaid {
+  background: #fff;
+  border: 1.5px solid var(--g300);
+  border-radius: 10px;
+  padding: 16px;
+  margin: 16px 0;
+  text-align: center;
+}
+
+/* ========== Inline tags / chips ========== */
+.tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--g100);
+  color: var(--g700);
+  margin-right: 6px;
+}
+.tag.id { color: var(--clay); border: 1px solid var(--g300); background: #fff; }
+
+/* ========== Status pill ========== */
+.status-pill {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.status-pill.implemented { background: #E4E9DC; color: #4B5C39; }
+.status-pill.mvp { background: var(--oat); color: var(--slate); }
+.status-pill.pending { background: #F3D9CC; color: #8A3B1E; }
+.status-pill.draft { background: var(--g100); color: var(--g500); }
+.status-pill.planned { background: #DCE2EA; color: #3E4B5C; }
+
+/* ========== Print / PDF ========== */
+@page { size: A4; margin: 18mm 15mm; }
+
+@media print {
+  body { background: #fff; padding: 0; }
+  .page, .toc-page { max-width: 100%; }
+  section { break-before: page; page-break-before: page; }
+  section:first-of-type { break-before: auto; page-break-before: auto; }
+  .milestone, .summary .cell, .q, .risks .row,
+  pre, table, svg, .mermaid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  details > summary { list-style: none; }
+  details:not([open]) > *:not(summary) { display: none; }
+  aside, .toc { position: static; }
+  a::after { content: " (" attr(href) ")"; font-size: 10px; color: #888; }
+}
