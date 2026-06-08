@@ -4,7 +4,6 @@ title: 정책·감사 기반 (Foundation·Audit)
 status: implemented
 jtbd: [JTBD-6]
 maps_modules: [F0, F5]
-commits: [026863650, 8a55208ef]
 source_paths:
   - cmd/community/
   - pkg/types/ruletypes/pilot_contract.go
@@ -39,7 +38,7 @@ CF-6은 다른 모든 기능(CF-1~5)이 공유하는 **계약·진입점·감사
   Then 자격증명 노출 필드(secretRefVisible 등)는 항상 false이고
    And 잘못된 값(secret-like 노출 등)은 거부된다
   ```
-- **구현 근거**: `pilot_contract.go` — `PilotConfiguration` 외 5종 구조체 + validator(`errors.Join`). source kind enum 중 `managed_markdown`만 v0.1 구현. 테넌트 정책은 `tenant_policy.go`(CF-1), AI 설정은 `ds_ai_config`(CF-2). · `026863650` · WBS-1.0
+- **구현 근거**: `pilot_contract.go` — `PilotConfiguration` 외 5종 구조체 + validator(`errors.Join`). source kind enum 중 `managed_markdown`만 v0.1 구현. 테넌트 정책은 `tenant_policy.go`(CF-1), AI 설정은 `ds_ai_config`(CF-2). · WBS-1.0
 
 ### FR-CF6.2 — 감사담당자는 행위 1건마다 감사 기록이 남음을 보장받는다
 - **무엇을**: SOP 검색·preview·fetch, evidence 수집, AI 요청/결과 등 행위를 8종 event × 5종 outcome으로 JSONL에 기록한다. 보안 불변식(자격증명 비노출)을 강제한다.
@@ -54,7 +53,7 @@ CF-6은 다른 모든 기능(CF-1~5)이 공유하는 **계약·진입점·감사
   When 유효성 검사가 실행되면
   Then "reason: field is required"로 실패한다
   ```
-- **구현 근거**: `PilotAuditEventSink` + `PilotAuditEventJSONLSink`(50 MiB rotation). event 8종(`sop.search|preview|fetch|health_check|evidence.collect_request|collect_result|ai.summary_request|summary_result`) × outcome 5종(`allowed|denied|redacted|failed|deferred`). 불변식: `secretRefVisible=false`·`browserCredentialsUsed=false`·`serviceAccountProfile` non-empty. → NF-5.4.3 · `8a55208ef` · WBS-1.0
+- **구현 근거**: `PilotAuditEventSink` + `PilotAuditEventJSONLSink`(50 MiB rotation). event 8종(`sop.search|preview|fetch|health_check|evidence.collect_request|collect_result|ai.summary_request|summary_result`) × outcome 5종(`allowed|denied|redacted|failed|deferred`). 불변식: `secretRefVisible=false`·`browserCredentialsUsed=false`·`serviceAccountProfile` non-empty. → NF-5.4.3 · WBS-1.0
 
 ### FR-CF6.3 — 감사담당자는 감사 기록 실패가 서비스를 막지 않음을 보장받는다
 - **무엇을**: 감사 sink 초기화·기록 실패가 서버 부팅이나 원 operation을 중단시키지 않는다(fail-open). 유효성 실패 이벤트는 조용히 drop(caller에 error 전파 안 함).
@@ -64,7 +63,7 @@ CF-6은 다른 모든 기능(CF-1~5)이 공유하는 **계약·진입점·감사
   When community 진입점이 JSONL sink를 초기화하면
   Then 경고만 남기고 NopPilotAuditEventSink로 진행하며 서버는 커맨드 등록을 계속한다
   ```
-- **구현 근거**: `cmd/community/main.go` — sink 초기화 실패 시 `zap.Warn` 후 `NopPilotAuditEventSink` fallback. validation 실패는 `Warn` 후 `nil` 반환(drop). → NF-5.2.3 · `026863650`, `8a55208ef` · WBS-1.0
+- **구현 근거**: `cmd/community/main.go` — sink 초기화 실패 시 `zap.Warn` 후 `NopPilotAuditEventSink` fallback. validation 실패는 `Warn` 후 `nil` 반환(drop). → NF-5.2.3 · WBS-1.0
 
 ## CF-6.3 감사 기록 상태 전이
 
@@ -106,5 +105,5 @@ stateDiagram-v2
 - JTBD: 6(플랫폼 내재화) · User Journey: UJ-1 · NFR: NF-5.2.3, NF-5.4.3, NF-5.3.3
 - User Journey: UJ-1(단계 10), UJ-2, UJ-3 · WBS: WBS-1.0
 - 구 모듈: F0(Foundation), F5(Audit)
-- Commits: `026863650`, `8a55208ef`
+- Commits: 
 - → 상위: [`../index.md`](../index.md) §7.1 · 전략: [`source-strategy-brief.md`](../../_foundation/source-strategy-brief.md) §2(자산화), §3(SigNoz 통합)

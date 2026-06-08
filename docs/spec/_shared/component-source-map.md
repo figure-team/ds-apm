@@ -4,7 +4,7 @@ title: 컴포넌트 구성·소스 매핑 (개발 현장 용어 기준)
 type: reference
 status: living
 updated: 2026-06-05
-source_of_truth: 실제 코드(pkg/) + _foundation/baseline.md §4 (DS-APM 커밋 11건)
+source_of_truth: 실제 코드(pkg/) + _foundation/baseline.md
 ---
 
 # DS-APM 컴포넌트 구성 및 소스 매핑
@@ -35,7 +35,7 @@ runbookdrafter}` 5개 신규 패키지 + `pkg/alertmanager/alertmanagernotify/dl
 
 ## 1. 공통 기반 모듈 — `WBS-1.0`
 
-**기능명세:** F0 Foundation + F4 멀티테넌시 + F5 감사 · **근거 커밋:** `026863650`, `3fa604e03`, `8a55208ef`
+**기능명세:** F0 Foundation + F4 멀티테넌시 + F5 감사
 
 > 모든 하위 컴포넌트가 공유하는 기반 데이터 구조·정책·기록 통로.
 
@@ -52,7 +52,7 @@ runbookdrafter}` 5개 신규 패키지 + `pkg/alertmanager/alertmanagernotify/dl
 
 ## 2. SOP 연계(그라운딩) 서비스 — `WBS-1.1`
 
-**기능명세:** F1 SOP Grounding & Store · **근거 커밋:** `72944ecac`, `c7f4fd330`
+**기능명세:** F1 SOP Grounding & Store
 
 > 알람을 운영 절차서(SOP)에 자동으로 연결.
 
@@ -69,7 +69,7 @@ runbookdrafter}` 5개 신규 패키지 + `pkg/alertmanager/alertmanagernotify/dl
 
 ## 3. AI 초안 매니저 — `WBS-1.2`
 
-**기능명세:** F2 AI Drafting + F3 사용량 제어(장애 시 우회) · **근거 커밋:** `cb29d2a59`, `a6757136e`
+**기능명세:** F2 AI Drafting + F3 사용량 제어(장애 시 우회)
 
 > 운영 절차서를 참고해 AI가 조치 초안을 생성·저장하고, 사용량 초과 시 안전하게 우회.
 
@@ -87,7 +87,7 @@ runbookdrafter}` 5개 신규 패키지 + `pkg/alertmanager/alertmanagernotify/dl
 
 ## 4. 알림 발송기(디스패처) — `WBS-1.3`
 
-**기능명세:** F6 Notification Dispatch · **근거 커밋:** `5c036c806`
+**기능명세:** F6 Notification Dispatch
 
 > SigNoz 발송 경로를 감싸 AI·SOP 정보를 합쳐 5개 채널로 전송.
 
@@ -101,7 +101,7 @@ runbookdrafter}` 5개 신규 패키지 + `pkg/alertmanager/alertmanagernotify/dl
 
 ## 5. 개인정보(PII) 마스킹 필터 — `WBS-1.4`
 
-**기능명세:** F7 PII Redaction · **근거 커밋:** `3e9dfa557`
+**기능명세:** F7 PII Redaction
 
 > 외부 발송 전 민감 정보를 가림.
 
@@ -114,7 +114,7 @@ runbookdrafter}` 5개 신규 패키지 + `pkg/alertmanager/alertmanagernotify/dl
 
 ## 6. 실패 큐(DLQ) 재처리 서비스 — `WBS-1.5`
 
-**기능명세:** F8 DLQ + Replay · **근거 커밋:** `ade174bb8`, `91b9ff5db`
+**기능명세:** F8 DLQ + Replay
 
 > 채널 발송 최종 실패 건을 안전 보관하고 재발송.
 
@@ -129,17 +129,17 @@ runbookdrafter}` 5개 신규 패키지 + `pkg/alertmanager/alertmanagernotify/dl
 
 ## 7. 기능명세(F0~F8) ↔ 컴포넌트 매핑 요약
 
-| 기능모듈 | 컴포넌트 | 근거 커밋 |
-|---|---|---|
-| F0 Foundation | 1. 공통 기반 모듈 | `026863650` |
-| F4 멀티테넌시 | 1. 공통 기반 모듈 | `3fa604e03` |
-| F5 감사 | 1. 공통 기반 모듈 | `8a55208ef` |
-| F1 SOP 연계·저장 | 2. SOP 연계 서비스 | `72944ecac`, `c7f4fd330` |
-| F2 AI 초안 | 3. AI 초안 매니저 | `cb29d2a59` |
-| F3 사용량 제어 | 3. AI 초안 매니저 | `a6757136e` |
-| F6 알림 발송 | 4. 알림 발송기 | `5c036c806` |
-| F7 PII 마스킹 | 5. PII 마스킹 필터 | `3e9dfa557` |
-| F8 DLQ·재발송 | 6. 실패 큐 재처리 | `ade174bb8`, `91b9ff5db` |
+| 기능모듈 | 컴포넌트 |
+|---|---|
+| F0 Foundation | 1. 공통 기반 모듈 |
+| F4 멀티테넌시 | 1. 공통 기반 모듈 |
+| F5 감사 | 1. 공통 기반 모듈 |
+| F1 SOP 연계·저장 | 2. SOP 연계 서비스 |
+| F2 AI 초안 | 3. AI 초안 매니저 |
+| F3 사용량 제어 | 3. AI 초안 매니저 |
+| F6 알림 발송 | 4. 알림 발송기 |
+| F7 PII 마스킹 | 5. PII 마스킹 필터 |
+| F8 DLQ·재발송 | 6. 실패 큐 재처리 |
 
 > 기능명세는 **9개 모듈(F0~F8)**, WBS·발표덱은 **6개 컴포넌트** 축이다. F0·F4·F5 → 컴포넌트 1,
 > F2·F3 → 컴포넌트 3으로 합쳐진다.

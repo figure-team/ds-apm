@@ -20,15 +20,14 @@
 
 | 항목 | 값 |
 |---|---|
-| SigNoz upstream 분기점 (parent) | `feea9e9b3 refactor: remove light mode styles ... (#11080)` |
-| DS-APM 시작 커밋 | `026863650 feat(ds-apm): add native mvp foundation pilot scaffolding` |
-| DS-APM 마지막 커밋 (HEAD) | `91b9ff5db feat(ds-apm): wire dead-letter sink into alertmanager dispatcher` |
+| SigNoz upstream 분기점 (parent) | `refactor: remove light mode styles ... (#11080)` |
+| DS-APM 시작 커밋 | native mvp foundation pilot scaffolding |
+| DS-APM 마지막 커밋 (HEAD) | wire dead-letter sink into alertmanager dispatcher |
 | 브랜치명 | `ds-apm/native-mvp-foundation` |
 | nested repo 경로 | `workspace_archive/ds-apm/var/signoz` |
 | 원격 (세 곳 HEAD 동일) | `origin=SigNoz/signoz`, `sudong=suUdong/signoz`, `product=suUdong/signoz-product` |
 
-> 정식 diff 명령:
-> `git diff 026863650^..ds-apm/native-mvp-foundation`
+> 구현 이력(11 커밋)은 nested repo `var/signoz` 기준 — 공개 `ds-apm`은 single squash라 개별 커밋·SHA가 없다.
 
 ## 3. 변경 표면 요약
 
@@ -50,21 +49,21 @@
 | `cmd/community`, `cmd/enterprise` | 진입점 통합 |
 | `frontend/src`, `frontend/public` | UI 변경 — **범위 별도 확인 필요** (§6 open) |
 
-## 4. 커밋 ↔ 기능 모듈 매핑
+## 4. 기능 모듈(F0~F8) ↔ CF ↔ WBS
 
-| # | 커밋 | 기능 | 모듈 키 |
+> 공개 `ds-apm`은 squash라 개별 커밋이 없다. nested repo의 11 커밋이 구현한 모듈↔CF↔WBS 매핑(코드 경로는 [`../_shared/component-source-map.md`](../_shared/component-source-map.md)):
+
+| 모듈 | 기능 | CF | WBS |
 |---|---|---|---|
-| 1 | `026863650` | Native MVP pilot scaffolding | F0 Foundation |
-| 2 | `72944ecac` | Ground alerts in uploaded SOPs | F1 SOP Grounding |
-| 3 | `8a55208ef` | Make SOP access auditable | F5 Audit |
-| 4 | `3fa604e03` | Scope SOP strategy access by tenant | F4 Multi-tenant |
-| 5 | `a6757136e` | Fail open AI quota controls | F3 AI Quota |
-| 6 | `cb29d2a59` | Persist latest AI strategy history | F2 AI Drafting (history) |
-| 7 | `5c036c806` | Propagate SOP AI context to channels | F6 Notification Dispatch |
-| 8 | `c7f4fd330` | Persist SOP documents to file | F1 SOP Store |
-| 9 | `3e9dfa557` | Redact PII (email, phone, long secrets) | F7 PII Redaction |
-| 10 | `ade174bb8` | JSONL DLQ + idempotent replay ledger | F8 DLQ + Replay |
-| 11 | `91b9ff5db` | Wire DLQ into alertmanager dispatcher | F8 DLQ + Replay |
+| F0 | Foundation / pilot scaffolding | CF-6 | WBS-1.0 |
+| F1 | SOP Grounding & Store | CF-1 | WBS-1.1 |
+| F2 | AI Runbook Drafting (history) | CF-2 | WBS-1.2 |
+| F3 | AI Quota Controls (fail-open) | CF-2 | WBS-1.2 |
+| F4 | Multi-tenant Scope | CF-1 | WBS-1.0 |
+| F5 | Audit | CF-6 | WBS-1.0 |
+| F6 | Notification Dispatch (5채널) | CF-3 | WBS-1.3 |
+| F7 | PII Redaction | CF-4 | WBS-1.4 |
+| F8 | DLQ + Replay | CF-5 | WBS-1.5 |
 
 > 마이그레이션: 078(`ds_sop_documents`·`ds_ai_strategy_history`), 079(`ds_ai_config`), 080(ai oauth 컬럼).
 
