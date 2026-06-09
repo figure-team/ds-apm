@@ -1,4 +1,5 @@
 import { memo, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { Typography } from 'antd';
 import { getYAxisFormattedValue } from 'components/Graph/yAxisConfig';
@@ -23,6 +24,7 @@ function GridValueComponent({
 }: GridValueComponentProps): JSX.Element {
 	const value = ((data[1] || [])[0] || 0) as number;
 
+	const { t } = useTranslation(['dashboard']);
 	const location = useLocation();
 	const gridTitle = useMemo(() => generateGridTitle(title), [title]);
 
@@ -64,7 +66,7 @@ function GridValueComponent({
 	if (data.length === 0) {
 		return (
 			<ValueContainer>
-				<Typography>No Data</Typography>
+				<Typography>{t('no_data')}</Typography>
 			</ValueContainer>
 		);
 	}

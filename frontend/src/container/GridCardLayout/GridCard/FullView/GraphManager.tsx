@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Input } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { ResizeTable } from 'components/ResizeTable';
@@ -36,6 +37,7 @@ function GraphManager({
 		setTableDataSet(getDefaultTableDataSet(options, data));
 	}, [data, options]);
 
+	const { t } = useTranslation(['dashboard', 'common']);
 	const { notifications } = useNotifications();
 	const isDashboardLocked = useDashboardStore(selectIsDashboardLocked);
 
@@ -99,7 +101,7 @@ function GraphManager({
 			name,
 		});
 		notifications.success({
-			message: 'The updated graphs & legends are saved',
+			message: t('graphs_legends_saved'),
 		});
 		if (onToggleModelHandler) {
 			onToggleModelHandler();
@@ -110,6 +112,7 @@ function GraphManager({
 		notifications,
 		onToggleModelHandler,
 		options,
+		t,
 	]);
 
 	const dataSource = tableDataSet.filter(
@@ -119,16 +122,16 @@ function GraphManager({
 	return (
 		<div className="graph-manager-container">
 			<div className="graph-manager-header">
-				<Input onChange={filterHandler} placeholder="Filter Series" />
+				<Input onChange={filterHandler} placeholder={t('filter_series')} />
 				<div className="save-cancel-container">
 					<span className="save-cancel-button">
 						<Button type="default" onClick={onToggleModelHandler}>
-							Cancel
+							{t('common:cancel')}
 						</Button>
 					</span>
 					<span className="save-cancel-button">
 						<Button type="primary" onClick={saveHandler}>
-							Save
+							{t('common:save')}
 						</Button>
 					</span>
 				</div>

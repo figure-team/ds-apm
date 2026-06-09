@@ -177,7 +177,7 @@ describe('TableDrilldown Breakout Functionality', () => {
 
 		// Check that the search input is displayed
 		expect(
-			screen.getByPlaceholderText('Search breakout options...'),
+			screen.getByPlaceholderText('search_breakout_options'),
 		).toBeInTheDocument();
 
 		// Wait for the API call to complete and options to load

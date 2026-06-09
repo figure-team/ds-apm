@@ -132,7 +132,7 @@ function DashboardsList(): JSX.Element {
 	const [showNewDashboardTemplatesModal, setShowNewDashboardTemplatesModal] =
 		useState(false);
 
-	const { t } = useTranslation('dashboard');
+	const { t } = useTranslation(['dashboard', 'common']);
 
 	const [isImportJSONModalVisible, setIsImportJSONModalVisible] =
 		useState<boolean>(false);
@@ -338,31 +338,31 @@ function DashboardsList(): JSX.Element {
 		const monthsDiff = currentTime.diff(lastRefresh, 'months');
 
 		if (isEmpty(time)) {
-			return `No updates yet!`;
+			return t('no_updates_yet');
 		}
 
 		if (monthsDiff > 0) {
-			return `Last Updated ${monthsDiff} months ago`;
+			return t('last_updated_months_ago', { count: monthsDiff });
 		}
 
 		if (daysDiff > 0) {
-			return `Last Updated ${daysDiff} days ago`;
+			return t('last_updated_days_ago', { count: daysDiff });
 		}
 
 		if (hoursDiff > 0) {
-			return `Last Updated ${hoursDiff} hrs ago`;
+			return t('last_updated_hours_ago', { count: hoursDiff });
 		}
 
 		if (minutedDiff > 0) {
-			return `Last Updated ${minutedDiff} mins ago`;
+			return t('last_updated_mins_ago', { count: minutedDiff });
 		}
 
-		return `Last Updated ${secondsDiff} sec ago`;
+		return t('last_updated_sec_ago', { count: secondsDiff });
 	};
 
 	const columns: TableProps<Data>['columns'] = [
 		{
-			title: 'Dashboards',
+			title: t('dashboards_title'),
 			key: 'dashboard',
 			render: (dashboard: Data, _, index): JSX.Element => {
 				const formattedDateAndTime = formatTimezoneAdjustedTimestamp(
@@ -445,7 +445,7 @@ function DashboardsList(): JSX.Element {
 													icon={<Expand size={12} />}
 													onClick={onClickHandler}
 												>
-													View
+													{t('view')}
 												</Button>
 												<Button
 													type="text"
@@ -457,7 +457,7 @@ function DashboardsList(): JSX.Element {
 														openInNewTab(getLink());
 													}}
 												>
-													Open in New Tab
+													{t('open_in_new_tab')}
 												</Button>
 												<Button
 													type="text"
@@ -469,7 +469,7 @@ function DashboardsList(): JSX.Element {
 														setCopy(getAbsoluteUrl(getLink()));
 													}}
 												>
-													Copy Link
+													{t('copy_link')}
 												</Button>
 												<Button
 													type="text"
@@ -477,7 +477,7 @@ function DashboardsList(): JSX.Element {
 													icon={<FileJson size={12} />}
 													onClick={handleJsonExport}
 												>
-													Export JSON
+													{t('export_json')}
 												</Button>
 											</section>
 											<section className="section-2">
@@ -536,7 +536,7 @@ function DashboardsList(): JSX.Element {
 							{dashboard.lastUpdatedBy && visibleColumns.updatedBy && (
 								<div className="updated-by">
 									<Typography.Text className="text">
-										Last Updated By - &nbsp;
+										{t('last_updated_by')}&nbsp;
 									</Typography.Text>
 									<div className="dashboard-tag">
 										<Typography.Text className="tag-text">
@@ -564,7 +564,7 @@ function DashboardsList(): JSX.Element {
 						data-testid="import-json-menu-cta"
 						onClick={(): void => onModalHandler(false)}
 					>
-						<Radius size={14} /> Import JSON
+						<Radius size={14} /> {t('import_json_short')}
 					</div>
 				),
 				key: '1',
@@ -584,7 +584,7 @@ function DashboardsList(): JSX.Element {
 							gap="small"
 						>
 							<div className="create-dashboard-menu-item">
-								<Github size={14} /> View templates
+								<Github size={14} /> {t('view_template')}
 							</div>
 							<ExternalLink size={14} />
 						</Flex>
@@ -604,7 +604,7 @@ function DashboardsList(): JSX.Element {
 							onNewDashboardHandler();
 						}}
 					>
-						<LayoutGrid size={14} /> Create dashboard
+						<LayoutGrid size={14} /> {t('create_dashboard')}
 					</div>
 				),
 				key: '0',
@@ -652,10 +652,12 @@ function DashboardsList(): JSX.Element {
 		<div className="dashboards-list-container">
 			<div className="dashboards-list-view-content">
 				<div className="dashboards-list-title-container">
-					<Typography.Title className="title">Dashboards</Typography.Title>
+					<Typography.Title className="title">
+						{t('dashboards_title')}
+					</Typography.Title>
 					<Flex align="center" justify="space-between">
 						<Typography.Text className="subtitle">
-							Create and manage dashboards for your workspace.
+							{t('dashboards_subtitle')}
 						</Typography.Text>
 					</Flex>
 					{isCloudUserVal && (
@@ -679,7 +681,7 @@ function DashboardsList(): JSX.Element {
 						<img src={awwSnapUrl} alt="something went wrong" className="error-img" />
 
 						<Typography.Text className="error-text">
-							Something went wrong :/ Please retry or contact support.
+							{t('something_went_wrong_retry')}
 						</Typography.Text>
 						<section className="action-btns">
 							<Button
@@ -688,14 +690,14 @@ function DashboardsList(): JSX.Element {
 								icon={<RotateCw size={16} />}
 								onClick={(): Promise<any> => refetchDashboardList()}
 							>
-								Retry
+								{t('retry')}
 							</Button>
 							<Button
 								type="text"
 								className="learn-more"
 								onClick={(): void => handleContactSupport(isCloudUserVal)}
 							>
-								Contact Support
+								{t('contact_support')}
 							</Button>
 							<ArrowUpRight size={16} className="learn-more-arrow" />
 						</section>
@@ -705,10 +707,10 @@ function DashboardsList(): JSX.Element {
 						<img src={dashboardsUrl} alt="dashboards" className="dashboard-img" />
 						<section className="text">
 							<Typography.Text className="no-dashboard">
-								No dashboards yet.{' '}
+								{t('no_dashboards_yet')}{' '}
 							</Typography.Text>
 							<Typography.Text className="info">
-								Create a dashboard to start visualizing your data
+								{t('create_dashboard_to_visualize')}
 							</Typography.Text>
 						</section>
 
@@ -728,7 +730,7 @@ function DashboardsList(): JSX.Element {
 											logEvent('Dashboard List: New dashboard clicked', {});
 										}}
 									>
-										New Dashboard
+										{t('new_dashboard')}
 									</Button>
 								</Dropdown>
 								<Button
@@ -742,7 +744,7 @@ function DashboardsList(): JSX.Element {
 										);
 									}}
 								>
-									Learn more
+									{t('learn_more')}
 								</Button>
 								<ArrowUpRight size={16} className="learn-more-arrow" />
 							</section>
@@ -752,7 +754,7 @@ function DashboardsList(): JSX.Element {
 					<>
 						<div className="dashboards-list-header-container">
 							<Input
-								placeholder="Search by name, description, or tags..."
+								placeholder={t('search_by_name_description_tags')}
 								prefix={<Search size={12} color={Color.BG_VANILLA_400} />}
 								value={searchString}
 								data-testid="dashboards-list-search"
@@ -774,7 +776,7 @@ function DashboardsList(): JSX.Element {
 											logEvent('Dashboard List: New dashboard clicked', {});
 										}}
 									>
-										New dashboard
+										{t('new_dashboard')}
 									</Button>
 								</Dropdown>
 							)}
@@ -784,23 +786,23 @@ function DashboardsList(): JSX.Element {
 							<div className="no-search">
 								<img src={emptyStateUrl} alt="img" className="img" />
 								<Typography.Text className="text">
-									No dashboards found for {searchString}. Create a new dashboard?
+									{t('no_dashboards_found_for_search', { searchString })}
 								</Typography.Text>
 							</div>
 						) : (
 							<>
 								<div className="all-dashboards-header">
 									<Typography.Text className="typography">
-										All Dashboards
+										{t('all_dashboards')}
 									</Typography.Text>
 									<section className="right-actions">
-										<Tooltip title="Sort">
+										<Tooltip title={t('sort')}>
 											<Popover
 												trigger="click"
 												content={
 													<div className="sort-content">
 														<Typography.Text className="sort-heading">
-															Sort By
+															{t('sort_by')}
 														</Typography.Text>
 														<Button
 															type="text"
@@ -808,7 +810,7 @@ function DashboardsList(): JSX.Element {
 															onClick={(): void => sortHandle('createdAt')}
 															data-testid="sort-by-last-created"
 														>
-															Last created
+															{t('last_created')}
 															{dashboardsListQueryParams.columnKey === 'createdAt' && (
 																<Check size={14} />
 															)}
@@ -819,7 +821,7 @@ function DashboardsList(): JSX.Element {
 															onClick={(): void => sortHandle('updatedAt')}
 															data-testid="sort-by-last-updated"
 														>
-															Last updated
+															{t('last_updated')}
 															{dashboardsListQueryParams.columnKey === 'updatedAt' && (
 																<Check size={14} />
 															)}
@@ -847,7 +849,7 @@ function DashboardsList(): JSX.Element {
 															setIsConfigureMetadata(true);
 														}}
 													>
-														Configure metadata
+														{t('configure_metadata')}
 													</Button>
 												</div>
 											}
@@ -893,7 +895,7 @@ function DashboardsList(): JSX.Element {
 						// reset to default if the changes are not applied
 						setVisibleColumns(getLocalStorageDynamicColumns());
 					}}
-					title="Configure Metadata"
+					title={t('configure_metadata_title')}
 					footer={
 						<Button
 							type="text"
@@ -904,7 +906,7 @@ function DashboardsList(): JSX.Element {
 								setDynamicColumnsLocalStorage(visibleColumns);
 							}}
 						>
-							Save Changes
+							{t('save_changes')}
 						</Button>
 					}
 					rootClassName="configure-metadata-root"
@@ -963,7 +965,7 @@ function DashboardsList(): JSX.Element {
 						<div className="metadata-action">
 							<div className="left">
 								<CalendarClock size={14} />
-								<Typography.Text>Created at</Typography.Text>
+								<Typography.Text>{t('created_at')}</Typography.Text>
 							</div>
 							<div className="connection-line" />
 							<div className="right">
@@ -983,7 +985,7 @@ function DashboardsList(): JSX.Element {
 						<div className="metadata-action">
 							<div className="left">
 								<CalendarClock size={14} />
-								<Typography.Text>Created by</Typography.Text>
+								<Typography.Text>{t('created_by')}</Typography.Text>
 							</div>
 							<div className="connection-line" />
 							<div className="right">
@@ -1003,7 +1005,7 @@ function DashboardsList(): JSX.Element {
 						<div className="metadata-action">
 							<div className="left">
 								<Clock4 size={14} />
-								<Typography.Text>Updated at</Typography.Text>
+								<Typography.Text>{t('updated_at')}</Typography.Text>
 							</div>
 							<div className="connection-line" />
 							<div className="right">
@@ -1022,7 +1024,7 @@ function DashboardsList(): JSX.Element {
 						<div className="metadata-action">
 							<div className="left">
 								<Clock4 size={14} />
-								<Typography.Text>Updated by</Typography.Text>
+								<Typography.Text>{t('updated_by')}</Typography.Text>
 							</div>
 							<div className="connection-line" />
 							<div className="right">

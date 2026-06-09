@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Typography } from 'antd';
 import logEvent from 'api/common/logEvent';
@@ -23,6 +24,7 @@ import toolsUrl from '@/assets/Icons/tools.svg';
 import './DashboardEmptyState.styles.scss';
 
 export default function DashboardEmptyState(): JSX.Element {
+	const { t } = useTranslation(['dashboard']);
 	const setIsPanelTypeSelectionModalOpen = usePanelTypeSelectionModalStore(
 		(s) => s.setIsPanelTypeSelectionModalOpen,
 	);
@@ -80,10 +82,10 @@ export default function DashboardEmptyState(): JSX.Element {
 						style={{ height: '32px', width: '32px' }}
 					/>
 					<Typography.Text className="welcome">
-						Welcome to your new dashboard
+						{t('welcome_new_dashboard')}
 					</Typography.Text>
 					<Typography.Text className="welcome-info">
-						Follow the steps to populate it with data and share with your teammates
+						{t('welcome_new_dashboard_info')}
 					</Typography.Text>
 				</section>
 				<section className="actions">
@@ -96,11 +98,11 @@ export default function DashboardEmptyState(): JSX.Element {
 									style={{ height: '14px', width: '14px' }}
 								/>
 								<Typography.Text className="configure">
-									Configure your new dashboard
+									{t('configure_new_dashboard')}
 								</Typography.Text>
 							</div>
 							<Typography.Text className="configure-info">
-								Give it a name, add description, tags and variables
+								{t('configure_new_dashboard_info')}
 							</Typography.Text>
 						</div>
 						{/* This Empty State needs to be consolidated. The SettingsDrawer should be global to the
@@ -112,10 +114,10 @@ export default function DashboardEmptyState(): JSX.Element {
 							data-testid="show-drawer"
 							onClick={onConfigureClick}
 						>
-							Configure
+							{t('configure')}
 						</Button>
 						<SettingsDrawer
-							drawerTitle="Dashboard Configuration"
+							drawerTitle={t('dashboard_configuration')}
 							isOpen={isSettingsDrawerOpen}
 							onClose={onSettingsDrawerClose}
 						>
@@ -132,10 +134,10 @@ export default function DashboardEmptyState(): JSX.Element {
 									alt="header-image"
 									style={{ height: '14px', width: '14px' }}
 								/>
-								<Typography.Text className="panel">Add panels</Typography.Text>
+								<Typography.Text className="panel">{t('add_panels')}</Typography.Text>
 							</div>
 							<Typography.Text className="panel-info">
-								Add panels to visualize your data
+								{t('add_panels_info')}
 							</Typography.Text>
 						</div>
 						{!isDashboardLocked && addPanelPermission && (
@@ -146,7 +148,7 @@ export default function DashboardEmptyState(): JSX.Element {
 								type="primary"
 								data-testid="add-panel"
 							>
-								New Panel
+								{t('new_panel')}
 							</Button>
 						)}
 					</div>

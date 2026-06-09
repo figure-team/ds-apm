@@ -25,7 +25,7 @@ const TABLE_WIDGET_TITLE = 'Table Widget';
 const WIDGET_HEADER_SEARCH = 'widget-header-search';
 const WIDGET_HEADER_SEARCH_INPUT = 'widget-header-search-input';
 const TEST_WIDGET_TITLE_RESOLVED = 'Test Widget Title';
-const CREATE_ALERTS_TEXT = 'Create Alerts';
+const CREATE_ALERTS_TEXT = 'create_alerts';
 const WIDGET_HEADER_OPTIONS_ID = 'widget-header-options';
 
 const mockStore = configureStore([thunk]);

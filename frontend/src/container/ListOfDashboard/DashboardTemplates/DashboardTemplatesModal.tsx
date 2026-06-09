@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { ChangeEvent, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Input, Modal, Typography } from 'antd';
 import ApacheIcon from 'assets/CustomIcons/ApacheIcon';
 import DockerIcon from 'assets/CustomIcons/DockerIcon';
@@ -127,6 +128,7 @@ export default function DashboardTemplatesModal({
 	onCreateNewDashboard,
 	onCancel,
 }: DashboardTemplatesModalProps): JSX.Element {
+	const { t } = useTranslation(['dashboard']);
 	const [selectedDashboardTemplate, setSelectedDashboardTemplate] = useState(
 		templatesList[0],
 	);
@@ -141,6 +143,14 @@ export default function DashboardTemplatesModal({
 		setDashboardTemplates(filteredTemplates);
 	};
 
+	const getTemplateName = (template: DashboardTemplate): string =>
+		template.id === 'blank' ? t('blank_dashboard') : template.name;
+
+	const getTemplateDescription = (template: DashboardTemplate): string =>
+		template.description === 'Create a custom dashboard from scratch.'
+			? t('create_custom_dashboard_from_scratch')
+			: template.description;
+
 	return (
 		<Modal
 			wrapClassName="new-dashboard-templates-modal"
@@ -153,7 +163,7 @@ export default function DashboardTemplatesModal({
 		>
 			<div className="new-dashboard-templates-content-container">
 				<div className="new-dashboard-templates-content-header">
-					<Typography.Text>New Dashboard</Typography.Text>
+					<Typography.Text>{t('new_dashboard')}</Typography.Text>
 
 					<X size={14} className="periscope-btn ghost" onClick={onCancel} />
 				</div>
@@ -162,7 +172,7 @@ export default function DashboardTemplatesModal({
 					<div className="new-dashboard-templates-list">
 						<Input
 							className="new-dashboard-templates-search"
-							placeholder="🔍 Search..."
+							placeholder={t('search_with_icon')}
 							onChange={handleDashboardTemplateSearch}
 						/>
 
@@ -177,7 +187,7 @@ export default function DashboardTemplatesModal({
 									onClick={() => setSelectedDashboardTemplate(template)}
 								>
 									<div className="template-icon">{template.icon}</div>
-									<div className="template-name">{template.name}</div>
+									<div className="template-name">{getTemplateName(template)}</div>
 								</div>
 							))}
 						</div>
@@ -191,10 +201,12 @@ export default function DashboardTemplatesModal({
 								</div>
 
 								<div className="template-info">
-									<div className="template-name">{selectedDashboardTemplate.name}</div>
+									<div className="template-name">
+										{getTemplateName(selectedDashboardTemplate)}
+									</div>
 
 									<div className="template-description">
-										{selectedDashboardTemplate.description}
+										{getTemplateDescription(selectedDashboardTemplate)}
 									</div>
 								</div>
 							</div>
@@ -206,7 +218,7 @@ export default function DashboardTemplatesModal({
 									icon={<Plus size={14} />}
 									onClick={onCreateNewDashboard}
 								>
-									New dashboard
+									{t('new_dashboard')}
 								</Button>
 							</div>
 						</div>
