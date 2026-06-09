@@ -17,6 +17,7 @@ import { getMs } from 'container/Trace/Filters/Panel/PanelBody/Duration/util';
 import { useGetCompositeQueryParam } from 'hooks/queryBuilder/useGetCompositeQueryParam';
 import { useQueryBuilder } from 'hooks/queryBuilder/useQueryBuilder';
 import { cloneDeep, isArray, isEmpty, isEqual } from 'lodash-es';
+import { useTranslation } from 'react-i18next';
 import { BaseAutocompleteData } from 'types/api/queryBuilder/queryAutocompleteResponse';
 import { Query, TagFilterItem } from 'types/api/queryBuilder/queryBuilderData';
 import { v4 as uuid } from 'uuid';
@@ -39,6 +40,7 @@ interface FilterProps {
 
 export function Filter(props: FilterProps): JSX.Element {
 	const { setOpen } = props;
+	const { t } = useTranslation('trace');
 	const [selectedFilters, setSelectedFilters] =
 		useState<
 			Record<
@@ -247,9 +249,9 @@ export function Filter(props: FilterProps): JSX.Element {
 				<Flex gap={8} align="center">
 					<div className="filter-title">
 						<FilterOutlined />
-						<Typography.Text>Filters</Typography.Text>
+						<Typography.Text>{t('filters')}</Typography.Text>
 					</div>
-					<Tooltip title="Reset" placement="right">
+					<Tooltip title={t('reset')} placement="right">
 						<Button
 							onClick={(): void => handleRun({ resetAll: true })}
 							className="sync-icon"
@@ -259,7 +261,7 @@ export function Filter(props: FilterProps): JSX.Element {
 						</Button>
 					</Tooltip>
 				</Flex>
-				<Tooltip title="Collapse" placement="right">
+				<Tooltip title={t('collapse')} placement="right">
 					<Button
 						onClick={(): void => setOpen(false)}
 						className="arrow-icon"

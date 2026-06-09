@@ -1,24 +1,25 @@
 import { matchPath } from 'react-router-dom';
 import { TabRoutes } from 'components/RouteTab/types';
 import ROUTES from 'constants/routes';
+import { TFunction } from 'i18next';
 import { Compass, Cone, TowerControl } from 'lucide-react';
 import SaveView from 'pages/SaveView';
 import TracesExplorer from 'pages/TracesExplorer';
 import TracesFunnelDetails from 'pages/TracesFunnelDetails';
 import TracesFunnels from 'pages/TracesFunnels';
 
-export const tracesExplorer: TabRoutes = {
+export const tracesExplorer = (t: TFunction): TabRoutes => ({
 	Component: (): JSX.Element => <TracesExplorer />,
 	name: (
 		<div className="tab-item">
-			<Compass size={16} /> Explorer
+			<Compass size={16} /> {t('tab_explorer').toString()}
 		</div>
 	),
 	route: ROUTES.TRACES_EXPLORER,
 	key: ROUTES.TRACES_EXPLORER,
-};
+});
 
-export const tracesFunnel = (pathname: string): TabRoutes => ({
+export const tracesFunnel = (pathname: string, t: TFunction): TabRoutes => ({
 	Component: (): JSX.Element => {
 		const isFunnelDetails = matchPath(pathname, ROUTES.TRACES_FUNNELS_DETAIL);
 
@@ -26,20 +27,20 @@ export const tracesFunnel = (pathname: string): TabRoutes => ({
 	},
 	name: (
 		<div className="tab-item">
-			<Cone className="funnel-icon" size={16} /> Funnels
+			<Cone className="funnel-icon" size={16} /> {t('tab_funnels').toString()}
 		</div>
 	),
 	route: ROUTES.TRACES_FUNNELS,
 	key: ROUTES.TRACES_FUNNELS,
 });
 
-export const tracesSaveView: TabRoutes = {
+export const tracesSaveView = (t: TFunction): TabRoutes => ({
 	Component: SaveView,
 	name: (
 		<div className="tab-item">
-			<TowerControl size={16} /> Views
+			<TowerControl size={16} /> {t('tab_views').toString()}
 		</div>
 	),
 	route: ROUTES.TRACES_SAVE_VIEWS,
 	key: ROUTES.TRACES_SAVE_VIEWS,
-};
+});

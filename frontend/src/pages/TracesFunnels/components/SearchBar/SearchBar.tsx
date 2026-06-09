@@ -1,4 +1,5 @@
 import { ChangeEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import { Button, Input, Popover, Tooltip, Typography } from 'antd';
 import { ArrowDownWideNarrow, Check, Plus, Search } from 'lucide-react';
@@ -22,6 +23,7 @@ function SearchBar({
 	onSort,
 	onCreateFunnel,
 }: SearchBarProps): JSX.Element {
+	const { t } = useTranslation('trace');
 	const { hasEditPermission } = useAppContext();
 
 	return (
@@ -31,14 +33,14 @@ function SearchBar({
 				content={
 					<div className="sort-popover-content">
 						<Typography.Text className="sort-popover-content__heading">
-							Sort By
+							{t('funnels.sort_by')}
 						</Typography.Text>
 						<Button
 							type="text"
 							className="sort-popover-content__button"
 							onClick={(): void => onSort('created_at')}
 						>
-							Last created
+							{t('funnels.sort_last_created')}
 							{sortOrder.columnKey === 'created_at' && <Check size={14} />}
 						</Button>
 						<Button
@@ -46,7 +48,7 @@ function SearchBar({
 							className="sort-popover-content__button"
 							onClick={(): void => onSort('updated_at')}
 						>
-							Last updated
+							{t('funnels.sort_last_updated')}
 							{sortOrder.columnKey === 'updated_at' && <Check size={14} />}
 						</Button>
 					</div>
@@ -57,12 +59,12 @@ function SearchBar({
 			>
 				<Button type="text" className="search__sort-btn">
 					<ArrowDownWideNarrow size={12} data-testid="sort-by" />
-					<div className="search__sort-btn-text">Sort</div>
+					<div className="search__sort-btn-text">{t('funnels.sort')}</div>
 				</Button>
 			</Popover>
 			<Input
 				className="search__input"
-				placeholder="Search by name, description, or tags..."
+				placeholder={t('search_funnels_placeholder')}
 				prefix={
 					<Search
 						size={12}
@@ -76,7 +78,7 @@ function SearchBar({
 			<Tooltip
 				title={
 					!hasEditPermission
-						? 'You need editor or admin access to create funnels'
+						? t('funnels.perm_create_funnels')
 						: ''
 				}
 			>
@@ -87,7 +89,7 @@ function SearchBar({
 					onClick={onCreateFunnel}
 					disabled={!hasEditPermission}
 				>
-					New funnel
+					{t('funnels.new_funnel')}
 				</Button>
 			</Tooltip>
 		</div>

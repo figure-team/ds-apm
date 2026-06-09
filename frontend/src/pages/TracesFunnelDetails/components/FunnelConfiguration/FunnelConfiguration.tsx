@@ -1,4 +1,5 @@
 import { memo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Divider, Tooltip } from 'antd';
 import cx from 'classnames';
 import OverlayScrollbar from 'components/OverlayScrollbar/OverlayScrollbar';
@@ -34,6 +35,7 @@ function FunnelConfiguration({
 	triggerAutoSave,
 	showNotifications,
 }: FunnelConfigurationProps): JSX.Element {
+	const { t } = useTranslation('trace');
 	const { hasEditPermission } = useAppContext();
 	const { triggerSave } = useFunnelContext();
 	const { isPopoverOpen, setIsPopoverOpen, steps, isSaving } =
@@ -60,10 +62,10 @@ function FunnelConfiguration({
 						<Tooltip
 							title={
 								!hasEditPermission
-									? 'You need editor or admin access to edit funnel description'
+									? t('funnels.perm_edit_description')
 									: funnel?.description
-										? 'Edit funnel description'
-										: 'Add funnel description'
+										? t('funnels.edit_funnel_description')
+										: t('funnels.add_desc_title')
 							}
 						>
 							<Button
@@ -71,7 +73,7 @@ function FunnelConfiguration({
 								className="funnel-item__action-btn funnel-configuration__rename-btn"
 								icon={<PencilLine size={14} />}
 								onClick={(): void => setIsDescriptionModalOpen(true)}
-								aria-label="Edit Funnel Description"
+								aria-label={t('funnels.edit_funnel_description')}
 								disabled={!hasEditPermission}
 							/>
 						</Tooltip>

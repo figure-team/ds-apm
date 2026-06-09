@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import { Input } from 'antd';
 import SignozModal from 'components/SignozModal/SignozModal';
@@ -22,6 +23,7 @@ function AddFunnelDescriptionModal({
 	funnelId,
 	funnelDescription,
 }: AddFunnelDescriptionProps): JSX.Element {
+	const { t } = useTranslation('trace');
 	const [description, setDescription] = useState<string>(funnelDescription);
 	const { notifications } = useNotifications();
 	const queryClient = useQueryClient();
@@ -48,14 +50,14 @@ function AddFunnelDescriptionModal({
 						funnelId,
 					]);
 					notifications.success({
-						message: 'Success',
-						description: 'Funnel description saved successfully',
+						message: t('funnels.success'),
+						description: t('funnels.desc_saved'),
 					});
 					handleCancel();
 				},
 				onError: (error) => {
 					notifications.error({
-						message: 'Failed to save funnel description',
+						message: t('funnels.desc_save_failed'),
 						description: error.message,
 					});
 				},
@@ -66,12 +68,12 @@ function AddFunnelDescriptionModal({
 	return (
 		<SignozModal
 			open={isOpen}
-			title="Add funnel description"
+			title={t('funnels.add_desc_title')}
 			width={384}
 			onCancel={handleCancel}
 			rootClassName="funnel-step-modal funnel-modal signoz-modal"
-			cancelText="Cancel"
-			okText="Save changes"
+			cancelText={t('funnels.cancel')}
+			okText={t('funnels.save_changes')}
 			okButtonProps={{
 				icon: <Check size={14} />,
 				type: 'primary',
@@ -90,7 +92,7 @@ function AddFunnelDescriptionModal({
 		>
 			<div className="funnel-step-modal-content">
 				<div className="funnel-step-modal-content__field">
-					<span className="funnel-step-modal-content__label">Description</span>
+					<span className="funnel-step-modal-content__label">{t('funnels.description')}</span>
 					<Input.TextArea
 						className="funnel-step-modal-content__input"
 						placeholder="(Optional) Eg. checkout dropoff funnel"

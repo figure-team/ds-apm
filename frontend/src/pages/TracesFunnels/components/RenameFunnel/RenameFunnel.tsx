@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import { Input } from 'antd';
 import SignozModal from 'components/SignozModal/SignozModal';
@@ -22,6 +23,7 @@ function RenameFunnel({
 	funnelId,
 	initialName,
 }: RenameFunnelProps): JSX.Element {
+	const { t } = useTranslation('trace');
 	const [newFunnelName, setNewFunnelName] = useState<string>(initialName);
 	const renameFunnelMutation = useRenameFunnel();
 	const { notifications } = useNotifications();
@@ -37,7 +39,7 @@ function RenameFunnel({
 			{
 				onSuccess: () => {
 					notifications.success({
-						message: 'Funnel renamed successfully',
+						message: t('funnels.rename_success'),
 					});
 					queryClient.invalidateQueries([REACT_QUERY_KEY.GET_FUNNELS_LIST]);
 					queryClient.invalidateQueries([
@@ -48,7 +50,7 @@ function RenameFunnel({
 				},
 				onError: () => {
 					notifications.error({
-						message: 'Failed to rename funnel',
+						message: t('funnels.rename_failed'),
 					});
 				},
 			},
@@ -63,12 +65,12 @@ function RenameFunnel({
 	return (
 		<SignozModal
 			open={isOpen}
-			title="Rename Funnel"
+			title={t('funnels.rename_title')}
 			width={384}
 			onCancel={handleCancel}
 			rootClassName="funnel-modal"
-			cancelText="Cancel"
-			okText="Rename Funnel"
+			cancelText={t('funnels.cancel')}
+			okText={t('funnels.rename_ok')}
 			okButtonProps={{
 				icon: <Check size={14} />,
 				loading: renameFunnelMutation.isLoading,
@@ -87,7 +89,7 @@ function RenameFunnel({
 			destroyOnClose
 		>
 			<div className="funnel-modal-content">
-				<span className="funnel-modal-content__label">Enter a new name</span>
+				<span className="funnel-modal-content__label">{t('funnels.rename_label')}</span>
 				<Input
 					className="funnel-modal-content__input"
 					value={newFunnelName}

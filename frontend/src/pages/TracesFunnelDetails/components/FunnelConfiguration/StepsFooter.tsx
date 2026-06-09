@@ -1,4 +1,5 @@
 import { useIsMutating } from 'react-query';
+import { useTranslation } from 'react-i18next';
 import { Button, Skeleton } from 'antd';
 import { REACT_QUERY_KEY } from 'constants/reactQueryKeys';
 import { Check, Cone } from 'lucide-react';
@@ -12,6 +13,7 @@ interface StepsFooterProps {
 }
 
 function ValidTracesCount(): JSX.Element {
+	const { t } = useTranslation('trace');
 	const {
 		hasAllEmptyStepFields,
 		isValidateStepsLoading,
@@ -27,7 +29,7 @@ function ValidTracesCount(): JSX.Element {
 
 	if (hasAllEmptyStepFields) {
 		return (
-			<span className="steps-footer__valid-traces">No service / span names</span>
+			<span className="steps-footer__valid-traces">{t('funnels.no_service_span_names')}</span>
 		);
 	}
 
@@ -51,7 +53,7 @@ function ValidTracesCount(): JSX.Element {
 		);
 	}
 
-	return <span className="steps-footer__valid-traces">Valid traces found</span>;
+	return <span className="steps-footer__valid-traces">{t('funnels.valid_traces_found')}</span>;
 }
 
 function StepsFooter({ stepsCount, isSaving }: StepsFooterProps): JSX.Element {

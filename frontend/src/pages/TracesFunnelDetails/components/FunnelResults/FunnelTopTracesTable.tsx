@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { UseQueryResult } from 'react-query';
 import {
 	ErrorTraceData,
@@ -10,7 +11,7 @@ import { ErrorResponse, SuccessResponse } from 'types/api';
 import { FunnelStepData } from 'types/api/traceFunnels';
 
 import FunnelTable from './FunnelTable';
-import { topTracesTableColumns } from './utils';
+import { getTopTracesTableColumns } from './utils';
 
 interface FunnelTopTracesTableProps {
 	funnelId: string;
@@ -37,6 +38,7 @@ function FunnelTopTracesTable({
 	steps,
 	useQueryHook,
 }: FunnelTopTracesTableProps): JSX.Element {
+	const { t } = useTranslation('trace');
 	const { startTime, endTime } = useFunnelContext();
 	const payload = useMemo(
 		() => ({
@@ -70,7 +72,7 @@ function FunnelTopTracesTable({
 		<FunnelTable
 			title={title}
 			tooltip={tooltip}
-			columns={topTracesTableColumns}
+			columns={getTopTracesTableColumns(t)}
 			data={data}
 			loading={isLoading || isFetching}
 		/>

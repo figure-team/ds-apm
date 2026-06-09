@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Popover, Tooltip } from 'antd';
 import cx from 'classnames';
 import { Ellipsis, PencilLine, Trash2 } from 'lucide-react';
@@ -38,6 +39,7 @@ function FunnelStepActions({
 	stepsCount,
 	hasEditPermission,
 }: FunnelStepActionsProps): JSX.Element {
+	const { t } = useTranslation('trace');
 	return (
 		<div className="funnel-item__actions">
 			<Button
@@ -56,10 +58,10 @@ function FunnelStepActions({
 			<Tooltip
 				title={
 					!hasEditPermission
-						? 'You need editor or admin access to delete steps'
+						? t('funnels.perm_delete_steps')
 						: stepsCount <= 2
 							? 'Minimum 2 steps required'
-							: 'Delete'
+							: t('funnels.delete')
 				}
 			>
 				<Button
@@ -91,6 +93,7 @@ function FunnelStepPopover({
 	isAddDetailsModalOpen,
 	setIsAddDetailsModalOpen,
 }: FunnelStepPopoverProps): JSX.Element {
+	const { t } = useTranslation('trace');
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
 	const { hasEditPermission } = useAppContext();
 
@@ -101,7 +104,7 @@ function FunnelStepPopover({
 
 	if (!hasEditPermission) {
 		return (
-			<Tooltip title="You need editor or admin access to add details to step">
+			<Tooltip title={t('funnels.perm_add_step_details')}>
 				<Button
 					type="text"
 					className="funnel-item__action-btn"

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Breadcrumb } from 'antd';
 import ROUTES from 'constants/routes';
 
@@ -9,12 +10,13 @@ interface FunnelBreadcrumbProps {
 }
 
 function FunnelBreadcrumb({ funnelName }: FunnelBreadcrumbProps): JSX.Element {
+	const { t } = useTranslation('trace');
 	const breadcrumbItems = [
 		{
 			title: (
 				<Link to={ROUTES.TRACES_FUNNELS}>
 					<span className="funnel-breadcrumb__link">
-						<span className="funnel-breadcrumb__title">All funnels</span>
+						<span className="funnel-breadcrumb__title">{t('all_funnels')}</span>
 					</span>
 				</Link>
 			),

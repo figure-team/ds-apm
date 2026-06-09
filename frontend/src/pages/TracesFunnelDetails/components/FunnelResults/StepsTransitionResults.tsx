@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+import { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import SignozRadioGroup from 'components/SignozRadioGroup/SignozRadioGroup';
 import { useFunnelContext } from 'pages/TracesFunnels/FunnelContext';
 
@@ -13,16 +15,23 @@ export interface StepTransition {
 	label: string;
 }
 
-function generateStepTransitions(stepsCount: number): StepTransition[] {
+function generateStepTransitions(
+	stepsCount: number,
+	t: TFunction,
+): StepTransition[] {
 	return Array.from({ length: stepsCount - 1 }, (_, index) => ({
 		value: `${index + 1}_to_${index + 2}`,
-		label: `Step ${index + 1} → Step ${index + 2}`,
+		label: t('funnels.step_transition_label', {
+			from: index + 1,
+			to: index + 2,
+		}).toString(),
 	}));
 }
 
 function StepsTransitionResults(): JSX.Element {
+	const { t } = useTranslation('trace');
 	const { steps, funnelId } = useFunnelContext();
-	const stepTransitions = generateStepTransitions(steps.length);
+	const stepTransitions = generateStepTransitions(steps.length, t);
 	const [selectedTransition, setSelectedTransition] = useState<string>(
 		stepTransitions[0]?.value || '',
 	);

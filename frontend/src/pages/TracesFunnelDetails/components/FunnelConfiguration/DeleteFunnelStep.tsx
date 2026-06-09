@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import SignozModal from 'components/SignozModal/SignozModal';
 import { Trash2, X } from 'lucide-react';
 import { useFunnelContext } from 'pages/TracesFunnels/FunnelContext';
@@ -15,6 +16,7 @@ function DeleteFunnelStep({
 	onClose,
 	onStepRemove,
 }: DeleteFunnelStepProps): JSX.Element {
+	const { t } = useTranslation('trace');
 	const { handleRunFunnel } = useFunnelContext();
 	const handleStepRemoval = (): void => {
 		onStepRemove();
@@ -25,12 +27,12 @@ function DeleteFunnelStep({
 	return (
 		<SignozModal
 			open={isOpen}
-			title="Delete this step"
+			title={t('funnels.delete_step_title')}
 			width={390}
 			onCancel={onClose}
 			rootClassName="funnel-modal delete-funnel-modal"
-			cancelText="Cancel"
-			okText="Delete Step"
+			cancelText={t('funnels.cancel')}
+			okText={t('funnels.delete_step_ok')}
 			okButtonProps={{
 				icon: <Trash2 size={14} />,
 				type: 'primary',

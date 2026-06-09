@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Popover, Tooltip } from 'antd';
 import cx from 'classnames';
 import { Ellipsis, PencilLine, Trash2 } from 'lucide-react';
@@ -26,6 +27,7 @@ function FunnelItemActions({
 	setIsRenameModalOpen,
 	setIsDeleteModalOpen,
 }: FunnelItemActionsProps): JSX.Element {
+	const { t } = useTranslation('trace');
 	return (
 		<div className="funnel-item__actions">
 			<Button
@@ -37,7 +39,7 @@ function FunnelItemActions({
 					setIsRenameModalOpen(true);
 				}}
 			>
-				Rename
+				{t('funnels.rename')}
 			</Button>
 			<Button
 				type="text"
@@ -48,7 +50,7 @@ function FunnelItemActions({
 					setIsDeleteModalOpen(true);
 				}}
 			>
-				Delete
+				{t('funnels.delete')}
 			</Button>
 		</div>
 	);
@@ -60,6 +62,7 @@ function FunnelItemPopover({
 	funnel,
 	shouldRedirectToTracesListOnDeleteSuccess,
 }: FunnelItemPopoverProps): JSX.Element {
+	const { t } = useTranslation('trace');
 	const [isRenameModalOpen, setIsRenameModalOpen] = useState<boolean>(false);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
 	const { hasEditPermission } = useAppContext();
@@ -75,7 +78,7 @@ function FunnelItemPopover({
 
 	if (!hasEditPermission) {
 		return (
-			<Tooltip title="You need editor or admin access to edit funnels">
+			<Tooltip title={t('funnels.perm_edit_funnels')}>
 				<Button
 					type="text"
 					className="funnel-item__action-btn"

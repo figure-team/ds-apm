@@ -1,4 +1,5 @@
 import { useIsMutating } from 'react-query';
+import { useTranslation } from 'react-i18next';
 import Spinner from 'components/Spinner';
 import { REACT_QUERY_KEY } from 'constants/reactQueryKeys';
 import { useFunnelContext } from 'pages/TracesFunnels/FunnelContext';
@@ -11,6 +12,7 @@ import StepsTransitionResults from './StepsTransitionResults';
 import './FunnelResults.styles.scss';
 
 function FunnelResults(): JSX.Element {
+	const { t } = useTranslation('trace');
 	const {
 		validTracesCount,
 		isValidateStepsLoading,
@@ -31,8 +33,8 @@ function FunnelResults(): JSX.Element {
 	if (hasIncompleteStepFields) {
 		return (
 			<EmptyFunnelResults
-				title="Missing service / span names"
-				description="Fill in the service and span names for all the steps"
+				title={t('funnels.missing_names_title')}
+				description={t('funnels.missing_names_desc')}
 			/>
 		);
 	}
@@ -44,8 +46,8 @@ function FunnelResults(): JSX.Element {
 	if (validTracesCount === 0) {
 		return (
 			<EmptyFunnelResults
-				title="There are no traces that match the funnel steps."
-				description="Check the service / span names in the funnel steps and try again to start seeing analytics here"
+				title={t('funnels.no_traces_title')}
+				description={t('funnels.no_traces_desc')}
 			/>
 		);
 	}

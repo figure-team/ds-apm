@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Skeleton } from 'antd';
 import { useFunnelsList } from 'hooks/TracesFunnels/useFunnels';
 import useHandleTraceFunnelsSearch from 'hooks/TracesFunnels/useHandleTraceFunnelsSearch';
@@ -30,6 +31,7 @@ export function TracesFunnelsContentRenderer({
 	onFunnelClick,
 	shouldRedirectToTracesListOnDeleteSuccess,
 }: TracesFunnelsContentRendererProps): JSX.Element {
+	const { t } = useTranslation('trace');
 	if (isLoading) {
 		return (
 			<div className="traces-funnels__loading">
@@ -51,7 +53,7 @@ export function TracesFunnelsContentRenderer({
 	}
 
 	if (isError) {
-		return <div>Something went wrong</div>;
+		return <div>{t('something_went_wrong')}</div>;
 	}
 
 	if (data.length === 0 && onCreateFunnel) {
