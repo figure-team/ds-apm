@@ -31,9 +31,11 @@ import { DataSource } from 'types/common/queryBuilder';
 import { GlobalReducer } from 'types/reducer/globalTime';
 import DOCLINKS from 'utils/docLinks';
 
+import { useTranslation } from 'react-i18next';
+
 import TraceExplorerControls from '../Controls';
 import { TracesLoading } from '../TraceLoading/TraceLoading';
-import { columns, PER_PAGE_OPTIONS } from './configs';
+import { getColumns, PER_PAGE_OPTIONS } from './configs';
 import { ActionsContainer, Container } from './styles';
 
 interface TracesViewProps {
@@ -49,6 +51,7 @@ function TracesView({
 	setIsLoadingQueries,
 	queryKeyRef,
 }: TracesViewProps): JSX.Element {
+	const { t } = useTranslation(['trace']);
 	const { stagedQuery, panelType } = useQueryBuilder();
 
 	const {
@@ -139,15 +142,17 @@ function TracesView({
 		}
 	}, [isLoading, isFetching, isError, panelType, tableData]);
 
+	const columns = useMemo(() => getColumns(t), [t]);
+
 	return (
 		<Container>
 			{(tableData || []).length !== 0 && (
 				<ActionsContainer>
 					<Typography>
-						This tab only shows Root Spans. More details
+						{t('root_spans_note')}
 						<Typography.Link href={DOCLINKS.TRACES_DETAILS_LINK} target="_blank">
 							{' '}
-							here
+							{t('here')}
 						</Typography.Link>
 					</Typography>
 

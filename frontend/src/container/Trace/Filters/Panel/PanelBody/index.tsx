@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { Card } from 'antd';
@@ -11,6 +12,7 @@ import TraceID from './SearchTraceID';
 
 function PanelBody(props: PanelBodyProps): JSX.Element {
 	const { type } = props;
+	const { t } = useTranslation(['trace']);
 
 	const { filterLoading } = useSelector<AppState, TraceReducer>(
 		(state) => state.traces,
@@ -19,7 +21,7 @@ function PanelBody(props: PanelBodyProps): JSX.Element {
 	if (filterLoading) {
 		return (
 			<Card bordered={false}>
-				<Spinner height="10vh" tip="Loading.." />
+				<Spinner height="10vh" tip={t('loading')} />
 			</Card>
 		);
 	}

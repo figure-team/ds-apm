@@ -1,4 +1,5 @@
 import { MouseEventHandler, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useDispatch, useSelector } from 'react-redux';
 import { DownOutlined, RightOutlined } from '@ant-design/icons';
@@ -49,13 +50,15 @@ function PanelHeading(props: PanelHeadingProps): JSX.Element {
 
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 
+	const { t } = useTranslation(['trace']);
+
 	const global = useSelector<AppState, GlobalReducer>(
 		(state) => state.globalTime,
 	);
 
 	const dispatch = useDispatch<Dispatch<AppActions>>();
 
-	const defaultErrorMessage = 'Something went wrong';
+	const defaultErrorMessage = t('something_went_wrong');
 
 	const { notifications } = useNotifications();
 
@@ -236,7 +239,7 @@ function PanelHeading(props: PanelHeadingProps): JSX.Element {
 				);
 			} else {
 				notifications.error({
-					message: response.error || 'Something went wrong',
+					message: response.error || defaultErrorMessage,
 				});
 			}
 			setIsLoading(false);
@@ -340,7 +343,7 @@ function PanelHeading(props: PanelHeadingProps): JSX.Element {
 								onClick={onClearAllHandler}
 								type="link"
 							>
-								Clear All
+								{t('clear_all')}
 							</ButtonComponent>
 						</ButtonContainer>
 					)}

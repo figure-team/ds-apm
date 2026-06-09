@@ -7,6 +7,7 @@ import ROUTES from 'constants/routes';
 import { getMs } from 'container/Trace/Filters/Panel/PanelBody/Duration/util';
 import { formUrlParams } from 'container/TraceDetail/utils';
 import { TimestampInput } from 'hooks/useTimezoneFormatter/useTimezoneFormatter';
+import { TFunction } from 'i18next';
 import { RowData } from 'lib/query/createTableColumnsFromQuery';
 import LineClampedText from 'periscope/components/LineClampedText/LineClampedText';
 import { ILog } from 'types/api/logs/log';
@@ -52,12 +53,13 @@ export const getListColumns = (
 		input: TimestampInput,
 		format?: string,
 	) => string | number,
+	t?: TFunction,
 ): ColumnsType<RowData> => {
 	const initialColumns: ColumnsType<RowData> = [
 		{
 			dataIndex: 'date',
 			key: 'date',
-			title: 'Timestamp',
+			title: t ? t('col_timestamp').toString() : 'Timestamp',
 			width: 145,
 			render: (value, item): JSX.Element => {
 				const date =

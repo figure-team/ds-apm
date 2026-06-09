@@ -7,6 +7,7 @@ import {
 	useRef,
 	useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery } from 'react-query';
 import {
 	Button,
@@ -120,6 +121,8 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 		traceEndTime,
 	} = props;
 
+	const { t } = useTranslation(['trace']);
+
 	const [isSearchVisible, setIsSearchVisible] = useState<boolean>(true);
 	const [shouldAutoFocusSearch, setShouldAutoFocusSearch] =
 		useState<boolean>(false);
@@ -205,7 +208,7 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 				label: (
 					<div className="view-title">
 						<LogsIcon width={14} height={14} />
-						Logs
+						{t('logs')}
 					</div>
 				),
 				value: RelatedSignalsViews.LOGS,
@@ -218,7 +221,7 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 				label: (
 					<div className="view-title">
 						<BarChart2 size={14} />
-						Metrics
+						{t('metrics')}
 					</div>
 				),
 				value: RelatedSignalsViews.INFRA,
@@ -226,7 +229,7 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 		}
 
 		return baseOptions;
-	}, [selectedSpan]);
+	}, [selectedSpan, t]);
 
 	function getItems(span: Span, startTime: number): TabsProps['items'] {
 		return [
@@ -237,7 +240,7 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 						icon={<Bookmark size="14" />}
 						className="attributes-tab-btn"
 					>
-						<span className="tab-label">Attributes</span>
+						<span className="tab-label">{t('attributes')}</span>
 						<span className="count-badge">
 							{Object.keys(span.tagMap || {}).length}
 						</span>
@@ -255,7 +258,7 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 			{
 				label: (
 					<Button type="text" icon={<Anvil size="14" />} className="events-tab-btn">
-						<span className="tab-label">Events</span>
+						<span className="tab-label">{t('events')}</span>
 						<span className="count-badge">{span.event?.length || 0}</span>
 					</Button>
 				),
@@ -275,7 +278,7 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 						icon={<Link2 size="14" />}
 						className="linked-spans-tab-btn"
 					>
-						<span className="tab-label">Links</span>
+						<span className="tab-label">{t('links')}</span>
 						<span className="count-badge">
 							{
 								(
@@ -307,21 +310,20 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 		() => (
 			<div className="span-percentile-tooltip-text">
 				<Typography.Text>
-					This span duration is{' '}
+					{t('span_percentile_description')}{' '}
 					<span className="span-percentile-tooltip-text-percentile">
 						p{Math.floor(spanPercentileData?.percentile || 0)}
 					</span>{' '}
-					out of the distribution for this resource evaluated for {selectedTimeRange}{' '}
-					hour(s) since the span start time.
+					{t('span_percentile_description_suffix', { hours: selectedTimeRange })}
 				</Typography.Text>
 				<br />
 				<br />
 				<Typography.Text className="span-percentile-tooltip-text-link">
-					Click to learn more
+					{t('click_to_learn_more')}
 				</Typography.Text>
 			</div>
 		),
-		[spanPercentileData?.percentile, selectedTimeRange],
+		[spanPercentileData?.percentile, selectedTimeRange, t],
 	);
 
 	const endTime = useMemo(
@@ -568,7 +570,7 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 				{!isSpanDetailsDocked && (
 					<div className="heading">
 						<div className="dot" style={{ background: color }} />
-						<Typography.Text className="text">Span Details</Typography.Text>
+						<Typography.Text className="text">{t('span_details')}</Typography.Text>
 					</div>
 				)}
 				<PanelRight
@@ -581,7 +583,9 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 				<>
 					<section className="description">
 						<div className="item">
-							<Typography.Text className="attribute-key">span name</Typography.Text>
+							<Typography.Text className="attribute-key">
+								{t('span_name')}
+							</Typography.Text>
 
 							<div className="value-wrapper span-name-wrapper">
 								<Tooltip title={selectedSpan.name}>
@@ -645,7 +649,7 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 													className="span-percentiles-header-text"
 													onClick={(): void => setIsSpanPercentilesOpen((prev) => !prev)}
 												>
-													<ChevronDown size={16} /> Span Percentile
+													<ChevronDown size={16} /> {t('span_percentile')}
 												</Typography.Text>
 
 												{showResourceAttributesSelector ? (
@@ -672,7 +676,7 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 												>
 													<div className="resource-attributes-select-container-header">
 														<Input
-															placeholder="Search resource attributes"
+															placeholder={t('search_resource_attributes')}
 															className="resource-attributes-select-container-input"
 															value={resourceAttributesSearchQuery}
 															onChange={(e): void =>
@@ -721,7 +725,7 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 
 											<div className="span-percentile-content">
 												<Typography.Text className="span-percentile-content-title">
-													This span duration is{' '}
+													{t('span_percentile_description')}{' '}
 													{!isLoadingSpanPercentilesData &&
 													!isFetchingSpanPercentilesData &&
 													spanPercentileData ? (
@@ -733,14 +737,15 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 															<Loader2 size={12} className="animate-spin" />
 														</span>
 													)}{' '}
-													out of the distribution for this resource evaluated for{' '}
-													{selectedTimeRange} hour(s) since the span start time.
+													{t('span_percentile_description_suffix', {
+														hours: selectedTimeRange,
+													})}
 												</Typography.Text>
 
 												<div className="span-percentile-timerange">
 													<Select
 														labelInValue
-														placeholder="Select timerange"
+														placeholder={t('select_timerange')}
 														className="span-percentile-timerange-select"
 														value={{
 															label: `${selectedTimeRange}h : ${dayjs(selectedSpan?.timestamp)
@@ -760,11 +765,11 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 												<div className="span-percentile-values-table">
 													<div className="span-percentile-values-table-header-row">
 														<Typography.Text className="span-percentile-values-table-header">
-															Percentile
+															{t('percentile')}
 														</Typography.Text>
 
 														<Typography.Text className="span-percentile-values-table-header">
-															Duration
+															{t('duration_title')}
 														</Typography.Text>
 													</div>
 
@@ -804,7 +809,7 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 																	<div className="dashed-line" />
 
 																	<Typography.Text className="span-percentile-values-table-data-row-value">
-																		(this span){' '}
+																		{t('this_span')}{' '}
 																		{getYAxisFormattedValue(
 																			`${selectedSpan.durationNano / 1000000}`,
 																			'ms',
@@ -822,7 +827,9 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 							</AnimatePresence>
 						</div>
 						<div className="item">
-							<Typography.Text className="attribute-key">span id</Typography.Text>
+							<Typography.Text className="attribute-key">
+								{t('span_id')}
+							</Typography.Text>
 							<div className="value-wrapper">
 								<Typography.Text className="attribute-value">
 									{selectedSpan.spanId}
@@ -840,7 +847,9 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 							</div>
 						</div>
 						<div className="item">
-							<Typography.Text className="attribute-key">start time</Typography.Text>
+							<Typography.Text className="attribute-key">
+								{t('start_time')}
+							</Typography.Text>
 							<div className="value-wrapper">
 								<Typography.Text className="attribute-value">
 									{formatEpochTimestamp(selectedSpan.timestamp)}
@@ -848,7 +857,9 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 							</div>
 						</div>
 						<div className="item">
-							<Typography.Text className="attribute-key">duration</Typography.Text>
+							<Typography.Text className="attribute-key">
+								{t('duration')}
+							</Typography.Text>
 							<div className="value-wrapper">
 								<Typography.Text className="attribute-value">
 									{getYAxisFormattedValue(`${selectedSpan.durationNano}`, 'ns')}
@@ -856,7 +867,9 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 							</div>
 						</div>
 						<div className="item">
-							<Typography.Text className="attribute-key">service</Typography.Text>
+							<Typography.Text className="attribute-key">
+								{t('service')}
+							</Typography.Text>
 							<div className="service">
 								<div className="dot" style={{ backgroundColor: color }} />
 								<div className="value-wrapper">
@@ -879,7 +892,9 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 							</div>
 						</div>
 						<div className="item">
-							<Typography.Text className="attribute-key">span kind</Typography.Text>
+							<Typography.Text className="attribute-key">
+								{t('span_kind')}
+							</Typography.Text>
 							<div className="value-wrapper">
 								<Typography.Text className="attribute-value">
 									{selectedSpan.spanKind}
@@ -898,7 +913,7 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 						</div>
 						<div className="item">
 							<Typography.Text className="attribute-key">
-								status code string
+								{t('status_code_string')}
 							</Typography.Text>
 							<div className="value-wrapper">
 								<Typography.Text className="attribute-value">
@@ -920,7 +935,7 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 						{selectedSpan.statusMessage && (
 							<div className="item">
 								<EventAttribute
-									attributeKey="status message"
+									attributeKey={t('status_message')}
 									attributeValue={selectedSpan.statusMessage}
 									onExpand={showStatusMessageModal}
 								/>
@@ -938,7 +953,7 @@ function SpanDetailsDrawer(props: ISpanDetailsDrawerProps): JSX.Element {
 						)}
 						<div className="item">
 							<Typography.Text className="attribute-key">
-								related signals
+								{t('related_signals')}
 							</Typography.Text>
 							<div className="related-signals-section">
 								<Button.Group className="related-signals-button-group">

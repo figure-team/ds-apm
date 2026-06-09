@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Tooltip, Typography } from 'antd';
 import ROUTES from 'constants/routes';
 import { formUrlParams } from 'container/TraceDetail/utils';
@@ -20,6 +21,7 @@ interface SpanReference {
 
 function LinkedSpans(props: LinkedSpansProps): JSX.Element {
 	const { span } = props;
+	const { t } = useTranslation(['trace']);
 
 	const getLink = useCallback((item: SpanReference): string | null => {
 		if (!item.traceId || !item.spanId) {
@@ -52,7 +54,7 @@ function LinkedSpans(props: LinkedSpansProps): JSX.Element {
 				return (
 					<div className="item" key={item.spanId}>
 						<Typography.Text className="item-key" ellipsis>
-							Linked Span ID
+							{t('linked_span_id')}
 						</Typography.Text>
 						<div className="value-wrapper">
 							<Tooltip title={item.spanId}>

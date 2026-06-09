@@ -1,4 +1,5 @@
 import { ChangeEvent, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useDispatch, useSelector } from 'react-redux';
 import { Input } from 'antd';
@@ -17,6 +18,7 @@ import { TraceReducer } from 'types/reducer/trace';
 const { Search } = Input;
 
 function TraceID(): JSX.Element {
+	const { t } = useTranslation(['trace']);
 	const {
 		selectedFilter,
 		filterToFetchData,
@@ -99,7 +101,7 @@ function TraceID(): JSX.Element {
 			}
 		} catch (error) {
 			notifications.error({
-				message: (error as AxiosError).toString() || 'Something went wrong',
+				message: (error as AxiosError).toString() || t('something_went_wrong'),
 			});
 		} finally {
 			setIsLoading(false);
@@ -116,7 +118,7 @@ function TraceID(): JSX.Element {
 	return (
 		<div>
 			<Search
-				placeholder="Filter by Trace ID"
+				placeholder={t('filter_by_trace_id')}
 				onSearch={onSearch}
 				style={{
 					marginBottom: '5rem',

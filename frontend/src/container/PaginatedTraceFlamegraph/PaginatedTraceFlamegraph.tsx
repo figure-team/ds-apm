@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { Progress, Skeleton, Tooltip, Typography } from 'antd';
 import { AxiosError } from 'axios';
@@ -34,6 +35,7 @@ function TraceFlamegraph(props: ITraceFlamegraphProps): JSX.Element {
 		selectedSpan,
 	} = props;
 	const { id: traceId } = useParams<TraceDetailFlamegraphURLProps>();
+	const { t } = useTranslation(['trace']);
 	const urlQuery = useUrlQuery();
 	const [firstSpanAtFetchLevel, setFirstSpanAtFetchLevel] = useState<string>(
 		urlQuery.get('spanId') || '',
@@ -110,7 +112,7 @@ function TraceFlamegraph(props: ITraceFlamegraphProps): JSX.Element {
 					/>
 				);
 			default:
-				return <Spinner tip="Fetching the trace!" />;
+				return <Spinner tip={t('fetching_the_trace')} />;
 		}
 	}, [
 		data?.payload?.endTimestampMillis,
@@ -119,6 +121,7 @@ function TraceFlamegraph(props: ITraceFlamegraphProps): JSX.Element {
 		firstSpanAtFetchLevel,
 		selectedSpan,
 		spans,
+		t,
 		traceFlamegraphState,
 		traceId,
 	]);
@@ -131,7 +134,7 @@ function TraceFlamegraph(props: ITraceFlamegraphProps): JSX.Element {
 				className="flamegraph-stats"
 				style={{ width: `${traceFlamegraphStatsWidth + 22}px` }}
 			>
-				<div className="exec-time-service">% exec time</div>
+				<div className="exec-time-service">{t('exec_time')}</div>
 				<div className="stats">
 					{Object.keys(serviceExecTime)
 						.sort((a, b) => {

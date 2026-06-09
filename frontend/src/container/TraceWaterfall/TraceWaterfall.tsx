@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Skeleton } from 'antd';
 import { AxiosError } from 'axios';
 import Spinner from 'components/Spinner';
@@ -46,6 +47,7 @@ function TraceWaterfall(props: ITraceWaterfallProps): JSX.Element {
 		setSelectedSpan,
 		selectedSpan,
 	} = props;
+	const { t } = useTranslation(['trace']);
 	// get the current state of trace waterfall based on the API lifecycle
 	const traceWaterfallState = useMemo(() => {
 		if (isFetchingTraceData) {
@@ -113,7 +115,7 @@ function TraceWaterfall(props: ITraceWaterfallProps): JSX.Element {
 					/>
 				);
 			default:
-				return <Spinner tip="Fetching the trace!" />;
+				return <Spinner tip={t('fetching_the_trace')} />;
 		}
 	}, [
 		errorFetchingTraceData,
@@ -123,6 +125,7 @@ function TraceWaterfall(props: ITraceWaterfallProps): JSX.Element {
 		setSelectedSpan,
 		setTraceFlamegraphStatsWidth,
 		spans,
+		t,
 		traceData?.payload?.endTimestampMillis,
 		traceData?.payload?.hasMissingSpans,
 		traceData?.payload?.startTimestampMillis,

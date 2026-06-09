@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useDispatch, useSelector } from 'react-redux';
 import { Checkbox, Tooltip, Typography } from 'antd';
@@ -33,6 +34,7 @@ function CheckBoxComponent(props: CheckBoxProps): JSX.Element {
 		(state) => state.globalTime,
 	);
 	const { keyValue, name, value } = props;
+	const { t } = useTranslation(['trace']);
 
 	const dispatch = useDispatch<Dispatch<AppActions>>();
 
@@ -150,12 +152,12 @@ function CheckBoxComponent(props: CheckBoxProps): JSX.Element {
 				setIsLoading(false);
 
 				notifications.error({
-					message: response.error || 'Something went wrong',
+					message: response.error || t('something_went_wrong'),
 				});
 			}
 		} catch (error) {
 			notifications.error({
-				message: (error as AxiosError).toString() || 'Something went wrong',
+				message: (error as AxiosError).toString() || t('something_went_wrong'),
 			});
 			setIsLoading(false);
 		}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Input } from 'antd';
@@ -20,6 +21,7 @@ function CommonCheckBox(props: CommonCheckBoxProps): JSX.Element {
 	);
 
 	const { name } = props;
+	const { t } = useTranslation(['trace']);
 
 	const status = filter.get(name) || {};
 
@@ -54,7 +56,7 @@ function CommonCheckBox(props: CommonCheckBoxProps): JSX.Element {
 					style={{
 						padding: '0 3%',
 					}}
-					placeholder="Filter Values"
+					placeholder={t('filter_values')}
 				/>
 			)}
 
@@ -90,7 +92,7 @@ function CommonCheckBox(props: CommonCheckBoxProps): JSX.Element {
 
 			{isMoreButtonAvilable && (
 				<Button onClick={onClickMoreHandler} type="link">
-					More
+					{t('more')}
 				</Button>
 			)}
 		</>

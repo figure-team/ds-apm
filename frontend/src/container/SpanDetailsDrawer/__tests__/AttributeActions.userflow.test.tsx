@@ -357,10 +357,10 @@ describe('AttributeActions User Flow Tests', () => {
 			await user.click(moreActionsButton!);
 
 			await waitFor(() => {
-				expect(screen.getByText('Copy Field Value')).toBeInTheDocument();
+				expect(screen.getByText('copy_field_value')).toBeInTheDocument();
 			});
 
-			const copyFieldValueButton = screen.getByText('Copy Field Value');
+			const copyFieldValueButton = screen.getByText('copy_field_value');
 			fireEvent.click(copyFieldValueButton);
 
 			// Verify quotes are stripped from copied value
@@ -377,7 +377,7 @@ describe('AttributeActions User Flow Tests', () => {
 
 			// Verify no attributes message is displayed
 			expect(
-				screen.getByText('No attributes found for selected span'),
+				screen.getByText('no_data_found_for_span'),
 			).toBeInTheDocument();
 		});
 	});

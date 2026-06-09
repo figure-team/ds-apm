@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Skeleton, Tooltip, Typography } from 'antd';
 import { getYAxisFormattedValue } from 'components/Graph/yAxisConfig';
 import { DATE_TIME_FORMATS } from 'constants/dateTimeFormats';
@@ -42,6 +43,7 @@ function TraceMetadata(props: ITraceMetadataProps): JSX.Element {
 	} = props;
 
 	const { timezone } = useTimezone();
+	const { t } = useTranslation(['trace']);
 
 	const startTimeInMs = useMemo(
 		() =>
@@ -68,7 +70,7 @@ function TraceMetadata(props: ITraceMetadataProps): JSX.Element {
 					</Button>
 					<div className="trace-name">
 						<DraftingCompass size={14} className="drafting" />
-						<Typography.Text className="trace-id">Trace ID</Typography.Text>
+						<Typography.Text className="trace-id">{t('trace_id')}</Typography.Text>
 					</div>
 					<Typography.Text className="trace-id-value">{traceID}</Typography.Text>
 				</div>
@@ -94,7 +96,7 @@ function TraceMetadata(props: ITraceMetadataProps): JSX.Element {
 							</Typography.Text>
 						</div>
 						<div className="trace-duration">
-							<Tooltip title="Duration of trace">
+							<Tooltip title={t('duration_of_trace')}>
 								<Timer size={14} />
 							</Tooltip>
 							<Typography.Text className="text">
@@ -102,7 +104,7 @@ function TraceMetadata(props: ITraceMetadataProps): JSX.Element {
 							</Typography.Text>
 						</div>
 						<div className="start-time-info">
-							<Tooltip title="Start timestamp">
+							<Tooltip title={t('start_timestamp')}>
 								<CalendarClock size={14} />
 							</Tooltip>
 
@@ -116,12 +118,12 @@ function TraceMetadata(props: ITraceMetadataProps): JSX.Element {
 			{!notFound && (
 				<section className="datapoints-info">
 					<div className="data-point">
-						<Typography.Text className="text">Total Spans</Typography.Text>
+						<Typography.Text className="text">{t('total_spans')}</Typography.Text>
 						<Typography.Text className="value">{totalSpans}</Typography.Text>
 					</div>
 					<div className="separator" />
 					<div className="data-point">
-						<Typography.Text className="text">Error Spans</Typography.Text>
+						<Typography.Text className="text">{t('error_spans')}</Typography.Text>
 						<Typography.Text className="value">{totalErrorSpans}</Typography.Text>
 					</div>
 				</section>

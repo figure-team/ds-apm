@@ -140,14 +140,14 @@ describe('SpanLogs', () => {
 
 		// Should show simple empty state (no emptyStateConfig provided)
 		expect(
-			screen.getByText('No logs found for selected span.'),
+			screen.getByText('no_logs_found_for_span'),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText('View logs for the current trace.'),
+			screen.getByText('view_logs_for_current_trace'),
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole('button', {
-				name: /view logs/i,
+				name: /view_logs/i,
 			}),
 		).toBeInTheDocument();
 
@@ -186,7 +186,7 @@ describe('SpanLogs', () => {
 
 		// Should NOT show simple empty state
 		expect(
-			screen.queryByText('No logs found for selected span.'),
+			screen.queryByText('no_logs_found_for_span'),
 		).not.toBeInTheDocument();
 	});
 
@@ -202,7 +202,7 @@ describe('SpanLogs', () => {
 		);
 
 		const logExplorerButton = screen.getByRole('button', {
-			name: /view logs/i,
+			name: /view_logs/i,
 		});
 		await user.click(logExplorerButton);
 
