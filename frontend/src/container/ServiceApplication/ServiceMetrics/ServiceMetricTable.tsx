@@ -67,7 +67,10 @@ function ServiceMetricTable({
 	);
 
 	const { search } = useLocation();
-	const tableColumns = useMemo(() => getColumns(search, true), [search]);
+	const tableColumns = useMemo(() => getColumns(search, true, getText), [
+		search,
+		getText,
+	]);
 	const [RPS, setRPS] = useState(0);
 
 	useEffect(() => {

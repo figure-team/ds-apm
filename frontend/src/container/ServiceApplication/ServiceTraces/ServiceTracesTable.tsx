@@ -23,7 +23,10 @@ function ServiceTraceTable({
 
 	const { isFetchingActiveLicense, trialInfo } = useAppContext();
 	const { isCloudUser: isCloudUserVal } = useGetTenantLicense();
-	const tableColumns = useMemo(() => getColumns(search, false), [search]);
+	const tableColumns = useMemo(() => getColumns(search, false, getText), [
+		search,
+		getText,
+	]);
 
 	useEffect(() => {
 		if (

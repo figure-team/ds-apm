@@ -1,16 +1,19 @@
 import type { TableColumnsType as ColumnsType } from 'antd';
+import { TFunction } from 'i18next';
 import { ServicesList } from 'types/api/metrics/getService';
 
 import {
 	ColumnKey,
-	ColumnTitle,
+	ColumnTitleKey,
 	ColumnWidth,
 	SORTING_ORDER,
 } from './ColumnContants';
 
-export const baseColumnOptions: ColumnsType<ServicesList> = [
+export const getBaseColumnOptions = (
+	t: TFunction,
+): ColumnsType<ServicesList> => [
 	{
-		title: ColumnTitle[ColumnKey.Application],
+		title: t(ColumnTitleKey[ColumnKey.Application]).toString(),
 		dataIndex: ColumnKey.Application,
 		width: ColumnWidth.Application,
 		key: ColumnKey.Application,
@@ -22,13 +25,13 @@ export const baseColumnOptions: ColumnsType<ServicesList> = [
 		defaultSortOrder: SORTING_ORDER,
 	},
 	{
-		title: ColumnTitle[ColumnKey.ErrorRate],
+		title: t(ColumnTitleKey[ColumnKey.ErrorRate]).toString(),
 		dataIndex: ColumnKey.ErrorRate,
 		key: ColumnKey.ErrorRate,
 		width: 150,
 	},
 	{
-		title: ColumnTitle[ColumnKey.Operations],
+		title: t(ColumnTitleKey[ColumnKey.Operations]).toString(),
 		dataIndex: ColumnKey.Operations,
 		key: ColumnKey.Operations,
 		width: ColumnWidth.Operations,

@@ -1,14 +1,16 @@
 import type { ColumnsType, ColumnType } from 'antd/es/table';
 import { generatorResizeTableColumns } from 'components/TableRenderer/utils';
+import { TFunction } from 'i18next';
 import { ServicesList } from 'types/api/metrics/getService';
 
-import { baseColumnOptions } from './BaseColumnOptions';
-import { ColumnKey, ColumnTitle } from './ColumnContants';
+import { getBaseColumnOptions } from './BaseColumnOptions';
+import { ColumnKey, ColumnTitleKey } from './ColumnContants';
 import { getColumnSearchProps } from './GetColumnSearchProps';
 
 export const getColumns = (
 	search: string,
 	isMetricData: boolean,
+	t: TFunction,
 ): ColumnsType<ServicesList> => {
 	const dynamicColumnOption: {
 		key: string;
@@ -17,13 +19,13 @@ export const getColumns = (
 		{
 			key: ColumnKey.Application,
 			columnOption: {
-				...getColumnSearchProps('serviceName', search),
+				...getColumnSearchProps('serviceName', search, t),
 			},
 		},
 		{
 			key: ColumnKey.P99,
 			columnOption: {
-				title: `${ColumnTitle[ColumnKey.P99]}${
+				title: `${t(ColumnTitleKey[ColumnKey.P99])}${
 					isMetricData ? ' (in ns)' : ' (in ms)'
 				}`,
 				sorter: (a: ServicesList, b: ServicesList): number => a.p99 - b.p99,
@@ -54,7 +56,7 @@ export const getColumns = (
 	];
 
 	return generatorResizeTableColumns<ServicesList>({
-		baseColumnOptions,
+		baseColumnOptions: getBaseColumnOptions(t),
 		dynamicColumnOption,
 	});
 };
