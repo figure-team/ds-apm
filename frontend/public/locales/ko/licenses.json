@@ -1,0 +1,13 @@
+{
+  "column_license_key": "라이선스 키",
+  "column_valid_from": "유효 시작일",
+  "column_valid_until": "유효 종료일",
+  "column_license_status": "상태",
+  "button_apply": "적용",
+  "placeholder_license_key": "라이선스 키 입력",
+  "tab_current_license": "현재 라이선스",
+  "tab_license_history": "기록",
+  "loading_licenses": "라이선스 로딩 중...",
+  "enter_license_key": "라이선스 키를 입력해 주세요",
+  "license_applied": "라이선스가 성공적으로 적용되었습니다"
+}
