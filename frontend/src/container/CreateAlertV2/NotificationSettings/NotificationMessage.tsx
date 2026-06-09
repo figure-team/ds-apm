@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button, Input, Popover, Tooltip, Typography } from 'antd';
 import { previewNotificationTemplate } from 'api/v2/rules/previewNotificationTemplate';
 import { Info } from 'lucide-react';
@@ -10,6 +11,7 @@ import {
 } from './incidentTemplateVariables';
 
 function NotificationMessage(): JSX.Element {
+	const { t } = useTranslation(['alerts']);
 	const { alertState, notificationSettings, setNotificationSettings } =
 		useCreateAlertState();
 	const [previewBody, setPreviewBody] = useState<string>('');
@@ -37,7 +39,7 @@ function NotificationMessage(): JSX.Element {
 		} catch {
 			setPreviewBody('');
 			setPreviewMissingVars([]);
-			setPreviewError('Unable to preview this notification message.');
+			setPreviewError(t('v2_preview_error_msg'));
 		} finally {
 			setIsPreviewLoading(false);
 		}
@@ -62,10 +64,9 @@ function NotificationMessage(): JSX.Element {
 
 	const templateVariableContent = (
 		<div className="template-variable-content">
-			<Typography.Text strong>Incident template variables</Typography.Text>
+			<Typography.Text strong>{t('v2_incident_template_vars_title')}</Typography.Text>
 			<Typography.Text className="template-variable-content-description">
-				Use these DS-APM variables to include PM briefing, SI/SM routing, and SOP
-				binding context in notifications.
+				{t('v2_incident_template_vars_desc')}
 			</Typography.Text>
 			{INCIDENT_TEMPLATE_VARIABLES.map((item) => (
 				<div className="template-variable-content-item" key={item.variable}>
@@ -81,21 +82,20 @@ function NotificationMessage(): JSX.Element {
 			<div className="notification-message-header">
 				<div className="notification-message-header-content">
 					<Typography.Text className="notification-message-header-title">
-						Notification Message
-						<Tooltip title="Customize the message content sent in alert notifications. Variables like $incident.impact_summary, $incident.next_action, $incident.service_name, and $incident.sop_id are replaced when the alert fires.">
+						{t('v2_notification_message_title')}
+						<Tooltip title={t('v2_notification_message_tooltip')}>
 							<Info size={16} />
 						</Tooltip>
 					</Typography.Text>
 					<Typography.Text className="notification-message-header-description">
-						Custom message content for alert notifications. Use template variables to
-						include dynamic information.
+						{t('v2_notification_message_desc')}
 					</Typography.Text>
 				</div>
 				<div className="notification-message-header-actions">
 					<Popover content={templateVariableContent} trigger="click">
 						<Button type="text">
 							<Info size={12} />
-							Variables
+							{t('v2_variables_btn')}
 						</Button>
 					</Popover>
 					<Button
@@ -104,23 +104,24 @@ function NotificationMessage(): JSX.Element {
 						onClick={handlePreview}
 						type="text"
 					>
-						Preview
+						{t('v2_preview_btn')}
 					</Button>
 				</div>
 			</div>
 			<div className="notification-message-incident-hint">
 				<Typography.Text>
-					PM/SI-SM context is available with variables like{' '}
+					{t('v2_pm_sisam_hint')}{' '}
 					<code>$incident.impact_summary</code>, <code>$incident.next_action</code>,
 					<code>$incident.service_name</code>, and <code>$incident.sop_id</code>.
 				</Typography.Text>
 			</div>
 			{unknownIncidentVariables.length > 0 && (
 				<div className="notification-message-warning" role="alert">
-					Unknown incident template variable
-					{unknownIncidentVariables.length > 1 ? 's' : ''}:{' '}
-					{unknownIncidentVariables.join(', ')}. Use the Variables list to pick a
-					supported $incident.* field.
+					{unknownIncidentVariables.length > 1
+						? t('v2_unknown_incident_vars')
+						: t('v2_unknown_incident_var')}
+					:{' '}
+					{unknownIncidentVariables.join(', ')}. {t('v2_unknown_vars_hint')}
 				</div>
 			)}
 			{previewError && (
@@ -131,12 +132,12 @@ function NotificationMessage(): JSX.Element {
 			{previewBody && (
 				<div className="notification-message-preview">
 					<Typography.Text className="notification-message-preview-title">
-						Preview
+						{t('v2_preview_title')}
 					</Typography.Text>
 					<pre>{previewBody}</pre>
 					{previewMissingVars.length > 0 && (
 						<div className="notification-message-warning" role="alert">
-							Preview missing variables: {previewMissingVars.join(', ')}
+							{t('v2_preview_missing_vars')} {previewMissingVars.join(', ')}
 						</div>
 					)}
 				</div>
@@ -144,7 +145,7 @@ function NotificationMessage(): JSX.Element {
 			<Input.TextArea
 				value={notificationSettings.description}
 				onChange={(e): void => handleDescriptionChange(e.target.value)}
-				placeholder="Enter notification message..."
+				placeholder={t('v2_notification_message_placeholder')}
 			/>
 		</div>
 	);

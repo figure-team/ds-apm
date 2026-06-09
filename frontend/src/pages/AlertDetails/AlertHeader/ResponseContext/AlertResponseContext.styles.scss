@@ -115,3 +115,35 @@
 		padding: 0;
 	}
 }
+
+body.lightMode {
+	.alert-response-context {
+		&__heading {
+			color: var(--l1-foreground);
+		}
+
+		&__description {
+			color: var(--l2-foreground);
+		}
+
+		&__title {
+			color: var(--l2-foreground);
+		}
+
+		&__label {
+			color: var(--l2-foreground);
+		}
+
+		&__value {
+			color: var(--l1-foreground);
+		}
+
+		&__copy {
+			color: var(--l2-foreground);
+		}
+
+		&__item-copy {
+			color: var(--l2-foreground);
+		}
+	}
+}

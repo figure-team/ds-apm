@@ -276,6 +276,41 @@ describe('LabelsInput', () => {
 
 			jest.useRealTimers();
 		});
+
+		it('saves label when blurring value input with key and value filled', () => {
+			renderLabelsInput();
+
+			fireEvent.click(screen.getByText(ADD_LABELS_TEXT));
+			const input = screen.getByPlaceholderText(ENTER_KEY_PLACEHOLDER);
+
+			// Enter key, switch to value mode
+			fireEvent.change(input, { target: { value: 'severity' } });
+			fireEvent.keyDown(input, { key: 'Enter' });
+
+			// Enter value, then blur instead of pressing Enter
+			const valueInput = screen.getByPlaceholderText(ENTER_VALUE_PLACEHOLDER);
+			fireEvent.change(valueInput, { target: { value: 'high' } });
+			fireEvent.blur(valueInput);
+
+			expect(mockOnLabelsChange).toHaveBeenCalledWith({ severity: 'high' });
+		});
+
+		it('does not save label when blurring value input with empty value', () => {
+			renderLabelsInput();
+
+			fireEvent.click(screen.getByText(ADD_LABELS_TEXT));
+			const input = screen.getByPlaceholderText(ENTER_KEY_PLACEHOLDER);
+
+			// Enter key, switch to value mode
+			fireEvent.change(input, { target: { value: 'severity' } });
+			fireEvent.keyDown(input, { key: 'Enter' });
+
+			// Blur without entering a value
+			const valueInput = screen.getByPlaceholderText(ENTER_VALUE_PLACEHOLDER);
+			fireEvent.blur(valueInput);
+
+			expect(mockOnLabelsChange).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('Input Change Handling', () => {

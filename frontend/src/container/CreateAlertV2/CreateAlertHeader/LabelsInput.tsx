@@ -116,8 +116,28 @@ function LabelsInput({
 		if (!inputState.key && !inputState.value) {
 			setIsAdding(false);
 			setInputState({ key: '', value: '', isKeyInput: true });
+		} else if (
+			!inputState.isKeyInput &&
+			inputState.key.trim() &&
+			inputState.value.trim()
+		) {
+			// Save the label when focus leaves the value input with both key and value filled
+			if (labels[inputState.key.trim()]) {
+				notifications.error({ message: 'Label with this key already exists' });
+				return;
+			}
+			const error = validateLabelsKey(inputState.key.trim());
+			if (error) {
+				notifications.error({ message: error });
+				return;
+			}
+			onLabelsChange({
+				...labels,
+				[inputState.key.trim()]: inputState.value.trim(),
+			});
+			setInputState({ key: '', value: '', isKeyInput: true });
 		}
-	}, [inputState]);
+	}, [inputState, labels, notifications, onLabelsChange, validateLabelsKey]);
 
 	return (
 		<div className="labels-input">

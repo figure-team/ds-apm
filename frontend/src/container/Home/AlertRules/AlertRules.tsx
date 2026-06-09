@@ -10,6 +10,7 @@ import history from 'lib/history';
 import { mapQueryDataFromApi } from 'lib/newQueryBuilder/queryBuilderMappers/mapQueryDataFromApi';
 import { ArrowRight, ArrowUpRight, Plus } from 'lucide-react';
 import Card from 'periscope/components/Card/Card';
+import { useIsDarkMode } from 'hooks/useDarkMode';
 import { useAppContext } from 'providers/App/App';
 import { toCompositeMetricQuery } from 'types/api/alerts/convert';
 import { USER_ROLES } from 'types/roles';
@@ -25,6 +26,7 @@ export default function AlertRules({
 	onUpdateChecklistDoneItem: (itemKey: string) => void;
 	loadingUserPreferences: boolean;
 }): JSX.Element {
+	const isDarkMode = useIsDarkMode();
 	const { user } = useAppContext();
 	const [rulesExist, setRulesExist] = useState(false);
 
@@ -180,7 +182,7 @@ export default function AlertRules({
 							<Tag color={rule?.labels?.severity}>{rule?.labels?.severity}</Tag>
 
 							{rule.state === 'firing' && (
-								<Tag color="red" className="firing-tag">
+								<Tag color={isDarkMode ? 'red' : '#DC2626'} className="firing-tag">
 									{rule.state}
 								</Tag>
 							)}

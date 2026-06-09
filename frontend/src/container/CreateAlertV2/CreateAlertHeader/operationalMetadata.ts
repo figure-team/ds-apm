@@ -6,38 +6,38 @@ export type RequiredOperationalLabel = {
 	description: string;
 };
 
-export const REQUIRED_OPERATIONAL_LABELS: RequiredOperationalLabel[] = [
+export const RECOMMENDED_OPERATIONAL_LABELS: RequiredOperationalLabel[] = [
 	{
 		key: 'project_id',
-		label: 'Project',
-		description: 'Routes the incident to the right SI/SM project.',
+		label: 'Project ID',
+		description: 'SOP 테넌트 범위 검증·AI 전략 org 선택에 사용. environment와 함께 없으면 SOP 문서 접근이 차단됩니다.',
 	},
 	{
 		key: 'environment',
 		label: 'Environment',
-		description: 'Separates prod, staging, and customer-specific environments.',
+		description: 'project_id와 함께 SOP 테넌트 정책을 완성합니다. 둘 다 있어야 SOP 연동이 활성화됩니다.',
 	},
 	{
 		key: 'service.name',
-		label: 'Service',
-		description: 'Connects the alert to the OpenTelemetry service.',
+		label: 'Service Name',
+		description: '알림 발송 payload(Slack·PagerDuty·webhook)에 Service 필드로 포함됩니다.',
 	},
 	{
 		key: 'owner_team',
-		label: 'Owner team',
-		description: 'Identifies the first responder or vendor team.',
+		label: 'Owner Team',
+		description: '알림 발송 payload에 Owner team 필드로 포함됩니다.',
 	},
 	{
 		key: 'severity',
 		label: 'Severity',
-		description: 'Drives urgency, notification routing, and customer messaging.',
+		description: '라우팅 정책 자동 생성 시 임계값 expression 값으로 사용됩니다.',
 	},
 ];
 
 export function getMissingOperationalLabels(
 	labels: Labels,
 ): RequiredOperationalLabel[] {
-	return REQUIRED_OPERATIONAL_LABELS.filter(({ key }) => !labels[key]?.trim());
+	return RECOMMENDED_OPERATIONAL_LABELS.filter(({ key }) => !labels[key]?.trim());
 }
 
 export function hasOperationalLabel(labels: Labels, key: string): boolean {

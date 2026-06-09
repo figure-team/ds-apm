@@ -1,4 +1,5 @@
 import { useQuery } from 'react-query';
+import { useTranslation } from 'react-i18next';
 import { Button, Tooltip } from 'antd';
 import getAllChannels from 'api/channels/getAll';
 import classNames from 'classnames';
@@ -18,6 +19,7 @@ import { ANOMALY_TAB_TOOLTIP, THRESHOLD_TAB_TOOLTIP } from './constants';
 import './styles.scss';
 
 function AlertCondition(): JSX.Element {
+	const { t } = useTranslation(['alerts']);
 	const { alertType, setAlertType } = useCreateAlertState();
 
 	const {
@@ -36,7 +38,7 @@ function AlertCondition(): JSX.Element {
 
 	const tabs = [
 		{
-			label: 'Threshold',
+			label: t('v2_tab_threshold'),
 			icon: <ChartLine size={14} data-testid="threshold-view" />,
 			value: AlertTypes.METRICS_BASED_ALERT,
 		},
@@ -68,7 +70,7 @@ function AlertCondition(): JSX.Element {
 
 	return (
 		<div className="alert-condition-container">
-			<Stepper stepNumber={2} label="Set alert conditions" />
+			<Stepper stepNumber={2} label={t('v2_step_set_conditions')} />
 			<div className="alert-condition">
 				<div className="alert-condition-tabs">
 					{tabs.map((tab) => (

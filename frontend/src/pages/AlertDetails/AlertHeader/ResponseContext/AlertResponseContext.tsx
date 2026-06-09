@@ -1,6 +1,7 @@
 import { Button } from 'antd';
 import { Check, Copy } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCopyToClipboard } from 'react-use';
 import type { Labels } from 'types/api/alerts/def';
 
@@ -568,11 +569,26 @@ function AlertResponseContext({
 	labels,
 	strategyHistory,
 }: AlertResponseContextProps): JSX.Element | null {
+	const { t } = useTranslation('alerts');
 	const sections = getSectionsWithItems({
 		annotations,
 		labels,
 		strategyHistory,
 	});
+	const sectionTitleMap: Record<string, string> = {
+		'SOP status': t('rc_section_sop_status'),
+		'AI strategy': t('rc_section_ai_strategy'),
+		'Incident briefing': t('rc_section_incident_briefing'),
+		'Response context': t('rc_section_response_context'),
+		'Evidence status': t('rc_section_evidence_status'),
+	};
+	const sectionCopyLabelMap: Record<string, string> = {
+		'AI strategy': t('rc_copy_ai_strategy'),
+		'Evidence status': t('rc_copy_evidence_status'),
+		'Incident briefing': t('rc_copy_incident_briefing'),
+		'Response context': t('rc_copy_response_context'),
+		'SOP status': t('rc_copy_sop_status'),
+	};
 	const [, copyToClipboard] = useCopyToClipboard();
 	const [copiedTarget, setCopiedTarget] = useState<string>();
 	const copiedResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -630,9 +646,9 @@ function AlertResponseContext({
 		>
 			<div className="alert-response-context__header">
 				<div>
-					<div className="alert-response-context__heading">PM handoff</div>
+					<div className="alert-response-context__heading">{t('rc_heading')}</div>
 					<div className="alert-response-context__description">
-						Copy-ready incident packet for PM, operator, vendor, and customer updates.
+						{t('rc_description')}
 					</div>
 				</div>
 				<Button
@@ -648,13 +664,13 @@ function AlertResponseContext({
 					size="small"
 					type="text"
 				>
-					{copiedTarget === COPIED_HANDOFF_TARGET ? 'Copied' : 'Copy handoff'}
+					{copiedTarget === COPIED_HANDOFF_TARGET ? t('rc_copied') : t('rc_copy_handoff')}
 				</Button>
 			</div>
 			{sections.map((section) => (
 				<div className="alert-response-context__section" key={section.title}>
 					<div className="alert-response-context__section-header">
-						<div className="alert-response-context__title">{section.title}</div>
+						<div className="alert-response-context__title">{sectionTitleMap[section.title] ?? section.title}</div>
 						<Button
 							className="alert-response-context__copy"
 							icon={
@@ -669,8 +685,8 @@ function AlertResponseContext({
 							type="text"
 						>
 							{copiedTarget === `${COPIED_SECTION_PREFIX}${section.title}`
-								? 'Copied'
-								: SECTION_COPY_LABELS[section.title] || 'Copy'}
+								? t('rc_copied')
+								: sectionCopyLabelMap[section.title] ?? t('rc_copy_default')}
 						</Button>
 					</div>
 					<div className="alert-response-context__items">

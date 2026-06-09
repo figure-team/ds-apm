@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Select, Tooltip, Typography } from 'antd';
 import { useQueryBuilder } from 'hooks/queryBuilder/useQueryBuilder';
 import { Info } from 'lucide-react';
@@ -7,6 +8,7 @@ import { ALL_SELECTED_VALUE } from '../constants';
 import { useCreateAlertState } from '../context';
 
 function MultipleNotifications(): JSX.Element {
+	const { t } = useTranslation(['alerts']);
 	const { notificationSettings, setNotificationSettings } =
 		useCreateAlertState();
 	const { currentQuery } = useQueryBuilder();
@@ -35,7 +37,7 @@ function MultipleNotifications(): JSX.Element {
 		if (options.length > 0) {
 			return [
 				{
-					label: 'All',
+					label: t('v2_all_option'),
 					value: ALL_SELECTED_VALUE,
 					'data-testid': 'multiple-notifications-select-option',
 				},
@@ -70,20 +72,20 @@ function MultipleNotifications(): JSX.Element {
 
 	const groupByDescription = useMemo(() => {
 		if (isAllOptionSelected) {
-			return 'All = grouping of alerts is disabled';
+			return t('v2_all_grouping_disabled');
 		}
 		if (notificationSettings.multipleNotifications?.length) {
-			return `Alerts with same ${notificationSettings.multipleNotifications?.join(
-				', ',
-			)} will be grouped`;
+			return t('v2_alerts_grouped', {
+				fields: notificationSettings.multipleNotifications?.join(', '),
+			});
 		}
-		return 'Empty = all matching alerts combined into one notification';
-	}, [isAllOptionSelected, notificationSettings.multipleNotifications]);
+		return t('v2_empty_grouping');
+	}, [isAllOptionSelected, notificationSettings.multipleNotifications, t]);
 
 	const multipleNotificationsInput = useMemo(() => {
 		const placeholder = isMultipleNotificationsEnabled
-			? 'Select fields to group by (optional)'
-			: 'No grouping fields available';
+			? t('v2_select_fields_placeholder')
+			: t('v2_no_grouping_fields_placeholder');
 		let input = (
 			<div>
 				<Select
@@ -106,7 +108,7 @@ function MultipleNotifications(): JSX.Element {
 		);
 		if (!isMultipleNotificationsEnabled) {
 			input = (
-				<Tooltip title="Add 'Group by' fields to your query to enable alert grouping">
+				<Tooltip title={t('v2_enable_grouping_tooltip')}>
 					{input}
 				</Tooltip>
 			);
@@ -124,13 +126,13 @@ function MultipleNotifications(): JSX.Element {
 		<div className="multiple-notifications-container">
 			<div className="multiple-notifications-header">
 				<Typography.Text className="multiple-notifications-header-title">
-					Group alerts by{' '}
-					<Tooltip title="Group similar alerts together to reduce notification volume. Leave empty to combine all matching alerts into one notification without grouping.">
+					{t('v2_group_alerts_by_title')}{' '}
+					<Tooltip title={t('v2_group_alerts_by_tooltip')}>
 						<Info size={16} />
 					</Tooltip>
 				</Typography.Text>
 				<Typography.Text className="multiple-notifications-header-description">
-					Combine alerts with the same field values into a single notification.
+					{t('v2_group_alerts_by_desc')}
 				</Typography.Text>
 			</div>
 			{multipleNotificationsInput}

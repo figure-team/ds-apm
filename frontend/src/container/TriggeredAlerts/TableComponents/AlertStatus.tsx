@@ -1,17 +1,20 @@
 import { Tag } from 'antd';
+import { useIsDarkMode } from 'hooks/useDarkMode';
 
 function Severity({ severity }: SeverityProps): JSX.Element {
+	const isDarkMode = useIsDarkMode();
+
 	switch (severity) {
 		case 'unprocessed': {
-			return <Tag color="green">UnProcessed</Tag>;
+			return <Tag color={isDarkMode ? 'green' : '#16A34A'}>UnProcessed</Tag>;
 		}
 
 		case 'active': {
-			return <Tag color="red">Firing</Tag>;
+			return <Tag color={isDarkMode ? 'red' : '#DC2626'}>Firing</Tag>;
 		}
 
 		case 'suppressed': {
-			return <Tag color="red">Suppressed</Tag>;
+			return <Tag color={isDarkMode ? 'red' : '#DC2626'}>Suppressed</Tag>;
 		}
 
 		default: {

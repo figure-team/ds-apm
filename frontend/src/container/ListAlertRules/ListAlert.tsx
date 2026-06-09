@@ -49,7 +49,7 @@ import { alertActionLogEvent, filterAlerts } from './utils';
 const { Search } = Input;
 
 function ListAlert({ allAlertRules, refetch }: ListAlertProps): JSX.Element {
-	const { t } = useTranslation('common');
+	const { t } = useTranslation(['common', 'alerts']);
 	const { safeNavigate } = useSafeNavigate();
 	const { user } = useAppContext();
 	const [addNewAlert, action] = useComponentPermission(
@@ -194,7 +194,7 @@ function ListAlert({ allAlertRules, refetch }: ListAlertProps): JSX.Element {
 
 	const dynamicColumns: ColumnsType<RuletypesRuleDTO> = [
 		{
-			title: 'Created At',
+			title: t('alerts:column_created_at'),
 			dataIndex: 'createdAt',
 			width: 80,
 			key: DynamicColumnsKey.CreatedAt,
@@ -212,14 +212,14 @@ function ListAlert({ allAlertRules, refetch }: ListAlertProps): JSX.Element {
 					: null,
 		},
 		{
-			title: 'Created By',
+			title: t('alerts:column_created_by'),
 			dataIndex: 'createdBy',
 			width: 80,
 			key: DynamicColumnsKey.CreatedBy,
 			align: 'center',
 		},
 		{
-			title: 'Updated At',
+			title: t('alerts:column_updated_at'),
 			dataIndex: 'updatedAt',
 			width: 80,
 			key: DynamicColumnsKey.UpdatedAt,
@@ -237,7 +237,7 @@ function ListAlert({ allAlertRules, refetch }: ListAlertProps): JSX.Element {
 					: null,
 		},
 		{
-			title: 'Updated By',
+			title: t('alerts:column_updated_by'),
 			dataIndex: 'updatedBy',
 			width: 80,
 			key: DynamicColumnsKey.UpdatedBy,
@@ -247,7 +247,7 @@ function ListAlert({ allAlertRules, refetch }: ListAlertProps): JSX.Element {
 
 	const columns: ColumnsType<RuletypesRuleDTO> = [
 		{
-			title: 'Status',
+			title: t('alerts:column_status'),
 			dataIndex: 'state',
 			width: 80,
 			key: 'state',
@@ -258,7 +258,7 @@ function ListAlert({ allAlertRules, refetch }: ListAlertProps): JSX.Element {
 			sortOrder: sortedInfo.columnKey === 'state' ? sortedInfo.order : null,
 		},
 		{
-			title: 'Alert Name',
+			title: t('alerts:column_alert_name'),
 			dataIndex: 'alert',
 			width: 100,
 			key: 'name',
@@ -280,7 +280,7 @@ function ListAlert({ allAlertRules, refetch }: ListAlertProps): JSX.Element {
 			sortOrder: sortedInfo.columnKey === 'name' ? sortedInfo.order : null,
 		},
 		{
-			title: 'Severity',
+			title: t('alerts:column_severity'),
 			dataIndex: 'labels',
 			width: 80,
 			key: 'severity',
@@ -296,7 +296,7 @@ function ListAlert({ allAlertRules, refetch }: ListAlertProps): JSX.Element {
 			sortOrder: sortedInfo.columnKey === 'severity' ? sortedInfo.order : null,
 		},
 		{
-			title: 'Labels',
+			title: t('alerts:column_labels'),
 			dataIndex: 'labels',
 			key: 'tags',
 			align: 'center',
@@ -318,7 +318,7 @@ function ListAlert({ allAlertRules, refetch }: ListAlertProps): JSX.Element {
 
 	if (action) {
 		columns.push({
-			title: 'Action',
+			title: t('alerts:column_action'),
 			dataIndex: 'id',
 			key: 'action',
 			width: 10,
@@ -343,7 +343,7 @@ function ListAlert({ allAlertRules, refetch }: ListAlertProps): JSX.Element {
 								type="link"
 								loading={editLoader}
 							>
-								Edit
+								{t('edit')}
 							</ColumnButton>,
 							<ColumnButton
 								key="3"
@@ -351,7 +351,7 @@ function ListAlert({ allAlertRules, refetch }: ListAlertProps): JSX.Element {
 								type="link"
 								loading={editLoader}
 							>
-								Edit in New Tab
+								{t('alerts:action_edit_new_tab')}
 							</ColumnButton>,
 							<ColumnButton
 								key="3"
@@ -359,7 +359,7 @@ function ListAlert({ allAlertRules, refetch }: ListAlertProps): JSX.Element {
 								type="link"
 								loading={cloneLoader}
 							>
-								Clone
+								{t('alerts:action_clone')}
 							</ColumnButton>,
 							<DeleteAlert
 								key="4"
@@ -381,7 +381,7 @@ function ListAlert({ allAlertRules, refetch }: ListAlertProps): JSX.Element {
 		<div className="alert-rules-list-container">
 			<SearchContainer>
 				<Search
-					placeholder="Search by Alert Name, Severity and Labels"
+					placeholder={t('alerts:search_placeholder')}
 					onChange={handleSearch}
 					defaultValue={searchString}
 				/>
@@ -392,7 +392,7 @@ function ListAlert({ allAlertRules, refetch }: ListAlertProps): JSX.Element {
 							onClick={onClickNewAlertHandler}
 							icon={<PlusOutlined />}
 						>
-							New Alert
+							{t('alerts:new_alert_btn')}
 						</Button>
 					)}
 					<TextToolTip

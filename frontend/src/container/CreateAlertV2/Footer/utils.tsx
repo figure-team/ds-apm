@@ -1,6 +1,7 @@
 import { UniversalYAxisUnit } from 'components/YAxisUnitSelector/types';
 import { PANEL_TYPES } from 'constants/queryBuilder';
 import { AlertDetectionTypes } from 'container/FormAlertRules';
+import { AlertTypes } from 'types/api/alerts/alertTypes';
 import { mapQueryDataToApi } from 'lib/newQueryBuilder/queryBuilderMappers/mapQueryDataToApi';
 import {
 	BasicThreshold,
@@ -31,21 +32,48 @@ export function getFormattedTimeValue(timeValue: number, unit: string): string {
 export function validateCreateAlertState(
 	args: BuildCreateAlertRulePayloadArgs,
 ): string | null {
-	const { basicAlertState, thresholdState, notificationSettings } = args;
+	const {
+		alertType,
+		basicAlertState,
+		thresholdState,
+		notificationSettings,
+		query,
+	} = args;
 
 	// Validate alert name
 	if (!basicAlertState.name) {
-		return 'Please enter an alert name';
+		return 'v2_validation_name_required';
+	}
+
+	// Validate SOP ID
+	if (!basicAlertState.labels['sop_id']?.trim()) {
+		return 'v2_validation_sop_id_required';
+	}
+
+	// Validate query is configured
+	const { queryType, builder, promql, clickhouse_sql } = query;
+	let isQueryEmpty: boolean;
+	if (queryType === EQueryType.PROM) {
+		isQueryEmpty = !promql.some((q) => q.query?.trim());
+	} else if (queryType === EQueryType.CLICKHOUSE) {
+		isQueryEmpty = !clickhouse_sql.some((q) => q.query?.trim());
+	} else {
+		isQueryEmpty =
+			alertType === AlertTypes.METRICS_BASED_ALERT &&
+			!builder.queryData.some((q) => q.aggregateAttribute?.key?.trim());
+	}
+	if (isQueryEmpty) {
+		return 'v2_validation_query_required';
 	}
 
 	// Validate threshold state if routing policies is not enabled
 	for (let i = 0; i < thresholdState.thresholds.length; i++) {
 		const threshold = thresholdState.thresholds[i];
 		if (!threshold.label) {
-			return 'Please enter a label for each threshold';
+			return 'v2_validation_threshold_label_required';
 		}
 		if (!notificationSettings.routingPolicies && !threshold.channels.length) {
-			return 'Please select at least one channel for each threshold or enable routing policies';
+			return 'v2_validation_channel_required';
 		}
 	}
 

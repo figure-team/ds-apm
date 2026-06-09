@@ -85,7 +85,7 @@ function SelectAlertType({ onSelect }: SelectAlertTypeProps): JSX.Element {
 								handleRedirection(option.selection);
 							}}
 						>
-							Click here to see how to create a sample alert.
+							{t('sample_alert_link')}
 						</Typography.Link>{' '}
 					</AlertTypeCard>
 				))}
