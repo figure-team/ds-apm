@@ -1,0 +1,42 @@
+# syntax=docker/dockerfile:1
+
+# Stage 1: Go binary
+FROM golang:1.25-alpine AS go-builder
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download
+COPY . .
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -tags timetzdata \
+    -o /out/signoz-community \
+    -ldflags "-s -w -X github.com/SigNoz/signoz/pkg/version.variant=community" \
+    ./cmd/community
+
+# Stage 2: Frontend
+FROM node:22-alpine AS js-builder
+WORKDIR /frontend
+COPY frontend/package.json frontend/yarn.lock frontend/i18-generate-hash.cjs ./
+COPY frontend/scripts ./scripts/
+RUN --mount=type=cache,target=/root/.yarn \
+    CI=1 yarn install --silent
+COPY frontend/ .
+RUN --mount=type=cache,target=/root/.yarn \
+    CI=1 yarn build
+
+# Stage 3: Final image
+FROM alpine:3.20.3
+LABEL maintainer="signoz"
+WORKDIR /root
+
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+
+COPY --from=go-builder /out/signoz-community ./signoz
+COPY --from=js-builder /frontend/build/ /etc/signoz/web/
+COPY templates/email /root/templates
+
+RUN chmod 755 /root/signoz
+
+ENTRYPOINT ["./signoz", "server"]

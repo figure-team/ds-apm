@@ -235,6 +235,8 @@ pyrightconfig.json
 
 ### local agent state & build artifacts ###
 .omc/
+.claude/
+.superpowers/
 /test_interface
 .gstack/
 docs/spec/_ssg-samples/
