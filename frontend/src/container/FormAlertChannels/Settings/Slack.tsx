@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Form, Input } from 'antd';
+import { Collapse, Form, Input } from 'antd';
 import { MarkdownRenderer } from 'components/MarkdownRenderer/MarkdownRenderer';
 
 import { SlackChannel } from '../../CreateAlertChannels/config';
@@ -53,32 +53,44 @@ function Slack({ setSelectedConfig }: SlackProps): JSX.Element {
 				/>
 			</Form.Item>
 
-			<Form.Item name="title" label={t('field_slack_title')}>
-				<TextArea
-					data-testid="title-textarea"
-					rows={4}
-					// value={`[{{ .Status | toUpper }}{{ if eq .Status \"firing\" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}\n{{- if gt (len .CommonLabels) (len .GroupLabels) -}}\n{{\" \"}}(\n{{- with .CommonLabels.Remove .GroupLabels.Names }}\n    {{- range $index, $label := .SortedPairs -}}\n    {{ if $index }}, {{ end }}\n    {{- $label.Name }}=\"{{ $label.Value -}}\"\n    {{- end }}\n{{- end -}}\n)\n{{- end }}`}
-					onChange={(event): void =>
-						setSelectedConfig((value) => ({
-							...value,
-							title: event.target.value,
-						}))
-					}
-				/>
-			</Form.Item>
+			<Collapse ghost>
+				<Collapse.Panel header={t('label_advanced_settings')} key="advanced">
+					<Form.Item
+						name="title"
+						label={t('field_slack_title')}
+						help={t('help_channel_title')}
+					>
+						<TextArea
+							data-testid="title-textarea"
+							rows={4}
+							onChange={(event): void =>
+								setSelectedConfig((value) => ({
+									...value,
+									title: event.target.value,
+								}))
+							}
+						/>
+					</Form.Item>
 
-			<Form.Item name="text" label={t('field_slack_description')}>
-				<TextArea
-					onChange={(event): void =>
-						setSelectedConfig((value) => ({
-							...value,
-							text: event.target.value,
-						}))
-					}
-					placeholder={t('placeholder_slack_description')}
-					data-testid="description-textarea"
-				/>
-			</Form.Item>
+					<Form.Item
+						name="text"
+						label={t('field_slack_description')}
+						help={t('help_channel_description')}
+					>
+						<TextArea
+							rows={8}
+							onChange={(event): void =>
+								setSelectedConfig((value) => ({
+									...value,
+									text: event.target.value,
+								}))
+							}
+							placeholder={t('placeholder_slack_description')}
+							data-testid="description-textarea"
+						/>
+					</Form.Item>
+				</Collapse.Panel>
+			</Collapse>
 		</>
 	);
 }

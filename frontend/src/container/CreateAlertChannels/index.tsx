@@ -33,8 +33,10 @@ import {
 } from './config';
 import {
 	EmailInitialConfig,
+	MsTeamsInitialConfig,
 	OpsgenieInitialConfig,
 	PagerInitialConfig,
+	SlackInitialConfig,
 } from './defaults';
 import { isChannelType } from './utils';
 
@@ -64,29 +66,7 @@ function CreateAlertChannels({
 		>
 	>({
 		send_resolved: true,
-		text: `{{ range .Alerts -}}
-     *Alert:* {{ .Labels.alertname }}{{ if .Labels.severity }} - {{ .Labels.severity }}{{ end }}
-
-     *Summary:* {{ .Annotations.summary }}
-     *Description:* {{ .Annotations.description }}
-     *RelatedLogs:* {{ if gt (len .Annotations.related_logs) 0 -}} View in <{{ .Annotations.related_logs }}|logs explorer> {{- end}}
-     *RelatedTraces:* {{ if gt (len .Annotations.related_traces) 0 -}} View in <{{ .Annotations.related_traces }}|traces explorer> {{- end}}
-
-     *Details:*
-       {{ range .Labels.SortedPairs }} • *{{ .Name }}:* {{ .Value }}
-       {{ end }}
-     {{ end }}`,
-		title: `[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}
-     {{- if gt (len .CommonLabels) (len .GroupLabels) -}}
-       {{" "}}(
-       {{- with .CommonLabels.Remove .GroupLabels.Names }}
-         {{- range $index, $label := .SortedPairs -}}
-           {{ if $index }}, {{ end }}
-           {{- $label.Name }}="{{ $label.Value -}}"
-         {{- end }}
-       {{- end -}}
-       )
-     {{- end }}`,
+		...SlackInitialConfig,
 	});
 	const [savingState, setSavingState] = useState<boolean>(false);
 	const [testingState, setTestingState] = useState<boolean>(false);
@@ -97,6 +77,22 @@ function CreateAlertChannels({
 		(value: string) => {
 			const currentType = type;
 			setType(value as ChannelType);
+
+			if (value === ChannelType.Slack && currentType !== value) {
+				setSelectedConfig((prev) => ({
+					name: prev?.name,
+					send_resolved: prev?.send_resolved,
+					...SlackInitialConfig,
+				}));
+			}
+
+			if (value === ChannelType.MsTeams && currentType !== value) {
+				setSelectedConfig((prev) => ({
+					name: prev?.name,
+					send_resolved: prev?.send_resolved,
+					...MsTeamsInitialConfig,
+				}));
+			}
 
 			if (value === ChannelType.Pagerduty && currentType !== value) {
 				// reset config to pager defaults
@@ -561,10 +557,12 @@ function CreateAlertChannels({
 					title: t('page_title_create'),
 					initialValue: {
 						type,
-						...selectedConfig,
+						...SlackInitialConfig,
+						...MsTeamsInitialConfig,
 						...PagerInitialConfig,
 						...OpsgenieInitialConfig,
 						...EmailInitialConfig,
+						...selectedConfig,
 					},
 				}}
 			/>
