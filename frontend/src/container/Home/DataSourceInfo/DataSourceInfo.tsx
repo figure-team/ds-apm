@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@signozhq/ui';
 import { Skeleton } from 'antd';
 import logEvent from 'api/common/logEvent';
@@ -24,6 +25,7 @@ function DataSourceInfo({
 	dataSentToSigNoz: boolean;
 	isLoading: boolean;
 }): JSX.Element {
+	const { t } = useTranslation('home');
 	const { activeLicense } = useAppContext();
 
 	const notSendingData = !dataSentToSigNoz;
@@ -60,13 +62,11 @@ function DataSourceInfo({
 	const renderNotSendingData = (): JSX.Element => (
 		<>
 			<h2 className="welcome-title">
-				Hello there, Welcome to your SigNoz workspace
+				{t('welcome_title')}
 			</h2>
 
 			<p className="welcome-description">
-				You’re not sending any data yet. <br />
-				SigNoz is so much better with your data ⎯ start by sending your telemetry
-				data to SigNoz.
+				{t("not_sending_data_desc")}
 			</p>
 
 			<Card className="welcome-card">
@@ -75,7 +75,7 @@ function DataSourceInfo({
 						<div className="workspace-ready-header">
 							<span className="workspace-ready-title">
 								<img src={hurrayUrl} alt="hurray" />
-								Your workspace is ready
+								{t('workspace_ready')}
 							</span>
 
 							<Button
@@ -87,7 +87,7 @@ function DataSourceInfo({
 								onClick={handleConnect}
 								// TODO - Support tabindex, keyboard events - @H4ad
 							>
-								Connect Data Source
+								{t('connect_data_source')}
 							</Button>
 						</div>
 
@@ -109,7 +109,7 @@ function DataSourceInfo({
 	const renderDataReceived = (): JSX.Element => (
 		<>
 			<h2 className="welcome-title">
-				Hello there, Welcome to your SigNoz workspace
+				{t('welcome_title')}
 			</h2>
 
 			{!isError && hostsData && (

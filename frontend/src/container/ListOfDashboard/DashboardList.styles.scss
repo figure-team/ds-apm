@@ -1122,3 +1122,11 @@
 		}
 	}
 }
+
+body.lightMode {
+	.all-dashboards-header {
+		.right-actions {
+			color: var(--l2-foreground);
+		}
+	}
+}

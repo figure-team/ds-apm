@@ -885,3 +885,9 @@
 		color: var(--l2-foreground);
 	}
 }
+
+body.lightMode {
+	.ingestion-settings-container {
+		color: var(--l1-foreground);
+	}
+}
