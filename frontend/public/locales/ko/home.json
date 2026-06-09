@@ -24,5 +24,7 @@
 	"do_this_later": "나중에 하기",
 	"welcome_checklist": "환영 체크리스트",
 	"go_to_service_accounts": "서비스 계정으로 이동",
-	"alerts_section": "알림"
+	"alerts_section": "알림",
+	"services_empty_title": "아직 트레이스를 전송하지 않고 있습니다.",
+	"services_empty_description": "서비스를 보려면 트레이스 전송을 시작하세요."
 }

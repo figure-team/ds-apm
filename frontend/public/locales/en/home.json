@@ -24,5 +24,7 @@
 	"do_this_later": "I'll do this later",
 	"welcome_checklist": "Welcome checklist",
 	"go_to_service_accounts": "Go to Service Accounts",
-	"alerts_section": "Alerts"
+	"alerts_section": "Alerts",
+	"services_empty_title": "You are not sending traces yet.",
+	"services_empty_description": "Start sending traces to see your services."
 }

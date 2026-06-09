@@ -16,99 +16,20 @@ import useGetTopLevelOperations from 'hooks/useGetTopLevelOperations';
 import useResourceAttribute from 'hooks/useResourceAttribute';
 import { convertRawQueriesToTraceSelectedTags } from 'hooks/useResourceAttribute/utils';
 import { useSafeNavigate } from 'hooks/useSafeNavigate';
-import history from 'lib/history';
-import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import Card from 'periscope/components/Card/Card';
 import { useAppContext } from 'providers/App/App';
-import { IUser } from 'providers/App/types';
 import { AppState } from 'store/reducers';
-import {
-	LicensePlatform,
-	LicenseResModel,
-} from 'types/api/licensesV3/getActive';
 import { ServicesList } from 'types/api/metrics/getService';
 import { GlobalReducer } from 'types/reducer/globalTime';
 import { Tags } from 'types/reducer/trace';
-import { USER_ROLES } from 'types/roles';
 import { isModifierKeyPressed } from 'utils/app';
-import { openInNewTab } from 'utils/navigation';
-
-import triangleRulerUrl from '@/assets/Icons/triangle-ruler.svg';
 
 import { FeatureKeys } from '../../../constants/features';
-import { DOCS_LINKS } from '../constants';
 import { columns, TIME_PICKER_OPTIONS } from './constants';
+import ServicesEmptyState from './ServicesEmptyState';
 
 const homeInterval = 30 * 60 * 1000;
-
-// Extracted EmptyState component
-const EmptyState = memo(
-	({
-		user,
-		activeLicenseV3,
-	}: {
-		user: IUser;
-		activeLicenseV3: LicenseResModel | null;
-	}): JSX.Element => (
-		<div className="empty-state-container">
-			<div className="empty-state-content-container">
-				<div className="empty-state-content">
-					<img
-						src={triangleRulerUrl}
-						alt="empty-alert-icon"
-						className="empty-state-icon"
-					/>
-					<div className="empty-title">You are not sending traces yet.</div>
-					<div className="empty-description">
-						Start sending traces to see your services.
-					</div>
-				</div>
-
-				{user?.role !== USER_ROLES.VIEWER && (
-					<div className="empty-actions-container">
-						<Button
-							type="default"
-							className="periscope-btn secondary"
-							onClick={(): void => {
-								logEvent('Homepage: Get Started clicked', {
-									source: 'Service Metrics',
-								});
-
-								if (
-									activeLicenseV3 &&
-									activeLicenseV3.platform === LicensePlatform.CLOUD
-								) {
-									history.push(ROUTES.GET_STARTED_WITH_CLOUD);
-								} else {
-									openInNewTab(DOCS_LINKS.ADD_DATA_SOURCE);
-								}
-							}}
-						>
-							Get Started &nbsp; <ArrowRight size={16} />
-						</Button>
-
-						<Button
-							type="link"
-							className="learn-more-link"
-							onClick={(): void => {
-								logEvent('Homepage: Learn more clicked', {
-									source: 'Service Metrics',
-								});
-								window.open(
-									'https://signoz.io/docs/instrumentation/overview/',
-									'_blank',
-								);
-							}}
-						>
-							Learn more <ArrowUpRight size={12} />
-						</Button>
-					</div>
-				)}
-			</div>
-		</div>
-	),
-);
-EmptyState.displayName = 'EmptyState';
 
 // Extracted ServicesList component
 const ServicesListTable = memo(
@@ -147,8 +68,6 @@ function ServiceMetrics({
 		AppState,
 		GlobalReducer
 	>((state) => state.globalTime);
-
-	const { user, activeLicense } = useAppContext();
 
 	const [timeRange, setTimeRange] = useState(() => {
 		const now = new Date().getTime();
@@ -340,7 +259,7 @@ function ServiceMetrics({
 				{servicesExist ? (
 					<ServicesListTable services={top5Services} onRowClick={handleRowClick} />
 				) : (
-					<EmptyState user={user} activeLicenseV3={activeLicense} />
+					<ServicesEmptyState source="Service Metrics" />
 				)}
 			</Card.Content>
 
