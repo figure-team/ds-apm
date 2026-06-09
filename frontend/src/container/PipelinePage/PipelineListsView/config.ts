@@ -2,6 +2,7 @@ import {
 	TableColumnGroupType as ColumnGroupType,
 	TableColumnType as ColumnType,
 } from 'antd/';
+import { TFunction } from 'i18next';
 import {
 	HistoryData,
 	PipelineData,
@@ -91,35 +92,36 @@ export const processorColumns: Array<
 	},
 ];
 
-export const changeHistoryColumns: Array<
-	ColumnType<HistoryData> | ColumnGroupType<HistoryData>
-> = [
+export const getChangeHistoryColumns = (
+	t: TFunction,
+): Array<ColumnType<HistoryData> | ColumnGroupType<HistoryData>> => [
 	{
 		key: 'version',
-		title: 'Version',
+		title: t('column_version').toString(),
 		dataIndex: 'version',
 	},
 	{
-		title: 'Deployment Stage',
+		title: t('column_deployment_stage').toString(),
 		key: 'deployStatus',
 		dataIndex: 'deployStatus',
-		render: DeploymentStage,
+		render: (deployStatus: string): JSX.Element =>
+			DeploymentStage(deployStatus, t),
 	},
 	{
 		key: 'deployResult',
-		title: 'Last Deploy Message',
+		title: t('column_last_deploy_message').toString(),
 		dataIndex: 'deployResult',
 		ellipsis: true,
 	},
 	{
 		key: 'createdAt',
-		title: 'Last Deployed Time',
+		title: t('column_last_deployed_time').toString(),
 		dataIndex: 'createdAt',
 		render: DeploymentTime,
 	},
 	{
 		key: 'createdByName',
-		title: 'Edited by',
+		title: t('column_edited_by').toString(),
 		dataIndex: 'createdByName',
 	},
 ];

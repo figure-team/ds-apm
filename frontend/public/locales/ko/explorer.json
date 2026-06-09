@@ -1,4 +1,17 @@
 {
     "name_of_the_view": "뷰 이름",
-    "delete_confirm_message": "{{viewName}} 뷰를 삭제하시겠습니까? 뷰 삭제는 되돌릴 수 없습니다."
+    "delete_confirm_message": "{{viewName}} 뷰를 삭제하시겠습니까? 뷰 삭제는 되돌릴 수 없습니다.",
+    "save_this_view": "이 뷰 저장",
+    "create_an_alert": "알림 생성",
+    "add_to_dashboard": "대시보드에 추가",
+    "views_title": "뷰",
+    "manage_saved_views": "{{dataSource}}의 저장된 뷰를 관리하세요.",
+    "learn_more": "자세히 보기",
+    "search_views_placeholder": "뷰 검색...",
+    "delete_view": "뷰 삭제",
+    "edit_view_details": "뷰 세부 정보 편집",
+    "save_changes": "변경 사항 저장",
+    "label": "라벨",
+    "edit_view_name_placeholder": "예: 자주 사용하는 뷰",
+    "view_updated_successfully": "뷰가 성공적으로 업데이트되었습니다"
 }

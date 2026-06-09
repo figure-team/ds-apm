@@ -6,19 +6,20 @@ import {
 	MinusCircleFilled,
 } from '@ant-design/icons';
 import { Spin } from 'antd';
+import { TFunction } from 'i18next';
 
-export function getDeploymentStage(value: string): string {
+export function getDeploymentStage(value: string, t: TFunction): string {
 	switch (value) {
 		case 'in_progress':
-			return 'In Progress';
+			return t('deploy_stage_in_progress').toString();
 		case 'deployed':
-			return 'Deployed';
+			return t('deploy_stage_deployed').toString();
 		case 'dirty':
-			return 'Dirty';
+			return t('deploy_stage_dirty').toString();
 		case 'failed':
-			return 'Failed';
+			return t('deploy_stage_failed').toString();
 		case 'unknown':
-			return 'Unknown';
+			return t('deploy_stage_unknown').toString();
 		default:
 			return '';
 	}

@@ -8,8 +8,13 @@ import TimezoneProvider from 'providers/Timezone';
 import i18n from 'ReactI18';
 import store from 'store';
 
+import pipelineEnTranslation from '../../../../../../public/locales/en/pipeline.json';
 import ChangeHistory from '../index';
 import { pipelineData, pipelineDataHistory } from './testUtils';
+
+// The change-history columns read from the `pipeline` namespace via useTranslation.
+// Preload the en bundle so titles/stages resolve synchronously (useSuspense is off).
+i18n.addResourceBundle('en', 'pipeline', pipelineEnTranslation, true, true);
 
 const queryClient = new QueryClient({
 	defaultOptions: {

@@ -3,9 +3,17 @@
 	"already_logged_in": "이미 로그인됨",
 	"success": "성공",
 	"cancel": "취소",
+	"run_query": "쿼리 실행",
 	"share": "공유",
 	"save": "저장",
 	"edit": "편집",
 	"logged_in": "로그인됨",
-	"pending_data_placeholder": "{{dataSource}}을(를) 가져오는 중입니다!"
+	"pending_data_placeholder": "{{dataSource}}을(를) 가져오는 중입니다!",
+	"no_data_yet": "아직 {{dataSource}} 데이터가 없습니다.",
+	"data_show_up_here": "{{dataSource}} 데이터가 수집되면 여기에 표시됩니다",
+	"send_data_to_signoz": "{{dataSource}} 데이터를 SigNoz로 전송하기",
+	"data_source_logs": "로그",
+	"data_source_traces": "트레이스",
+	"data_source_metrics": "메트릭",
+	"data_source_meter": "미터"
 }

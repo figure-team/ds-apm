@@ -1,15 +1,17 @@
+import { useTranslation } from 'react-i18next';
 import { Table } from 'antd';
 import { Pipeline } from 'types/api/pipeline/def';
 
-import { changeHistoryColumns } from '../../PipelineListsView/config';
+import { getChangeHistoryColumns } from '../../PipelineListsView/config';
 import { HistoryTableWrapper } from '../../styles';
 import { historyPagination } from '../config';
 
 function ChangeHistory({ pipelineData }: ChangeHistoryProps): JSX.Element {
+	const { t } = useTranslation('pipeline');
 	return (
 		<HistoryTableWrapper>
 			<Table
-				columns={changeHistoryColumns}
+				columns={getChangeHistoryColumns(t)}
 				dataSource={pipelineData?.history ?? []}
 				rowKey="id"
 				pagination={historyPagination}

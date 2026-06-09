@@ -31,7 +31,7 @@ const pipelineRefetchInterval = (
 };
 
 function Pipelines(): JSX.Element {
-	const { t } = useTranslation('common');
+	const { t } = useTranslation(['pipeline', 'common']);
 	const { notifications } = useNotifications();
 	const {
 		isLoading,
@@ -50,7 +50,7 @@ function Pipelines(): JSX.Element {
 		() => [
 			{
 				key: 'pipelines',
-				label: `Pipelines`,
+				label: t('tab_pipelines'),
 				children: (
 					<PipelinePage
 						refetchPipelineLists={refetchPipelineLists}
@@ -60,19 +60,19 @@ function Pipelines(): JSX.Element {
 			},
 			{
 				key: 'change-history',
-				label: `Change History`,
+				label: t('tab_change_history'),
 				children: (
 					<ChangeHistory pipelineData={pipelineData?.payload as Pipeline} />
 				),
 			},
 		],
-		[pipelineData?.payload, refetchPipelineLists],
+		[pipelineData?.payload, refetchPipelineLists, t],
 	);
 
 	useEffect(() => {
 		if (pipelineData?.error && isError) {
 			notifications.error({
-				message: pipelineData?.error || t('something_went_wrong'),
+				message: pipelineData?.error || t('common:something_went_wrong'),
 			});
 		}
 	}, [isError, notifications, pipelineData?.error, t]);

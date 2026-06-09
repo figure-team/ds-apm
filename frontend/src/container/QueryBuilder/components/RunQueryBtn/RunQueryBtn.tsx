@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button } from '@signozhq/ui';
 import cx from 'classnames';
 import {
@@ -36,6 +37,7 @@ function RunQueryBtn({
 	onStageRunQuery,
 	disabled,
 }: RunQueryBtnProps): JSX.Element {
+	const { t } = useTranslation(['common']);
 	const isMac = getUserOperatingSystem() === UserOperatingSystem.MACOS;
 	const isLoading = isLoadingQueries ?? false;
 
@@ -47,7 +49,7 @@ function RunQueryBtn({
 			className={cx('cancel-query-btn', className)}
 			onClick={handleCancelQuery}
 		>
-			Cancel
+			{t('cancel')}
 		</Button>
 	) : (
 		<Button
@@ -58,7 +60,7 @@ function RunQueryBtn({
 			onClick={onStageRunQuery}
 			prefix={<Play size={14} />}
 		>
-			{label || 'Run Query'}
+			{label || t('run_query')}
 			<div className="cmd-hint">
 				{isMac ? <Command size={12} /> : <ChevronUp size={12} />}
 				<CornerDownLeft size={12} />

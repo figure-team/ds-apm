@@ -42,5 +42,17 @@
 	"processor_span_id_placeholder": "Span ID 파싱 원본",
 	"processor_trace_flags_placeholder": "Trace 플래그 파싱 원본",
 	"processor_from_placeholder": "원본",
-	"processor_to_placeholder": "대상"
+	"processor_to_placeholder": "대상",
+	"tab_pipelines": "파이프라인",
+	"tab_change_history": "변경 이력",
+	"column_version": "버전",
+	"column_deployment_stage": "배포 단계",
+	"column_last_deploy_message": "마지막 배포 메시지",
+	"column_last_deployed_time": "마지막 배포 시간",
+	"column_edited_by": "편집자",
+	"deploy_stage_in_progress": "진행 중",
+	"deploy_stage_deployed": "배포됨",
+	"deploy_stage_dirty": "변경됨",
+	"deploy_stage_failed": "실패",
+	"deploy_stage_unknown": "알 수 없음"
 }

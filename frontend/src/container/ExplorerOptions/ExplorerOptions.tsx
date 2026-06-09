@@ -8,6 +8,7 @@ import {
 	useRef,
 	useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Color } from '@signozhq/design-tokens';
@@ -102,6 +103,7 @@ function ExplorerOptions({
 	splitedQueries = [],
 	handleChangeSelectedView,
 }: ExplorerOptionsProps): JSX.Element {
+	const { t } = useTranslation(['explorer']);
 	const [isExport, setIsExport] = useState<boolean>(false);
 	const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
 	const [newViewName, setNewViewName] = useState<string>('');
@@ -741,7 +743,7 @@ function ExplorerOptions({
 					shape="round"
 					icon={<ConciergeBell size={16} />}
 				>
-					Create an Alert
+					{t('create_an_alert')}
 				</Button>
 			);
 			return (
@@ -775,7 +777,7 @@ function ExplorerOptions({
 				onClick={(): void => onCreateAlertsHandler(query)}
 				icon={<ConciergeBell size={16} />}
 			>
-				Create an Alert
+				{t('create_an_alert')}
 			</Button>
 		);
 	}, [
@@ -784,6 +786,7 @@ function ExplorerOptions({
 		isOneChartPerQuery,
 		onCreateAlertsHandler,
 		splitedQueries,
+		t,
 	]);
 
 	const AddToDashboardButton = useMemo(() => {
@@ -796,7 +799,7 @@ function ExplorerOptions({
 					onClick={onAddToDashboard}
 					icon={<Plus size={16} />}
 				>
-					Add to Dashboard
+					{t('add_to_dashboard')}
 				</Button>
 			);
 			return (
@@ -835,10 +838,10 @@ function ExplorerOptions({
 				onClick={onAddToDashboard}
 				icon={<Plus size={16} />}
 			>
-				Add to Dashboard
+				{t('add_to_dashboard')}
 			</Button>
 		);
-	}, [disabled, isOneChartPerQuery, onAddToDashboard, splitedQueries]);
+	}, [disabled, isOneChartPerQuery, onAddToDashboard, splitedQueries, t]);
 
 	const hideToolbar = (): void => {
 		setExplorerToolBarVisibility(false, sourcepage);
@@ -943,7 +946,7 @@ function ExplorerOptions({
 							disabled={viewsIsLoading || isRefetching}
 							icon={<Disc3 size={16} />}
 						>
-							Save this view
+							{t('save_this_view')}
 						</Button>
 					</div>
 
@@ -997,7 +1000,7 @@ function ExplorerOptions({
 			/>
 			<Modal
 				className="save-view-modal"
-				title={<span className="title">Save this view</span>}
+				title={<span className="title">{t('save_this_view')}</span>}
 				open={isSaveModalOpen}
 				closable
 				onCancel={hideSaveViewModal}
@@ -1010,7 +1013,7 @@ function ExplorerOptions({
 						disabled={isSaveViewLoading}
 						data-testid="save-view-btn"
 					>
-						Save this view
+						{t('save_this_view')}
 					</Button>,
 				]}
 			>
