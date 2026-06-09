@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useMutation } from 'react-query';
-import { Radio, RadioChangeEvent, Switch, Tag } from 'antd';
+import { useTranslation } from 'react-i18next';
+import { Modal, Radio, RadioChangeEvent, Switch, Tag } from 'antd';
 import setLocalStorageApi from 'api/browser/localstorage/set';
 import logEvent from 'api/common/logEvent';
 import updateUserPreference from 'api/v1/user/preferences/name/update';
+import i18n from 'i18next';
 import { AxiosError } from 'axios';
 import { USER_PREFERENCES } from 'constants/userPreferences';
 import useThemeMode, { useIsDarkMode, useSystemTheme } from 'hooks/useDarkMode';
@@ -25,8 +27,12 @@ function MySettings(): JSX.Element {
 	const { toggleTheme, autoSwitch, setAutoSwitch } = useThemeMode();
 	const systemTheme = useSystemTheme();
 	const { notifications } = useNotifications();
+	const { t } = useTranslation(['settings']);
 
 	const [sideNavPinned, setSideNavPinned] = useState(false);
+	const [language, setLanguage] = useState<'en' | 'ko'>(
+		i18n.language?.startsWith('ko') ? 'ko' : 'en',
+	);
 
 	useEffect(() => {
 		if (userPreferences) {
@@ -118,6 +124,23 @@ function MySettings(): JSX.Element {
 		}
 	}, [autoSwitch, isDarkMode]);
 
+	const handleLanguageToggle = (checked: boolean): void => {
+		const targetLang = checked ? 'ko' : 'en';
+		Modal.confirm({
+			title: '언어 변경',
+			content: checked
+				? '설정 메뉴를 한국어로 변환하시겠습니까?'
+				: '설정 메뉴를 영어로 변환하시겠습니까?',
+			okText: '확인',
+			cancelText: '취소',
+			className: 'language-change-modal',
+			onOk: () => {
+				i18n.changeLanguage(targetLang);
+				setLanguage(targetLang);
+			},
+		});
+	};
+
 	const handleSideNavPinnedChange = (checked: boolean): void => {
 		logEvent('Account Settings: Sidebar Pinned Changed', {
 			pinned: checked,
@@ -161,10 +184,10 @@ function MySettings(): JSX.Element {
 		<div className="my-settings-container">
 			<div className="user-info-section">
 				<div className="user-info-section-header">
-					<div className="user-info-section-title">Account </div>
+					<div className="user-info-section-title">{t('settings:account_title')}</div>
 
 					<div className="user-info-section-subtitle">
-						Manage your account settings.
+						{t('settings:account_subtitle')}
 					</div>
 				</div>
 
@@ -175,17 +198,17 @@ function MySettings(): JSX.Element {
 
 			<div className="user-preference-section">
 				<div className="user-preference-section-header">
-					<div className="user-preference-section-title">User Preferences</div>
+					<div className="user-preference-section-title">{t('settings:preferences_title')}</div>
 
 					<div className="user-preference-section-subtitle">
-						Tailor the SigNoz console to work according to your needs.
+						{t('settings:preferences_subtitle')}
 					</div>
 				</div>
 
 				<div className="user-preference-section-content">
 					<div className="user-preference-section-content-item theme-selector">
 						<div className="user-preference-section-content-item-title-action">
-							Select your theme
+							{t('settings:theme_title')}
 							<Radio.Group
 								options={themeOptions}
 								onChange={handleThemeChange}
@@ -198,14 +221,13 @@ function MySettings(): JSX.Element {
 						</div>
 
 						<div className="user-preference-section-content-item-description">
-							Select if SigNoz&apos;s appearance should be light, dark, or
-							automatically follow your system preference
+							{t('settings:theme_description')}
 						</div>
 
 						{autoSwitch && (
 							<div className="auto-theme-info">
 								<div className="auto-theme-status">
-									Currently following system theme:{' '}
+									{t('settings:auto_theme_status')}{' '}
 									<strong>{systemTheme === 'dark' ? 'Dark' : 'Light'}</strong>
 								</div>
 							</div>
@@ -216,7 +238,23 @@ function MySettings(): JSX.Element {
 
 					<div className="user-preference-section-content-item">
 						<div className="user-preference-section-content-item-title-action">
-							Keep the primary sidebar always open{' '}
+							{t('settings:language_title')}{' '}
+							<Switch
+								checked={language === 'ko'}
+								onChange={handleLanguageToggle}
+								checkedChildren="한국어"
+								unCheckedChildren="English"
+								data-testid="language-toggle-switch"
+							/>
+						</div>
+						<div className="user-preference-section-content-item-description">
+							{t('settings:language_description')}
+						</div>
+					</div>
+
+					<div className="user-preference-section-content-item">
+						<div className="user-preference-section-content-item-title-action">
+							{t('settings:sidenav_title')}{' '}
 							<Switch
 								checked={sideNavPinned}
 								onChange={handleSideNavPinnedChange}
@@ -226,8 +264,7 @@ function MySettings(): JSX.Element {
 						</div>
 
 						<div className="user-preference-section-content-item-description">
-							Keep the primary sidebar always open by default, unless collapsed with
-							the keyboard shortcut
+							{t('settings:sidenav_description')}
 						</div>
 					</div>
 				</div>

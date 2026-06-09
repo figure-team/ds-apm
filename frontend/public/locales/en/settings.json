@@ -2,5 +2,16 @@
 	"current_password": "Current Password",
 	"new_password": "New Password",
 	"change_password": "Change Password",
-	"input_password": "input password"
+	"input_password": "input password",
+	"account_title": "Account",
+	"account_subtitle": "Manage your account settings.",
+	"preferences_title": "User Preferences",
+	"preferences_subtitle": "Tailor the SigNoz console to work according to your needs.",
+	"theme_title": "Select your theme",
+	"theme_description": "Select if SigNoz's appearance should be light, dark, or automatically follow your system preference",
+	"auto_theme_status": "Currently following system theme:",
+	"language_title": "Settings menu language",
+	"language_description": "Switch settings menu labels between English and Korean",
+	"sidenav_title": "Keep the primary sidebar always open",
+	"sidenav_description": "Keep the primary sidebar always open by default, unless collapsed with the keyboard shortcut"
 }
