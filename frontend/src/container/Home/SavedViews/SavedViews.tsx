@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Button, Skeleton, Tag } from 'antd';
 import logEvent from 'api/common/logEvent';
@@ -33,6 +34,7 @@ export default function SavedViews({
 	loadingUserPreferences: boolean;
 }): JSX.Element {
 	const { user } = useAppContext();
+	const { t } = useTranslation(['home', 'common']);
 	const [selectedEntity, setSelectedEntity] = useState<string>('logs');
 	const [selectedEntityViews, setSelectedEntityViews] = useState<any[]>([]);
 
@@ -164,11 +166,11 @@ export default function SavedViews({
 						className="empty-state-icon"
 					/>
 
-					<div className="empty-title">You have not saved any views yet.</div>
+					<div className="empty-title">{t('saved_views_empty_title')}</div>
 
 					{user?.role !== USER_ROLES.VIEWER && (
 						<div className="empty-description">
-							Explore your data and save them as views.
+							{t('saved_views_empty_description')}
 						</div>
 					)}
 				</div>
@@ -186,7 +188,7 @@ export default function SavedViews({
 									});
 								}}
 							>
-								Get Started &nbsp; <ArrowRight size={16} />
+								{t('common:get_started')} &nbsp; <ArrowRight size={16} />
 							</Button>
 						</Link>
 
@@ -206,7 +208,7 @@ export default function SavedViews({
 								);
 							}}
 						>
-							Learn more <ArrowUpRight size={12} />
+							{t('common:learn_more')} <ArrowUpRight size={12} />
 						</Button>
 					</div>
 				)}
@@ -270,7 +272,7 @@ export default function SavedViews({
 				{selectedEntityViews.length === 0 && (
 					<div className="saved-views-list-empty-state">
 						<div className="saved-views-list-empty-state-message">
-							No saved views found.
+							{t('saved_views_none_found')}
 						</div>
 					</div>
 				)}
@@ -278,7 +280,7 @@ export default function SavedViews({
 				{selectedEntity === 'logs' && logsViewsError && (
 					<div className="logs-saved-views-error-container">
 						<div className="logs-saved-views-error-message">
-							Oops, something went wrong while loading your saved views.
+							{t('saved_views_load_error')}
 						</div>
 					</div>
 				)}
@@ -286,7 +288,7 @@ export default function SavedViews({
 				{selectedEntity === 'traces' && tracesViewsError && (
 					<div className="traces-saved-views-error-container">
 						<div className="traces-saved-views-error-message">
-							Oops, something went wrong while loading your saved views.
+							{t('saved_views_load_error')}
 						</div>
 					</div>
 				)}
@@ -294,7 +296,7 @@ export default function SavedViews({
 				{selectedEntity === 'metrics' && metricsViewsError && (
 					<div className="metrics-saved-views-error-container">
 						<div className="metrics-saved-views-error-message">
-							Oops, something went wrong while loading your saved views.
+							{t('saved_views_load_error')}
 						</div>
 					</div>
 				)}
@@ -343,7 +345,7 @@ export default function SavedViews({
 			{hasSavedViews && (
 				<Card.Header>
 					<div className="saved-views-header home-data-card-header">
-						Saved Views
+						{t('saved_views_header')}
 						<div className="saved-views-header-actions">
 							<Button.Group className="views-tabs">
 								<Button
@@ -352,21 +354,21 @@ export default function SavedViews({
 									onClick={(): void => handleTabChange('logs')}
 								>
 									<ScrollText size={14} />
-									Logs
+									{t('tab_logs')}
 								</Button>
 								<Button
 									value="traces"
 									className={selectedEntity === 'traces' ? 'selected tab' : 'tab'}
 									onClick={(): void => handleTabChange('traces')}
 								>
-									<DraftingCompass size={14} /> Traces
+									<DraftingCompass size={14} /> {t('tab_traces')}
 								</Button>
 								<Button
 									value="metrics"
 									className={selectedEntity === 'metrics' ? 'selected tab' : 'tab'}
 									onClick={(): void => handleTabChange('metrics')}
 								>
-									<BarChart size={14} /> Metrics
+									<BarChart size={14} /> {t('tab_metrics')}
 								</Button>
 							</Button.Group>
 						</div>
@@ -391,7 +393,7 @@ export default function SavedViews({
 									});
 								}}
 							>
-								All Views <ArrowRight size={12} />
+								{t('all_views')} <ArrowRight size={12} />
 							</Button>
 						</Link>
 					</div>

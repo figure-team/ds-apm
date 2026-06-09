@@ -1,4 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { QueryKey } from 'react-query';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
@@ -132,6 +133,7 @@ function ServiceMetrics({
 	const topLevelOperations = useMemo(() => Object.entries(data || {}), [data]);
 
 	const { featureFlags } = useAppContext();
+	const { t } = useTranslation('home');
 	const dotMetricsEnabled =
 		featureFlags?.find((flag) => flag.name === FeatureKeys.DOT_METRICS_ENABLED)
 			?.active || false;
@@ -242,8 +244,7 @@ function ServiceMetrics({
 			{servicesExist && (
 				<Card.Header>
 					<div className="services-header home-data-card-header">
-						{' '}
-						Services
+						{t('services_header')}
 						<div className="services-header-actions">
 							<Select
 								value={timeRange.selectedInterval}
@@ -274,7 +275,7 @@ function ServiceMetrics({
 									logEvent('Homepage: All Services clicked', {});
 								}}
 							>
-								All Services <ArrowRight size={12} />
+								{t('all_services')} <ArrowRight size={12} />
 							</Button>
 						</Link>
 					</div>

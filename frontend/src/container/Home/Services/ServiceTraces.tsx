@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux'; // old code, TODO: fix this correctly
 import { Link } from 'react-router-dom';
@@ -29,6 +30,7 @@ export default function ServiceTraces({
 	const { selectedTime } = useSelector<AppState, GlobalReducer>(
 		(state) => state.globalTime,
 	);
+	const { t } = useTranslation('home');
 
 	const now = new Date().getTime();
 	const [timeRange, setTimeRange] = useState({
@@ -145,7 +147,7 @@ export default function ServiceTraces({
 			{servicesExist && (
 				<Card.Header>
 					<div className="services-header home-data-card-header">
-						Services
+						{t('services_header')}
 						<div className="services-header-actions">
 							<Select
 								value={timeRange.selectedInterval}
@@ -176,7 +178,7 @@ export default function ServiceTraces({
 									logEvent('Homepage: All Services clicked', {});
 								}}
 							>
-								All Services <ArrowRight size={12} />
+								{t('all_services')} <ArrowRight size={12} />
 							</Button>
 						</Link>
 					</div>

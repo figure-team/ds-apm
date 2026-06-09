@@ -1,5 +1,6 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from 'antd';
 import logEvent from 'api/common/logEvent';
 import ROUTES from 'constants/routes';
@@ -34,6 +35,7 @@ function HomeChecklist({
 	isLoading: boolean;
 }): JSX.Element {
 	const { user, activeLicense } = useAppContext();
+	const { t } = useTranslation(['home', 'common']);
 
 	const [completedChecklistItems, setCompletedChecklistItems] = useState<
 		ChecklistItem[]
@@ -51,7 +53,9 @@ function HomeChecklist({
 	return (
 		<div className="home-checklist-container">
 			<div className="completed-checklist-container">
-				<div className="completed-checklist-title">Completed</div>
+				<div className="completed-checklist-title">
+					{t('checklist_completed')}
+				</div>
 
 				{completedChecklistItems.map((item) => (
 					<div key={item.id} className="completed-checklist-item">
@@ -62,7 +66,9 @@ function HomeChecklist({
 
 			{whatsNextChecklistItems.length > 0 && (
 				<div className="whats-next-checklist-container">
-					<div className="whats-next-checklist-title">What&apos;s Next</div>
+					<div className="whats-next-checklist-title">
+						{t('checklist_whats_next')}
+					</div>
 
 					<div className="whats-next-checklist-items-container">
 						{whatsNextChecklistItems.map((item, index) => (
@@ -104,7 +110,8 @@ function HomeChecklist({
 														}
 													}}
 												>
-													Get Started &nbsp; <ArrowRight size={16} />
+													{t('common:get_started')} &nbsp;{' '}
+													<ArrowRight size={16} />
 												</Button>
 
 												{item.docsLink && (
@@ -139,7 +146,7 @@ function HomeChecklist({
 														loading={isLoading}
 														icon={<ArrowRightToLine size={16} />}
 													>
-														Skip for now
+														{t('skip_for_now')}
 													</Button>
 												</div>
 											)}

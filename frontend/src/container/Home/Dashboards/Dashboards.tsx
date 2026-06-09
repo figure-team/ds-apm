@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Button, Skeleton, Tag } from 'antd';
 import logEvent from 'api/common/logEvent';
@@ -25,6 +26,7 @@ export default function Dashboards({
 }): JSX.Element {
 	const { safeNavigate } = useSafeNavigate();
 	const { user } = useAppContext();
+	const { t } = useTranslation(['home', 'common']);
 
 	const [sortedDashboards, setSortedDashboards] = useState<Dashboard[]>([]);
 
@@ -59,10 +61,12 @@ export default function Dashboards({
 				<div className="empty-state-content">
 					<img src={dialsUrl} alt="empty-alert-icon" className="empty-state-icon" />
 
-					<div className="empty-title">You don’t have any dashboards yet.</div>
+					<div className="empty-title">{t('dashboards_empty_title')}</div>
 
 					{user?.role !== USER_ROLES.VIEWER && (
-						<div className="empty-description">Create a dashboard to get started</div>
+						<div className="empty-description">
+							{t('dashboards_empty_description')}
+						</div>
 					)}
 				</div>
 
@@ -77,7 +81,7 @@ export default function Dashboards({
 									logEvent('Homepage: Create dashboard clicked', {});
 								}}
 							>
-								New Dashboard
+								{t('new_dashboard')}
 							</Button>
 						</Link>
 
@@ -94,7 +98,7 @@ export default function Dashboards({
 								);
 							}}
 						>
-							Learn more <ArrowUpRight size={12} />
+							{t('common:learn_more')} <ArrowUpRight size={12} />
 						</Button>
 					</div>
 				)}
@@ -186,7 +190,9 @@ export default function Dashboards({
 		<Card className="dashboards-list-card home-data-card">
 			{dashboardsExist && (
 				<Card.Header>
-					<div className="dashboards-header home-data-card-header">Dashboards</div>
+					<div className="dashboards-header home-data-card-header">
+						{t('dashboards_header')}
+					</div>
 				</Card.Header>
 			)}
 			<Card.Content>
@@ -204,7 +210,7 @@ export default function Dashboards({
 									logEvent('Homepage: All dashboards clicked', {});
 								}}
 							>
-								All Dashboards <ArrowRight size={12} />
+								{t('all_dashboards')} <ArrowRight size={12} />
 							</Button>
 						</Link>
 					</div>

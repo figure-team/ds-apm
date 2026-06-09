@@ -1,6 +1,6 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import React, { useCallback, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useMutation, useQuery } from 'react-query';
 import { Color } from '@signozhq/design-tokens';
 import { Compass, Dot, House, Plus, Wrench } from '@signozhq/icons';
@@ -282,11 +282,11 @@ export default function Home(): JSX.Element {
 						onClick: (): void => history.push(ROUTES.SERVICE_ACCOUNTS_SETTINGS),
 					}}
 				>
-					<>
-						<strong>API keys</strong> have been deprecated in favour of{' '}
-						<strong>Service accounts</strong>. The existing API Keys have been
-						migrated to service accounts.
-					</>
+					<Trans
+						t={t}
+						i18nKey="api_keys_deprecated"
+						components={[<strong key="0" />, <strong key="1" />]}
+					/>
 				</PersistedAnnouncementBanner>
 			)}
 

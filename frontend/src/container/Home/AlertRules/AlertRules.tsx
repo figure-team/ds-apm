@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
 import { Button, Skeleton, Tag } from 'antd';
 import logEvent from 'api/common/logEvent';
@@ -28,6 +29,7 @@ export default function AlertRules({
 }): JSX.Element {
 	const isDarkMode = useIsDarkMode();
 	const { user } = useAppContext();
+	const { t } = useTranslation(['home', 'common']);
 	const [rulesExist, setRulesExist] = useState(false);
 
 	const [sortedAlertRules, setSortedAlertRules] = useState<RuletypesRuleDTO[]>(
@@ -78,11 +80,11 @@ export default function AlertRules({
 				<div className="empty-state-content">
 					<img src={beaconUrl} alt="empty-alert-icon" className="empty-state-icon" />
 
-					<div className="empty-title">No Alert rules yet.</div>
+					<div className="empty-title">{t('alerts_empty_title')}</div>
 
 					{user?.role !== USER_ROLES.VIEWER && (
 						<div className="empty-description">
-							Create an Alert Rule to get started
+							{t('alerts_empty_description')}
 						</div>
 					)}
 				</div>
@@ -98,7 +100,7 @@ export default function AlertRules({
 									logEvent('Homepage: Create alert rule clicked', {});
 								}}
 							>
-								Create Alert Rule
+								{t('create_alert_rule')}
 							</Button>
 						</Link>
 
@@ -117,7 +119,7 @@ export default function AlertRules({
 								);
 							}}
 						>
-							Learn more <ArrowUpRight size={12} />
+							{t('common:learn_more')} <ArrowUpRight size={12} />
 						</Button>
 					</div>
 				)}
@@ -217,7 +219,9 @@ export default function AlertRules({
 		<Card className="alert-rules-card home-data-card">
 			{rulesExist && (
 				<Card.Header>
-					<div className="alert-rules-header home-data-card-header">Alerts</div>
+					<div className="alert-rules-header home-data-card-header">
+						{t('alerts_section')}
+					</div>
 				</Card.Header>
 			)}
 			<Card.Content>
@@ -235,7 +239,7 @@ export default function AlertRules({
 									logEvent('Homepage: All alert rules clicked', {});
 								}}
 							>
-								All Alert Rules <ArrowRight size={12} />
+								{t('all_alert_rules')} <ArrowRight size={12} />
 							</Button>
 						</Link>
 					</div>
