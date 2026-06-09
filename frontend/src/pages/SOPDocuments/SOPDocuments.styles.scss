@@ -16,6 +16,23 @@
 		gap: var(--spacing-2);
 	}
 
+	&__header-row {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--spacing-8);
+	}
+
+	&__header-actions {
+		display: flex;
+		gap: var(--spacing-4);
+		flex-shrink: 0;
+	}
+
+	.sop-preview-row--error td {
+		background: rgba(255, 77, 79, 0.06) !important;
+	}
+
 	h1,
 	h2,
 	p {

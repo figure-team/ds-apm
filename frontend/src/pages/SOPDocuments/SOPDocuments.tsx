@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 import { Alert, Button, Input, Select, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import SHA256 from 'crypto-js/sha256';
@@ -15,6 +16,9 @@ import {
 import RunbooksSection from 'container/Runbooks/RunbooksSection';
 
 import './SOPDocuments.styles.scss';
+import { downloadSopExcelTemplate, type ParseSopExcelResult } from './parseSopExcel';
+import SopBulkUploadModal from './SopBulkUploadModal';
+import SopBulkPreviewDrawer from './SopBulkPreviewDrawer';
 
 type SopDocumentFormState = {
 	sopId: string;
@@ -138,6 +142,9 @@ function SOPDocuments(): JSX.Element {
 	const [isPreviewing, setIsPreviewing] = useState(false);
 	const [message, setMessage] = useState('');
 	const [error, setError] = useState('');
+	const [uploadModalOpen, setUploadModalOpen] = useState(false);
+	const [previewDrawerOpen, setPreviewDrawerOpen] = useState(false);
+	const [parseResult, setParseResult] = useState<ParseSopExcelResult | null>(null);
 
 	const loadDocuments = useCallback(async (): Promise<void> => {
 		setIsLoading(true);
@@ -186,6 +193,16 @@ function SOPDocuments(): JSX.Element {
 			setIsSaving(false);
 		}
 	}, [form, loadDocuments]);
+
+	const handleParsed = useCallback((result: ParseSopExcelResult): void => {
+		setParseResult(result);
+		setUploadModalOpen(false);
+		setPreviewDrawerOpen(true);
+	}, []);
+
+	const handleRegistered = useCallback((): void => {
+		void loadDocuments();
+	}, [loadDocuments]);
 
 	const handlePreviewBinding = useCallback(async (): Promise<void> => {
 		setIsPreviewing(true);
@@ -260,11 +277,30 @@ function SOPDocuments(): JSX.Element {
 	return (
 		<div className="sop-documents-page">
 			<header className="sop-documents-page__header">
-				<h1>DS-APM SOP documents</h1>
-				<p>
-					Register managed Markdown SOPs that SigNoz alert rules can bind with
-					<code>sop_id</code> and feed into SOP-grounded AI response strategy.
-				</p>
+				<div className="sop-documents-page__header-row">
+					<div>
+						<h1>DS-APM SOP documents</h1>
+						<p>
+							Register managed Markdown SOPs that SigNoz alert rules can bind with
+							<code>sop_id</code> and feed into SOP-grounded AI response strategy.
+						</p>
+					</div>
+					<div className="sop-documents-page__header-actions">
+						<Button
+							icon={<DownloadOutlined />}
+							onClick={downloadSopExcelTemplate}
+						>
+							템플릿 다운로드
+						</Button>
+						<Button
+							icon={<UploadOutlined />}
+							onClick={(): void => setUploadModalOpen(true)}
+							type="primary"
+						>
+							파일 업로드
+						</Button>
+					</div>
+				</div>
 			</header>
 
 			{message && <Alert message={message} showIcon type="success" />}
@@ -513,6 +549,17 @@ function SOPDocuments(): JSX.Element {
 					size="small"
 				/>
 			</section>
+			<SopBulkUploadModal
+				onClose={(): void => setUploadModalOpen(false)}
+				onParsed={handleParsed}
+				open={uploadModalOpen}
+			/>
+			<SopBulkPreviewDrawer
+				onClose={(): void => setPreviewDrawerOpen(false)}
+				onRegistered={handleRegistered}
+				open={previewDrawerOpen}
+				parseResult={parseResult}
+			/>
 		</div>
 	);
 }

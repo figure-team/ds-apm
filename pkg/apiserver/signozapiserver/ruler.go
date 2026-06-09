@@ -206,6 +206,22 @@ func (provider *provider) addRulerRoutes(router *mux.Router) error {
 		return err
 	}
 
+	if err := router.Handle("/api/v2/ds/sop/documents/batch", handler.New(provider.authZ.EditAccess(provider.rulerHandler.CreateSOPDocumentBatch), handler.OpenAPIDef{
+		ID:                  "CreateSOPDocumentBatch",
+		Tags:                []string{"rules"},
+		Summary:             "Batch create SOP documents",
+		Description:         "Registers multiple ds.sop_document.v1 documents in a single request; each document is validated independently — valid ones are stored, invalid ones are reported with error details",
+		Request:             new(ruletypes.SOPDocumentBatchRequest),
+		RequestContentType:  "application/json",
+		Response:            new(ruletypes.SOPDocumentBatchResponse),
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusBadRequest, http.StatusUnauthorized},
+		SecuritySchemes:     newSecuritySchemes(types.RoleEditor),
+	})).Methods(http.MethodPost).GetError(); err != nil {
+		return err
+	}
+
 	if err := router.Handle("/api/v2/ds/sop/documents", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.ListSOPDocuments), handler.OpenAPIDef{
 		ID:                  "ListSOPDocuments",
 		Tags:                []string{"rules"},

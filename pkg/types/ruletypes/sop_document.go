@@ -353,3 +353,29 @@ func latestSOPDocumentByID(docs []SOPDocument, sopID string) (SOPDocument, bool)
 
 	return latest, found
 }
+
+const (
+	SOPBatchResultContractVersion = "ds.sop_batch_result.v1"
+	SOPBatchResultStatusOk        = "ok"
+	SOPBatchResultStatusError     = "error"
+)
+
+type SOPDocumentBatchRequest struct {
+	ContractVersion string        `json:"contractVersion"`
+	Documents       []SOPDocument `json:"documents"`
+}
+
+type SOPDocumentBatchResponse struct {
+	ContractVersion string                   `json:"contractVersion"`
+	Total           int                      `json:"total"`
+	Succeeded       int                      `json:"succeeded"`
+	Failed          int                      `json:"failed"`
+	Results         []SOPDocumentBatchResult `json:"results"`
+}
+
+type SOPDocumentBatchResult struct {
+	SOPID   string `json:"sopId"`
+	Version string `json:"version"`
+	Status  string `json:"status"` // "ok" | "error"
+	Error   string `json:"error,omitempty"`
+}

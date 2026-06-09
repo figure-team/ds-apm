@@ -104,3 +104,35 @@ export function previewSopDocumentBinding(
 		data,
 	});
 }
+
+export const SOP_BATCH_RESULT_CONTRACT_VERSION = 'ds.sop_batch_result.v1';
+
+export type SopDocumentBatchRequest = {
+	contractVersion: string;
+	documents: SopDocument[];
+};
+
+export type SopDocumentBatchResult = {
+	sopId: string;
+	version: string;
+	status: 'ok' | 'error';
+	error?: string;
+};
+
+export type SopDocumentBatchResponse = {
+	contractVersion: string;
+	total: number;
+	succeeded: number;
+	failed: number;
+	results: SopDocumentBatchResult[];
+};
+
+export function createSopDocumentBatch(
+	data: SopDocumentBatchRequest,
+): Promise<ApiResponse<SopDocumentBatchResponse>> {
+	return GeneratedAPIInstance<ApiResponse<SopDocumentBatchResponse>>({
+		url: '/api/v2/ds/sop/documents/batch',
+		method: 'POST',
+		data,
+	});
+}
