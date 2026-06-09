@@ -1,4 +1,5 @@
 import { ChangeEvent, useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { CloseOutlined, PlusCircleFilled } from '@ant-design/icons';
@@ -15,6 +16,7 @@ import { IHandleInterestProps, IHandleRemoveInterestProps } from './types';
 import { onHandleAddInterest, onHandleRemoveInterest } from './utils';
 
 function LogsFilters(): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const {
 		fields: { interesting, selected },
 	} = useSelector<AppState, ILogsReducer>((state) => state.logs);
@@ -60,14 +62,14 @@ function LogsFilters(): JSX.Element {
 	return (
 		<Col flex="250px">
 			<Input
-				placeholder="Filter Values"
+				placeholder={t('logs:filter_values_placeholder')}
 				onInput={handleSearch}
 				value={filterValuesInput}
 				onChange={handleSearch}
 			/>
 
 			<CategoryContainer>
-				<CategoryHeading>SELECTED FIELDS</CategoryHeading>
+				<CategoryHeading>{t('logs:selected_fields')}</CategoryHeading>
 				<FieldContainer>
 					{selected
 						.filter((field) => fieldSearchFilter(field.name, filterValuesInput))
@@ -84,13 +86,13 @@ function LogsFilters(): JSX.Element {
 									fieldIndex: idx,
 								})}
 								isLoading={selectedFieldLoading.includes(idx)}
-								iconHoverText="Remove from Selected Fields"
+								iconHoverText={t('logs:remove_from_selected_fields')}
 							/>
 						))}
 				</FieldContainer>
 			</CategoryContainer>
 			<CategoryContainer>
-				<CategoryHeading>INTERESTING FIELDS</CategoryHeading>
+				<CategoryHeading>{t('logs:interesting_fields')}</CategoryHeading>
 				<FieldContainer>
 					{interesting
 						.filter((field) => fieldSearchFilter(field.name, filterValuesInput))
@@ -106,7 +108,7 @@ function LogsFilters(): JSX.Element {
 									fieldIndex: idx,
 								})}
 								isLoading={interestingFieldLoading.includes(idx)}
-								iconHoverText="Add to Selected Fields"
+								iconHoverText={t('logs:add_to_selected_fields')}
 							/>
 						))}
 				</FieldContainer>

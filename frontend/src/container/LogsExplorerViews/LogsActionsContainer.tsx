@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Switch, Typography } from 'antd';
 import DownloadOptionsMenu from 'components/DownloadOptionsMenu/DownloadOptionsMenu';
 import LogsFormatOptionsMenu from 'components/LogsFormatOptionsMenu/LogsFormatOptionsMenu';
@@ -33,6 +34,7 @@ function LogsActionsContainer({
 	isError: boolean;
 	isSuccess: boolean;
 }): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const { options, config } = useOptionsMenu({
 		storageKey: LOCALSTORAGE.LOGS_LIST_OPTIONS,
 		dataSource: DataSource.LOGS,
@@ -42,20 +44,20 @@ function LogsActionsContainer({
 	const formatItems = [
 		{
 			key: 'raw',
-			label: 'Raw',
+			label: t('logs:raw'),
 			data: {
-				title: 'max lines per row',
+				title: t('logs:max_lines_per_row'),
 			},
 		},
 		{
 			key: 'list',
-			label: 'Default',
+			label: t('logs:default'),
 		},
 		{
 			key: 'table',
-			label: 'Column',
+			label: t('logs:column'),
 			data: {
-				title: 'columns',
+				title: t('logs:columns'),
 			},
 		},
 	];
@@ -66,7 +68,7 @@ function LogsActionsContainer({
 				<div className="tab-options-left">
 					{selectedPanelType === PANEL_TYPES.LIST && (
 						<div className="frequency-chart-view-controller">
-							<Typography>Frequency chart</Typography>
+							<Typography>{t('logs:frequency_chart')}</Typography>
 							<Switch
 								size="small"
 								checked={showFrequencyChart}
@@ -82,7 +84,7 @@ function LogsActionsContainer({
 						<>
 							<div className="order-by-container">
 								<div className="order-by-label">
-									Order by <Minus size={14} /> <ArrowUp10 size={14} />
+									{t('logs:order_by')} <Minus size={14} /> <ArrowUp10 size={14} />
 								</div>
 
 								<ListViewOrderBy

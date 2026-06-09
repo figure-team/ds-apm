@@ -6,6 +6,7 @@ import {
 	useCallback,
 	useMemo,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TableColumnsType as ColumnsType } from 'antd';
 import { VIEW_TYPES } from 'components/LogDetail/constants';
 import LogLinesActionButtons from 'components/Logs/LogLinesActionButtons/LogLinesActionButtons';
@@ -45,6 +46,7 @@ export default function TableRow({
 	isActiveLog,
 	onClearActiveLog,
 }: TableRowProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const isDarkMode = useIsDarkMode();
 
 	const currentLog = useMemo(
@@ -96,7 +98,7 @@ export default function TableRow({
 				}
 
 				if (!column.render) {
-					return <td key={column.key}>Empty</td>;
+					return <td key={column.key}>{t('logs:empty_cell')}</td>;
 				}
 
 				const element: ColumnTypeRender<Record<string, unknown>> = column.render(

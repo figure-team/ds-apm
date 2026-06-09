@@ -1,4 +1,5 @@
 import { memo, useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { EditFilled } from '@ant-design/icons';
 import { Modal, Typography } from 'antd';
 import RawLogView from 'components/Logs/RawLogView';
@@ -17,6 +18,7 @@ function LogsExplorerContext({
 	log,
 	onClose,
 }: LogsExplorerContextProps): JSX.Element | null {
+	const { t } = useTranslation(['logs']);
 	const initialContextQuery = useInitialQuery(log);
 
 	const [contextQuery, setContextQuery] = useState<Query>(initialContextQuery);
@@ -69,7 +71,7 @@ function LogsExplorerContext({
 			footer={null}
 			title={
 				<TitleWrapper block>
-					<Typography>Logs Context</Typography>
+					<Typography>{t('logs:logs_context')}</Typography>
 
 					<EditButton
 						$isDarkMode={isDarkMode}

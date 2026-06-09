@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { useNotifications } from 'hooks/useNotifications';
@@ -28,6 +29,7 @@ function SearchFields({
 	onDropDownToggleHandler,
 	updateQueryString,
 }: SearchFieldsProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const {
 		searchFilter: { parsedQuery },
 	} = useSelector<AppState, ILogsReducer>((store) => store.logs);
@@ -86,7 +88,7 @@ function SearchFields({
 
 		if (!fieldsQueryIsvalid(flatParsedQuery)) {
 			notifications.error({
-				message: 'Please enter a valid criteria for each of the selected fields',
+				message: t('logs:valid_criteria_required'),
 			});
 			return;
 		}
@@ -94,7 +96,7 @@ function SearchFields({
 		keyPrefixRef.current = hashCode(JSON.stringify(flatParsedQuery));
 		updateQueryString(reverseParser(flatParsedQuery));
 		onDropDownToggleHandler(false)();
-	}, [fieldsQuery, notifications, onDropDownToggleHandler, updateQueryString]);
+	}, [fieldsQuery, notifications, onDropDownToggleHandler, updateQueryString, t]);
 
 	const clearFilters = useCallback((): void => {
 		keyPrefixRef.current = hashCode(JSON.stringify([]));

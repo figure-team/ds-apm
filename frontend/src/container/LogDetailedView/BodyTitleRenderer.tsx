@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCopyToClipboard } from 'react-use';
 import { orange } from '@ant-design/colors';
 import { SettingOutlined } from '@ant-design/icons';
@@ -26,6 +27,7 @@ function BodyTitleRenderer({
 	nodeKey,
 	value,
 }: BodyTitleRendererProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const { onAddToQuery } = useActiveLog();
 	const [, setCopy] = useCopyToClipboard();
 	const { notifications } = useNotifications();
@@ -70,11 +72,11 @@ function BodyTitleRenderer({
 		items: [
 			{
 				key: DROPDOWN_KEY.FILTER_IN,
-				label: `Filter for ${value}`,
+				label: t('logs:filter_for_value_label', { value }),
 			},
 			{
 				key: DROPDOWN_KEY.FILTER_OUT,
-				label: `Filter out ${value}`,
+				label: t('logs:filter_out_value_label', { value }),
 			},
 		],
 		onClick: onClickHandler,
@@ -106,8 +108,8 @@ function BodyTitleRenderer({
 
 			if (copyText) {
 				const notificationMessage = isObject
-					? `${cleanedKey} object copied to clipboard`
-					: `${cleanedKey} copied to clipboard`;
+					? t('logs:attribute_object_copied_to_clipboard', { key: cleanedKey })
+					: t('logs:attribute_copied_to_clipboard', { key: cleanedKey });
 
 				notifications.success({
 					message: notificationMessage,
@@ -115,7 +117,7 @@ function BodyTitleRenderer({
 				});
 			}
 		},
-		[nodeKey, parentIsArray, setCopy, value, notifications],
+		[nodeKey, parentIsArray, setCopy, value, notifications, t],
 	);
 
 	return (

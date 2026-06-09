@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Popover, Select } from 'antd';
 import Spinner from 'components/Spinner';
 import { LOCALSTORAGE } from 'constants/localStorage';
@@ -16,6 +17,7 @@ import { popupContainer } from 'utils/selectPopupContainer';
 import { SpinnerWrapper } from './styles';
 
 function ListViewPanel(): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const { config } = useOptionsMenu({
 		storageKey: LOCALSTORAGE.LOGS_LIST_OPTIONS,
 		dataSource: DataSource.LOGS,
@@ -62,7 +64,7 @@ function ListViewPanel(): JSX.Element {
 					placement="right"
 					content={renderPopoverContent}
 				>
-					<Button>Format</Button>
+					<Button>{t('logs:format')}</Button>
 				</Popover>
 			)}
 			{isConnectionLoading && (

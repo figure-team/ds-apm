@@ -133,21 +133,21 @@ describe('LogsExplorerList - empty states', () => {
 		);
 
 		// Check for custom empty state message
-		expect(screen.getByText('No logs found for this trace.')).toBeInTheDocument();
-		expect(screen.getByText('This could be because :')).toBeInTheDocument();
+		expect(screen.getByText('logs:no_logs_found_for_trace')).toBeInTheDocument();
+		expect(screen.getByText('logs:this_could_be_because')).toBeInTheDocument();
 		expect(
-			screen.getByText('Logs are not linked to Traces.'),
+			screen.getByText('logs:logs_not_linked_to_traces'),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText('Logs are not being sent to SigNoz.'),
+			screen.getByText('logs:logs_not_being_sent'),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText('No logs are associated with this particular trace/span.'),
+			screen.getByText('logs:no_logs_associated_with_trace'),
 		).toBeInTheDocument();
 
 		// Check for documentation links
-		expect(screen.getByText('Sending logs to SigNoz')).toBeInTheDocument();
-		expect(screen.getByText('Correlate traces and logs')).toBeInTheDocument();
+		expect(screen.getByText('logs:sending_logs_to_signoz')).toBeInTheDocument();
+		expect(screen.getByText('logs:correlate_traces_and_logs')).toBeInTheDocument();
 	});
 
 	it('should display empty state when filters are applied and no results are found', async () => {

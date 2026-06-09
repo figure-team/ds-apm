@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
@@ -15,6 +16,7 @@ import { DataSource } from 'types/common/queryBuilder';
 import { constructCompositeQuery } from '../constants';
 
 function BackButton(): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const history = useHistory();
 
 	const { updateAllQueriesOperators } = useQueryBuilder();
@@ -47,7 +49,7 @@ function BackButton(): JSX.Element {
 
 	return (
 		<Button icon={<ArrowLeftOutlined />} onClick={handleBack}>
-			Exit live view
+			{t('logs:exit_live_view')}
 		</Button>
 	);
 }

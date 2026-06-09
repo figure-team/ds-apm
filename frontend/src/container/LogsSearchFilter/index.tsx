@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { connect, useDispatch, useSelector } from 'react-redux';
 import { Input, InputRef, Popover } from 'antd';
@@ -33,6 +34,7 @@ function SearchFilter({
 	getLogsAggregate,
 	getLogsFields,
 }: SearchFilterProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const { updateQueryString, queryString } = useSearchParser();
 	const [searchText, setSearchText] = useState(queryString);
 	const [showDropDown, setShowDropDown] = useState(false);
@@ -197,7 +199,7 @@ function SearchFilter({
 			>
 				<Input.Search
 					ref={searchRef}
-					placeholder="Search Filter"
+					placeholder={t('logs:search_filter_placeholder')}
 					value={searchText}
 					onChange={(e): void => {
 						const { value } = e.target;

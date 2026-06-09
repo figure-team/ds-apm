@@ -1,4 +1,5 @@
 import { useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueries, UseQueryResult } from 'react-query';
 import { Card, Col, Row, Skeleton, Typography } from 'antd';
 import cx from 'classnames';
@@ -29,6 +30,7 @@ function PodMetrics({
 	clusterName: string;
 	timestamp: string;
 }): JSX.Element {
+	const { t } = useTranslation(['logs', 'common']);
 	const { start, end, verticalLineTimestamp } = useMemo(() => {
 		const logTimestamp = dayjs(timestamp);
 		const now = dayjs();
@@ -130,7 +132,7 @@ function PodMetrics({
 
 		if (query.error) {
 			const errorMessage =
-				(query.error as Error)?.message || 'Something went wrong';
+				(query.error as Error)?.message || t('common:something_went_wrong');
 			return <div>{errorMessage}</div>;
 		}
 		return (

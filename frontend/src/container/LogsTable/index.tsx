@@ -1,4 +1,5 @@
 import { memo, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { Virtuoso } from 'react-virtuoso';
@@ -33,6 +34,7 @@ type LogsTableProps = {
 };
 
 function LogsTable(props: LogsTableProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const { viewMode, linesPerRow } = props;
 
 	const { activeLog, onClearActiveLog, onAddToQuery, onSetActiveLog } =
@@ -133,20 +135,20 @@ function LogsTable(props: LogsTableProps): JSX.Element {
 	]);
 
 	if (isLoading) {
-		return <Spinner height={20} tip="Getting Logs" />;
+		return <Spinner height={20} tip={t('logs:getting_logs')} />;
 	}
 
 	return (
 		<Container>
 			{viewMode !== 'table' && (
 				<Heading>
-					<Typography.Text>Event</Typography.Text>
+					<Typography.Text>{t('logs:event')}</Typography.Text>
 				</Heading>
 			)}
 
-			{isLiveTail && <Typography>Getting live logs...</Typography>}
+			{isLiveTail && <Typography>{t('logs:getting_live_logs')}</Typography>}
 
-			{isNoLogs && <Typography>No logs lines found</Typography>}
+			{isNoLogs && <Typography>{t('logs:no_logs_lines_found')}</Typography>}
 
 			{renderContent}
 			<LogDetail

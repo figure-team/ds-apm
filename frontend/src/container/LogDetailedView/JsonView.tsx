@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import MEditor, { EditorProps, Monaco } from '@monaco-editor/react';
 import { Color } from '@signozhq/design-tokens';
 import { Switch, Typography } from 'antd';
@@ -10,6 +11,7 @@ import { aggregateAttributesResourcesToString } from './utils';
 import './JsonView.styles.scss';
 
 function JSONView({ logData }: JSONViewProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const [isWrapWord, setIsWrapWord] = useState<boolean>(true);
 
 	const LogJsonData = useMemo(
@@ -80,7 +82,7 @@ function JSONView({ logData }: JSONViewProps): JSX.Element {
 			<div className="json-view-footer">
 				<div className="log-switch">
 					<div className="wrap-word-switch">
-						<Typography.Text>Wrap text</Typography.Text>
+						<Typography.Text>{t('logs:wrap_text')}</Typography.Text>
 						<Switch checked={isWrapWord} onChange={handleWrapWord} size="small" />
 					</div>
 				</div>

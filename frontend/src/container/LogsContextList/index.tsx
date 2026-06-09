@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Virtuoso } from 'react-virtuoso';
 import RawLogView from 'components/Logs/RawLogView';
 import OverlayScrollbar from 'components/OverlayScrollbar/OverlayScrollbar';
@@ -42,6 +43,7 @@ function LogsContextList({
 	order,
 	filters,
 }: LogsContextListProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const isDarkMode = useIsDarkMode();
 	const [logs, setLogs] = useState<ILog[]>([]);
 	const [page, setPage] = useState<number>(1);
@@ -194,7 +196,7 @@ function LogsContextList({
 
 			<ListContainer $isDarkMode={isDarkMode}>
 				{((!logs.length && !isFetching) || isError) && (
-					<EmptyText>No Data</EmptyText>
+					<EmptyText>{t('logs:no_data')}</EmptyText>
 				)}
 				{isFetching && <Spinner size="large" height="10rem" />}
 				<OverlayScrollbar isVirtuoso>

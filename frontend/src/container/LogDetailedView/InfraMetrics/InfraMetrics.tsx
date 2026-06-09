@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Empty } from 'antd';
 import type { RadioChangeEvent } from 'antd/lib';
 import SignozRadioGroup from 'components/SignozRadioGroup/SignozRadioGroup';
@@ -28,6 +29,7 @@ function InfraMetrics({
 	timestamp,
 	dataSource = DataSource.LOGS,
 }: MetricsDataProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const [selectedView, setSelectedView] = useState<string>(() =>
 		podName ? VIEW_TYPES.POD : VIEW_TYPES.NODE,
 	);
@@ -38,7 +40,7 @@ function InfraMetrics({
 				label: (
 					<div className="view-title">
 						<Table size={14} />
-						Node
+						{t('logs:node')}
 					</div>
 				),
 				value: VIEW_TYPES.NODE,
@@ -50,7 +52,7 @@ function InfraMetrics({
 				label: (
 					<div className="view-title">
 						<History size={14} />
-						Pod
+						{t('logs:pod')}
 					</div>
 				),
 				value: VIEW_TYPES.POD,
@@ -58,7 +60,7 @@ function InfraMetrics({
 		}
 
 		return options;
-	}, [podName]);
+	}, [podName, t]);
 
 	const handleModeChange = (e: RadioChangeEvent): void => {
 		setSelectedView(e.target.value);
@@ -67,8 +69,8 @@ function InfraMetrics({
 	if (!podName && !nodeName && !hostName) {
 		const emptyStateDescription =
 			dataSource === DataSource.TRACES
-				? 'No data available. Please select a span containing a pod, node, or host attributes to view metrics.'
-				: 'No data available. Please select a valid log line containing a pod, node, or host attributes to view metrics.';
+				? t('logs:infra_metrics_empty_traces')
+				: t('logs:infra_metrics_empty_logs');
 
 		return (
 			<div className="empty-container">

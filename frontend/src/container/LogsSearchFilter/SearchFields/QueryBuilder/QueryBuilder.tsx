@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { CloseOutlined, CloseSquareOutlined } from '@ant-design/icons';
@@ -59,6 +60,7 @@ function QueryField({
 	onUpdate,
 	onDelete,
 }: QueryFieldProps): JSX.Element | null {
+	const { t } = useTranslation(['logs']);
 	const [isDropDownOpen, setIsDropDownOpen] = useState(false);
 
 	const {
@@ -115,7 +117,7 @@ function QueryField({
 			</div>
 			<Select
 				defaultActiveFirstOption={false}
-				placeholder="Select Operator"
+				placeholder={t('logs:select_operator')}
 				defaultValue={
 					query[1] && query[1].value
 						? (query[1].value as string).toUpperCase()
@@ -193,6 +195,7 @@ function QueryBuilder({
 	onDropDownToggleHandler,
 	syncKeyPrefix,
 }: QueryBuilderProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const handleUpdate = (query: Query, queryIndex: number): void => {
 		const updated = [...fieldsQuery];
 		updated[queryIndex] = query as never; // parseQuery(query) as never;
@@ -246,7 +249,7 @@ function QueryBuilder({
 	return (
 		<>
 			<Container isMargin={fieldsQuery.length === 0}>
-				<CategoryHeading>LOG QUERY BUILDER</CategoryHeading>
+				<CategoryHeading>{t('logs:log_query_builder')}</CategoryHeading>
 				<CloseSquareOutlined onClick={onDropDownToggleHandler(false)} />
 			</Container>
 
