@@ -25,7 +25,10 @@
     "test:changedsince": "jest --changedSince=main --coverage --silent",
     "generate:api": "orval --config ./orval.config.ts && sh scripts/post-types-generation.sh",
     "generate:permissions-type": "node scripts/generate-permissions-type.cjs",
-    "i18n:check": "node scripts/check-i18n-parity.js"
+    "i18n:check": "node scripts/check-i18n-parity.js",
+    "i18n:check-literals": "node scripts/check-hardcoded-strings.js",
+    "i18n:check-literals:ci": "node scripts/check-hardcoded-strings.js --ci",
+    "i18n:check-literals:update": "node scripts/check-hardcoded-strings.js --update-baseline"
   },
   "engines": {
     "node": ">=22.0.0"
