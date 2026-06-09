@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 import { Alert, Button, Input, Select, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -49,13 +50,6 @@ const DEFAULT_FORM_STATE: SopDocumentFormState = {
 	tags: '',
 	serviceAccountProfile: 'managed-markdown-local',
 };
-
-const APPROVAL_STATUS_OPTIONS: { label: string; value: SopApprovalStatus }[] = [
-	{ label: 'Approved', value: 'approved' },
-	{ label: 'Draft', value: 'draft' },
-	{ label: 'Deprecated', value: 'deprecated' },
-	{ label: 'Disabled', value: 'disabled' },
-];
 
 function parseTags(value: string): string[] {
 	return value
@@ -130,6 +124,15 @@ function isSubmitDisabled(form: SopDocumentFormState): boolean {
 }
 
 function SOPDocuments(): JSX.Element {
+	const { t } = useTranslation(['sop_documents']);
+
+	const APPROVAL_STATUS_OPTIONS: { label: string; value: SopApprovalStatus }[] = [
+		{ label: t('status_approved'), value: 'approved' },
+		{ label: t('status_draft'), value: 'draft' },
+		{ label: t('status_deprecated'), value: 'deprecated' },
+		{ label: t('status_disabled'), value: 'disabled' },
+	];
+
 	const [documents, setDocuments] = useState<SopDocumentSummary[]>([]);
 	const [form, setForm] = useState<SopDocumentFormState>(DEFAULT_FORM_STATE);
 	const [bindingSopId, setBindingSopId] = useState('');
@@ -228,29 +231,29 @@ function SOPDocuments(): JSX.Element {
 	const columns = useMemo<ColumnsType<SopDocumentSummary>>(
 		() => [
 			{
-				title: 'SOP ID',
+				title: t('col_sop_id'),
 				dataIndex: 'sopId',
 				key: 'sopId',
 			},
 			{
-				title: 'Title',
+				title: t('col_title'),
 				dataIndex: 'title',
 				key: 'title',
 			},
 			{
-				title: 'Version',
+				title: t('col_version'),
 				dataIndex: 'version',
 				key: 'version',
 				width: 160,
 			},
 			{
-				title: 'Owner',
+				title: t('col_owner'),
 				dataIndex: 'ownerTeam',
 				key: 'ownerTeam',
 				width: 160,
 			},
 			{
-				title: 'Status',
+				title: t('col_status'),
 				dataIndex: 'approvalStatus',
 				key: 'approvalStatus',
 				width: 140,
@@ -259,7 +262,7 @@ function SOPDocuments(): JSX.Element {
 				),
 			},
 			{
-				title: 'Tenant',
+				title: t('col_tenant'),
 				dataIndex: 'tenantScope',
 				key: 'tenantScope',
 				render: (tenantScope: SopDocumentSummary['tenantScope']): JSX.Element => {
@@ -271,7 +274,7 @@ function SOPDocuments(): JSX.Element {
 				},
 			},
 		],
-		[],
+		[t],
 	);
 
 	return (
@@ -279,25 +282,22 @@ function SOPDocuments(): JSX.Element {
 			<header className="sop-documents-page__header">
 				<div className="sop-documents-page__header-row">
 					<div>
-						<h1>DS-APM SOP documents</h1>
-						<p>
-							Register managed Markdown SOPs that SigNoz alert rules can bind with
-							<code>sop_id</code> and feed into SOP-grounded AI response strategy.
-						</p>
+						<h1>{t('page_title')}</h1>
+						<p>{t('page_description')}</p>
 					</div>
 					<div className="sop-documents-page__header-actions">
 						<Button
 							icon={<DownloadOutlined />}
 							onClick={downloadSopExcelTemplate}
 						>
-							템플릿 다운로드
+							{t('btn_template_download')}
 						</Button>
 						<Button
 							icon={<UploadOutlined />}
 							onClick={(): void => setUploadModalOpen(true)}
 							type="primary"
 						>
-							파일 업로드
+							{t('btn_file_upload')}
 						</Button>
 					</div>
 				</div>
@@ -308,15 +308,12 @@ function SOPDocuments(): JSX.Element {
 
 			<section className="sop-documents-page__section">
 				<div className="sop-documents-page__section-header">
-					<h2>Register managed Markdown SOP</h2>
-					<p>
-						The browser submits only managed Markdown content and public metadata.
-						Connector credentials remain server-side.
-					</p>
+					<h2>{t('register_section_title')}</h2>
+					<p>{t('register_section_description')}</p>
 				</div>
 				<div className="sop-documents-page__form-grid">
 					<label htmlFor="sop-document-sop-id-input">
-						<span>SOP ID</span>
+						<span>{t('field_sop_id')}</span>
 						<Input
 							data-testid="sop-document-sop-id"
 							id="sop-document-sop-id-input"
@@ -328,7 +325,7 @@ function SOPDocuments(): JSX.Element {
 						/>
 					</label>
 					<label htmlFor="sop-document-title-input">
-						<span>Title</span>
+						<span>{t('field_title')}</span>
 						<Input
 							data-testid="sop-document-title"
 							id="sop-document-title-input"
@@ -340,7 +337,7 @@ function SOPDocuments(): JSX.Element {
 						/>
 					</label>
 					<label htmlFor="sop-document-version-input">
-						<span>Version</span>
+						<span>{t('field_version')}</span>
 						<Input
 							data-testid="sop-document-version"
 							id="sop-document-version-input"
@@ -352,7 +349,7 @@ function SOPDocuments(): JSX.Element {
 						/>
 					</label>
 					<label htmlFor="sop-document-owner-team-input">
-						<span>Owner team</span>
+						<span>{t('field_owner_team')}</span>
 						<Input
 							data-testid="sop-document-owner-team"
 							id="sop-document-owner-team-input"
@@ -364,7 +361,7 @@ function SOPDocuments(): JSX.Element {
 						/>
 					</label>
 					<label htmlFor="sop-document-approval-status-input">
-						<span>Approval status</span>
+						<span>{t('field_approval_status')}</span>
 						<Select
 							id="sop-document-approval-status-input"
 							options={APPROVAL_STATUS_OPTIONS}
@@ -375,7 +372,7 @@ function SOPDocuments(): JSX.Element {
 						/>
 					</label>
 					<label htmlFor="sop-document-source-id-input">
-						<span>Source ID</span>
+						<span>{t('field_source_id')}</span>
 						<Input
 							id="sop-document-source-id-input"
 							onChange={(event): void =>
@@ -385,7 +382,7 @@ function SOPDocuments(): JSX.Element {
 						/>
 					</label>
 					<label htmlFor="sop-document-project-ids-input">
-						<span>Project IDs</span>
+						<span>{t('field_project_ids')}</span>
 						<Input
 							data-testid="sop-document-project-ids"
 							id="sop-document-project-ids-input"
@@ -397,7 +394,7 @@ function SOPDocuments(): JSX.Element {
 						/>
 					</label>
 					<label htmlFor="sop-document-environments-input">
-						<span>Environments</span>
+						<span>{t('field_environments')}</span>
 						<Input
 							data-testid="sop-document-environments"
 							id="sop-document-environments-input"
@@ -409,7 +406,7 @@ function SOPDocuments(): JSX.Element {
 						/>
 					</label>
 					<label htmlFor="sop-document-display-url-input">
-						<span>Display URL</span>
+						<span>{t('field_display_url')}</span>
 						<Input
 							id="sop-document-display-url-input"
 							onChange={(event): void =>
@@ -420,7 +417,7 @@ function SOPDocuments(): JSX.Element {
 						/>
 					</label>
 					<label htmlFor="sop-document-tags-input">
-						<span>Tags</span>
+						<span>{t('field_tags')}</span>
 						<Input
 							id="sop-document-tags-input"
 							onChange={(event): void =>
@@ -431,7 +428,7 @@ function SOPDocuments(): JSX.Element {
 						/>
 					</label>
 					<label htmlFor="sop-document-service-account-profile-input">
-						<span>Service account profile</span>
+						<span>{t('field_service_account_profile')}</span>
 						<Input
 							id="sop-document-service-account-profile-input"
 							onChange={(event): void =>
@@ -444,7 +441,7 @@ function SOPDocuments(): JSX.Element {
 						className="sop-documents-page__markdown"
 						htmlFor="sop-document-body-markdown-input"
 					>
-						<span>Body Markdown</span>
+						<span>{t('field_body_markdown')}</span>
 						<Input.TextArea
 							data-testid="sop-document-body-markdown"
 							id="sop-document-body-markdown-input"
@@ -467,16 +464,16 @@ function SOPDocuments(): JSX.Element {
 						onClick={handleCreateDocument}
 						type="primary"
 					>
-						Register SOP document
+						{t('btn_register')}
 					</Button>
-					<span>Checksum is generated from the Markdown body before submit.</span>
+					<span>{t('register_checksum_note')}</span>
 				</div>
 			</section>
 
 			<section className="sop-documents-page__section">
 				<div className="sop-documents-page__section-header">
-					<h2>Binding preview</h2>
-					<p>Verify that an alert label resolves to an approved SOP document.</p>
+					<h2>{t('binding_section_title')}</h2>
+					<p>{t('binding_section_description')}</p>
 				</div>
 				<div className="sop-documents-page__binding">
 					<Input
@@ -507,7 +504,7 @@ function SOPDocuments(): JSX.Element {
 						loading={isPreviewing}
 						onClick={handlePreviewBinding}
 					>
-						Preview binding
+						{t('btn_preview_binding')}
 					</Button>
 				</div>
 				{bindingPreview && (
@@ -530,8 +527,8 @@ function SOPDocuments(): JSX.Element {
 
 			<section className="sop-documents-page__section">
 				<div className="sop-documents-page__section-header">
-					<h2>Registered documents</h2>
-					<p>Latest registered documents available to SOP binding preview.</p>
+					<h2>{t('documents_section_title')}</h2>
+					<p>{t('documents_section_description')}</p>
 				</div>
 				<Table
 					columns={columns}

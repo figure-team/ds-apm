@@ -187,6 +187,20 @@ export function downloadSopExcelTemplate(): void {
 
 	const wb = XLSX.utils.book_new();
 	const ws = XLSX.utils.aoa_to_sheet([headers, example]);
+	ws['!cols'] = [
+		{ wch: 20 }, // sop_id
+		{ wch: 35 }, // title
+		{ wch: 15 }, // version
+		{ wch: 20 }, // owner_team
+		{ wch: 18 }, // approval_status
+		{ wch: 30 }, // source_id
+		{ wch: 20 }, // project_ids
+		{ wch: 15 }, // environments
+		{ wch: 40 }, // display_url
+		{ wch: 25 }, // tags
+		{ wch: 25 }, // service_account_profile
+		{ wch: 60 }, // body_markdown
+	];
 	XLSX.utils.book_append_sheet(wb, ws, 'SOP Template');
 	XLSX.writeFile(wb, 'sop-template.xlsx');
 }

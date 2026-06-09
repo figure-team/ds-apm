@@ -6,6 +6,7 @@ import {
 	SOP_DOCUMENT_LIST_CONTRACT_VERSION,
 	type SopDocumentBatchResult,
 } from 'api/v2/rules/sopDocuments';
+import { useIsDarkMode } from 'hooks/useDarkMode';
 import type { ParseSopExcelResult, ParsedSopRow } from './parseSopExcel';
 
 type Props = {
@@ -34,6 +35,7 @@ function SopBulkPreviewDrawer({
 	onClose,
 	onRegistered,
 }: Props): JSX.Element {
+	const isDarkMode = useIsDarkMode();
 	const [submitting, setSubmitting] = useState(false);
 	const [submitError, setSubmitError] = useState('');
 	const [rowResults, setRowResults] = useState<Map<number, SopDocumentBatchResult>>(
@@ -115,15 +117,15 @@ function SopBulkPreviewDrawer({
 			render: (_, record): JSX.Element => {
 				if (record.batchResult) {
 					return record.batchResult.status === 'ok' ? (
-						<Tag color="green">등록 완료</Tag>
+						<Tag color={isDarkMode ? 'green' : '#16A34A'}>등록 완료</Tag>
 					) : (
-						<Tag color="red">서버 오류</Tag>
+						<Tag color={isDarkMode ? 'red' : '#DC2626'}>서버 오류</Tag>
 					);
 				}
 				return record.valid ? (
-					<Tag color="blue">유효</Tag>
+					<Tag color={isDarkMode ? 'blue' : '#2563EB'}>유효</Tag>
 				) : (
-					<Tag color="red">오류</Tag>
+					<Tag color={isDarkMode ? 'red' : '#DC2626'}>오류</Tag>
 				);
 			},
 		},
