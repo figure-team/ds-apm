@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Callout } from '@signozhq/ui';
 import getLocalStorageApi from 'api/browser/localstorage/get';
@@ -13,6 +14,7 @@ import { USER_ROLES } from 'types/roles';
 import './LicenseRowDismissible.styles.scss';
 
 function LicenseRowDismissibleCallout(): JSX.Element | null {
+	const { t } = useTranslation(['generalSettings']);
 	const [isCalloutDismissed, setIsCalloutDismissed] = useState<boolean>(
 		() =>
 			getLocalStorageApi(LOCALSTORAGE.LICENSE_KEY_CALLOUT_DISMISSED) === 'true',
@@ -49,26 +51,30 @@ function LicenseRowDismissibleCallout(): JSX.Element | null {
 			className="license-key-callout"
 		>
 			<div className="license-key-callout__description">
-				This is <strong>NOT</strong> your ingestion or Service account key.
+				<Trans
+					t={t}
+					i18nKey="callout_not_your_key"
+					components={[<strong key="0" />]}
+				/>
 				{(hasServiceAccountsAccess || hasIngestionAccess) && (
 					<>
 						{' '}
-						Find your{' '}
+						{t('callout_find_your')}{' '}
 						{hasServiceAccountsAccess && (
 							<Link
 								to={ROUTES.SERVICE_ACCOUNTS_SETTINGS}
 								className="license-key-callout__link"
 							>
-								Service account here
+								{t('callout_service_account_link')}
 							</Link>
 						)}
-						{hasServiceAccountsAccess && hasIngestionAccess && ' and '}
+						{hasServiceAccountsAccess && hasIngestionAccess && ` ${t('and')} `}
 						{hasIngestionAccess && (
 							<Link
 								to={ROUTES.INGESTION_SETTINGS}
 								className="license-key-callout__link"
 							>
-								Ingestion key here
+								{t('callout_ingestion_link')}
 							</Link>
 						)}
 						.

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useCopyToClipboard } from 'react-use';
 import { Copy, KeyRound } from '@signozhq/icons';
 import { Button, toast } from '@signozhq/ui';
@@ -7,6 +8,7 @@ import { getMaskedKey } from 'utils/maskedKey';
 import './LicenseKeyRow.styles.scss';
 
 function LicenseKeyRow(): JSX.Element | null {
+	const { t } = useTranslation(['generalSettings']);
 	const { activeLicense } = useAppContext();
 	const [, copyToClipboard] = useCopyToClipboard();
 
@@ -16,14 +18,14 @@ function LicenseKeyRow(): JSX.Element | null {
 
 	const handleCopyLicenseKey = (text: string): void => {
 		copyToClipboard(text);
-		toast.success('License key copied to clipboard.');
+		toast.success(t('license_key_copied'));
 	};
 
 	return (
 		<div className="license-key-row">
 			<span className="license-key-row__left">
 				<KeyRound size={14} />
-				<span className="license-key-row__label">SigNoz License Key</span>
+				<span className="license-key-row__label">{t('license_key_label')}</span>
 			</span>
 			<span className="license-key-row__value">
 				<code className="license-key-row__code">
@@ -32,7 +34,7 @@ function LicenseKeyRow(): JSX.Element | null {
 				<Button
 					type="button"
 					size="sm"
-					aria-label="Copy license key"
+					aria-label={t('copy_license_key')}
 					data-testid="license-key-row-copy-btn"
 					className="license-key-row__copy-btn"
 					onClick={(): void => handleCopyLicenseKey(activeLicense.key)}

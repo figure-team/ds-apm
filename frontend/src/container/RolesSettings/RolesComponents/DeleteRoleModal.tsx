@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Trash2, X } from '@signozhq/icons';
 import { Button } from '@signozhq/ui';
 import { Modal } from 'antd';
@@ -17,11 +18,12 @@ function DeleteRoleModal({
 	onCancel,
 	onConfirm,
 }: DeleteRoleModalProps): JSX.Element {
+	const { t } = useTranslation(['roles', 'common']);
 	return (
 		<Modal
 			open={isOpen}
 			onCancel={onCancel}
-			title={<span className="title">Delete Role</span>}
+			title={<span className="title">{t('delete_role')}</span>}
 			closable
 			footer={[
 				<Button
@@ -33,7 +35,7 @@ function DeleteRoleModal({
 					variant="solid"
 					color="secondary"
 				>
-					Cancel
+					{t('common:cancel')}
 				</Button>,
 				<Button
 					key="delete"
@@ -45,15 +47,15 @@ function DeleteRoleModal({
 					variant="solid"
 					color="destructive"
 				>
-					Delete Role
+					{t('delete_role')}
 				</Button>,
 			]}
 			destroyOnClose
 			className="role-details-delete-modal"
 		>
 			<p className="delete-text">
-				Are you sure you want to delete the role <strong>{roleName}</strong>? This
-				action cannot be undone.
+				{t('delete_confirm_prefix')} <strong>{roleName}</strong>
+				{t('delete_confirm_suffix')}
 			</p>
 		</Modal>
 	);

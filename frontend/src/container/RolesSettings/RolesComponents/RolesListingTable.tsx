@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { Pagination, Skeleton } from 'antd';
 import { useListRoles } from 'api/generated/services/role';
@@ -29,6 +30,7 @@ interface RolesListingTableProps {
 function RolesListingTable({
 	searchQuery,
 }: RolesListingTableProps): JSX.Element {
+	const { t } = useTranslation(['roles']);
 	const { data, isLoading, isError, error } = useListRoles();
 	const { formatTimezoneAdjustedTimestamp } = useTimezone();
 	const history = useHistory();
@@ -89,13 +91,13 @@ function RolesListingTable({
 		const result: DisplayItem[] = [];
 
 		if (managedRoles.length > 0) {
-			result.push({ type: 'section', label: 'Managed roles' });
+			result.push({ type: 'section', label: t('managed_roles') });
 			managedRoles.forEach((role) => result.push({ type: 'role', role }));
 		}
 		if (customRoles.length > 0) {
 			result.push({
 				type: 'section',
-				label: 'Custom roles',
+				label: t('custom_roles'),
 				count: customRoles.length,
 			});
 			customRoles.forEach((role) => result.push({ type: 'role', role }));
@@ -147,7 +149,10 @@ function RolesListingTable({
 			<span className="numbers">
 				{range[0]} &#8212; {range[1]}
 			</span>
-			<span className="total"> of {total}</span>
+			<span className="total">
+				{' '}
+				{t('pagination_of')} {total}
+			</span>
 		</>
 	);
 
@@ -162,12 +167,7 @@ function RolesListingTable({
 	if (isError) {
 		return (
 			<div className="roles-listing-table">
-				<ErrorInPlace
-					error={toAPIError(
-						error,
-						'An unexpected error occurred while fetching roles.',
-					)}
-				/>
+				<ErrorInPlace error={toAPIError(error, t('roles_fetch_error'))} />
 			</div>
 		);
 	}
@@ -176,7 +176,7 @@ function RolesListingTable({
 		return (
 			<div className="roles-listing-table">
 				<div className="roles-table-empty">
-					{searchQuery ? 'No roles match your search.' : 'No roles found.'}
+					{searchQuery ? t('no_roles_match') : t('no_roles_found')}
 				</div>
 			</div>
 		);
@@ -234,16 +234,16 @@ function RolesListingTable({
 				<div className="roles-table-inner">
 					<div className="roles-table-header">
 						<div className="roles-table-header-cell roles-table-header-cell--name">
-							Name
+							{t('name')}
 						</div>
 						<div className="roles-table-header-cell roles-table-header-cell--description">
-							Description
+							{t('description')}
 						</div>
 						<div className="roles-table-header-cell roles-table-header-cell--updated-at">
-							Updated At
+							{t('updated_at')}
 						</div>
 						<div className="roles-table-header-cell roles-table-header-cell--created-at">
-							Created At
+							{t('created_at')}
 						</div>
 					</div>
 

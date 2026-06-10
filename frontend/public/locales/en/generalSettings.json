@@ -17,5 +17,17 @@
 	"retention_comparison_error": "Total retention period for {{name}} can’t be lower or equal to the period after which data is moved to s3.",
 	"retention_null_value_error": "Retention Period for {{name}} is not set yet. Please set by choosing below",
 	"retention_confirmation": "Are you sure you want to change the retention period?",
-	"retention_confirmation_description": "This will change the amount of storage needed for saving {{name}}."
+	"retention_confirmation_description": "This will change the amount of storage needed for saving {{name}}.",
+	"workspace_title": "Workspace",
+	"workspace_subtitle": "Manage your workspace settings.",
+	"retention_controls": "Retention Controls",
+	"license_key_label": "SigNoz License Key",
+	"copy_license_key": "Copy license key",
+	"license_key_copied": "License key copied to clipboard.",
+	"callout_not_your_key": "This is <0>NOT</0> your ingestion or Service account key.",
+	"callout_find_your": "Find your",
+	"callout_service_account_link": "Service account here",
+	"callout_ingestion_link": "Ingestion key here",
+	"and": "and",
+	"cloud_retention_contact": "Please <0>email us</0> or connect with us via chat support to change the retention period."
 }

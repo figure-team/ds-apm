@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Table2, Trash2, Users } from '@signozhq/icons';
@@ -40,6 +41,7 @@ type TabKey = 'overview' | 'members';
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 function RoleDetailsPage(): JSX.Element {
+	const { t } = useTranslation(['roles']);
 	const { pathname } = useLocation();
 	const history = useHistory();
 
@@ -184,7 +186,9 @@ function RoleDetailsPage(): JSX.Element {
 	return (
 		<div className="role-details-page">
 			<div className="role-details-header">
-				<h2 className="role-details-title">Role — {role.name}</h2>
+				<h2 className="role-details-title">
+					{t('role_prefix')} {role.name}
+				</h2>
 			</div>
 
 			<div className="role-details-nav">
@@ -200,11 +204,11 @@ function RoleDetailsPage(): JSX.Element {
 				>
 					<ToggleGroupItem value="overview" className="role-details-tab">
 						<Table2 size={14} />
-						Overview
+						{t('overview')}
 					</ToggleGroupItem>
 					<ToggleGroupItem value="members" className="role-details-tab">
 						<Users size={14} />
-						Members
+						{t('members')}
 						<span className="role-details-tab-count">0</span>
 					</ToggleGroupItem>
 				</ToggleGroup>
@@ -216,7 +220,7 @@ function RoleDetailsPage(): JSX.Element {
 							color="destructive"
 							className="role-details-delete-action-btn"
 							onClick={(): void => setIsDeleteModalOpen(true)}
-							aria-label="Delete role"
+							aria-label={t('delete_role_aria')}
 						>
 							<Trash2 size={14} />
 						</Button>
@@ -226,7 +230,7 @@ function RoleDetailsPage(): JSX.Element {
 							size="sm"
 							onClick={(): void => setIsEditModalOpen(true)}
 						>
-							Edit Role Details
+							{t('edit_role_details')}
 						</Button>
 					</div>
 				)}

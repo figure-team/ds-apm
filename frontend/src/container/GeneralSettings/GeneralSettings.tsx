@@ -657,10 +657,8 @@ function GeneralSettings({
 	return (
 		<div className="general-settings-page">
 			<div className="general-settings-header">
-				<span className="general-settings-title">Workspace</span>
-				<span className="general-settings-subtitle">
-					Manage your workspace settings.
-				</span>
+				<span className="general-settings-title">{t('workspace_title')}</span>
+				<span className="general-settings-subtitle">{t('workspace_subtitle')}</span>
 			</div>
 
 			{(showCustomDomainSettings || activeLicense?.key) && (
@@ -680,7 +678,9 @@ function GeneralSettings({
 
 			<div className="retention-controls-container">
 				<div className="retention-controls-header">
-					<span className="retention-controls-header-label">Retention Controls</span>
+					<span className="retention-controls-header-label">
+						{t('retention_controls')}
+					</span>
 				</div>
 				{renderConfig}
 			</div>

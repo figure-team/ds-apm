@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search } from '@signozhq/icons';
 
 function MembersTab(): JSX.Element {
+	const { t } = useTranslation(['roles']);
 	const [searchQuery, setSearchQuery] = useState('');
 
 	return (
@@ -11,7 +13,7 @@ function MembersTab(): JSX.Element {
 				<input
 					type="text"
 					className="role-details-members-search-input"
-					placeholder="Search and add members..."
+					placeholder={t('search_add_members_placeholder')}
 					value={searchQuery}
 					onChange={(e): void => setSearchQuery(e.target.value)}
 				/>
@@ -29,10 +31,10 @@ function MembersTab(): JSX.Element {
 					</span>
 					<p className="role-details-members-empty-text">
 						<span className="role-details-members-empty-text--bold">
-							No members added.
+							{t('no_members')}
 						</span>{' '}
 						<span className="role-details-members-empty-text--muted">
-							Start adding members to this role.
+							{t('start_adding_members')}
 						</span>
 					</p>
 				</div>
