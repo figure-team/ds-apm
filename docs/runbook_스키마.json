@@ -1,0 +1,309 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/runbook.schema.json",
+  "title": "ITO Incident-Response Runbook",
+  "description": "ITO 장애대응 관제시스템용 머신리더블 런북 스키마 초안. AWS SSM Automation(0.3) + Rundeck(on_failure) + Azure SRE Agent(filter→handler) + Rootly 7단계 + 한국 자원별 장애처리 절차(RTO) 레퍼런스 합성.",
+  "type": "object",
+  "required": ["id", "version", "metadata", "trigger", "steps", "verification"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "런북 고유 식별자 (예: RB-WEB-DISK-FULL-001)",
+      "pattern": "^RB-[A-Z0-9-]+$"
+    },
+    "version": {
+      "type": "string",
+      "description": "시맨틱 버전",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "description": "런북 스키마 버전 (AWS SSM 0.3 관행 차용)",
+      "default": "0.3"
+    },
+
+    "metadata": {
+      "type": "object",
+      "description": "런북 메타데이터",
+      "required": ["title", "owner_team", "severity", "last_updated"],
+      "additionalProperties": true,
+      "properties": {
+        "title": { "type": "string", "description": "런북 제목" },
+        "description": { "type": "string", "description": "런북 개요 설명" },
+        "owner_team": { "type": "string", "description": "소유 팀 (예: 서버관리팀)" },
+        "owner_person": { "type": "string", "description": "담당자 (예: 홍길동)" },
+        "category": {
+          "type": "string",
+          "description": "장애 분류 (자원 유형)",
+          "examples": ["WEB", "WAS", "DB", "NETWORK", "OS", "STORAGE", "APP"]
+        },
+        "severity": {
+          "type": "string",
+          "description": "심각도 등급 (SEV/P 등급)",
+          "enum": ["SEV-1", "SEV-2", "SEV-3", "SEV-4", "P1", "P2", "P3", "P4"]
+        },
+        "service": {
+          "type": "array",
+          "description": "영향 받는 서비스/시스템 목록",
+          "items": { "type": "string" }
+        },
+        "rto_minutes": {
+          "type": "integer",
+          "description": "목표복구시간(분). 한국 SI SLA 관행 — 장애요인 파악 후 조치 완료까지. 초과 시 관제시스템에서 알람.",
+          "minimum": 0
+        },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "last_updated": { "type": "string", "format": "date", "description": "최종 갱신일" },
+        "review_cycle_days": {
+          "type": "integer",
+          "description": "런북 재검토 주기(일). Google SRE: 플레이북 최신성 유지 원칙.",
+          "default": 90
+        }
+      }
+    },
+
+    "trigger": {
+      "type": "object",
+      "description": "트리거/탐지 조건. Azure SRE Agent의 incident filter 모델.",
+      "required": ["detection_conditions"],
+      "additionalProperties": true,
+      "properties": {
+        "detection_conditions": {
+          "type": "array",
+          "description": "알림 발동 조건 목록 (관제 알람과 매핑)",
+          "items": {
+            "type": "object",
+            "required": ["metric", "operator", "threshold"],
+            "properties": {
+              "source": { "type": "string", "description": "알림 소스 (예: Prometheus, Zabbix, APM)" },
+              "metric": { "type": "string", "description": "지표명 (예: disk_usage_pct)" },
+              "operator": { "type": "string", "enum": [">", ">=", "<", "<=", "==", "!=", "contains"] },
+              "threshold": { "description": "임계값 (숫자 또는 문자열)" },
+              "duration": { "type": "string", "description": "지속 시간 (예: 5m)" }
+            }
+          }
+        },
+        "match_filter": {
+          "type": "object",
+          "description": "자동 라우팅 매칭 필터 (어떤 인시던트에 이 런북을 적용할지)",
+          "properties": {
+            "service_pattern": { "type": "string" },
+            "severity_in": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "impact_assessment": {
+          "type": "string",
+          "description": "영향도 평가 — 영향 범위/사용자/비즈니스 영향 기술"
+        }
+      }
+    },
+
+    "diagnosis": {
+      "type": "object",
+      "description": "진단 체크리스트 (한국 '장애관리 시나리오' — 액션과 분리된 별도 진단 테이블). 원인 가능성 높은 순서로 정렬.",
+      "properties": {
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["order", "expected_failure_point", "check_action"],
+            "properties": {
+              "order": { "type": "integer", "description": "점검 순서 (원인 가능성 높은 순)" },
+              "expected_failure_point": { "type": "string", "description": "예상발생지점 (예: 웹 서버)" },
+              "check_action": { "type": "string", "description": "장애요인 파악을 위한 점검 항목" },
+              "related_team": { "type": "string", "description": "관련팀" },
+              "owner": { "type": "string", "description": "담당자" }
+            }
+          }
+        }
+      }
+    },
+
+    "parameters": {
+      "type": "object",
+      "description": "런북 입력 파라미터 (AWS SSM parameters 차용)",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["String", "Integer", "Boolean", "StringList"] },
+          "description": { "type": "string" },
+          "default": {},
+          "required": { "type": "boolean", "default": false }
+        }
+      }
+    },
+
+    "steps": {
+      "type": "array",
+      "description": "단계별 대응 액션. AWS SSM mainSteps + Rundeck 에러제어 합성. 분기/조건 허용(런북=선형 통념은 기각됨).",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "action_type", "instruction"],
+        "additionalProperties": true,
+        "properties": {
+          "name": { "type": "string", "description": "단계명" },
+          "order": { "type": "integer", "description": "실행 순서" },
+          "action_type": {
+            "type": "string",
+            "description": "수행 방식",
+            "enum": ["manual", "automated", "semi-automated"]
+          },
+          "instruction": { "type": "string", "description": "수행 지침 (사람이 읽는 설명)" },
+          "command": {
+            "type": "string",
+            "description": "복사-붙여넣기 가능한 명령어/스크립트 (Rootly 필수 요건)"
+          },
+          "inputs": { "type": "object", "description": "단계 입력값" },
+          "outputs": {
+            "type": "array",
+            "description": "단계 출력 (다음 단계로 전달). AWS SSM outputs 모델.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "selector": { "type": "string" },
+                "type": { "type": "string" }
+              }
+            }
+          },
+          "max_attempts": { "type": "integer", "default": 1, "description": "재시도 횟수 (AWS SSM maxAttempts)" },
+          "timeout_seconds": { "type": "integer", "description": "단계 타임아웃(초)" },
+          "on_failure": {
+            "type": "string",
+            "description": "실패 시 동작 (Rundeck keepgoing 모델). 단계 실패=전체중단이 항상 옳지 않음.",
+            "enum": ["stop", "continue", "escalate", "goto_rollback"],
+            "default": "stop"
+          },
+          "condition": {
+            "type": "string",
+            "description": "조건부 실행 표현식 (분기 로직 허용). 예: outputs.disk_usage > 90"
+          },
+          "next_step_on_success": { "type": "string", "description": "성공 시 분기 대상 단계명" },
+          "next_step_on_failure": { "type": "string", "description": "실패 시 분기 대상 단계명" }
+        }
+      }
+    },
+
+    "rollback": {
+      "type": "object",
+      "description": "롤백 절차 (별도 필수 필드 — Rootly: 실패 시 되돌릴 경로 없는 런북은 불완전).",
+      "properties": {
+        "description": { "type": "string" },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "command": { "type": "string" },
+              "instruction": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "verification": {
+      "type": "object",
+      "description": "검증/복구 확인. 반드시 측정 가능한 정량 기준 (Rootly 3-0: '정상 확인' 같은 모호 표현 금지).",
+      "required": ["success_criteria"],
+      "properties": {
+        "success_criteria": {
+          "type": "array",
+          "description": "측정 가능한 성공 기준 목록",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["metric", "operator", "threshold"],
+            "properties": {
+              "metric": { "type": "string", "description": "검증 지표 (예: error_rate, latency_ms)" },
+              "operator": { "type": "string", "enum": [">", ">=", "<", "<=", "==", "!="] },
+              "threshold": { "description": "기준값" },
+              "description": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "escalation": {
+      "type": "object",
+      "description": "에스컬레이션 경로 (Google SRE 핵심 온콜 리소스 1순위 + PagerDuty 역할 모델).",
+      "properties": {
+        "policy": { "type": "string", "description": "에스컬레이션 정책명" },
+        "levels": {
+          "type": "array",
+          "description": "에스컬레이션 단계 (시간 경과/심각도 상승 시)",
+          "items": {
+            "type": "object",
+            "properties": {
+              "level": { "type": "integer" },
+              "trigger_after_minutes": { "type": "integer", "description": "이 시간 경과 시 에스컬레이션" },
+              "role": {
+                "type": "string",
+                "description": "PagerDuty/Google 역할",
+                "examples": ["Incident Commander", "Deputy", "Operations Lead", "Communications Lead", "SME"]
+              },
+              "contact_team": { "type": "string" },
+              "contact_person": { "type": "string" },
+              "channel": { "type": "string", "description": "연락 채널 (전화/SMS/Slack 등)" }
+            }
+          }
+        },
+        "handoff_requires_ack": {
+          "type": "boolean",
+          "description": "지휘권 인계 시 명시적 ACK 필수 (Google SRE 3-0).",
+          "default": true
+        }
+      }
+    },
+
+    "communication": {
+      "type": "object",
+      "description": "커뮤니케이션 계획 (Rootly Communications Checklist).",
+      "properties": {
+        "internal_channels": { "type": "array", "items": { "type": "string" } },
+        "external_required": { "type": "boolean", "description": "대외 공지 필요 여부 (Customer Liaison)" },
+        "templates": { "type": "array", "items": { "type": "string" }, "description": "공지 템플릿 참조" }
+      }
+    },
+
+    "post_incident": {
+      "type": "object",
+      "description": "사후조치 (PagerDuty postmortem 시간제약 모델 3-0).",
+      "properties": {
+        "postmortem_required": { "type": "boolean", "default": true },
+        "postmortem_sla_days": {
+          "type": "integer",
+          "description": "포스트모템 미팅 SLA(일). SEV-1=3, SEV-2=5 (PagerDuty 기준).",
+          "examples": [3, 5]
+        },
+        "blameless": { "type": "boolean", "default": true, "description": "비난 없는 문화 (Google SRE)" },
+        "action_item_tracker": {
+          "type": "string",
+          "description": "액션아이템 추적 시스템 (예: JIRA). 후속조치를 티켓으로 생성/연동."
+        },
+        "capture": {
+          "type": "array",
+          "description": "사후 캡처 항목",
+          "items": { "type": "string", "enum": ["root_cause", "customer_impact", "timeline", "lessons_learned", "follow_up_actions"] }
+        }
+      }
+    },
+
+    "references": {
+      "type": "array",
+      "description": "관련 런북/플레이북/SOP/문서 참조",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["sop", "playbook", "runbook", "doc", "dashboard"] },
+          "id": { "type": "string" },
+          "url": { "type": "string" }
+        }
+      }
+    }
+  }
+}
