@@ -60,7 +60,7 @@ function MySettings(): JSX.Element {
 		{
 			label: (
 				<div className="theme-option">
-					<Moon data-testid="dark-theme-icon" size={12} /> Dark{' '}
+					<Moon data-testid="dark-theme-icon" size={12} /> {t('settings:theme_dark')}{' '}
 				</div>
 			),
 			value: 'dark',
@@ -68,9 +68,9 @@ function MySettings(): JSX.Element {
 		{
 			label: (
 				<div className="theme-option">
-					<Sun size={12} data-testid="light-theme-icon" /> Light{' '}
+					<Sun size={12} data-testid="light-theme-icon" /> {t('settings:theme_light')}{' '}
 					<Tag bordered={false} color="geekblue">
-						Beta
+						{t('settings:beta')}
 					</Tag>
 				</div>
 			),
@@ -79,7 +79,8 @@ function MySettings(): JSX.Element {
 		{
 			label: (
 				<div className="theme-option">
-					<MonitorCog size={12} data-testid="auto-theme-icon" /> System{' '}
+					<MonitorCog size={12} data-testid="auto-theme-icon" />{' '}
+					{t('settings:theme_system')}{' '}
 				</div>
 			),
 			value: 'auto',
@@ -228,7 +229,11 @@ function MySettings(): JSX.Element {
 							<div className="auto-theme-info">
 								<div className="auto-theme-status">
 									{t('settings:auto_theme_status')}{' '}
-									<strong>{systemTheme === 'dark' ? 'Dark' : 'Light'}</strong>
+									<strong>
+										{systemTheme === 'dark'
+											? t('settings:theme_dark')
+											: t('settings:theme_light')}
+									</strong>
 								</div>
 							</div>
 						)}

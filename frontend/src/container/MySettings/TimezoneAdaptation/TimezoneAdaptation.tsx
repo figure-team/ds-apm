@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import { Switch } from 'antd';
 import logEvent from 'api/common/logEvent';
@@ -8,6 +9,7 @@ import { useTimezone } from 'providers/Timezone';
 import './TimezoneAdaptation.styles.scss';
 
 function TimezoneAdaptation(): JSX.Element {
+	const { t } = useTranslation(['settings']);
 	const {
 		timezone,
 		browserTimezone,
@@ -47,7 +49,9 @@ function TimezoneAdaptation(): JSX.Element {
 	return (
 		<div className="timezone-adaption">
 			<div className="timezone-adaption__header">
-				<h2 className="timezone-adaption__title">Adapt to my timezone</h2>
+				<h2 className="timezone-adaption__title">
+					{t('settings:timezone_adapt_title')}
+				</h2>
 				<Switch
 					checked={isAdaptationEnabled}
 					onChange={handleSwitchChange}
@@ -57,7 +61,7 @@ function TimezoneAdaptation(): JSX.Element {
 			</div>
 
 			<p className="timezone-adaption__description">
-				Adapt the timestamps shown in the SigNoz console to my active timezone.
+				{t('settings:timezone_adapt_description')}
 			</p>
 
 			<div className="timezone-adaption__note">
@@ -66,16 +70,13 @@ function TimezoneAdaptation(): JSX.Element {
 					<span className="timezone-adaption__note-text">
 						{isTimezoneOverridden ? (
 							<>
-								Your current timezone is overridden to
+								{t('settings:timezone_overridden_to')}
 								<span className="timezone-adaption__note-text-overridden">
 									{timezone.offset}
 								</span>
 							</>
 						) : (
-							<>
-								You can override the timezone adaption for any view with the time
-								picker.
-							</>
+							<>{t('settings:timezone_override_hint')}</>
 						)}
 					</span>
 				</div>
@@ -87,7 +88,7 @@ function TimezoneAdaptation(): JSX.Element {
 						onClick={handleOverrideClear}
 					>
 						<Delete height={12} width={12} color={Color.BG_ROBIN_300} />
-						Clear override
+						{t('settings:timezone_clear_override')}
 					</button>
 				)}
 			</div>

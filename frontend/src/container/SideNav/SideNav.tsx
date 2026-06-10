@@ -143,7 +143,7 @@ function SortableFilter({ item }: { item: SidebarItem }): JSX.Element {
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
-	const { t } = useTranslation(['routes']);
+	const { t } = useTranslation(['routes', 'settings']);
 	const { openCmdK } = useCmdK();
 	const { pathname, search } = useLocation();
 	const { currentVersion, latestVersion, isCurrentVersionError } = useSelector<
@@ -507,12 +507,14 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 				isWorkspaceBlocked,
 				isEnterpriseSelfHostedUser,
 				isCommunityEnterpriseUser,
+				t,
 			}),
 		[
 			isEnterpriseSelfHostedUser,
 			isCommunityEnterpriseUser,
 			user.email,
 			isWorkspaceBlocked,
+			t,
 		],
 	);
 

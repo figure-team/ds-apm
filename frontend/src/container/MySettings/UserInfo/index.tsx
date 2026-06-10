@@ -140,7 +140,7 @@ function UserInfo(): JSX.Element {
 					icon={<FileTerminal size={16} />}
 					onClick={(): void => setIsUpdateNameModalOpen(true)}
 				>
-					Update name
+					{t('settings:update_name')}
 				</Button>
 
 				<Button
@@ -149,13 +149,13 @@ function UserInfo(): JSX.Element {
 					icon={<FileTerminal size={16} />}
 					onClick={(): void => setIsResetPasswordModalOpen(true)}
 				>
-					Reset password
+					{t('settings:reset_password')}
 				</Button>
 			</div>
 
 			<Modal
 				className="update-name-modal"
-				title={<span className="title">Update name</span>}
+				title={<span className="title">{t('settings:update_name')}</span>}
 				open={isUpdateNameModalOpen}
 				closable
 				onCancel={hideUpdateNameModal}
@@ -168,14 +168,14 @@ function UserInfo(): JSX.Element {
 						disabled={isLoading}
 						data-testid="update-name-btn"
 					>
-						Update name
+						{t('settings:update_name')}
 					</Button>,
 				]}
 			>
-				<Typography.Text>Name</Typography.Text>
+				<Typography.Text>{t('settings:name')}</Typography.Text>
 				<div className="update-name-input">
 					<Input
-						placeholder="e.g. John Doe"
+						placeholder={t('settings:name_placeholder')}
 						value={changedName}
 						onChange={(e): void => setChangedName(e.target.value)}
 					/>
@@ -184,7 +184,7 @@ function UserInfo(): JSX.Element {
 
 			<Modal
 				className="reset-password-modal"
-				title={<span className="title">Reset password</span>}
+				title={<span className="title">{t('settings:reset_password')}</span>}
 				open={isResetPasswordModalOpen}
 				closable
 				onCancel={hideResetPasswordModal}
@@ -199,13 +199,13 @@ function UserInfo(): JSX.Element {
 						disabled={isLoading || isResetPasswordDisabled}
 						data-testid="reset-password-btn"
 					>
-						Reset password
+						{t('settings:reset_password')}
 					</Button>,
 				]}
 			>
 				<div className="reset-password-container">
 					<div className="current-password-input">
-						<Typography.Text>Current password</Typography.Text>
+						<Typography.Text>{t('settings:current_password')}</Typography.Text>
 						<Input.Password
 							data-testid="current-password-textbox"
 							disabled={isLoading}
@@ -221,7 +221,7 @@ function UserInfo(): JSX.Element {
 					</div>
 
 					<div className="new-password-input">
-						<Typography.Text>New password</Typography.Text>
+						<Typography.Text>{t('settings:new_password')}</Typography.Text>
 						<Input.Password
 							data-testid="new-password-textbox"
 							disabled={isLoading}

@@ -59,12 +59,12 @@ jest.mock('hooks/useNotifications', () => ({
 }));
 
 const THEME_SELECTOR_TEST_ID = 'theme-selector';
-const RESET_PASSWORD_BUTTON_TEXT = 'Reset password';
+const RESET_PASSWORD_BUTTON_TEXT = 'settings:reset_password';
 const CURRENT_PASSWORD_TEST_ID = 'current-password-textbox';
 const NEW_PASSWORD_TEST_ID = 'new-password-textbox';
 const UPDATE_NAME_BUTTON_TEST_ID = 'update-name-btn';
 const RESET_PASSWORD_BUTTON_TEST_ID = 'reset-password-btn';
-const UPDATE_NAME_BUTTON_TEXT = 'Update name';
+const UPDATE_NAME_BUTTON_TEXT = 'settings:update_name';
 const PASSWORD_VALIDATION_MESSAGE_TEST_ID = 'password-validation-message';
 
 describe('MySettings Flows', () => {
@@ -77,20 +77,20 @@ describe('MySettings Flows', () => {
 	describe('Dark/Light Theme Switch', () => {
 		it('Should display Dark, Light, and System theme options properly', async () => {
 			// Check Dark theme option
-			expect(screen.getByText('Dark')).toBeInTheDocument();
+			expect(screen.getByText('settings:theme_dark')).toBeInTheDocument();
 			const darkThemeIcon = screen.getByTestId('dark-theme-icon');
 			expect(darkThemeIcon).toBeInTheDocument();
 			expect(darkThemeIcon.tagName).toBe('svg');
 
 			// Check Light theme option
-			expect(screen.getByText('Light')).toBeInTheDocument();
+			expect(screen.getByText('settings:theme_light')).toBeInTheDocument();
 			const lightThemeIcon = screen.getByTestId('light-theme-icon');
 			expect(lightThemeIcon).toBeInTheDocument();
 			expect(lightThemeIcon.tagName).toBe('svg');
-			expect(screen.getByText('Beta')).toBeInTheDocument();
+			expect(screen.getByText('settings:beta')).toBeInTheDocument();
 
 			// Check System theme option
-			expect(screen.getByText('System')).toBeInTheDocument();
+			expect(screen.getByText('settings:theme_system')).toBeInTheDocument();
 			const autoThemeIcon = screen.getByTestId('auto-theme-icon');
 			expect(autoThemeIcon).toBeInTheDocument();
 			expect(autoThemeIcon.tagName).toBe('svg');
@@ -131,11 +131,11 @@ describe('MySettings Flows', () => {
 			fireEvent.click(updateNameButton);
 
 			// Find the label with class 'ant-typography' and text 'Name'
-			const nameLabels = screen.getAllByText('Name');
+			const nameLabels = screen.getAllByText('settings:name');
 			const nameLabel = nameLabels.find((el) =>
 				el.className.includes('ant-typography'),
 			);
-			const nameTextbox = screen.getByPlaceholderText('e.g. John Doe');
+			const nameTextbox = screen.getByPlaceholderText('settings:name_placeholder');
 			const modalUpdateNameButton = screen.getByTestId(UPDATE_NAME_BUTTON_TEST_ID);
 
 			expect(nameLabel).toBeInTheDocument();
@@ -148,7 +148,7 @@ describe('MySettings Flows', () => {
 			const updateNameButton = screen.getByText(UPDATE_NAME_BUTTON_TEXT);
 			fireEvent.click(updateNameButton);
 
-			const nameTextbox = screen.getByPlaceholderText('e.g. John Doe');
+			const nameTextbox = screen.getByPlaceholderText('settings:name_placeholder');
 			const modalUpdateNameButton = screen.getByTestId(UPDATE_NAME_BUTTON_TEST_ID);
 
 			act(() => {
@@ -245,9 +245,11 @@ describe('MySettings Flows', () => {
 
 	describe('License section', () => {
 		it('Should render license section content when license key exists', () => {
-			expect(screen.getByText('License')).toBeInTheDocument();
-			expect(screen.getByText('License key')).toBeInTheDocument();
-			expect(screen.getByText('Your SigNoz license key.')).toBeInTheDocument();
+			expect(screen.getByText('settings:license')).toBeInTheDocument();
+			expect(screen.getByText('settings:license_key')).toBeInTheDocument();
+			expect(
+				screen.getByText('settings:license_key_description'),
+			).toBeInTheDocument();
 		});
 
 		it('Should not render license section when license key is missing', () => {
@@ -304,7 +306,7 @@ describe('MySettings Flows', () => {
 			await waitFor(() => {
 				expect(copyToClipboardFn).toHaveBeenCalledWith('test-license-key-12345');
 				expect(successNotification).toHaveBeenCalledWith({
-					message: 'Copied to clipboard',
+					message: 'settings:copied_to_clipboard',
 				});
 			});
 		});

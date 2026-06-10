@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useCopyToClipboard } from 'react-use';
 import { Button } from '@signozhq/ui';
 import { Typography } from 'antd';
@@ -9,6 +10,7 @@ import { getMaskedKey } from 'utils/maskedKey';
 import './LicenseSection.styles.scss';
 
 function LicenseSection(): JSX.Element | null {
+	const { t } = useTranslation(['settings']);
 	const { activeLicense } = useAppContext();
 	const { notifications } = useNotifications();
 	const [, handleCopyToClipboard] = useCopyToClipboard();
@@ -16,7 +18,7 @@ function LicenseSection(): JSX.Element | null {
 	const handleCopyKey = (text: string): void => {
 		handleCopyToClipboard(text);
 		notifications.success({
-			message: 'Copied to clipboard',
+			message: t('settings:copied_to_clipboard'),
 		});
 	};
 
@@ -27,19 +29,19 @@ function LicenseSection(): JSX.Element | null {
 	return (
 		<div className="license-section">
 			<div className="license-section-header">
-				<div className="license-section-title">License</div>
+				<div className="license-section-title">{t('settings:license')}</div>
 			</div>
 
 			<div className="license-section-content">
 				<div className="license-section-content-item">
 					<div className="license-section-content-item-title-action">
-						<span>License key</span>
+						<span>{t('settings:license_key')}</span>
 						<span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
 							<Typography.Text code>{getMaskedKey(activeLicense.key)}</Typography.Text>
 							<Button
 								variant="link"
 								color="none"
-								aria-label="Copy license key"
+								aria-label={t('settings:copy_license_key')}
 								data-testid="license-key-copy-btn"
 								onClick={(): void => handleCopyKey(activeLicense.key)}
 							>
@@ -49,7 +51,7 @@ function LicenseSection(): JSX.Element | null {
 					</div>
 
 					<div className="license-section-content-item-description">
-						Your SigNoz license key.
+						{t('settings:license_key_description')}
 					</div>
 				</div>
 			</div>
