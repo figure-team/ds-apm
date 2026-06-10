@@ -14,5 +14,12 @@
 	"delete_domain_message": "이 도메인을 삭제하시겠습니까?",
 	"delete_domain": "도메인 삭제",
 	"add_domain": "도메인 추가",
-	"saml_settings": "SAML 설정이 저장되었습니다. 올바르게 설정되었는지 확인하려면 시크릿 창에서 로그인해 주세요"
+	"saml_settings": "SAML 설정이 저장되었습니다. 올바르게 설정되었는지 확인하려면 시크릿 창에서 로그인해 주세요",
+	"members_title": "멤버",
+	"members_subtitle": "이 워크스페이스에 추가된 사용자 개요.",
+	"members_search_placeholder": "이름 또는 이메일로 검색...",
+	"invite_member": "멤버 초대",
+	"members_filter_all": "전체 멤버 ⎯ {{count}}",
+	"members_filter_pending": "대기 중인 초대 ⎯ {{count}}",
+	"members_filter_deleted": "삭제됨 ⎯ {{count}}"
 }

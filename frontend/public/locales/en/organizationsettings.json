@@ -14,5 +14,12 @@
 	"delete_domain_message": "Are you sure you want to delete this domain?",
 	"delete_domain": "Delete Domain",
 	"add_domain": "Add Domains",
-	"saml_settings": "Your SAML settings have been saved, please login from incognito window to confirm that it has been set up correctly"
+	"saml_settings": "Your SAML settings have been saved, please login from incognito window to confirm that it has been set up correctly",
+	"members_title": "Members",
+	"members_subtitle": "Overview of people added to this workspace.",
+	"members_search_placeholder": "Search by name or email...",
+	"invite_member": "Invite member",
+	"members_filter_all": "All members ⎯ {{count}}",
+	"members_filter_pending": "Pending invites ⎯ {{count}}",
+	"members_filter_deleted": "Deleted ⎯ {{count}}"
 }
