@@ -36,9 +36,9 @@ describe('AuthDomain', () => {
 
 			render(<AuthDomain />);
 
-			expect(screen.getByText(/authenticated domains/i)).toBeInTheDocument();
+			expect(screen.getByText('authenticated_domains')).toBeInTheDocument();
 			expect(
-				screen.getByRole('button', { name: /add domain/i }),
+				screen.getByRole('button', { name: /add_domain/ }),
 			).toBeInTheDocument();
 		});
 
@@ -101,13 +101,11 @@ describe('AuthDomain', () => {
 
 			render(<AuthDomain />);
 
-			const addButton = await screen.findByRole('button', { name: /add domain/i });
+			const addButton = await screen.findByRole('button', { name: /add_domain/ });
 			await user.click(addButton);
 
 			await waitFor(() => {
-				expect(
-					screen.getByText(/configure authentication method/i),
-				).toBeInTheDocument();
+				expect(screen.getByText('selector_title')).toBeInTheDocument();
 			});
 		});
 	});
@@ -128,11 +126,13 @@ describe('AuthDomain', () => {
 				expect(screen.getByText('signoz.io')).toBeInTheDocument();
 			});
 
-			const configureLinks = await screen.findAllByText(/configure google auth/i);
+			const configureLinks = await screen.findAllByText(
+				'domain_configure_provider',
+			);
 			await user.click(configureLinks[0]);
 
 			await waitFor(() => {
-				expect(screen.getByText(/edit google authentication/i)).toBeInTheDocument();
+				expect(screen.getByText('google_title')).toBeInTheDocument();
 			});
 		});
 	});
