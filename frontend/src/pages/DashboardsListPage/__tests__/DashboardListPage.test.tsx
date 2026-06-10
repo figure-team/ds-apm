@@ -45,7 +45,7 @@ describe('dashboard list page', () => {
 			</MemoryRouter>,
 		);
 
-		await waitFor(() => expect(getByText('All Dashboards')).toBeInTheDocument());
+		await waitFor(() => expect(getByText('all_dashboards')).toBeInTheDocument());
 		const firstElement = getByTestId('dashboard-title-0');
 		expect(firstElement.textContent).toBe('captain america');
 		const secondElement = getByTestId('dashboard-title-1');
@@ -67,7 +67,7 @@ describe('dashboard list page', () => {
 			</MemoryRouter>,
 		);
 
-		await waitFor(() => expect(getByText('All Dashboards')).toBeInTheDocument());
+		await waitFor(() => expect(getByText('all_dashboards')).toBeInTheDocument());
 		const firstElement = getByTestId('dashboard-title-0');
 		expect(firstElement.textContent).toBe('thor');
 		const secondElement = getByTestId('dashboard-title-1');
@@ -86,7 +86,7 @@ describe('dashboard list page', () => {
 			</MemoryRouter>,
 		);
 
-		await waitFor(() => expect(getByText('All Dashboards')).toBeInTheDocument());
+		await waitFor(() => expect(getByText('all_dashboards')).toBeInTheDocument());
 
 		const firstElement = getByTestId('dashboard-title-0');
 		expect(firstElement.textContent).toBe('thor');
@@ -127,7 +127,7 @@ describe('dashboard list page', () => {
 			</MemoryRouter>,
 		);
 
-		await waitFor(() => expect(getByText('All Dashboards')).toBeInTheDocument());
+		await waitFor(() => expect(getByText('all_dashboards')).toBeInTheDocument());
 		const firstElement = getByTestId('dashboard-title-0');
 		expect(firstElement.textContent).toBe('thor');
 		expect(queryByText('captain america')).not.toBeInTheDocument();
@@ -156,9 +156,7 @@ describe('dashboard list page', () => {
 
 		await waitFor(() =>
 			expect(
-				getByText(
-					'No dashboards found for someRandomString. Create a new dashboard?',
-				),
+				getByText('no_dashboards_found_for_search'),
 			).toBeInTheDocument(),
 		);
 	});
@@ -185,7 +183,7 @@ describe('dashboard list page', () => {
 		);
 
 		await waitFor(() =>
-			expect(getByText('No dashboards yet.')).toBeInTheDocument(),
+			expect(getByText('no_dashboards_yet')).toBeInTheDocument(),
 		);
 
 		const learnMoreButton = getByTestId('learn-more');
@@ -210,7 +208,7 @@ describe('dashboard list page', () => {
 			fireEvent.click([...popovers[0].children][0]);
 		});
 
-		const exportJsonBtn = getByText('Export JSON');
+		const exportJsonBtn = getByText('export_json');
 		expect(exportJsonBtn).toBeInTheDocument();
 		fireEvent.click(exportJsonBtn);
 		const firstDashboardData = dashboardSuccessResponse.data[0];

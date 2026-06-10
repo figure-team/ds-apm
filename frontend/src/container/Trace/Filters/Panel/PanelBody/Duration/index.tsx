@@ -6,6 +6,7 @@ import {
 	useRef,
 	useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useDispatch, useSelector } from 'react-redux';
 import { Slider } from 'antd';
@@ -25,6 +26,7 @@ import { Container, InputComponent, InputContainer, Text } from './styles';
 import { getMs } from './util';
 
 function Duration(): JSX.Element {
+	const { t } = useTranslation(['trace']);
 	const {
 		filter,
 		selectedFilter,
@@ -184,7 +186,7 @@ function Duration(): JSX.Element {
 		<div>
 			<Container>
 				<InputContainer>
-					<Text>Min</Text>
+					<Text>{t('min')}</Text>
 				</InputContainer>
 				<InputComponent
 					addonAfter="ms"
@@ -194,7 +196,7 @@ function Duration(): JSX.Element {
 				/>
 
 				<InputContainer>
-					<Text>Max</Text>
+					<Text>{t('max')}</Text>
 				</InputContainer>
 				<InputComponent
 					addonAfter="ms"

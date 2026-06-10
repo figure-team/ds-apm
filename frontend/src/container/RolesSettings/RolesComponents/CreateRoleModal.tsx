@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import { generatePath, useHistory } from 'react-router-dom';
 import { X } from '@signozhq/icons';
@@ -43,6 +44,7 @@ function CreateRoleModal({
 	onClose,
 	initialData,
 }: CreateRoleModalProps): JSX.Element {
+	const { t } = useTranslation(['roles', 'common']);
 	const [form] = Form.useForm<CreateRoleFormValues>();
 	const queryClient = useQueryClient();
 	const history = useHistory();
@@ -89,7 +91,7 @@ function CreateRoleModal({
 		mutation: {
 			onSuccess: (res) =>
 				handleSuccess(
-					'Role created successfully',
+					t('role_created'),
 					generatePath(ROUTES.ROLE_DETAILS, { roleId: res.data.id }),
 				),
 			onError: handleError,
@@ -98,7 +100,7 @@ function CreateRoleModal({
 
 	const { mutate: patchRole, isLoading: isPatching } = usePatchRole({
 		mutation: {
-			onSuccess: () => handleSuccess('Role updated successfully'),
+			onSuccess: () => handleSuccess(t('role_updated')),
 			onError: handleError,
 		},
 	});
@@ -134,7 +136,7 @@ function CreateRoleModal({
 		<Modal
 			open={isOpen}
 			onCancel={onCancel}
-			title={isEditMode ? 'Edit Role Details' : 'Create a New Role'}
+			title={isEditMode ? t('edit_role_details') : t('create_new_role')}
 			footer={[
 				<Button
 					key="cancel"
@@ -144,7 +146,7 @@ function CreateRoleModal({
 					size="sm"
 				>
 					<X size={14} />
-					Cancel
+					{t('common:cancel')}
 				</Button>,
 				<Button
 					key="submit"
@@ -154,7 +156,7 @@ function CreateRoleModal({
 					loading={isLoading}
 					size="sm"
 				>
-					{isEditMode ? 'Save Changes' : 'Create Role'}
+					{isEditMode ? t('save_changes') : t('create_role')}
 				</Button>,
 			]}
 			destroyOnClose
@@ -164,18 +166,15 @@ function CreateRoleModal({
 			<Form form={form} layout="vertical" className="create-role-form">
 				<Form.Item
 					name="name"
-					label="Name"
-					rules={[{ required: true, message: 'Role name is required' }]}
+					label={t('name')}
+					rules={[{ required: true, message: t('role_name_required') }]}
 				>
-					<Input
-						disabled={isEditMode}
-						placeholder="Enter role name e.g. : Service Owner"
-					/>
+					<Input disabled={isEditMode} placeholder={t('role_name_placeholder')} />
 				</Form.Item>
-				<Form.Item name="description" label="Description">
+				<Form.Item name="description" label={t('description')}>
 					<textarea
 						className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm text-foreground shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-						placeholder="A helpful description of the role"
+						placeholder={t('role_description_placeholder')}
 					/>
 				</Form.Item>
 			</Form>

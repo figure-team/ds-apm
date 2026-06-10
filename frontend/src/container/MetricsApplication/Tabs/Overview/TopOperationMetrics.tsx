@@ -1,4 +1,5 @@
 import { ReactNode, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -22,11 +23,11 @@ import { v4 as uuid } from 'uuid';
 import { FeatureKeys } from '../../../../constants/features';
 import { useAppContext } from '../../../../providers/App/App';
 import { IServiceName } from '../types';
-import { title } from './config';
 import ColumnWithLink from './TableRenderer/ColumnWithLink';
 import { getTableColumnRenderer } from './TableRenderer/TableColumnRenderer';
 
 function TopOperationMetrics(): JSX.Element {
+	const { t } = useTranslation(['services']);
 	const { servicename: encodedServiceName } = useParams<IServiceName>();
 	const servicename = decodeURIComponent(encodedServiceName);
 
@@ -118,7 +119,7 @@ function TopOperationMetrics(): JSX.Element {
 
 	return (
 		<QueryTable
-			title={title}
+			title={(): string => t('services:key_operations')}
 			query={updatedQuery}
 			queryTableData={queryTableData}
 			loading={isLoading}

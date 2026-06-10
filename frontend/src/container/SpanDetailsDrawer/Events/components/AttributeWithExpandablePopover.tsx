@@ -1,5 +1,6 @@
 import { Button, Popover, Tooltip, Typography } from 'antd';
 import { Fullscreen } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import './AttributeWithExpandablePopover.styles.scss';
 
@@ -14,6 +15,7 @@ function AttributeWithExpandablePopover({
 	attributeValue,
 	onExpand,
 }: AttributeWithExpandablePopoverProps): JSX.Element {
+	const { t } = useTranslation(['trace']);
 	const popoverContent = (
 		<div className="attribute-with-expandable-popover__popover">
 			<pre className="attribute-with-expandable-popover__preview">
@@ -25,7 +27,7 @@ function AttributeWithExpandablePopover({
 				className="attribute-with-expandable-popover__expand-button"
 				icon={<Fullscreen size={14} />}
 			>
-				Expand
+				{t('expand')}
 			</Button>
 		</div>
 	);

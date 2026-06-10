@@ -648,19 +648,19 @@ function QuerySearch({
 
 		switch (editingMode) {
 			case 'key':
-				return <Tag color="blue">Key</Tag>;
+				return <Tag color={isDarkMode ? 'blue' : '#2563EB'}>Key</Tag>;
 			case 'operator':
-				return <Tag color="purple">Operator</Tag>;
+				return <Tag color={isDarkMode ? 'purple' : '#7C3AED'}>Operator</Tag>;
 			case 'value':
-				return <Tag color="green">Value</Tag>;
+				return <Tag color={isDarkMode ? 'green' : '#16A34A'}>Value</Tag>;
 			case 'conjunction':
-				return <Tag color="orange">Conjunction</Tag>;
+				return <Tag color={isDarkMode ? 'orange' : '#F59E0B'}>Conjunction</Tag>;
 			case 'function':
-				return <Tag color="cyan">Function</Tag>;
+				return <Tag color={isDarkMode ? 'cyan' : '#0891B2'}>Function</Tag>;
 			case 'parenthesis':
-				return <Tag color="magenta">Parenthesis</Tag>;
+				return <Tag color={isDarkMode ? 'magenta' : '#DB2777'}>Parenthesis</Tag>;
 			case 'bracketList':
-				return <Tag color="red">Bracket List</Tag>;
+				return <Tag color={isDarkMode ? 'red' : '#DC2626'}>Bracket List</Tag>;
 			default:
 				return <Tag>Unknown</Tag>;
 		}
@@ -1298,10 +1298,10 @@ function QuerySearch({
 					)}
 					{queryContext?.currentPair && (
 						<span className="triplet-info query-pair-info">
-							Current pair: <Tag color="blue">{queryContext.currentPair.key}</Tag>
-							<Tag color="purple">{queryContext.currentPair.operator}</Tag>
+							Current pair: <Tag color={isDarkMode ? 'blue' : '#2563EB'}>{queryContext.currentPair.key}</Tag>
+							<Tag color={isDarkMode ? 'purple' : '#7C3AED'}>{queryContext.currentPair.operator}</Tag>
 							{queryContext.currentPair.value && (
-								<Tag color="green">{queryContext.currentPair.value}</Tag>
+								<Tag color={isDarkMode ? 'green' : '#16A34A'}>{queryContext.currentPair.value}</Tag>
 							)}
 							<Tag color={queryContext.currentPair.isComplete ? 'success' : 'warning'}>
 								{queryContext.currentPair.isComplete ? 'Complete' : 'Incomplete'}
@@ -1310,7 +1310,7 @@ function QuerySearch({
 					)}
 					{queryContext?.queryPairs && queryContext.queryPairs.length > 0 && (
 						<span className="triplet-info">
-							Total pairs: <Tag color="blue">{queryContext.queryPairs.length}</Tag>
+							Total pairs: <Tag color={isDarkMode ? 'blue' : '#2563EB'}>{queryContext.queryPairs.length}</Tag>
 						</span>
 					)}
 				</div>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { connect, useDispatch, useSelector } from 'react-redux';
 import { CaretRightFilled } from '@ant-design/icons';
@@ -24,6 +25,7 @@ function Search({
 	updateTagIsError,
 }: SearchProps): JSX.Element {
 	const traces = useSelector<AppState, TraceReducer>((state) => state.traces);
+	const { t } = useTranslation(['trace']);
 
 	const [value, setValue] = useState<string>('');
 	const dispatch = useDispatch<Dispatch<AppActions>>();
@@ -105,7 +107,7 @@ function Search({
 					value={value}
 					allowClear
 					disabled={traces.filterLoading}
-					placeholder="Click to filter by tags"
+					placeholder={t('click_to_filter_by_tags')}
 					type="search"
 					enterButton={<CaretRightFilled />}
 					onSearch={(string): void => {

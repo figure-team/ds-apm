@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FullScreen, FullScreenHandle } from 'react-full-screen';
+import { useTranslation } from 'react-i18next';
 import { ItemCallback, Layout } from 'react-grid-layout';
 import { useIsFetching } from 'react-query';
 // eslint-disable-next-line no-restricted-imports
@@ -65,6 +66,7 @@ interface GraphLayoutProps {
 // eslint-disable-next-line sonarjs/cognitive-complexity
 function GraphLayout(props: GraphLayoutProps): JSX.Element {
 	const { handle, enableDrillDown = false } = props;
+	const { t } = useTranslation(['dashboard', 'common']);
 	const { safeNavigate } = useSafeNavigate();
 	const isDashboardFetching =
 		useIsFetching([REACT_QUERY_KEY.DASHBOARD_BY_ID]) > 0;
@@ -526,14 +528,14 @@ function GraphLayout(props: GraphLayoutProps): JSX.Element {
 						icon={<LockKeyhole size={14} />}
 						className="locked-text"
 					>
-						Locked
+						{t('locked')}
 					</Button>
 					<div className="locked-bar" />
 				</div>
 			)}
 			<Modal
 				open={isSettingsModalOpen}
-				title="Rename Section"
+				title={t('rename_section')}
 				rootClassName="rename-section"
 				destroyOnClose
 				footer={null}
@@ -544,11 +546,11 @@ function GraphLayout(props: GraphLayoutProps): JSX.Element {
 			>
 				<Form form={form} onFinish={onSettingsModalSubmit} requiredMark>
 					<Typography.Text className="typography">
-						Enter section name
+						{t('enter_section_name')}
 					</Typography.Text>
 					<Form.Item required name={['title']}>
 						<Input
-							placeholder="Enter row name here..."
+							placeholder={t('enter_row_name_placeholder')}
 							defaultValue={defaultTo(
 								widgets?.find((widget) => widget.id === currentSelectRowId)
 									?.title as string,
@@ -565,7 +567,7 @@ function GraphLayout(props: GraphLayoutProps): JSX.Element {
 								icon={<Check size={14} />}
 								disabled={updateDashboardMutation.isLoading}
 							>
-								Apply Changes
+								{t('apply_changes')}
 							</Button>
 							<Button
 								type="text"
@@ -576,7 +578,7 @@ function GraphLayout(props: GraphLayoutProps): JSX.Element {
 									setCurrentSelectRowId(null);
 								}}
 							>
-								Cancel
+								{t('common:cancel')}
 							</Button>
 						</div>
 					</Form.Item>
@@ -584,7 +586,7 @@ function GraphLayout(props: GraphLayoutProps): JSX.Element {
 			</Modal>
 			<Modal
 				open={isDeleteModalOpen}
-				title="Delete Row"
+				title={t('delete_row')}
 				destroyOnClose
 				onCancel={(): void => {
 					setIsDeleteModalOpen(false);
@@ -592,7 +594,7 @@ function GraphLayout(props: GraphLayoutProps): JSX.Element {
 				}}
 				onOk={(): void => handleRowDelete()}
 			>
-				<Typography.Text>Are you sure you want to delete this row</Typography.Text>
+				<Typography.Text>{t('delete_row_confirm')}</Typography.Text>
 			</Modal>
 		</FullScreen>
 	);

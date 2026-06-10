@@ -24,12 +24,10 @@ describe('RolesSettings', () => {
 
 		render(<RolesSettings />);
 
-		expect(screen.getByText('Roles')).toBeInTheDocument();
+		expect(screen.getByText('roles_title')).toBeInTheDocument();
+		expect(screen.getByText('roles_subtitle')).toBeInTheDocument();
 		expect(
-			screen.getByText('Create and manage custom roles for your team.'),
-		).toBeInTheDocument();
-		expect(
-			screen.getByPlaceholderText('Search for roles...'),
+			screen.getByPlaceholderText('search_roles_placeholder'),
 		).toBeInTheDocument();
 	});
 
@@ -45,8 +43,8 @@ describe('RolesSettings', () => {
 		expect(await screen.findByText('signoz-admin')).toBeInTheDocument();
 
 		// Section headers
-		expect(screen.getByText('Managed roles')).toBeInTheDocument();
-		expect(screen.getByText('Custom roles')).toBeInTheDocument();
+		expect(screen.getByText('managed_roles')).toBeInTheDocument();
+		expect(screen.getByText('custom_roles')).toBeInTheDocument();
 
 		// Managed roles
 		expect(screen.getByText('signoz-admin')).toBeInTheDocument();
@@ -61,10 +59,10 @@ describe('RolesSettings', () => {
 		expect(screen.getByText('2')).toBeInTheDocument();
 
 		// Column headers
-		expect(screen.getByText('Name')).toBeInTheDocument();
-		expect(screen.getByText('Description')).toBeInTheDocument();
-		expect(screen.getByText('Updated At')).toBeInTheDocument();
-		expect(screen.getByText('Created At')).toBeInTheDocument();
+		expect(screen.getByText('name')).toBeInTheDocument();
+		expect(screen.getByText('description')).toBeInTheDocument();
+		expect(screen.getByText('updated_at')).toBeInTheDocument();
+		expect(screen.getByText('created_at')).toBeInTheDocument();
 	});
 
 	it('filters roles by search query on name', async () => {
@@ -79,7 +77,7 @@ describe('RolesSettings', () => {
 		expect(await screen.findByText('signoz-admin')).toBeInTheDocument();
 
 		const user = userEvent.setup({ pointerEventsCheck: 0 });
-		const searchInput = screen.getByPlaceholderText('Search for roles...');
+		const searchInput = screen.getByPlaceholderText('search_roles_placeholder');
 
 		await user.type(searchInput, 'billing');
 
@@ -101,7 +99,7 @@ describe('RolesSettings', () => {
 		expect(await screen.findByText('signoz-admin')).toBeInTheDocument();
 
 		const user = userEvent.setup({ pointerEventsCheck: 0 });
-		const searchInput = screen.getByPlaceholderText('Search for roles...');
+		const searchInput = screen.getByPlaceholderText('search_roles_placeholder');
 
 		await user.type(searchInput, 'read-only');
 
@@ -122,12 +120,12 @@ describe('RolesSettings', () => {
 		expect(await screen.findByText('signoz-admin')).toBeInTheDocument();
 
 		const user = userEvent.setup({ pointerEventsCheck: 0 });
-		const searchInput = screen.getByPlaceholderText('Search for roles...');
+		const searchInput = screen.getByPlaceholderText('search_roles_placeholder');
 
 		await user.type(searchInput, 'nonexistentrole');
 
 		expect(
-			await screen.findByText('No roles match your search.'),
+			await screen.findByText('no_roles_match'),
 		).toBeInTheDocument();
 	});
 
@@ -175,7 +173,7 @@ describe('RolesSettings', () => {
 
 		render(<RolesSettings />);
 
-		expect(await screen.findByText('No roles found.')).toBeInTheDocument();
+		expect(await screen.findByText('no_roles_found')).toBeInTheDocument();
 	});
 
 	it('renders descriptions for all roles', async () => {

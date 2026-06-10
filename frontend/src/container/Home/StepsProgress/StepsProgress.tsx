@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Progress } from 'antd';
 
 import { ChecklistItem } from '../HomeChecklist/HomeChecklist';
@@ -9,6 +10,7 @@ function StepsProgress({
 }: {
 	checklistItems: ChecklistItem[];
 }): JSX.Element {
+	const { t } = useTranslation('home');
 	const completedChecklistItems = checklistItems.filter(
 		(item) => item.completed,
 	);
@@ -23,10 +25,10 @@ function StepsProgress({
 		<div className="steps-progress-container">
 			<div className="steps-progress-title">
 				<div className="steps-progress-title-text">
-					Build your observability base
+					{t('steps_progress_title')}
 				</div>
 				<div className="steps-progress-count">
-					Step {completedChecklistItems.length} / {totalChecklistItems}
+					{t('step')} {completedChecklistItems.length} / {totalChecklistItems}
 				</div>
 			</div>
 

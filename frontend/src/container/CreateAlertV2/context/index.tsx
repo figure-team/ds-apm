@@ -62,13 +62,15 @@ export function CreateAlertProvider(
 
 	const [createAlertState, setCreateAlertState] = useReducer(
 		createAlertReducer,
-		{
-			...INITIAL_CREATE_ALERT_STATE,
-			basic: {
-				...INITIAL_CREATE_ALERT_STATE.basic,
-				yAxisUnit: currentQuery.unit,
-			},
-		},
+		isEditMode && initialAlertState
+			? initialAlertState
+			: {
+					...INITIAL_CREATE_ALERT_STATE,
+					basic: {
+						...INITIAL_CREATE_ALERT_STATE.basic,
+						yAxisUnit: currentQuery.unit,
+					},
+				},
 	);
 
 	const setAlertState = useCallback(

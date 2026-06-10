@@ -7,6 +7,7 @@ import {
 	useState,
 } from 'react';
 import { useMutation } from 'react-query';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
@@ -88,14 +89,37 @@ import { getActiveMenuKeyFromPath } from './sideNav.utils';
 
 import './SideNav.styles.scss';
 
+const sideNavItemKeyMap: Record<string, string> = {
+	home: 'home',
+	alerts: 'alerts',
+	dashboards: 'dashboards',
+	services: 'services',
+	logs: 'logs',
+	traces: 'traces',
+	metrics: 'metrics',
+	infrastructure: 'infrastructure',
+	integrations: 'integrations',
+	exceptions: 'exceptions',
+	'external-apis': 'external_apis',
+	'messaging-queues': 'messaging_queues',
+	'service-map': 'service_map',
+	'meter-explorer': 'cost_meter',
+};
+
 function SortableFilter({ item }: { item: SidebarItem }): JSX.Element {
 	const { attributes, listeners, setNodeRef, transform, transition } =
 		useSortable({ id: item.key });
+	const { t } = useTranslation(['routes']);
 
 	const style = {
 		transform: CSS.Transform.toString(transform),
 		transition,
 	};
+
+	const label =
+		item.itemKey && sideNavItemKeyMap[item.itemKey as string]
+			? t(sideNavItemKeyMap[item.itemKey as string])
+			: item.label;
 
 	return (
 		<div ref={setNodeRef} style={style} className="reorder-shortcut-nav-item">
@@ -111,7 +135,7 @@ function SortableFilter({ item }: { item: SidebarItem }): JSX.Element {
 
 				<div className="reorder-shortcut-nav-item-icon">{item.icon}</div>
 
-				<div className="reorder-shortcut-nav-item-label">{item.label}</div>
+				<div className="reorder-shortcut-nav-item-label">{label}</div>
 			</div>
 		</div>
 	);
@@ -119,6 +143,7 @@ function SortableFilter({ item }: { item: SidebarItem }): JSX.Element {
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
+	const { t } = useTranslation(['routes', 'settings']);
 	const { openCmdK } = useCmdK();
 	const { pathname, search } = useLocation();
 	const { currentVersion, latestVersion, isCurrentVersionError } = useSelector<
@@ -298,7 +323,7 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 
 	const userSettingsMenuItem = {
 		key: ROUTES.SETTINGS,
-		label: 'Settings',
+		label: t('settings_title'),
 		icon: <Cog size={16} />,
 	};
 
@@ -482,12 +507,14 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 				isWorkspaceBlocked,
 				isEnterpriseSelfHostedUser,
 				isCommunityEnterpriseUser,
+				t,
 			}),
 		[
 			isEnterpriseSelfHostedUser,
 			isCommunityEnterpriseUser,
 			user.email,
 			isWorkspaceBlocked,
+			t,
 		],
 	);
 
@@ -757,37 +784,43 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 		allowPin?: boolean,
 	): JSX.Element => (
 		<>
-			{items.map((item, index) => (
-				<NavItem
-					showIcon
-					key={item.key || index}
-					item={item}
-					isActive={activeMenuKey === item.key}
-					isDisabled={
-						isWorkspaceBlocked &&
-						item.key !== ROUTES.BILLING &&
-						item.key !== ROUTES.SETTINGS
-					}
-					onTogglePin={
-						allowPin
-							? (item): void => {
-									logEvent(
-										`Sidebar V2: Menu item ${item.isPinned ? 'unpinned' : 'pinned'}`,
-										{
-											menuRoute: item.key,
-											menuLabel: item.label,
-										},
-									);
-									onTogglePin(item);
-								}
-							: undefined
-					}
-					onClick={(event): void => {
-						handleMenuItemClick(event, item);
-					}}
-					isPinned={isPinnedItem(item)}
-				/>
-			))}
+			{items.map((item, index) => {
+				const translatedLabel =
+					item.itemKey && sideNavItemKeyMap[item.itemKey as string]
+						? t(sideNavItemKeyMap[item.itemKey as string])
+						: item.label;
+				return (
+					<NavItem
+						showIcon
+						key={item.key || index}
+						item={{ ...item, label: translatedLabel }}
+						isActive={activeMenuKey === item.key}
+						isDisabled={
+							isWorkspaceBlocked &&
+							item.key !== ROUTES.BILLING &&
+							item.key !== ROUTES.SETTINGS
+						}
+						onTogglePin={
+							allowPin
+								? (item): void => {
+										logEvent(
+											`Sidebar V2: Menu item ${item.isPinned ? 'unpinned' : 'pinned'}`,
+											{
+												menuRoute: item.key,
+												menuLabel: item.label,
+											},
+										);
+										onTogglePin(item);
+									}
+								: undefined
+						}
+						onClick={(event): void => {
+							handleMenuItemClick(event, item);
+						}}
+						isPinned={isPinnedItem(item)}
+					/>
+				);
+			})}
 		</>
 	);
 

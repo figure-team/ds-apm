@@ -10,6 +10,7 @@ import {
 } from 'hooks/TracesFunnels/useFunnels';
 import { isEqual } from 'lodash-es';
 import { ArrowLeft, Check, Plus, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import FunnelConfiguration from 'pages/TracesFunnelDetails/components/FunnelConfiguration/FunnelConfiguration';
 import { TracesFunnelsContentRenderer } from 'pages/TracesFunnels';
 import CreateFunnel from 'pages/TracesFunnels/components/CreateFunnel/CreateFunnel';
@@ -90,6 +91,7 @@ function AddSpanToFunnelModal({
 	onClose,
 	span,
 }: AddSpanToFunnelModalProps): JSX.Element {
+	const { t } = useTranslation(['trace', 'common']);
 	const [activeView, setActiveView] = useState<ModalView>(ModalView.LIST);
 	const [searchQuery, setSearchQuery] = useState<string>('');
 	const [selectedFunnelId, setSelectedFunnelId] = useState<string | undefined>(
@@ -166,7 +168,7 @@ function AddSpanToFunnelModal({
 				<div className="add-span-to-funnel-modal__search">
 					<Input
 						className="add-span-to-funnel-modal__search-input"
-						placeholder="Search by name, description, or tags..."
+						placeholder={t('search_funnels_placeholder')}
 						prefix={<Search size={12} />}
 						value={searchQuery}
 						onChange={handleSearch}
@@ -208,7 +210,7 @@ function AddSpanToFunnelModal({
 				onClick={handleBack}
 			>
 				<ArrowLeft size={14} />
-				All funnels
+				{t('all_funnels')}
 			</Button>
 			<div className="traces-funnel-details">
 				<div className="traces-funnel-details__steps-config">
@@ -243,7 +245,7 @@ function AddSpanToFunnelModal({
 			open={isOpen}
 			onCancel={onClose}
 			width={570}
-			title="Add span to funnel"
+			title={t('add_span_to_funnel')}
 			className={cx('add-span-to-funnel-modal-container', {
 				'add-span-to-funnel-modal-container--details':
 					activeView === ModalView.DETAILS,
@@ -258,7 +260,7 @@ function AddSpanToFunnelModal({
 								className="add-span-to-funnel-modal__discard-button"
 								disabled={!isUnsavedChanges}
 							>
-								Discard
+								{t('discard')}
 							</Button>,
 							<Button
 								key="save"
@@ -268,7 +270,7 @@ function AddSpanToFunnelModal({
 								disabled={!isUnsavedChanges}
 								icon={<Check size={14} color="var(--bg-vanilla-100)" />}
 							>
-								Save Funnel
+								{t('save_funnel')}
 							</Button>,
 						]
 					: [
@@ -279,7 +281,7 @@ function AddSpanToFunnelModal({
 								onClick={handleCreateNewClick}
 								icon={<Plus size={14} />}
 							>
-								Create new funnel
+								{t('create_new_funnel')}
 							</Button>,
 						]
 			}

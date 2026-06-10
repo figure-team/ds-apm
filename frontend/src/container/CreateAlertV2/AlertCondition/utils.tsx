@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button, Flex, SelectProps, Switch, Typography } from 'antd';
 import type { BaseOptionType, DefaultOptionType } from 'antd/es/select';
 import { getInvolvedQueriesInTraceOperator } from 'components/QueryBuilderV2/QueryV2/TraceOperator/utils/utils';
@@ -377,13 +378,14 @@ export function NotificationChannelsNotFoundContent({
 	user: IUser;
 	refreshChannels: () => void;
 }): JSX.Element {
+	const { t } = useTranslation(['alerts']);
 	return (
 		<Flex justify="space-between">
 			<Flex gap={4} align="center">
-				<Typography.Text>No channels yet.</Typography.Text>
+				<Typography.Text>{t('v2_no_channels_yet')}</Typography.Text>
 				{user?.role === USER_ROLES.ADMIN ? (
 					<Typography.Text>
-						Create one
+						{t('v2_create_channel')}
 						<Button
 							style={{ padding: '0 4px' }}
 							type="link"
@@ -391,15 +393,15 @@ export function NotificationChannelsNotFoundContent({
 								openInNewTab(ROUTES.CHANNELS_NEW);
 							}}
 						>
-							here.
+							{t('v2_channel_here')}
 						</Button>
 					</Typography.Text>
 				) : (
-					<Typography.Text>Please ask your admin to create one.</Typography.Text>
+					<Typography.Text>{t('v2_ask_admin')}</Typography.Text>
 				)}
 			</Flex>
 			<Button type="text" onClick={refreshChannels}>
-				Refresh
+				{t('v2_refresh')}
 			</Button>
 		</Flex>
 	);
@@ -409,10 +411,11 @@ export function RoutingPolicyBanner({
 	notificationSettings,
 	setNotificationSettings,
 }: RoutingPolicyBannerProps): JSX.Element {
+	const { t } = useTranslation(['alerts']);
 	return (
 		<div className="routing-policies-info-banner">
 			<Typography.Text>
-				Use <strong>Routing Policies</strong> for dynamic routing
+				{t('v2_routing_policies_banner')}
 			</Typography.Text>
 			<div className="routing-policies-info-banner-right">
 				<Switch
@@ -431,7 +434,7 @@ export function RoutingPolicyBanner({
 					className="view-routing-policies-button"
 					data-testid="view-routing-policies-button"
 				>
-					View Routing Policies
+					{t('v2_view_routing_policies')}
 					<ArrowRight size={14} />
 				</Button>
 			</div>

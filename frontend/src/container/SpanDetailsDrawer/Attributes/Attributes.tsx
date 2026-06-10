@@ -5,6 +5,7 @@ import CopyClipboardHOC from 'components/Logs/CopyClipboardHOC';
 import { flattenObject } from 'container/LogDetailedView/utils';
 import { usePinnedAttributes } from 'hooks/spanDetails/usePinnedAttributes';
 import { Pin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Span } from 'types/api/trace/getTraceV2';
 
 import NoData from '../NoData/NoData';
@@ -25,6 +26,7 @@ interface IAttributesProps {
 
 function Attributes(props: IAttributesProps): JSX.Element {
 	const { span, isSearchVisible, shouldFocusOnToggle } = props;
+	const { t } = useTranslation(['trace']);
 	const [fieldSearchInput, setFieldSearchInput] = useState<string>('');
 
 	const flattenSpanData: Record<string, string> = useMemo(
@@ -75,7 +77,7 @@ function Attributes(props: IAttributesProps): JSX.Element {
 				(datasource.length > 0 || fieldSearchInput.length > 0) && (
 					<Input
 						autoFocus={shouldFocusOnToggle}
-						placeholder="Search for attribute..."
+						placeholder={t('search_for_attribute')}
 						className="search-input"
 						value={fieldSearchInput}
 						onChange={(e): void => setFieldSearchInput(e.target.value)}

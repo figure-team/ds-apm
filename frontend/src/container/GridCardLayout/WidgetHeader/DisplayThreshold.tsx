@@ -1,4 +1,5 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 import {
 	DisplayThresholdContainer,
@@ -8,9 +9,10 @@ import {
 import { DisplayThresholdProps } from './types';
 
 function DisplayThreshold({ threshold }: DisplayThresholdProps): JSX.Element {
+	const { t } = useTranslation(['dashboard']);
 	return (
 		<DisplayThresholdContainer>
-			<TypographHeading>Threshold </TypographHeading>
+			<TypographHeading>{t('threshold')} </TypographHeading>
 			<Typography>{threshold || <InfoCircleOutlined />}</Typography>
 		</DisplayThresholdContainer>
 	);

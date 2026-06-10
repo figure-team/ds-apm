@@ -7,6 +7,7 @@ import {
 	useRef,
 	useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { Virtualizer } from '@tanstack/react-virtual';
 import { Button, Tooltip, Typography } from 'antd';
@@ -83,6 +84,7 @@ function SpanOverview({
 }): JSX.Element {
 	const isRootSpan = span.level === 0;
 	const { hasEditPermission } = useAppContext();
+	const { t } = useTranslation(['trace']);
 
 	let color = generateColor(span.serviceName, themeColors.traceDetailColors);
 	if (span.hasError) {
@@ -173,9 +175,7 @@ function SpanOverview({
 								<span className="add-funnel-button__separator">·</span>
 								<Tooltip
 									title={
-										!hasEditPermission
-											? 'You need editor or admin access to add spans to funnels'
-											: ''
+										!hasEditPermission ? t('editor_access_required_for_funnel') : ''
 									}
 								>
 									<Button
@@ -412,6 +412,7 @@ function Success(props: ISuccessProps): JSX.Element {
 		setSelectedSpan,
 		selectedSpan,
 	} = props;
+	const { t } = useTranslation(['trace']);
 
 	const [filteredSpanIds, setFilteredSpanIds] = useState<string[]>([]);
 	const [isFilterActive, setIsFilterActive] = useState<boolean>(false);
@@ -539,7 +540,7 @@ function Success(props: ISuccessProps): JSX.Element {
 					<section className="left-info">
 						<AlertCircle size={14} />
 						<Typography.Text className="text">
-							This trace has missing spans
+							{t('this_trace_has_missing_spans')}
 						</Typography.Text>
 					</section>
 					<Button
@@ -553,7 +554,7 @@ function Success(props: ISuccessProps): JSX.Element {
 							)
 						}
 					>
-						Learn More
+						{t('learn_more')}
 					</Button>
 				</div>
 			)}

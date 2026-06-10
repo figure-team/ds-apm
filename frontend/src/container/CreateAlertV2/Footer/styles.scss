@@ -15,6 +15,19 @@
 	.button-group {
 		display: flex;
 		gap: 12px;
+		align-items: center;
+	}
+
+	.footer__validation-status {
+		font-size: 12px;
+
+		&--error {
+			color: #e54545;
+		}
+
+		&--ready {
+			color: #52c41a;
+		}
 	}
 
 	.ant-btn {

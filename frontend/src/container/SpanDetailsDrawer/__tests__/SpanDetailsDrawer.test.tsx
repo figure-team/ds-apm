@@ -286,9 +286,9 @@ const renderSpanDetailsDrawer = (props = {}): void => {
 };
 
 // Constants for repeated strings
-const SEARCH_RESOURCE_ATTRIBUTES_PLACEHOLDER = 'Search resource attributes';
+const SEARCH_RESOURCE_ATTRIBUTES_PLACEHOLDER = 'search_resource_attributes';
 const P75_TEXT = 'p75';
-const SPAN_PERCENTILE_TEXT = 'Span Percentile';
+const SPAN_PERCENTILE_TEXT = 'span_percentile';
 
 // Mock data for span percentiles
 const mockSpanPercentileResponse = {
@@ -677,7 +677,7 @@ describe('SpanDetailsDrawer', () => {
 			expect(spanLog2).toHaveClass('log-highlighted');
 			expect(spanLog1).toHaveAttribute(
 				'title',
-				'This log belongs to the current span',
+				'this_log_belongs_to_current_span',
 			);
 
 			// Verify context logs are not highlighted
@@ -751,11 +751,13 @@ describe('SpanDetailsDrawer', () => {
 			// Verify percentile details are expanded
 			await waitFor(() => {
 				expect(screen.getByText(SPAN_PERCENTILE_TEXT)).toBeInTheDocument();
-				// Look for the text that's actually rendered
-				expect(screen.getByText(/This span duration is/)).toBeInTheDocument();
+				// Look for the i18n keys that are rendered in the test environment
 				expect(
-					screen.getByText(/out of the distribution for this resource/),
-				).toBeInTheDocument();
+					screen.getAllByText(/span_percentile_description/).length,
+				).toBeGreaterThan(0);
+				expect(
+					screen.getAllByText(/span_percentile_description_suffix/).length,
+				).toBeGreaterThan(0);
 			});
 		});
 
@@ -781,8 +783,8 @@ describe('SpanDetailsDrawer', () => {
 			// Wait for the table to be visible (it might take a moment to render)
 			await waitFor(
 				() => {
-					expect(screen.getByText('Percentile')).toBeInTheDocument();
-					expect(screen.getByText('Duration')).toBeInTheDocument();
+					expect(screen.getByText('percentile')).toBeInTheDocument();
+					expect(screen.getByText('duration_title')).toBeInTheDocument();
 				},
 				{ timeout: 5000 },
 			);
@@ -797,7 +799,7 @@ describe('SpanDetailsDrawer', () => {
 			expect(screen.getAllByText(P75_TEXT)).toHaveLength(3); // Should appear in value, expanded details, and table
 
 			// Verify the table has the current span indicator (there are multiple occurrences)
-			expect(screen.getAllByText(/this span/i).length).toBeGreaterThan(0);
+			expect(screen.getAllByText(/this_span/i).length).toBeGreaterThan(0);
 		});
 
 		it('should allow time range selection and trigger API call', async () => {
@@ -823,8 +825,8 @@ describe('SpanDetailsDrawer', () => {
 			const timeRangeSelector = screen.getByRole('combobox');
 			expect(timeRangeSelector).toBeInTheDocument();
 
-			// Verify the default time range is displayed
-			expect(screen.getByText(/1.*hour/i)).toBeInTheDocument();
+			// Verify the default time range is displayed (Select value label starts with "1h")
+			expect(screen.getByText(/1h\s*:/i)).toBeInTheDocument();
 
 			// Verify API was called with default parameters
 			await waitFor(() => {
@@ -1012,12 +1014,13 @@ describe('SpanDetailsDrawer', () => {
 
 			// Verify tooltip content - use more flexible text matching
 			await waitFor(() => {
-				expect(screen.getByText(/This span duration is/)).toBeInTheDocument();
-				expect(screen.getByText(/out of the distribution/)).toBeInTheDocument();
 				expect(
-					screen.getByText(/evaluated for 1 hour\(s\) since the span start time/),
-				).toBeInTheDocument();
-				expect(screen.getByText('Click to learn more')).toBeInTheDocument();
+					screen.getAllByText(/span_percentile_description/).length,
+				).toBeGreaterThan(0);
+				expect(
+					screen.getAllByText(/span_percentile_description_suffix/).length,
+				).toBeGreaterThan(0);
+				expect(screen.getByText('click_to_learn_more')).toBeInTheDocument();
 			});
 		});
 
@@ -1123,7 +1126,7 @@ describe('SpanDetailsDrawer', () => {
 });
 
 describe('SpanDetailsDrawer - Search Visibility User Flows', () => {
-	const SEARCH_PLACEHOLDER = 'Search for attribute...';
+	const SEARCH_PLACEHOLDER = 'search_for_attribute';
 
 	beforeEach(() => {
 		jest.useRealTimers();
@@ -1255,7 +1258,7 @@ describe('SpanDetailsDrawer - Status Message Truncation User Flows', () => {
 		);
 
 		// User sees status message label
-		expect(screen.getByText('status message')).toBeInTheDocument();
+		expect(screen.getByText('status_message')).toBeInTheDocument();
 
 		// User sees the status message value (appears in both original element and popover preview)
 		const statusMessageElements = screen.getAllByText(
@@ -1290,7 +1293,7 @@ describe('SpanDetailsDrawer - Status Message Truncation User Flows', () => {
 			// Modal should be visible with the title
 			const modalTitle = document.querySelector('.ant-modal-title');
 			expect(modalTitle).toBeInTheDocument();
-			expect(modalTitle?.textContent).toBe('status message');
+			expect(modalTitle?.textContent).toBe('status_message');
 			// Modal content should contain the full message in a pre tag
 			const preElement = document.querySelector(
 				'.attribute-with-expandable-popover__full-view',
@@ -1316,7 +1319,7 @@ describe('SpanDetailsDrawer - Status Message Truncation User Flows', () => {
 		);
 
 		// User sees status message label and value
-		expect(screen.getByText('status message')).toBeInTheDocument();
+		expect(screen.getByText('status_message')).toBeInTheDocument();
 		expect(
 			screen.getByText(mockSpanWithShortStatusMessage.statusMessage),
 		).toBeInTheDocument();

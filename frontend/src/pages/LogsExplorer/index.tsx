@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import * as Sentry from '@sentry/react';
 import getLocalStorageKey from 'api/browser/localstorage/get';
@@ -46,6 +47,7 @@ import { ExplorerViews } from './utils';
 import './LogsExplorer.styles.scss';
 
 function LogsExplorer(): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const [showLiveLogs, setShowLiveLogs] = useState<boolean>(false);
 
 	// Get panel type from URL
@@ -241,40 +243,40 @@ function LogsExplorer(): JSX.Element {
 		() => ({
 			list: {
 				name: 'list',
-				label: 'List',
+				label: t('view_list'),
 				show: true,
 				key: 'list',
 			},
 			timeseries: {
 				name: 'timeseries',
-				label: 'Timeseries',
+				label: t('view_timeseries'),
 				disabled: false,
 				show: true,
 				key: 'timeseries',
 			},
 			trace: {
 				name: 'trace',
-				label: 'Trace',
+				label: t('view_trace'),
 				disabled: false,
 				show: false,
 				key: 'trace',
 			},
 			table: {
 				name: 'table',
-				label: 'Table',
+				label: t('view_table'),
 				disabled: false,
 				show: true,
 				key: 'table',
 			},
 			clickhouse: {
 				name: 'clickhouse',
-				label: 'Clickhouse',
+				label: t('view_clickhouse'),
 				disabled: false,
 				show: false,
 				key: 'clickhouse',
 			},
 		}),
-		[],
+		[t],
 	);
 
 	const handleShowLiveLogs = useCallback(() => {
@@ -340,7 +342,7 @@ function LogsExplorer(): JSX.Element {
 							</div>
 							<div className="logs-explorer-views">
 								{isCancelled ? (
-									<QueryCancelledPlaceholder subText='Click "Run Query" to load logs.' />
+									<QueryCancelledPlaceholder subText={t('run_query_to_load_logs')} />
 								) : (
 									<LogsExplorerViewsContainer
 										listQueryKeyRef={listQueryKeyRef}

@@ -141,11 +141,13 @@ describe('Login Component', () => {
 			const { getByTestId, getByPlaceholderText } = render(<Login />);
 
 			expect(
-				screen.getByText(/sign in to monitor, trace, and troubleshoot/i),
+				screen.getByText('login_form_description'),
 			).toBeInTheDocument();
 			expect(getByTestId('email')).toBeInTheDocument();
 			expect(getByTestId('initiate_login')).toBeInTheDocument();
-			expect(getByPlaceholderText('e.g. john@signoz.io')).toBeInTheDocument();
+			expect(
+				getByPlaceholderText('placeholder_email_example'),
+			).toBeInTheDocument();
 		});
 
 		it('shows loading state when version data is being fetched', () => {
@@ -313,7 +315,9 @@ describe('Login Component', () => {
 			await waitFor(() => {
 				// Should show password field directly (no org selection needed)
 				expect(getByTestId('password')).toBeInTheDocument();
-				expect(screen.queryByText(/organization name/i)).not.toBeInTheDocument();
+				expect(
+					screen.queryByText('label_organization_name'),
+				).not.toBeInTheDocument();
 			});
 		});
 	});
@@ -348,7 +352,7 @@ describe('Login Component', () => {
 			await user.click(nextButton);
 
 			await waitFor(() => {
-				expect(getByText('Organization Name')).toBeInTheDocument();
+				expect(getByText('label_organization_name')).toBeInTheDocument();
 			});
 			await screen.findByRole('combobox');
 
@@ -395,7 +399,9 @@ describe('Login Component', () => {
 			await user.click(screen.getByRole('combobox'));
 			await user.click(screen.getByText(CALLBACK_AUTHN_ORG));
 
-			await screen.findByRole('button', { name: /sign in with sso/i });
+			await screen.findByRole('button', {
+				name: /button_sign_in_with_sso/i,
+			});
 		});
 	});
 
@@ -430,7 +436,7 @@ describe('Login Component', () => {
 
 			await waitFor(() => {
 				expect(getByTestId('password')).toBeInTheDocument();
-				expect(getByText(/forgot password/i)).toBeInTheDocument();
+				expect(getByText('forgot_password')).toBeInTheDocument();
 				expect(getByTestId('password_authn_submit')).toBeInTheDocument();
 			});
 		});

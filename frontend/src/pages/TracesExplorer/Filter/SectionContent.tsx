@@ -11,6 +11,7 @@ import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { ParaGraph } from 'container/Trace/Filters/Panel/PanelBody/Common/styles';
 import useDebouncedFn from 'hooks/useDebouncedFunction';
 import { isArray, isEmpty } from 'lodash-es';
+import { useTranslation } from 'react-i18next';
 
 import {
 	addFilter,
@@ -34,6 +35,7 @@ interface SectionBodyProps {
 
 export function SectionBody(props: SectionBodyProps): JSX.Element {
 	const { type, setSelectedFilters, selectedFilters, handleRun } = props;
+	const { t } = useTranslation('trace');
 	const [visibleItemsCount, setVisibleItemsCount] = useState(10);
 	const [searchFilter, setSearchFilter] = useState<string>('');
 	const [searchText, setSearchText] = useState<string>('');
@@ -136,11 +138,11 @@ export function SectionBody(props: SectionBodyProps): JSX.Element {
 				<Input.Search
 					value={searchFilter}
 					onChange={handleSearch}
-					placeholder="Filter Values"
+					placeholder={t('filter_values')}
 					className="search-input"
 				/>
 				{listData.length === 0 && isEmpty(searchFilter) ? (
-					<div style={{ padding: '8px 18px' }}>No data found</div>
+					<div style={{ padding: '8px 18px' }}>{t('no_results_found')}</div>
 				) : (
 					<>
 						{listData.map((item) => (

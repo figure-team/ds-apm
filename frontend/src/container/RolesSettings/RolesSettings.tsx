@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus } from '@signozhq/icons';
 import { Button, Input } from '@signozhq/ui';
 
@@ -9,23 +10,22 @@ import RolesListingTable from './RolesComponents/RolesListingTable';
 import './RolesSettings.styles.scss';
 
 function RolesSettings(): JSX.Element {
+	const { t } = useTranslation(['roles']);
 	const [searchQuery, setSearchQuery] = useState('');
 	const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
 	return (
 		<div className="roles-settings" data-testid="roles-settings">
 			<div className="roles-settings-header">
-				<h3 className="roles-settings-header-title">Roles</h3>
-				<p className="roles-settings-header-description">
-					Create and manage custom roles for your team.
-				</p>
+				<h3 className="roles-settings-header-title">{t('roles_title')}</h3>
+				<p className="roles-settings-header-description">{t('roles_subtitle')}</p>
 			</div>
 			<div className="roles-settings-content">
 				<div className="roles-settings-toolbar">
 					<div className="roles-search-wrapper">
 						<Input
 							type="search"
-							placeholder="Search for roles..."
+							placeholder={t('search_roles_placeholder')}
 							value={searchQuery}
 							onChange={(e): void => setSearchQuery(e.target.value)}
 						/>
@@ -38,7 +38,7 @@ function RolesSettings(): JSX.Element {
 							onClick={(): void => setIsCreateModalOpen(true)}
 						>
 							<Plus size={14} />
-							Custom role
+							{t('custom_role')}
 						</Button>
 					)}
 				</div>

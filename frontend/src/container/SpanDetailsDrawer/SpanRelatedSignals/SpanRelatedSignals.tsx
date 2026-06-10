@@ -14,6 +14,7 @@ import { getEmptyLogsListConfig } from 'container/LogsExplorerList/utils';
 import dayjs from 'dayjs';
 import { useIsDarkMode } from 'hooks/useDarkMode';
 import { BarChart2, Compass, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { BaseAutocompleteData } from 'types/api/queryBuilder/queryAutocompleteResponse';
 import { Span } from 'types/api/trace/getTraceV2';
 import { DataSource, LogsAggregatorOperator } from 'types/common/queryBuilder';
@@ -48,6 +49,7 @@ function SpanRelatedSignals({
 	const [selectedView, setSelectedView] =
 		useState<RelatedSignalsViews>(initialView);
 	const isDarkMode = useIsDarkMode();
+	const { t } = useTranslation(['trace']);
 
 	// Extract infrastructure metadata from span attributes
 	const infraMetadata = useMemo(() => {
@@ -91,7 +93,7 @@ function SpanRelatedSignals({
 				label: (
 					<div className="view-title">
 						<LogsIcon width={14} height={14} />
-						Logs
+						{t('logs')}
 					</div>
 				),
 				value: RelatedSignalsViews.LOGS,
@@ -104,7 +106,7 @@ function SpanRelatedSignals({
 				label: (
 					<div className="view-title">
 						<BarChart2 size={14} />
-						Metrics
+						{t('metrics')}
 					</div>
 				),
 				value: RelatedSignalsViews.INFRA,
@@ -112,7 +114,7 @@ function SpanRelatedSignals({
 		}
 
 		return baseOptions;
-	}, [infraMetadata]);
+	}, [infraMetadata, t]);
 
 	const handleExplorerPageRedirect = useCallback((): void => {
 		const startTimeMs = traceStartTime - FIVE_MINUTES_IN_MS;
@@ -179,7 +181,7 @@ function SpanRelatedSignals({
 				<>
 					<Divider type="vertical" />
 					<Typography.Text className="title">
-						Related Signals - {selectedSpan.name}
+						{t('related_signals_title', { name: selectedSpan.name })}
 					</Typography.Text>
 				</>
 			}
@@ -210,7 +212,7 @@ function SpanRelatedSignals({
 								onClick={handleExplorerPageRedirect}
 								data-testid="open-in-explorer-button"
 							>
-								Open in Logs Explorer
+								{t('open_in_logs_explorer')}
 							</Button>
 						)}
 					</div>

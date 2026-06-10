@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight, X } from '@signozhq/icons';
 import {
 	Button,
@@ -42,6 +43,7 @@ function ResourceRow({
 	onScopeChange,
 	onSelectedIdsChange,
 }: ResourceRowProps): JSX.Element {
+	const { t } = useTranslation(['roles']);
 	return (
 		<div className="psp-resource">
 			<div
@@ -75,7 +77,9 @@ function ResourceRow({
 					>
 						<div className="psp-resource__radio-item">
 							<RadioGroupItem value={PermissionScope.ALL} id={`${resource.id}-all`} />
-							<RadioGroupLabel htmlFor={`${resource.id}-all`}>All</RadioGroupLabel>
+							<RadioGroupLabel htmlFor={`${resource.id}-all`}>
+								{t('all')}
+							</RadioGroupLabel>
 						</div>
 
 						<div className="psp-resource__radio-item">
@@ -84,7 +88,7 @@ function ResourceRow({
 								id={`${resource.id}-only-selected`}
 							/>
 							<RadioGroupLabel htmlFor={`${resource.id}-only-selected`}>
-								Only selected
+								{t('only_selected')}
 							</RadioGroupLabel>
 						</div>
 					</RadioGroup>
@@ -99,7 +103,7 @@ function ResourceRow({
 									onSelectedIdsChange(resource.id, vals)
 								}
 								options={resource.options ?? []}
-								placeholder="Select resources..."
+								placeholder={t('select_resources_placeholder')}
 								className="psp-resource__select"
 								popupClassName="psp-resource__select-popup"
 								showSearch
@@ -127,6 +131,7 @@ function PermissionSidePanel({
 	isSaving = false,
 	onSave,
 }: PermissionSidePanelProps): JSX.Element | null {
+	const { t } = useTranslation(['roles', 'common']);
 	const [config, setConfig] = useState<PermissionConfig>(() =>
 		buildConfig(resources, initialConfig),
 	);
@@ -217,13 +222,13 @@ function PermissionSidePanel({
 						size="icon"
 						className="permission-side-panel__close"
 						onClick={onClose}
-						aria-label="Close panel"
+						aria-label={t('close_panel')}
 					>
 						<X size={16} />
 					</Button>
 					<span className="permission-side-panel__header-divider" />
 					<span className="permission-side-panel__title">
-						Edit {permissionLabel} Permissions
+						{t('edit_permissions', { label: permissionLabel })}
 					</span>
 				</div>
 
@@ -252,7 +257,7 @@ function PermissionSidePanel({
 						<div className="permission-side-panel__unsaved">
 							<span className="permission-side-panel__unsaved-dot" />
 							<span className="permission-side-panel__unsaved-text">
-								{unsavedCount} unsaved change{unsavedCount !== 1 ? 's' : ''}
+								{t('unsaved_changes', { count: unsavedCount })}
 							</span>
 						</div>
 					)}
@@ -266,7 +271,7 @@ function PermissionSidePanel({
 							size="sm"
 							disabled={isSaving}
 						>
-							{unsavedCount > 0 ? 'Discard' : 'Cancel'}
+							{unsavedCount > 0 ? t('discard') : t('common:cancel')}
 						</Button>
 						<Button
 							variant="solid"
@@ -276,7 +281,7 @@ function PermissionSidePanel({
 							loading={isSaving}
 							disabled={isLoading || unsavedCount === 0}
 						>
-							Save Changes
+							{t('save_changes')}
 						</Button>
 					</div>
 				</div>

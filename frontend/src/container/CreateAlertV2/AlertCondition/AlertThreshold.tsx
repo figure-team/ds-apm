@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Select, Tooltip, Typography } from 'antd';
 import classNames from 'classnames';
 import { useQueryBuilder } from 'hooks/queryBuilder/useQueryBuilder';
@@ -40,6 +41,7 @@ function AlertThreshold({
 	isErrorChannels,
 	refreshChannels,
 }: AnomalyAndThresholdProps): JSX.Element {
+	const { t } = useTranslation(['alerts']);
 	const {
 		alertState,
 		thresholdState,
@@ -228,7 +230,7 @@ function AlertThreshold({
 			<div className="alert-condition-sentences">
 				<div className="alert-condition-sentence">
 					<Typography.Text className="sentence-text">
-						Send a notification when
+						{t('v2_send_notification_when')}
 					</Typography.Text>
 					<Select
 						value={thresholdState.selectedQuery}
@@ -237,7 +239,7 @@ function AlertThreshold({
 						options={queryNames}
 						data-testid="alert-threshold-query-select"
 					/>
-					<Typography.Text className="sentence-text">is</Typography.Text>
+					<Typography.Text className="sentence-text">{t('v2_is_text')}</Typography.Text>
 					<Select
 						value={
 							(normalizeOperator(thresholdState.operator) ??
@@ -254,7 +256,7 @@ function AlertThreshold({
 						data-testid="alert-threshold-operator-select"
 					/>
 					<Typography.Text className="sentence-text">
-						the threshold(s)
+						{t('v2_the_thresholds')}
 					</Typography.Text>
 					<Select
 						value={
@@ -272,7 +274,7 @@ function AlertThreshold({
 						data-testid="alert-threshold-match-type-select"
 					/>
 					<Typography.Text className="sentence-text">
-						during the <EvaluationSettings />
+						{t('v2_during_the')} <EvaluationSettings />
 					</Typography.Text>
 				</div>
 			</div>
@@ -299,7 +301,7 @@ function AlertThreshold({
 					className="add-threshold-btn"
 					data-testid="add-threshold-button"
 				>
-					Add Threshold
+					{t('v2_add_threshold')}
 				</Button>
 			</div>
 

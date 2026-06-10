@@ -161,7 +161,7 @@ describe('ContextLogRenderer', () => {
 		});
 
 		await waitFor(() => {
-			expect(screen.getAllByText('Load more')).toHaveLength(2);
+			expect(screen.getAllByText('logs:load_more')).toHaveLength(2);
 			expect(screen.getByText(/Test log message/)).toBeInTheDocument();
 		});
 	});
@@ -172,11 +172,11 @@ describe('ContextLogRenderer', () => {
 		});
 
 		await waitFor(() => {
-			expect(screen.getAllByText('Load more')).toHaveLength(2);
+			expect(screen.getAllByText('logs:load_more')).toHaveLength(2);
 			expect(screen.getByText(/Test log message/)).toBeInTheDocument();
 		});
 
-		const loadMoreButtons = screen.getAllByText('Load more');
+		const loadMoreButtons = screen.getAllByText('logs:load_more');
 
 		// Check if buttons are enabled and clickable
 		expect(loadMoreButtons[1]).not.toBeDisabled();
@@ -188,7 +188,7 @@ describe('ContextLogRenderer', () => {
 		// Verify that the button click triggered an API call
 		await waitFor(() => {
 			// The buttons should still be present after clicking
-			expect(screen.getAllByText('Load more')).toHaveLength(2);
+			expect(screen.getAllByText('logs:load_more')).toHaveLength(2);
 		});
 	});
 
@@ -210,11 +210,11 @@ describe('ContextLogRenderer', () => {
 			});
 
 			await waitFor(() => {
-				expect(screen.getAllByText('Load more')).toHaveLength(2);
+				expect(screen.getAllByText('logs:load_more')).toHaveLength(2);
 				expect(screen.getByText(/Test log message/)).toBeInTheDocument();
 			});
 
-			loadMoreButtons = screen.getAllByText('Load more');
+			loadMoreButtons = screen.getAllByText('logs:load_more');
 
 			// Capture initial query payload
 			expect(capturedQueryRangePayload).toBeDefined();

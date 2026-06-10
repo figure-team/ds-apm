@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import ReactDragListView from 'react-drag-listview';
 import { TableComponents } from 'react-virtuoso';
 import Spinner from 'components/Spinner';
@@ -15,8 +16,10 @@ export const LogsCustomTable = ({
 	handleDragEnd,
 }: LogsCustomTableProps): TableComponents['Table'] =>
 	function CustomTable({ style, children }): JSX.Element {
+		// eslint-disable-next-line react-hooks/rules-of-hooks
+		const { t } = useTranslation(['logs']);
 		if (isLoading) {
-			return <Spinner height="35px" tip="Getting Logs" />;
+			return <Spinner height="35px" tip={t('logs:getting_logs')} />;
 		}
 		return (
 			<ReactDragListView.DragColumn

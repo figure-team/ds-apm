@@ -82,9 +82,11 @@ describe('MembersSettings (integration)', () => {
 
 		await screen.findByText('Alice Smith');
 
-		await user.click(screen.getByRole('button', { name: /all members/i }));
+		await user.click(
+			screen.getByRole('button', { name: /members_filter_all/i }),
+		);
 
-		const pendingOption = await screen.findByText(/pending invites/i);
+		const pendingOption = await screen.findByText(/members_filter_pending/i);
 		await user.click(pendingOption);
 
 		await screen.findByText('charlie@signoz.io');
@@ -99,7 +101,7 @@ describe('MembersSettings (integration)', () => {
 		await screen.findByText('Alice Smith');
 
 		await user.type(
-			screen.getByPlaceholderText(/Search by name or email/i),
+			screen.getByPlaceholderText(/members_search_placeholder/i),
 			'bob',
 		);
 
@@ -133,7 +135,7 @@ describe('MembersSettings (integration)', () => {
 
 		render(<MembersSettings />);
 
-		await user.click(screen.getByRole('button', { name: /invite member/i }));
+		await user.click(screen.getByRole('button', { name: /invite_member/i }));
 
 		expect(await screen.findAllByPlaceholderText('john@signoz.io')).toHaveLength(
 			3,

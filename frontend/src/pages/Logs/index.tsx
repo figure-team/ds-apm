@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
@@ -33,6 +34,7 @@ import SpaceContainer from './styles';
 import './logs.styles.scss';
 
 function OldLogsExplorer(): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const dispatch = useDispatch<Dispatch<AppActions>>();
 	const { order } = useSelector<AppState, ILogsReducer>((store) => store.logs);
 	const location = useLocation();
@@ -111,7 +113,7 @@ function OldLogsExplorer(): JSX.Element {
 									onChange={onChangeVeiwMode}
 								>
 									{viewModeOptionList.map((option) => (
-										<Select.Option key={option.value}>{option.label}</Select.Option>
+										<Select.Option key={option.value}>{t(`view_${option.value}`)}</Select.Option>
 									))}
 								</Select>
 
@@ -121,7 +123,7 @@ function OldLogsExplorer(): JSX.Element {
 										placement="right"
 										content={renderPopoverContent}
 									>
-										<Button>Format</Button>
+										<Button>{t('format')}</Button>
 									</Popover>
 								)}
 
@@ -132,7 +134,7 @@ function OldLogsExplorer(): JSX.Element {
 									onChange={handleChangeOrder}
 								>
 									{orderItems.map((item) => (
-										<Select.Option key={item.enum}>{item.name}</Select.Option>
+										<Select.Option key={item.enum}>{t(item.enum === 'desc' ? 'order_descending' : 'order_ascending')}</Select.Option>
 									))}
 								</Select>
 							</Space>

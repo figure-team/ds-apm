@@ -1,4 +1,5 @@
 import { memo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Steps, Tooltip } from 'antd';
 import logEvent from 'api/common/logEvent';
 import { PlusIcon, Undo2 } from 'lucide-react';
@@ -20,6 +21,7 @@ function StepsContent({
 	isTraceDetailsPage?: boolean;
 	span?: Span;
 }): JSX.Element {
+	const { t } = useTranslation('trace');
 	const { steps, handleAddStep, handleReplaceStep } = useFunnelContext();
 	const { hasEditPermission } = useAppContext();
 
@@ -52,7 +54,7 @@ function StepsContent({
 										<Tooltip
 											title={
 												!hasEditPermission
-													? 'You need editor or admin access to replace steps'
+													? t('funnels.perm_replace_steps')
 													: ''
 											}
 										>
@@ -88,7 +90,7 @@ function StepsContent({
 					description={
 						<Tooltip
 							title={
-								!hasEditPermission ? 'You need editor or admin access to add steps' : ''
+								!hasEditPermission ? t('funnels.perm_add_steps') : ''
 							}
 						>
 							<Button
@@ -98,7 +100,7 @@ function StepsContent({
 								icon={<PlusIcon size={14} />}
 								disabled={!hasEditPermission}
 							>
-								{isTraceDetailsPage ? 'Add for new Step' : 'Add Funnel Step'}
+								{isTraceDetailsPage ? t('funnels.add_new_step') : t('funnels.add_funnel_step')}
 							</Button>
 						</Tooltip>
 					}

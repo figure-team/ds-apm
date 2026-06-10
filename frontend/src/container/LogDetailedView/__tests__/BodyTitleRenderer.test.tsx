@@ -54,7 +54,7 @@ describe('BodyTitleRenderer', () => {
 			expect(mockSetCopy).toHaveBeenCalledWith('John');
 			expect(mockNotification).toHaveBeenCalledWith(
 				expect.objectContaining({
-					message: expect.stringContaining('user.name'),
+					message: expect.stringContaining('attribute_copied_to_clipboard'),
 				}),
 			);
 		});
@@ -100,7 +100,9 @@ describe('BodyTitleRenderer', () => {
 			expect(callArg).toBe(expectedJson);
 			expect(mockNotification).toHaveBeenCalledWith(
 				expect.objectContaining({
-					message: expect.stringContaining('object copied'),
+					message: expect.stringContaining(
+						'attribute_object_copied_to_clipboard',
+					),
 				}),
 			);
 		});

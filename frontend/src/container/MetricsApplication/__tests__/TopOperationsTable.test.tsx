@@ -65,9 +65,11 @@ const mockedUseResourceAttribute = useResourceAttribute as jest.MockedFunction<
 >;
 
 // Constants
-const KEY_OPERATIONS_TEXT = 'Key Operations';
-const KEY_ENTRY_POINT_OPERATIONS_TEXT = 'Key Entrypoint Operations';
-const ENTRY_POINT_SPANS_TEXT = 'Entrypoint Spans';
+// In the test environment, i18n returns the translation KEY rather than the
+// resolved English string, so these assert on the `services` namespace keys.
+const KEY_OPERATIONS_TEXT = 'services:key_operations';
+const KEY_ENTRY_POINT_OPERATIONS_TEXT = 'services:key_entrypoint_operations';
+const ENTRY_POINT_SPANS_TEXT = 'services:entrypoint_spans';
 const TOP_OPERATIONS_ENDPOINT = 'top_operations';
 const ENTRY_POINT_OPERATIONS_ENDPOINT = 'entry_point_operations';
 

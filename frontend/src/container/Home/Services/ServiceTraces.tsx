@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux'; // old code, TODO: fix this correctly
 import { Link } from 'react-router-dom';
@@ -7,22 +8,15 @@ import logEvent from 'api/common/logEvent';
 import ROUTES from 'constants/routes';
 import { useQueryService } from 'hooks/useQueryService';
 import { useSafeNavigate } from 'hooks/useSafeNavigate';
-import history from 'lib/history';
-import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import Card from 'periscope/components/Card/Card';
-import { useAppContext } from 'providers/App/App';
 import { AppState } from 'store/reducers';
-import { LicensePlatform } from 'types/api/licensesV3/getActive';
 import { ServicesList } from 'types/api/metrics/getService';
 import { GlobalReducer } from 'types/reducer/globalTime';
-import { USER_ROLES } from 'types/roles';
 import { isModifierKeyPressed } from 'utils/app';
-import { openInNewTab } from 'utils/navigation';
 
-import triangleRulerUrl from '@/assets/Icons/triangle-ruler.svg';
-
-import { DOCS_LINKS } from '../constants';
 import { columns, TIME_PICKER_OPTIONS } from './constants';
+import ServicesEmptyState from './ServicesEmptyState';
 
 const homeInterval = 30 * 60 * 1000;
 
@@ -36,8 +30,7 @@ export default function ServiceTraces({
 	const { selectedTime } = useSelector<AppState, GlobalReducer>(
 		(state) => state.globalTime,
 	);
-
-	const { user, activeLicense } = useAppContext();
+	const { t } = useTranslation('home');
 
 	const now = new Date().getTime();
 	const [timeRange, setTimeRange] = useState({
@@ -102,70 +95,6 @@ export default function ServiceTraces({
 		});
 	}, []);
 
-	const emptyStateCard = useMemo(
-		() => (
-			<div className="empty-state-container">
-				<div className="empty-state-content-container">
-					<div className="empty-state-content">
-						<img
-							src={triangleRulerUrl}
-							alt="empty-alert-icon"
-							className="empty-state-icon"
-						/>
-
-						<div className="empty-title">You are not sending traces yet.</div>
-
-						<div className="empty-description">
-							Start sending traces to see your services.
-						</div>
-					</div>
-
-					{user?.role !== USER_ROLES.VIEWER && (
-						<div className="empty-actions-container">
-							<Button
-								type="default"
-								className="periscope-btn secondary"
-								onClick={(): void => {
-									logEvent('Homepage: Get Started clicked', {
-										source: 'Service Traces',
-									});
-
-									if (
-										activeLicense &&
-										activeLicense.platform === LicensePlatform.CLOUD
-									) {
-										history.push(ROUTES.GET_STARTED_WITH_CLOUD);
-									} else {
-										openInNewTab(DOCS_LINKS.ADD_DATA_SOURCE);
-									}
-								}}
-							>
-								Get Started &nbsp; <ArrowRight size={16} />
-							</Button>
-
-							<Button
-								type="link"
-								className="learn-more-link"
-								onClick={(): void => {
-									logEvent('Homepage: Learn more clicked', {
-										source: 'Service Traces',
-									});
-									window.open(
-										'https://signoz.io/docs/instrumentation/overview/',
-										'_blank',
-									);
-								}}
-							>
-								Learn more <ArrowUpRight size={12} />
-							</Button>
-						</div>
-					)}
-				</div>
-			</div>
-		),
-		[user?.role, activeLicense],
-	);
-
 	const renderDashboardsList = useCallback(
 		() => (
 			<div className="services-list-container home-data-item-container traces-services-list">
@@ -218,7 +147,7 @@ export default function ServiceTraces({
 			{servicesExist && (
 				<Card.Header>
 					<div className="services-header home-data-card-header">
-						Services
+						{t('services_header')}
 						<div className="services-header-actions">
 							<Select
 								value={timeRange.selectedInterval}
@@ -231,7 +160,11 @@ export default function ServiceTraces({
 				</Card.Header>
 			)}
 			<Card.Content>
-				{servicesExist ? renderDashboardsList() : emptyStateCard}
+				{servicesExist ? (
+					renderDashboardsList()
+				) : (
+					<ServicesEmptyState source="Service Traces" />
+				)}
 			</Card.Content>
 
 			{servicesExist && (
@@ -245,7 +178,7 @@ export default function ServiceTraces({
 									logEvent('Homepage: All Services clicked', {});
 								}}
 							>
-								All Services <ArrowRight size={12} />
+								{t('all_services')} <ArrowRight size={12} />
 							</Button>
 						</Link>
 					</div>

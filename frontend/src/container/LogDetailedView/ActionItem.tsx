@@ -1,4 +1,5 @@
 import { memo, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { Button, Col, Popover } from 'antd';
 import { OPERATORS } from 'constants/queryBuilder';
@@ -10,6 +11,7 @@ function ActionItem({
 	fieldValue,
 	onClickActionItem,
 }: ActionItemProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const handleClick = useCallback(
 		(operator: string) => {
 			const validatedFieldValue = removeJSONStringifyQuotes(fieldValue);
@@ -30,15 +32,15 @@ function ActionItem({
 		() => (
 			<Col>
 				<Button type="text" size="small" onClick={onClickHandler(OPERATORS.IN)}>
-					<PlusCircleOutlined size={12} /> Filter for value
+					<PlusCircleOutlined size={12} /> {t('logs:filter_for_value')}
 				</Button>
 				<br />
 				<Button type="text" size="small" onClick={onClickHandler(OPERATORS.NIN)}>
-					<MinusCircleOutlined size={12} /> Filter out value
+					<MinusCircleOutlined size={12} /> {t('logs:filter_out_value')}
 				</Button>
 			</Col>
 		),
-		[onClickHandler],
+		[onClickHandler, t],
 	);
 	return (
 		<Popover placement="bottomLeft" content={PopOverMenuContent} trigger="click">

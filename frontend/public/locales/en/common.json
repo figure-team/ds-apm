@@ -3,9 +3,19 @@
 	"already_logged_in": "Already Logged In",
 	"success": "Success",
 	"cancel": "Cancel",
+	"run_query": "Run Query",
+	"get_started": "Get Started",
+	"learn_more": "Learn more",
 	"share": "Share",
 	"save": "Save",
 	"edit": "Edit",
 	"logged_in": "Logged In",
-	"pending_data_placeholder": "Retrieving your {{dataSource}}!"
+	"pending_data_placeholder": "Retrieving your {{dataSource}}!",
+	"no_data_yet": "No {{dataSource}} yet.",
+	"data_show_up_here": "When we receive {{dataSource}}, they would show up here",
+	"send_data_to_signoz": "Sending {{dataSource}} to SigNoz",
+	"data_source_logs": "logs",
+	"data_source_traces": "traces",
+	"data_source_metrics": "metrics",
+	"data_source_meter": "meter"
 }

@@ -17,6 +17,7 @@ import {
 	getTopErrorsQueryPayload,
 } from 'container/ApiMonitoring/utils';
 import { GetMetricQueryRange } from 'lib/dashboard/getQueryResults';
+import { useIsDarkMode } from 'hooks/useDarkMode';
 import { Info } from 'lucide-react';
 import { SuccessResponse, SuccessResponseV2 } from 'types/api';
 import { MetricRangePayloadProps } from 'types/api/metrics/getQueryRange';
@@ -42,6 +43,7 @@ function TopErrors({
 	};
 	initialFilters: IBuilderQuery['filters'];
 }): JSX.Element {
+	const isDarkMode = useIsDarkMode();
 	const { startTime: minTime, endTime: maxTime } = timeRange;
 
 	const [endPointName, setSelectedEndPointName] = useState<string>('');
@@ -175,11 +177,11 @@ function TopErrors({
 						onChange={setShowStatusCodeErrors}
 						size="small"
 					/>
-					<span style={{ color: 'white', fontSize: '14px' }}>
+					<span style={{ color: isDarkMode ? 'white' : '#374151', fontSize: '14px' }}>
 						Status Message Exists
 					</span>
 					<Tooltip title="When enabled, shows errors that have a status message. When disabled, shows all errors regardless of status message">
-						<Info size={16} color="white" />
+						<Info size={16} color={isDarkMode ? 'white' : '#374151'} />
 					</Tooltip>
 				</div>
 			</div>

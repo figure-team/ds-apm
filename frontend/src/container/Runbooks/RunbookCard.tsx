@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useIsDarkMode } from 'hooks/useDarkMode';
 import { Button, Tag } from 'antd';
 import { CopyOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { toast } from '@signozhq/ui';
@@ -14,12 +15,6 @@ interface Props {
 	onDelete: (rb: Runbook) => void;
 }
 
-const STATUS_COLORS: Record<RunbookStatus, string> = {
-	draft: 'gold',
-	approved: 'green',
-	deprecated: 'default',
-};
-
 export default function RunbookCard({
 	runbook,
 	canEdit,
@@ -28,6 +23,13 @@ export default function RunbookCard({
 	onStatusChange,
 	onDelete,
 }: Props): JSX.Element {
+	const isDarkMode = useIsDarkMode();
+	const STATUS_COLORS: Record<RunbookStatus, string> = {
+		draft: isDarkMode ? 'gold' : '#D97706',
+		approved: isDarkMode ? 'green' : '#16A34A',
+		deprecated: 'default',
+	};
+
 	const handleCopyScript = useCallback(async () => {
 		try {
 			await navigator.clipboard.writeText(runbook.executableScript);

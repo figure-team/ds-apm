@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import { Button } from 'antd';
 import { Binoculars, DraftingCompass, ScrollText } from 'lucide-react';
@@ -18,6 +19,7 @@ function GraphControlsPanel({
 	onViewTracesClick,
 	onViewAPIMonitoringClick,
 }: GraphControlsPanelProps): JSX.Element {
+	const { t } = useTranslation(['services']);
 	return (
 		<div id={id} className="graph-controls-panel">
 			<Button
@@ -27,7 +29,7 @@ function GraphControlsPanel({
 				onClick={onViewTracesClick}
 				style={{ color: Color.BG_VANILLA_100 }}
 			>
-				View traces
+				{t('services:view_traces')}
 			</Button>
 			{onViewLogsClick && (
 				<Button
@@ -37,7 +39,7 @@ function GraphControlsPanel({
 					onClick={onViewLogsClick}
 					style={{ color: Color.BG_VANILLA_100 }}
 				>
-					View logs
+					{t('services:view_logs')}
 				</Button>
 			)}
 			{onViewAPIMonitoringClick && (
@@ -48,7 +50,7 @@ function GraphControlsPanel({
 					onClick={onViewAPIMonitoringClick}
 					style={{ color: Color.BG_VANILLA_100 }}
 				>
-					View External APIs
+					{t('services:view_external_apis')}
 				</Button>
 			)}
 		</div>

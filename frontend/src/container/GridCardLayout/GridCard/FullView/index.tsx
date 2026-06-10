@@ -6,6 +6,7 @@ import React, {
 	useRef,
 	useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux'; // old code, TODO: fix this correctly
@@ -86,6 +87,7 @@ function FullView({
 		maxTime,
 	} = useSelector<AppState, GlobalReducer>((state) => state.globalTime);
 	const urlQuery = useUrlQuery();
+	const { t } = useTranslation(['dashboard']);
 
 	const fullViewRef = useRef<HTMLDivElement>(null);
 	const { handleRunQuery } = useQueryBuilder();
@@ -293,7 +295,7 @@ function FullView({
 	const [searchTerm, setSearchTerm] = useState<string>('');
 
 	if (response.isLoading && selectedPanelType !== PANEL_TYPES.LIST) {
-		return <Spinner height="100%" size="large" tip="Loading..." />;
+		return <Spinner height="100%" size="large" tip={t('loading')} />;
 	}
 
 	return (
@@ -397,7 +399,7 @@ function FullView({
 								<Input
 									addonBefore={<SearchOutlined size={14} />}
 									className="global-search"
-									placeholder="Search..."
+									placeholder={t('search_placeholder')}
 									allowClear
 									key={widget.id}
 									onChange={(e): void => {
@@ -406,7 +408,7 @@ function FullView({
 								/>
 							)}
 							{isCancelled ? (
-								<QueryCancelledPlaceholder subText='Click "Run Query" to reload the widget.' />
+								<QueryCancelledPlaceholder subText={t('run_query_to_reload')} />
 							) : (
 								<PanelWrapper
 									panelMode={PanelMode.STANDALONE_VIEW}

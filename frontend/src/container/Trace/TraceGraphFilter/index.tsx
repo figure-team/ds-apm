@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from 'react-query';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
@@ -23,6 +24,7 @@ import {
 const { Option } = SelectComponent;
 
 function TraceGraphFilter(): JSX.Element {
+	const { t } = useTranslation(['trace']);
 	const { selectedFunction, selectedGroupBy } = useSelector<
 		AppState,
 		TraceReducer
@@ -61,7 +63,7 @@ function TraceGraphFilter(): JSX.Element {
 
 	return (
 		<Space>
-			<label htmlFor="selectedFunction">Function</label>
+			<label htmlFor="selectedFunction">{t('function')}</label>
 
 			<SelectComponent
 				getPopupContainer={popupContainer}
@@ -78,7 +80,7 @@ function TraceGraphFilter(): JSX.Element {
 				))}
 			</SelectComponent>
 
-			<label htmlFor="selectedGroupBy">Group By</label>
+			<label htmlFor="selectedGroupBy">{t('group_by')}</label>
 			<AutoComplete
 				getPopupContainer={popupContainer}
 				dropdownMatchSelectWidth
@@ -92,7 +94,7 @@ function TraceGraphFilter(): JSX.Element {
 					filterGroupBy(inputValue, option)
 				}
 			>
-				<Input disabled={isLoading} placeholder="Please select" />
+				<Input disabled={isLoading} placeholder={t('please_select')} />
 			</AutoComplete>
 		</Space>
 	);

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input } from 'antd';
 import SignozModal from 'components/SignozModal/SignozModal';
 import { useUpdateFunnelSteps } from 'hooks/TracesFunnels/useFunnels';
@@ -21,6 +22,7 @@ function AddFunnelStepDetailsModal({
 	onClose,
 	stepData,
 }: AddFunnelStepDetailsModalProps): JSX.Element {
+	const { t } = useTranslation('trace');
 	const { funnelId, steps, setSteps } = useFunnelContext();
 
 	const [stepName, setStepName] = useState<string>(stepData?.name || '');
@@ -68,14 +70,14 @@ function AddFunnelStepDetailsModal({
 						setSteps(data.payload.steps);
 					}
 					notifications.success({
-						message: 'Success',
-						description: 'Funnel step details updated successfully',
+						message: t('funnels.success'),
+						description: t('funnels.step_details_updated'),
 					});
 					handleCancel();
 				},
 				onError: (error) => {
 					notifications.error({
-						message: 'Failed to update funnel step details',
+						message: t('funnels.step_details_update_failed'),
 						description: error.message,
 					});
 				},
@@ -86,12 +88,12 @@ function AddFunnelStepDetailsModal({
 	return (
 		<SignozModal
 			open={isOpen}
-			title="Add funnel step details"
+			title={t('funnels.add_step_details_title')}
 			width={384}
 			onCancel={handleCancel}
 			rootClassName="funnel-step-modal funnel-modal signoz-modal"
-			cancelText="Cancel"
-			okText="Save changes"
+			cancelText={t('funnels.cancel')}
+			okText={t('funnels.save_changes')}
 			okButtonProps={{
 				icon: <Check size={14} />,
 				type: 'primary',
@@ -111,10 +113,10 @@ function AddFunnelStepDetailsModal({
 		>
 			<div className="funnel-step-modal-content">
 				<div className="funnel-step-modal-content__field">
-					<span className="funnel-step-modal-content__label">Step name</span>
+					<span className="funnel-step-modal-content__label">{t('funnels.step_name')}</span>
 					<Input
 						className="funnel-step-modal-content__input"
-						placeholder="Eg. checkout-dropoff-funnel-step1"
+						placeholder={t('funnels.step_name_placeholder')}
 						value={stepName}
 						onChange={(e): void => setStepName(e.target.value)}
 						autoFocus
@@ -122,10 +124,10 @@ function AddFunnelStepDetailsModal({
 					/>
 				</div>
 				<div className="funnel-step-modal-content__field">
-					<span className="funnel-step-modal-content__label">Description</span>
+					<span className="funnel-step-modal-content__label">{t('funnels.description')}</span>
 					<Input.TextArea
 						className="funnel-step-modal-content__input"
-						placeholder="Eg. checkout dropoff funnel"
+						placeholder={t('funnels.step_desc_placeholder')}
 						value={description}
 						onChange={(e): void => setDescription(e.target.value)}
 						autoSize={{ minRows: 3, maxRows: 5 }}

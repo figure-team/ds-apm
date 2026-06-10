@@ -61,7 +61,7 @@ function SaveView(): JSX.Element {
 		useState<ICompositeMetricQuery | null>(null);
 	const [searchValue, setSearchValue] = useState<string>('');
 	const [dataSource, setDataSource] = useState<ViewProps[]>([]);
-	const { t } = useTranslation(['explorer']);
+	const { t } = useTranslation(['explorer', 'common']);
 
 	const hideDeleteViewModal = (): void => {
 		setIsDeleteModalOpen(false);
@@ -175,7 +175,7 @@ function SaveView(): JSX.Element {
 			{
 				onSuccess: () => {
 					notifications.success({
-						message: 'View Updated Successfully',
+						message: t('view_updated_successfully'),
 					});
 					hideEditViewModal();
 					refetchAllView();
@@ -299,19 +299,23 @@ function SaveView(): JSX.Element {
 	return (
 		<div className="save-view-container">
 			<div className="save-view-content">
-				<Typography.Title className="title">Views</Typography.Title>
+				<Typography.Title className="title">
+					{t('views_title')}
+				</Typography.Title>
 				<Typography.Text className="subtitle">
-					Manage your saved views for {ROUTES_VS_SOURCEPAGE[pathname]}.{' '}
+					{t('manage_saved_views', {
+						dataSource: t(`common:data_source_${sourcepage}`),
+					})}{' '}
 					<Typography.Link
 						className="learn-more"
 						href="https://signoz.io/docs/product-features/saved-view/?utm_source=product&utm_medium=views-tab"
 						target="_blank"
 					>
-						Learn more
+						{t('learn_more')}
 					</Typography.Link>
 				</Typography.Text>
 				<Input
-					placeholder="Search for views..."
+					placeholder={t('search_views_placeholder')}
 					prefix={<Search size={12} color={Color.BG_VANILLA_400} />}
 					value={searchValue}
 					onChange={handleSearch}
@@ -328,7 +332,7 @@ function SaveView(): JSX.Element {
 
 			<Modal
 				className="delete-view-modal"
-				title={<span className="title">Delete view</span>}
+				title={<span className="title">{t('delete_view')}</span>}
 				open={isDeleteModalOpen}
 				closable={false}
 				onCancel={hideDeleteViewModal}
@@ -341,7 +345,7 @@ function SaveView(): JSX.Element {
 						className="cancel-btn"
 						prefix={<X size={16} />}
 					>
-						Cancel
+						{t('common:cancel')}
 					</Button>,
 					<Button
 						key="submit"
@@ -353,7 +357,7 @@ function SaveView(): JSX.Element {
 						disabled={isDeleteLoading}
 						data-testid="confirm-delete"
 					>
-						Delete view
+						{t('delete_view')}
 					</Button>,
 				]}
 			>
@@ -366,7 +370,7 @@ function SaveView(): JSX.Element {
 
 			<Modal
 				className="save-view-modal"
-				title={<span className="title">Edit view details</span>}
+				title={<span className="title">{t('edit_view_details')}</span>}
 				open={isEditModalOpen}
 				closable={false}
 				onCancel={hideEditViewModal}
@@ -380,18 +384,18 @@ function SaveView(): JSX.Element {
 						disabled={isViewUpdating}
 						data-testid="save-view"
 					>
-						Save changes
+						{t('save_changes')}
 					</Button>,
 				]}
 			>
-				<Typography.Text>Label</Typography.Text>
+				<Typography.Text>{t('label')}</Typography.Text>
 				<div className="save-view-input">
 					<ColorPicker
 						value={color}
 						onChange={(value, hex): void => setColor(hex)}
 					/>
 					<Input
-						placeholder="e.g. Crash landing view"
+						placeholder={t('edit_view_name_placeholder')}
 						value={newViewName}
 						data-testid="view-name"
 						onChange={(e): void => setNewViewName(e.target.value)}

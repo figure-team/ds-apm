@@ -21,6 +21,7 @@ import { getOperatorValue } from 'container/QueryBuilder/filters/QueryBuilderSea
 import { useQueryBuilder } from 'hooks/queryBuilder/useQueryBuilder';
 import createQueryParams from 'lib/createQueryParams';
 import { Compass } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ILog } from 'types/api/logs/log';
 import {
 	BaseAutocompleteData,
@@ -63,6 +64,7 @@ function SpanLogs({
 	handleExplorerPageRedirect,
 	emptyStateConfig,
 }: SpanLogsProps): JSX.Element {
+	const { t } = useTranslation(['trace']);
 	const { updateAllQueriesOperators } = useQueryBuilder();
 
 	// Create trace_id and span_id filters for logs explorer navigation
@@ -179,7 +181,7 @@ function SpanLogs({
 					onLogClick={handleLogClick}
 					isHighlighted={isSpanRelated}
 					helpTooltip={
-						isSpanRelated ? 'This log belongs to the current span' : undefined
+						isSpanRelated ? t('this_log_belongs_to_current_span') : undefined
 					}
 					selectedFields={[
 						{
@@ -196,20 +198,20 @@ function SpanLogs({
 				/>
 			);
 		},
-		[handleLogClick, spanId],
+		[handleLogClick, spanId, t],
 	);
 
 	const renderFooter = useCallback((): JSX.Element | null => {
 		if (isFetching) {
-			return <div className="logs-loading-skeleton"> Loading more logs ... </div>;
+			return <div className="logs-loading-skeleton">{t('loading_more_logs')}</div>;
 		}
 
 		if (hasReachedEndOfLogs) {
-			return <div className="logs-loading-skeleton"> *** End *** </div>;
+			return <div className="logs-loading-skeleton">{t('end')}</div>;
 		}
 
 		return null;
-	}, [isFetching, hasReachedEndOfLogs]);
+	}, [isFetching, hasReachedEndOfLogs, t]);
 
 	const renderContent = useMemo(
 		() => (
@@ -238,8 +240,10 @@ function SpanLogs({
 			<section className="description">
 				<img src={noDataUrl} alt="no-data" className="no-data-img" />
 				<Typography.Text className="no-data-text-1">
-					No logs found for selected span.
-					<span className="no-data-text-2">View logs for the current trace.</span>
+					{t('no_logs_found_for_span')}
+					<span className="no-data-text-2">
+						{t('view_logs_for_current_trace')}
+					</span>
 				</Typography.Text>
 			</section>
 			<section className="action-section">
@@ -250,7 +254,7 @@ function SpanLogs({
 					onClick={handleExplorerPageRedirect}
 					size="md"
 				>
-					View Logs
+					{t('view_logs')}
 				</Button>
 			</section>
 		</div>

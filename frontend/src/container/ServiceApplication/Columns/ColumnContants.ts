@@ -5,11 +5,11 @@ export enum ColumnKey {
 	Operations = 'callRate',
 }
 
-export const ColumnTitle: Record<ColumnKey, string> = {
-	[ColumnKey.Application]: 'Application',
-	[ColumnKey.P99]: 'P99 latency',
-	[ColumnKey.ErrorRate]: 'Error Rate (% of total)',
-	[ColumnKey.Operations]: 'Operations Per Second',
+export const ColumnTitleKey: Record<ColumnKey, string> = {
+	[ColumnKey.Application]: 'column_application',
+	[ColumnKey.P99]: 'column_p99_latency',
+	[ColumnKey.ErrorRate]: 'column_error_rate_pct',
+	[ColumnKey.Operations]: 'column_operations_per_second',
 };
 
 export enum ColumnWidth {
@@ -20,5 +20,3 @@ export enum ColumnWidth {
 }
 
 export const SORTING_ORDER = 'descend';
-
-export const SEARCH_PLACEHOLDER = 'Search by service';

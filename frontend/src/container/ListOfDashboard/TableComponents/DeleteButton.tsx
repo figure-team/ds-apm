@@ -47,18 +47,18 @@ export function DeleteButton({
 		const { destroy } = modal.confirm({
 			title: (
 				<Typography.Title level={5}>
-					Are you sure you want to delete the
+					{t('delete_dashboard_confirm_prefix')}
 					<span style={{ color: 'var(--danger-background)', fontWeight: 500 }}>
 						{' '}
 						{name}{' '}
 					</span>
-					dashboard?
+					{t('delete_dashboard_confirm_suffix')}
 				</Typography.Title>
 			),
 			icon: (
 				<ExclamationCircleOutlined style={{ color: 'var(--danger-background)' }} />
 			),
-			okText: 'Delete',
+			okText: t('delete'),
 			okButtonProps: {
 				danger: true,
 				onClick: (e) => {
@@ -120,7 +120,7 @@ export function DeleteButton({
 					className="delete-btn"
 					disabled={isLocked || (user.role === USER_ROLES.VIEWER && !isAuthor)}
 				>
-					<DeleteOutlined /> Delete dashboard
+					<DeleteOutlined /> {t('delete_dashboard')}
 				</TableLinkText>
 			</Tooltip>
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { connect, useSelector } from 'react-redux';
 import { CaretRightFilled, PlusOutlined } from '@ant-design/icons';
@@ -32,6 +33,7 @@ function AllTags({
 	updateFilters,
 }: AllTagsProps): JSX.Element {
 	const traces = useSelector<AppState, TraceReducer>((state) => state.traces);
+	const { t } = useTranslation(['trace']);
 
 	const [localSelectedTags, setLocalSelectedTags] = useState<
 		TraceReducer['selectedTags']
@@ -78,12 +80,11 @@ function AllTags({
 		return (
 			<ErrorContainer>
 				<Paragraph style={{ color: 'var(--warning-background)' }}>
-					Unrecognized query format. Please reset your query by clicking `X` in the
-					search bar above.
+					{t('unrecognized_query_format')}
 				</Paragraph>
 
 				<Paragraph style={{ color: 'var(--warning-background)' }}>
-					Please click on the search bar to get a drop down to select relevant tags
+					{t('click_search_bar_for_tags')}
 				</Paragraph>
 			</ErrorContainer>
 		);
@@ -91,7 +92,7 @@ function AllTags({
 
 	return (
 		<Container>
-			<Typography>Tags</Typography>
+			<Typography>{t('tags')}</Typography>
 
 			<CurrentTagsContainer>
 				{localSelectedTags.map((tags, index) => (
@@ -108,23 +109,21 @@ function AllTags({
 
 			<Space wrap direction="horizontal">
 				<Button type="primary" onClick={onTagAddHandler} icon={<PlusOutlined />}>
-					Add Tags Filter
+					{t('add_tags_filter')}
 				</Button>
 
-				<Text ellipsis>
-					Results will include spans with ALL the specified tags ( Rows are `ANDed` )
-				</Text>
+				<Text ellipsis>{t('results_include_all_tags')}</Text>
 			</Space>
 
 			<ButtonContainer>
 				<Space align="start">
-					<Button onClick={onResetHandler}>Reset</Button>
+					<Button onClick={onResetHandler}>{t('reset')}</Button>
 					<Button
 						type="primary"
 						onClick={onRunQueryHandler}
 						icon={<CaretRightFilled />}
 					>
-						Run Query
+						{t('run_query')}
 					</Button>
 				</Space>
 			</ButtonContainer>

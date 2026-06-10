@@ -24,7 +24,11 @@
     "test": "jest",
     "test:changedsince": "jest --changedSince=main --coverage --silent",
     "generate:api": "orval --config ./orval.config.ts && sh scripts/post-types-generation.sh",
-    "generate:permissions-type": "node scripts/generate-permissions-type.cjs"
+    "generate:permissions-type": "node scripts/generate-permissions-type.cjs",
+    "i18n:check": "node scripts/check-i18n-parity.js",
+    "i18n:check-literals": "node scripts/check-hardcoded-strings.js",
+    "i18n:check-literals:ci": "node scripts/check-hardcoded-strings.js --ci",
+    "i18n:check-literals:update": "node scripts/check-hardcoded-strings.js --update-baseline"
   },
   "engines": {
     "node": ">=22.0.0"
@@ -145,6 +149,7 @@
     "vite": "npm:rolldown-vite@7.3.1",
     "vite-plugin-html": "3.2.2",
     "web-vitals": "^0.2.4",
+    "xlsx": "^0.18.5",
     "zod": "4.3.6",
     "zustand": "5.0.11"
   },

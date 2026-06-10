@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Collapse, Input, Typography } from 'antd';
 
 import { useCreateAlertState } from '../context';
@@ -5,21 +6,22 @@ import AdvancedOptionItem from './AdvancedOptionItem';
 import EvaluationCadence from './EvaluationCadence';
 
 function AdvancedOptions(): JSX.Element {
+	const { t } = useTranslation(['alerts']);
 	const { advancedOptions, setAdvancedOptions } = useCreateAlertState();
 
 	return (
 		<div className="advanced-options-container">
 			<Collapse bordered={false}>
-				<Collapse.Panel header="ADVANCED OPTIONS" key="1">
+				<Collapse.Panel header={t('v2_advanced_options')} key="1">
 					<EvaluationCadence />
 					<AdvancedOptionItem
-						title="Alert when data stops coming"
-						description="Send notification if no data is received for a specified time period."
-						tooltipText="Useful for monitoring data pipelines or services that should continuously send data. For example, alert if no logs are received for 10 minutes"
+						title={t('v2_alert_data_stops_title')}
+						description={t('v2_alert_data_stops_desc')}
+						tooltipText={t('v2_alert_data_stops_tooltip')}
 						input={
 							<div className="advanced-option-item-input-group">
 								<Input
-									placeholder="Enter tolerance limit..."
+									placeholder={t('v2_tolerance_limit_placeholder')}
 									type="number"
 									style={{ width: 100 }}
 									onChange={(e): void =>
@@ -33,7 +35,7 @@ function AdvancedOptions(): JSX.Element {
 									}
 									value={advancedOptions.sendNotificationIfDataIsMissing.toleranceLimit}
 								/>
-								<Typography.Text>Minutes</Typography.Text>
+								<Typography.Text>{t('v2_minutes_text')}</Typography.Text>
 							</div>
 						}
 						onToggle={(): void =>
@@ -46,13 +48,13 @@ function AdvancedOptions(): JSX.Element {
 						data-testid="send-notification-if-data-is-missing-container"
 					/>
 					<AdvancedOptionItem
-						title="Minimum data required"
-						description="Only trigger alert when there are enough data points to make a reliable decision."
-						tooltipText="Prevents false alarms when there's insufficient data. For example, require at least 5 data points before checking if CPU usage is above 80%."
+						title={t('v2_min_data_required_title')}
+						description={t('v2_min_data_required_desc')}
+						tooltipText={t('v2_min_data_required_tooltip')}
 						input={
 							<div className="advanced-option-item-input-group">
 								<Input
-									placeholder="Enter minimum datapoints..."
+									placeholder={t('v2_min_datapoints_placeholder')}
 									style={{ width: 100 }}
 									type="number"
 									onChange={(e): void =>
@@ -65,7 +67,7 @@ function AdvancedOptions(): JSX.Element {
 									}
 									value={advancedOptions.enforceMinimumDatapoints.minimumDatapoints}
 								/>
-								<Typography.Text>Datapoints</Typography.Text>
+								<Typography.Text>{t('v2_datapoints_text')}</Typography.Text>
 							</div>
 						}
 						onToggle={(): void =>

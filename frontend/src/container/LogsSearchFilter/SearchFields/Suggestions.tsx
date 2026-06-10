@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { Button } from 'antd';
@@ -38,13 +39,14 @@ interface SuggestionsProps {
 }
 
 function Suggestions({ applySuggestion }: SuggestionsProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const {
 		fields: { selected },
 	} = useSelector<AppState, ILogsReducer>((store) => store.logs);
 
 	return (
 		<div>
-			<CategoryHeading>SUGGESTIONS</CategoryHeading>
+			<CategoryHeading>{t('logs:suggestions')}</CategoryHeading>
 			<div>
 				{map(selected, (field) => (
 					<SuggestedItem

@@ -2,6 +2,7 @@ import { RocketOutlined } from '@ant-design/icons';
 import { Style } from '@signozhq/design-tokens';
 import { MenuProps } from 'antd';
 import ROUTES from 'constants/routes';
+import { TFunction } from 'i18next';
 import {
 	ArrowUpRight,
 	BarChart2,
@@ -485,6 +486,7 @@ export interface UserSettingsMenuItemsParams {
 	isWorkspaceBlocked: boolean;
 	isEnterpriseSelfHostedUser: boolean;
 	isCommunityEnterpriseUser: boolean;
+	t: TFunction;
 }
 
 export const getUserSettingsDropdownMenuItems = ({
@@ -492,13 +494,16 @@ export const getUserSettingsDropdownMenuItems = ({
 	isWorkspaceBlocked,
 	isEnterpriseSelfHostedUser,
 	isCommunityEnterpriseUser,
+	t,
 }: UserSettingsMenuItemsParams): MenuProps['items'] =>
 	[
 		{
 			key: 'label',
 			label: (
 				<div className="user-settings-dropdown-logged-in-section">
-					<span className="user-settings-dropdown-label-text">LOGGED IN AS</span>
+					<span className="user-settings-dropdown-label-text">
+						{t('settings:logged_in_as').toString()}
+					</span>
 					<span className="user-settings-dropdown-label-email">{userEmail}</span>
 				</div>
 			),
@@ -508,14 +513,14 @@ export const getUserSettingsDropdownMenuItems = ({
 		{ type: 'divider' as const },
 		{
 			key: 'workspace',
-			label: 'Workspace Settings',
+			label: t('settings:workspace_settings').toString(),
 			icon: <Building2 size={14} color={Style.L1_FOREGROUND} />,
 			disabled: isWorkspaceBlocked,
 			dataTestId: 'workspace-settings-nav-item',
 		},
 		{
 			key: 'account',
-			label: 'Account Settings',
+			label: t('settings:account_settings').toString(),
 			icon: <User size={14} color={Style.L1_FOREGROUND} />,
 			dataTestId: 'account-settings-nav-item',
 		},
@@ -523,7 +528,7 @@ export const getUserSettingsDropdownMenuItems = ({
 			? [
 					{
 						key: 'license',
-						label: 'Manage License',
+						label: t('settings:manage_license').toString(),
 						icon: <Shield size={14} color={Style.L1_FOREGROUND} />,
 						dataTestId: 'manage-license-nav-item',
 					},
@@ -531,7 +536,7 @@ export const getUserSettingsDropdownMenuItems = ({
 			: []),
 		{
 			key: 'keyboard-shortcuts',
-			label: 'Keyboard Shortcuts',
+			label: t('settings:keyboard_shortcuts').toString(),
 			icon: <Keyboard size={14} color={Style.L1_FOREGROUND} />,
 			dataTestId: 'keyboard-shortcuts-nav-item',
 		},
@@ -539,7 +544,9 @@ export const getUserSettingsDropdownMenuItems = ({
 		{
 			key: 'logout',
 			label: (
-				<span className="user-settings-dropdown-logout-section">Sign out</span>
+				<span className="user-settings-dropdown-logout-section">
+					{t('settings:sign_out').toString()}
+				</span>
 			),
 			icon: (
 				<LogOut

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Collapse, Input, Modal, Typography } from 'antd';
 import { getYAxisFormattedValue } from 'components/Graph/yAxisConfig';
 import { Diamond } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Span } from 'types/api/trace/getTraceV2';
 
 import NoData from '../NoData/NoData';
@@ -17,6 +18,7 @@ interface IEventsTableProps {
 
 function EventsTable(props: IEventsTableProps): JSX.Element {
 	const { span, startTime, isSearchVisible } = props;
+	const { t } = useTranslation(['trace']);
 	const [fieldSearchInput, setFieldSearchInput] = useState<string>('');
 	const [modalContent, setModalContent] = useState<{
 		title: string;
@@ -44,7 +46,7 @@ function EventsTable(props: IEventsTableProps): JSX.Element {
 				{isSearchVisible && events.length > 0 && (
 					<Input
 						autoFocus
-						placeholder="Search for events..."
+						placeholder={t('search_for_events')}
 						className="search-input"
 						value={fieldSearchInput}
 						onChange={(e): void => setFieldSearchInput(e.target.value)}
@@ -78,7 +80,7 @@ function EventsTable(props: IEventsTableProps): JSX.Element {
 											<div className="event-details">
 												<div className="attribute-container" key="timeUnixNano">
 													<Typography.Text className="attribute-key">
-														Start Time
+														{t('event_start_time')}
 													</Typography.Text>
 													<div className="timestamp-container">
 														<Typography.Text className="attribute-value">
@@ -88,7 +90,7 @@ function EventsTable(props: IEventsTableProps): JSX.Element {
 															)}
 														</Typography.Text>
 														<Typography.Text className="timestamp-text">
-															since trace start
+															{t('since_trace_start')}
 														</Typography.Text>
 													</div>
 													<div className="timestamp-container">
@@ -99,7 +101,7 @@ function EventsTable(props: IEventsTableProps): JSX.Element {
 															)}
 														</Typography.Text>
 														<Typography.Text className="timestamp-text">
-															since span start
+															{t('since_span_start')}
 														</Typography.Text>
 													</div>
 												</div>

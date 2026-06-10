@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import { Button } from 'antd';
 import cx from 'classnames';
@@ -19,6 +20,7 @@ function ShowButton({
 	order,
 	onClick,
 }: ShowButtonProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const getIcons = (): JSX.Element => {
 		if (order === ORDERBY_FILTERS.ASC) {
 			return isDisabled ? (
@@ -46,7 +48,7 @@ function ShowButton({
 				isDisabled && 'disabled',
 			)}
 		>
-			Load more
+			{t('logs:load_more')}
 		</Button>
 	);
 }

@@ -23,6 +23,28 @@ import { getRoutes } from './utils';
 
 import './Settings.styles.scss';
 
+const navItemKeyMap: Record<string, string> = {
+	workspace: 'routes:workspace',
+	account: 'routes:account',
+	'notification-channels': 'routes:alert_channels',
+	'sop-documents': 'routes:sop_documents',
+	billing: 'routes:billing',
+	integrations: 'routes:integrations',
+	'mcp-server': 'routes:mcp_server',
+	'ai-module': 'routes:ai_module',
+	roles: 'routes:roles',
+	members: 'routes:members',
+	'service-accounts': 'routes:service_accounts',
+	ingestion: 'routes:ingestion',
+	sso: 'routes:single_sign_on',
+	'keyboard-shortcuts': 'routes:keyboard_shortcuts',
+};
+
+const sectionTitleKeyMap: Record<string, string> = {
+	'identity-access': 'routes:identity_access',
+	authentication: 'routes:authentication',
+};
+
 function SettingsPage(): JSX.Element {
 	const { pathname, search } = useLocation();
 
@@ -254,7 +276,7 @@ function SettingsPage(): JSX.Element {
 					data-testid="settings-page-title"
 				>
 					<Cog size={16} />
-					Settings
+					{t('routes:settings_title')}
 				</div>
 			</header>
 
@@ -277,12 +299,21 @@ function SettingsPage(): JSX.Element {
 								}`}
 							>
 								{section.title && (
-									<div className="settings-nav-section-title">{section.title}</div>
+									<div className="settings-nav-section-title">
+										{sectionTitleKeyMap[section.key]
+											? t(sectionTitleKeyMap[section.key])
+											: section.title}
+									</div>
 								)}
 								{enabledItems.map((item) => (
 									<NavItem
 										key={item.key}
-										item={item}
+										item={{
+											...item,
+											label: navItemKeyMap[item.itemKey as string]
+												? t(navItemKeyMap[item.itemKey as string])
+												: item.label,
+										}}
 										isActive={isActiveNavItem(item.key as string)}
 										isDisabled={false}
 										showIcon={false}

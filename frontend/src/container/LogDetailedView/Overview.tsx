@@ -1,4 +1,5 @@
 import { ReactNode, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import MEditor, { EditorProps, Monaco } from '@monaco-editor/react';
 import { Color } from '@signozhq/design-tokens';
 import { Button } from '@signozhq/ui';
@@ -38,6 +39,7 @@ function Overview({
 	listViewPanelSelectedFields,
 	handleChangeSelectedView,
 }: Props): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const [isWrapWord, setIsWrapWord] = useState<boolean>(true);
 	const [isSearchVisible, setIsSearchVisible] = useState<boolean>(true);
 	const [isAttributesExpanded, setIsAttributesExpanded] =
@@ -135,7 +137,7 @@ function Overview({
 								/>
 								<div className="log-switch">
 									<div className="wrap-word-switch">
-										<Typography.Text>Wrap text</Typography.Text>
+										<Typography.Text>{t('logs:wrap_text')}</Typography.Text>
 										<Switch checked={isWrapWord} onChange={handleWrapWord} size="small" />
 									</div>
 								</div>
@@ -164,7 +166,7 @@ function Overview({
 							>
 								<Tag bordered={false}>
 									<Typography.Text style={{ color: Color.BG_ROBIN_400 }}>
-										Attributes
+										{t('logs:attributes')}
 									</Typography.Text>
 								</Tag>
 
@@ -179,7 +181,7 @@ function Overview({
 											handleSearchVisible();
 										}}
 									>
-										Search
+										{t('logs:search')}
 									</Button>
 								)}
 							</div>
@@ -189,7 +191,7 @@ function Overview({
 								{isSearchVisible && (
 									<Input
 										autoFocus
-										placeholder="Search for a field..."
+										placeholder={t('logs:search_for_a_field_placeholder')}
 										className="search-input"
 										value={fieldSearchInput}
 										onChange={(e): void => setFieldSearchInput(e.target.value)}

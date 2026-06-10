@@ -1,5 +1,6 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import React, { useCallback, useEffect, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useMutation, useQuery } from 'react-query';
 import { Color } from '@signozhq/design-tokens';
 import { Compass, Dot, House, Plus, Wrench } from '@signozhq/icons';
@@ -57,6 +58,7 @@ const homeInterval = 30 * 60 * 1000;
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export default function Home(): JSX.Element {
+	const { t } = useTranslation('home');
 	const { user } = useAppContext();
 	const { safeNavigate } = useSafeNavigate();
 	const isDarkMode = useIsDarkMode();
@@ -276,15 +278,15 @@ export default function Home(): JSX.Element {
 					type="info"
 					storageKey={LOCALSTORAGE.DISMISSED_API_KEYS_DEPRECATION_BANNER}
 					action={{
-						label: 'Go to Service Accounts',
+						label: t('go_to_service_accounts'),
 						onClick: (): void => history.push(ROUTES.SERVICE_ACCOUNTS_SETTINGS),
 					}}
 				>
-					<>
-						<strong>API keys</strong> have been deprecated in favour of{' '}
-						<strong>Service accounts</strong>. The existing API Keys have been
-						migrated to service accounts.
-					</>
+					<Trans
+						t={t}
+						i18nKey="api_keys_deprecated"
+						components={[<strong key="0" />, <strong key="1" />]}
+					/>
 				</PersistedAnnouncementBanner>
 			)}
 
@@ -292,7 +294,7 @@ export default function Home(): JSX.Element {
 				<Header
 					leftComponent={
 						<div className="home-header-left">
-							<House size={14} /> Home
+							<House size={14} /> {t('page_title')}
 						</div>
 					}
 					rightComponent={
@@ -327,7 +329,7 @@ export default function Home(): JSX.Element {
 											height={16}
 											className="welcome-checklist-icon"
 										/>
-										&nbsp; Welcome checklist
+										&nbsp; {t('welcome_checklist')}
 									</Button>
 								</Popover>
 							)}
@@ -362,7 +364,7 @@ export default function Home(): JSX.Element {
 											</div>
 
 											<div className="active-ingestion-card-content-description">
-												Logs ingestion is active
+												{t('ingestion_active_logs')}
 											</div>
 										</div>
 
@@ -389,7 +391,7 @@ export default function Home(): JSX.Element {
 											}}
 										>
 											<Compass size={12} />
-											Explore Logs
+											{t('explore_logs')}
 										</div>
 									</div>
 								</Card.Content>
@@ -406,7 +408,7 @@ export default function Home(): JSX.Element {
 											</div>
 
 											<div className="active-ingestion-card-content-description">
-												Traces ingestion is active
+												{t('ingestion_active_traces')}
 											</div>
 										</div>
 
@@ -432,7 +434,7 @@ export default function Home(): JSX.Element {
 											}}
 										>
 											<Compass size={12} />
-											Explore Traces
+											{t('explore_traces')}
 										</div>
 									</div>
 								</Card.Content>
@@ -449,7 +451,7 @@ export default function Home(): JSX.Element {
 											</div>
 
 											<div className="active-ingestion-card-content-description">
-												Metrics ingestion is active
+												{t('ingestion_active_metrics')}
 											</div>
 										</div>
 
@@ -475,7 +477,7 @@ export default function Home(): JSX.Element {
 											}}
 										>
 											<Compass size={12} />
-											Explore Metrics
+											{t('explore_metrics')}
 										</div>
 									</div>
 								</Card.Content>
@@ -500,10 +502,10 @@ export default function Home(): JSX.Element {
 											</div>
 
 											<div className="section-title">
-												<div className="title">Filter and save views with the Explorer</div>
+												<div className="title">{t('explorer_title')}</div>
 
 												<div className="description">
-													Explore your data, and save useful views for everyone in the team.
+													{t('explorer_desc')}
 												</div>
 											</div>
 										</div>
@@ -523,7 +525,7 @@ export default function Home(): JSX.Element {
 													});
 												}}
 											>
-												Open Logs Explorer
+												{t('open_logs_explorer')}
 											</Button>
 
 											<Button
@@ -540,7 +542,7 @@ export default function Home(): JSX.Element {
 													});
 												}}
 											>
-												Open Traces Explorer
+												{t('open_traces_explorer')}
 											</Button>
 
 											<Button
@@ -557,7 +559,7 @@ export default function Home(): JSX.Element {
 													});
 												}}
 											>
-												Open Metrics Explorer
+												{t('open_metrics_explorer')}
 											</Button>
 										</div>
 									</div>
@@ -573,10 +575,10 @@ export default function Home(): JSX.Element {
 											</div>
 
 											<div className="section-title">
-												<div className="title">Create a dashboard</div>
+												<div className="title">{t('dashboard_title')}</div>
 
 												<div className="description">
-													Create a dashboard to visualize your data.
+													{t('dashboard_desc')}
 												</div>
 											</div>
 										</div>
@@ -596,7 +598,7 @@ export default function Home(): JSX.Element {
 													});
 												}}
 											>
-												Create dashboard
+												{t('create_dashboard')}
 											</Button>
 										</div>
 									</div>
@@ -618,10 +620,10 @@ export default function Home(): JSX.Element {
 											</div>
 
 											<div className="section-title">
-												<div className="title">Add an alert</div>
+												<div className="title">{t('alert_title')}</div>
 
 												<div className="description">
-													Create bespoke alerting rules to suit your needs.
+													{t('alert_desc')}
 												</div>
 											</div>
 										</div>
@@ -641,7 +643,7 @@ export default function Home(): JSX.Element {
 													});
 												}}
 											>
-												Create an alert
+												{t('create_alert')}
 											</Button>
 										</div>
 									</div>
@@ -715,7 +717,7 @@ export default function Home(): JSX.Element {
 											onClick={handleWillDoThisLater}
 											loading={updatingUserPreferences}
 										>
-											I&apos;ll do this later
+											{t('do_this_later')}
 										</Button>
 									</div>
 								</Card.Footer>

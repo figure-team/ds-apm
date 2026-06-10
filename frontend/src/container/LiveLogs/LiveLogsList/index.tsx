@@ -1,5 +1,6 @@
 import type { CSSProperties, MouseEvent, ReactNode } from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCopyToClipboard } from 'react-use';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { toast } from '@signozhq/ui';
@@ -46,6 +47,7 @@ function LiveLogsList({
 	isLoading,
 	handleChangeSelectedView,
 }: LiveLogsListProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const ref = useRef<TanStackTableHandle | VirtuosoHandle | null>(null);
 	const [, setCopy] = useCopyToClipboard();
 	const isDarkMode = useIsDarkMode();
@@ -136,9 +138,9 @@ function LiveLogsList({
 					`${window.location.pathname}?${urlQuery.toString()}`,
 				);
 				setCopy(link);
-				toast.success('Copied to clipboard', { position: 'top-right' });
+				toast.success(t('logs:copied_to_clipboard'), { position: 'top-right' });
 			},
-		[setCopy],
+		[setCopy, t],
 	);
 
 	const handleScrollToLog = useScrollToLog({
@@ -217,11 +219,11 @@ function LiveLogsList({
 				<div className="loading-live-logs-content">
 					<img className="loading-gif" src={loadingPlaneUrl} alt="wait-icon" />
 
-					<Typography>Fetching live logs...</Typography>
+					<Typography>{t('logs:fetching_live_logs')}</Typography>
 				</div>
 			</div>
 		),
-		[],
+		[t],
 	);
 
 	return (

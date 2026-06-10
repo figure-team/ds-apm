@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { Switch, Typography } from 'antd';
 import LogsFormatOptionsMenu from 'components/LogsFormatOptionsMenu/LogsFormatOptionsMenu';
@@ -29,6 +30,7 @@ interface LiveLogsContainerProps {
 function LiveLogsContainer({
 	handleChangeSelectedView,
 }: LiveLogsContainerProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const location = useLocation();
 	const [logs, setLogs] = useState<ILiveLogsLog[]>([]);
 	const { currentQuery, stagedQuery } = useQueryBuilder();
@@ -58,20 +60,20 @@ function LiveLogsContainer({
 	const formatItems = [
 		{
 			key: 'raw',
-			label: 'Raw',
+			label: t('logs:raw'),
 			data: {
-				title: 'max lines per row',
+				title: t('logs:max_lines_per_row'),
 			},
 		},
 		{
 			key: 'list',
-			label: 'Default',
+			label: t('logs:default'),
 		},
 		{
 			key: 'table',
-			label: 'Column',
+			label: t('logs:column'),
 			data: {
-				title: 'columns',
+				title: t('logs:columns'),
 			},
 		},
 	];
@@ -225,7 +227,7 @@ function LiveLogsContainer({
 			<div className="live-logs-content">
 				<div className="live-logs-settings-panel">
 					<div className="live-logs-frequency-chart-view-controller">
-						<Typography>Frequency chart</Typography>
+						<Typography>{t('logs:frequency_chart')}</Typography>
 						<Switch
 							size="small"
 							checked={showLiveLogsFrequencyChart}

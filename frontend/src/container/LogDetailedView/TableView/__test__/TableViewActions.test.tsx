@@ -263,7 +263,7 @@ describe('TableViewActions', () => {
 			/>,
 		);
 
-		fireEvent.click(screen.getByText('Group By Attribute'));
+		fireEvent.click(screen.getByText('logs:group_by_attribute'));
 
 		expect(defaultProps.handleChangeSelectedView).toHaveBeenCalledWith(
 			ExplorerViews.TIMESERIES,

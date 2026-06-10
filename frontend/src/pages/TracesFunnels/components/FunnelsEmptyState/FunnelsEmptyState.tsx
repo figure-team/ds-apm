@@ -1,4 +1,5 @@
 import { Button } from 'antd';
+import { useTranslation } from 'react-i18next';
 import LearnMore from 'components/LearnMore/LearnMore';
 import { Plus } from 'lucide-react';
 import { useAppContext } from 'providers/App/App';
@@ -14,6 +15,7 @@ interface FunnelsEmptyStateProps {
 function FunnelsEmptyState({
 	onCreateFunnel,
 }: FunnelsEmptyStateProps): JSX.Element {
+	const { t } = useTranslation('trace');
 	const { hasEditPermission } = useAppContext();
 
 	return (
@@ -26,7 +28,7 @@ function FunnelsEmptyState({
 						className="funnels-empty__icon"
 					/>
 					<div>
-						<span className="funnels-empty__title">No funnels yet. </span>
+						<span className="funnels-empty__title">{t('funnels.empty_no_funnels')}</span>
 						<span className="funnels-empty__subtitle">
 							Create a funnel to start analyzing your data
 						</span>

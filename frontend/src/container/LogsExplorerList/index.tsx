@@ -1,5 +1,6 @@
 import type { CSSProperties, MouseEvent, ReactNode } from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCopyToClipboard } from 'react-use';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { toast } from '@signozhq/ui';
@@ -52,7 +53,8 @@ import {
 import './LogsExplorerList.style.scss';
 
 function Footer(): JSX.Element {
-	return <Spinner height={20} tip="Getting Logs" />;
+	const { t } = useTranslation(['logs']);
+	return <Spinner height={20} tip={t('logs:getting_logs')} />;
 }
 function LogsExplorerList({
 	isLoading,
@@ -65,6 +67,7 @@ function LogsExplorerList({
 	isFilterApplied,
 	handleChangeSelectedView,
 }: LogsExplorerListProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const ref = useRef<TanStackTableHandle | VirtuosoHandle | null>(null);
 	const [, setCopy] = useCopyToClipboard();
 	const isDarkMode = useIsDarkMode();
@@ -140,9 +143,9 @@ function LogsExplorerList({
 					`${window.location.pathname}?${urlQuery.toString()}`,
 				);
 				setCopy(link);
-				toast.success('Copied to clipboard', { position: 'top-right' });
+				toast.success(t('logs:copied_to_clipboard'), { position: 'top-right' });
 			},
-		[setCopy],
+		[setCopy, t],
 	);
 
 	const handleScrollToLog = useScrollToLog({
@@ -367,8 +370,8 @@ function LogsExplorerList({
 			return;
 		}
 
-		return getEmptyLogsListConfig(handleClearFilters);
-	}, [isTraceToLogsNavigation, handleClearFilters]);
+		return getEmptyLogsListConfig(handleClearFilters, t);
+	}, [isTraceToLogsNavigation, handleClearFilters, t]);
 
 	return (
 		<div className="logs-list-view-container">

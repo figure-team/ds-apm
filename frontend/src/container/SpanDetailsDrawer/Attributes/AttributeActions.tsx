@@ -11,6 +11,7 @@ import {
 	Ellipsis,
 	Pin,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface AttributeRecord {
 	field: string;
@@ -32,6 +33,7 @@ export default function AttributeActions({
 	showPinned = true,
 	showCopyOptions = true,
 }: AttributeActionsProps): JSX.Element {
+	const { t } = useTranslation(['trace']);
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 	const [isFilterInLoading, setIsFilterInLoading] = useState<boolean>(false);
 	const [isFilterOutLoading, setIsFilterOutLoading] = useState<boolean>(false);
@@ -107,7 +109,7 @@ export default function AttributeActions({
 				onClick={handleGroupBy}
 				block
 			>
-				Group By Attribute
+				{t('group_by_attribute')}
 			</Button>
 			{showCopyOptions && (
 				<>
@@ -117,7 +119,7 @@ export default function AttributeActions({
 						onClick={handleCopyFieldName}
 						block
 					>
-						Copy Field Name
+						{t('copy_field_name')}
 					</Button>
 					<Button
 						type="text"
@@ -125,7 +127,7 @@ export default function AttributeActions({
 						onClick={handleCopyFieldValue}
 						block
 					>
-						Copy Field Value
+						{t('copy_field_value')}
 					</Button>
 				</>
 			)}
@@ -135,19 +137,19 @@ export default function AttributeActions({
 	return (
 		<div className={cx('action-btn', { 'action-btn--is-open': isOpen })}>
 			{showPinned && (
-				<Tooltip title={isPinned ? 'Unpin attribute' : 'Pin attribute'}>
+				<Tooltip title={isPinned ? t('unpin_attribute') : t('pin_attribute')}>
 					<Button
 						className={`filter-btn periscope-btn ${isPinned ? 'pinned' : ''}`}
-						aria-label={isPinned ? 'Unpin attribute' : 'Pin attribute'}
+						aria-label={isPinned ? t('unpin_attribute') : t('pin_attribute')}
 						icon={<Pin size={14} fill={isPinned ? 'currentColor' : 'none'} />}
 						onClick={handleTogglePin}
 					/>
 				</Tooltip>
 			)}
-			<Tooltip title="Filter for value">
+			<Tooltip title={t('filter_for_value')}>
 				<Button
 					className="filter-btn periscope-btn"
-					aria-label="Filter for value"
+					aria-label={t('filter_for_value')}
 					disabled={isFilterInLoading}
 					icon={
 						isFilterInLoading ? (
@@ -159,10 +161,10 @@ export default function AttributeActions({
 					onClick={handleFilterIn}
 				/>
 			</Tooltip>
-			<Tooltip title="Filter out value">
+			<Tooltip title={t('filter_out_value')}>
 				<Button
 					className="filter-btn periscope-btn"
-					aria-label="Filter out value"
+					aria-label={t('filter_out_value')}
 					disabled={isFilterOutLoading}
 					icon={
 						isFilterOutLoading ? (

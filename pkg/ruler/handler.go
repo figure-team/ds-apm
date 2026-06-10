@@ -16,6 +16,7 @@ type Handler interface {
 	ListPilotSOPSources(http.ResponseWriter, *http.Request)
 	GetPilotSOPSourceHealth(http.ResponseWriter, *http.Request)
 	CreateSOPDocument(http.ResponseWriter, *http.Request)
+	CreateSOPDocumentBatch(http.ResponseWriter, *http.Request)
 	ListSOPDocuments(http.ResponseWriter, *http.Request)
 	GetSOPDocument(http.ResponseWriter, *http.Request)
 	FetchSOPDocumentVersion(http.ResponseWriter, *http.Request)

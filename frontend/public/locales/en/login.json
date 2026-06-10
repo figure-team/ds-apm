@@ -18,5 +18,15 @@
   "failed_to_login": "sorry, failed to login",
   "invalid_email": "Please enter a valid email address",
   "invalid_account": "This account does not exist. To create a new account, contact your admin to get an invite link",
-  "invalid_config": "Invalid configuration detected, please contact your administrator"
+  "invalid_config": "Invalid configuration detected, please contact your administrator",
+  "login_form_title": "Sign in to your workspace",
+  "login_form_description": "Sign in to monitor, trace, and troubleshoot your applications effortlessly.",
+  "label_email_address": "Email address",
+  "placeholder_email_example": "e.g. john@signoz.io",
+  "label_organization_name": "Organization Name",
+  "placeholder_select_organization": "Select your organization",
+  "label_default_org": "default",
+  "placeholder_password": "Enter password",
+  "button_sign_in_with_sso": "Sign in with SSO",
+  "button_sign_in_with_password": "Sign in with Password"
 }

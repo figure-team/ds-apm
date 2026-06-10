@@ -1,4 +1,10 @@
-import { EmailChannel, OpsgenieChannel, PagerChannel } from './config';
+import {
+	EmailChannel,
+	MsTeamsChannel,
+	OpsgenieChannel,
+	PagerChannel,
+	SlackChannel,
+} from './config';
 
 export const PagerInitialConfig: Partial<PagerChannel> = {
 	description: `[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}
@@ -445,4 +451,15 @@ export const EmailInitialConfig: Partial<EmailChannel> = {
 	  </table>
 	</body>
   </html>`,
+};
+
+export const SlackInitialConfig: Partial<SlackChannel> = {
+	title: `[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}`,
+	text: `{{ range .Alerts }}{{ .Annotations.description }}
+{{ end }}`,
+};
+
+export const MsTeamsInitialConfig: Partial<MsTeamsChannel> = {
+	title: SlackInitialConfig.title,
+	text: SlackInitialConfig.text,
 };

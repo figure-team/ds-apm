@@ -11,10 +11,7 @@ import { DataTypes } from 'types/api/queryBuilder/queryAutocompleteResponse';
 import { EQueryType } from 'types/common/dashboard';
 import { DataSource, ReduceOperators } from 'types/common/queryBuilder';
 
-import {
-	MENUITEM_KEYS_VS_LABELS,
-	MenuItemKeys,
-} from '../WidgetHeader/contants';
+import { MenuItemKeys } from '../WidgetHeader/contants';
 import { WidgetGraphComponentProps } from './types';
 import WidgetGraphComponent from './WidgetGraphComponent';
 
@@ -213,13 +210,15 @@ describe('WidgetGraphComponent', () => {
 		const menu = await findByRole('menu');
 		expect(menu).toBeInTheDocument();
 
-		// Check if all menu items are present
+		// Check if all menu items are present.
+		// In the test environment i18n returns the translation key, so we assert
+		// against the keys the WidgetHeader renders for each menu item.
 		const expectedMenuItems = [
-			MENUITEM_KEYS_VS_LABELS[MenuItemKeys.View],
-			MENUITEM_KEYS_VS_LABELS[MenuItemKeys.Clone],
-			MENUITEM_KEYS_VS_LABELS[MenuItemKeys.Delete],
-			MENUITEM_KEYS_VS_LABELS[MenuItemKeys.Edit],
-			MENUITEM_KEYS_VS_LABELS[MenuItemKeys.CreateAlerts],
+			'view',
+			'clone',
+			'delete',
+			'common:edit',
+			'create_alerts',
 		];
 
 		// check that menu is visible

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Divider } from 'antd';
 import SignozRadioGroup from 'components/SignozRadioGroup/SignozRadioGroup';
 import { useFunnelContext } from 'pages/TracesFunnels/FunnelContext';
@@ -13,6 +14,7 @@ function InterStepConfig({
 	index: number;
 	step: FunnelStepData;
 }): JSX.Element {
+	const { t } = useTranslation('trace');
 	const { handleStepChange: onStepChange } = useFunnelContext();
 	const { hasEditPermission } = useAppContext();
 	const options = Object.entries(LatencyOptions).map(([key, value]) => ({
@@ -22,7 +24,7 @@ function InterStepConfig({
 
 	return (
 		<div className="inter-step-config">
-			<div className="inter-step-config__label">Latency type</div>
+			<div className="inter-step-config__label">{t('funnels.latency_type')}</div>
 			<div className="inter-step-config__divider">
 				<Divider dashed />
 			</div>

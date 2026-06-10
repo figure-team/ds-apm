@@ -1,10 +1,9 @@
 import { SearchOutlined } from '@ant-design/icons';
 import { Button, Card, Input, Space } from 'antd';
 import type { FilterDropdownProps } from 'antd/es/table/interface';
+import { TFunction } from 'i18next';
 
-import { SEARCH_PLACEHOLDER } from '../Columns/ColumnContants';
-
-export const filterDropdown = ({
+export const getFilterDropdown = (t: TFunction) => ({
 	setSelectedKeys,
 	selectedKeys,
 	confirm,
@@ -21,7 +20,7 @@ export const filterDropdown = ({
 		<Card size="small">
 			<Space align="start" direction="vertical">
 				<Input
-					placeholder={SEARCH_PLACEHOLDER}
+					placeholder={t('search_by_service').toString()}
 					value={selectedKeys[0]}
 					onChange={selectedKeysHandler}
 					allowClear
@@ -33,7 +32,7 @@ export const filterDropdown = ({
 					icon={<SearchOutlined />}
 					size="small"
 				>
-					Search
+					{t('search').toString()}
 				</Button>
 			</Space>
 		</Card>

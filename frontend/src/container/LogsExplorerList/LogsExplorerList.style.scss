@@ -323,3 +323,17 @@
 		}
 	}
 }
+
+body.lightMode {
+	.logs-list-view-container {
+		table {
+			thead {
+				tr {
+					th {
+						color: var(--l1-foreground) !important;
+					}
+				}
+			}
+		}
+	}
+}

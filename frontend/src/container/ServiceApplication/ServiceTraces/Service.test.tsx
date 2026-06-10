@@ -8,10 +8,14 @@ describe('Metrics Component', () => {
 		render(<ServiceTraceTable services={services} loading={false} />);
 
 		await waitFor(() => {
-			expect(screen.getByText(/application/i)).toBeInTheDocument();
-			expect(screen.getByText(/p99 latency \(in ms\)/i)).toBeInTheDocument();
-			expect(screen.getByText(/error rate \(% of total\)/i)).toBeInTheDocument();
-			expect(screen.getByText(/operations per second/i)).toBeInTheDocument();
+			expect(screen.getByText('column_application')).toBeInTheDocument();
+			expect(
+				screen.getByText('column_p99_latency (in ms)'),
+			).toBeInTheDocument();
+			expect(screen.getByText('column_error_rate_pct')).toBeInTheDocument();
+			expect(
+				screen.getByText('column_operations_per_second'),
+			).toBeInTheDocument();
 		});
 	});
 

@@ -1,13 +1,21 @@
 import {
 	getMissingOperationalLabels,
 	hasOperationalLabel,
-	REQUIRED_OPERATIONAL_LABELS,
+	RECOMMENDED_OPERATIONAL_LABELS,
 } from '../operationalMetadata';
 
+const ALL_FILLED_LABELS = {
+	environment: 'prod',
+	owner_team: 'sm-payments',
+	project_id: 'customer-a',
+	'service.name': 'payment-api',
+	severity: 'critical',
+};
+
 describe('operationalMetadata', () => {
-	it('reports every required SI/SM label when metadata is empty', () => {
+	it('reports every recommended SI/SM label as missing when metadata is empty', () => {
 		expect(getMissingOperationalLabels({})).toStrictEqual(
-			REQUIRED_OPERATIONAL_LABELS,
+			RECOMMENDED_OPERATIONAL_LABELS,
 		);
 	});
 
@@ -24,15 +32,57 @@ describe('operationalMetadata', () => {
 	});
 
 	it('detects complete SI/SM routing labels', () => {
-		const labels = {
-			environment: 'prod',
-			owner_team: 'sm-payments',
-			project_id: 'customer-a',
-			'service.name': 'payment-api',
-			severity: 'critical',
-		};
+		expect(getMissingOperationalLabels(ALL_FILLED_LABELS)).toStrictEqual([]);
+		expect(hasOperationalLabel(ALL_FILLED_LABELS, 'service.name')).toBe(true);
+	});
 
-		expect(getMissingOperationalLabels(labels)).toStrictEqual([]);
-		expect(hasOperationalLabel(labels, 'service.name')).toBe(true);
+	describe('missing → filled status transitions', () => {
+		it('transitions a single label from missing to filled', () => {
+			const before = {};
+			const after = { severity: 'critical' };
+
+			expect(hasOperationalLabel(before, 'severity')).toBe(false);
+			expect(hasOperationalLabel(after, 'severity')).toBe(true);
+
+			const missingBefore = getMissingOperationalLabels(before).map(({ key }) => key);
+			const missingAfter = getMissingOperationalLabels(after).map(({ key }) => key);
+
+			expect(missingBefore).toContain('severity');
+			expect(missingAfter).not.toContain('severity');
+		});
+
+		it('reduces missing count as labels are filled one by one', () => {
+			const labels: Record<string, string> = {};
+			const keys = RECOMMENDED_OPERATIONAL_LABELS.map(({ key }) => key);
+
+			for (let i = 0; i < keys.length; i++) {
+				expect(getMissingOperationalLabels(labels)).toHaveLength(keys.length - i);
+				labels[keys[i]] = 'value';
+			}
+
+			expect(getMissingOperationalLabels(labels)).toHaveLength(0);
+		});
+
+		it('reverts to missing when a label value is cleared', () => {
+			expect(hasOperationalLabel({ environment: 'prod' }, 'environment')).toBe(true);
+			expect(hasOperationalLabel({ environment: '' }, 'environment')).toBe(false);
+			expect(hasOperationalLabel({ environment: '   ' }, 'environment')).toBe(false);
+		});
+
+		it('reaches zero missing labels once all 5 are filled', () => {
+			const partialLabels = {
+				project_id: 'customer-a',
+				environment: 'prod',
+				'service.name': 'payment-api',
+			};
+			expect(getMissingOperationalLabels(partialLabels)).toHaveLength(2);
+
+			const completeLabels = {
+				...partialLabels,
+				owner_team: 'sm-payments',
+				severity: 'critical',
+			};
+			expect(getMissingOperationalLabels(completeLabels)).toHaveLength(0);
+		});
 	});
 });

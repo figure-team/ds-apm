@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import logEvent from 'api/common/logEvent';
 import RouteTab from 'components/RouteTab';
@@ -11,11 +12,12 @@ import './TracesModulePage.styles.scss';
 
 function TracesModulePage(): JSX.Element {
 	const { pathname } = useLocation();
+	const { t } = useTranslation('trace');
 
 	const routes: TabRoutes[] = [
-		tracesExplorer,
-		tracesFunnel(pathname),
-		tracesSaveView,
+		tracesExplorer(t),
+		tracesFunnel(pathname, t),
+		tracesSaveView(t),
 	].filter(Boolean) as TabRoutes[];
 
 	const handleTabChange = (activeRoute: string): void => {

@@ -62,8 +62,8 @@ function DynamicConfigDropdown({
 			open={isHelpDropDownOpen}
 		>
 			<Space align="center">
-				<Icon style={{ fontSize: 26, color: 'white', paddingTop: 26 }} />
-				<DropDownIcon style={{ color: 'white' }} />
+				<Icon style={{ fontSize: 26, color: isDarkMode ? 'white' : '#374151', paddingTop: 26 }} />
+				<DropDownIcon style={{ color: isDarkMode ? 'white' : '#374151' }} />
 			</Space>
 		</ConfigDropdown>
 	);

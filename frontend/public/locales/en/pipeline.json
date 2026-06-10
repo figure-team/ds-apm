@@ -42,5 +42,17 @@
 	"processor_span_id_placeholder": "Parse Span ID from",
 	"processor_trace_flags_placeholder": "Parse Trace flags from",
 	"processor_from_placeholder": "From",
-	"processor_to_placeholder": "To"
+	"processor_to_placeholder": "To",
+	"tab_pipelines": "Pipelines",
+	"tab_change_history": "Change History",
+	"column_version": "Version",
+	"column_deployment_stage": "Deployment Stage",
+	"column_last_deploy_message": "Last Deploy Message",
+	"column_last_deployed_time": "Last Deployed Time",
+	"column_edited_by": "Edited by",
+	"deploy_stage_in_progress": "In Progress",
+	"deploy_stage_deployed": "Deployed",
+	"deploy_stage_dirty": "Dirty",
+	"deploy_stage_failed": "Failed",
+	"deploy_stage_unknown": "Unknown"
 }

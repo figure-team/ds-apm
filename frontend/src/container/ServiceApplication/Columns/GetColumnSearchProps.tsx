@@ -5,28 +5,32 @@ import type { ColumnType } from 'antd/es/table';
 import ROUTES from 'constants/routes';
 import { routeConfig } from 'container/SideNav/config';
 import { getQueryString } from 'container/SideNav/helper';
+import { TFunction } from 'i18next';
 import history from 'lib/history';
 import { Info } from 'lucide-react';
 import { ServicesList } from 'types/api/metrics/getService';
 
-import { filterDropdown } from '../Filter/FilterDropdown';
+import { getFilterDropdown } from '../Filter/FilterDropdown';
 
 import '../ServiceApplication.styles.scss';
 
 const MAX_TOP_LEVEL_OPERATIONS = 2500;
 
-const highTopLevelOperationsPopoverDesc = (metrics: string): JSX.Element => (
+const highTopLevelOperationsPopoverDesc = (
+	metrics: string,
+	t: TFunction,
+): JSX.Element => (
 	<div className="popover-description">
-		The service `{metrics}` has too many top level operations. It makes the
-		dashboard slow to load.
+		{t('high_top_level_operations_desc', { metrics }).toString()}
 	</div>
 );
 
 export const getColumnSearchProps = (
 	dataIndex: keyof ServicesList,
 	search: string,
+	t: TFunction,
 ): ColumnType<ServicesList> => ({
-	filterDropdown,
+	filterDropdown: getFilterDropdown(t),
 	filterIcon: <SearchOutlined />,
 	onFilter: (
 		value: string | number | boolean,
@@ -64,14 +68,14 @@ export const getColumnSearchProps = (
 			<div className={`serviceName ${hasHighTopLevelOperations ? 'error' : ''} `}>
 				{hasHighTopLevelOperations && (
 					<Popconfirm
-						title="Too Many Top Level Operations"
-						description={highTopLevelOperationsPopoverDesc(metrics)}
+						title={t('too_many_top_level_operations').toString()}
+						description={highTopLevelOperationsPopoverDesc(metrics, t)}
 						placement="right"
 						overlayClassName="service-high-top-level-operations"
 						onConfirm={handleShowTopLevelOperations}
 						trigger={['hover']}
 						showCancel={false}
-						okText="Show Top Level Operations"
+						okText={t('show_top_level_operations').toString()}
 					>
 						<Info size={14} />
 					</Popconfirm>

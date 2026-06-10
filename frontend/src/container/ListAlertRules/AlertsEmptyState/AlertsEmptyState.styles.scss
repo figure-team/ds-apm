@@ -176,3 +176,11 @@
 		cursor: pointer;
 	}
 }
+
+body.lightMode {
+	.alert-list-container {
+		.icons {
+			color: var(--l2-foreground);
+		}
+	}
+}

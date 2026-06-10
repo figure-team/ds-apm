@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { useMeasure } from 'react-use';
@@ -12,6 +13,7 @@ import { getChartData, getChartDataforGroupBy } from './config';
 import { Container } from './styles';
 
 function TraceGraph(): JSX.Element {
+	const { t } = useTranslation(['trace']);
 	const [ref, { width }] = useMeasure();
 
 	const { spansGraph, selectedGroupBy, yAxisUnit } = useSelector<
@@ -32,7 +34,7 @@ function TraceGraph(): JSX.Element {
 	if (error) {
 		return (
 			<Container center>
-				<Typography>{errorMessage || 'Something went wrong'}</Typography>
+				<Typography>{errorMessage || t('something_went_wrong')}</Typography>
 			</Container>
 		);
 	}
@@ -40,7 +42,7 @@ function TraceGraph(): JSX.Element {
 	if (loading) {
 		return (
 			<Container>
-				<Spinner height="20vh" size="small" tip="Loading..." />
+				<Spinner height="20vh" size="small" tip={t('loading')} />
 			</Container>
 		);
 	}

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { Badge, toast } from '@signozhq/ui';
 import { Alert, Button, Input, Radio } from 'antd';
 import getAIConfig from 'api/aiModule/getAIConfig';
@@ -87,6 +88,7 @@ function truncate(str: string, max: number): string {
 // ── Component ──────────────────────────────────────────────────────────────
 
 function AIModuleSettings(): JSX.Element {
+	const { t } = useTranslation(['aiModule']);
 	const { user } = useAppContext();
 	const isAdmin = user.role === USER_ROLES.ADMIN;
 
@@ -156,7 +158,7 @@ function AIModuleSettings(): JSX.Element {
 				});
 				setUpdatedAt(cfg.updatedAt ?? '');
 			} catch (err) {
-				toast.error(getErrorMessage(err, 'Failed to load AI config'));
+				toast.error(getErrorMessage(err, t('toast_load_error')));
 			} finally {
 				if (!cancelled) setIsInitialLoading(false);
 			}
@@ -206,7 +208,7 @@ function AIModuleSettings(): JSX.Element {
 			setIsSaving(true);
 			try {
 				await updateAIConfig(buildPayload(values));
-				toast.success('AI module configuration saved');
+				toast.success(t('toast_save_success'));
 				setAuthIssue(null);
 				if (values.apiKey !== '') {
 					apiKeyMasked.current = true;
@@ -223,7 +225,7 @@ function AIModuleSettings(): JSX.Element {
 					transport: values.provider === 'llm' ? values.transport : undefined,
 				});
 			} catch (err) {
-				toast.error(getErrorMessage(err, 'Failed to save AI config'));
+				toast.error(getErrorMessage(err, t('toast_save_error')));
 			} finally {
 				setIsSaving(false);
 			}
@@ -238,15 +240,15 @@ function AIModuleSettings(): JSX.Element {
 			const res = await testAIConfig(buildPayload(values));
 			const result = res.data;
 			if (result.ok) {
-				toast.success(truncate(result.headline ?? 'Connection OK', 80));
+				toast.success(truncate(result.headline ?? t('test_ok_fallback'), 80));
 				setAuthIssue(null);
 			} else {
 				toast.error(result.error ?? 'Test failed');
 				if (result.errorKind === 'auth') {
 					setAuthIssue(
 						values.transport === 'cli'
-							? 'The configured OAuth token was rejected. Re-paste a fresh token (claude setup-token / codex login).'
-							: 'The configured API key was rejected. Re-paste a fresh key from the provider console.',
+							? t('auth_issue_cli')
+							: t('auth_issue_api'),
 					);
 				} else {
 					setAuthIssue(null);
@@ -258,7 +260,7 @@ function AIModuleSettings(): JSX.Element {
 				errorKind: result.errorKind,
 			});
 		} catch (err) {
-			toast.error(getErrorMessage(err, 'Test request failed'));
+			toast.error(getErrorMessage(err, t('toast_test_error')));
 		} finally {
 			setIsTesting(false);
 		}
@@ -287,11 +289,9 @@ function AIModuleSettings(): JSX.Element {
 	return (
 		<div className="ai-module-settings" data-testid="ai-module-settings">
 			<header className="ai-module-settings__header">
-				<h1 className="ai-module-settings__header-title">AI Module</h1>
+				<h1 className="ai-module-settings__header-title">{t('header_title')}</h1>
 				<p className="ai-module-settings__header-subtitle">
-					Configure which backend generates incident-response strategies for SOP-bound
-					alerts. Mock and Local modes need no external setup; LLM mode calls an
-					external API or a local CLI.
+					{t('header_subtitle')}
 				</p>
 			</header>
 
@@ -300,7 +300,7 @@ function AIModuleSettings(): JSX.Element {
 					type="warning"
 					showIcon
 					closable
-					message="Authentication issue detected"
+					message={t('auth_issue_title')}
 					description={authIssue}
 					onClose={(): void => setAuthIssue(null)}
 					style={{ marginBottom: 'var(--spacing-4)' }}
@@ -313,12 +313,10 @@ function AIModuleSettings(): JSX.Element {
 						<Badge color="secondary" variant="default">
 							1
 						</Badge>
-						Provider
+						{t('provider_title')}
 					</h3>
 					<p className="ai-module-settings__card-description">
-						Pick which generator runs when alertmanager dispatches an alert. Mock returns
-						a scripted scenario response. Local runs the deterministic in-process
-						generator. LLM hands off to an external model.
+						{t('provider_description')}
 					</p>
 
 					<div className="ai-module-settings__field">
@@ -345,17 +343,17 @@ function AIModuleSettings(): JSX.Element {
 							<Badge color="secondary" variant="default">
 								2
 							</Badge>
-							Connection
+							{t('connection_title')}
 						</h3>
 						<p className="ai-module-settings__card-description">
 							{isLLM
-								? 'Choose the LLM vendor and transport, then provide the model identifier and credential. Use the Test button to probe the configuration without saving.'
-								: 'Optional overrides. Leave the model blank to use the package default.'}
+								? t('connection_description_llm')
+								: t('connection_description_non_llm')}
 						</p>
 
 						{isLLM && (
 							<div className="ai-module-settings__field">
-								<label className="ai-module-settings__field-label">LLM Provider</label>
+								<label className="ai-module-settings__field-label">{t('field_llm_provider')}</label>
 								<Controller
 									name="llmProvider"
 									control={control}
@@ -371,7 +369,7 @@ function AIModuleSettings(): JSX.Element {
 
 						{isLLM && (
 							<div className="ai-module-settings__field">
-								<label className="ai-module-settings__field-label">Transport</label>
+								<label className="ai-module-settings__field-label">{t('field_transport')}</label>
 								<Controller
 									name="transport"
 									control={control}
@@ -383,14 +381,13 @@ function AIModuleSettings(): JSX.Element {
 									)}
 								/>
 								<p className="ai-module-settings__field-hint">
-									API uses HTTPS with the configured API key. CLI shells out to the
-									local binary; the container must have it installed and authenticated.
+									{t('transport_hint')}
 								</p>
 							</div>
 						)}
 
 						<div className="ai-module-settings__field">
-							<label className="ai-module-settings__field-label">Model</label>
+							<label className="ai-module-settings__field-label">{t('field_model')}</label>
 							<Controller
 								name="model"
 								control={control}
@@ -409,14 +406,14 @@ function AIModuleSettings(): JSX.Element {
 
 						{isLLM && isAPI && (
 							<div className="ai-module-settings__field">
-								<label className="ai-module-settings__field-label">API Key</label>
+								<label className="ai-module-settings__field-label">{t('field_api_key')}</label>
 								<Controller
 									name="apiKey"
 									control={control}
 									render={({ field }): JSX.Element => (
 										<Input.Password
 											{...field}
-											placeholder="Leave blank to keep the existing key"
+											placeholder={t('api_key_placeholder')}
 											onFocus={handleApiKeyFocus}
 											style={{ maxWidth: 360 }}
 											disabled={!isAdmin}
@@ -424,8 +421,8 @@ function AIModuleSettings(): JSX.Element {
 									)}
 								/>
 								<p className="ai-module-settings__field-hint">
-									Stored encrypted at rest (AES-GCM). Returned to the UI as
-									<code> &lt;unchanged&gt;</code>; type a new value to overwrite.
+									{t('api_key_hint_before')}
+									<code> &lt;unchanged&gt;</code>{t('api_key_hint_after')}
 								</p>
 							</div>
 						)}
@@ -433,7 +430,7 @@ function AIModuleSettings(): JSX.Element {
 						{isLLM && !isAPI && (
 							<>
 								<div className="ai-module-settings__field">
-									<label className="ai-module-settings__field-label">OAuth Token</label>
+									<label className="ai-module-settings__field-label">{t('field_oauth_token')}</label>
 									<Controller
 										name="oauthToken"
 										control={control}
@@ -445,7 +442,7 @@ function AIModuleSettings(): JSX.Element {
 											watch('llmProvider') === 'codex' ? (
 												<Input.TextArea
 													{...field}
-													placeholder="Leave blank to keep the existing token"
+													placeholder={t('oauth_token_placeholder')}
 													onFocus={handleOAuthTokenFocus}
 													autoSize={{ minRows: 1, maxRows: 8 }}
 													style={{ maxWidth: 560, fontFamily: 'monospace' }}
@@ -454,7 +451,7 @@ function AIModuleSettings(): JSX.Element {
 											) : (
 												<Input.Password
 													{...field}
-													placeholder="Leave blank to keep the existing token"
+													placeholder={t('oauth_token_placeholder')}
 													onFocus={handleOAuthTokenFocus}
 													style={{ maxWidth: 360 }}
 													disabled={!isAdmin}
@@ -464,13 +461,13 @@ function AIModuleSettings(): JSX.Element {
 									/>
 									<p className="ai-module-settings__field-hint">
 										{watch('llmProvider') === 'claude'
-											? 'Run `claude setup-token` on a machine with a browser, sign in, then paste the issued token here. Stored encrypted at rest (AES-GCM).'
-											: 'Two options: paste an OPENAI_API_KEY (single line) for direct API auth, OR paste the full `~/.codex/auth.json` JSON (multi-line) for ChatGPT subscription auth. Stored encrypted at rest (AES-GCM).'}
+											? t('oauth_hint_claude')
+											: t('oauth_hint_codex')}
 									</p>
 								</div>
 
 								<div className="ai-module-settings__field">
-									<label className="ai-module-settings__field-label">Binary path</label>
+									<label className="ai-module-settings__field-label">{t('field_binary_path')}</label>
 									<Controller
 										name="binaryPath"
 										control={control}
@@ -484,14 +481,14 @@ function AIModuleSettings(): JSX.Element {
 										)}
 									/>
 									<p className="ai-module-settings__field-hint">
-										Defaults to <code>claude</code> or <code>codex</code> on the container's PATH.
+										{t('binary_path_hint_before')} <code>claude</code> or <code>codex</code> {t('binary_path_hint_after')}
 									</p>
 								</div>
 							</>
 						)}
 
 						<div className="ai-module-settings__field">
-							<label className="ai-module-settings__field-label">Timeout (seconds)</label>
+							<label className="ai-module-settings__field-label">{t('field_timeout')}</label>
 							<Controller
 								name="timeoutSeconds"
 								control={control}
@@ -512,7 +509,7 @@ function AIModuleSettings(): JSX.Element {
 								)}
 							/>
 							<p className="ai-module-settings__field-hint">
-								Per-call deadline. 0 picks the package default (15 s).
+								{t('timeout_hint')}
 							</p>
 						</div>
 					</section>
@@ -523,7 +520,7 @@ function AIModuleSettings(): JSX.Element {
 					style={{ marginTop: 'var(--spacing-6)' }}
 				>
 					<Button onClick={onTest} loading={isTesting} disabled={isSaving || !isAdmin}>
-						Test
+						{t('btn_test')}
 					</Button>
 					<Button
 						type="primary"
@@ -531,11 +528,11 @@ function AIModuleSettings(): JSX.Element {
 						loading={isSaving}
 						disabled={isTesting || !isAdmin}
 					>
-						Save changes
+						{t('btn_save')}
 					</Button>
 					{updatedAt && (
 						<span className="ai-module-settings__actions-meta">
-							Last updated · {updatedAt}
+							{t('last_updated')} {updatedAt}
 						</span>
 					)}
 				</div>

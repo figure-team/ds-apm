@@ -57,13 +57,13 @@ describe('AttributeActions (unit)', () => {
 		render(<AttributeActions record={record} isPinned={false} />);
 
 		expect(
-			screen.getByRole('button', { name: 'Pin attribute' }),
+			screen.getByRole('button', { name: 'pin_attribute' }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole('button', { name: 'Filter for value' }),
+			screen.getByRole('button', { name: 'filter_for_value' }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole('button', { name: 'Filter out value' }),
+			screen.getByRole('button', { name: 'filter_out_value' }),
 		).toBeInTheDocument();
 		// more actions (ellipsis) button
 		expect(
@@ -91,7 +91,7 @@ describe('AttributeActions (unit)', () => {
 			queryBuilderOverrides: { currentQuery, redirectWithQueryBuilderData },
 		});
 
-		const filterForBtn = screen.getByRole('button', { name: 'Filter for value' });
+		const filterForBtn = screen.getByRole('button', { name: 'filter_for_value' });
 
 		await userEvent.click(filterForBtn);
 		await waitFor(() => {
@@ -139,7 +139,7 @@ describe('AttributeActions (unit)', () => {
 			queryBuilderOverrides: { currentQuery, redirectWithQueryBuilderData },
 		});
 
-		const filterOutBtn = screen.getByRole('button', { name: 'Filter out value' });
+		const filterOutBtn = screen.getByRole('button', { name: 'filter_out_value' });
 
 		await userEvent.click(filterOutBtn);
 		await waitFor(() => {
@@ -196,10 +196,10 @@ describe('AttributeActions (unit)', () => {
 
 		// content appears
 		await waitFor(() =>
-			expect(screen.getByText('Group By Attribute')).toBeInTheDocument(),
+			expect(screen.getByText('group_by_attribute')).toBeInTheDocument(),
 		);
 
-		await userEvent.click(screen.getByText('Group By Attribute'));
+		await userEvent.click(screen.getByText('group_by_attribute'));
 		await waitFor(() => {
 			expect(redirectWithQueryBuilderData).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -227,7 +227,7 @@ describe('AttributeActions (unit)', () => {
 	it('hides pin button when showPinned=false', async () => {
 		render(<AttributeActions record={record} showPinned={false} />);
 		expect(
-			screen.queryByRole('button', { name: /pin attribute/i }),
+			screen.queryByRole('button', { name: /pin_attribute/i }),
 		).not.toBeInTheDocument();
 	});
 
@@ -239,8 +239,8 @@ describe('AttributeActions (unit)', () => {
 		fireEvent.mouseEnter(ellipsisBtn.parentElement as Element);
 
 		await waitFor(() =>
-			expect(screen.queryByText('Copy Field Name')).not.toBeInTheDocument(),
+			expect(screen.queryByText('copy_field_name')).not.toBeInTheDocument(),
 		);
-		expect(screen.queryByText('Copy Field Value')).not.toBeInTheDocument();
+		expect(screen.queryByText('copy_field_value')).not.toBeInTheDocument();
 	});
 });

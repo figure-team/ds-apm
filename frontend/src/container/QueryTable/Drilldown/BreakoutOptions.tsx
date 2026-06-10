@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from 'react-query';
 import { Input, Skeleton } from 'antd';
 import { getKeySuggestions } from 'api/querySuggestions/getKeySuggestions';
@@ -33,6 +34,7 @@ function BreakoutOptions({
 	queryData,
 	onColumnClick,
 }: BreakoutOptionsProps): JSX.Element {
+	const { t } = useTranslation(['dashboard']);
 	const { groupBy = [] } = queryData;
 	const [searchText, setSearchText] = useState<string>('');
 	const debouncedSearchText = useDebounce(searchText, 400);
@@ -98,7 +100,7 @@ function BreakoutOptions({
 				<Input
 					type="text"
 					value={searchText}
-					placeholder="Search breakout options..."
+					placeholder={t('search_breakout_options')}
 					onChange={handleInputChange}
 				/>
 			</section>

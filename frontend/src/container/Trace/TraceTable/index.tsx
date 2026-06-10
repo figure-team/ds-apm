@@ -1,4 +1,5 @@
 import { HTMLAttributes } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -37,6 +38,7 @@ import { v4 } from 'uuid';
 dayjs.extend(duration);
 
 function TraceTable(): JSX.Element {
+	const { t } = useTranslation(['trace']);
 	const {
 		spansAggregate,
 		selectedFilter,
@@ -79,7 +81,7 @@ function TraceTable(): JSX.Element {
 
 	const columns: ColumnsType<TableType> = [
 		{
-			title: 'Date',
+			title: t('date'),
 			dataIndex: 'timestamp',
 			key: 'timestamp',
 			width: 120,
@@ -94,21 +96,21 @@ function TraceTable(): JSX.Element {
 			},
 		},
 		{
-			title: 'Service',
+			title: t('service_title'),
 			dataIndex: 'serviceName',
 			key: 'serviceName',
 			width: 50,
 			render: getValue,
 		},
 		{
-			title: 'Operation',
+			title: t('operation'),
 			dataIndex: 'operation',
 			key: 'operation',
 			width: 110,
 			render: getValue,
 		},
 		{
-			title: 'Duration',
+			title: t('duration_title'),
 			dataIndex: 'durationNano',
 			key: 'durationNano',
 			width: 50,
@@ -123,14 +125,14 @@ function TraceTable(): JSX.Element {
 			),
 		},
 		{
-			title: 'Method',
+			title: t('method'),
 			dataIndex: 'method',
 			key: 'method',
 			width: 50,
 			render: getHttpMethodOrStatus,
 		},
 		{
-			title: 'Status Code',
+			title: t('status_code'),
 			dataIndex: 'statusCode',
 			key: 'statusCode',
 			width: 50,

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useDispatch } from 'react-redux';
 import { generatePath } from 'react-router-dom';
@@ -71,6 +72,7 @@ function TableView({
 	listViewPanelSelectedFields,
 	handleChangeSelectedView,
 }: Props): JSX.Element | null {
+	const { t } = useTranslation(['logs']);
 	const dispatch = useDispatch<Dispatch<AppActions>>();
 	const [isfilterInLoading, setIsFilterInLoading] = useState<boolean>(false);
 	const [isfilterOutLoading, setIsFilterOutLoading] = useState<boolean>(false);
@@ -235,7 +237,7 @@ function TableView({
 			},
 		},
 		{
-			title: 'Field',
+			title: t('logs:field'),
 			dataIndex: 'field',
 			key: 'field',
 			width: 50,
@@ -253,7 +255,7 @@ function TableView({
 							<Typography.Text>{renderedField}</Typography.Text>
 
 							{traceId && (
-								<Tooltip title="Inspect in Trace" mouseLeaveDelay={0}>
+								<Tooltip title={t('logs:inspect_in_trace')} mouseLeaveDelay={0}>
 									<Button
 										className="periscope-btn"
 										onClick={(
@@ -293,7 +295,7 @@ function TableView({
 			},
 		},
 		{
-			title: 'Value',
+			title: t('logs:value'),
 			key: 'value',
 			width: 70,
 			ellipsis: false,

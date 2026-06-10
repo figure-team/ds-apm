@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { InfoCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 import { Button, Spin, Tooltip, Typography } from 'antd';
@@ -61,6 +62,7 @@ function Filters({
 	traceID: string;
 	onFilteredSpansChange?: (spanIds: string[], isFilterActive: boolean) => void;
 }): JSX.Element {
+	const { t } = useTranslation(['trace']);
 	const [filters, setFilters] = useState<TagFilter>(
 		BASE_FILTER_QUERY.filters || { items: [], op: 'AND' },
 	);
@@ -189,12 +191,16 @@ function Filters({
 			)}
 			{isFetching && <Spin indicator={<LoadingOutlined spin />} size="small" />}
 			{error && (
-				<Tooltip title={(error as AxiosError)?.message || 'Something went wrong'}>
+				<Tooltip
+					title={(error as AxiosError)?.message || t('something_went_wrong')}
+				>
 					<InfoCircleOutlined size={14} />
 				</Tooltip>
 			)}
 			{noData && (
-				<Typography.Text className="no-results">No results found</Typography.Text>
+				<Typography.Text className="no-results">
+					{t('no_results_found')}
+				</Typography.Text>
 			)}
 		</div>
 	);

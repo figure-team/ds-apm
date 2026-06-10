@@ -1,4 +1,5 @@
 import { ReactNode, useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { UseQueryResult } from 'react-query';
 import {
 	AlertOutlined,
@@ -36,9 +37,18 @@ import { MetricRangePayloadProps } from 'types/api/metrics/getQueryRange';
 import { buildAbsolutePath } from 'utils/app';
 
 import { errorTooltipPosition } from './config';
-import { MENUITEM_KEYS_VS_LABELS, MenuItemKeys } from './contants';
+import { MenuItemKeys } from './contants';
 import { MenuItem } from './types';
 import { generateMenuList, isTWidgetOptions } from './utils';
+
+const MENUITEM_KEYS_VS_TRANSLATION_KEYS: Record<MenuItemKeys, string> = {
+	[MenuItemKeys.View]: 'view',
+	[MenuItemKeys.Edit]: 'common:edit',
+	[MenuItemKeys.Delete]: 'delete',
+	[MenuItemKeys.Clone]: 'clone',
+	[MenuItemKeys.CreateAlerts]: 'create_alerts',
+	[MenuItemKeys.Download]: 'download_as_csv',
+};
 
 import './WidgetHeader.styles.scss';
 
@@ -76,6 +86,7 @@ function WidgetHeader({
 	tableProcessedDataRef,
 	setSearchTerm,
 }: IWidgetHeaderProps): JSX.Element | null {
+	const { t } = useTranslation(['dashboard', 'common']);
 	const urlQuery = useUrlQuery();
 	const { safeNavigate } = useSafeNavigate();
 	const onEditHandler = useCallback((): void => {
@@ -149,35 +160,35 @@ function WidgetHeader({
 			{
 				key: MenuItemKeys.View,
 				icon: <FullscreenOutlined />,
-				label: MENUITEM_KEYS_VS_LABELS[MenuItemKeys.View],
+				label: t(MENUITEM_KEYS_VS_TRANSLATION_KEYS[MenuItemKeys.View]),
 				isVisible: headerMenuList?.includes(MenuItemKeys.View) || false,
 				disabled: queryResponse.isFetching,
 			},
 			{
 				key: MenuItemKeys.Edit,
 				icon: <EditFilled />,
-				label: MENUITEM_KEYS_VS_LABELS[MenuItemKeys.Edit],
+				label: t(MENUITEM_KEYS_VS_TRANSLATION_KEYS[MenuItemKeys.Edit]),
 				isVisible: headerMenuList?.includes(MenuItemKeys.Edit) || false,
 				disabled: !editWidget,
 			},
 			{
 				key: MenuItemKeys.Clone,
 				icon: <CopyOutlined />,
-				label: MENUITEM_KEYS_VS_LABELS[MenuItemKeys.Clone],
+				label: t(MENUITEM_KEYS_VS_TRANSLATION_KEYS[MenuItemKeys.Clone]),
 				isVisible: headerMenuList?.includes(MenuItemKeys.Clone) || false,
 				disabled: !editWidget,
 			},
 			{
 				key: MenuItemKeys.Download,
 				icon: <CloudDownloadOutlined />,
-				label: MENUITEM_KEYS_VS_LABELS[MenuItemKeys.Download],
+				label: t(MENUITEM_KEYS_VS_TRANSLATION_KEYS[MenuItemKeys.Download]),
 				isVisible: widget.panelTypes === PANEL_TYPES.TABLE,
 				disabled: false,
 			},
 			{
 				key: MenuItemKeys.Delete,
 				icon: <DeleteOutlined />,
-				label: MENUITEM_KEYS_VS_LABELS[MenuItemKeys.Delete],
+				label: t(MENUITEM_KEYS_VS_TRANSLATION_KEYS[MenuItemKeys.Delete]),
 				isVisible: headerMenuList?.includes(MenuItemKeys.Delete) || false,
 				disabled: !deleteWidget,
 				danger: true,
@@ -193,7 +204,7 @@ function WidgetHeader({
 							justifyContent: 'space-between',
 						}}
 					>
-						{MENUITEM_KEYS_VS_LABELS[MenuItemKeys.CreateAlerts]}
+						{t(MENUITEM_KEYS_VS_TRANSLATION_KEYS[MenuItemKeys.CreateAlerts])}
 						<SquareArrowOutUpRight size={10} />
 					</span>
 				),
@@ -207,6 +218,7 @@ function WidgetHeader({
 			editWidget,
 			deleteWidget,
 			widget.panelTypes,
+			t,
 		],
 	);
 
@@ -243,7 +255,7 @@ function WidgetHeader({
 			{showGlobalSearch ? (
 				<Input
 					addonBefore={<SearchOutlined size={14} />}
-					placeholder="Search..."
+					placeholder={t('search_placeholder')}
 					bordered={false}
 					data-testid="widget-header-search-input"
 					autoFocus

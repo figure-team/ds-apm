@@ -7,6 +7,7 @@ import {
 	useRef,
 	useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { Skeleton, Tooltip, Typography } from 'antd';
 import cx from 'classnames';
@@ -66,6 +67,7 @@ function WidgetGraphComponent({
 	customTimeRangeWindowForCoRelation,
 	enableDrillDown,
 }: WidgetGraphComponentProps): JSX.Element {
+	const { t } = useTranslation(['dashboard']);
 	const { safeNavigate } = useSafeNavigate();
 	const [deleteModal, setDeleteModal] = useState(false);
 	const { notifications } = useNotifications();
@@ -200,7 +202,7 @@ function WidgetGraphComponent({
 						setDashboardData(updatedDashboard.data);
 					}
 					notifications.success({
-						message: 'Panel cloned successfully, redirecting to new copy.',
+						message: t('panel_cloned_success'),
 					});
 
 					const clonedWidget = updatedDashboard.data?.data?.widgets?.find(
@@ -339,18 +341,18 @@ function WidgetGraphComponent({
 				onCancel={onDeleteModelHandler}
 				open={deleteModal}
 				confirmLoading={updateDashboardMutation.isLoading}
-				title="Delete"
+				title={t('delete')}
 				height="10vh"
 				onOk={onDeleteHandler}
 				centered
 			>
-				<Typography>Are you sure you want to delete this widget</Typography>
+				<Typography>{t('delete_widget_confirm')}</Typography>
 			</Modal>
 
 			<Modal
 				title={
 					<Tooltip title={fullText} placement="top">
-						<span>{truncatedText || fullText || 'View'}</span>
+						<span>{truncatedText || fullText || t('view')}</span>
 					</Tooltip>
 				}
 				footer={[]}

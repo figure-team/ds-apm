@@ -126,7 +126,7 @@ function QuerySection(): JSX.Element {
 
 	return (
 		<div className="query-section">
-			<Stepper stepNumber={1} label="Define the query" />
+			<Stepper stepNumber={1} label="Define the query" required />
 			<ChartPreview
 				alertDef={alertDef}
 				source={source}

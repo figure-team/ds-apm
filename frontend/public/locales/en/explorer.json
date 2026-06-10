@@ -1,4 +1,17 @@
 {
     "name_of_the_view": "Name of the view",
-    "delete_confirm_message": "Are you sure you want to delete {{viewName}} view? Deleting a view is irreversible and cannot be undone."
+    "delete_confirm_message": "Are you sure you want to delete {{viewName}} view? Deleting a view is irreversible and cannot be undone.",
+    "save_this_view": "Save this view",
+    "create_an_alert": "Create an Alert",
+    "add_to_dashboard": "Add to Dashboard",
+    "views_title": "Views",
+    "manage_saved_views": "Manage your saved views for {{dataSource}}.",
+    "learn_more": "Learn more",
+    "search_views_placeholder": "Search for views...",
+    "delete_view": "Delete view",
+    "edit_view_details": "Edit view details",
+    "save_changes": "Save changes",
+    "label": "Label",
+    "edit_view_name_placeholder": "e.g. Crash landing view",
+    "view_updated_successfully": "View Updated Successfully"
 }

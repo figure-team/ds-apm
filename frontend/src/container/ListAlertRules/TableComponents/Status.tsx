@@ -1,18 +1,21 @@
 import { Tag } from 'antd';
 import type { RuletypesRuleDTO } from 'api/generated/services/sigNoz.schemas';
+import { useIsDarkMode } from 'hooks/useDarkMode';
 
 function Status({ status }: StatusProps): JSX.Element {
+	const isDarkMode = useIsDarkMode();
+
 	switch (status) {
 		case 'inactive': {
-			return <Tag color="green">OK</Tag>;
+			return <Tag color={isDarkMode ? 'green' : '#16A34A'}>OK</Tag>;
 		}
 
 		case 'pending': {
-			return <Tag color="orange">Pending</Tag>;
+			return <Tag color={isDarkMode ? 'orange' : '#F59E0B'}>Pending</Tag>;
 		}
 
 		case 'firing': {
-			return <Tag color="red">Firing</Tag>;
+			return <Tag color={isDarkMode ? 'red' : '#DC2626'}>Firing</Tag>;
 		}
 
 		case 'disabled': {

@@ -7,11 +7,11 @@ describe('ServicesTraces', () => {
 		await act(() => {
 			render(<ServiceTraces />);
 		});
-		const applicationHeader = screen.getByText(/application/i);
+		const applicationHeader = screen.getByText('column_application');
 		expect(applicationHeader).toBeInTheDocument();
-		const p99LatencyHeader = screen.getByText(/p99 latency \(in ms\)/i);
+		const p99LatencyHeader = screen.getByText('column_p99_latency (in ms)');
 		expect(p99LatencyHeader).toBeInTheDocument();
-		const errorRateHeader = screen.getByText(/error rate \(% of total\)/i);
+		const errorRateHeader = screen.getByText('column_error_rate_pct');
 		expect(errorRateHeader).toBeInTheDocument();
 	});
 
@@ -31,7 +31,9 @@ describe('ServicesTraces', () => {
 		act(() => {
 			render(<ServiceTraces />);
 		});
-		const p99LatencyHeader = await screen.findByText(/p99 latency \(in ms\)/i);
+		const p99LatencyHeader = await screen.findByText(
+			'column_p99_latency (in ms)',
+		);
 		expect(p99LatencyHeader).toBeInTheDocument();
 		const firstServiceName = await screen.findByText(/TestService/i);
 		expect(firstServiceName).toBeInTheDocument();

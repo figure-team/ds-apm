@@ -4,23 +4,24 @@ import { Typography } from 'antd';
 import ROUTES from 'constants/routes';
 import { getMs } from 'container/Trace/Filters/Panel/PanelBody/Duration/util';
 import { DEFAULT_PER_PAGE_OPTIONS } from 'hooks/queryPagination';
+import { TFunction } from 'i18next';
 import { ListItem } from 'types/api/widgets/getQuery';
 
 export const PER_PAGE_OPTIONS: number[] = [10, ...DEFAULT_PER_PAGE_OPTIONS];
 
-export const columns: ColumnsType<ListItem['data']> = [
+export const getColumns = (t: TFunction): ColumnsType<ListItem['data']> => [
 	{
-		title: 'Root Service Name',
+		title: t('col_root_service_name').toString(),
 		dataIndex: 'service.name',
 		key: 'serviceName',
 	},
 	{
-		title: 'Root Operation Name',
+		title: t('col_root_operation_name').toString(),
 		dataIndex: 'name',
 		key: 'name',
 	},
 	{
-		title: 'Root Duration (in ms)',
+		title: t('col_root_duration_ms').toString(),
 		dataIndex: 'duration_nano',
 		key: 'durationNano',
 		render: (duration: number): JSX.Element => (
@@ -28,12 +29,12 @@ export const columns: ColumnsType<ListItem['data']> = [
 		),
 	},
 	{
-		title: 'No of Spans',
+		title: t('col_no_of_spans').toString(),
 		dataIndex: 'span_count',
 		key: 'span_count',
 	},
 	{
-		title: 'TraceID',
+		title: t('col_trace_id').toString(),
 		dataIndex: 'trace_id',
 		key: 'traceID',
 		render: (traceID: string): JSX.Element => (

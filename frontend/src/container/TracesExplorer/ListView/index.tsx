@@ -10,6 +10,7 @@ import {
 } from 'react';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import logEvent from 'api/common/logEvent';
 import DownloadOptionsMenu from 'components/DownloadOptionsMenu/DownloadOptionsMenu';
 import ErrorInPlace from 'components/ErrorInPlace/ErrorInPlace';
@@ -62,6 +63,7 @@ function ListView({
 	setIsLoadingQueries,
 	queryKeyRef,
 }: ListViewProps): JSX.Element {
+	const { t } = useTranslation(['trace']);
 	const { stagedQuery, panelType: panelTypeFromQueryBuilder } =
 		useQueryBuilder();
 
@@ -186,9 +188,10 @@ function ListView({
 		const updatedColumns = getListColumns(
 			options?.selectColumns || [],
 			formatTimezoneAdjustedTimestamp,
+			t,
 		);
 		return getDraggedColumns(updatedColumns, draggedColumns);
-	}, [options?.selectColumns, formatTimezoneAdjustedTimestamp, draggedColumns]);
+	}, [options?.selectColumns, formatTimezoneAdjustedTimestamp, draggedColumns, t]);
 
 	const transformedQueryTableData = useMemo(
 		() => transformDataWithDate(queryTableData) || [],

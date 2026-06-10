@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getYAxisFormattedValue } from 'components/Graph/yAxisConfig';
 import { MetricItem } from 'pages/TracesFunnelDetails/components/FunnelResults/FunnelMetricsTable';
 import { useFunnelContext } from 'pages/TracesFunnels/FunnelContext';
@@ -18,6 +19,7 @@ export function useFunnelMetrics({ funnelId }: FunnelMetricsParams): {
 	metricsData: MetricItem[];
 	conversionRate: number;
 } {
+	const { t } = useTranslation('trace');
 	const { startTime, endTime, steps } = useFunnelContext();
 	const payload = {
 		start_time: startTime,
@@ -40,20 +42,20 @@ export function useFunnelMetrics({ funnelId }: FunnelMetricsParams): {
 
 		return [
 			{
-				title: 'Avg. Rate',
+				title: t('funnels.avg_rate'),
 				value: `${Number(sourceData.avg_rate.toFixed(2))} req/s`,
 			},
-			{ title: 'Errors', value: sourceData.errors },
+			{ title: t('funnels.errors'), value: sourceData.errors },
 			{
-				title: 'Avg. Duration',
+				title: t('funnels.avg_duration'),
 				value: getYAxisFormattedValue(sourceData.avg_duration.toString(), 'ms'),
 			},
 			{
-				title: `P99 Latency`,
+				title: `P99 ${t('funnels.latency')}`,
 				value: getYAxisFormattedValue(sourceData.latency.toString(), 'ms'),
 			},
 		];
-	}, [overviewData?.payload?.data]);
+	}, [overviewData?.payload?.data, t]);
 
 	const conversionRate =
 		overviewData?.payload?.data?.[0]?.data?.conversion_rate ?? 0;
@@ -75,6 +77,7 @@ export function useFunnelStepsMetrics({
 	metricsData: MetricItem[];
 	conversionRate: number;
 } {
+	const { t } = useTranslation('trace');
 	const { startTime, endTime, steps } = useFunnelContext();
 
 	const payload = {
@@ -108,26 +111,26 @@ export function useFunnelStepsMetrics({
 
 		return [
 			{
-				title: 'Avg. Rate',
+				title: t('funnels.avg_rate'),
 				value: `${Number(sourceData.avg_rate.toFixed(2))} req/s`,
 			},
-			{ title: 'Errors', value: sourceData.errors },
+			{ title: t('funnels.errors'), value: sourceData.errors },
 			{
-				title: 'Avg. Duration',
+				title: t('funnels.avg_duration'),
 				value: getYAxisFormattedValue(
 					(sourceData.avg_duration * 1_000_000).toString(),
 					'ns',
 				),
 			},
 			{
-				title: `${latencyType.toUpperCase()} Latency`,
+				title: `${latencyType.toUpperCase()} ${t('funnels.latency')}`,
 				value: getYAxisFormattedValue(
 					(sourceData.latency * 1_000_000).toString(),
 					'ns',
 				),
 			},
 		];
-	}, [stepsOverviewData, latencyType]);
+	}, [stepsOverviewData, latencyType, t]);
 
 	const conversionRate =
 		stepsOverviewData?.payload?.data?.[0]?.data?.conversion_rate ?? 0;

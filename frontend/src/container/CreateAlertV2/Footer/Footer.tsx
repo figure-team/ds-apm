@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, toast } from '@signozhq/ui';
 import { Tooltip } from 'antd';
 import { convertToApiError } from 'api/ErrorResponseHandlerForGeneratedAPIs';
@@ -21,6 +22,7 @@ import {
 import './styles.scss';
 
 function Footer(): JSX.Element {
+	const { t } = useTranslation(['alerts']);
 	const {
 		alertType,
 		alertState: basicAlertState,
@@ -93,12 +95,10 @@ function Footer(): JSX.Element {
 			{
 				onSuccess: (response) => {
 					if (response.data?.alertCount === 0) {
-						toast.error(
-							'No alerts found during the evaluation. This happens when rule condition is unsatisfied. You may adjust the rule threshold and retry.',
-						);
+						toast.error(t('no_alerts_found'));
 						return;
 					}
-					toast.success('Test notification sent successfully');
+					toast.success(t('rule_test_fired'));
 				},
 				onError: handleApiError,
 			},
@@ -132,7 +132,7 @@ function Footer(): JSX.Element {
 				},
 				{
 					onSuccess: () => {
-						toast.success('Alert rule updated successfully');
+						toast.success(t('v2_alert_rule_updated'));
 						safeNavigate('/alerts');
 					},
 					onError: handleApiError,
@@ -143,7 +143,7 @@ function Footer(): JSX.Element {
 				{ data: toPostableRuleDTO(payload) },
 				{
 					onSuccess: () => {
-						toast.success('Alert rule created successfully');
+						toast.success(t('v2_alert_rule_created'));
 						safeNavigate('/alerts');
 					},
 					onError: handleApiError,
@@ -182,11 +182,11 @@ function Footer(): JSX.Element {
 				) : (
 					<Check size={14} />
 				)}
-				Save Alert Rule
+				{t('v2_save_alert_rule')}
 			</Button>
 		);
 		if (alertValidationMessage) {
-			button = <Tooltip title={alertValidationMessage}>{button}</Tooltip>;
+			button = <Tooltip title={t(alertValidationMessage)}>{button}</Tooltip>;
 		}
 		return button;
 	}, [
@@ -206,11 +206,11 @@ function Footer(): JSX.Element {
 				disabled={disableButtons || Boolean(alertValidationMessage)}
 			>
 				{isTestingAlertRule ? <Loader size={14} /> : <Send size={14} />}
-				Test Notification
+				{t('v2_test_notification')}
 			</Button>
 		);
 		if (alertValidationMessage) {
-			button = <Tooltip title={alertValidationMessage}>{button}</Tooltip>;
+			button = <Tooltip title={t(alertValidationMessage)}>{button}</Tooltip>;
 		}
 		return button;
 	}, [
@@ -228,9 +228,18 @@ function Footer(): JSX.Element {
 				onClick={handleDiscard}
 				disabled={disableButtons}
 			>
-				<X size={14} /> Discard
+				<X size={14} /> {t('v2_discard')}
 			</Button>
 			<div className="button-group">
+				<span
+					className={`footer__validation-status ${
+						alertValidationMessage
+							? 'footer__validation-status--error'
+							: 'footer__validation-status--ready'
+					}`}
+				>
+					{alertValidationMessage ? t(alertValidationMessage) : t('v2_alert_ready_to_save')}
+				</span>
 				{testAlertButton}
 				{saveAlertButton}
 			</div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Typography } from 'antd';
 import logEvent from 'api/common/logEvent';
 import ROUTES from 'constants/routes';
@@ -17,7 +18,9 @@ export default function NoLogs({
 }: {
 	dataSource: DataSource;
 }): JSX.Element {
+	const { t } = useTranslation(['common']);
 	const { isCloudUser: isCloudUserVal } = useGetTenantLicense();
+	const dataSourceLabel = t(`data_source_${dataSource}`);
 
 	const handleLinkClick = (
 		e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -55,15 +58,16 @@ export default function NoLogs({
 			<div className="no-logs-container-content">
 				<img className="eyes-emoji" src={eyesEmojiUrl} alt="eyes emoji" />
 				<Typography className="no-logs-text">
-					No {dataSource} yet.
+					{t('no_data_yet', { dataSource: dataSourceLabel })}
 					<span className="sub-text">
 						{' '}
-						When we receive {dataSource}, they would show up here
+						{t('data_show_up_here', { dataSource: dataSourceLabel })}
 					</span>
 				</Typography>
 
 				<Typography.Link className="send-logs-link" onClick={handleLinkClick}>
-					Sending {dataSource} to SigNoz <ArrowUpRight size={16} />
+					{t('send_data_to_signoz', { dataSource: dataSourceLabel })}{' '}
+					<ArrowUpRight size={16} />
 				</Typography.Link>
 			</div>
 		</div>

@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -14,7 +15,7 @@ import {
 import { ResizeTable } from 'components/ResizeTable';
 import TextToolTip from 'components/TextToolTip';
 import Download from 'container/Download/Download';
-import { filterDropdown } from 'container/ServiceApplication/Filter/FilterDropdown';
+import { getFilterDropdown } from 'container/ServiceApplication/Filter/FilterDropdown';
 import useResourceAttribute from 'hooks/useResourceAttribute';
 import { convertRawQueriesToTraceSelectedTags } from 'hooks/useResourceAttribute/utils';
 import { useSafeNavigate } from 'hooks/useSafeNavigate';
@@ -41,6 +42,7 @@ function TopOperationsTable({
 	onEntryPointToggle,
 }: TopOperationsTableProps): JSX.Element {
 	const searchInput = useRef<InputRef>(null);
+	const { t } = useTranslation(['services']);
 	const { servicename: encodedServiceName } = useParams<IServiceName>();
 	const { safeNavigate } = useSafeNavigate();
 	const servicename = decodeURIComponent(encodedServiceName);
@@ -103,7 +105,7 @@ function TopOperationsTable({
 	};
 
 	const getSearchOption = (): ColumnType<TopOperationList> => ({
-		filterDropdown,
+		filterDropdown: getFilterDropdown(t),
 		filterIcon: <SearchOutlined />,
 		onFilter: (value, record): boolean =>
 			record.name
@@ -137,14 +139,14 @@ function TopOperationsTable({
 
 	const columns: ColumnsType<TopOperationList> = [
 		{
-			title: 'Name',
+			title: t('services:column_name'),
 			dataIndex: 'name',
 			key: 'name',
 			width: 100,
 			...getSearchOption(),
 		},
 		{
-			title: 'P50  (in ms)',
+			title: t('services:column_p50_ms'),
 			dataIndex: 'p50',
 			key: 'p50',
 			width: 50,
@@ -152,7 +154,7 @@ function TopOperationsTable({
 			render: (value: number): string => (value / 1_000_000).toFixed(2),
 		},
 		{
-			title: 'P95  (in ms)',
+			title: t('services:column_p95_ms'),
 			dataIndex: 'p95',
 			key: 'p95',
 			width: 50,
@@ -160,7 +162,7 @@ function TopOperationsTable({
 			render: (value: number): string => (value / 1_000_000).toFixed(2),
 		},
 		{
-			title: 'P99  (in ms)',
+			title: t('services:column_p99_ms'),
 			dataIndex: 'p99',
 			key: 'p99',
 			width: 50,
@@ -168,7 +170,7 @@ function TopOperationsTable({
 			render: (value: number): string => (value / 1_000_000).toFixed(2),
 		},
 		{
-			title: 'Number of Calls',
+			title: t('services:column_number_of_calls'),
 			dataIndex: 'numCalls',
 			key: 'numCalls',
 			width: 50,
@@ -176,7 +178,7 @@ function TopOperationsTable({
 				a.numCalls - b.numCalls,
 		},
 		{
-			title: 'Error Rate',
+			title: t('services:column_error_rate'),
 			dataIndex: 'errorCount',
 			key: 'errorCount',
 			width: 50,
@@ -196,9 +198,9 @@ function TopOperationsTable({
 	};
 
 	const entryPointSpanInfo = {
-		text: 'Shows the spans where requests enter new services for the first time',
+		text: t('services:entrypoint_spans_tooltip'),
 		url: 'https://signoz.io/docs/traces-management/guides/entry-point-spans-service-overview/',
-		urlText: 'Learn more about Entrypoint Spans.',
+		urlText: t('services:entrypoint_spans_learn_more'),
 	};
 
 	return (
@@ -217,7 +219,9 @@ function TopOperationsTable({
 						onChange={onEntryPointToggle}
 						size="small"
 					/>
-					<span className="top-operation__entry-point-label">Entrypoint Spans</span>
+					<span className="top-operation__entry-point-label">
+						{t('services:entrypoint_spans')}
+					</span>
 					<TextToolTip
 						text={entryPointSpanInfo.text}
 						url={entryPointSpanInfo.url}
@@ -231,7 +235,9 @@ function TopOperationsTable({
 				loading={isLoading}
 				showHeader
 				title={(): string =>
-					isEntryPoint ? 'Key Entrypoint Operations' : 'Key Operations'
+					isEntryPoint
+						? t('services:key_entrypoint_operations')
+						: t('services:key_operations')
 				}
 				tableLayout="fixed"
 				dataSource={data}

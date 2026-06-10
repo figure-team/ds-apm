@@ -252,7 +252,7 @@ describe('Logs Explorer Tests', () => {
 		);
 
 		// check the presence of Frequency Chart
-		expect(queryByText('Frequency chart')).toBeInTheDocument();
+		expect(queryByText('logs:frequency_chart')).toBeInTheDocument();
 
 		// check the default state of the histogram toggle
 		const histogramToggle = getByRole('switch');

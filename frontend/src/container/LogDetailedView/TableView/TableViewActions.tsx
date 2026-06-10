@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { Color } from '@signozhq/design-tokens';
 import { Button, Popover, Spin, Tooltip, Tree } from 'antd';
@@ -75,6 +76,7 @@ const BodyContent: React.FC<{
 	bodyHtml: { __html: string };
 	textToCopy: string;
 }> = React.memo(({ fieldData, record, bodyHtml, textToCopy }) => {
+	const { t } = useTranslation(['logs']);
 	const { isLoading, treeData, error } = useAsyncJSONProcessing(
 		fieldData.value,
 		record.field === 'body',
@@ -89,7 +91,9 @@ const BodyContent: React.FC<{
 		return (
 			<div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
 				<Spin size="small" />
-				<span style={{ color: Color.BG_SIENNA_400 }}>Processing JSON...</span>
+				<span style={{ color: Color.BG_SIENNA_400 }}>
+					{t('logs:processing_json')}
+				</span>
 			</div>
 		);
 	}
@@ -99,7 +103,7 @@ const BodyContent: React.FC<{
 			<span
 				style={{ color: Color.BG_SIENNA_400, whiteSpace: 'pre-wrap', tabSize: 4 }}
 			>
-				Error parsing Body JSON
+				{t('logs:error_parsing_body_json')}
 			</span>
 		);
 	}
@@ -134,6 +138,7 @@ export default function TableViewActions(
 		handleChangeSelectedView,
 	} = props;
 
+	const { t } = useTranslation(['logs']);
 	const { pathname } = useLocation();
 	const { stagedQuery, updateQueriesData } = useQueryBuilder();
 	const viewName = useGetSearchQueryParam(QueryParams.viewName) || '';
@@ -359,7 +364,7 @@ export default function TableViewActions(
 				{!isListViewPanel &&
 					!RESTRICTED_SELECTED_FIELDS.includes(fieldFilterKey) && (
 						<span className="action-btn">
-							<Tooltip title="Filter for value" mouseLeaveDelay={0}>
+							<Tooltip title={t('logs:filter_for_value')} mouseLeaveDelay={0}>
 								<Button
 									className="filter-btn periscope-btn"
 									icon={
@@ -378,7 +383,7 @@ export default function TableViewActions(
 									)}
 								/>
 							</Tooltip>
-							<Tooltip title="Filter out value" mouseLeaveDelay={0}>
+							<Tooltip title={t('logs:filter_out_value')} mouseLeaveDelay={0}>
 								<Button
 									className="filter-btn periscope-btn"
 									icon={
@@ -410,7 +415,7 @@ export default function TableViewActions(
 												icon={<GroupByIcon />}
 												onClick={handleGroupByAttribute}
 											>
-												Group By Attribute
+												{t('logs:group_by_attribute')}
 											</Button>
 											<Button
 												className="more-filter-actions"
@@ -418,7 +423,7 @@ export default function TableViewActions(
 												icon={<RefreshCw size={14} />}
 												onClick={handleReplaceFilter}
 											>
-												Replace filters with this value
+												{t('logs:replace_filters_with_this_value')}
 											</Button>
 										</div>
 									}
@@ -446,7 +451,7 @@ export default function TableViewActions(
 			{!isListViewPanel &&
 				!RESTRICTED_SELECTED_FIELDS.includes(fieldFilterKey) && (
 					<span className="action-btn">
-						<Tooltip title="Filter for value" mouseLeaveDelay={0}>
+						<Tooltip title={t('logs:filter_for_value')} mouseLeaveDelay={0}>
 							<Button
 								className="filter-btn periscope-btn"
 								icon={
@@ -465,7 +470,7 @@ export default function TableViewActions(
 								)}
 							/>
 						</Tooltip>
-						<Tooltip title="Filter out value" mouseLeaveDelay={0}>
+						<Tooltip title={t('logs:filter_out_value')} mouseLeaveDelay={0}>
 							<Button
 								className="filter-btn periscope-btn"
 								icon={
@@ -497,7 +502,7 @@ export default function TableViewActions(
 											icon={<GroupByIcon />}
 											onClick={handleGroupByAttribute}
 										>
-											Group By Attribute
+											{t('logs:group_by_attribute')}
 										</Button>
 										<Button
 											className="more-filter-actions"
@@ -505,7 +510,7 @@ export default function TableViewActions(
 											icon={<RefreshCw size={14} />}
 											onClick={handleReplaceFilter}
 										>
-											Replace filters with this value
+											{t('logs:replace_filters_with_this_value')}
 										</Button>
 									</div>
 								}

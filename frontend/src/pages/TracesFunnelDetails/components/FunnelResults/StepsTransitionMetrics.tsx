@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useFunnelStepsMetrics } from 'hooks/TracesFunnels/useFunnelMetrics';
 
 import FunnelMetricsTable from './FunnelMetricsTable';
@@ -17,6 +18,7 @@ function StepsTransitionMetrics({
 	startStep,
 	endStep,
 }: StepsTransitionMetricsProps): JSX.Element {
+	const { t } = useTranslation('trace');
 	const { funnelId } = useParams<{ funnelId: string }>();
 	const currentTransition = transitions.find(
 		(transition) => transition.value === selectedTransition,
@@ -29,14 +31,14 @@ function StepsTransitionMetrics({
 	});
 
 	if (!currentTransition) {
-		return <div>No transition selected</div>;
+		return <div>{t('funnels.no_transition_selected')}</div>;
 	}
 
 	return (
 		<FunnelMetricsTable
 			title={currentTransition.label}
 			subtitle={{
-				label: 'Conversion rate',
+				label: t('funnels.conversion_rate'),
 				value: `${conversionRate.toFixed(2)}%`,
 			}}
 			isLoading={isLoading}

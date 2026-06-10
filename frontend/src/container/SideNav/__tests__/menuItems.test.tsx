@@ -1,10 +1,15 @@
 import { getUserSettingsDropdownMenuItems } from 'container/SideNav/menuItems';
+import type { TFunction } from 'i18next';
+
+// Identity stub: returns the key, enough for these structure-only assertions.
+const tStub = ((key: string): string => key) as unknown as TFunction;
 
 const BASE_PARAMS = {
 	userEmail: 'test@signoz.io',
 	isWorkspaceBlocked: false,
 	isEnterpriseSelfHostedUser: false,
 	isCommunityEnterpriseUser: false,
+	t: tStub,
 };
 
 describe('getUserSettingsDropdownMenuItems', () => {

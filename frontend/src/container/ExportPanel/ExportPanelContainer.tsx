@@ -85,11 +85,11 @@ function ExportPanelContainer({
 
 	return (
 		<Wrapper direction="vertical">
-			<Title>Export Panel</Title>
+			<Title>{t('export_panel')}</Title>
 
 			<SelectWrapper direction="horizontal">
 				<DashboardSelect
-					placeholder="Select Dashboard"
+					placeholder={t('select_dashboard')}
 					options={options}
 					showSearch
 					loading={isDashboardLoading}
@@ -104,19 +104,19 @@ function ExportPanelContainer({
 					disabled={isDisabled}
 					onClick={handleExportClick}
 				>
-					Export
+					{t('export')}
 				</Button>
 			</SelectWrapper>
 
 			<Typography>
-				Or create dashboard with this panel -
+				{t('or_create_dashboard_with_panel')}
 				<NewDashboardButton
 					disabled={createDashboardLoading}
 					loading={createDashboardLoading}
 					type="link"
 					onClick={handleNewDashboard}
 				>
-					New Dashboard
+					{t('new_dashboard')}
 				</NewDashboardButton>
 			</Typography>
 		</Wrapper>
