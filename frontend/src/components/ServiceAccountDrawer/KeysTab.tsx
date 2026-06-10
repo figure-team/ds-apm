@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { type TFunction, useTranslation } from 'react-i18next';
 import { KeyRound, X } from '@signozhq/icons';
 import { Button } from '@signozhq/ui';
 import { Skeleton, Table, Tooltip } from 'antd';
@@ -27,15 +28,16 @@ interface BuildColumnsParams {
 	handleformatLastObservedAt: (
 		lastObservedAt: Date | null | undefined,
 	) => string;
+	t: TFunction;
 }
 
-function formatExpiry(expiresAt: number): JSX.Element {
+function formatExpiry(expiresAt: number, t: TFunction): JSX.Element {
 	if (expiresAt === 0) {
-		return <span className="keys-tab__expiry--never">Never</span>;
+		return <span className="keys-tab__expiry--never">{t('never')}</span>;
 	}
 	const expiryDate = dayjs.unix(expiresAt);
 	if (expiryDate.isBefore(dayjs())) {
-		return <span className="keys-tab__expiry--expired">Expired</span>;
+		return <span className="keys-tab__expiry--expired">{t('expired')}</span>;
 	}
 	return <span>{expiryDate.format(DATE_TIME_FORMATS.MONTH_DATE)}</span>;
 }
@@ -44,6 +46,7 @@ function buildColumns({
 	isDisabled,
 	onRevokeClick,
 	handleformatLastObservedAt,
+	t,
 }: BuildColumnsParams): ColumnsType<ServiceaccounttypesGettableFactorAPIKeyDTO> {
 	return [
 		{
@@ -67,7 +70,7 @@ function buildColumns({
 				const bVal = b.expiresAt === 0 ? Infinity : b.expiresAt;
 				return aVal - bVal;
 			},
-			render: (expiresAt: number): JSX.Element => formatExpiry(expiresAt),
+			render: (expiresAt: number): JSX.Element => formatExpiry(expiresAt, t),
 		},
 		{
 			title: 'Last Observed At',
@@ -120,6 +123,7 @@ function KeysTab({
 	currentPage,
 	pageSize,
 }: KeysTabProps): JSX.Element {
+	const { t } = useTranslation(['serviceAccounts', 'common']);
 	const [, setIsAddKeyOpen] = useQueryState(
 		'add-key',
 		parseAsBoolean.withDefault(false),
@@ -149,8 +153,9 @@ function KeysTab({
 	);
 
 	const columns = useMemo(
-		() => buildColumns({ isDisabled, onRevokeClick, handleformatLastObservedAt }),
-		[isDisabled, onRevokeClick, handleformatLastObservedAt],
+		() =>
+			buildColumns({ isDisabled, onRevokeClick, handleformatLastObservedAt, t }),
+		[isDisabled, onRevokeClick, handleformatLastObservedAt, t],
 	);
 
 	if (isLoading) {
@@ -166,14 +171,14 @@ function KeysTab({
 			<div className="keys-tab__empty">
 				<KeyRound size={24} className="keys-tab__empty-icon" />
 				<p className="keys-tab__empty-text">
-					No keys. Start by creating one.{' '}
+					{t('no_keys')}{' '}
 					<a
 						href="https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/#step-3-generate-an-api-key"
 						target="_blank"
 						rel="noopener noreferrer"
 						className="keys-tab__learn-more"
 					>
-						Learn more
+						{t('common:learn_more')}
 					</a>
 				</p>
 				<Button
@@ -184,7 +189,7 @@ function KeysTab({
 					}}
 					disabled={isDisabled}
 				>
-					+ Add your first key
+					{t('add_first_key')}
 				</Button>
 			</div>
 		);

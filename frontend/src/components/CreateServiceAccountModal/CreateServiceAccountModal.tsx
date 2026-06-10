@@ -1,4 +1,5 @@
 import { Controller, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import { X } from '@signozhq/icons';
 import {
@@ -27,6 +28,7 @@ interface FormValues {
 }
 
 function CreateServiceAccountModal(): JSX.Element {
+	const { t } = useTranslation(['serviceAccounts', 'common']);
 	const queryClient = useQueryClient();
 	const [isOpen, setIsOpen] = useQueryState(
 		SA_QUERY_PARAMS.CREATE_SA,
@@ -82,7 +84,7 @@ function CreateServiceAccountModal(): JSX.Element {
 
 	return (
 		<DialogWrapper
-			title="New Service Account"
+			title={t('create_modal_title')}
 			open={isOpen}
 			onOpenChange={(open): void => {
 				if (!open) {
@@ -101,7 +103,7 @@ function CreateServiceAccountModal(): JSX.Element {
 					onSubmit={handleSubmit(handleCreate)}
 				>
 					<div className="create-sa-form__item">
-						<label htmlFor="sa-name">Name</label>
+						<label htmlFor="sa-name">{t('create_name_label')}</label>
 						<Controller
 							name="name"
 							control={control}
@@ -109,7 +111,7 @@ function CreateServiceAccountModal(): JSX.Element {
 							render={({ field }): JSX.Element => (
 								<Input
 									id="sa-name"
-									placeholder="Enter a name"
+									placeholder={t('create_name_placeholder')}
 									className="create-sa-form__input"
 									value={field.value}
 									onChange={field.onChange}
@@ -132,7 +134,7 @@ function CreateServiceAccountModal(): JSX.Element {
 					onClick={handleClose}
 				>
 					<X size={12} />
-					Cancel
+					{t('common:cancel')}
 				</Button>
 
 				<Button
@@ -144,7 +146,7 @@ function CreateServiceAccountModal(): JSX.Element {
 					loading={isSubmitting}
 					disabled={!isValid}
 				>
-					Create Service Account
+					{t('create_submit')}
 				</Button>
 			</DialogFooter>
 		</DialogWrapper>

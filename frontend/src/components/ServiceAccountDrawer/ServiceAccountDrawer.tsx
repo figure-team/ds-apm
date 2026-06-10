@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import { Key, LayoutGrid, Plus, Trash2, X } from '@signozhq/icons';
 import {
@@ -68,6 +69,7 @@ function toSaveApiError(err: unknown): APIError {
 function ServiceAccountDrawer({
 	onSuccess,
 }: ServiceAccountDrawerProps): JSX.Element {
+	const { t } = useTranslation(['serviceAccounts', 'common']);
 	const [selectedAccountId, setSelectedAccountId] = useQueryState(
 		SA_QUERY_PARAMS.ACCOUNT,
 	);
@@ -395,14 +397,14 @@ function ServiceAccountDrawer({
 						className="sa-drawer__tab"
 					>
 						<LayoutGrid size={14} />
-						Overview
+						{t('tab_overview')}
 					</ToggleGroupItem>
 					<ToggleGroupItem
 						value={ServiceAccountDrawerTab.Keys}
 						className="sa-drawer__tab"
 					>
 						<Key size={14} />
-						Keys
+						{t('tab_keys')}
 						{keys.length > 0 && (
 							<span className="sa-drawer__tab-count">{keys.length}</span>
 						)}
@@ -419,7 +421,7 @@ function ServiceAccountDrawer({
 						}}
 					>
 						<Plus size={12} />
-						Add Key
+						{t('add_key')}
 					</Button>
 				)}
 			</div>
@@ -486,7 +488,10 @@ function ServiceAccountDrawer({
 							<span className="sa-drawer__pagination-range">
 								{range[0]} &#8212; {range[1]}
 							</span>
-							<span className="sa-drawer__pagination-total"> of {total}</span>
+							<span className="sa-drawer__pagination-total">
+								{' '}
+								{t('pagination_total', { total })}
+							</span>
 						</>
 					)}
 					showSizeChanger={false}
@@ -507,14 +512,14 @@ function ServiceAccountDrawer({
 							}}
 						>
 							<Trash2 size={12} />
-							Delete Service Account
+							{t('delete_service_account')}
 						</Button>
 					)}
 					{!isDeleted && (
 						<div className="sa-drawer__footer-right">
 							<Button variant="solid" color="secondary" onClick={handleClose}>
 								<X size={14} />
-								Cancel
+								{t('common:cancel')}
 							</Button>
 							<Button
 								variant="solid"
@@ -523,7 +528,7 @@ function ServiceAccountDrawer({
 								disabled={!isDirty}
 								onClick={handleSave}
 							>
-								Save Changes
+								{t('save_changes')}
 							</Button>
 						</div>
 					)}
@@ -544,7 +549,7 @@ function ServiceAccountDrawer({
 				direction="right"
 				showCloseButton
 				showOverlay={false}
-				title="Service Account Details"
+				title={t('drawer_title')}
 				className="sa-drawer"
 				width="wide"
 				footer={footer}

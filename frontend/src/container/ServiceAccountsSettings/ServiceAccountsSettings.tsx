@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Check, ChevronDown, Plus } from '@signozhq/icons';
 import { Button, Input } from '@signozhq/ui';
 import type { MenuProps } from 'antd';
@@ -30,6 +31,7 @@ import {
 import './ServiceAccountsSettings.styles.scss';
 
 function ServiceAccountsSettings(): JSX.Element {
+	const { t } = useTranslation(['serviceAccounts', 'common']);
 	const [currentPage, setPage] = useQueryState(
 		SA_QUERY_PARAMS.PAGE,
 		parseAsInteger.withDefault(1),
@@ -124,7 +126,7 @@ function ServiceAccountsSettings(): JSX.Element {
 			key: FilterMode.All,
 			label: (
 				<div className="sa-settings-filter-option">
-					<span>All accounts ⎯ {totalCount}</span>
+					<span>{t('filter_all', { count: totalCount })}</span>
 					{filterMode === FilterMode.All && <Check size={14} />}
 				</div>
 			),
@@ -137,7 +139,7 @@ function ServiceAccountsSettings(): JSX.Element {
 			key: FilterMode.Active,
 			label: (
 				<div className="sa-settings-filter-option">
-					<span>Active ⎯ {activeCount}</span>
+					<span>{t('filter_active', { count: activeCount })}</span>
 					{filterMode === FilterMode.Active && <Check size={14} />}
 				</div>
 			),
@@ -150,7 +152,7 @@ function ServiceAccountsSettings(): JSX.Element {
 			key: FilterMode.Deleted,
 			label: (
 				<div className="sa-settings-filter-option">
-					<span>Deleted ⎯ {deletedCount}</span>
+					<span>{t('filter_deleted', { count: deletedCount })}</span>
 					{filterMode === FilterMode.Deleted && <Check size={14} />}
 				</div>
 			),
@@ -164,11 +166,11 @@ function ServiceAccountsSettings(): JSX.Element {
 	function getFilterLabel(): string {
 		switch (filterMode) {
 			case FilterMode.Active:
-				return `Active ⎯ ${activeCount}`;
+				return t('filter_active', { count: activeCount }).toString();
 			case FilterMode.Deleted:
-				return `Deleted ⎯ ${deletedCount}`;
+				return t('filter_deleted', { count: deletedCount }).toString();
 			default:
-				return `All accounts ⎯ ${totalCount}`;
+				return t('filter_all', { count: totalCount }).toString();
 		}
 	}
 	const filterLabel = getFilterLabel();
@@ -194,16 +196,16 @@ function ServiceAccountsSettings(): JSX.Element {
 		<>
 			<div className="sa-settings">
 				<div className="sa-settings__header">
-					<h1 className="sa-settings__title">Service Accounts</h1>
+					<h1 className="sa-settings__title">{t('page_title')}</h1>
 					<p className="sa-settings__subtitle">
-						Overview of service accounts added to this workspace.{' '}
+						{t('page_subtitle')}{' '}
 						<a
 							href="https://signoz.io/docs/manage/administrator-guide/iam/service-accounts"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="sa-settings__learn-more"
 						>
-							Learn more
+							{t('common:learn_more')}
 						</a>
 					</p>
 				</div>
@@ -228,7 +230,7 @@ function ServiceAccountsSettings(): JSX.Element {
 						<Input
 							type="search"
 							name="service-accounts-search"
-							placeholder="Search by name or email..."
+							placeholder={t('search_placeholder')}
 							value={searchQuery}
 							onChange={(e): void => {
 								setSearchQuery(e.target.value);
@@ -246,7 +248,7 @@ function ServiceAccountsSettings(): JSX.Element {
 						}}
 					>
 						<Plus size={12} />
-						New Service Account
+						{t('new_service_account')}
 					</Button>
 				</div>
 			</div>

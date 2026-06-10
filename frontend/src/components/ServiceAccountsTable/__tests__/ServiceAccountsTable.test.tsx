@@ -37,7 +37,7 @@ describe('ServiceAccountsTable', () => {
 
 		expect(screen.getByText('CI Bot')).toBeInTheDocument();
 		expect(screen.getByText('ci-bot@signoz.io')).toBeInTheDocument();
-		expect(screen.getByText('ACTIVE')).toBeInTheDocument();
+		expect(screen.getByText('status_active')).toBeInTheDocument();
 	});
 
 	it('shows DISABLED badge and +2 overflow badge for multi-role accounts', () => {
@@ -75,7 +75,7 @@ describe('ServiceAccountsTable', () => {
 	it('shows "No service accounts" empty state when data is empty and no search query', () => {
 		render(<ServiceAccountsTable {...defaultProps} data={[]} />);
 
-		expect(screen.getByText(/No service accounts/i)).toBeInTheDocument();
+		expect(screen.getByText('no_service_accounts')).toBeInTheDocument();
 	});
 
 	it('shows "No results for {query}" empty state when search is active', () => {
@@ -85,7 +85,7 @@ describe('ServiceAccountsTable', () => {
 			</NuqsTestingAdapter>,
 		);
 
-		expect(screen.getByText(/No results for/i)).toBeInTheDocument();
+		expect(screen.getByText('no_results_for')).toBeInTheDocument();
 		expect(screen.getByText('ghost')).toBeInTheDocument();
 	});
 });
