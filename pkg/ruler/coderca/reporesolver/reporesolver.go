@@ -6,7 +6,9 @@ package reporesolver
 
 import (
 	"context"
+	"errors"
 
+	"github.com/SigNoz/signoz/pkg/ruler/coderca"
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
 )
 
@@ -27,7 +29,24 @@ func New(maps ruletypes.CodebaseServiceMapStore, repos ruletypes.CodebaseRepoSto
 // nil error) means "skip as no_repo_mapping": an unmapped service, a mapping
 // pointing at a missing repo, or a disabled repo. A store error propagates.
 //
-// E3 STUB: always ok=true with a zero repo → every assertion fails (RED).
 func (r *Resolver) ResolveRepo(ctx context.Context, orgID, service string) (ruletypes.CodebaseRepo, string, bool, error) {
-	return ruletypes.CodebaseRepo{}, "", true, nil
+	mappings, err := r.maps.List(ctx, orgID)
+	if err != nil {
+		return ruletypes.CodebaseRepo{}, "", false, err
+	}
+	m, ok := coderca.ResolveServiceRepo(mappings, orgID, service)
+	if !ok {
+		return ruletypes.CodebaseRepo{}, "", false, nil
+	}
+	repo, err := r.repos.Get(ctx, orgID, m.RepoID, r.decrypt)
+	if err != nil {
+		if errors.Is(err, ruletypes.ErrCodebaseRepoNotFound) {
+			return ruletypes.CodebaseRepo{}, "", false, nil // mapping points at a missing repo
+		}
+		return ruletypes.CodebaseRepo{}, "", false, err
+	}
+	if !repo.Enabled {
+		return ruletypes.CodebaseRepo{}, "", false, nil // repo registration disabled
+	}
+	return repo, m.Subpath, true, nil
 }
