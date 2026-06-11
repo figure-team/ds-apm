@@ -1,6 +1,9 @@
 package ruletypes
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/uptrace/bun"
 )
 
@@ -26,14 +29,54 @@ type StorableCodebaseRepo struct {
 // FromDomainCodebaseRepo encrypts the credential via the provided encryptor
 // and returns the storable form. orgID and repoID are required.
 func FromDomainCodebaseRepo(repo CodebaseRepo, encrypt func(string) (string, error)) (*StorableCodebaseRepo, error) {
-	// STUB — replaced in GREEN.
-	return &StorableCodebaseRepo{}, nil
+	if strings.TrimSpace(repo.OrgID) == "" {
+		return nil, fmt.Errorf("storable codebase repo: orgID must not be empty")
+	}
+	if strings.TrimSpace(repo.RepoID) == "" {
+		return nil, fmt.Errorf("storable codebase repo: repoID must not be empty")
+	}
+
+	credCT, err := encrypt(repo.Credential)
+	if err != nil {
+		return nil, fmt.Errorf("storable codebase repo: encrypt credential: %w", err)
+	}
+
+	return &StorableCodebaseRepo{
+		OrgID:                repo.OrgID,
+		RepoID:               repo.RepoID,
+		GitURL:               repo.GitURL,
+		DefaultBranch:        repo.DefaultBranch,
+		CredentialCiphertext: credCT,
+		Enabled:              repo.Enabled,
+		BranchName:           repo.BranchName,
+		Fetched:              repo.Fetched,
+		BaselineCommit:       repo.BaselineCommit,
+		LastSyncAt:           repo.LastSyncAt,
+		LastSyncStatus:       repo.LastSyncStatus,
+	}, nil
 }
 
 // ToDomain decrypts the credential via the provided decryptor. The returned
 // CodebaseRepo carries the plaintext credential; callers must scrub it before
 // returning over the network.
 func (s *StorableCodebaseRepo) ToDomain(decrypt func(string) (string, error)) (CodebaseRepo, error) {
-	// STUB — replaced in GREEN.
-	return CodebaseRepo{}, nil
+	cred, err := decrypt(s.CredentialCiphertext)
+	if err != nil {
+		return CodebaseRepo{}, fmt.Errorf("storable codebase repo: decrypt credential: %w", err)
+	}
+
+	return CodebaseRepo{
+		ContractVersion: CodebaseRepoContractVersion,
+		OrgID:           s.OrgID,
+		RepoID:          s.RepoID,
+		GitURL:          s.GitURL,
+		DefaultBranch:   s.DefaultBranch,
+		Credential:      cred,
+		Enabled:         s.Enabled,
+		BranchName:      s.BranchName,
+		Fetched:         s.Fetched,
+		BaselineCommit:  s.BaselineCommit,
+		LastSyncAt:      s.LastSyncAt,
+		LastSyncStatus:  s.LastSyncStatus,
+	}, nil
 }
