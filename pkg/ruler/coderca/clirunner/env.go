@@ -21,9 +21,28 @@ import (
 // auth. The returned cleanup is always non-nil and safe to defer; it removes any
 // materialized tempdir.
 //
-// A2 STUB: returns parent unchanged → auth-injection assertions fail (RED).
 func BuildEnv(s Spec, parent []string) (env []string, cleanup func(), err error) {
-	return parent, func() {}, nil
+	cleanup = func() {}
+	token := strings.TrimSpace(s.AuthToken)
+	if token == "" {
+		return parent, cleanup, nil
+	}
+
+	switch s.Agent {
+	case AgentClaude:
+		return appendEnv(parent, "CLAUDE_CODE_OAUTH_TOKEN", s.AuthToken), cleanup, nil
+	case AgentCodex:
+		if strings.HasPrefix(token, "{") {
+			dir, clean, mErr := materializeCodexHome(token)
+			if mErr != nil {
+				return nil, cleanup, mErr
+			}
+			return appendEnv(parent, "CODEX_HOME", dir, "OPENAI_API_KEY"), clean, nil
+		}
+		return appendEnv(parent, "OPENAI_API_KEY", s.AuthToken, "CODEX_HOME"), cleanup, nil
+	default:
+		return parent, cleanup, nil
+	}
 }
 
 // appendEnv returns parent with key=value appended, after dropping any inherited
