@@ -59,14 +59,14 @@ func (s *Store) ClaimNext(ctx context.Context, p ClaimParams) (ClaimResult, erro
 
 		// 1. Oldest eligible queued run (read). Nothing queued → no claim, no
 		//    capacity touched.
-		var runID, dedupKey, service string
+		var runID, orgID, dedupKey, service string
 		var attempts int
 		scanErr := db.NewRaw(
-			`SELECT run_id, dedup_key, service, attempts FROM coderca_run
+			`SELECT run_id, org_id, dedup_key, service, attempts FROM coderca_run
 			 WHERE status = ? AND (lease_until = 0 OR lease_until < ?)
 			 ORDER BY created_at ASC LIMIT 1`,
 			string(coderca.RunStatusQueued), nowUnix,
-		).Scan(ctx, &runID, &dedupKey, &service, &attempts)
+		).Scan(ctx, &runID, &orgID, &dedupKey, &service, &attempts)
 		if errors.Is(scanErr, sql.ErrNoRows) {
 			return nil
 		}
@@ -134,6 +134,7 @@ func (s *Store) ClaimNext(ctx context.Context, p ClaimParams) (ClaimResult, erro
 		res = ClaimResult{
 			Claimed:    true,
 			RunID:      runID,
+			OrgID:      orgID,
 			LeaseToken: leaseToken,
 			DedupKey:   dedupKey,
 			Service:    service,
