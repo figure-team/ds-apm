@@ -25,6 +25,8 @@
 	"tab_metrics": "메트릭",
 	"tab_processes": "프로세스",
 	"tab_traces": "트레이스",
+	"tab_hosts": "호스트",
+	"tab_kubernetes": "쿠버네티스",
 	"error_team_resolving": "팀에서 문제 해결을 위해 노력하고 있습니다. 문제가 지속되면 지원팀에 문의해 주세요.",
 	"no_host_metrics_yet": "아직 수신된 host 메트릭 데이터가 없습니다",
 	"send_host_metrics_help": "host 메트릭 전송 방법은 <0>문서</0>를 참고하세요.",

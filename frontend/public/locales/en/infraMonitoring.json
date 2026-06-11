@@ -25,6 +25,8 @@
 	"tab_metrics": "Metrics",
 	"tab_processes": "Processes",
 	"tab_traces": "Traces",
+	"tab_hosts": "Hosts",
+	"tab_kubernetes": "Kubernetes",
 	"error_team_resolving": "Our team is getting on top to resolve this. Please reach out to support if the issue persists.",
 	"no_host_metrics_yet": "No host metrics data received yet",
 	"send_host_metrics_help": "Please refer to <0>our documentation</0> to learn how to send host metrics.",
