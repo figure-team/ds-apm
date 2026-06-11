@@ -6,11 +6,24 @@ package runstore
 
 import (
 	"context"
+	"crypto/rand"
+	"database/sql"
+	"encoding/hex"
+	"errors"
 	"time"
 
 	"github.com/SigNoz/signoz/pkg/ruler/coderca"
 	"github.com/SigNoz/signoz/pkg/sqlstore"
 )
+
+// newRunID returns a random 128-bit hex id (no external uuid dependency).
+func newRunID() (string, error) {
+	var b [16]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b[:]), nil
+}
 
 // AdmitParams is the input to a single admission decision. Thresholds are
 // passed in (sourced from codebase_config) so the logic stays testable.
@@ -51,6 +64,105 @@ func New(store sqlstore.SQLStore) *Store {
 // serializes concurrent admits, so for one dedup_key exactly one run is
 // created (design §6.2).
 func (s *Store) Admit(ctx context.Context, p AdmitParams) (AdmitResult, error) {
-	// STUB — replaced in GREEN.
-	return AdmitResult{}, nil
+	// Defensive: a non-positive daily cap admits nothing (feature should be
+	// gated off upstream before reaching here).
+	if p.MaxRunsPerDay <= 0 {
+		return AdmitResult{Reason: coderca.SkipBudgetExhausted}, nil
+	}
+
+	nowUnix := p.Now.Unix()
+	day := p.Now.UTC().Format("2006-01-02")
+	cooldownSecs := int64(p.CooldownWindow / time.Second)
+
+	var res AdmitResult
+	err := s.sqlstore.RunInTxCtx(ctx, nil, func(ctx context.Context) error {
+		db := s.sqlstore.BunDBCtx(ctx)
+
+		// 1. Dedup (read). A row within the sliding cooldown is a duplicate.
+		var lastAdmitted int64
+		var lastRunRef string
+		scanErr := db.NewRaw(
+			"SELECT last_admitted_at, last_run_ref FROM coderca_admission WHERE org_id = ? AND dedup_key = ?",
+			p.OrgID, p.DedupKey,
+		).Scan(ctx, &lastAdmitted, &lastRunRef)
+		switch {
+		case scanErr == nil:
+			if nowUnix-lastAdmitted < cooldownSecs {
+				if _, err := db.ExecContext(ctx,
+					"UPDATE coderca_admission SET hit_count = hit_count + 1 WHERE org_id = ? AND dedup_key = ?",
+					p.OrgID, p.DedupKey,
+				); err != nil {
+					return err
+				}
+				res = AdmitResult{Reason: coderca.SkipDeduped, PriorRunRef: lastRunRef}
+				return nil
+			}
+		case errors.Is(scanErr, sql.ErrNoRows):
+			// fresh key — fall through to admit
+		default:
+			return scanErr
+		}
+
+		// 2. Queue depth (read). Checked before any write so a rejection never
+		//    over-counts the budget.
+		var queued int
+		if err := db.NewRaw(
+			"SELECT COUNT(*) FROM coderca_run WHERE org_id = ? AND status = ?",
+			p.OrgID, string(coderca.RunStatusQueued),
+		).Scan(ctx, &queued); err != nil {
+			return err
+		}
+		if queued >= p.MaxQueueDepth {
+			res = AdmitResult{Reason: coderca.SkipQueueFull}
+			return nil
+		}
+
+		// 3. Budget (conditional atomic increment). 0 rows affected ⇒ at/over cap.
+		r, err := db.ExecContext(ctx,
+			`INSERT INTO coderca_budget (org_id, day, used) VALUES (?, ?, 1)
+			 ON CONFLICT (org_id, day) DO UPDATE SET used = used + 1 WHERE coderca_budget.used < ?`,
+			p.OrgID, day, p.MaxRunsPerDay,
+		)
+		if err != nil {
+			return err
+		}
+		affected, err := r.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if affected == 0 {
+			res = AdmitResult{Reason: coderca.SkipBudgetExhausted}
+			return nil
+		}
+
+		// 4. Insert the queued run.
+		runID, err := newRunID()
+		if err != nil {
+			return err
+		}
+		if _, err := db.ExecContext(ctx,
+			`INSERT INTO coderca_run (run_id, org_id, service, dedup_key, status, created_at)
+			 VALUES (?, ?, ?, ?, ?, ?)`,
+			runID, p.OrgID, p.Service, p.DedupKey, string(coderca.RunStatusQueued), nowUnix,
+		); err != nil {
+			return err
+		}
+
+		// 5. Upsert the admission row (pins the sliding window + last run ref).
+		if _, err := db.ExecContext(ctx,
+			`INSERT INTO coderca_admission (org_id, dedup_key, last_admitted_at, hit_count, last_run_ref)
+			 VALUES (?, ?, ?, 0, ?)
+			 ON CONFLICT (org_id, dedup_key) DO UPDATE SET last_admitted_at = ?, last_run_ref = ?`,
+			p.OrgID, p.DedupKey, nowUnix, runID, nowUnix, runID,
+		); err != nil {
+			return err
+		}
+
+		res = AdmitResult{Admitted: true, RunID: runID}
+		return nil
+	})
+	if err != nil {
+		return AdmitResult{}, err
+	}
+	return res, nil
 }
