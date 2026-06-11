@@ -1,7 +1,11 @@
 package clirunner
 
 import (
+	"bytes"
 	"context"
+	"fmt"
+	"os"
+	"os/exec"
 	"time"
 
 	"github.com/SigNoz/signoz/pkg/ruler/coderca"
@@ -58,8 +62,64 @@ func NewRunner(opts ...RunnerOption) *Runner {
 // signal, group-killed on ctx/timeout. Raw stdout is always retained on the
 // result for audit.
 //
-// A3 STUB: returns failed without executing → status/result/err assertions fail
-// (RED).
 func (r *Runner) Run(ctx context.Context, s Spec) (coderca.RCAResult, coderca.RunStatus, error) {
-	return coderca.RCAResult{}, coderca.RunStatusFailed, nil
+	args, err := BuildArgs(s)
+	if err != nil {
+		return coderca.RCAResult{}, coderca.RunStatusFailed, err
+	}
+	binary := s.Binary
+	if binary == "" {
+		binary = DefaultBinary(s.Agent)
+	}
+
+	env, cleanup, err := BuildEnv(s, os.Environ())
+	if err != nil {
+		return coderca.RCAResult{}, coderca.RunStatusFailed, err
+	}
+	defer cleanup()
+	if len(s.ExtraEnv) > 0 {
+		env = append(env, s.ExtraEnv...)
+	}
+
+	runCtx, cancel := context.WithTimeout(ctx, r.timeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(runCtx, binary, args...)
+	cmd.Dir = s.Checkout
+	cmd.Env = env
+	cmd.WaitDelay = r.waitDelay
+	configureSubprocess(cmd)
+	// Override CommandContext's lead-pid kill with a whole-group kill (§6.5).
+	cmd.Cancel = func() error { return killProcessTree(cmd) }
+
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	runErr := cmd.Run()
+	raw := stdout.String()
+
+	if runCtx.Err() == context.DeadlineExceeded {
+		return coderca.RCAResult{Raw: raw}, coderca.RunStatusTimeout,
+			fmt.Errorf("clirunner: run exceeded %s: %w", r.timeout, runCtx.Err())
+	}
+	if runErr != nil {
+		return coderca.RCAResult{Raw: raw}, coderca.RunStatusFailed,
+			fmt.Errorf("clirunner: %s: %w (stderr: %s)", binary, runErr, truncate(stderr.String(), 512))
+	}
+
+	out := raw
+	if s.Agent == AgentCodex {
+		out = reconstructCodexText(raw)
+	}
+	res, status := coderca.ParseRCAResult(out)
+	res.Raw = raw // retain full stdout for audit, regardless of normalization
+	return res, status, nil
+}
+
+func truncate(s string, n int) string {
+	if len(s) > n {
+		return s[:n] + "..."
+	}
+	return s
 }
