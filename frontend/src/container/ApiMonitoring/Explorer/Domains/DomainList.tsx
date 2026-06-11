@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
@@ -29,12 +30,13 @@ import DOCLINKS from 'utils/docLinks';
 
 import { ApiMonitoringHardcodedAttributeKeys } from '../../constants';
 import { DEFAULT_PARAMS, useApiMonitoringParams } from '../../queryParams';
-import { columnsConfig, formatDataForTable } from '../../utils';
+import { formatDataForTable, getDomainListColumnsConfig } from '../../utils';
 import DomainDetails from './DomainDetails/DomainDetails';
 
 import '../Explorer.styles.scss';
 
 function DomainList(): JSX.Element {
+	const { t } = useTranslation('apiMonitoring');
 	const [params, setParams] = useApiMonitoringParams();
 	const { showIP, selectedDomain } = params;
 	const [selectedDomainIndex, setSelectedDomainIndex] = useState<number>(-1);
@@ -156,12 +158,12 @@ function DomainList(): JSX.Element {
 					dataSource={DataSource.TRACES}
 					queryData={query}
 					onChange={handleSearchChange}
-					placeholder="Enter your filter query (e.g., deployment.environment = 'otel-demo' AND service.name = 'frontend')"
+					placeholder={t('filter_query_placeholder')}
 					hardcodedAttributeKeys={ApiMonitoringHardcodedAttributeKeys}
 				/>
 			</div>
 			{isCancelled && formattedDataForTable.length === 0 && (
-				<QueryCancelledPlaceholder subText='Click "Run Query" to load API monitoring data.' />
+				<QueryCancelledPlaceholder subText={t('cancelled_load_data')} />
 			)}
 			{!isCancelled &&
 				!isFetching &&
@@ -177,13 +179,17 @@ function DomainList(): JSX.Element {
 
 							<div className="no-filtered-domains-message">
 								<div className="no-domain-title">
-									No External API calls detected with applied filters.
+									{t('no_external_api_calls')}
 								</div>
 								<div className="no-domain-subtitle">
-									Ensure all HTTP client spans are being sent with kind as{' '}
-									<span className="attribute">Client</span> and url set in{' '}
-									<span className="attribute">url.full</span> or{' '}
-									<span className="attribute">http.url</span> attribute.
+									<Trans
+										i18nKey="apiMonitoring:ensure_http_client_spans"
+										components={[
+											<span className="attribute" key="client" />,
+											<span className="attribute" key="url-full" />,
+											<span className="attribute" key="http-url" />,
+										]}
+									/>
 								</div>
 								<a
 									href={DOCLINKS.EXTERNAL_API_MONITORING}
@@ -191,8 +197,7 @@ function DomainList(): JSX.Element {
 									rel="noreferrer"
 									className="external-api-doc-link"
 								>
-									Learn how External API monitoring works in SigNoz{' '}
-									<MoveUpRight size={14} />
+									{t('learn_external_api')} <MoveUpRight size={14} />
 								</a>
 							</div>
 						</div>
@@ -202,7 +207,7 @@ function DomainList(): JSX.Element {
 				<Table
 					className="api-monitoring-domain-list-table"
 					dataSource={isFetching || isLoading ? [] : formattedDataForTable}
-					columns={columnsConfig}
+					columns={getDomainListColumnsConfig(t)}
 					loading={{
 						spinning: isFetching || isLoading,
 						indicator: <Spin indicator={<LoadingOutlined size={14} spin />} />,

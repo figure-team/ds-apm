@@ -237,10 +237,10 @@ describe('DomainMetrics - V5 Query Payload Tests', () => {
 			});
 
 			// Verify all metric labels are displayed
-			expect(screen.getByText('EXTERNAL API')).toBeInTheDocument();
-			expect(screen.getByText('AVERAGE LATENCY')).toBeInTheDocument();
-			expect(screen.getByText('ERROR %')).toBeInTheDocument();
-			expect(screen.getByText('LAST USED')).toBeInTheDocument();
+			expect(screen.getByText('external_api_caps')).toBeInTheDocument();
+			expect(screen.getByText('average_latency_caps')).toBeInTheDocument();
+			expect(screen.getByText('error_percent_caps')).toBeInTheDocument();
+			expect(screen.getByText('last_used_caps')).toBeInTheDocument();
 
 			// Verify metric values are displayed
 			expect(screen.getByText('150')).toBeInTheDocument();

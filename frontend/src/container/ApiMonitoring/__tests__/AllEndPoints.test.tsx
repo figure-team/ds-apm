@@ -154,7 +154,7 @@ describe('AllEndPoints', () => {
 		render(<AllEndPoints {...mockProps} />);
 
 		// Verify basic component rendering
-		expect(screen.getByText('Group by')).toBeInTheDocument();
+		expect(screen.getByText('group_by')).toBeInTheDocument();
 		expect(screen.getByTestId('query-builder-mock')).toBeInTheDocument();
 		expect(screen.getByTestId('select-mock')).toBeInTheDocument();
 		expect(screen.getByTestId('grid-card-mock')).toBeInTheDocument();
@@ -168,6 +168,7 @@ describe('AllEndPoints', () => {
 
 		// Check if getAllEndpointsWidgetData was called with updated filters
 		expect(getAllEndpointsWidgetData).toHaveBeenCalledWith(
+			expect.anything(),
 			expect.anything(),
 			'test-domain',
 			expect.objectContaining({

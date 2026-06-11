@@ -343,8 +343,8 @@ describe('StatusCodeBarCharts', () => {
 			'sum',
 		);
 		expect(screen.getByTestId('bar-chart-mock')).toBeInTheDocument();
-		expect(screen.getByText('Number of calls')).toBeInTheDocument();
-		expect(screen.getByText('Latency')).toBeInTheDocument();
+		expect(screen.getByText('number_of_calls')).toBeInTheDocument();
+		expect(screen.getByText('col_latency')).toBeInTheDocument();
 	});
 
 	it('switches between number of calls and latency views', () => {
@@ -382,7 +382,7 @@ describe('StatusCodeBarCharts', () => {
 		);
 
 		// Initially should be showing number of calls (index 0)
-		const latencyButton = screen.getByText('Latency');
+		const latencyButton = screen.getByText('col_latency');
 
 		// Click to switch to latency view
 		fireEvent.click(latencyButton);

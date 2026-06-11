@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { Spacing } from '@signozhq/design-tokens';
@@ -41,6 +42,7 @@ function DomainDetails({
 	domainListLength: number;
 	domainListFilters: IBuilderQuery['filters'];
 }): JSX.Element {
+	const { t } = useTranslation('apiMonitoring');
 	const [params, setParams] = useApiMonitoringParams();
 	const [selectedView, setSelectedView] = useState<VIEWS>(
 		(params.selectedView as VIEWS) || VIEWS.ALL_ENDPOINTS,
@@ -186,7 +188,7 @@ function DomainDetails({
 								}}
 								icon={<ArrowUp size={16} />}
 								disabled={selectedDomainIndex === 0}
-								title="Previous domain"
+								title={t('previous_domain')}
 							/>
 							<Button
 								className="domain-navigate-cta"
@@ -198,7 +200,7 @@ function DomainDetails({
 								}}
 								icon={<ArrowDown size={16} />}
 								disabled={selectedDomainIndex === domainListLength - 1}
-								title="Next domain"
+								title={t('next_domain')}
 							/>
 						</Button.Group>
 					</div>
@@ -234,7 +236,7 @@ function DomainDetails({
 								}
 								value={VIEW_TYPES.ALL_ENDPOINTS}
 							>
-								<div className="view-title">All Endpoints</div>
+								<div className="view-title">{t('view_all_endpoints')}</div>
 							</Radio.Button>
 							<Radio.Button
 								className={
@@ -244,7 +246,7 @@ function DomainDetails({
 								}
 								value={VIEW_TYPES.ENDPOINT_STATS}
 							>
-								<div className="view-title">Endpoint(s) Stats</div>
+								<div className="view-title">{t('view_endpoint_stats')}</div>
 							</Radio.Button>
 							<Radio.Button
 								className={
@@ -252,7 +254,7 @@ function DomainDetails({
 								}
 								value={VIEW_TYPES.TOP_ERRORS}
 							>
-								<div className="view-title">Top 10 Errors</div>
+								<div className="view-title">{t('view_top_errors')}</div>
 							</Radio.Button>
 						</Radio.Group>
 					</div>
