@@ -6,6 +6,7 @@
 package sourcestate
 
 import (
+	"strings"
 	"time"
 
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
@@ -37,16 +38,31 @@ type SyncFacts struct {
 // StateOf extracts the tracked source state from a stored repo so a sync can
 // compute the next state relative to the last-known one.
 //
-// M2-2 STUB: returns the zero state → assertions fail (RED).
 func StateOf(repo ruletypes.CodebaseRepo) SourceState {
-	return SourceState{}
+	return SourceState{
+		BranchName:     repo.BranchName,
+		Fetched:        repo.Fetched,
+		BaselineCommit: repo.BaselineCommit,
+		LastSyncAt:     repo.LastSyncAt,
+		LastSyncStatus: repo.LastSyncStatus,
+	}
 }
 
 // Apply computes the next source state from the previous state and the facts of
 // a sync attempt. On failure it preserves the last-good baseline (a transient
 // fetch error must not erase a usable cached clone). Pure.
 //
-// M2-2 STUB: returns prev unchanged → success assertions fail (RED).
 func Apply(prev SourceState, facts SyncFacts, now time.Time) SourceState {
-	return prev
+	next := prev
+	next.BranchName = facts.Branch
+	next.LastSyncAt = now.Format(time.RFC3339)
+	if facts.Err != nil {
+		// Keep the last-good Fetched + BaselineCommit; only record the failure.
+		next.LastSyncStatus = "error: " + facts.Err.Error()
+		return next
+	}
+	next.Fetched = true
+	next.BaselineCommit = strings.TrimSpace(facts.HeadCommit)
+	next.LastSyncStatus = SyncStatusOK
+	return next
 }

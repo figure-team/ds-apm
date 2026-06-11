@@ -3,6 +3,8 @@ package sourcestate
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
@@ -38,7 +40,18 @@ func NewSyncer(git GitRunner, now func() time.Time) *Syncer {
 // state (LastSyncStatus) rather than returned, so a transient error is visible
 // in the UI without losing the last-good baseline (design §8).
 //
-// M2-2 STUB: returns the zero state, never touches git → assertions fail (RED).
 func (s *Syncer) Sync(ctx context.Context, repo ruletypes.CodebaseRepo) SourceState {
-	return SourceState{}
+	prev := StateOf(repo)
+	branch := strings.TrimSpace(repo.DefaultBranch)
+	if branch == "" {
+		return Apply(prev, SyncFacts{Branch: branch, Err: ErrNoDefaultBranch}, s.now())
+	}
+	if err := s.git.Fetch(ctx, repo); err != nil {
+		return Apply(prev, SyncFacts{Branch: branch, Err: fmt.Errorf("fetch: %w", err)}, s.now())
+	}
+	head, err := s.git.ResolveHead(ctx, repo, branch)
+	if err != nil {
+		return Apply(prev, SyncFacts{Branch: branch, Err: fmt.Errorf("resolve head: %w", err)}, s.now())
+	}
+	return Apply(prev, SyncFacts{Branch: branch, HeadCommit: head}, s.now())
 }
