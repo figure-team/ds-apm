@@ -1,0 +1,3 @@
+I was unable to locate the error signature in the checkout. The repository does
+not appear to contain the referenced symbol, and no structured result could be
+produced for this run.

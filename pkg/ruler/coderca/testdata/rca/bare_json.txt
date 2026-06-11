@@ -1,0 +1,1 @@
+{"baseline_commit":"abcabc12","root_cause":"Missing index on orders(created_at) forces a full table scan under the alerting query.","proposed_fix":"CREATE INDEX idx_orders_created_at ON orders(created_at);","confidence":"high","limitations":"Estimated from schema; no EXPLAIN was run."}
