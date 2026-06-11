@@ -1,6 +1,9 @@
 package ruletypes
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/uptrace/bun"
 )
 
@@ -18,14 +21,30 @@ type StorableCodebaseServiceMap struct {
 // FromDomainCodebaseServiceMap validates and converts a mapping to its storable
 // form. org_id, service_name, and repo_id are required.
 //
-// E1 STUB: returns nil → round-trip + validation assertions fail (RED).
 func FromDomainCodebaseServiceMap(m CodebaseServiceMap) (*StorableCodebaseServiceMap, error) {
-	return nil, nil
+	if strings.TrimSpace(m.OrgID) == "" {
+		return nil, fmt.Errorf("storable codebase service map: orgID must not be empty")
+	}
+	if strings.TrimSpace(m.ServiceName) == "" {
+		return nil, fmt.Errorf("storable codebase service map: serviceName must not be empty")
+	}
+	if strings.TrimSpace(m.RepoID) == "" {
+		return nil, fmt.Errorf("storable codebase service map: repoID must not be empty")
+	}
+	return &StorableCodebaseServiceMap{
+		OrgID:       m.OrgID,
+		ServiceName: m.ServiceName,
+		RepoID:      m.RepoID,
+		Subpath:     m.Subpath,
+	}, nil
 }
 
 // ToDomain converts the storable form back to the domain mapping.
-//
-// E1 STUB: returns the zero value → round-trip assertion fails (RED).
 func (s *StorableCodebaseServiceMap) ToDomain() CodebaseServiceMap {
-	return CodebaseServiceMap{}
+	return CodebaseServiceMap{
+		OrgID:       s.OrgID,
+		ServiceName: s.ServiceName,
+		RepoID:      s.RepoID,
+		Subpath:     s.Subpath,
+	}
 }
