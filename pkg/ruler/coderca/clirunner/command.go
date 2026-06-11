@@ -32,7 +32,9 @@ const (
 	claudeDisallowedTools = "Bash,Write,Edit,WebFetch,WebSearch"
 )
 
-// Spec is a single CLI invocation. Secrets are NEVER part of a Spec.
+// Spec is a single CLI invocation. The only secret here is AuthToken — the
+// agent's OWN model-API credential, used solely to populate the child env. No
+// git credential and no RCA secret is ever part of a Spec.
 type Spec struct {
 	Agent        Agent
 	Binary       string // resolved binary; DefaultBinary(agent) when empty
@@ -41,6 +43,7 @@ type Spec struct {
 	SystemPrompt string
 	Prompt       string
 	MaxBudgetUSD string // claude hard $ ceiling, e.g. "0.50" — REQUIRED for claude
+	AuthToken    string // agent's model-API auth (claude OAuth / codex key|auth.json)
 }
 
 var (
