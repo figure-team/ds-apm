@@ -1,10 +1,12 @@
 package alertmanagertypes
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 
 	"github.com/prometheus/alertmanager/template"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -64,6 +66,112 @@ func TestSanitizeIncidentValuePreservesShortInnocuousText(t *testing.T) {
 	if got != "short status: degraded for 3 minutes" {
 		t.Fatalf("innocuous text mutated: %q", got)
 	}
+}
+
+// TestSanitize_AllPatterns is the DoD acceptance for SCOPE row 1: every
+// enumerated sensitive pattern (email, phone, opaque token, JWT, URL with a
+// sensitive query key) must be stripped of its raw secret, while identifying,
+// non-sensitive labels survive verbatim.
+func TestSanitize_AllPatterns(t *testing.T) {
+	redacted := []struct {
+		name   string
+		input  string
+		leaked string // raw substring that MUST NOT survive sanitization
+	}{
+		{"email", "reach chulsoo@example.co.kr now", "chulsoo@example.co.kr"},
+		{"korean_mobile", "call 010-1234-5678 asap", "010-1234-5678"},
+		{"opaque_token", "token=ghp_aBcDeF0123456789abcdef0123456789abcd", "ghp_aBcDeF0123456789abcdef0123456789abcd"},
+		{"jwt", "auth eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"},
+		{"url_sensitive_key", "https://rb.example.com/sop?access_token=s3cr3tvalue&view=public", "s3cr3tvalue"},
+	}
+	for _, tc := range redacted {
+		t.Run(tc.name, func(t *testing.T) {
+			got := SanitizeIncidentValue(tc.input)
+			require.NotContains(t, got, tc.leaked, "raw sensitive token leaked through sanitization: %q", got)
+		})
+	}
+
+	preserved := []string{"checkout-api", "prod", "critical", "SOP-PAY-001", "customer-a"}
+	for _, keep := range preserved {
+		t.Run("preserve/"+keep, func(t *testing.T) {
+			require.Equal(t, keep, SanitizeIncidentValue(keep), "identifying label must be preserved verbatim")
+		})
+	}
+}
+
+// TestRedactionMetric is the DoD acceptance for SCOPE row 2: each value that
+// gets redacted advances the redaction counter by exactly one, and innocuous
+// values leave it untouched ("마스킹 N건 발생 → redaction metric += N").
+func TestRedactionMetric(t *testing.T) {
+	before := testutil.ToFloat64(incidentRedactionsTotal)
+
+	redactedValues := []string{
+		"reach chulsoo@example.co.kr now",                  // email
+		"call 010-1234-5678 asap",                          // korean mobile
+		"token=ghp_aBcDeF0123456789abcdef0123456789abcdef", // secret marker
+	}
+	for _, v := range redactedValues {
+		SanitizeIncidentValue(v)
+	}
+
+	require.Equal(t, float64(len(redactedValues)), testutil.ToFloat64(incidentRedactionsTotal)-before,
+		"expected one redaction increment per redacted value")
+
+	// Innocuous values must not be counted as redactions.
+	mid := testutil.ToFloat64(incidentRedactionsTotal)
+	SanitizeIncidentValue("degraded for 3 minutes")
+	SanitizeIncidentValue("checkout-api")
+	require.Equal(t, mid, testutil.ToFloat64(incidentRedactionsTotal),
+		"innocuous values must not move the redaction counter")
+}
+
+// TestSanitizeTemplateData drives the masking of the full outbound webhook
+// payload (template.Data) — not just the derived incident block. It is the Go
+// underpinning for SCOPE row 3: the external payload must carry zero raw PII,
+// while routing/identifying metadata survives and the input is left untouched.
+func TestSanitizeTemplateData(t *testing.T) {
+	in := &template.Data{
+		Receiver:          "webhook",
+		Status:            "firing",
+		GroupLabels:       template.KV{"alertname": "PaymentFailures", "service.name": "checkout-api"},
+		CommonLabels:      template.KV{"severity": "critical", "owner_email": "oncall@example.com"},
+		CommonAnnotations: template.KV{"impact_summary": "call 010-1234-5678", "next_action": "investigate"},
+		Alerts: template.Alerts{
+			{
+				Status:       "firing",
+				Labels:       template.KV{"customer": "reach chulsoo@example.co.kr"},
+				Annotations:  template.KV{"customer_update": "token=ghp_aBcDeF0123456789abcdef0123456789abcd"},
+				GeneratorURL: "https://signoz.example.com/alert?access_token=s3cr3tvalue",
+			},
+		},
+	}
+
+	out := SanitizeTemplateData(in)
+
+	// No raw PII survives anywhere in the serialized outbound payload.
+	blob, err := json.Marshal(out)
+	require.NoError(t, err)
+	for _, leaked := range []string{
+		"oncall@example.com",
+		"010-1234-5678",
+		"chulsoo@example.co.kr",
+		"ghp_aBcDeF0123456789abcdef0123456789abcd",
+		"s3cr3tvalue",
+	} {
+		require.NotContains(t, string(blob), leaked, "raw PII leaked in outbound payload")
+	}
+
+	// Identifying / routing metadata is preserved verbatim.
+	require.Equal(t, "checkout-api", out.GroupLabels["service.name"])
+	require.Equal(t, "PaymentFailures", out.GroupLabels["alertname"])
+	require.Equal(t, "critical", out.CommonLabels["severity"])
+	require.Equal(t, "investigate", out.CommonAnnotations["next_action"])
+
+	// The input must not be mutated: webhook.go still templates the URL from the
+	// raw data, so sanitization has to be a defensive copy.
+	require.Equal(t, "oncall@example.com", in.CommonLabels["owner_email"])
+	require.Equal(t, "call 010-1234-5678", in.CommonAnnotations["impact_summary"])
+	require.Equal(t, "reach chulsoo@example.co.kr", in.Alerts[0].Labels["customer"])
 }
 
 func TestIncidentInfoFieldsOmitEmptyValues(t *testing.T) {
