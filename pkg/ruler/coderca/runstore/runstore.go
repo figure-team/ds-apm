@@ -114,7 +114,7 @@ func (s *Store) Admit(ctx context.Context, p AdmitParams) (AdmitResult, error) {
 		}
 		if queued >= p.MaxQueueDepth {
 			res = AdmitResult{Reason: coderca.SkipQueueFull}
-			return nil
+			return s.bumpSkipStat(ctx, p.OrgID, coderca.SkipQueueFull, day)
 		}
 
 		// 3. Budget (conditional atomic increment). 0 rows affected ⇒ at/over cap.
@@ -132,7 +132,7 @@ func (s *Store) Admit(ctx context.Context, p AdmitParams) (AdmitResult, error) {
 		}
 		if affected == 0 {
 			res = AdmitResult{Reason: coderca.SkipBudgetExhausted}
-			return nil
+			return s.bumpSkipStat(ctx, p.OrgID, coderca.SkipBudgetExhausted, day)
 		}
 
 		// 4. Insert the queued run.
