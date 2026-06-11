@@ -17,6 +17,7 @@ package dispatchhook
 import (
 	"context"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/SigNoz/signoz/pkg/types/alertmanagertypes"
@@ -27,6 +28,10 @@ import (
 // generator. The dispatcher must never block on a slow provider, so this
 // is intentionally aggressive.
 const DefaultGenerateTimeout = time.Second
+
+// priorIncidentLimit caps how many past occurrences of the same failure the
+// hook surfaces to the generator. Kept small so the prompt stays focused.
+const priorIncidentLimit = 3
 
 // Hook resolves an alert's SOP binding, runs the AIStrategyGenerator,
 // and merges the resulting public annotations back into the alert. It
@@ -127,6 +132,11 @@ func (h *Hook) Apply(
 		return annotations
 	}
 
+	// Reference past occurrences of the same failure signature (same
+	// alertFingerprint). Best-effort context: a lookup failure must never
+	// block generation, so errors are logged and we proceed with no history.
+	priorIncidents := h.lookupPriorIncidents(ctx, orgID, incidentID, alertFingerprint)
+
 	genCtx, cancel := context.WithTimeout(ctx, h.timeout)
 	defer cancel()
 
@@ -136,6 +146,7 @@ func (h *Hook) Apply(
 		Labels:           labels,
 		Annotations:      annotations,
 		SOPDocument:      doc,
+		PriorIncidents:   priorIncidents,
 		// EvidenceRefs is intentionally empty for v0.1: the dispatch
 		// path has no evidence collector yet. The generator is expected
 		// to handle the empty case (deterministic local generator does).
@@ -183,6 +194,40 @@ func (h *Hook) Apply(
 	}
 
 	return merged
+}
+
+// lookupPriorIncidents returns up to priorIncidentLimit past occurrences of the
+// same failure signature (matched by alertFingerprint), excluding the current
+// incident. It is best-effort: an empty fingerprint, nil store, or store error
+// yields no history rather than failing the dispatch.
+func (h *Hook) lookupPriorIncidents(ctx context.Context, orgID, incidentID, alertFingerprint string) []ruletypes.AIPriorIncident {
+	if h.aiHistoryStore == nil || strings.TrimSpace(alertFingerprint) == "" {
+		return nil
+	}
+
+	// Fetch one extra so excluding the current incident still leaves up to
+	// priorIncidentLimit prior occurrences.
+	records, err := h.aiHistoryStore.ListRecent(ctx, orgID,
+		ruletypes.AIStrategyHistoryLookupRequest{AlertFingerprint: alertFingerprint},
+		priorIncidentLimit+1)
+	if err != nil {
+		h.logger.WarnContext(ctx, "ai dispatch hook: list prior incidents failed",
+			slog.String("orgId", orgID), slog.String("incidentId", incidentID),
+			slog.Any("err", err))
+		return nil
+	}
+
+	priors := make([]ruletypes.AIPriorIncident, 0, priorIncidentLimit)
+	for _, record := range records {
+		if strings.TrimSpace(record.IncidentID) == strings.TrimSpace(incidentID) {
+			continue // the current incident is not its own prior occurrence
+		}
+		priors = append(priors, ruletypes.AIPriorIncidentFromHistoryRecord(record))
+		if len(priors) == priorIncidentLimit {
+			break
+		}
+	}
+	return priors
 }
 
 // mergeAnnotations returns a fresh map containing base overlaid with
