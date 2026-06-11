@@ -40,8 +40,8 @@ func (migration *addDSCodebaseConfig) Up(ctx context.Context, db *bun.DB) error 
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	if _, err := tx.ExecContext(ctx, `
-		CREATE TABLE IF NOT EXISTS ds_codebase_repo (
+	stmts := []string{
+		`CREATE TABLE IF NOT EXISTS ds_codebase_repo (
 			org_id                 TEXT      NOT NULL,
 			repo_id                TEXT      NOT NULL,
 			git_url                TEXT      NOT NULL,
@@ -54,9 +54,69 @@ func (migration *addDSCodebaseConfig) Up(ctx context.Context, db *bun.DB) error 
 			last_sync_at           TEXT      NOT NULL DEFAULT '',
 			last_sync_status       TEXT      NOT NULL DEFAULT '',
 			PRIMARY KEY (org_id, repo_id)
-		)
-	`); err != nil {
-		return err
+		)`,
+		// (org_id, service_name) -> repo_id [+ optional monorepo subpath] (design §8).
+		`CREATE TABLE IF NOT EXISTS ds_codebase_service_map (
+			org_id        TEXT NOT NULL,
+			service_name  TEXT NOT NULL,
+			repo_id       TEXT NOT NULL,
+			subpath       TEXT NOT NULL DEFAULT '',
+			PRIMARY KEY (org_id, service_name)
+		)`,
+		// One RCA run. Timestamps are INTEGER unix seconds for cooldown/lease
+		// arithmetic. Lease fields back the DB-backed worker (design §6.3).
+		`CREATE TABLE IF NOT EXISTS coderca_run (
+			run_id          TEXT    NOT NULL PRIMARY KEY,
+			org_id          TEXT    NOT NULL,
+			service         TEXT    NOT NULL DEFAULT '',
+			dedup_key       TEXT    NOT NULL,
+			status          TEXT    NOT NULL,
+			baseline_commit TEXT    NOT NULL DEFAULT '',
+			created_at      INTEGER NOT NULL,
+			claimed_by      TEXT    NOT NULL DEFAULT '',
+			lease_token     TEXT    NOT NULL DEFAULT '',
+			lease_until     INTEGER NOT NULL DEFAULT 0,
+			heartbeat_at    INTEGER NOT NULL DEFAULT 0,
+			attempts        INTEGER NOT NULL DEFAULT 0,
+			finished_at     INTEGER NOT NULL DEFAULT 0,
+			result_ref      TEXT    NOT NULL DEFAULT ''
+		)`,
+		// Dedup linchpin: one row per (org, dedup_key); sliding cooldown via
+		// last_admitted_at; hit_count aggregates suppressed duplicates (§6.2/6.4).
+		`CREATE TABLE IF NOT EXISTS coderca_admission (
+			org_id           TEXT    NOT NULL,
+			dedup_key        TEXT    NOT NULL,
+			last_admitted_at INTEGER NOT NULL,
+			hit_count        INTEGER NOT NULL DEFAULT 0,
+			last_run_ref     TEXT    NOT NULL DEFAULT '',
+			PRIMARY KEY (org_id, dedup_key)
+		)`,
+		// Per-(org, day) atomic run counter (§6.2).
+		`CREATE TABLE IF NOT EXISTS coderca_budget (
+			org_id TEXT    NOT NULL,
+			day    TEXT    NOT NULL,
+			used   INTEGER NOT NULL DEFAULT 0,
+			PRIMARY KEY (org_id, day)
+		)`,
+		// Locked concurrency semaphore (§6.3).
+		`CREATE TABLE IF NOT EXISTS coderca_capacity (
+			scope               TEXT    NOT NULL PRIMARY KEY,
+			running             INTEGER NOT NULL DEFAULT 0,
+			max_concurrent_runs INTEGER NOT NULL DEFAULT 1
+		)`,
+		// Aggregated skip counters: one row per (org, reason, day) (§6.4).
+		`CREATE TABLE IF NOT EXISTS coderca_skip_stat (
+			org_id TEXT    NOT NULL,
+			reason TEXT    NOT NULL,
+			day    TEXT    NOT NULL,
+			count  INTEGER NOT NULL DEFAULT 0,
+			PRIMARY KEY (org_id, reason, day)
+		)`,
+	}
+	for _, stmt := range stmts {
+		if _, err := tx.ExecContext(ctx, stmt); err != nil {
+			return err
+		}
 	}
 
 	return tx.Commit()
@@ -69,8 +129,13 @@ func (migration *addDSCodebaseConfig) Down(ctx context.Context, db *bun.DB) erro
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	if _, err := tx.ExecContext(ctx, `DROP TABLE IF EXISTS ds_codebase_repo`); err != nil {
-		return err
+	for _, table := range []string{
+		"coderca_skip_stat", "coderca_capacity", "coderca_budget",
+		"coderca_admission", "coderca_run", "ds_codebase_service_map", "ds_codebase_repo",
+	} {
+		if _, err := tx.ExecContext(ctx, "DROP TABLE IF EXISTS "+table); err != nil {
+			return err
+		}
 	}
 	return tx.Commit()
 }
