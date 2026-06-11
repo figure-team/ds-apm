@@ -1,6 +1,7 @@
 package ruletypes
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -39,8 +40,39 @@ type CodebaseRepo struct {
 // we never silently persist a git credential in plaintext. Public /
 // credential-less repos remain allowed in that mode.
 func ValidateCodebaseRepo(repo CodebaseRepo, encryptionAvailable bool) error {
-	// STUB — replaced in GREEN.
-	return nil
+	var errs []string
+
+	if strings.TrimSpace(repo.ContractVersion) != CodebaseRepoContractVersion {
+		errs = append(errs, fmt.Sprintf("contractVersion: must be %q, got %q", CodebaseRepoContractVersion, repo.ContractVersion))
+	}
+	if strings.TrimSpace(repo.OrgID) == "" {
+		errs = append(errs, "orgId: must not be empty")
+	}
+	if strings.TrimSpace(repo.RepoID) == "" {
+		errs = append(errs, "repoId: must not be empty")
+	}
+	if strings.TrimSpace(repo.GitURL) == "" {
+		errs = append(errs, "gitUrl: must not be empty")
+	} else if !looksLikeGitURL(repo.GitURL) {
+		errs = append(errs, fmt.Sprintf("gitUrl: %q is not a valid git remote (need scheme:// or user@host:path)", repo.GitURL))
+	}
+
+	if len(repo.Credential) > MaxSecretLen {
+		errs = append(errs, fmt.Sprintf("credential: exceeds %d-byte limit (got %d)", MaxSecretLen, len(repo.Credential)))
+	}
+	// Credential is delivered to git via GIT_ASKPASS env, so CR/LF must be rejected.
+	if strings.ContainsAny(repo.Credential, "\r\n") {
+		errs = append(errs, "credential: must not contain CR or LF")
+	}
+	// Fail-closed: refuse to persist a credential when encryption is unavailable.
+	if repo.Credential != "" && !encryptionAvailable {
+		errs = append(errs, "credential: encryption is not configured (DS_APM_AI_CONFIG_ENCRYPTION_KEY); refusing to store a git credential in plaintext")
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+	return fmt.Errorf("codebase repo validation: %s", strings.Join(errs, "; "))
 }
 
 // looksLikeGitURL is a permissive sanity check: a git remote is either a URL
