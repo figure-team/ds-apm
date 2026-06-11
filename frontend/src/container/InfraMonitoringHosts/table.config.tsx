@@ -11,6 +11,7 @@ import {
 } from 'container/InfraMonitoringK8s/Base/utils';
 import { ValidateColumnValueWrapper } from 'container/InfraMonitoringK8s/commonUtils';
 import { InfraMonitoringEntity } from 'container/InfraMonitoringK8s/constants';
+import { TFunction } from 'i18next';
 import { Group } from 'lucide-react';
 import { BaseAutocompleteData } from 'types/api/queryBuilder/queryAutocompleteResponse';
 
@@ -78,11 +79,13 @@ export const hostColumns: IEntityColumn[] = [
 	},
 ];
 
-export const hostColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
+export const hostColumnsConfig = (
+	t: TFunction,
+): ColumnType<K8sRenderedRowData>[] => [
 	{
 		title: (
 			<div className={styles.entityGroupHeader}>
-				<Group size={14} /> HOST GROUP
+				<Group size={14} /> {t('col_host_group').toString()}
 			</div>
 		),
 		dataIndex: 'hostGroup',
@@ -92,7 +95,11 @@ export const hostColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		sorter: false,
 	},
 	{
-		title: <div className={styles.hostnameColumnHeader}>Hostname</div>,
+		title: (
+			<div className={styles.hostnameColumnHeader}>
+				{t('col_hostname').toString()}
+			</div>
+		),
 		dataIndex: 'hostName',
 		key: 'hostName',
 		width: 250,
@@ -105,8 +112,8 @@ export const hostColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 	{
 		title: (
 			<div className={styles.statusHeader}>
-				Status
-				<Tooltip title="Sent system metrics in last 10 mins">
+				{t('col_status').toString()}
+				<Tooltip title={t('sent_system_metrics_last_10m').toString()}>
 					<InfoCircleOutlined />
 				</Tooltip>
 			</div>
@@ -116,7 +123,11 @@ export const hostColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		width: 100,
 	},
 	{
-		title: <div className={styles.columnHeaderRight}>CPU Usage</div>,
+		title: (
+			<div className={styles.columnHeaderRight}>
+				{t('col_cpu_usage').toString()}
+			</div>
+		),
 		dataIndex: 'cpu',
 		key: 'cpu',
 		width: 100,
@@ -126,8 +137,8 @@ export const hostColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 	{
 		title: (
 			<div className={`${styles.columnHeaderRight} ${styles.memoryUsageHeader}`}>
-				Memory Usage
-				<Tooltip title="Excluding cache memory">
+				{t('col_memory_usage').toString()}
+				<Tooltip title={t('excluding_cache_memory').toString()}>
 					<InfoCircleOutlined />
 				</Tooltip>
 			</div>
@@ -139,7 +150,9 @@ export const hostColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'right',
 	},
 	{
-		title: <div className={styles.columnHeaderRight}>IOWait</div>,
+		title: (
+			<div className={styles.columnHeaderRight}>{t('col_iowait').toString()}</div>
+		),
 		dataIndex: 'wait',
 		key: 'wait',
 		width: 100,
@@ -147,7 +160,11 @@ export const hostColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'right',
 	},
 	{
-		title: <div className={styles.columnHeaderRight}>Load Avg</div>,
+		title: (
+			<div className={styles.columnHeaderRight}>
+				{t('col_load_avg').toString()}
+			</div>
+		),
 		dataIndex: 'load15',
 		key: 'load15',
 		width: 100,

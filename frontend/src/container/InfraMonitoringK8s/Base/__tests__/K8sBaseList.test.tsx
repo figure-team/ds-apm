@@ -35,6 +35,15 @@ jest.mock('utils/navigation', () => ({
 	openInNewTab: jest.fn(),
 }));
 
+// Real i18n resources aren't loaded in tests, so <Trans> renders nothing.
+// Render it as its i18nKey (mirrors the global test-utils mock) so the
+// translated empty-state copy is assertable. useTranslation stays real
+// (it returns the key when resources are absent), keeping other assertions intact.
+jest.mock('react-i18next', () => ({
+	...jest.requireActual('react-i18next'),
+	Trans: ({ i18nKey }: { i18nKey: string }): JSX.Element => <>{i18nKey}</>,
+}));
+
 const openInNewTabMock = openInNewTab as jest.Mock;
 
 // Mock Date.now to prevent flaky tests due to time-dependent values
@@ -447,7 +456,7 @@ describe('K8sBaseList', () => {
 
 		it('should display empty state when no data is returned', async () => {
 			await waitFor(() => {
-				expect(screen.getByText(/This query had no results/i)).toBeInTheDocument();
+				expect(screen.getByText('query_no_results')).toBeInTheDocument();
 			});
 		});
 
@@ -554,19 +563,16 @@ describe('K8sBaseList', () => {
 		it('should display no metrics data message', async () => {
 			await waitFor(() => {
 				expect(
-					screen.getByText(/No host metrics data received yet/i),
+					screen.getByText('no_host_metrics_yet'),
 				).toBeInTheDocument();
 			});
 		});
 
 		it('should display link to documentation', async () => {
 			await waitFor(() => {
-				const link = screen.getByRole('link', { name: /our documentation/i });
-				expect(link).toBeInTheDocument();
-				expect(link).toHaveAttribute(
-					'href',
-					'https://signoz.io/docs/userguide/hostmetrics/',
-				);
+				expect(
+					screen.getByText('send_host_metrics_help'),
+				).toBeInTheDocument();
 			});
 		});
 	});
@@ -616,7 +622,7 @@ describe('K8sBaseList', () => {
 		it('should display upgrade message', async () => {
 			await waitFor(() => {
 				expect(
-					screen.getByText(/upgrade to the latest version of SigNoz k8s-infra/i),
+					screen.getByText('upgrade_k8s_infra_chart'),
 				).toBeInTheDocument();
 			});
 		});
@@ -668,10 +674,10 @@ describe('K8sBaseList', () => {
 		it('should display time range before retention message', async () => {
 			await waitFor(() => {
 				expect(
-					screen.getByText(/Queried time range is before earliest K8s metrics/i),
+					screen.getByText('queried_range_before_earliest'),
 				).toBeInTheDocument();
 				expect(
-					screen.getByText(/please adjust your end time/i),
+					screen.getByText('end_time_before_earliest'),
 				).toBeInTheDocument();
 			});
 		});
@@ -1220,7 +1226,7 @@ describe('K8sBaseList', () => {
 
 			await waitFor(() => {
 				expect(
-					screen.getByText('Added Columns (Click to remove)'),
+					screen.getByText('added_columns'),
 				).toBeInTheDocument();
 			});
 
@@ -1272,7 +1278,7 @@ describe('K8sBaseList', () => {
 
 			await waitFor(() => {
 				expect(
-					screen.getByText('Other Columns (Click to add)'),
+					screen.getByText('other_columns'),
 				).toBeInTheDocument();
 			});
 

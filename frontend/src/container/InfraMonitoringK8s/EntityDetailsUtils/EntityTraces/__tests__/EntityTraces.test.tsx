@@ -230,7 +230,8 @@ describe('EntityTraces', () => {
 		});
 
 		renderEntityTraces();
-		expect(screen.getByText(/No traces yet./)).toBeInTheDocument();
+		// NoLogs is i18n'd; with i18n resources unloaded in tests it emits the raw key.
+		expect(screen.getByText('no_data_yet')).toBeInTheDocument();
 	});
 
 	it('renders loader when fetching traces', () => {

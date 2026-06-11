@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { VerticalAlignTopOutlined } from '@ant-design/icons';
 import * as Sentry from '@sentry/react';
 import { Button, CollapseProps } from 'antd';
@@ -57,6 +58,7 @@ import K8sVolumesList from './Volumes/K8sVolumesList';
 import styles from './InfraMonitoringK8s.module.scss';
 
 export default function InfraMonitoringK8s(): JSX.Element {
+	const { t } = useTranslation('infraMonitoring');
 	const [showFilters, setShowFilters] = useState(true);
 
 	const [selectedCategory, setSelectedCategory] = useInfraMonitoringCategory();
@@ -332,9 +334,9 @@ export default function InfraMonitoringK8s(): JSX.Element {
 					{showFilters && (
 						<div className={styles.quickFiltersContainer}>
 							<div className={styles.quickFiltersContainerHeader}>
-								<Typography.Text>Filters</Typography.Text>
+								<Typography.Text>{t('filters')}</Typography.Text>
 
-								<Tooltip title="Collapse Filters">
+								<Tooltip title={t('collapse_filters')}>
 									<VerticalAlignTopOutlined
 										rotate={270}
 										onClick={handleFilterVisibilityChange}

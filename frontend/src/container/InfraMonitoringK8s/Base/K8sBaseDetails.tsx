@@ -5,6 +5,7 @@ import React, {
 	useRef,
 	useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from 'react-query';
 // eslint-disable-next-line no-restricted-imports
 import { Color, Spacing } from '@signozhq/design-tokens';
@@ -176,6 +177,7 @@ function K8sBaseDetails<T>({
 	tabsConfig,
 	customTabs,
 }: K8sBaseDetailsProps<T>): JSX.Element {
+	const { t } = useTranslation('infraMonitoring');
 	const tabVisibility = useMemo(
 		() => ({
 			showMetrics: true,
@@ -678,7 +680,7 @@ function K8sBaseDetails<T>({
 									>
 										<div className="view-title">
 											<BarChart2 size={14} />
-											Metrics
+											{t('tab_metrics')}
 										</div>
 									</Radio.Button>
 								)}
@@ -691,7 +693,7 @@ function K8sBaseDetails<T>({
 									>
 										<div className="view-title">
 											<ScrollText size={14} />
-											Logs
+											{t('tab_logs')}
 										</div>
 									</Radio.Button>
 								)}
@@ -704,7 +706,7 @@ function K8sBaseDetails<T>({
 									>
 										<div className="view-title">
 											<DraftingCompass size={14} />
-											Traces
+											{t('tab_traces')}
 										</div>
 									</Radio.Button>
 								)}
@@ -717,7 +719,7 @@ function K8sBaseDetails<T>({
 									>
 										<div className="view-title">
 											<ChevronsLeftRight size={14} />
-											Events
+											{t('tab_events')}
 										</div>
 									</Radio.Button>
 								)}
@@ -730,7 +732,7 @@ function K8sBaseDetails<T>({
 									>
 										<div className="view-title">
 											<Package2 size={14} />
-											Containers
+											{t('tab_containers')}
 										</div>
 									</Radio.Button>
 								)}
@@ -743,7 +745,7 @@ function K8sBaseDetails<T>({
 									>
 										<div className="view-title">
 											<ChevronsLeftRight size={14} />
-											Processes
+											{t('tab_processes')}
 										</div>
 									</Radio.Button>
 								)}
