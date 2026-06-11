@@ -130,9 +130,99 @@ func New(cfg Config, deps Deps) *Engine {
 // run's own outcome is recorded in its status (and audit); err is reserved for
 // infrastructure failures (claim/finalize).
 //
-// C1 STUB: returns (false, nil) without claiming → pipeline assertions fail (RED).
 func (e *Engine) ProcessNext(ctx context.Context) (processed bool, err error) {
-	return false, nil
+	claim, err := e.deps.Runs.ClaimNext(ctx, runstore.ClaimParams{
+		Scope:         e.cfg.Scope,
+		ClaimedBy:     e.cfg.InstanceID,
+		Now:           e.deps.Now(),
+		LeaseTTL:      e.cfg.LeaseTTL,
+		MaxConcurrent: e.cfg.MaxConcurrent,
+	})
+	if err != nil {
+		return false, err
+	}
+	if !claim.Claimed {
+		return false, nil
+	}
+
+	status, resultRef, detail := e.runOne(ctx, claim)
+
+	e.deps.Auditor.Audit(ctx, AuditEvent{
+		OrgID:   claim.OrgID,
+		RunID:   claim.RunID,
+		Service: claim.Service,
+		Status:  status,
+		Detail:  detail,
+	})
+
+	// Fenced terminal transition (design §6.3): only the live lease owner wins.
+	_, ferr := e.deps.Runs.Finalize(ctx, runstore.FinalizeParams{
+		Scope:      e.cfg.Scope,
+		RunID:      claim.RunID,
+		LeaseToken: claim.LeaseToken,
+		Status:     status,
+		ResultRef:  resultRef,
+		Now:        e.deps.Now(),
+	})
+	return true, ferr
+}
+
+// runOne executes the pipeline for a claimed run and returns its terminal
+// status, the delivery ref (set only when delivered), and an audit detail.
+func (e *Engine) runOne(ctx context.Context, claim runstore.ClaimResult) (coderca.RunStatus, string, string) {
+	repo, subpath, ok, err := e.deps.Repos.ResolveRepo(ctx, claim.OrgID, claim.Service)
+	if err != nil {
+		return coderca.RunStatusFailed, "", "resolve repo: " + err.Error()
+	}
+	if !ok {
+		return coderca.RunStatusFailed, "", string(coderca.SkipNoRepoMapping)
+	}
+
+	checkout, baseline, cleanup, err := e.deps.Source.Prepare(ctx, repo, subpath)
+	if cleanup != nil {
+		defer cleanup() // remove the disposable checkout, even on failure/timeout
+	}
+	if err != nil {
+		return coderca.RunStatusFailed, "", "source prepare: " + err.Error()
+	}
+
+	rc := coderca.RCAContext{
+		OrgID:          claim.OrgID,
+		Service:        claim.Service,
+		BaselineCommit: baseline,
+		// NOTE: signature/labels/severity are not yet persisted on the run, so
+		// v1 builds a minimal context from service + baseline. Persisting the
+		// full error context at admission is a deferred additive enhancement.
+	}
+	evidence, _ := e.deps.Evidence.Collect(ctx, rc) // best-effort; v1 Noop → none
+	system, user := coderca.BuildPrompt(rc, evidence)
+
+	result, status, _ := e.deps.CLI.Run(ctx, clirunner.Spec{
+		Agent:        e.cfg.Agent,
+		Model:        e.cfg.Model,
+		Checkout:     checkout,
+		SystemPrompt: system,
+		Prompt:       user,
+		MaxBudgetUSD: e.cfg.MaxBudgetUSD,
+		AuthToken:    e.cfg.AuthToken,
+	})
+	if status != coderca.RunStatusDone {
+		// timeout / failed / unparseable: never delivered (HITL gets only usable
+		// results); the status itself is the audit detail.
+		return status, "", string(status)
+	}
+
+	resultRef, derr := e.deps.Deliver.Deliver(ctx, Delivery{
+		OrgID:          claim.OrgID,
+		Service:        claim.Service,
+		RunID:          claim.RunID,
+		BaselineCommit: baseline,
+		Result:         result,
+	})
+	if derr != nil {
+		return coderca.RunStatusFailed, "", "deliver: " + derr.Error()
+	}
+	return coderca.RunStatusDone, resultRef, "delivered"
 }
 
 // compile-time port assertions against the real implementations.
