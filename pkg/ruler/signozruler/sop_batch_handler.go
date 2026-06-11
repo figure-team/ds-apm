@@ -2,6 +2,7 @@ package signozruler
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/SigNoz/signoz/pkg/errors"
 	"github.com/SigNoz/signoz/pkg/http/binding"
@@ -30,6 +31,11 @@ func (handler *handler) CreateSOPDocumentBatch(rw http.ResponseWriter, req *http
 	results := make([]ruletypes.SOPDocumentBatchResult, 0, len(batchReq.Documents))
 	succeeded := 0
 	failed := 0
+	// Track (sopId, version) pairs already accepted in this batch. The store
+	// upserts ON CONFLICT (org_id, sop_id, version), so two payload entries
+	// sharing a key would silently clobber each other. We reject the later
+	// one as a version conflict instead of upserting it.
+	seen := make(map[string]struct{}, len(batchReq.Documents))
 
 	for _, doc := range batchReq.Documents {
 		result := ruletypes.SOPDocumentBatchResult{
@@ -44,6 +50,16 @@ func (handler *handler) CreateSOPDocumentBatch(rw http.ResponseWriter, req *http
 			results = append(results, result)
 			continue
 		}
+
+		key := strings.TrimSpace(doc.SOPID) + "\x00" + strings.TrimSpace(doc.Version)
+		if _, dup := seen[key]; dup {
+			result.Status = ruletypes.SOPBatchResultStatusError
+			result.Error = "duplicate sopId and version in batch (version conflict)"
+			failed++
+			results = append(results, result)
+			continue
+		}
+		seen[key] = struct{}{}
 
 		if err := handler.sopStore.Upsert(req.Context(), orgID, doc); err != nil {
 			result.Status = ruletypes.SOPBatchResultStatusError
