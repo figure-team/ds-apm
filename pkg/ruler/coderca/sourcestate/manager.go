@@ -32,9 +32,35 @@ func NewManager(git *ShellGitRunner, checkoutBase string) *Manager {
 // disposable worktree checkout at that commit (narrowed to subpath when set).
 // cleanup removes the worktree and is always safe to defer.
 //
-// D2 STUB: returns empty → checkout/baseline assertions fail (RED).
 func (m *Manager) Prepare(ctx context.Context, repo ruletypes.CodebaseRepo, subpath string) (checkoutDir, baseline string, cleanup func(), err error) {
-	return "", "", func() {}, nil
+	noop := func() {}
+	if err := m.git.Fetch(ctx, repo); err != nil {
+		return "", "", noop, err
+	}
+	baseline, err = m.git.ResolveHead(ctx, repo, repo.DefaultBranch)
+	if err != nil {
+		return "", "", noop, err
+	}
+	dest, err := m.uniqueCheckoutDir(repo)
+	if err != nil {
+		return "", "", noop, err
+	}
+	if err := m.git.AddWorktree(ctx, repo, baseline, dest); err != nil {
+		_ = os.RemoveAll(dest)
+		return "", "", noop, err
+	}
+
+	cleanup = func() {
+		// Detached context: cleanup may run after the run's ctx is canceled.
+		_ = m.git.RemoveWorktree(context.Background(), repo, dest)
+		_ = os.RemoveAll(dest)
+	}
+
+	checkoutDir = dest
+	if sp := cleanSubpath(subpath); sp != "" {
+		checkoutDir = filepath.Join(dest, sp)
+	}
+	return checkoutDir, baseline, cleanup, nil
 }
 
 // uniqueCheckoutDir returns a fresh per-run checkout path under checkoutBase.
