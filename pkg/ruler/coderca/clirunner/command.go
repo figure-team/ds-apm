@@ -12,6 +12,7 @@ package clirunner
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -66,9 +67,40 @@ func DefaultBinary(a Agent) string {
 // security contract: it must never produce a write-capable or unscoped
 // invocation. Pure + table-tested.
 //
-// A1 STUB: returns nil → flag + validation assertions fail (RED).
 func BuildArgs(s Spec) ([]string, error) {
-	return nil, nil
+	if strings.TrimSpace(s.Checkout) == "" {
+		return nil, ErrNoCheckout
+	}
+	if strings.TrimSpace(s.Model) == "" {
+		return nil, ErrNoModel
+	}
+	switch s.Agent {
+	case AgentClaude:
+		if strings.TrimSpace(s.MaxBudgetUSD) == "" {
+			return nil, ErrNoBudgetCap
+		}
+		return []string{
+			"-p", s.Prompt,
+			"--append-system-prompt", s.SystemPrompt,
+			"--model", s.Model,
+			"--add-dir", s.Checkout,
+			"--permission-mode", "default",
+			"--allowed-tools", claudeAllowedTools,
+			"--disallowed-tools", claudeDisallowedTools,
+			"--max-budget-usd", s.MaxBudgetUSD,
+		}, nil
+	case AgentCodex:
+		return []string{
+			"exec",
+			"-s", "read-only",
+			"-C", s.Checkout,
+			"-m", s.Model,
+			"--json",
+			codexCombinedPrompt(s.SystemPrompt, s.Prompt),
+		}, nil
+	default:
+		return nil, fmt.Errorf("%w: %q", ErrUnknownAgent, s.Agent)
+	}
 }
 
 // codexCombinedPrompt folds the system prompt into the user prompt, since codex
