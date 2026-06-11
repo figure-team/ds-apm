@@ -114,7 +114,7 @@ describe('TimeSeries', () => {
 		});
 
 		expect(
-			screen.getByRole('img', { name: 'no unit warning' }),
+			screen.getByRole('img', { name: 'no_unit_warning_aria' }),
 		).toBeInTheDocument();
 	});
 
@@ -127,10 +127,10 @@ describe('TimeSeries', () => {
 			yAxisUnit: 'seconds',
 		});
 
-		const alertIcon = screen.getByRole('img', { name: 'no unit warning' });
+		const alertIcon = screen.getByRole('img', { name: 'no_unit_warning_aria' });
 		await user.hover(alertIcon);
 
-		expect(await screen.findByText('metric details')).toBeInTheDocument();
+		expect(await screen.findByText('metric_details_link')).toBeInTheDocument();
 	});
 
 	it('shows save unit prompt with enabled button when metric has no unit and a unit is selected', async () => {
@@ -143,10 +143,10 @@ describe('TimeSeries', () => {
 		});
 
 		expect(
-			await screen.findByText('Set the selected unit as the metric unit?'),
+			await screen.findByText('set_unit_as_metric_unit'),
 		).toBeInTheDocument();
 
-		const yesButton = screen.getByRole('button', { name: 'Yes' });
+		const yesButton = screen.getByRole('button', { name: 'yes' });
 		expect(yesButton).toBeEnabled();
 	});
 });

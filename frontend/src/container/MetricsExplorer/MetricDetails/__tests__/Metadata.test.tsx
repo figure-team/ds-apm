@@ -141,7 +141,7 @@ describe('Metadata', () => {
 			/>,
 		);
 
-		const editButton = screen.getByText('Edit');
+		const editButton = screen.getByText('edit');
 		expect(editButton).toBeInTheDocument();
 		await userEvent.click(editButton);
 
@@ -164,7 +164,7 @@ describe('Metadata', () => {
 			/>,
 		);
 
-		const editButton = screen.getByText('Edit');
+		const editButton = screen.getByText('edit');
 		expect(editButton).toBeInTheDocument();
 		await userEvent.click(editButton);
 
@@ -188,7 +188,7 @@ describe('Metadata', () => {
 		expect(unitSelect).toBeInTheDocument();
 		await userEvent.selectOptions(unitSelect, 'By');
 
-		const saveButton = screen.getByText('Save');
+		const saveButton = screen.getByText('save');
 		expect(saveButton).toBeInTheDocument();
 		await userEvent.click(saveButton);
 
@@ -222,14 +222,14 @@ describe('Metadata', () => {
 			/>,
 		);
 
-		const editButton = screen.getByText('Edit');
+		const editButton = screen.getByText('edit');
 		await userEvent.click(editButton);
 
 		const metricDescriptionInput = screen.getByTestId('description-input');
 		await userEvent.clear(metricDescriptionInput);
 		await userEvent.type(metricDescriptionInput, 'Updated description');
 
-		const saveButton = screen.getByText('Save');
+		const saveButton = screen.getByText('save');
 		await userEvent.click(saveButton);
 
 		const onSuccessCallback =
@@ -252,14 +252,14 @@ describe('Metadata', () => {
 			/>,
 		);
 
-		const editButton = screen.getByText('Edit');
+		const editButton = screen.getByText('edit');
 		await userEvent.click(editButton);
 
 		const metricDescriptionInput = screen.getByTestId('description-input');
 		await userEvent.clear(metricDescriptionInput);
 		await userEvent.type(metricDescriptionInput, 'Updated description');
 
-		const saveButton = screen.getByText('Save');
+		const saveButton = screen.getByText('save');
 		await userEvent.click(saveButton);
 
 		const onErrorCallback = mockUseUpdateMetricMetadata.mock.calls[0][1].onError;
@@ -282,14 +282,14 @@ describe('Metadata', () => {
 			/>,
 		);
 
-		const editButton = screen.getByText('Edit');
+		const editButton = screen.getByText('edit');
 		await userEvent.click(editButton);
 
 		const metricDescriptionInput = screen.getByTestId('description-input');
 		await userEvent.clear(metricDescriptionInput);
 		await userEvent.type(metricDescriptionInput, 'Updated description');
 
-		const saveButton = screen.getByText('Save');
+		const saveButton = screen.getByText('save');
 		await userEvent.click(saveButton);
 
 		const onErrorCallback = mockUseUpdateMetricMetadata.mock.calls[0][1].onError;
@@ -314,15 +314,15 @@ describe('Metadata', () => {
 			/>,
 		);
 
-		const editButton = screen.getByText('Edit');
+		const editButton = screen.getByText('edit');
 		expect(editButton).toBeInTheDocument();
 		await userEvent.click(editButton);
 
-		const cancelButton = screen.getByText('Cancel');
+		const cancelButton = screen.getByText('cancel');
 		expect(cancelButton).toBeInTheDocument();
 		await userEvent.click(cancelButton);
 
-		const editButton2 = screen.getByText('Edit');
+		const editButton2 = screen.getByText('edit');
 		expect(editButton2).toBeInTheDocument();
 	});
 
@@ -337,8 +337,8 @@ describe('Metadata', () => {
 			/>,
 		);
 
-		expect(screen.getByText('Metadata')).toBeInTheDocument();
-		const editButton = screen.getByText('Edit').closest('button');
+		expect(screen.getByText('metadata')).toBeInTheDocument();
+		const editButton = screen.getByText('edit').closest('button');
 		expect(editButton).toBeDisabled();
 	});
 
@@ -353,7 +353,7 @@ describe('Metadata', () => {
 			/>,
 		);
 
-		const editButton = screen.getByText('Edit');
+		const editButton = screen.getByText('edit');
 		expect(editButton).toBeInTheDocument();
 		await userEvent.click(editButton);
 

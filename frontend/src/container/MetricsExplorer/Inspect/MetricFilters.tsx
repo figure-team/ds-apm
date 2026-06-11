@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Typography } from 'antd';
 import logEvent from 'api/common/logEvent';
 import QuerySearch from 'components/QueryBuilderV2/QueryV2/QuerySearch/QuerySearch';
@@ -13,6 +14,7 @@ function MetricFilters({
 	currentQuery,
 	setCurrentQuery,
 }: MetricFiltersProps): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	const handleOnChange = useCallback(
 		(expression: string): void => {
 			logEvent(MetricsExplorerEvents.FilterApplied, {
@@ -44,7 +46,7 @@ function MetricFilters({
 			data-testid="metric-filters"
 			className="inspect-metrics-input-group metric-filters"
 		>
-			<Typography.Text>Where</Typography.Text>
+			<Typography.Text>{t('where')}</Typography.Text>
 			<QuerySearch
 				queryData={currentQuery}
 				onChange={handleOnChange}

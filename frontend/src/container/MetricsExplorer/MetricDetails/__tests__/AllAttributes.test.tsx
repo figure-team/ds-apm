@@ -59,8 +59,8 @@ describe('AllAttributes', () => {
 			/>,
 		);
 
-		expect(screen.getByText('All Attributes')).toBeInTheDocument();
-		expect(screen.getByText('No attributes found')).toBeInTheDocument();
+		expect(screen.getByText('all_attributes')).toBeInTheDocument();
+		expect(screen.getByText('no_attributes_found')).toBeInTheDocument();
 	});
 
 	it('clicking on an attribute key shows popover with Open in Metric Explorer option', async () => {
@@ -82,7 +82,7 @@ describe('AllAttributes', () => {
 				metricType={MetrictypesTypeDTO.gauge}
 			/>,
 		);
-		await userEvent.type(screen.getByPlaceholderText('Search'), 'value1');
+		await userEvent.type(screen.getByPlaceholderText('search_placeholder'), 'value1');
 
 		expect(screen.getByText('attribute1')).toBeInTheDocument();
 		expect(screen.getByText('value1')).toBeInTheDocument();
@@ -135,7 +135,7 @@ describe('AllAttributes', () => {
 			/>,
 		);
 
-		expect(screen.queryByText('No attributes found')).not.toBeInTheDocument();
+		expect(screen.queryByText('no_attributes_found')).not.toBeInTheDocument();
 	});
 });
 
@@ -157,7 +157,7 @@ describe('AllAttributesValue', () => {
 			/>,
 		);
 		expect(screen.queryByText('value6')).not.toBeInTheDocument();
-		expect(screen.getByText('All values (6)')).toBeInTheDocument();
+		expect(screen.getByText('all_values')).toBeInTheDocument();
 	});
 
 	it('All values popover shows values beyond the initial 5', async () => {
@@ -180,7 +180,7 @@ describe('AllAttributesValue', () => {
 			/>,
 		);
 
-		await userEvent.click(screen.getByText('All values (7)'));
+		await userEvent.click(screen.getByText('all_values'));
 
 		expect(screen.getByText('value6')).toBeInTheDocument();
 		expect(screen.getByText('value7')).toBeInTheDocument();
@@ -206,8 +206,8 @@ describe('AllAttributesValue', () => {
 			/>,
 		);
 
-		await userEvent.click(screen.getByText('All values (7)'));
-		await userEvent.type(screen.getByPlaceholderText('Search values'), 'golf');
+		await userEvent.click(screen.getByText('all_values'));
+		await userEvent.type(screen.getByPlaceholderText('search_values'), 'golf');
 
 		expect(screen.getByText('golf-target')).toBeInTheDocument();
 		expect(screen.queryByText('fig-special')).not.toBeInTheDocument();

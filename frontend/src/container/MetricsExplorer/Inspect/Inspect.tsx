@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import * as Sentry from '@sentry/react';
 import { Color } from '@signozhq/design-tokens';
@@ -34,6 +35,7 @@ function Inspect({
 	isOpen,
 	onClose,
 }: InspectProps): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	const isDarkMode = useIsDarkMode();
 	const [currentMetricName, setCurrentMetricName] =
 		useState<string>(defaultMetricName);
@@ -213,14 +215,14 @@ function Inspect({
 		if (isInspectMetricsError) {
 			return renderFallback(
 				'inspect-metrics-error',
-				<Empty description="Error loading inspect metrics." />,
+				<Empty description={t('error_loading_inspect')} />,
 			);
 		}
 
 		if (!inspectMetricsTimeSeries.length) {
 			return renderFallback(
 				'inspect-metrics-empty',
-				<Empty description="No time series found for this metric to inspect." />,
+				<Empty description={t('no_time_series_to_inspect')} />,
 			);
 		}
 
@@ -283,14 +285,14 @@ function Inspect({
 				width="100%"
 				title={
 					<div className="inspect-metrics-title">
-						<Typography.Text>Metrics Explorer —</Typography.Text>
+						<Typography.Text>{t('metrics_explorer_breadcrumb')}</Typography.Text>
 						<Button
 							className="inspect-metrics-button"
 							size="small"
 							icon={<Compass size={14} />}
 							disabled
 						>
-							Inspect Metric
+							{t('inspect_metric')}
 						</Button>
 					</div>
 				}

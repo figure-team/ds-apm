@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Card } from 'antd';
 import RunQueryBtn from 'container/QueryBuilder/components/RunQueryBtn/RunQueryBtn';
 import { Atom } from 'lucide-react';
@@ -24,6 +25,7 @@ function QueryBuilder({
 	handleCancelQuery,
 	onRunQuery,
 }: QueryBuilderProps): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	const applyInspectionOptions = useCallback(() => {
 		onRunQuery?.();
 		setAppliedMetricName(currentMetricName ?? '');
@@ -46,7 +48,7 @@ function QueryBuilder({
 					icon={<Atom size={14} />}
 					disabled
 				>
-					Query Builder
+					{t('query_builder')}
 				</Button>
 				<RunQueryBtn
 					onStageRunQuery={applyInspectionOptions}
