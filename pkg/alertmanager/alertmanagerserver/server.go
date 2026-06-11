@@ -146,6 +146,10 @@ func New(ctx context.Context, logger *slog.Logger, registry prometheus.Registere
 	signozRegisterer = prometheus.WrapRegistererWith(prometheus.Labels{"org_id": server.orgID}, signozRegisterer)
 	// initialize marker
 	server.marker = alertmanagertypes.NewMarker(signozRegisterer)
+	// expose the PII/secret redaction counter on the scrape endpoint. It is a
+	// process-global total (registered once on the raw registry, so its name is
+	// not org-prefixed and stays stable across organizations).
+	alertmanagertypes.RegisterRedactionMetrics(registry)
 
 	// get silences for initial state
 	state, err := server.stateStore.Get(ctx, server.orgID)

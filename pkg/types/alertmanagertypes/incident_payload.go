@@ -4,12 +4,40 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"sync"
 	"unicode"
 
 	"github.com/prometheus/alertmanager/template"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 const RedactedIncidentValue = "[redacted]"
+
+// incidentRedactionsTotal counts every incident field value that gets redacted
+// before leaving SigNoz (PII/secret masking). It is a package-level counter so
+// the leaf sanitizer can observe it regardless of the calling channel; expose
+// it on the scrape endpoint with RegisterRedactionMetrics.
+var incidentRedactionsTotal = prometheus.NewCounter(prometheus.CounterOpts{
+	Name: "signoz_alertmanager_incident_redactions_total",
+	Help: "Number of incident field values redacted (PII/secret masking) before delivery to a notification channel.",
+})
+
+var registerRedactionMetricsOnce sync.Once
+
+// RegisterRedactionMetrics registers the redaction counter with the given
+// registerer so it is exposed on the Prometheus scrape endpoint. The counter is
+// a process-global total, so registration happens exactly once even though the
+// alertmanager server is constructed per organization. It is safe to pass a nil
+// registerer (used by hermetic unit tests, which read the counter directly via
+// testutil).
+func RegisterRedactionMetrics(r prometheus.Registerer) {
+	if r == nil {
+		return
+	}
+	registerRedactionMetricsOnce.Do(func() {
+		r.MustRegister(incidentRedactionsTotal)
+	})
+}
 
 type IncidentField struct {
 	Key   string
@@ -71,22 +99,84 @@ func SanitizeIncidentInfo(info IncidentInfo) IncidentInfo {
 }
 
 func SanitizeIncidentValue(value string) string {
+	sanitized, redacted := sanitizeIncidentValue(value)
+	if redacted {
+		incidentRedactionsTotal.Inc()
+	}
+	return sanitized
+}
+
+// sanitizeIncidentValue performs the masking and reports whether any redaction
+// was applied, so callers can drive the redaction metric. Its string output is
+// identical to the historical SanitizeIncidentValue behavior; the bool is the
+// only addition (the exported signature is unchanged — see SCOPE seam).
+func sanitizeIncidentValue(value string) (string, bool) {
 	value = strings.TrimSpace(value)
 	if value == "" {
-		return ""
+		return "", false
 	}
 
+	redacted := false
 	if sanitizedURL, ok := sanitizeIncidentURL(value); ok {
+		if sanitizedURL != value {
+			redacted = true
+		}
 		value = sanitizedURL
 	}
 	if incidentValueLooksSecret(value) {
-		return RedactedIncidentValue
+		return RedactedIncidentValue, true
 	}
 
+	before := value
 	value = redactIncidentPII(value)
 	value = redactIncidentLongSecret(value)
+	if value != before {
+		redacted = true
+	}
 
-	return value
+	return value, redacted
+}
+
+// SanitizeTemplateData returns a defensive copy of the Alertmanager template
+// data with every label and annotation value passed through the incident
+// sanitizer, so the outbound notification payload carries no raw PII/secret.
+// The input is never mutated: callers (e.g. webhook URL templating) keep using
+// the raw data. Each redacted value advances the redaction metric.
+func SanitizeTemplateData(data *template.Data) *template.Data {
+	if data == nil {
+		return nil
+	}
+
+	out := *data
+	out.GroupLabels = sanitizeIncidentKV(data.GroupLabels)
+	out.CommonLabels = sanitizeIncidentKV(data.CommonLabels)
+	out.CommonAnnotations = sanitizeIncidentKV(data.CommonAnnotations)
+
+	if data.Alerts != nil {
+		alerts := make(template.Alerts, len(data.Alerts))
+		for i, alert := range data.Alerts {
+			alert.Labels = sanitizeIncidentKV(alert.Labels)
+			alert.Annotations = sanitizeIncidentKV(alert.Annotations)
+			if alert.GeneratorURL != "" {
+				alert.GeneratorURL = SanitizeIncidentValue(alert.GeneratorURL)
+			}
+			alerts[i] = alert
+		}
+		out.Alerts = alerts
+	}
+
+	return &out
+}
+
+func sanitizeIncidentKV(kv template.KV) template.KV {
+	if kv == nil {
+		return nil
+	}
+	out := make(template.KV, len(kv))
+	for key, value := range kv {
+		out[key] = SanitizeIncidentValue(value)
+	}
+	return out
 }
 
 func redactIncidentPII(value string) string {
