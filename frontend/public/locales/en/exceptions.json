@@ -1,0 +1,13 @@
+{
+	"show_filters": "Show Filters",
+	"search": "Search",
+	"search_by_exception": "Search By Exception",
+	"search_by_application": "Search By Application",
+	"column_exception_type": "Exception Type",
+	"column_error_message": "Error Message",
+	"column_count": "Count",
+	"column_last_seen": "Last Seen",
+	"column_first_seen": "First Seen",
+	"column_application": "Application",
+	"load_exceptions_hint": "Click \"Run Query\" to load exceptions."
+}

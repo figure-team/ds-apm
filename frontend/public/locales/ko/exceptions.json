@@ -1,0 +1,13 @@
+{
+	"show_filters": "필터 표시",
+	"search": "검색",
+	"search_by_exception": "예외로 검색",
+	"search_by_application": "애플리케이션으로 검색",
+	"column_exception_type": "예외 유형",
+	"column_error_message": "오류 메시지",
+	"column_count": "개수",
+	"column_last_seen": "마지막 발생",
+	"column_first_seen": "최초 발생",
+	"column_application": "애플리케이션",
+	"load_exceptions_hint": "예외를 불러오려면 \"Run Query\"를 클릭하세요."
+}
