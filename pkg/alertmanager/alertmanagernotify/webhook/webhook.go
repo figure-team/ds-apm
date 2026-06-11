@@ -90,9 +90,13 @@ func (n *Notifier) Notify(ctx context.Context, alerts ...*types.Alert) (bool, er
 	logger.DebugContext(ctx, "extracted group key")
 
 	incident := alertmanagertypes.BuildSafeIncidentInfo(data.CommonLabels, data.CommonAnnotations)
+	// The outbound payload embeds the full template data, so its labels and
+	// annotations must be masked too — otherwise raw PII would leak alongside
+	// the already-sanitized incident block. The raw data is retained below for
+	// URL templating only.
 	msg := &Message{
 		Version:         "4",
-		Data:            data,
+		Data:            alertmanagertypes.SanitizeTemplateData(data),
 		GroupKey:        groupKey.String(),
 		TruncatedAlerts: numTruncated,
 	}
