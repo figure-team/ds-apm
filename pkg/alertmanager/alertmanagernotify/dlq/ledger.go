@@ -2,7 +2,10 @@ package dlq
 
 import (
 	"bufio"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sync"
@@ -66,6 +69,27 @@ func NewReplayLedger(path string) (*ReplayLedger, error) {
 		f:    f,
 		w:    bufio.NewWriter(f),
 	}, nil
+}
+
+// IdempotencyKey derives the replay idempotency key for a single delivery
+// attempt: sha256(fingerprint‖channel‖round), hex-encoded.
+//
+// Earlier the dead-letter store keyed purely on the alert fingerprint, which
+// could not distinguish a redelivery to a different channel or a deliberate
+// re-attempt (round). Folding channel and round into the key means a replay
+// of the exact same (fingerprint, channel, round) collapses to one ledger
+// entry — an idempotent skip — while bumping the round yields a fresh key the
+// ledger accepts as a new delivery. The three fields are separated by a NUL
+// byte (which cannot appear in a fingerprint, channel name, or decimal round)
+// so distinct field boundaries can never collide via concatenation.
+func IdempotencyKey(fingerprint, channel string, round int) string {
+	h := sha256.New()
+	_, _ = io.WriteString(h, fingerprint)
+	_, _ = h.Write([]byte{0})
+	_, _ = io.WriteString(h, channel)
+	_, _ = h.Write([]byte{0})
+	_, _ = fmt.Fprintf(h, "%d", round)
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 // MarkIfNew returns true and durably records eventID when it has not
