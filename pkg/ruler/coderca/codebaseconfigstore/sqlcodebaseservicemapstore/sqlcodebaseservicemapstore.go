@@ -4,6 +4,8 @@ package sqlcodebaseservicemapstore
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
 	"github.com/SigNoz/signoz/pkg/sqlstore"
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
@@ -19,17 +21,54 @@ func New(store sqlstore.SQLStore) ruletypes.CodebaseServiceMapStore {
 	return &serviceMapStore{sqlstore: store}
 }
 
-// E2 STUB: no write → Get/List assertions fail (RED).
 func (s *serviceMapStore) Upsert(ctx context.Context, m ruletypes.CodebaseServiceMap) error {
-	return nil
+	storable, err := ruletypes.FromDomainCodebaseServiceMap(m)
+	if err != nil {
+		return err
+	}
+	return s.sqlstore.RunInTxCtx(ctx, nil, func(ctx context.Context) error {
+		_, err := s.sqlstore.BunDBCtx(ctx).
+			NewInsert().
+			Model(storable).
+			On("CONFLICT (org_id, service_name) DO UPDATE").
+			Set("repo_id = EXCLUDED.repo_id").
+			Set("subpath = EXCLUDED.subpath").
+			Exec(ctx)
+		return err
+	})
 }
 
-// E2 STUB: returns the zero mapping, no error → assertions fail (RED).
 func (s *serviceMapStore) Get(ctx context.Context, orgID, serviceName string) (ruletypes.CodebaseServiceMap, error) {
-	return ruletypes.CodebaseServiceMap{}, nil
+	storable := new(ruletypes.StorableCodebaseServiceMap)
+	err := s.sqlstore.BunDBCtx(ctx).
+		NewSelect().
+		Model(storable).
+		Where("org_id = ?", orgID).
+		Where("service_name = ?", serviceName).
+		Scan(ctx)
+	if errors.Is(err, sql.ErrNoRows) {
+		return ruletypes.CodebaseServiceMap{}, ruletypes.ErrCodebaseServiceMapNotFound
+	}
+	if err != nil {
+		return ruletypes.CodebaseServiceMap{}, err
+	}
+	return storable.ToDomain(), nil
 }
 
-// E2 STUB: returns nothing → List assertion fails (RED).
 func (s *serviceMapStore) List(ctx context.Context, orgID string) ([]ruletypes.CodebaseServiceMap, error) {
-	return nil, nil
+	var storables []ruletypes.StorableCodebaseServiceMap
+	err := s.sqlstore.BunDBCtx(ctx).
+		NewSelect().
+		Model(&storables).
+		Where("org_id = ?", orgID).
+		Order("service_name ASC").
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]ruletypes.CodebaseServiceMap, 0, len(storables))
+	for i := range storables {
+		out = append(out, storables[i].ToDomain())
+	}
+	return out, nil
 }
