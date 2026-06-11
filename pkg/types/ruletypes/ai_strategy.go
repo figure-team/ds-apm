@@ -47,10 +47,34 @@ type AIStrategyRequest struct {
 	Annotations      map[string]string  `json:"annotations,omitempty"`
 	SOPDocument      SOPDocument        `json:"sopDocument,omitempty"`
 	EvidenceRefs     []AIEvidenceRef    `json:"evidenceRefs,omitempty"`
+	PriorIncidents   []AIPriorIncident  `json:"priorIncidents,omitempty"`
 	PromptVersion    string             `json:"promptVersion,omitempty"`
 	Model            string             `json:"model,omitempty"`
 	Controls         AIStrategyControls `json:"controls,omitempty"`
 	GeneratedAt      string             `json:"generatedAt,omitempty"`
+}
+
+// AIPriorIncident is a compact summary of a past occurrence of the same failure
+// signature, supplied to the generator so it can reference recurrence history
+// (FR-CF2.6) without embedding the full prior strategy.
+type AIPriorIncident struct {
+	IncidentID  string `json:"incidentId"`
+	GeneratedAt string `json:"generatedAt,omitempty"`
+	Status      string `json:"status,omitempty"`
+	Confidence  string `json:"confidence,omitempty"`
+	Headline    string `json:"headline,omitempty"`
+}
+
+// AIPriorIncidentFromHistoryRecord projects a stored history record into the
+// compact prior-incident summary passed into AIStrategyRequest.PriorIncidents.
+func AIPriorIncidentFromHistoryRecord(record AIStrategyHistoryRecord) AIPriorIncident {
+	return AIPriorIncident{
+		IncidentID:  strings.TrimSpace(record.IncidentID),
+		GeneratedAt: strings.TrimSpace(record.GeneratedAt),
+		Status:      strings.TrimSpace(record.Status),
+		Confidence:  strings.TrimSpace(record.Confidence),
+		Headline:    strings.TrimSpace(record.Strategy.Headline),
+	}
 }
 
 type AIStrategyControls struct {

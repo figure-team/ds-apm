@@ -50,7 +50,11 @@ func (s *historyStore) GetLatest(ctx context.Context, orgID string, lookup rulet
 	case incidentID != "":
 		q = q.Where("incident_id = ?", incidentID)
 	case fingerprint != "":
-		q = q.Where("alert_fingerprint = ?", fingerprint)
+		// Multiple incidents can share a fingerprint (same-failure
+		// recurrences); return the most recent occurrence deterministically.
+		q = q.Where("alert_fingerprint = ?", fingerprint).
+			OrderExpr("generated_at DESC, incident_id DESC").
+			Limit(1)
 	default:
 		return ruletypes.AIStrategyHistoryRecord{}, false, errors.New("history lookup: incidentId or alertFingerprint required")
 	}
@@ -67,4 +71,41 @@ func (s *historyStore) GetLatest(ctx context.Context, orgID string, lookup rulet
 		return ruletypes.AIStrategyHistoryRecord{}, false, err
 	}
 	return record, true, nil
+}
+
+// ListRecent returns up to limit records for orgID matching the lookup, most
+// recent first by generated_at. Used to surface past occurrences of the same
+// failure (typically looked up by alertFingerprint) to the generator.
+func (s *historyStore) ListRecent(ctx context.Context, orgID string, lookup ruletypes.AIStrategyHistoryLookupRequest, limit int) ([]ruletypes.AIStrategyHistoryRecord, error) {
+	if limit <= 0 {
+		return nil, nil
+	}
+
+	var storables []ruletypes.StorableAIStrategyHistory
+	q := s.sqlstore.BunDBCtx(ctx).NewSelect().Model(&storables).Where("org_id = ?", orgID)
+
+	incidentID := strings.TrimSpace(lookup.IncidentID)
+	fingerprint := strings.TrimSpace(lookup.AlertFingerprint)
+	switch {
+	case incidentID != "":
+		q = q.Where("incident_id = ?", incidentID)
+	case fingerprint != "":
+		q = q.Where("alert_fingerprint = ?", fingerprint)
+	default:
+		return nil, errors.New("history list: incidentId or alertFingerprint required")
+	}
+
+	if err := q.OrderExpr("generated_at DESC, incident_id DESC").Limit(limit).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	records := make([]ruletypes.AIStrategyHistoryRecord, 0, len(storables))
+	for i := range storables {
+		record, err := storables[i].ToDomain()
+		if err != nil {
+			return nil, err
+		}
+		records = append(records, record)
+	}
+	return records, nil
 }
