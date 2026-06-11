@@ -1,0 +1,14 @@
+{
+	"tab_meter": "Meter",
+	"tab_explorer": "Explorer",
+	"tab_views": "Views",
+	"section_total": "Total",
+	"section_logs": "Logs",
+	"section_traces": "Traces",
+	"section_metrics": "Metrics",
+	"billing_utc_info": "Billing is calculated in UTC. To match your meter data with billing, select full-day ranges in UTC time (00:00 – 23:59 UTC). For example, if you're in PT, for the billing of Jan 1, select your time range as Dec 31, 4:00 PM – Jan 1, 3:59 PM PT.",
+	"accuracy_warning": "Meter module data is accurate only from 22nd August 2025, 00:00 UTC onwards. Data before this time was collected during the beta phase and may be inaccurate.",
+	"aggregation_warning": "Meter metrics data is aggregated over 1 hour period. Please select time range accordingly.",
+	"show_quick_filters": "Show Quick Filters",
+	"click_run_query": "Click \"Run Query\" to load metrics."
+}

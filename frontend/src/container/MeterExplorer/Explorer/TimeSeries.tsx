@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueries } from 'react-query';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
@@ -32,6 +33,7 @@ function TimeSeries({
 	onFetchingStateChange,
 	isCancelled = false,
 }: TimeSeriesProps): JSX.Element {
+	const { t } = useTranslation('meter');
 	const { stagedQuery, currentQuery } = useQueryBuilder();
 	const { yAxisUnit, onUnitChange } = useUrlYAxisUnit('');
 
@@ -149,7 +151,7 @@ function TimeSeries({
 			<div className="time-series-container">
 				{!hasMetricSelected && <EmptyMetricsSearch />}
 				{isCancelled && hasMetricSelected && (
-					<QueryCancelledPlaceholder subText='Click "Run Query" to load metrics.' />
+					<QueryCancelledPlaceholder subText={t('click_run_query')} />
 				)}
 				{!isCancelled &&
 					hasMetricSelected &&
