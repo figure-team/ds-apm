@@ -232,9 +232,7 @@ describe('Logs Explorer Tests', () => {
 			</MemoryRouter>,
 		);
 
-		const queries = queryAllByText(
-			"Enter your filter query (e.g., http.status_code >= 500 AND service.name = 'frontend')",
-		);
+		const queries = queryAllByText('filter_query_placeholder');
 		expect(queries.length).toBe(1);
 	});
 

@@ -10,5 +10,13 @@
 	"accuracy_warning": "Meter module data is accurate only from 22nd August 2025, 00:00 UTC onwards. Data before this time was collected during the beta phase and may be inaccurate.",
 	"aggregation_warning": "Meter metrics data is aggregated over 1 hour period. Please select time range accordingly.",
 	"show_quick_filters": "Show Quick Filters",
-	"click_run_query": "Click \"Run Query\" to load metrics."
+	"click_run_query": "Click \"Run Query\" to load metrics.",
+	"graph_total_log_size": "Total size of log records ingested",
+	"graph_total_span_size": "Total size of spans ingested",
+	"graph_total_metric_datapoints": "Total metric datapoints ingested",
+	"graph_log_count": "Count of log records ingested",
+	"graph_log_size": "Size of log records ingested",
+	"graph_span_count": "Count of spans ingested",
+	"graph_span_size": "Size of spans ingested",
+	"graph_metric_datapoint_count": "Count of metric datapoints ingested"
 }

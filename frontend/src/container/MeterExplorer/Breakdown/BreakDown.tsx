@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useDispatch, useSelector } from 'react-redux';
@@ -42,32 +42,6 @@ type MetricSection = {
 	graphs: Widgets[];
 };
 
-const sections: MetricSection[] = [
-	{
-		id: uuid(),
-		title: 'section_total',
-		graphs: [
-			getTotalLogSizeWidgetData(),
-			getTotalTraceSizeWidgetData(),
-			getTotalMetricDatapointCountWidgetData(),
-		],
-	},
-	{
-		id: uuid(),
-		title: 'section_logs',
-		graphs: [getLogCountWidgetData(), getLogSizeWidgetData()],
-	},
-	{
-		id: uuid(),
-		title: 'section_traces',
-		graphs: [getSpanCountWidgetData(), getSpanSizeWidgetData()],
-	},
-	{
-		id: uuid(),
-		title: 'section_metrics',
-		graphs: [getMetricCountWidgetData()],
-	},
-];
 
 function Section(section: MetricSection): JSX.Element {
 	const isDarkMode = useIsDarkMode();
@@ -118,6 +92,39 @@ function Section(section: MetricSection): JSX.Element {
 
 function BreakDown(): JSX.Element {
 	const { t } = useTranslation(['meter', 'common']);
+
+	const sections = useMemo<MetricSection[]>(
+		() => [
+			{
+				id: uuid(),
+				title: 'section_total',
+				graphs: [
+					getTotalLogSizeWidgetData(),
+					getTotalTraceSizeWidgetData(),
+					getTotalMetricDatapointCountWidgetData(),
+				],
+			},
+			{
+				id: uuid(),
+				title: 'section_logs',
+				graphs: [getLogCountWidgetData(), getLogSizeWidgetData()],
+			},
+			{
+				id: uuid(),
+				title: 'section_traces',
+				graphs: [getSpanCountWidgetData(), getSpanSizeWidgetData()],
+			},
+			{
+				id: uuid(),
+				title: 'section_metrics',
+				graphs: [getMetricCountWidgetData()],
+			},
+		],
+		// t changes reference when meter namespace finishes loading → triggers retranslation
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[t],
+	);
+
 	const { isCloudUser } = useGetTenantLicense();
 	const { maxTime, minTime } = useSelector<AppState, GlobalReducer>(
 		(state) => state.globalTime,

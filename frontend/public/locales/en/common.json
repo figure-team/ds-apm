@@ -60,5 +60,6 @@
 		"unit_days": "days",
 		"unit_week": "week",
 		"unit_weeks": "weeks"
-	}
+	},
+	"filter_query_placeholder": "Enter your filter query (e.g., http.status_code >= 500 AND service.name = 'frontend')"
 }
