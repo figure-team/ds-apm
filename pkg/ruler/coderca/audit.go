@@ -9,6 +9,14 @@ package coderca
 //	occurrence: 1-based count of this event (1 = first seen).
 //	everyN:     sampling stride; <=1 means "audit every occurrence".
 func ShouldSampleAudit(occurrence, everyN int) bool {
-	// STUB — replaced in GREEN.
-	return false
+	if occurrence < 1 {
+		return false
+	}
+	if occurrence == 1 {
+		return true
+	}
+	if everyN <= 1 {
+		return everyN == 1
+	}
+	return occurrence%everyN == 0
 }
