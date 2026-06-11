@@ -44,6 +44,11 @@ func applyRunstoreDDL(ctx context.Context, ss sqlstore.SQLStore) error {
 			used   INTEGER NOT NULL DEFAULT 0,
 			PRIMARY KEY (org_id, day)
 		)`,
+		`CREATE TABLE coderca_capacity (
+			scope               TEXT    NOT NULL PRIMARY KEY,
+			running             INTEGER NOT NULL DEFAULT 0,
+			max_concurrent_runs INTEGER NOT NULL DEFAULT 1
+		)`,
 	}
 	for _, stmt := range stmts {
 		if _, err := ss.BunDB().ExecContext(ctx, stmt); err != nil {
