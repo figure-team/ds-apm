@@ -1,4 +1,5 @@
 import { TableColumnType as ColumnType, Tooltip } from 'antd';
+import { TFunction } from 'i18next';
 import { Group } from 'lucide-react';
 import { BaseAutocompleteData } from 'types/api/queryBuilder/queryAutocompleteResponse';
 
@@ -61,11 +62,13 @@ export const k8sVolumesColumns: IEntityColumn[] = [
 	},
 ];
 
-export const k8sVolumesColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
+export const k8sVolumesColumnsConfig = (
+	t: TFunction,
+): ColumnType<K8sRenderedRowData>[] => [
 	{
 		title: (
 			<div className={styles.entityGroupHeader}>
-				<Group size={14} /> VOLUME GROUP
+				<Group size={14} /> {t('col_volume_group').toString()}
 			</div>
 		),
 		dataIndex: 'volumeGroup',
@@ -76,7 +79,7 @@ export const k8sVolumesColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		sorter: false,
 	},
 	{
-		title: <div>PVC Name</div>,
+		title: <div>{t('col_pvc_name').toString()}</div>,
 		dataIndex: 'pvcName',
 		key: 'pvcName',
 		ellipsis: true,
@@ -85,7 +88,7 @@ export const k8sVolumesColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Namespace Name</div>,
+		title: <div>{t('col_namespace_name').toString()}</div>,
 		dataIndex: 'namespaceName',
 		key: 'namespaceName',
 		ellipsis: true,
@@ -94,7 +97,7 @@ export const k8sVolumesColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Volume Capacity</div>,
+		title: <div>{t('col_volume_capacity').toString()}</div>,
 		dataIndex: 'capacity',
 		key: 'capacity',
 		ellipsis: true,
@@ -103,7 +106,7 @@ export const k8sVolumesColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Volume Utilization</div>,
+		title: <div>{t('col_volume_utilization').toString()}</div>,
 		dataIndex: 'usage',
 		key: 'usage',
 		width: 100,
@@ -111,7 +114,7 @@ export const k8sVolumesColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Volume Available</div>,
+		title: <div>{t('col_volume_available').toString()}</div>,
 		dataIndex: 'available',
 		key: 'available',
 		width: 80,

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { UseQueryResult } from 'react-query';
 import { Select } from 'antd';
 import { getFormattedEndPointDropDownData } from 'container/ApiMonitoring/utils';
@@ -25,6 +26,7 @@ function EndPointsDropDown({
 	parentContainerDiv,
 	dropdownStyle,
 }: EndPointsDropDownProps): JSX.Element {
+	const { t } = useTranslation('apiMonitoring');
 	const { data, isLoading, isFetching } = endPointDropDownDataQuery;
 
 	const handleChange = (value: string): void => {
@@ -40,7 +42,7 @@ function EndPointsDropDown({
 	return (
 		<Select
 			value={selectedEndPointName || undefined}
-			placeholder="Select endpoint"
+			placeholder={t('select_endpoint')}
 			loading={isLoading || isFetching}
 			style={{ width: '100%' }}
 			onChange={handleChange}

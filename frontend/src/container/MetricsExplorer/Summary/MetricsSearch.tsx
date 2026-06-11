@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import QuerySearch from 'components/QueryBuilderV2/QueryV2/QuerySearch/QuerySearch';
 import RunQueryBtn from 'container/QueryBuilder/components/RunQueryBtn/RunQueryBtn';
 import DateTimeSelectionV2 from 'container/TopNav/DateTimeSelectionV2';
@@ -15,6 +16,7 @@ function MetricsSearch({
 	handleCancelQuery,
 	onRunQuery,
 }: MetricsSearchProps): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	const handleOnChange = useCallback(
 		(expression: string): void => {
 			setCurrentQueryFilterExpression(expression);
@@ -50,7 +52,7 @@ function MetricsSearch({
 					}}
 					onRun={handleRunQuery}
 					showFilterSuggestionsWithoutMetric
-					placeholder="Search your metrics. Try service.name='api' to see all API service metrics, or http.client for HTTP client metrics."
+					placeholder={t('search_metrics_placeholder')}
 				/>
 			</div>
 			<RunQueryBtn

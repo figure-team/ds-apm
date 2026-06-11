@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueries } from 'react-query';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
@@ -38,7 +39,11 @@ function ExpandedRow({
 	setSelectedView: (view: VIEWS) => void;
 	orderBy: OrderByPayload | null;
 }): JSX.Element {
-	const nestedColumns = useMemo(() => getEndPointsColumnsConfig(false, []), []);
+	const { t } = useTranslation('apiMonitoring');
+	const nestedColumns = useMemo(
+		() => getEndPointsColumnsConfig(t, false, []),
+		[t],
+	);
 	const { maxTime, minTime } = useSelector<AppState, GlobalReducer>(
 		(state) => state.globalTime,
 	);

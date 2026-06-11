@@ -119,7 +119,7 @@ describe('QueryBuilder', () => {
 				</Provider>
 			</QueryClientProvider>,
 		);
-		expect(screen.getByText('Query Builder')).toBeInTheDocument();
+		expect(screen.getByText('query_builder')).toBeInTheDocument();
 		expect(screen.getByTestId('metric-name-search')).toBeInTheDocument();
 		expect(screen.getByTestId('metric-filters')).toBeInTheDocument();
 		expect(screen.getByTestId('metric-time-aggregation')).toBeInTheDocument();
@@ -158,7 +158,7 @@ describe('QueryBuilder', () => {
 		const metricNameSearch = screen.getByTestId('metric-name-search');
 		expect(metricNameSearch).toBeInTheDocument();
 
-		expect(screen.getByText('From')).toBeInTheDocument();
+		expect(screen.getByText('from')).toBeInTheDocument();
 
 		const input = within(metricNameSearch).getByRole('combobox');
 		fireEvent.change(input, { target: { value: 'test_metric_2' } });

@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -36,6 +37,7 @@ import './BreakDown.styles.scss';
 
 type MetricSection = {
 	id: string;
+	// i18n key in the `meter` namespace — translated at render time in Section
 	title: string;
 	graphs: Widgets[];
 };
@@ -43,7 +45,7 @@ type MetricSection = {
 const sections: MetricSection[] = [
 	{
 		id: uuid(),
-		title: 'Total',
+		title: 'section_total',
 		graphs: [
 			getTotalLogSizeWidgetData(),
 			getTotalTraceSizeWidgetData(),
@@ -52,23 +54,24 @@ const sections: MetricSection[] = [
 	},
 	{
 		id: uuid(),
-		title: 'Logs',
+		title: 'section_logs',
 		graphs: [getLogCountWidgetData(), getLogSizeWidgetData()],
 	},
 	{
 		id: uuid(),
-		title: 'Traces',
+		title: 'section_traces',
 		graphs: [getSpanCountWidgetData(), getSpanSizeWidgetData()],
 	},
 	{
 		id: uuid(),
-		title: 'Metrics',
+		title: 'section_metrics',
 		graphs: [getMetricCountWidgetData()],
 	},
 ];
 
 function Section(section: MetricSection): JSX.Element {
 	const isDarkMode = useIsDarkMode();
+	const { t } = useTranslation('meter');
 	const { title, graphs } = section;
 	const history = useHistory();
 	const { pathname } = useLocation();
@@ -95,7 +98,7 @@ function Section(section: MetricSection): JSX.Element {
 	return (
 		<div className="meter-column-graph">
 			<CardContainer className="row-card" isDarkMode={isDarkMode}>
-				<Typography.Text className="section-title">{title}</Typography.Text>
+				<Typography.Text className="section-title">{t(title)}</Typography.Text>
 			</CardContainer>
 			<div className="meter-page-grid">
 				{graphs.map((widget) => (
@@ -114,6 +117,7 @@ function Section(section: MetricSection): JSX.Element {
 }
 
 function BreakDown(): JSX.Element {
+	const { t } = useTranslation(['meter', 'common']);
 	const { isCloudUser } = useGetTenantLicense();
 	const { maxTime, minTime } = useSelector<AppState, GlobalReducer>(
 		(state) => state.globalTime,
@@ -141,15 +145,14 @@ function BreakDown(): JSX.Element {
 						onClose={(): void => {
 							setLocalStorageApi(LOCALSTORAGE.DISSMISSED_COST_METER_INFO, 'true');
 						}}
-						message="Billing is calculated in UTC. To match your meter data with billing, select full-day ranges in UTC time (00:00 – 23:59 UTC). 
-						For example, if you’re in PT, for the billing of Jan 1, select your time range as Dec 31, 4:00 PM – Jan 1, 3:59 PM PT."
+						message={t('billing_utc_info')}
 					/>
 				)}
 				{isCloudUser && isDateBeforeAugust22nd2025(minTime) && (
 					<Alert
 						type="warning"
 						showIcon
-						message="Meter module data is accurate only from 22nd August 2025, 00:00 UTC onwards. Data before this time was collected during the beta phase and may be inaccurate."
+						message={t('accuracy_warning')}
 					/>
 				)}
 
@@ -160,15 +163,14 @@ function BreakDown(): JSX.Element {
 						closable
 						message={
 							<>
-								Meter metrics data is aggregated over 1 hour period. Please select time
-								range accordingly.&nbsp;
+								{t('aggregation_warning')}&nbsp;
 								<a
 									href="https://signoz.io/docs/cost-meter/overview/#accessing-cost-meter"
 									rel="noopener noreferrer"
 									target="_blank"
 									style={{ textDecoration: 'underline' }}
 								>
-									Learn more
+									{t('common:learn_more')}
 								</a>
 								.
 							</>

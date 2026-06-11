@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueries } from 'react-query';
 import { ENTITY_VERSION_V4, ENTITY_VERSION_V5 } from 'constants/app';
 import { initialQueriesMap } from 'constants/queryBuilder';
@@ -59,6 +60,7 @@ function EndPointDetails({
 	) => void;
 }): JSX.Element {
 	const { startTime: minTime, endTime: maxTime } = timeRange;
+	const { t } = useTranslation('apiMonitoring');
 	const [params, setParams] = useApiMonitoringParams();
 
 	const currentQuery = initialQueriesMap[DataSource.TRACES];
@@ -270,19 +272,19 @@ function EndPointDetails({
 					<QueryBuilderSearchV2
 						query={query}
 						onChange={handleFilterChange}
-						placeholder="Search for filters..."
+						placeholder={t('search_for_filters')}
 					/>
 				</div>
 			</div>
 			<div className="endpoint-meta-data">
 				<div className="endpoint-meta-data-pill">
-					<div className="endpoint-meta-data-label">Endpoint</div>
+					<div className="endpoint-meta-data-label">{t('meta_endpoint')}</div>
 					<div className="endpoint-meta-data-value">
-						{endpoint || 'All Endpoints'}
+						{endpoint || t('all_endpoints_fallback')}
 					</div>
 				</div>
 				<div className="endpoint-meta-data-pill">
-					<div className="endpoint-meta-data-label">Port</div>
+					<div className="endpoint-meta-data-label">{t('meta_port')}</div>
 					<div className="endpoint-meta-data-value">{port || '-'}</div>
 				</div>
 			</div>

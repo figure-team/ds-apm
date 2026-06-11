@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import { Tooltip, Typography } from 'antd';
 import { HostListPayload } from 'api/infraMonitoring/getHostLists';
@@ -18,6 +19,7 @@ export function HostnameCell({
 }: {
 	hostName?: string | null;
 }): React.ReactElement {
+	const { t } = useTranslation('infraMonitoring');
 	const isEmpty = !hostName || !hostName.trim();
 	if (!isEmpty) {
 		return <div className="hostname-column-value">{hostName}</div>;
@@ -30,7 +32,7 @@ export function HostnameCell({
 			<Tooltip
 				title={
 					<div>
-						Missing host.name metadata.
+						{t('missing_hostname_metadata')}
 						<br />
 						<a
 							href={HOSTNAME_DOCS_URL}
@@ -38,7 +40,7 @@ export function HostnameCell({
 							rel="noopener noreferrer"
 							onClick={(e): void => e.stopPropagation()}
 						>
-							Learn how to configure →
+							{t('learn_how_to_configure')}
 						</a>
 					</div>
 				}
@@ -48,7 +50,7 @@ export function HostnameCell({
 					className="hostname-cell-warning-icon"
 					tabIndex={0}
 					role="img"
-					aria-label="Missing host.name metadata"
+					aria-label={t('missing_hostname_metadata_aria')}
 					onClick={(e): void => e.stopPropagation()}
 					onKeyDown={(e): void => {
 						if (e.key === 'Enter' || e.key === ' ') {

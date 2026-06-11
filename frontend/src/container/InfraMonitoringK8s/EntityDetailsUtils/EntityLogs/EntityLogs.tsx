@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from 'react-query';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { Card } from 'antd';
@@ -42,6 +43,7 @@ function EntityLogs({
 	category,
 	queryKeyFilters,
 }: Props): JSX.Element {
+	const { t } = useTranslation('infraMonitoring');
 	const virtuosoRef = useRef<VirtuosoHandle>(null);
 	const {
 		activeLog,
@@ -136,13 +138,13 @@ function EntityLogs({
 		(): JSX.Element | null => (
 			<>
 				{isFetching ? (
-					<div className="logs-loading-skeleton"> Loading more logs ... </div>
+					<div className="logs-loading-skeleton"> {t('loading_more_logs')} </div>
 				) : hasReachedEndOfLogs ? (
-					<div className="logs-loading-skeleton"> *** End *** </div>
+					<div className="logs-loading-skeleton"> {t('logs_end')} </div>
 				) : null}
 			</>
 		),
-		[isFetching, hasReachedEndOfLogs],
+		[isFetching, hasReachedEndOfLogs, t],
 	);
 
 	const renderContent = useMemo(

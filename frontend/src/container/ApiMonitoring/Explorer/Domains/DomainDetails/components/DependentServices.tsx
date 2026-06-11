@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { UseQueryResult } from 'react-query';
 import { Skeleton, Table, TablePaginationConfig, Typography } from 'antd';
 import { QueryParams } from 'constants/query';
 import {
-	dependentServicesColumns,
 	DependentServicesData,
+	getDependentServicesColumns,
 	getFormattedDependentServicesData,
 } from 'container/ApiMonitoring/utils';
 import { UnfoldVertical } from 'lucide-react';
@@ -31,6 +32,7 @@ function DependentServices({
 }: DependentServicesProps): JSX.Element {
 	const { data, refetch, isError, isLoading, isRefetching } =
 		dependentServicesQuery;
+	const { t } = useTranslation('apiMonitoring');
 
 	const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
@@ -67,7 +69,7 @@ function DependentServices({
 				<Table
 					loading={isLoading || isRefetching}
 					dataSource={dependentServicesData || []}
-					columns={dependentServicesColumns}
+					columns={getDependentServicesColumns(t)}
 					rowClassName="table-row-dark"
 					pagination={paginationConfig}
 					locale={{
@@ -82,7 +84,7 @@ function DependentServices({
 										/>
 
 										<Typography.Text className="no-status-code-data-message">
-											This query had no results. Edit your query and try again!
+											{t('query_no_results')}
 										</Typography.Text>
 									</div>
 								</div>
@@ -116,7 +118,7 @@ function DependentServices({
 						tabIndex={0}
 					>
 						<UnfoldVertical size={14} />
-						{isExpanded ? 'Show less...' : 'Show more...'}
+						{isExpanded ? t('show_less') : t('show_more')}
 					</div>
 				)}
 			</div>

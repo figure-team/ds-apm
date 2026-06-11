@@ -1,17 +1,22 @@
 import { Plus, Trash2 } from '@signozhq/icons';
 import { Button, Input } from '@signozhq/ui';
 import { Form } from 'antd';
+import { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 import './DomainMappingList.styles.scss';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const validateEmail = (_: unknown, value: string): Promise<void> => {
+const createValidateEmail = (t: TFunction) => (
+	_: unknown,
+	value: string,
+): Promise<void> => {
 	if (!value) {
-		return Promise.reject(new Error('Admin email is required'));
+		return Promise.reject(new Error(t('domain_mapping_admin_email_required')));
 	}
 	if (!EMAIL_REGEX.test(value)) {
-		return Promise.reject(new Error('Please enter a valid email'));
+		return Promise.reject(new Error(t('domain_mapping_invalid_email')));
 	}
 	return Promise.resolve();
 };
@@ -23,15 +28,16 @@ interface DomainMappingListProps {
 function DomainMappingList({
 	fieldNamePrefix,
 }: DomainMappingListProps): JSX.Element {
+	const { t } = useTranslation('organizationsettings');
+	const validateEmail = createValidateEmail(t);
 	return (
 		<div className="domain-mapping-list">
 			<div className="domain-mapping-list__header">
 				<span className="domain-mapping-list__title">
-					Domain to Admin Email Mapping
+					{t('domain_mapping_title')}
 				</span>
 				<p className="domain-mapping-list__description">
-					Map workspace domains to admin emails for service account impersonation.
-					Use &quot;*&quot; as a wildcard for any domain.
+					{t('domain_mapping_description')}
 				</p>
 			</div>
 
@@ -43,9 +49,11 @@ function DomainMappingList({
 								<Form.Item
 									name={[field.name, 'domain']}
 									className="domain-mapping-list__field"
-									rules={[{ required: true, message: 'Domain is required' }]}
+									rules={[
+										{ required: true, message: t('domain_mapping_domain_required') },
+									]}
 								>
-									<Input placeholder="Domain (e.g., example.com or *)" />
+									<Input placeholder={t('domain_mapping_domain_placeholder')} />
 								</Form.Item>
 
 								<Form.Item
@@ -53,7 +61,7 @@ function DomainMappingList({
 									className="domain-mapping-list__field"
 									rules={[{ validator: validateEmail }]}
 								>
-									<Input placeholder="Admin Email" />
+									<Input placeholder={t('domain_mapping_admin_email_placeholder')} />
 								</Form.Item>
 
 								<Button
@@ -61,7 +69,7 @@ function DomainMappingList({
 									color="secondary"
 									className="domain-mapping-list__remove-btn"
 									onClick={(): void => remove(field.name)}
-									aria-label="Remove mapping"
+									aria-label={t('domain_mapping_remove_aria')}
 								>
 									<Trash2 size={12} />
 								</Button>
@@ -74,7 +82,7 @@ function DomainMappingList({
 							prefix={<Plus size={14} />}
 							className="domain-mapping-list__add-btn"
 						>
-							Add Domain Mapping
+							{t('domain_mapping_add')}
 						</Button>
 					</div>
 				)}

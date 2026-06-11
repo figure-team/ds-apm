@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Input, Typography } from 'antd';
 import { Select } from 'antd';
 import classNames from 'classnames';
@@ -13,6 +14,7 @@ function MetricTimeAggregation({
 	inspectionStep,
 	inspectMetricsTimeSeries,
 }: MetricTimeAggregationProps): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	return (
 		<div
 			data-testid="metric-time-aggregation"
@@ -23,11 +25,11 @@ function MetricTimeAggregation({
 					'selected-step': inspectionStep === InspectionStep.TIME_AGGREGATION,
 				})}
 			>
-				<Typography.Text>AGGREGATE BY TIME</Typography.Text>
+				<Typography.Text>{t('aggregate_by_time')}</Typography.Text>
 			</div>
 			<div className="metric-time-aggregation-content">
 				<div className="inspect-metrics-input-group">
-					<Typography.Text>Align with</Typography.Text>
+					<Typography.Text>{t('align_with')}</Typography.Text>
 					<Select
 						value={currentMetricInspectionOptions.timeAggregationOption}
 						onChange={(value): void => {
@@ -46,7 +48,7 @@ function MetricTimeAggregation({
 							}
 						}}
 						style={{ width: 130 }}
-						placeholder="Select option"
+						placeholder={t('select_option')}
 					>
 						{Object.entries(TIME_AGGREGATION_OPTIONS).map(([key, value]) => (
 							<Select.Option key={key} value={key}>
@@ -56,12 +58,12 @@ function MetricTimeAggregation({
 					</Select>
 				</div>
 				<div className="inspect-metrics-input-group">
-					<Typography.Text>aggregated every</Typography.Text>
+					<Typography.Text>{t('aggregated_every')}</Typography.Text>
 					<Input
 						type="number"
 						className="no-arrows-input"
 						value={currentMetricInspectionOptions.timeAggregationInterval}
-						placeholder="Select interval..."
+						placeholder={t('select_interval')}
 						suffix="seconds"
 						onChange={(e): void => {
 							dispatchMetricInspectionOptions({

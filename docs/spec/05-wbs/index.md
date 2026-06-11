@@ -5,17 +5,17 @@ type: wbs-index
 template: PMI WBS 2nd ed. + Agile (hybrid)
 decomposition_logic: component(Lv2) → epic → story(Lv3) 기반
 status: draft
-updated: 2026-06-08
+updated: 2026-06-11
 ---
 
 # DS-APM WBS
 
 > **PMI WBS** — 컴포넌트·일정 분해(독립 산출물). **WBS 항목 = 에픽/스토리에서 파생**([`../03-epics/`](../03-epics/index.md)·[`../04-stories/`](../04-stories/)) — 스토리/태스크가 바뀌면 항목도 따라 바뀐다. WBS는 거기에 **시작/종료일·상태**를 얹는 일정 층.
 > **에픽 ≠ WBS**: 에픽/스토리=애자일 작업 정의, WBS=PMI 컴포넌트·일정.
-> **상태 = as-built 수행 기록**: 전 스토리 **완료**(5.3 HMAC만 planned). 날짜는 **추정 수행 기간**(실제 커밋 일자 아님 — 공개 repo squash). 완료 항목도 **삭제 않고 유지**.
+> **상태 = as-built 수행 기록 + 계획**: Epic 1~6 스토리 **완료**(5.3 HMAC만 planned), Epic 7(WBS-1.6) 스토리 6건은 **planned**(설계 확정 2026-06-11). 날짜는 **추정 수행 기간**(실제 커밋 일자 아님 — 공개 repo squash). 완료 항목도 **삭제 않고 유지**.
 
 ## 100% Rule
-DS-APM 범위 = `WBS-1.0 ∪ … ∪ WBS-1.5` (자식 합 = 부모 100%). Excluded scope는 §Excluded Scope.
+DS-APM 범위 = `WBS-1.0 ∪ … ∪ WBS-1.6` (자식 합 = 부모 100%). Excluded scope는 §Excluded Scope.
 
 ## WBS Tree (Component Lv2) ↔ Epic ↔ CF
 ```
@@ -25,9 +25,10 @@ WBS-1   DS-APM Project (root)
 ├─ WBS-1.2  AI 초안 매니저        ← Epic 2 · Covers CF-2
 ├─ WBS-1.3  알림 디스패처         ← Epic 3 · Covers CF-3
 ├─ WBS-1.4  PII 마스킹 필터       ← Epic 4 · Covers CF-4
-└─ WBS-1.5  DLQ 재처리 서비스     ← Epic 5 · Covers CF-5
+├─ WBS-1.5  DLQ 재처리 서비스     ← Epic 5 · Covers CF-5
+└─ WBS-1.6  미등록 예외 대응 서비스 ← Epic 7 · Covers CF-7(1차) ○ planned
 ```
-> Lv2 컴포넌트(6) = 에픽(6) = CF(6) 1:1(파운데이션만 WBS-1.0↔Epic 6↔CF-6). Lv3 = 스토리.
+> Lv2 컴포넌트(7) = 에픽(7) = CF(7) 1:1(파운데이션만 WBS-1.0↔Epic 6↔CF-6). Lv3 = 스토리. WBS-1.6은 설계 확정·착수 전.
 
 ## 작업 패키지 일람
 
@@ -39,6 +40,7 @@ WBS-1   DS-APM Project (root)
 | WBS-1.3 | 알림 디스패처 | implemented | CF-3 | [Epic 3](../03-epics/epic-3-handoff.md) |
 | WBS-1.4 | PII 마스킹 필터 | implemented | CF-4 | [Epic 4](../03-epics/epic-4-pii-safety.md) |
 | WBS-1.5 | DLQ 재처리 서비스 | implemented-mvp | CF-5 | [Epic 5](../03-epics/epic-5-reliable-delivery.md) |
+| WBS-1.6 | 미등록 예외 대응 서비스 | **planned** (설계 확정) | CF-7 (1차) | [Epic 7](../03-epics/epic-7-unknown-exception.md) |
 
 ## 컴포넌트 일정 (Lv2 · 추정 수행 기간)
 
@@ -53,6 +55,9 @@ WBS-1   DS-APM Project (root)
 | WBS-1.4 PII 필터 | 2주 | 2026-07-13 | 2026-07-24 | WBS-1.0 (1.3 병렬) |
 | WBS-1.5 DLQ 재처리 | 3주 | 2026-08-03 | 2026-08-21 | WBS-1.3 |
 | 통합·안정화 | 1주 | 2026-08-24 | 2026-08-28 | 전체 |
+| **WBS-1.6 미등록 예외 대응** *(planned)* | 5주 | 2026-06-15 | 2026-07-17 | WBS-1.0~1.5 (기존 인프라 재사용) |
+
+> WBS-1.6 일정은 **계획(전망)** — 설계서(2026-06-11) 기준 추정. 착수·완료 시 갱신.
 
 ## 스토리 일정 (Lv3 · 에픽/스토리 파생 · 영업일 · 추정)
 
@@ -81,6 +86,12 @@ WBS-1   DS-APM Project (root)
 | WBS-1.5 (Epic 5) | [5.1](../04-stories/5.1.story.md) | 무유실 보존 | 2026-08-03 | 2026-08-07 | ✅ 완료 |
 | WBS-1.5 (Epic 5) | [5.2](../04-stories/5.2.story.md) | 멱등 재발송 | 2026-08-10 | 2026-08-14 | ✅ 완료 |
 | WBS-1.5 (Epic 5) | [5.3](../04-stories/5.3.story.md) | 재발송 HMAC | 2026-08-17 | 2026-08-21 | ○ planned |
+| WBS-1.6 (Epic 7) | [7.2](../04-stories/7.2.story.md) | 미등록 예외 인지·1차 알림 | 2026-06-15 | 2026-06-19 | ○ planned |
+| WBS-1.6 (Epic 7) | [7.4](../04-stories/7.4.story.md) | 저장소 연결·코드 전송 통제 | 2026-06-15 | 2026-06-19 | ○ planned (7.2 병렬) |
+| WBS-1.6 (Epic 7) | [7.6](../04-stories/7.6.story.md) | 반복 알림 억제·무시 처리 | 2026-06-22 | 2026-06-24 | ○ planned |
+| WBS-1.6 (Epic 7) | [7.3](../04-stories/7.3.story.md) | 코드베이스 근거 분석 보고서 | 2026-06-25 | 2026-07-07 | ○ planned |
+| WBS-1.6 (Epic 7) | [7.5](../04-stories/7.5.story.md) | SOP/Runbook 자산화 (HITL) | 2026-07-08 | 2026-07-13 | ○ planned |
+| WBS-1.6 (Epic 7) | [7.7](../04-stories/7.7.story.md) | fail-open 보장·통합 검증 | 2026-07-14 | 2026-07-17 | ○ planned |
 
 ```mermaid
 gantt
@@ -106,7 +117,7 @@ gantt
 
 ## Excluded Scope (명시적 OUT OF SCOPE)
 - **SigNoz upstream + OTel/ClickHouse 수집·저장**(전제 환경) · **Enterprise 모듈**(`ee/`) · **y2i**(영구 비활성)
-- **로드맵 역량 CF-7~10**(이상탐지·자동조치·자동보고서·ITSM) — §A 부록
+- **로드맵 역량 CF-7 후속(기준선 학습)·CF-8~10**(자동조치·자동보고서·ITSM) — §A 부록. CF-7 1차(미등록 예외 대응)는 WBS-1.6으로 **범위 내 편입**(planned)
 
 ## Milestones (달성 현황 · gate 기준)
 
@@ -117,8 +128,9 @@ gantt
 | **M-3 전달·안전** | ✅ 완료 | WBS-1.3+1.4. CF-3 5채널 + CF-4 PII (UJ-1). | |
 | **M-4 신뢰성·Beta** | ◐ 부분 | WBS-1.5 코어 완료. **HMAC 미정·DLQ 기본 배선 nil**(open). | Story 5.3 · PRD §9.3 |
 | **M-5 Production** | ✗ 미달 | Multi-tenant RLS·PII OTel Collector 단 미적용. | PRD §9.2 |
+| **M-6 미등록 예외 대응** | ○ planned | WBS-1.6. CF-7 1차 — UJ-5 골든패스 + fail-open 분기 인수 통과. | Epic 7 · 설계 확정 2026-06-11 |
 
-> 로드맵 마일스톤(미일정): 이상탐지(CF-7)·자동조치(CF-8)·자산화(CF-9)·ITSM(CF-10). → §A.
+> 로드맵 마일스톤(미일정): 이상탐지 후속(CF-7 기준선)·자동조치(CF-8)·자산화(CF-9)·ITSM(CF-10). → §A.
 
 ## Appendix
 - [전략 로드맵 ↔ WBS·CF 연계 (§A)](appendix-phases.md)

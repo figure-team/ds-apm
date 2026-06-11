@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { UseQueryResult } from 'react-query';
 import { Color } from '@signozhq/design-tokens';
 import { Progress, Skeleton, Tooltip, Typography } from 'antd';
@@ -18,6 +19,7 @@ function EndPointMetrics({
 }): JSX.Element {
 	const { isLoading, isRefetching, isError, data, refetch } =
 		endPointMetricsDataQuery;
+	const { t } = useTranslation('apiMonitoring');
 
 	const metricsData = useMemo(() => {
 		if (isLoading || isRefetching || isError) {
@@ -41,25 +43,25 @@ function EndPointMetrics({
 						type="secondary"
 						className="domain-details-metadata-label"
 					>
-						Rate
+						{t('metric_rate')}
 					</Typography.Text>
 					<Typography.Text
 						type="secondary"
 						className="domain-details-metadata-label"
 					>
-						AVERAGE LATENCY
+						{t('average_latency_caps')}
 					</Typography.Text>
 					<Typography.Text
 						type="secondary"
 						className="domain-details-metadata-label"
 					>
-						ERROR %
+						{t('error_percent_caps')}
 					</Typography.Text>
 					<Typography.Text
 						type="secondary"
 						className="domain-details-metadata-label"
 					>
-						LAST USED
+						{t('last_used_caps')}
 					</Typography.Text>
 				</div>
 

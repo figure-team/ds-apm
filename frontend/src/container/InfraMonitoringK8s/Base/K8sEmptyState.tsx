@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@signozhq/ui';
 import { useGetTenantLicense } from 'hooks/useGetTenantLicense';
 import history from 'lib/history';
@@ -33,6 +34,7 @@ export function K8sEmptyState({
 	isLoading,
 	rawData,
 }: K8sEmptyStateProps): JSX.Element | null {
+	const { t } = useTranslation('infraMonitoring');
 	const { isCloudUser } = useGetTenantLicense();
 
 	const handleSupport = useCallback(() => {
@@ -51,10 +53,7 @@ export function K8sEmptyState({
 					<span className={styles.message}>
 						{error || 'An error occurred while fetching data.'}
 					</span>
-					<p>
-						Our team is getting on top to resolve this. Please reach out to support if
-						the issue persists.
-					</p>
+					<p>{t('error_team_resolving')}</p>
 					<div className={styles.actions}>
 						<Button
 							onClick={handleSupport}
@@ -62,7 +61,7 @@ export function K8sEmptyState({
 							color="secondary"
 							prefix={<LifeBuoy size={14} />}
 						>
-							Contact Support
+							{t('contact_support')}
 						</Button>
 					</div>
 				</div>
@@ -76,19 +75,25 @@ export function K8sEmptyState({
 		return (
 			<div className={styles.container}>
 				<div className={styles.content}>
-					<img className={styles.eyesEmoji} src={eyesEmojiUrl} alt="eyes emoji" />
+					<img className={styles.eyesEmoji} src={eyesEmojiUrl} alt={t('eyes_emoji_alt')} />
 					<div className={styles.noDataMessage}>
-						<h5 className={styles.title}>No host metrics data received yet</h5>
+						<h5 className={styles.title}>{t('no_host_metrics_yet')}</h5>
 						<span className={styles.message}>
-							Please refer to{' '}
-							<a
-								href="https://signoz.io/docs/userguide/hostmetrics/"
-								target="_blank"
-								rel="noreferrer"
-							>
-								our documentation
-							</a>{' '}
-							to learn how to send host metrics.
+							<Trans
+								i18nKey="send_host_metrics_help"
+								t={t}
+								components={[
+									// eslint-disable-next-line jsx-a11y/anchor-has-content
+									<a
+										key="0"
+										href="https://signoz.io/docs/userguide/hostmetrics/"
+										target="_blank"
+										rel="noreferrer"
+									>
+										{' '}
+									</a>,
+								]}
+							/>
 						</span>
 					</div>
 				</div>
@@ -100,10 +105,9 @@ export function K8sEmptyState({
 		return (
 			<div className={styles.container}>
 				<div className={styles.content}>
-					<img className={styles.eyesEmoji} src={eyesEmojiUrl} alt="eyes emoji" />
+					<img className={styles.eyesEmoji} src={eyesEmojiUrl} alt={t('eyes_emoji_alt')} />
 					<span className={styles.message}>
-						To see K8s metrics, upgrade to the latest version of SigNoz k8s-infra
-						chart. Please contact support if you need help.
+						{t('upgrade_k8s_infra_chart')}
 					</span>
 				</div>
 			</div>
@@ -114,14 +118,13 @@ export function K8sEmptyState({
 		return (
 			<div className={styles.container}>
 				<div className={styles.content}>
-					<img className={styles.eyesEmoji} src={eyesEmojiUrl} alt="eyes emoji" />
+					<img className={styles.eyesEmoji} src={eyesEmojiUrl} alt={t('eyes_emoji_alt')} />
 					<div className={styles.noDataMessage}>
 						<h5 className={styles.title}>
-							Queried time range is before earliest K8s metrics
+							{t('queried_range_before_earliest')}
 						</h5>
 						<span className={styles.message}>
-							Your requested end time is earlier than the earliest detected time of K8s
-							metrics data, please adjust your end time.
+							{t('end_time_before_earliest')}
 						</span>
 					</div>
 				</div>
@@ -138,7 +141,7 @@ export function K8sEmptyState({
 					className={styles.emptyStateSvg}
 				/>
 				<span className={styles.message}>
-					This query had no results. Edit your query and try again!
+					{t('query_no_results')}
 				</span>
 			</div>
 		</div>

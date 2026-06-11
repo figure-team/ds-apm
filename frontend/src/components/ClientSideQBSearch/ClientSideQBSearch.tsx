@@ -8,6 +8,7 @@ import {
 	useRef,
 	useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import { Select, Tag, Tooltip } from 'antd';
 import {
@@ -90,6 +91,14 @@ function ClientSideQBSearch(
 		attributeKeys,
 		filters,
 	} = props;
+
+	const { t } = useTranslation('common');
+	// PLACEHOLDER is the untranslated default prop; resolve it to the translated
+	// copy here so callers passing a custom placeholder are unaffected.
+	const resolvedPlaceholder =
+		placeholder === PLACEHOLDER
+			? t('qb_search_placeholder').toString()
+			: placeholder;
 
 	const isDarkMode = useIsDarkMode();
 
@@ -605,7 +614,7 @@ function ClientSideQBSearch(
 				onDropdownVisibleChange={setIsOpen}
 				autoClearSearchValue={false}
 				mode="multiple"
-				placeholder={placeholder}
+				placeholder={resolvedPlaceholder}
 				value={queryTags}
 				searchValue={searchValue}
 				className={className}

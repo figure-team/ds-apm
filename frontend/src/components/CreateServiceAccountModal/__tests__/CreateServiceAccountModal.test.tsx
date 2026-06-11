@@ -56,7 +56,7 @@ describe('CreateServiceAccountModal', () => {
 		renderModal();
 
 		expect(
-			screen.getByRole('button', { name: /Create Service Account/i }),
+			screen.getByRole('button', { name: 'create_submit' }),
 		).toBeDisabled();
 	});
 
@@ -64,10 +64,10 @@ describe('CreateServiceAccountModal', () => {
 		const user = userEvent.setup({ pointerEventsCheck: 0 });
 		renderModal();
 
-		await user.type(screen.getByPlaceholderText('Enter a name'), 'Deploy Bot');
+		await user.type(screen.getByPlaceholderText('create_name_placeholder'), 'Deploy Bot');
 
 		const submitBtn = screen.getByRole('button', {
-			name: /Create Service Account/i,
+			name: 'create_submit',
 		});
 		await waitFor(() => expect(submitBtn).not.toBeDisabled());
 		await user.click(submitBtn);
@@ -80,7 +80,7 @@ describe('CreateServiceAccountModal', () => {
 
 		await waitFor(() => {
 			expect(
-				screen.queryByRole('dialog', { name: /New Service Account/i }),
+				screen.queryByRole('dialog', { name: 'create_modal_title' }),
 			).not.toBeInTheDocument();
 		});
 	});
@@ -99,10 +99,10 @@ describe('CreateServiceAccountModal', () => {
 
 		renderModal();
 
-		await user.type(screen.getByPlaceholderText('Enter a name'), 'Dupe Bot');
+		await user.type(screen.getByPlaceholderText('create_name_placeholder'), 'Dupe Bot');
 
 		const submitBtn = screen.getByRole('button', {
-			name: /Create Service Account/i,
+			name: 'create_submit',
 		});
 		await waitFor(() => expect(submitBtn).not.toBeDisabled());
 		await user.click(submitBtn);
@@ -118,7 +118,7 @@ describe('CreateServiceAccountModal', () => {
 		});
 
 		expect(
-			screen.getByRole('dialog', { name: /New Service Account/i }),
+			screen.getByRole('dialog', { name: 'create_modal_title' }),
 		).toBeInTheDocument();
 	});
 
@@ -127,9 +127,9 @@ describe('CreateServiceAccountModal', () => {
 		renderModal();
 
 		const dialog = await screen.findByRole('dialog', {
-			name: /New Service Account/i,
+			name: 'create_modal_title',
 		});
-		await user.click(screen.getByRole('button', { name: /Cancel/i }));
+		await user.click(screen.getByRole('button', { name: 'common:cancel' }));
 
 		await waitForElementToBeRemoved(dialog);
 	});
@@ -138,7 +138,7 @@ describe('CreateServiceAccountModal', () => {
 		const user = userEvent.setup({ pointerEventsCheck: 0 });
 		renderModal();
 
-		const nameInput = screen.getByPlaceholderText('Enter a name');
+		const nameInput = screen.getByPlaceholderText('create_name_placeholder');
 		await user.type(nameInput, 'Bot');
 		await user.clear(nameInput);
 

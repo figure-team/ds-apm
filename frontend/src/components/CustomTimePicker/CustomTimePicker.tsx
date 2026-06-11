@@ -6,6 +6,7 @@ import {
 	useRef,
 	useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { Button } from '@signozhq/ui';
 import { Input, InputRef, Popover, Tooltip } from 'antd';
@@ -17,6 +18,7 @@ import {
 	FixedDurationSuggestionOptions,
 	Options,
 	RelativeDurationSuggestionOptions,
+	translateTimeRangeLabel,
 } from 'container/TopNav/DateTimeSelectionV2/constants';
 import dayjs from 'dayjs';
 import { useZoomOut } from 'hooks/useZoomOut';
@@ -96,8 +98,9 @@ function CustomTimePicker({
 	maxTime,
 	isModalTimeSelection = false,
 }: CustomTimePickerProps): JSX.Element {
+	const { t } = useTranslation('common');
 	const [selectedTimePlaceholderValue, setSelectedTimePlaceholderValue] =
-		useState('Select / Enter Time Range');
+		useState(t('select_enter_time_range').toString());
 
 	const [inputValue, setInputValue] = useState('');
 	const [inputStatus, setInputStatus] = useState<CustomTimePickerInputStatus>(
@@ -142,7 +145,7 @@ function CustomTimePicker({
 		const match = selectedTime.match(/^(\d+)([mhdw])$/);
 		if (!match) {
 			// If it doesn't match the format, return as is
-			return `Last ${selectedTime}`;
+			return t('time_range.last_value', { value: selectedTime }).toString();
 		}
 
 		const value = parseInt(match[1], 10);
@@ -158,7 +161,10 @@ function CustomTimePicker({
 
 		const unitLabel = value === 1 ? unitMap[unit].singular : unitMap[unit].plural;
 
-		return `Last ${value} ${unitLabel}`;
+		return t('time_range.last_relative', {
+			value,
+			unit: t(`time_range.unit_${unitLabel}`),
+		}).toString();
 	};
 
 	const getSelectedTimeRangeLabel = (
@@ -186,7 +192,7 @@ function CustomTimePicker({
 
 		for (let index = 0; index < Options.length; index++) {
 			if (Options[index].value === selectedTime) {
-				return Options[index].label;
+				return translateTimeRangeLabel(t, Options[index].label);
 			}
 		}
 
@@ -196,13 +202,19 @@ function CustomTimePicker({
 			index++
 		) {
 			if (RelativeDurationSuggestionOptions[index].value === selectedTime) {
-				return RelativeDurationSuggestionOptions[index].label;
+				return translateTimeRangeLabel(
+					t,
+					RelativeDurationSuggestionOptions[index].label,
+				);
 			}
 		}
 
 		for (let index = 0; index < FixedDurationSuggestionOptions.length; index++) {
 			if (FixedDurationSuggestionOptions[index].value === selectedTime) {
-				return FixedDurationSuggestionOptions[index].label;
+				return translateTimeRangeLabel(
+					t,
+					FixedDurationSuggestionOptions[index].label,
+				);
 			}
 		}
 
@@ -342,9 +354,13 @@ function CustomTimePicker({
 				setInputStatus(CustomTimePickerInputStatus.ERROR);
 				onError(true);
 				setInputErrorDetails({
-					message: `Please enter time less than ${maxAllowedMinTimeInMonths} months`,
+					message: t('time_less_than_months', {
+						months: maxAllowedMinTimeInMonths,
+					}).toString(),
 					code: 'TIME_LESS_THAN_MAX_ALLOWED_TIME_IN_MONTHS',
-					description: `Please enter time less than ${maxAllowedMinTimeInMonths} months`,
+					description: t('time_less_than_months', {
+						months: maxAllowedMinTimeInMonths,
+					}).toString(),
 				});
 				if (isFunction(onCustomTimeStatusUpdate)) {
 					onCustomTimeStatusUpdate(true);
@@ -424,7 +440,7 @@ function CustomTimePicker({
 				{items?.map(({ value, label }) => (
 					<div
 						onClick={(): void => {
-							handleSelect(label, value);
+							handleSelect(translateTimeRangeLabel(t, label), value);
 						}}
 						key={value}
 						className={cx(
@@ -432,7 +448,7 @@ function CustomTimePicker({
 							selectedValue === value ? 'active' : '',
 						)}
 					>
-						{label}
+						{translateTimeRangeLabel(t, label)}
 					</div>
 				))}
 			</div>
@@ -650,9 +666,7 @@ function CustomTimePicker({
 			</Tooltip>
 			{!showLiveLogs && !isModalTimeSelection && (
 				<Tooltip
-					title={
-						zoomOutDisabled ? 'Zoom out time range is limited to 1 month' : 'Zoom out'
-					}
+					title={zoomOutDisabled ? t('zoom_out_limited') : t('zoom_out')}
 				>
 					<Button
 						className="zoom-out-btn"

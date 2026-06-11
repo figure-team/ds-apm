@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from 'react-query';
 // eslint-disable-next-line no-restricted-imports
 import { LoadingOutlined } from '@ant-design/icons';
@@ -62,6 +63,7 @@ export function K8sExpandedRow<T>({
 	fetchListData,
 	renderRowData,
 }: K8sExpandedRowProps<T>): JSX.Element {
+	const { t } = useTranslation('infraMonitoring');
 	const [groupBy, setGroupBy] = useInfraMonitoringGroupBy();
 	const [orderBy, setOrderBy] = useInfraMonitoringOrderBy();
 	const [, setCurrentPage] = useInfraMonitoringCurrentPage();
@@ -235,7 +237,7 @@ export function K8sExpandedRow<T>({
 								onClick={handleViewAllClick}
 							>
 								<CornerDownRight size={14} />
-								View All
+								{t('view_all')}
 							</Button>
 						</div>
 					)}

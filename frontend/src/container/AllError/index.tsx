@@ -77,7 +77,7 @@ function AllErrors(): JSX.Element {
 	);
 	const { pathname } = useLocation();
 	const params = useUrlQuery();
-	const { t } = useTranslation(['common']);
+	const { t } = useTranslation(['exceptions', 'common']);
 	const {
 		updatedOrder,
 		getUpdatedOffset,
@@ -179,7 +179,7 @@ function AllErrors(): JSX.Element {
 	useEffect(() => {
 		if (data?.error) {
 			notifications.error({
-				message: data.error || t('something_went_wrong'),
+				message: data.error || t('common:something_went_wrong'),
 			});
 		}
 	}, [data?.error, data?.payload, t, notifications]);
@@ -278,7 +278,7 @@ function AllErrors(): JSX.Element {
 						icon={<SearchOutlined />}
 						size="small"
 					>
-						Search
+						{t('search')}
 					</Button>
 				</Space>
 			</Card>
@@ -330,11 +330,15 @@ function AllErrors(): JSX.Element {
 
 	const columns: ColumnsType<Exception> = [
 		{
-			title: 'Exception Type',
+			title: t('column_exception_type'),
 			width: 100,
 			dataIndex: 'exceptionType',
 			key: 'exceptionType',
-			...getFilter(onExceptionTypeFilter, 'Search By Exception', 'exceptionType'),
+			...getFilter(
+				onExceptionTypeFilter,
+				t('search_by_exception'),
+				'exceptionType',
+			),
 			render: (value, record): JSX.Element => (
 				<Tooltip overlay={(): JSX.Element => value}>
 					<Link
@@ -354,7 +358,7 @@ function AllErrors(): JSX.Element {
 			),
 		},
 		{
-			title: 'Error Message',
+			title: t('column_error_message'),
 			dataIndex: 'exceptionMessage',
 			key: 'exceptionMessage',
 			width: 100,
@@ -371,7 +375,7 @@ function AllErrors(): JSX.Element {
 			),
 		},
 		{
-			title: 'Count',
+			title: t('column_count'),
 			width: 50,
 			dataIndex: 'exceptionCount',
 			key: 'exceptionCount',
@@ -383,7 +387,7 @@ function AllErrors(): JSX.Element {
 			),
 		},
 		{
-			title: 'Last Seen',
+			title: t('column_last_seen'),
 			dataIndex: 'lastSeen',
 			width: 80,
 			key: 'lastSeen',
@@ -397,7 +401,7 @@ function AllErrors(): JSX.Element {
 			),
 		},
 		{
-			title: 'First Seen',
+			title: t('column_first_seen'),
 			dataIndex: 'firstSeen',
 			width: 80,
 			key: 'firstSeen',
@@ -411,7 +415,7 @@ function AllErrors(): JSX.Element {
 			),
 		},
 		{
-			title: 'Application',
+			title: t('column_application'),
 			dataIndex: 'serviceName',
 			width: 100,
 			key: 'serviceName',
@@ -423,7 +427,7 @@ function AllErrors(): JSX.Element {
 			),
 			...getFilter(
 				onApplicationTypeFilter,
-				'Search By Application',
+				t('search_by_application'),
 				'serviceName',
 			),
 		},
@@ -488,7 +492,7 @@ function AllErrors(): JSX.Element {
 
 	if (isCancelled && !data?.payload?.length) {
 		return (
-			<QueryCancelledPlaceholder subText='Click "Run Query" to load exceptions.' />
+			<QueryCancelledPlaceholder subText={t('load_exceptions_hint')} />
 		);
 	}
 

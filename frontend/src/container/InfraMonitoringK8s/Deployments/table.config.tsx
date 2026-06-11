@@ -1,4 +1,5 @@
 import { TableColumnType as ColumnType, Tooltip } from 'antd';
+import { TFunction } from 'i18next';
 import { Group } from 'lucide-react';
 import { BaseAutocompleteData } from 'types/api/queryBuilder/queryAutocompleteResponse';
 
@@ -105,11 +106,13 @@ export const k8sDeploymentsColumns: IEntityColumn[] = [
 	},
 ];
 
-export const k8sDeploymentsColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
+export const k8sDeploymentsColumnsConfig = (
+	t: TFunction,
+): ColumnType<K8sRenderedRowData>[] => [
 	{
 		title: (
 			<div className={styles.entityGroupHeader}>
-				<Group size={14} /> DEPLOYMENT GROUP
+				<Group size={14} /> {t('col_deployment_group').toString()}
 			</div>
 		),
 		dataIndex: 'deploymentGroup',
@@ -120,7 +123,7 @@ export const k8sDeploymentsColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		sorter: false,
 	},
 	{
-		title: <div>Deployment Name</div>,
+		title: <div>{t('col_deployment_name').toString()}</div>,
 		dataIndex: 'deploymentName',
 		key: 'deploymentName',
 		ellipsis: true,
@@ -129,7 +132,7 @@ export const k8sDeploymentsColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Namespace Name</div>,
+		title: <div>{t('col_namespace_name').toString()}</div>,
 		dataIndex: 'namespaceName',
 		key: 'namespaceName',
 		ellipsis: true,
@@ -138,7 +141,7 @@ export const k8sDeploymentsColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Available</div>,
+		title: <div>{t('col_available').toString()}</div>,
 		dataIndex: 'available_pods',
 		key: 'available_pods',
 		width: 100,
@@ -146,7 +149,7 @@ export const k8sDeploymentsColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Desired</div>,
+		title: <div>{t('col_desired').toString()}</div>,
 		dataIndex: 'desired_pods',
 		key: 'desired_pods',
 		width: 80,
@@ -154,7 +157,7 @@ export const k8sDeploymentsColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>CPU Req Usage (%)</div>,
+		title: <div>{t('col_cpu_req_usage_pct').toString()}</div>,
 		dataIndex: 'cpu_request',
 		key: 'cpu_request',
 		width: 170,
@@ -162,7 +165,7 @@ export const k8sDeploymentsColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>CPU Limit Usage (%)</div>,
+		title: <div>{t('col_cpu_limit_usage_pct').toString()}</div>,
 		dataIndex: 'cpu_limit',
 		key: 'cpu_limit',
 		width: 170,
@@ -170,7 +173,7 @@ export const k8sDeploymentsColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>CPU Usage (cores)</div>,
+		title: <div>{t('col_cpu_usage_cores').toString()}</div>,
 		dataIndex: 'cpu',
 		key: 'cpu',
 		width: 80,
@@ -178,7 +181,7 @@ export const k8sDeploymentsColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Mem Req Usage (%)</div>,
+		title: <div>{t('col_mem_req_usage_pct').toString()}</div>,
 		dataIndex: 'memory_request',
 		key: 'memory_request',
 		width: 170,
@@ -186,7 +189,7 @@ export const k8sDeploymentsColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Mem Limit Usage (%)</div>,
+		title: <div>{t('col_mem_limit_usage_pct').toString()}</div>,
 		dataIndex: 'memory_limit',
 		key: 'memory_limit',
 		width: 170,
@@ -194,7 +197,7 @@ export const k8sDeploymentsColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Mem Usage (WSS)</div>,
+		title: <div>{t('col_mem_usage_wss').toString()}</div>,
 		dataIndex: 'memory',
 		key: 'memory',
 		width: 120,

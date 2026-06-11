@@ -17,12 +17,12 @@ interface MockQueryResult {
 // Mock the utility function
 jest.mock('container/ApiMonitoring/utils', () => ({
 	getFormattedDependentServicesData: jest.fn(),
-	dependentServicesColumns: [
+	getDependentServicesColumns: jest.fn(() => [
 		{ title: 'Dependent Services', dataIndex: 'serviceData', key: 'serviceData' },
 		{ title: 'AVG. LATENCY', dataIndex: 'latency', key: 'latency' },
 		{ title: 'ERROR %', dataIndex: 'errorPercentage', key: 'errorPercentage' },
 		{ title: 'AVG. RATE', dataIndex: 'rate', key: 'rate' },
-	],
+	]),
 }));
 
 // Mock the ErrorState component
@@ -344,7 +344,7 @@ describe('DependentServices', () => {
 		);
 
 		// Find the "Show more" button (using container query since it might not have a testId)
-		const showMoreButton = screen.getByText(/Show more/i);
+		const showMoreButton = screen.getByText(/show_more/i);
 		expect(showMoreButton).toBeInTheDocument();
 
 		// Initial page size should be 5
@@ -357,6 +357,6 @@ describe('DependentServices', () => {
 		expect(screen.getByTestId('page-size')).toHaveTextContent('8');
 
 		// Text should have changed to "Show less"
-		expect(screen.getByText(/Show less/i)).toBeInTheDocument();
+		expect(screen.getByText(/show_less/i)).toBeInTheDocument();
 	});
 });

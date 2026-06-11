@@ -102,7 +102,7 @@ describe('MetricsTable', () => {
 			</MemoryRouter>,
 		);
 
-		expect(screen.getByText('List View')).toBeInTheDocument();
+		expect(screen.getByText('list_view')).toBeInTheDocument();
 		expect(screen.getByText('Metric 1')).toBeInTheDocument();
 		expect(screen.getByText('Metric 2')).toBeInTheDocument();
 	});
@@ -190,9 +190,7 @@ describe('MetricsTable', () => {
 
 		expect(screen.getByTestId('metrics-table-empty-state')).toBeInTheDocument();
 		expect(
-			screen.getByText(
-				'This query had no results. Edit your query and try again!',
-			),
+			screen.getByText('query_no_results'),
 		).toBeInTheDocument();
 	});
 

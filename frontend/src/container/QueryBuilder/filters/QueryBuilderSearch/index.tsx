@@ -8,6 +8,7 @@ import {
 	useRef,
 	useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { Button, Select, Spin, Tag, Tooltip, Typography } from 'antd';
 import cx from 'classnames';
@@ -79,6 +80,13 @@ function QueryBuilderSearch({
 	disableNavigationShortcuts,
 	entity,
 }: QueryBuilderSearchProps): JSX.Element {
+	const { t } = useTranslation('common');
+	// PLACEHOLDER is the untranslated default prop; resolve it to the translated
+	// copy here so callers passing a custom placeholder are unaffected.
+	const resolvedPlaceholder =
+		placeholder === PLACEHOLDER
+			? t('qb_search_placeholder').toString()
+			: placeholder || '';
 	const { pathname } = useLocation();
 	const isLogsExplorerPage = useMemo(
 		() => pathname === ROUTES.LOGS_EXPLORER,
@@ -122,7 +130,7 @@ function QueryBuilderSearch({
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 	const [showAllFilters, setShowAllFilters] = useState<boolean>(false);
 	const [dynamicPlacholder, setDynamicPlaceholder] = useState<string>(
-		placeholder || '',
+		resolvedPlaceholder,
 	);
 	const selectRef = useRef<BaseSelectRef>(null);
 
@@ -348,9 +356,9 @@ function QueryBuilderSearch({
 
 	useEffect(() => {
 		if (!isOpen) {
-			setDynamicPlaceholder(placeholder || '');
+			setDynamicPlaceholder(resolvedPlaceholder);
 		}
-	}, [isOpen, placeholder]);
+	}, [isOpen, resolvedPlaceholder]);
 
 	const userOs = getUserOperatingSystem();
 

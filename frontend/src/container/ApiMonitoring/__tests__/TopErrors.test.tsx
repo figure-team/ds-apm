@@ -141,8 +141,8 @@ describe('TopErrors', () => {
 		const { container } = render(<TopErrors {...mockProps} />);
 
 		// Check if the title and toggle are rendered
-		expect(screen.getByText('Errors with Status Message')).toBeInTheDocument();
-		expect(screen.getByText('Status Message Exists')).toBeInTheDocument();
+		expect(screen.getByText('header_errors_with_status')).toBeInTheDocument();
+		expect(screen.getByText('status_message_exists')).toBeInTheDocument();
 
 		// Wait for data to load
 		await waitForTableDataToLoad(container);
@@ -170,12 +170,12 @@ describe('TopErrors', () => {
 		// Wait for error state
 		await waitFor(() => {
 			expect(
-				screen.getByText('Uh-oh :/ We ran into an error.'),
+				screen.getByText('error_ran_into'),
 			).toBeInTheDocument();
 		});
 
-		expect(screen.getByText('Please refresh this panel.')).toBeInTheDocument();
-		expect(screen.getByText('Refresh this panel')).toBeInTheDocument();
+		expect(screen.getByText('error_refresh_panel')).toBeInTheDocument();
+		expect(screen.getByText('refresh_this_panel')).toBeInTheDocument();
 	});
 
 	it('handles row click correctly', async () => {
@@ -266,7 +266,7 @@ describe('TopErrors', () => {
 
 		// Title should change
 		await waitFor(() => {
-			expect(screen.getByText('All Errors')).toBeInTheDocument();
+			expect(screen.getByText('header_all_errors')).toBeInTheDocument();
 		});
 
 		// Click the toggle to turn it back on
@@ -274,7 +274,7 @@ describe('TopErrors', () => {
 
 		// Title should change back
 		await waitFor(() => {
-			expect(screen.getByText('Errors with Status Message')).toBeInTheDocument();
+			expect(screen.getByText('header_errors_with_status')).toBeInTheDocument();
 		});
 	});
 
@@ -293,7 +293,7 @@ describe('TopErrors', () => {
 
 		// Wait for title to change, indicating query was refetched with new key
 		await waitFor(() => {
-			expect(screen.getByText('All Errors')).toBeInTheDocument();
+			expect(screen.getByText('header_all_errors')).toBeInTheDocument();
 		});
 
 		// The fact that data refetches when toggle changes proves the query key includes the toggle state

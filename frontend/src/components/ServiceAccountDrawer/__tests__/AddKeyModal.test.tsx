@@ -70,13 +70,13 @@ describe('AddKeyModal', () => {
 		const user = userEvent.setup({ pointerEventsCheck: 0 });
 		renderModal();
 
-		expect(screen.getByRole('button', { name: /Create Key/i })).toBeDisabled();
+		expect(screen.getByRole('button', { name: 'create_key' })).toBeDisabled();
 
-		await user.type(screen.getByPlaceholderText(/Enter key name/i), 'My Key');
+		await user.type(screen.getByPlaceholderText('key_name_placeholder'), 'My Key');
 
 		await waitFor(() =>
 			expect(
-				screen.getByRole('button', { name: /Create Key/i }),
+				screen.getByRole('button', { name: 'create_key' }),
 			).not.toBeDisabled(),
 		);
 	});
@@ -85,16 +85,16 @@ describe('AddKeyModal', () => {
 		const user = userEvent.setup({ pointerEventsCheck: 0 });
 		renderModal();
 
-		await user.type(screen.getByPlaceholderText(/Enter key name/i), 'Deploy Key');
+		await user.type(screen.getByPlaceholderText('key_name_placeholder'), 'Deploy Key');
 		await waitFor(() =>
 			expect(
-				screen.getByRole('button', { name: /Create Key/i }),
+				screen.getByRole('button', { name: 'create_key' }),
 			).not.toBeDisabled(),
 		);
-		await user.click(screen.getByRole('button', { name: /Create Key/i }));
+		await user.click(screen.getByRole('button', { name: 'create_key' }));
 
 		await screen.findByText('snz_abc123xyz456secret');
-		expect(screen.getByText(/Store the key securely/i)).toBeInTheDocument();
+		expect(screen.getByText('store_key_securely')).toBeInTheDocument();
 		await screen.findByRole('dialog', { name: /Key Created Successfully/i });
 	});
 
@@ -103,13 +103,13 @@ describe('AddKeyModal', () => {
 
 		renderModal();
 
-		await user.type(screen.getByPlaceholderText(/Enter key name/i), 'Deploy Key');
+		await user.type(screen.getByPlaceholderText('key_name_placeholder'), 'Deploy Key');
 		await waitFor(() =>
 			expect(
-				screen.getByRole('button', { name: /Create Key/i }),
+				screen.getByRole('button', { name: 'create_key' }),
 			).not.toBeDisabled(),
 		);
-		await user.click(screen.getByRole('button', { name: /Create Key/i }));
+		await user.click(screen.getByRole('button', { name: 'create_key' }));
 
 		await screen.findByText('snz_abc123xyz456secret');
 
@@ -132,7 +132,7 @@ describe('AddKeyModal', () => {
 		renderModal();
 
 		const dialog = await screen.findByRole('dialog', { name: /Add a New Key/i });
-		await user.click(screen.getByRole('button', { name: /Cancel/i }));
+		await user.click(screen.getByRole('button', { name: 'common:cancel' }));
 
 		await waitForElementToBeRemoved(dialog);
 	});

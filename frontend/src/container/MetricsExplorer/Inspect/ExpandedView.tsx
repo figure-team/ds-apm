@@ -1,5 +1,6 @@
 /* eslint-disable sonarjs/no-identical-functions */
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import type { TableColumnsType as ColumnsType } from 'antd';
 import { Card, Tooltip, Typography } from 'antd';
@@ -34,6 +35,7 @@ function ExpandedView({
 	metricInspectionAppliedOptions,
 	timeAggregatedSeriesMap,
 }: ExpandedViewProps): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	const [selectedTimeSeries, setSelectedTimeSeries] =
 		useState<InspectMetricsSeries | null>(null);
 
@@ -149,7 +151,7 @@ function ExpandedView({
 			<div className="expanded-view-header">
 				<Typography.Title level={5}>
 					<Focus size={16} color={Color.BG_VANILLA_100} />
-					<div>POINT INSPECTOR</div>
+					<div>{t('point_inspector')}</div>
 				</Typography.Title>
 			</div>
 			{/* Show only when space aggregation is completed */}
@@ -175,7 +177,7 @@ function ExpandedView({
 						<div className="graph-popover-section">
 							<div className="graph-popover-row">
 								<Typography.Text className="graph-popover-row-label">
-									VALUES
+									{t('values')}
 								</Typography.Text>
 								<div className="graph-popover-inner-row">
 									{spaceAggregatedData?.map(({ value, title, timestamp }) => (
@@ -189,7 +191,7 @@ function ExpandedView({
 							</div>
 							<div className="graph-popover-row">
 								<Typography.Text className="graph-popover-row-label">
-									TIME SERIES
+									{t('time_series')}
 								</Typography.Text>
 								<div className="graph-popover-inner-row">
 									{spaceAggregatedData?.map(({ title, timeSeries }) => (
@@ -251,7 +253,7 @@ function ExpandedView({
 						<div className="graph-popover-section">
 							<div className="graph-popover-row">
 								<Typography.Text className="graph-popover-row-label">
-									RAW VALUES
+									{t('raw_values')}
 								</Typography.Text>
 								<div className="graph-popover-inner-row">
 									{rawData?.map(({ value: rawValue, timestamp, title }) => (
@@ -265,7 +267,7 @@ function ExpandedView({
 							</div>
 							<div className="graph-popover-row">
 								<Typography.Text className="graph-popover-row-label">
-									TIMESTAMPS
+									{t('timestamps')}
 								</Typography.Text>
 								<div className="graph-popover-inner-row">
 									{rawData?.map(({ timestamp }) => (
@@ -307,7 +309,7 @@ function ExpandedView({
 						<div className="graph-popover-section">
 							<div className="graph-popover-row">
 								<Typography.Text className="graph-popover-row-label">
-									RAW VALUES
+									{t('raw_values')}
 								</Typography.Text>
 								<div className="graph-popover-inner-row">
 									{timeAggregatedData?.map(({ value, title, timestamp }) => (
@@ -321,7 +323,7 @@ function ExpandedView({
 							</div>
 							<div className="graph-popover-row">
 								<Typography.Text className="graph-popover-row-label">
-									TIMESTAMPS
+									{t('timestamps')}
 								</Typography.Text>
 								<div className="graph-popover-inner-row">
 									{timeAggregatedData?.map(({ timestamp }) => (

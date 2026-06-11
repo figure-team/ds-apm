@@ -127,7 +127,7 @@ describe('Inspect', () => {
 
 		expect(screen.getByText('test_metric')).toBeInTheDocument();
 		expect(screen.getByRole('switch')).toBeInTheDocument(); // Graph/Table view switch
-		expect(screen.getByText('Query Builder')).toBeInTheDocument();
+		expect(screen.getByText('query_builder')).toBeInTheDocument();
 	});
 
 	it('renders loading state', () => {

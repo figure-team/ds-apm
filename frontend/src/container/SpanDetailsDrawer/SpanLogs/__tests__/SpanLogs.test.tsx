@@ -1,6 +1,10 @@
 import { getEmptyLogsListConfig } from 'container/LogsExplorerList/utils';
+import { TFunction } from 'i18next';
 import { server } from 'mocks-server/server';
 import { render, screen, userEvent } from 'tests/test-utils';
+
+// i18n resources are unloaded in tests, so t() returns the raw key.
+const tMock = ((key: string): string => key) as TFunction;
 
 import SpanLogs from '../SpanLogs';
 
@@ -160,29 +164,31 @@ describe('SpanLogs', () => {
 		render(
 			<SpanLogs
 				{...defaultProps}
-				emptyStateConfig={getEmptyLogsListConfig(jest.fn())}
+				emptyStateConfig={getEmptyLogsListConfig(jest.fn(), tMock)}
 			/>,
 		);
 
 		// Should show enhanced empty state with custom message
-		expect(screen.getByText('No logs found for this trace.')).toBeInTheDocument();
-		expect(screen.getByText('This could be because :')).toBeInTheDocument();
+		expect(
+			screen.getByText('logs:no_logs_found_for_trace'),
+		).toBeInTheDocument();
+		expect(screen.getByText('logs:this_could_be_because')).toBeInTheDocument();
 
 		// Should show description list
 		expect(
-			screen.getByText('Logs are not linked to Traces.'),
+			screen.getByText('logs:logs_not_linked_to_traces'),
 		).toBeInTheDocument();
+		expect(screen.getByText('logs:logs_not_being_sent')).toBeInTheDocument();
 		expect(
-			screen.getByText('Logs are not being sent to SigNoz.'),
-		).toBeInTheDocument();
-		expect(
-			screen.getByText('No logs are associated with this particular trace/span.'),
+			screen.getByText('logs:no_logs_associated_with_trace'),
 		).toBeInTheDocument();
 
 		// Should show documentation links
 		expect(screen.getByText('RESOURCES')).toBeInTheDocument();
-		expect(screen.getByText('Sending logs to SigNoz')).toBeInTheDocument();
-		expect(screen.getByText('Correlate traces and logs')).toBeInTheDocument();
+		expect(screen.getByText('logs:sending_logs_to_signoz')).toBeInTheDocument();
+		expect(
+			screen.getByText('logs:correlate_traces_and_logs'),
+		).toBeInTheDocument();
 
 		// Should NOT show simple empty state
 		expect(

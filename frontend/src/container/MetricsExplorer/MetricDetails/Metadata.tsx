@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import type { TableColumnsType as ColumnsType } from 'antd';
 import { Button, Collapse, Input, Select, Spin, Typography } from 'antd';
@@ -42,6 +43,7 @@ function Metadata({
 	isLoadingMetricMetadata,
 	refetchMetricMetadata,
 }: MetadataProps): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	const [isEditing, setIsEditing] = useState(false);
 
 	const [metricMetadataState, setMetricMetadataState] =
@@ -301,7 +303,7 @@ function Metadata({
 						disabled={isUpdatingMetricsMetadata}
 					>
 						<X size={14} />
-						<Typography.Text>Cancel</Typography.Text>
+						<Typography.Text>{t('cancel')}</Typography.Text>
 					</Button>
 					<Button
 						className="action-button"
@@ -313,7 +315,7 @@ function Metadata({
 						disabled={isUpdatingMetricsMetadata}
 					>
 						<Save size={14} />
-						<Typography.Text>Save</Typography.Text>
+						<Typography.Text>{t('save')}</Typography.Text>
 					</Button>
 				</div>
 			);
@@ -333,7 +335,7 @@ function Metadata({
 					disabled={isUpdatingMetricsMetadata || isLoadingMetricMetadata}
 				>
 					<Edit2 size={14} />
-					<Typography.Text>Edit</Typography.Text>
+					<Typography.Text>{t('edit')}</Typography.Text>
 				</Button>
 			</div>
 		);
@@ -351,7 +353,7 @@ function Metadata({
 			{
 				label: (
 					<div className="metrics-accordion-header metrics-metadata-header">
-						<Typography.Text>Metadata</Typography.Text>
+						<Typography.Text>{t('metadata')}</Typography.Text>
 						{actionButton}
 					</div>
 				),

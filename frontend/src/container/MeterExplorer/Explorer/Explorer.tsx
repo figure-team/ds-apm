@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import * as Sentry from '@sentry/react';
 import { Button, Tooltip } from 'antd';
@@ -31,6 +32,7 @@ import { splitQueryIntoOneChartPerQuery } from './utils';
 import './Explorer.styles.scss';
 
 function Explorer(): JSX.Element {
+	const { t } = useTranslation('meter');
 	const {
 		handleRunQuery,
 		stagedQuery,
@@ -159,7 +161,11 @@ function Explorer(): JSX.Element {
 						<div className="explore-header">
 							<div className="explore-header-left-actions">
 								{!showQuickFilters && (
-									<Tooltip title="Show Quick Filters" placement="right" arrow={false}>
+									<Tooltip
+										title={t('show_quick_filters')}
+										placement="right"
+										arrow={false}
+									>
 										<Button
 											className="periscope-btn outline"
 											icon={<Filter size={16} />}

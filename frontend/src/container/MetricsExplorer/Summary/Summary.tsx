@@ -1,5 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux'; // old code, TODO: fix this correctly
 import { useSearchParams } from 'react-router-dom-v5-compat';
@@ -57,6 +58,7 @@ const DEFAULT_ORDER_BY: Querybuildertypesv5OrderByDTO = {
 };
 
 function Summary(): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	const { pageSize, setPageSize } = usePageSize('metricsExplorer');
 	const [currentPage, setCurrentPage] = useState(1);
 	const [orderBy, setOrderBy] =
@@ -392,12 +394,12 @@ function Summary(): JSX.Element {
 				) : isCancelled ? (
 					<div className="no-logs-container">
 						<div className="no-logs-container-content">
-							<img className="eyes-emoji" src={eyesEmojiUrl} alt="eyes emoji" />
+							<img className="eyes-emoji" src={eyesEmojiUrl} alt={t('eyes_emoji_alt')} />
 							<Typography className="no-logs-text">
-								Query cancelled.
+								{t('query_cancelled')}
 								<span className="sub-text">
 									{' '}
-									Click &quot;Run Query&quot; to load metrics.
+									{t('click_run_query')}
 								</span>
 							</Typography>
 						</div>

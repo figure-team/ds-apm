@@ -4,10 +4,10 @@ import { IBuilderQuery } from 'types/api/queryBuilder/queryBuilderData';
 
 import { SPAN_ATTRIBUTES } from '../Explorer/Domains/DomainDetails/constants';
 import {
-	endPointStatusCodeColumns,
 	extractPortAndEndpoint,
 	formatDataForTable,
 	getCustomFiltersForBarChart,
+	getEndPointStatusCodeColumns,
 	getFormattedEndPointDropDownData,
 	getFormattedEndPointStatusCodeChartData,
 	getFormattedEndPointStatusCodeData,
@@ -24,6 +24,10 @@ const DataTypes = {
 	Float64: 'float64',
 	bool: 'bool',
 };
+
+// i18n is not loaded in unit tests; the t-injected column factories only need
+// a stub that echoes the key back.
+const t = ((key: string): string => key) as any;
 
 // Mock the external utils dependencies that are used within our tested functions
 jest.mock('../utils', () => {
@@ -230,7 +234,7 @@ describe('API Monitoring Utils', () => {
 	describe('getTopErrorsColumnsConfig', () => {
 		it('should return column configuration with expected fields', () => {
 			// Act
-			const result = getTopErrorsColumnsConfig();
+			const result = getTopErrorsColumnsConfig(t);
 
 			// Assert
 			expect(result).toBeDefined();
@@ -887,6 +891,7 @@ describe('API Monitoring Utils', () => {
 	});
 
 	describe('endPointStatusCodeColumns', () => {
+		const endPointStatusCodeColumns = getEndPointStatusCodeColumns(t);
 		it('should have the expected columns', () => {
 			// Assert
 			expect(endPointStatusCodeColumns).toBeDefined();

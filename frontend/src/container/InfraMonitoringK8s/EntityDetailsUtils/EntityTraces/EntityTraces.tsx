@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from 'react-query';
 import logEvent from 'api/common/logEvent';
 import { ResizeTable } from 'components/ResizeTable';
@@ -66,6 +67,7 @@ function EntityTraces({
 	category,
 	queryKeyFilters,
 }: Props): JSX.Element {
+	const { t } = useTranslation('infraMonitoring');
 	const [traces, setTraces] = useState<any[]>([]);
 	const [offset] = useState<number>(0);
 
@@ -134,7 +136,7 @@ function EntityTraces({
 		enabled: !!queryPayload,
 	});
 
-	const traceListColumns = getTraceListColumns(selectedEntityTracesColumns);
+	const traceListColumns = getTraceListColumns(selectedEntityTracesColumns, t);
 
 	useEffect(() => {
 		if (data?.payload?.data?.newResult?.data?.result) {

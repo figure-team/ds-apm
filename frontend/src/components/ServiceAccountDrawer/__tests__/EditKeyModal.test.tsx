@@ -73,18 +73,18 @@ describe('EditKeyModal (URL-controlled)', () => {
 		expect(
 			await screen.findByDisplayValue('Original Key Name'),
 		).toBeInTheDocument();
-		expect(screen.getByRole('button', { name: /Save Changes/i })).toBeDisabled();
+		expect(screen.getByRole('button', { name: 'save_changes' })).toBeDisabled();
 	});
 
 	it('save calls update API, shows toast, and closes modal', async () => {
 		const user = userEvent.setup({ pointerEventsCheck: 0 });
 		renderModal();
 
-		const nameInput = await screen.findByPlaceholderText(/Enter key name/i);
+		const nameInput = await screen.findByPlaceholderText('edit_key_name_placeholder');
 		await user.clear(nameInput);
 		await user.type(nameInput, 'Updated Key Name');
 
-		await user.click(screen.getByRole('button', { name: /Save Changes/i }));
+		await user.click(screen.getByRole('button', { name: 'save_changes' }));
 
 		await waitFor(() => {
 			expect(mockToast.success).toHaveBeenCalledWith('Key updated successfully');
@@ -103,7 +103,7 @@ describe('EditKeyModal (URL-controlled)', () => {
 		renderModal(mockKey, undefined, onUrlUpdate);
 
 		await screen.findByDisplayValue('Original Key Name');
-		await user.click(screen.getByRole('button', { name: /Cancel/i }));
+		await user.click(screen.getByRole('button', { name: 'common:cancel' }));
 
 		await waitFor(() => {
 			expect(onUrlUpdate).toHaveBeenCalled();
@@ -131,15 +131,13 @@ describe('EditKeyModal (URL-controlled)', () => {
 		renderModal();
 
 		await screen.findByDisplayValue('Original Key Name');
-		await user.click(screen.getByRole('button', { name: /Revoke Key/i }));
+		await user.click(screen.getByRole('button', { name: 'revoke_key' }));
 
 		// Same dialog, now showing revoke confirmation
 		expect(
 			await screen.findByRole('dialog', { name: /Revoke Original Key Name/i }),
 		).toBeInTheDocument();
-		expect(
-			screen.getByText(/Revoking this key will permanently invalidate it/i),
-		).toBeInTheDocument();
+		expect(screen.getByText('revoke_key_warning')).toBeInTheDocument();
 	});
 
 	it('revoke flow: confirming revoke shows toast and closes modal', async () => {
@@ -147,12 +145,12 @@ describe('EditKeyModal (URL-controlled)', () => {
 		renderModal();
 
 		await screen.findByDisplayValue('Original Key Name');
-		await user.click(screen.getByRole('button', { name: /Revoke Key/i }));
+		await user.click(screen.getByRole('button', { name: 'revoke_key' }));
 
-		const confirmBtn = await screen.findByRole('button', {
-			name: /^Revoke Key$/i,
+		const confirmBtns = await screen.findAllByRole('button', {
+			name: 'revoke_key',
 		});
-		await user.click(confirmBtn);
+		await user.click(confirmBtns[confirmBtns.length - 1]);
 
 		await waitFor(() => {
 			expect(mockToast.success).toHaveBeenCalledWith('Key revoked successfully');

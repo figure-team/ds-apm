@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { InfraMonitoringEvents } from 'constants/events';
 import { FeatureKeys } from 'constants/features';
 import { useAppContext } from 'providers/App/App';
@@ -29,6 +30,7 @@ function K8sDeploymentsList({
 }: {
 	controlListPrefix?: React.ReactNode;
 }): JSX.Element {
+	const { t } = useTranslation('infraMonitoring');
 	const { featureFlags } = useAppContext();
 	const dotMetricsEnabled =
 		featureFlags?.find((flag) => flag.name === FeatureKeys.DOT_METRICS_ENABLED)
@@ -92,7 +94,7 @@ function K8sDeploymentsList({
 				controlListPrefix={controlListPrefix}
 				entity={InfraMonitoringEntity.DEPLOYMENTS}
 				tableColumnsDefinitions={k8sDeploymentsColumns}
-				tableColumns={k8sDeploymentsColumnsConfig}
+				tableColumns={k8sDeploymentsColumnsConfig(t)}
 				fetchListData={fetchListData}
 				renderRowData={k8sDeploymentsRenderRowData}
 				eventCategory={InfraMonitoringEvents.Deployment}

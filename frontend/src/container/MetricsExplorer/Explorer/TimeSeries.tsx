@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueries, useQueryClient } from 'react-query';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
@@ -51,6 +52,7 @@ function TimeSeries({
 	metrics,
 	isCancelled = false,
 }: TimeSeriesProps): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	const { stagedQuery, currentQuery } = useQueryBuilder();
 
 	const {
@@ -228,7 +230,7 @@ function TimeSeries({
 						{showSaveUnitButton && (
 							<div className="save-unit-container">
 								<Typography.Text>
-									Set the selected unit as the metric unit?
+									{t('set_unit_as_metric_unit')}
 								</Typography.Text>
 								<Button
 									type="primary"
@@ -236,7 +238,7 @@ function TimeSeries({
 									disabled={isUpdatingMetricMetadata}
 									onClick={handleSaveUnit}
 								>
-									<Typography.Paragraph>Yes</Typography.Paragraph>
+									<Typography.Paragraph>{t('yes')}</Typography.Paragraph>
 								</Button>
 							</div>
 						)}
@@ -286,13 +288,13 @@ function TimeSeries({
 										className="no-unit-warning"
 										title={
 											<Typography.Text>
-												No unit is set for this metric. You can assign one from the{' '}
+												{t('no_unit_set_prefix')}{' '}
 												<Typography.Link
 													onClick={(): void => handleOpenMetricDetails(metricName)}
 												>
-													metric details
+													{t('metric_details_link')}
 												</Typography.Link>{' '}
-												page.
+												{t('page_suffix')}
 											</Typography.Text>
 										}
 									>
@@ -300,7 +302,7 @@ function TimeSeries({
 											size={16}
 											color={Color.BG_AMBER_400}
 											role="img"
-											aria-label="no unit warning"
+											aria-label={t('no_unit_warning_aria')}
 										/>
 									</Tooltip>
 								)}

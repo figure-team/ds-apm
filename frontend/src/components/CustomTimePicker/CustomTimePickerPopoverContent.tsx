@@ -6,6 +6,7 @@ import {
 	useMemo,
 	useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { Color } from '@signozhq/design-tokens';
 import { Button } from 'antd';
@@ -15,7 +16,10 @@ import { DATE_TIME_FORMATS } from 'constants/dateTimeFormats';
 import { QueryParams } from 'constants/query';
 import ROUTES from 'constants/routes';
 import { DateTimeRangeType } from 'container/TopNav/CustomDateTimeModal';
-import { RelativeDurationSuggestionOptions } from 'container/TopNav/DateTimeSelectionV2/constants';
+import {
+	RelativeDurationSuggestionOptions,
+	translateTimeRangeLabel,
+} from 'container/TopNav/DateTimeSelectionV2/constants';
 import {
 	LexicalContext,
 	Option,
@@ -114,6 +118,7 @@ function CustomTimePickerPopoverContent({
 	customDateTimeInputStatus = CustomTimePickerInputStatus.UNSET,
 	inputErrorDetails,
 }: CustomTimePickerPopoverContentProps): JSX.Element {
+	const { t } = useTranslation('common');
 	const { pathname } = useLocation();
 
 	const isLogsExplorerPage = useMemo(
@@ -182,10 +187,10 @@ function CustomTimePickerPopoverContent({
 						key={option.label + option.value}
 						onClick={(): void => {
 							handleExitLiveLogs();
-							onSelectHandler(option.label, option.value);
+							onSelectHandler(translateTimeRangeLabel(t, option.label), option.value);
 						}}
 					>
-						{option.label}
+						{translateTimeRangeLabel(t, option.label)}
 					</Button>
 				))}
 			</div>
@@ -263,7 +268,7 @@ function CustomTimePickerPopoverContent({
 								e.stopPropagation();
 								e.preventDefault();
 								handleExitLiveLogs();
-								onSelectHandler(option.label, option.value);
+								onSelectHandler(translateTimeRangeLabel(t, option.label), option.value);
 							}}
 							className={cx(
 								'date-time-options-btn',
@@ -272,7 +277,9 @@ function CustomTimePickerPopoverContent({
 									: selectedTime === option.value && !isLiveLogsEnabled && 'active',
 							)}
 						>
-							<span className="time-label">{option.label}</span>
+							<span className="time-label">
+								{translateTimeRangeLabel(t, option.label)}
+							</span>
 
 							{option.value !== 'custom' && option.value !== '1month' && (
 								<span className="time-value">{option.value}</span>
@@ -315,13 +322,13 @@ function CustomTimePickerPopoverContent({
 								)}
 
 							<div className="relative-times-container">
-								<div className="time-heading">RELATIVE TIMES</div>
+								<div className="time-heading">{t('relative_times')}</div>
 								<div>{getTimeChips(RelativeDurationSuggestionOptions)}</div>
 							</div>
 
 							{showRecentlyUsed && recentlyUsedTimeRanges.length > 0 && (
 								<div className="recently-used-container">
-									<div className="time-heading">RECENTLY USED</div>
+									<div className="time-heading">{t('recently_used')}</div>
 									<div className="recently-used-range">
 										{recentlyUsedTimeRanges.map((range: RecentlyUsedDateTimeRange) => (
 											<div
@@ -376,7 +383,7 @@ function CustomTimePickerPopoverContent({
 							onClick={handleTimezoneHintClick}
 							icon={<PenLine size={10} />}
 						>
-							Change Timezone
+							{t('change_timezone')}
 						</Button>
 					</div>
 				</div>

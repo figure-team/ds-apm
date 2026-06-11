@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import { Trash2, X } from '@signozhq/icons';
 import { Button, DialogWrapper, toast } from '@signozhq/ui';
@@ -18,6 +19,7 @@ import { useErrorModal } from 'providers/ErrorModalProvider';
 import APIError from 'types/api/error';
 
 function DeleteAccountModal(): JSX.Element {
+	const { t } = useTranslation(['serviceAccounts', 'common']);
 	const queryClient = useQueryClient();
 	const { showErrorModal, isErrorModalVisible } = useErrorModal();
 	const [accountId, setAccountId] = useQueryState(SA_QUERY_PARAMS.ACCOUNT);
@@ -68,9 +70,8 @@ function DeleteAccountModal(): JSX.Element {
 
 	const content = (
 		<p className="sa-delete-dialog__body">
-			Are you sure you want to delete <strong>{accountName}</strong>? This action
-			cannot be undone. All keys associated with this service account will be
-			permanently removed.
+			{t('delete_confirm_prefix')} <strong>{accountName}</strong>
+			{t('delete_confirm_suffix')}
 		</p>
 	);
 
@@ -78,7 +79,7 @@ function DeleteAccountModal(): JSX.Element {
 		<div className="sa-delete-dialog__footer">
 			<Button variant="solid" color="secondary" onClick={handleCancel}>
 				<X size={12} />
-				Cancel
+				{t('common:cancel')}
 			</Button>
 			<Button
 				variant="solid"
@@ -87,7 +88,7 @@ function DeleteAccountModal(): JSX.Element {
 				onClick={handleConfirm}
 			>
 				<Trash2 size={12} />
-				Delete
+				{t('delete')}
 			</Button>
 		</div>
 	);

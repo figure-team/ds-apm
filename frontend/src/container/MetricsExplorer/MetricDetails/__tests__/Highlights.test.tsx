@@ -60,10 +60,10 @@ describe('Highlights', () => {
 
 		render(<Highlights metricName={MOCK_METRIC_NAME} />);
 
-		expect(screen.getByText('SAMPLES')).toBeInTheDocument();
-		expect(screen.getByText('TIME SERIES')).toBeInTheDocument();
-		expect(screen.getByText('LAST RECEIVED')).toBeInTheDocument();
-		expect(screen.getByText('Loading metric stats')).toBeInTheDocument();
+		expect(screen.getByText('samples')).toBeInTheDocument();
+		expect(screen.getByText('time_series')).toBeInTheDocument();
+		expect(screen.getByText('last_received')).toBeInTheDocument();
+		expect(screen.getByText('loading_metric_stats')).toBeInTheDocument();
 
 		expect(
 			screen.queryByTestId('metric-highlights-data-points'),

@@ -59,7 +59,7 @@ describe('MetricsTreemap', () => {
 			</MemoryRouter>,
 		);
 
-		expect(screen.getByText('Proportion View')).toBeInTheDocument();
+		expect(screen.getByText('proportion_view')).toBeInTheDocument();
 	});
 
 	it('shows loading state', () => {
@@ -107,9 +107,7 @@ describe('MetricsTreemap', () => {
 
 		expect(screen.getByTestId('metrics-treemap-error-state')).toBeInTheDocument();
 		expect(
-			screen.getByText(
-				'Error fetching metrics. If the problem persists, please contact support.',
-			),
+			screen.getByText('error_fetching_metrics'),
 		).toBeInTheDocument();
 	});
 
@@ -130,6 +128,6 @@ describe('MetricsTreemap', () => {
 		);
 
 		expect(screen.getByTestId('metrics-treemap-empty-state')).toBeInTheDocument();
-		expect(screen.getByText('No metrics found')).toBeInTheDocument();
+		expect(screen.getByText('no_metrics_found')).toBeInTheDocument();
 	});
 });

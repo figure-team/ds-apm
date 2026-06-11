@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import { useLocation } from 'react-router-dom';
 import { FilterOutlined } from '@ant-design/icons';
@@ -26,6 +27,7 @@ import './AllErrors.styles.scss';
 
 function AllErrors(): JSX.Element {
 	const { pathname } = useLocation();
+	const { t } = useTranslation('exceptions');
 	const { handleRunQuery } = useQueryBuilder();
 	const queryClient = useQueryClient();
 
@@ -79,7 +81,7 @@ function AllErrors(): JSX.Element {
 							showAutoRefresh={false}
 							leftActions={
 								!showFilters ? (
-									<Tooltip title="Show Filters">
+									<Tooltip title={t('show_filters')}>
 										<Button onClick={handleFilterVisibilityChange} className="filter-btn">
 											<FilterOutlined />
 										</Button>

@@ -1,5 +1,6 @@
 import type { Control, UseFormRegister } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { LockKeyhole, Trash2, X } from '@signozhq/icons';
 import {
 	Badge,
@@ -41,24 +42,25 @@ function EditKeyForm({
 	onRevokeClick,
 	formatTimezoneAdjustedTimestamp,
 }: EditKeyFormProps): JSX.Element {
+	const { t } = useTranslation(['serviceAccounts', 'common']);
 	return (
 		<>
 			<form id={FORM_ID} className="edit-key-modal__form" onSubmit={onSubmit}>
 				<div className="edit-key-modal__field">
 					<label className="edit-key-modal__label" htmlFor="edit-key-name">
-						Name
+						{t('name')}
 					</label>
 					<Input
 						id="edit-key-name"
 						className="edit-key-modal__input"
-						placeholder="Enter key name"
+						placeholder={t('edit_key_name_placeholder')}
 						{...register('name')}
 					/>
 				</div>
 
 				<div className="edit-key-modal__field">
 					<label className="edit-key-modal__label" htmlFor="edit-key-display">
-						Key
+						{t('key')}
 					</label>
 					<div id="edit-key-display" className="edit-key-modal__key-display">
 						<span className="edit-key-modal__key-text">********************</span>
@@ -67,7 +69,7 @@ function EditKeyForm({
 				</div>
 
 				<div className="edit-key-modal__field">
-					<span className="edit-key-modal__label">Expiration</span>
+					<span className="edit-key-modal__label">{t('expiration')}</span>
 					<Controller
 						name="expiryMode"
 						control={control}
@@ -87,13 +89,13 @@ function EditKeyForm({
 									value={ExpiryMode.NONE}
 									className="edit-key-modal__expiry-toggle-btn"
 								>
-									No Expiration
+									{t('no_expiration')}
 								</ToggleGroupItem>
 								<ToggleGroupItem
 									value={ExpiryMode.DATE}
 									className="edit-key-modal__expiry-toggle-btn"
 								>
-									Set Expiration Date
+									{t('set_expiration_date')}
 								</ToggleGroupItem>
 							</ToggleGroup>
 						)}
@@ -103,7 +105,7 @@ function EditKeyForm({
 				{expiryMode === ExpiryMode.DATE && (
 					<div className="edit-key-modal__field">
 						<label className="edit-key-modal__label" htmlFor="edit-key-datepicker">
-							Expiration Date
+							{t('expiration_date')}
 						</label>
 						<div className="edit-key-modal__datepicker">
 							<Controller
@@ -125,7 +127,7 @@ function EditKeyForm({
 				)}
 
 				<div className="edit-key-modal__meta">
-					<span className="edit-key-modal__meta-label">Last Observed At</span>
+					<span className="edit-key-modal__meta-label">{t('last_observed_at')}</span>
 					<Badge color="vanilla">
 						{formatLastObservedAt(
 							keyItem?.lastObservedAt ?? null,
@@ -138,12 +140,12 @@ function EditKeyForm({
 			<div className="edit-key-modal__footer">
 				<Button variant="ghost" color="destructive" onClick={onRevokeClick}>
 					<Trash2 size={12} />
-					Revoke Key
+					{t('revoke_key')}
 				</Button>
 				<div className="edit-key-modal__footer-right">
 					<Button variant="solid" color="secondary" onClick={onClose}>
 						<X size={12} />
-						Cancel
+						{t('common:cancel')}
 					</Button>
 					<Button
 						type="submit"
@@ -154,7 +156,7 @@ function EditKeyForm({
 						loading={isSaving}
 						disabled={!isDirty}
 					>
-						Save Changes
+						{t('save_changes')}
 					</Button>
 				</div>
 			</div>

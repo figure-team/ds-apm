@@ -1,6 +1,7 @@
 import { Color } from '@signozhq/design-tokens';
 import { Tooltip } from 'antd';
 import { TableColumnType as ColumnType } from 'antd';
+import { TFunction } from 'i18next';
 import {
 	MetricsexplorertypesStatDTO,
 	MetricsexplorertypesTreemapEntryDTO,
@@ -16,11 +17,14 @@ import { MetricsListItemRowData, TreemapTile } from './types';
 export const getMetricsTableColumns = (
 	queryFilterExpression: Filter,
 	onFilterChange: (expression: string) => void,
+	t: TFunction,
 ): ColumnType<MetricsListItemRowData>[] => [
 	{
 		title: (
 			<div className="metric-name-column-header">
-				<span className="metric-name-column-header-text">METRIC</span>
+				<span className="metric-name-column-header-text">
+					{t('metric').toString()}
+				</span>
 				<MetricNameSearch
 					queryFilterExpression={queryFilterExpression}
 					onFilterChange={onFilterChange}
@@ -45,7 +49,9 @@ export const getMetricsTableColumns = (
 	{
 		title: (
 			<div className="metric-type-column-header">
-				<span className="metric-type-column-header-text">TYPE</span>
+				<span className="metric-type-column-header-text">
+					{t('type').toString()}
+				</span>
 				{/* <MetricTypeSearch
 					queryFilters={queryFilters}
 					onFilterChange={onFilterChange}

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
 	Button,
 	Empty,
@@ -28,6 +29,7 @@ function MetricNameSearch({
 	queryFilterExpression: Filter;
 	onFilterChange: (value: string) => void;
 }): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 	const [searchString, setSearchString] = useState<string>('');
 	const [debouncedSearchString, setDebouncedSearchString] = useState<string>('');
@@ -158,9 +160,9 @@ function MetricNameSearch({
 		if (isLoadingMetricNameFilterValues) {
 			items.push(<Spin />);
 		} else if (isErrorMetricNameFilterValues) {
-			items.push(<Empty description="Error fetching metric names" />);
+			items.push(<Empty description={t('error_fetching_metric_names')} />);
 		} else if (metricNameFilterValues?.length === 0) {
-			items.push(<Empty description="No metric names found" />);
+			items.push(<Empty description={t('no_metric_names_found')} />);
 		} else {
 			items.push(
 				...metricNameFilterValues.map((filterValue, index) => (
@@ -203,7 +205,7 @@ function MetricNameSearch({
 				<Input
 					ref={inputRef}
 					onKeyDown={handleKeyDown}
-					placeholder="Search..."
+					placeholder={t('search_dots')}
 					value={searchString}
 					onChange={handleInputChange}
 					bordered
