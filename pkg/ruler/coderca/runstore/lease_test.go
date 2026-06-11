@@ -74,6 +74,19 @@ func TestClaim_ClaimsOldestAndTakesSlot(t *testing.T) {
 	require.Equal(t, 1, running(t, ss))
 }
 
+func TestClaim_ReturnsOrgID(t *testing.T) {
+	ctx := context.Background()
+	store, _ := newRunStore(t)
+	now := time.Unix(1_700_000_000, 0)
+
+	seedQueued(t, store, "org-7", "k1", now)
+
+	res, err := store.ClaimNext(ctx, claimParams("w1", now.Add(time.Second), 1))
+	require.NoError(t, err)
+	require.True(t, res.Claimed)
+	require.Equal(t, "org-7", res.OrgID, "claim must expose the run's org so the worker can resolve an org-scoped repo")
+}
+
 func TestClaim_RespectsCapacitySequential(t *testing.T) {
 	ctx := context.Background()
 	store, ss := newRunStore(t)

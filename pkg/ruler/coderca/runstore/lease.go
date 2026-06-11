@@ -22,6 +22,7 @@ type ClaimParams struct {
 type ClaimResult struct {
 	Claimed    bool
 	RunID      string
+	OrgID      string // owning org — the worker resolves an org-scoped repo with it
 	LeaseToken string // fencing token — required to heartbeat/finalize this run
 	DedupKey   string
 	Service    string
