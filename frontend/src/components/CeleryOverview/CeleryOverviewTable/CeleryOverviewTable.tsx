@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation } from 'react-query';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
@@ -28,6 +29,7 @@ import { QueryParams } from 'constants/query';
 import useDragColumns from 'hooks/useDragColumns';
 import { getDraggedColumns } from 'hooks/useDragColumns/utils';
 import useUrlQuery from 'hooks/useUrlQuery';
+import { TFunction } from 'i18next';
 import { isEmpty } from 'lodash-es';
 import { AppState } from 'store/reducers';
 import { GlobalReducer } from 'types/reducer/globalTime';
@@ -37,12 +39,17 @@ import './CeleryOverviewTable.styles.scss';
 
 const INITIAL_PAGE_SIZE = 20;
 
-const showPaginationItem = (total: number, range: number[]): JSX.Element => (
+const showPaginationItem = (t: TFunction) => (
+	total: number,
+	range: number[],
+): JSX.Element => (
 	<>
 		<Typography.Text className="numbers">
 			{range[0]} &#8212; {range[1]}
 		</Typography.Text>
-		<Typography.Text className="total"> of {total}</Typography.Text>
+		<Typography.Text className="total">
+			{t('pagination_total', { total }).toString()}
+		</Typography.Text>
 	</>
 );
 
@@ -82,6 +89,7 @@ const getColumnSearchProps = (
 		confirm: FilterDropdownProps['confirm'],
 	) => void,
 	handleSearch: (selectedKeys: string[], confirm: () => void) => void,
+	t: TFunction,
 	dataIndex?: string,
 ): TableColumnType<RowData> => ({
 	filterDropdown: ({
@@ -94,7 +102,7 @@ const getColumnSearchProps = (
 		<div style={{ padding: 8 }} onKeyDown={(e): void => e.stopPropagation()}>
 			<Input
 				ref={searchInput}
-				placeholder={`Search ${dataIndex}`}
+				placeholder={t('search_column', { column: dataIndex }).toString()}
 				value={selectedKeys[0]}
 				onChange={(e): void =>
 					setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -109,14 +117,14 @@ const getColumnSearchProps = (
 					onClick={(): void => handleSearch(selectedKeys as string[], confirm)}
 					icon={<SearchOutlined />}
 				>
-					Search
+					{t('search').toString()}
 				</Button>
 				<Button
 					onClick={(): void => clearFilters && handleReset(clearFilters, confirm)}
 					size="small"
 					style={{ width: 90 }}
 				>
-					Reset
+					{t('reset').toString()}
 				</Button>
 				<Button
 					type="link"
@@ -125,7 +133,7 @@ const getColumnSearchProps = (
 						close();
 					}}
 				>
-					close
+					{t('close').toString()}
 				</Button>
 			</Space>
 		</div>
@@ -142,7 +150,7 @@ const getColumnSearchProps = (
 			.includes((value as string).toLowerCase()),
 });
 
-function getColumns(data: RowData[]): TableColumnsType<RowData> {
+function getColumns(data: RowData[], t: TFunction): TableColumnsType<RowData> {
 	if (data?.length === 0) {
 		return [];
 	}
@@ -155,7 +163,7 @@ function getColumns(data: RowData[]): TableColumnsType<RowData> {
 
 	return [
 		{
-			title: 'SERVICE NAME',
+			title: t('column_service_name').toString(),
 			dataIndex: 'service_name',
 			key: 'service_name',
 			ellipsis: {
@@ -168,7 +176,7 @@ function getColumns(data: RowData[]): TableColumnsType<RowData> {
 			fixed: 'left',
 		},
 		{
-			title: 'SPAN NAME',
+			title: t('column_span_name').toString(),
 			dataIndex: 'span_name',
 			key: 'span_name',
 			ellipsis: {
@@ -180,7 +188,7 @@ function getColumns(data: RowData[]): TableColumnsType<RowData> {
 			render: tooltipRender,
 		},
 		{
-			title: 'MESSAGING SYSTEM',
+			title: t('column_messaging_system').toString(),
 			dataIndex: 'messaging_system',
 			key: 'messaging_system',
 			ellipsis: {
@@ -192,7 +200,7 @@ function getColumns(data: RowData[]): TableColumnsType<RowData> {
 			render: tooltipRender,
 		},
 		{
-			title: 'DESTINATION',
+			title: t('column_destination').toString(),
 			dataIndex: 'destination',
 			key: 'destination',
 			ellipsis: {
@@ -204,7 +212,7 @@ function getColumns(data: RowData[]): TableColumnsType<RowData> {
 				String(a.destination).localeCompare(String(b.destination)),
 		},
 		{
-			title: 'KIND',
+			title: t('column_kind').toString(),
 			dataIndex: 'kind_string',
 			key: 'kind_string',
 			ellipsis: {
@@ -216,7 +224,7 @@ function getColumns(data: RowData[]): TableColumnsType<RowData> {
 			render: tooltipRender,
 		},
 		{
-			title: 'ERROR %',
+			title: t('column_error_percentage').toString(),
 			dataIndex: 'error_percentage',
 			key: 'error_percentage',
 			ellipsis: {
@@ -231,7 +239,7 @@ function getColumns(data: RowData[]): TableColumnsType<RowData> {
 			render: ProgressRender,
 		},
 		{
-			title: 'LATENCY (P95) in ms',
+			title: t('column_latency_p95').toString(),
 			dataIndex: 'p95_latency',
 			key: 'p95_latency',
 			ellipsis: {
@@ -246,7 +254,7 @@ function getColumns(data: RowData[]): TableColumnsType<RowData> {
 			render: formatNumericValue,
 		},
 		{
-			title: 'THROUGHPUT (ops/s)',
+			title: t('column_throughput').toString(),
 			dataIndex: 'throughput',
 			key: 'throughput',
 			ellipsis: {
@@ -354,6 +362,7 @@ export default function CeleryOverviewTable({
 }: {
 	onRowClick: (record: RowData) => void;
 }): JSX.Element {
+	const { t } = useTranslation('messagingQueues');
 	const [tableData, setTableData] = useState<RowData[]>([]);
 
 	const { minTime, maxTime } = useSelector<AppState, GlobalReducer>(
@@ -420,12 +429,13 @@ export default function CeleryOverviewTable({
 	const columns = useMemo(
 		() =>
 			getDraggedColumns<RowData>(
-				getColumns(tableData).map((item) => ({
+				getColumns(tableData, t).map((item) => ({
 					...item,
 					...getColumnSearchProps(
 						searchInput,
 						handleReset,
 						handleSearch,
+						t,
 						item.key?.toString(),
 					),
 					// Only set defaultSortOrder for error_percentage, but allow sorting for all columns
@@ -448,11 +458,11 @@ export default function CeleryOverviewTable({
 		() =>
 			tableData?.length > INITIAL_PAGE_SIZE && {
 				pageSize: INITIAL_PAGE_SIZE,
-				showTotal: showPaginationItem,
+				showTotal: showPaginationItem(t),
 				showSizeChanger: false,
 				hideOnSinglePage: true,
 			},
-		[tableData],
+		[tableData, t],
 	);
 
 	const handleRowClick = (record: RowData): void => {
@@ -502,7 +512,7 @@ export default function CeleryOverviewTable({
 	return (
 		<div className="celery-overview-table-container">
 			<Input.Search
-				placeholder="Search across all columns"
+				placeholder={t('search_across_columns')}
 				onChange={(e): void => setSearchText(e.target.value)}
 				value={searchText}
 				allowClear
@@ -519,7 +529,7 @@ export default function CeleryOverviewTable({
 					indicator: <Spin indicator={<LoadingOutlined size={14} spin />} />,
 				}}
 				locale={{
-					emptyText: isLoading ? null : <Typography.Text>No data</Typography.Text>,
+					emptyText: isLoading ? null : <Typography.Text>{t('no_data')}</Typography.Text>,
 				}}
 				scroll={{ x: 'max-content' }}
 				showSorterTooltip

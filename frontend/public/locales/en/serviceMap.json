@@ -1,0 +1,5 @@
+{
+	"no_service_found": "No Service Found",
+	"loading": "Loading...",
+	"filter_tooltip": "Currently, service map supports filtering of {{keys}} only, in resource attributes"
+}

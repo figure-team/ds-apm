@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { Select } from 'antd';
 import logEvent from 'api/common/logEvent';
@@ -24,6 +25,7 @@ import MessagingQueuesGraph from '../MQGraph/MQGraph';
 import '../MessagingQueues.styles.scss';
 
 function MQDetailPage(): JSX.Element {
+	const { t } = useTranslation('messagingQueues');
 	const history = useHistory();
 	const [selectedView, setSelectedView] =
 		useState<MessagingQueuesViewTypeOptions>(
@@ -86,7 +88,7 @@ function MQDetailPage(): JSX.Element {
 						role="button"
 						tabIndex={0}
 					>
-						Kafka / views /
+						{t('breadcrumb_kafka_views')}
 					</div>
 					<Select
 						className="messaging-queue-options"
@@ -99,23 +101,23 @@ function MQDetailPage(): JSX.Element {
 						value={selectedView}
 						options={[
 							{
-								label: MessagingQueuesViewType.consumerLag.label,
+								label: t(MessagingQueuesViewType.consumerLag.i18nKey),
 								value: MessagingQueuesViewType.consumerLag.value,
 							},
 							{
-								label: MessagingQueuesViewType.partitionLatency.label,
+								label: t(MessagingQueuesViewType.partitionLatency.i18nKey),
 								value: MessagingQueuesViewType.partitionLatency.value,
 							},
 							{
-								label: MessagingQueuesViewType.producerLatency.label,
+								label: t(MessagingQueuesViewType.producerLatency.i18nKey),
 								value: MessagingQueuesViewType.producerLatency.value,
 							},
 							{
-								label: MessagingQueuesViewType.dropRate.label,
+								label: t(MessagingQueuesViewType.dropRate.i18nKey),
 								value: MessagingQueuesViewType.dropRate.value,
 							},
 							{
-								label: MessagingQueuesViewType.metricPage.label,
+								label: t(MessagingQueuesViewType.metricPage.i18nKey),
 								value: MessagingQueuesViewType.metricPage.value,
 							},
 						]}

@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input, Select, Typography } from 'antd';
 
 import './DropRateView.styles.scss';
@@ -20,11 +21,12 @@ function SelectDropdownRender({
 	handleAddCustomValue,
 	handleKeyDown,
 }: SelectDropdownRenderProps): JSX.Element {
+	const { t } = useTranslation('messagingQueues');
 	return (
 		<>
 			{menu}
 			<Input
-				placeholder="Enter custom time (ms)"
+				placeholder={t('enter_custom_time')}
 				value={inputValue}
 				onChange={handleInputChange}
 				onKeyDown={handleKeyDown}
@@ -40,6 +42,7 @@ function EvaluationTimeSelector({
 }: {
 	setInterval: Dispatch<SetStateAction<string>>;
 }): JSX.Element {
+	const { t } = useTranslation('messagingQueues');
 	const [inputValue, setInputValue] = useState<string>('');
 	const [selectedInterval, setSelectedInterval] = useState<string | null>(
 		'10ms',
@@ -89,11 +92,11 @@ function EvaluationTimeSelector({
 	return (
 		<div className="evaluation-time-selector">
 			<Typography.Text className="eval-title">
-				Evaluation Interval:
+				{t('evaluation_interval')}
 			</Typography.Text>
 			<Select
 				style={{ width: 220 }}
-				placeholder="Select time interval (ms)"
+				placeholder={t('select_time_interval')}
 				value={selectedInterval}
 				onChange={handleSelectChange}
 				open={dropdownOpen}

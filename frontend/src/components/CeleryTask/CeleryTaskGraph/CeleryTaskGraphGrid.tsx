@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { Card, Typography } from 'antd';
@@ -34,6 +35,7 @@ export default function CeleryTaskGraphGrid({
 	queryEnabled: boolean;
 	configureOptionComponent?: React.ReactNode;
 }): JSX.Element {
+	const { t } = useTranslation('messagingQueues');
 	const { minTime, maxTime } = useSelector<AppState, GlobalReducer>(
 		(state) => state.globalTime,
 	);
@@ -110,7 +112,7 @@ export default function CeleryTaskGraphGrid({
 					<div className="row-panel">
 						<div className="row-panel-section">
 							<Typography.Text className="section-title">
-								Flower Metrics
+								{t('flower_metrics')}
 							</Typography.Text>
 							{collapsedSections.metricBasedGraphs ? (
 								<ChevronDown
@@ -143,7 +145,7 @@ export default function CeleryTaskGraphGrid({
 						<Card className="celery-task-graph-worker-count">
 							<div className="worker-count-header">
 								<Typography.Text className="worker-count-header-text">
-									Worker Online
+									{t('worker_online')}
 								</Typography.Text>
 							</div>
 							<div className="worker-count-text-container">
@@ -161,7 +163,7 @@ export default function CeleryTaskGraphGrid({
 						<div className="row-panel">
 							<div className="row-panel-section">
 								<Typography.Text className="section-title">
-									Span Based Stats
+									{t('span_based_stats')}
 								</Typography.Text>
 								{collapsedSections.traceBasedGraphs ? (
 									<ChevronDown
@@ -182,7 +184,7 @@ export default function CeleryTaskGraphGrid({
 					<div className="configure-option-Info">
 						{configureOptionComponent}
 						<Typography.Text className="configure-option-Info-text">
-							Click on a graph co-ordinate to see more details
+							{t('graph_click_hint')}
 						</Typography.Text>
 					</div>
 				</div>

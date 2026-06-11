@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -48,6 +49,7 @@ function CeleryTaskLatencyGraph({
 	queryEnabled: boolean;
 	checkIfDataExists?: (isDataAvailable: boolean) => void;
 }): JSX.Element {
+	const { t } = useTranslation('messagingQueues');
 	const history = useHistory();
 	const { pathname } = useLocation();
 	const dispatch = useDispatch();
@@ -194,7 +196,7 @@ function CeleryTaskLatencyGraph({
 							id="Celery_p99_latency_button"
 							onClick={goToTraces}
 						>
-							View Traces
+							{t('view_traces')}
 						</Button>
 						<GridCard
 							widget={updatedWidgetData}
@@ -215,7 +217,7 @@ function CeleryTaskLatencyGraph({
 							id="Celery_p95_latency_button"
 							onClick={goToTraces}
 						>
-							View Traces
+							{t('view_traces')}
 						</Button>
 						<GridCard
 							widget={updatedWidgetData}
@@ -235,7 +237,7 @@ function CeleryTaskLatencyGraph({
 							id="Celery_p90_latency_button"
 							onClick={goToTraces}
 						>
-							View Traces
+							{t('view_traces')}
 						</Button>
 						<GridCard
 							widget={updatedWidgetData}
