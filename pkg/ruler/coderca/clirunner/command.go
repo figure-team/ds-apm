@@ -44,6 +44,9 @@ type Spec struct {
 	Prompt       string
 	MaxBudgetUSD string // claude hard $ ceiling, e.g. "0.50" — REQUIRED for claude
 	AuthToken    string // agent's model-API auth (claude OAuth / codex key|auth.json)
+	// ExtraEnv is appended verbatim to the child env. It must NOT carry secrets
+	// (model auth goes via AuthToken; git creds never reach the agent).
+	ExtraEnv []string
 }
 
 var (
