@@ -7,6 +7,8 @@ package delivery
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/SigNoz/signoz/pkg/ruler/coderca/engine"
 )
@@ -32,9 +34,49 @@ type HandoffSink interface {
 
 // FormatHandoff builds the HITL handoff message from a completed run. Pure.
 //
-// STEP-1 STUB: returns the zero message → formatting assertions fail (RED).
 func FormatHandoff(d engine.Delivery) HandoffMessage {
-	return HandoffMessage{}
+	r := d.Result
+	baseline := firstNonEmpty(r.BaselineCommit, d.BaselineCommit)
+
+	var b strings.Builder
+	b.WriteString("> ⚠️ AI-generated root-cause **suggestion** — it has **not** been applied. Human review is required before any change.\n\n")
+	fmt.Fprintf(&b, "**Service:** %s  \n", orNA(d.Service))
+	fmt.Fprintf(&b, "**Analyzed baseline commit:** `%s`  \n", orNA(baseline))
+	fmt.Fprintf(&b, "**Confidence:** %s\n\n", orNA(r.Confidence))
+	b.WriteString("## Root cause\n")
+	b.WriteString(orNA(r.RootCause) + "\n\n")
+	b.WriteString("## Suggested fix (not applied)\n")
+	b.WriteString(orNA(r.ProposedFix) + "\n")
+	if strings.TrimSpace(r.Limitations) != "" {
+		b.WriteString("\n## Limitations\n")
+		b.WriteString(r.Limitations + "\n")
+	}
+
+	return HandoffMessage{
+		OrgID:          d.OrgID,
+		Service:        d.Service,
+		RunID:          d.RunID,
+		BaselineCommit: baseline,
+		Confidence:     r.Confidence,
+		Title:          fmt.Sprintf("Code RCA suggestion: %s (review required)", orNA(d.Service)),
+		Body:           b.String(),
+	}
+}
+
+func firstNonEmpty(vals ...string) string {
+	for _, v := range vals {
+		if strings.TrimSpace(v) != "" {
+			return v
+		}
+	}
+	return ""
+}
+
+func orNA(s string) string {
+	if strings.TrimSpace(s) == "" {
+		return "_(not provided)_"
+	}
+	return s
 }
 
 // Deliverer implements engine.Deliverer by formatting the run and submitting it
@@ -50,9 +92,12 @@ func New(sink HandoffSink) *Deliverer {
 
 // Deliver formats the completed run and submits it, returning the sink's ref.
 //
-// STEP-1 STUB: returns no ref without submitting → assertions fail (RED).
 func (d *Deliverer) Deliver(ctx context.Context, del engine.Delivery) (string, error) {
-	return "", nil
+	ref, err := d.sink.Submit(ctx, FormatHandoff(del))
+	if err != nil {
+		return "", fmt.Errorf("delivery: submit handoff: %w", err)
+	}
+	return ref, nil
 }
 
 var _ engine.Deliverer = (*Deliverer)(nil)
