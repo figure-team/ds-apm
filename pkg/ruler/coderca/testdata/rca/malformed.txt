@@ -1,0 +1,6 @@
+```json
+{
+  "baseline_commit": "truncated",
+  "root_cause": "the agent was killed mid-output and the string never closed
+}
+```

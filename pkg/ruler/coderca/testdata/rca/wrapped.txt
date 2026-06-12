@@ -1,0 +1,16 @@
+I explored the checkout at the pinned baseline and traced the error signature
+through the request path.
+
+Here is my analysis:
+
+```json
+{
+  "baseline_commit": "deadbeef99",
+  "root_cause": "A nil pointer dereference in orders.Handler.Submit when the cart is empty.",
+  "proposed_fix": "Guard `if cart == nil { return ErrEmptyCart }` before dereferencing.",
+  "confidence": "high",
+  "limitations": "No integration test covers the empty-cart path."
+}
+```
+
+Let me know if you'd like me to draft a patch.
