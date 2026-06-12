@@ -206,9 +206,14 @@ func TestApply_UnboundSOPReturnsAnnotationsUnchanged(t *testing.T) {
 	gen := &stubGen{strategy: cannedStrategy("INC-x", "fp-x")}
 	hook, _, hist, seed := seedHookFixture(t, orgID, gen)
 
-	// Drop the sop_id label so the binding resolves to "missing".
+	// Drop sop_id AND the label-match dimensions (service.name/owner_team/
+	// severity) so the binding is genuinely unbound. Post CF-1 label-match
+	// grounding, those labels alone would otherwise resolve to SOP-PAY-001.
 	labels := cloneMap(seed.Alert.Labels)
 	delete(labels, alertmanagertypes.IncidentLabelSopID)
+	delete(labels, alertmanagertypes.IncidentLabelServiceName)
+	delete(labels, alertmanagertypes.IncidentLabelOwnerTeam)
+	delete(labels, alertmanagertypes.IncidentLabelSeverity)
 
 	got := hook.Apply(
 		context.Background(),
