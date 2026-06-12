@@ -6,6 +6,7 @@ package aihistorystoretest
 import (
 	"context"
 	"errors"
+	"sort"
 	"strings"
 	"sync"
 
@@ -57,6 +58,50 @@ func (f *Fake) GetLatest(_ context.Context, orgID string, lookup ruletypes.AIStr
 		return ruletypes.AIStrategyHistoryRecord{}, false, nil
 	}
 	return ruletypes.AIStrategyHistoryRecord{}, false, errors.New("history lookup: incidentId or alertFingerprint required")
+}
+
+// ListRecent returns up to limit records for orgID matching the lookup, most
+// recent first by the record's GeneratedAt. Lookup by incidentID returns at
+// most one record; lookup by alertFingerprint returns all same-failure
+// occurrences for the tenant.
+func (f *Fake) ListRecent(_ context.Context, orgID string, lookup ruletypes.AIStrategyHistoryLookupRequest, limit int) ([]ruletypes.AIStrategyHistoryRecord, error) {
+	if limit <= 0 {
+		return nil, nil
+	}
+	incidentID := strings.TrimSpace(lookup.IncidentID)
+	fingerprint := strings.TrimSpace(lookup.AlertFingerprint)
+	if incidentID == "" && fingerprint == "" {
+		return nil, errors.New("history list: incidentId or alertFingerprint required")
+	}
+
+	f.mu.RLock()
+	defer f.mu.RUnlock()
+
+	var matches []ruletypes.AIStrategyHistoryRecord
+	for key, rec := range f.byIncident {
+		if !strings.HasPrefix(key, orgID+"\x00") {
+			continue
+		}
+		if incidentID != "" && rec.IncidentID != incidentID {
+			continue
+		}
+		if fingerprint != "" && rec.AlertFingerprint != fingerprint {
+			continue
+		}
+		matches = append(matches, rec)
+	}
+
+	// Most recent first by GeneratedAt, incident_id as a stable tiebreaker.
+	sort.Slice(matches, func(i, j int) bool {
+		if matches[i].GeneratedAt != matches[j].GeneratedAt {
+			return matches[i].GeneratedAt > matches[j].GeneratedAt
+		}
+		return matches[i].IncidentID > matches[j].IncidentID
+	})
+	if len(matches) > limit {
+		matches = matches[:limit]
+	}
+	return matches, nil
 }
 
 var _ ruletypes.AIStrategyHistoryStore = (*Fake)(nil)

@@ -89,6 +89,84 @@ func TestParse_NoJSON(t *testing.T) {
 		"error should mention JSON, got: %s", err.Error())
 }
 
+// TestParse_ExtractsCustomerAndVendorDrafts pins the output-structure
+// requirement that the LLM-controlled customer/vendor communication drafts
+// survive parsing. These fields exist on AIStrategy and are surfaced via
+// AIStrategyIncidentAnnotations, but the LLM parse path previously dropped
+// them.
+func TestParse_ExtractsCustomerAndVendorDrafts(t *testing.T) {
+	const raw = `{
+	  "headline": "결제 API 오류율 급증 — PG timeout 가능성 우선 확인",
+	  "hypotheses": [
+	    {"rank":1,"text":"외부 PG 응답 지연으로 5xx 증가","confidence":"medium","evidenceRefs":["metric:err:svc"]}
+	  ],
+	  "firstActions": [
+	    {"text":"결제 성공률 dashboard와 PG timeout log를 확인","sopStepRef":"SOP-PARSE-001#1","requiresHumanApproval":true}
+	  ],
+	  "customerUpdateDraft": "현재 결제 지연 알림을 확인하여 SOP 기준 초동 분석 중입니다. 다음 업데이트는 15분 내 공유하겠습니다.",
+	  "vendorRequestDraft": "PG사 측 응답 지연 또는 장애 공지 여부를 확인 부탁드립니다.",
+	  "confidence": "medium",
+	  "status": "ready"
+	}`
+
+	strategy, err := Parse(raw, parseReq, "test-model-v1")
+	require.NoError(t, err)
+	require.Equal(t,
+		"현재 결제 지연 알림을 확인하여 SOP 기준 초동 분석 중입니다. 다음 업데이트는 15분 내 공유하겠습니다.",
+		strategy.CustomerUpdateDraft)
+	require.Equal(t,
+		"PG사 측 응답 지연 또는 장애 공지 여부를 확인 부탁드립니다.",
+		strategy.VendorRequestDraft)
+}
+
+// TestDraft_GroundedCitation pins the SOP-grounding requirement: when an SOP
+// document is injected into the request, a ready draft must cite the SOP via at
+// least one sopStepRef/sopStepRefs. A draft grounded on evidence refs alone is
+// not SOP-grounded and is downgraded so consumers are not misled into trusting
+// an ungrounded (potentially hallucinated) recommendation.
+func TestDraft_GroundedCitation(t *testing.T) {
+	// Positive: the LLM cites the SOP step — the citation survives parsing and
+	// the strategy stays ready.
+	groundedJSON := `{
+	  "headline": "결제 API 오류율 급증 — PG timeout 우선 확인",
+	  "hypotheses": [
+	    {"rank":1,"text":"외부 PG 응답 지연으로 5xx 증가","confidence":"medium","evidenceRefs":["metric:err:svc"],"sopStepRefs":["SOP-PARSE-001#1"]}
+	  ],
+	  "firstActions": [
+	    {"text":"PG timeout log 확인","sopStepRef":"SOP-PARSE-001#1","requiresHumanApproval":true}
+	  ],
+	  "confidence": "medium",
+	  "status": "ready"
+	}`
+	grounded, err := Parse(groundedJSON, parseReq, "test-model")
+	require.NoError(t, err)
+	require.Equal(t, ruletypes.AIStrategyStatusReady, grounded.Status)
+	require.Equal(t, "SOP-PARSE-001#1", grounded.FirstActions[0].SOPStepRef,
+		"SOP citation must survive parsing")
+
+	// Negative: SOP is injected (parseReq.SOPDocument.SOPID is set) but the LLM
+	// grounds everything on evidence refs only — zero SOP citations. The draft
+	// is not SOP-grounded, so it must be downgraded and flagged.
+	ungroundedJSON := `{
+	  "headline": "결제 API 오류율 급증",
+	  "hypotheses": [
+	    {"rank":1,"text":"외부 PG 응답 지연으로 5xx 증가","confidence":"medium","evidenceRefs":["metric:err:svc"]}
+	  ],
+	  "firstActions": [
+	    {"text":"PG timeout log 확인","evidenceRefs":["metric:err:svc"],"requiresHumanApproval":true}
+	  ],
+	  "confidence": "medium",
+	  "status": "ready"
+	}`
+	ungrounded, err := Parse(ungroundedJSON, parseReq, "test-model")
+	require.NoError(t, err)
+	require.Equal(t, ruletypes.AIStrategyStatusLowConfidence, ungrounded.Status,
+		"ungrounded ready draft must be downgraded to low_confidence")
+	require.Equal(t, ruletypes.AIConfidenceLow, ungrounded.Confidence)
+	require.NotEmpty(t, ungrounded.Limitations,
+		"downgrade must explain the missing SOP grounding")
+}
+
 func TestParse_AuditFieldsPopulated(t *testing.T) {
 	strategy, err := Parse(happyJSON, parseReq, "gpt-4o-mini")
 	require.NoError(t, err)

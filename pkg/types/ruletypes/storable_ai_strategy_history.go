@@ -22,7 +22,10 @@ type StorableAIStrategyHistory struct {
 	IncidentID       string `bun:"incident_id,pk,notnull,type:text"`
 	AlertFingerprint string `bun:"alert_fingerprint,notnull,default:'',type:text"`
 	ContractVersion  string `bun:"contract_version,notnull,type:text"`
-	Payload          string `bun:"payload,notnull,type:text"`
+	// GeneratedAt mirrors record.GeneratedAt as a flat column so ListRecent can
+	// order recurrences of the same failure by recency without parsing payload.
+	GeneratedAt string `bun:"generated_at,notnull,default:'',type:text"`
+	Payload     string `bun:"payload,notnull,type:text"`
 }
 
 // FromDomainAIStrategyHistoryRecord builds a StorableAIStrategyHistory scoped to orgID.
@@ -48,6 +51,7 @@ func FromDomainAIStrategyHistoryRecord(orgID string, record AIStrategyHistoryRec
 		IncidentID:       record.IncidentID,
 		AlertFingerprint: record.AlertFingerprint,
 		ContractVersion:  contractVersion,
+		GeneratedAt:      strings.TrimSpace(record.GeneratedAt),
 		Payload:          string(payload),
 	}, nil
 }
