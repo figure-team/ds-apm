@@ -39,9 +39,11 @@ type Sink interface {
 // Outcome classifies a terminal run status into a coarse success/failure for
 // audit consumers.
 //
-// STEP-2 STUB: returns "" → outcome assertions fail (RED).
 func Outcome(status coderca.RunStatus) string {
-	return ""
+	if status == coderca.RunStatusDone {
+		return "success"
+	}
+	return "failure"
 }
 
 // Auditor implements engine.Auditor by mapping the event to an AuditRecord and
@@ -61,8 +63,17 @@ func New(sink Sink, now func() time.Time) *Auditor {
 
 // Audit maps the engine event to an AuditRecord and records it (fire-and-forget).
 //
-// STEP-2 STUB: no-op → recording assertions fail (RED).
 func (a *Auditor) Audit(ctx context.Context, e engine.AuditEvent) {
+	a.sink.Record(ctx, AuditRecord{
+		EventName: EventName,
+		OrgID:     e.OrgID,
+		RunID:     e.RunID,
+		Service:   e.Service,
+		Status:    e.Status,
+		Outcome:   Outcome(e.Status),
+		Detail:    e.Detail,
+		At:        a.now(),
+	})
 }
 
 var _ engine.Auditor = (*Auditor)(nil)
