@@ -6,8 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-
-	"github.com/SigNoz/signoz/pkg/types/alertmanagertypes"
+	"time"
 )
 
 const (
@@ -81,14 +80,15 @@ type SOPBindingPreviewRequest struct {
 }
 
 type SOPBindingPreviewResponse struct {
-	ContractVersion string   `json:"contractVersion"`
-	Status          string   `json:"status"`
-	Resolution      string   `json:"resolution"`
-	SOPID           string   `json:"sopId,omitempty"`
-	Version         string   `json:"version,omitempty"`
-	Title           string   `json:"title,omitempty"`
-	SourceID        string   `json:"sourceId,omitempty"`
-	Warnings        []string `json:"warnings,omitempty"`
+	ContractVersion string                `json:"contractVersion"`
+	Status          string                `json:"status"`
+	Resolution      string                `json:"resolution"`
+	SOPID           string                `json:"sopId,omitempty"`
+	Version         string                `json:"version,omitempty"`
+	Title           string                `json:"title,omitempty"`
+	SourceID        string                `json:"sourceId,omitempty"`
+	Warnings        []string              `json:"warnings,omitempty"`
+	Candidates      []SOPBindingCandidate `json:"candidates,omitempty"`
 }
 
 func NewSOPDocumentFromManagedMarkdown(source PilotManagedMarkdownSource, doc PilotManagedMarkdownDocument, ownerTeam string, approvalStatus string) SOPDocument {
@@ -147,66 +147,13 @@ func NewSOPDocumentSummary(doc SOPDocument) SOPDocumentSummary {
 	}
 }
 
+// PreviewSOPDocumentBinding resolves the best SOP for an alert. An explicit
+// sop_id label keeps the v1 single-match behaviour (highest priority); without
+// it, the service/severity/team labels are ranked into candidates (see
+// sop_match.go). Output fields consumed by the WT-ai dispatch hook
+// (Status/SOPID/Version) are unchanged; candidate ranking is additive.
 func PreviewSOPDocumentBinding(docs []SOPDocument, req SOPBindingPreviewRequest) (SOPBindingPreviewResponse, error) {
-	sopID := strings.TrimSpace(req.Labels[alertmanagertypes.IncidentLabelSopID])
-	if sopID == "" {
-		return SOPBindingPreviewResponse{
-			ContractVersion: SOPBindingContractVersion,
-			Status:          SOPBindingStatusMissing,
-			Resolution:      SOPBindingResolutionNoMatch,
-			Warnings:        []string{"sop_id label is not set"},
-		}, nil
-	}
-
-	doc, ok := latestSOPDocumentByID(docs, sopID)
-	if !ok {
-		return SOPBindingPreviewResponse{
-			ContractVersion: SOPBindingContractVersion,
-			Status:          SOPBindingStatusMissing,
-			Resolution:      SOPBindingResolutionExplicitLabel,
-			SOPID:           sopID,
-			Warnings:        []string{"sop document was not found"},
-		}, nil
-	}
-	tenant := PilotTenantFromLabels(req.Labels)
-	if !PilotTenantIsComplete(tenant) {
-		return SOPBindingPreviewResponse{
-			ContractVersion: SOPBindingContractVersion,
-			Status:          SOPBindingStatusMissing,
-			Resolution:      SOPBindingResolutionExplicitLabel,
-			SOPID:           sopID,
-			Warnings:        []string{SOPTenantPolicyMissingLabelsWarning},
-		}, nil
-	}
-	if !PilotTenantScopeAllows(doc.TenantScope, tenant) {
-		return SOPBindingPreviewResponse{
-			ContractVersion: SOPBindingContractVersion,
-			Status:          SOPBindingStatusForbidden,
-			Resolution:      SOPBindingResolutionExplicitLabel,
-			SOPID:           sopID,
-			Warnings:        []string{SOPTenantPolicyDeniedWarning},
-		}, nil
-	}
-
-	status := SOPBindingStatusBound
-	warnings := []string{}
-	if doc.ApprovalStatus == SOPApprovalStatusDisabled {
-		status = SOPBindingStatusDisabled
-		warnings = append(warnings, "sop document is disabled")
-	}
-
-	resp := SOPBindingPreviewResponse{
-		ContractVersion: SOPBindingContractVersion,
-		Status:          status,
-		Resolution:      SOPBindingResolutionExplicitLabel,
-		SOPID:           doc.SOPID,
-		Version:         doc.Version,
-		Title:           doc.Title,
-		SourceID:        doc.Source.SourceID,
-		Warnings:        warnings,
-	}
-
-	return resp, ValidateSOPBindingPreviewResponse(resp)
+	return previewSOPDocumentBindingAt(docs, req, time.Now().UTC())
 }
 
 func ValidateSOPDocument(doc SOPDocument) error {
@@ -295,6 +242,13 @@ func ValidateSOPBindingPreviewResponse(resp SOPBindingPreviewResponse) error {
 	for i, warning := range resp.Warnings {
 		pilotAppendSecretLikeStringErrors(&errs, fmt.Sprintf("warnings[%d]", i), warning)
 	}
+	for i, candidate := range resp.Candidates {
+		pilotAppendSecretLikeStringErrors(&errs, fmt.Sprintf("candidates[%d].sopId", i), candidate.SOPID)
+		pilotAppendSecretLikeStringErrors(&errs, fmt.Sprintf("candidates[%d].version", i), candidate.Version)
+		pilotAppendSecretLikeStringErrors(&errs, fmt.Sprintf("candidates[%d].title", i), candidate.Title)
+		pilotAppendSecretLikeStringErrors(&errs, fmt.Sprintf("candidates[%d].sourceId", i), candidate.SourceID)
+		pilotAppendSecretLikeStringErrors(&errs, fmt.Sprintf("candidates[%d].ownerTeam", i), candidate.OwnerTeam)
+	}
 
 	return errors.Join(errs...)
 }
@@ -326,6 +280,8 @@ var allowedSOPBindingStatuses = map[string]struct{}{
 var allowedSOPBindingResolutions = map[string]struct{}{
 	SOPBindingResolutionExplicitLabel: {},
 	SOPBindingResolutionNoMatch:       {},
+	SOPBindingResolutionLabelMatch:    {},
+	SOPBindingResolutionFallback:      {},
 }
 
 func checksumForSOPDocument(doc PilotManagedMarkdownDocument) string {

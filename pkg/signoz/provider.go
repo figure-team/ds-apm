@@ -199,6 +199,8 @@ func NewSQLMigrationProviderFactories(
 		sqlmigration.NewAddDSApmStoresFactory(sqlstore),
 		sqlmigration.NewAddDSAIConfigFactory(sqlstore),
 		sqlmigration.NewAddAIOAuthTokenFactory(sqlstore),
+		sqlmigration.NewAlterDSAIStrategyHistoryMultiFactory(sqlstore),
+		sqlmigration.NewAddDSCodebaseConfigFactory(sqlstore),
 	)
 }
 

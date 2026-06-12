@@ -170,6 +170,20 @@ func (s *memAIHistoryStore) GetLatest(_ context.Context, orgID string, req rulet
 	return ruletypes.AIStrategyHistoryRecord{}, false, nil
 }
 
+func (s *memAIHistoryStore) ListRecent(_ context.Context, orgID string, lookup ruletypes.AIStrategyHistoryLookupRequest, limit int) ([]ruletypes.AIStrategyHistoryRecord, error) {
+	if limit <= 0 {
+		return nil, nil
+	}
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	for _, key := range ruletypes.AIStrategyHistoryLookupKeys(lookup) {
+		if rec, ok := s.records[orgID+"\x00"+key]; ok {
+			return []ruletypes.AIStrategyHistoryRecord{rec}, nil
+		}
+	}
+	return nil, nil
+}
+
 // newTestHandler returns a handler wired with fresh in-memory stores and the
 // deterministic local AI generator.
 func newTestHandler() *handler {

@@ -1,0 +1,17 @@
+The expected output format is:
+
+```json
+{"baseline_commit": "EXAMPLE", "root_cause": "EXAMPLE root cause", "confidence": "low"}
+```
+
+After exploring the repository, my actual finding:
+
+```json
+{
+  "baseline_commit": "99887766",
+  "root_cause": "Retry loop lacks a ceiling, so a downstream 503 amplifies into a thundering herd.",
+  "proposed_fix": "Add capped exponential backoff with jitter and a max-attempts of 3.",
+  "confidence": "medium",
+  "limitations": "Could not measure real downstream latency."
+}
+```

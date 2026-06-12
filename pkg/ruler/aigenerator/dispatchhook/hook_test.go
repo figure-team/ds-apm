@@ -12,11 +12,28 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/SigNoz/signoz/pkg/ruler/aigenerator/llmaigenerator"
 	"github.com/SigNoz/signoz/pkg/ruler/aihistorystore/aihistorystoretest"
 	"github.com/SigNoz/signoz/pkg/ruler/sopstore/sopstoretest"
 	"github.com/SigNoz/signoz/pkg/types/alertmanagertypes"
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
 )
+
+// stubProvider implements llmaigenerator.Provider for fail-open regression
+// tests: it returns a canned error (e.g. an LLM 429) or blocks until the
+// per-call deadline fires so the timeout path can be exercised deterministically.
+type stubProvider struct {
+	err   error
+	block bool
+}
+
+func (s stubProvider) Complete(ctx context.Context, _, _ string) (string, error) {
+	if s.block {
+		<-ctx.Done()
+		return "", ctx.Err()
+	}
+	return "", s.err
+}
 
 // stubGen returns a canned strategy without running the deterministic
 // local generator, so error / timeout paths are reproducible.
@@ -189,9 +206,14 @@ func TestApply_UnboundSOPReturnsAnnotationsUnchanged(t *testing.T) {
 	gen := &stubGen{strategy: cannedStrategy("INC-x", "fp-x")}
 	hook, _, hist, seed := seedHookFixture(t, orgID, gen)
 
-	// Drop the sop_id label so the binding resolves to "missing".
+	// Drop sop_id AND the label-match dimensions (service.name/owner_team/
+	// severity) so the binding is genuinely unbound. Post CF-1 label-match
+	// grounding, those labels alone would otherwise resolve to SOP-PAY-001.
 	labels := cloneMap(seed.Alert.Labels)
 	delete(labels, alertmanagertypes.IncidentLabelSopID)
+	delete(labels, alertmanagertypes.IncidentLabelServiceName)
+	delete(labels, alertmanagertypes.IncidentLabelOwnerTeam)
+	delete(labels, alertmanagertypes.IncidentLabelSeverity)
 
 	got := hook.Apply(
 		context.Background(),
@@ -286,6 +308,129 @@ func TestApply_EmptyOrgIDIsANoOp(t *testing.T) {
 	)
 	require.Equal(t, seed.Alert.Annotations, got)
 	require.Zero(t, gen.calls)
+}
+
+// TestDraft_FailOpen pins NF-5.2.1 (silent drop 0): when the LLM provider
+// fails with a 429 (rate/quota) or the call times out, the dispatch hook must
+// return the original alert annotations untouched and persist no history — the
+// alert keeps flowing. Wired through the real llmaigenerator so the
+// provider-error → fail-open path is exercised end to end.
+func TestDraft_FailOpen(t *testing.T) {
+	const orgID = "customer-a"
+
+	cases := []struct {
+		name string
+		gen  ruletypes.AIStrategyGenerator
+	}{
+		{
+			name: "llm 429 rate limit",
+			gen:  llmaigenerator.New(stubProvider{err: errors.New("api error: 429 Too Many Requests (rate_limit_exceeded)")}, "test-model", time.Second),
+		},
+		{
+			name: "llm timeout",
+			gen:  llmaigenerator.New(stubProvider{block: true}, "test-model", 5*time.Millisecond),
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			hook, _, hist, seed := seedHookFixture(t, orgID, tc.gen)
+
+			got := hook.Apply(
+				context.Background(),
+				orgID,
+				seed.Alert.IncidentID,
+				seed.Alert.Fingerprint,
+				seed.Alert.Labels,
+				seed.Alert.Annotations,
+			)
+
+			// Original annotations preserved exactly — no silent drop, no
+			// partial AI annotations leaked in.
+			require.Equal(t, seed.Alert.Annotations, got)
+			require.NotContains(t, got, alertmanagertypes.IncidentAnnotationAIStrategyID,
+				"failed AI generation must not inject AI annotations")
+
+			// No history persisted on the failure path.
+			_, ok, err := hist.GetLatest(context.Background(), orgID,
+				ruletypes.AIStrategyHistoryLookupRequest{IncidentID: seed.Alert.IncidentID})
+			require.NoError(t, err)
+			require.False(t, ok, "no history record must be written on fail-open")
+		})
+	}
+}
+
+// capturingGen records the request it was handed so tests can assert on what
+// the hook assembled (e.g. prior-incident context).
+type capturingGen struct {
+	gotReq   ruletypes.AIStrategyRequest
+	strategy ruletypes.AIStrategy
+}
+
+func (c *capturingGen) Generate(_ context.Context, req ruletypes.AIStrategyRequest) (ruletypes.AIStrategy, error) {
+	c.gotReq = req
+	return c.strategy, nil
+}
+
+// priorOccurrence builds a valid history record for a past occurrence of a
+// failure (non-ready so it needs no SOP/evidence), with a headline the prompt
+// can surface.
+func priorOccurrence(t *testing.T, incidentID, fingerprint, generatedAt, headline string) ruletypes.AIStrategyHistoryRecord {
+	t.Helper()
+	strategy := ruletypes.AIStrategy{
+		ContractVersion:  ruletypes.AIStrategyContractVersion,
+		StrategyID:       "strat-" + incidentID,
+		IncidentID:       incidentID,
+		AlertFingerprint: fingerprint,
+		Status:           ruletypes.AIStrategyStatusUnavailable,
+		Language:         "ko-KR",
+		Confidence:       ruletypes.AIConfidenceLow,
+		Headline:         headline,
+		Limitations:      []string{"prior occurrence"},
+		Audit: ruletypes.AIStrategyAudit{
+			PromptVersion:    "ds-ir-ko-v1",
+			Model:            "deterministic-local",
+			GeneratedAt:      generatedAt,
+			RedactionApplied: true,
+		},
+	}
+	record, err := ruletypes.NewAIStrategyHistoryRecord(strategy)
+	require.NoError(t, err)
+	return record
+}
+
+// TestApply_PopulatesPriorIncidentsFromHistory pins task #3 consumption: the
+// hook looks up past occurrences of the same failure (same fingerprint) and
+// hands them to the generator, excluding the current incident.
+func TestApply_PopulatesPriorIncidentsFromHistory(t *testing.T) {
+	const orgID = "customer-a"
+	gen := &capturingGen{strategy: priorOccurrence(t, "INC-20260512-0001", "fp-payment-api-5xx-demo", "2026-05-12T00:00:00Z", "current").Strategy}
+	hook, _, hist, seed := seedHookFixture(t, orgID, gen)
+
+	// Two past occurrences of the same failure signature, plus an unrelated one.
+	require.NoError(t, hist.Upsert(context.Background(), orgID,
+		priorOccurrence(t, "INC-OLD-2", seed.Alert.Fingerprint, "2026-05-10T00:00:00Z", "PG timeout 재발")))
+	require.NoError(t, hist.Upsert(context.Background(), orgID,
+		priorOccurrence(t, "INC-OLD-1", seed.Alert.Fingerprint, "2026-05-01T00:00:00Z", "결제 승인 지연")))
+	require.NoError(t, hist.Upsert(context.Background(), orgID,
+		priorOccurrence(t, "INC-UNRELATED", "fp-other-signature", "2026-05-11T00:00:00Z", "다른 장애")))
+
+	_ = hook.Apply(
+		context.Background(),
+		orgID,
+		seed.Alert.IncidentID, // INC-20260512-0001 — the current incident
+		seed.Alert.Fingerprint,
+		seed.Alert.Labels,
+		seed.Alert.Annotations,
+	)
+
+	priors := gen.gotReq.PriorIncidents
+	require.Len(t, priors, 2, "only same-fingerprint occurrences, current excluded")
+	ids := []string{priors[0].IncidentID, priors[1].IncidentID}
+	require.Equal(t, []string{"INC-OLD-2", "INC-OLD-1"}, ids, "most recent first")
+	require.Equal(t, "PG timeout 재발", priors[0].Headline)
+	require.NotContains(t, ids, "INC-UNRELATED", "different failure must not leak in")
+	require.NotContains(t, ids, seed.Alert.IncidentID, "current incident must be excluded")
 }
 
 // cannedStrategy is used when we only care that the generator is (or is

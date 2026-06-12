@@ -11,7 +11,8 @@ import (
 // systemMessage is the fixed Korean system prompt sent to the LLM.
 const systemMessage = `당신은 SigNoz 알람의 1차 분석 AI 입니다. 입력으로 SOP 문서 본문, 알람 라벨/어노테이션, evidence 리스트가 주어집니다.
 응답은 반드시 단일 JSON 객체로만 합니다. 추가 설명, 마크다운, 코드 펜스 금지.
-스키마 (ruletypes.AIStrategy): { "headline": string, "hypotheses": [{"rank":int,"text":string,"confidence":"low|medium|high","evidenceRefs":[string]}], "firstActions": [{"text":string,"sopStepRef":string,"requiresHumanApproval":bool}], "confidence":"low|medium|high", "limitations":[string] }
+스키마 (ruletypes.AIStrategy): { "headline": string, "hypotheses": [{"rank":int,"text":string,"confidence":"low|medium|high","evidenceRefs":[string],"sopStepRefs":[string]}], "firstActions": [{"text":string,"sopStepRef":string,"evidenceRefs":[string],"requiresHumanApproval":bool}], "customerUpdateDraft": string, "vendorRequestDraft": string, "confidence":"low|medium|high", "limitations":[string] }
+customerUpdateDraft는 고객에게 보낼 상황 공유 초안, vendorRequestDraft는 공급자/벤더에게 보낼 확인 요청 초안입니다. 자동 조치를 했다고 단정하지 마십시오.
 응답 언어는 한국어. 청구되지 않은 필드는 비웁니다.`
 
 // Render builds the system and user messages for the LLM from req.
@@ -69,6 +70,17 @@ func renderUser(req ruletypes.AIStrategyRequest) string {
 	} else {
 		for _, ref := range req.EvidenceRefs {
 			fmt.Fprintf(&sb, "- [%s] %s: %s (confidence=%s)\n", ref.Type, ref.RefID, ref.Observation, ref.Confidence)
+		}
+	}
+
+	// Prior incidents section — past occurrences of the same failure signature,
+	// most recent first. Rendered only when present so the prompt stays compact
+	// for first-time alerts. The model may reference these to spot recurrence.
+	if len(req.PriorIncidents) > 0 {
+		fmt.Fprintf(&sb, "\n# Prior Incidents (동일 장애 과거 이력)\n")
+		for _, prior := range req.PriorIncidents {
+			fmt.Fprintf(&sb, "- [%s] %s (status=%s, confidence=%s): %s\n",
+				prior.GeneratedAt, prior.IncidentID, prior.Status, prior.Confidence, prior.Headline)
 		}
 	}
 

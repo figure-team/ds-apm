@@ -1,0 +1,9 @@
+```json
+{
+  "baseline_commit": "a1b2c3d4",
+  "root_cause": "The payments service opens a new DB connection per request and never closes it; under load the pool is exhausted, surfacing as 5xx PgTimeout.",
+  "proposed_fix": "Reuse a pooled *sql.DB, call rows.Close(), and cap MaxOpenConns. See handler.go:142.",
+  "confidence": "medium",
+  "limitations": "Analyzed statically; could not reproduce against a live DB."
+}
+```

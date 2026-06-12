@@ -15,12 +15,14 @@ import (
 // JSON response. Caller-controlled metadata (contract version, audit, IDs) is
 // never taken from LLM output.
 type partialResponse struct {
-	Headline     string                   `json:"headline"`
-	Hypotheses   []ruletypes.AIHypothesis `json:"hypotheses"`
-	FirstActions []ruletypes.AIFirstAction `json:"firstActions"`
-	Confidence   string                   `json:"confidence"`
-	Limitations  []string                 `json:"limitations"`
-	Status       string                   `json:"status"`
+	Headline            string                    `json:"headline"`
+	Hypotheses          []ruletypes.AIHypothesis  `json:"hypotheses"`
+	FirstActions        []ruletypes.AIFirstAction `json:"firstActions"`
+	CustomerUpdateDraft string                    `json:"customerUpdateDraft"`
+	VendorRequestDraft  string                    `json:"vendorRequestDraft"`
+	Confidence          string                    `json:"confidence"`
+	Limitations         []string                  `json:"limitations"`
+	Status              string                    `json:"status"`
 }
 
 // Parse extracts an AIStrategy from the raw LLM text output.
@@ -52,20 +54,22 @@ func Parse(raw string, req ruletypes.AIStrategyRequest, model string) (ruletypes
 	}
 
 	strategy := ruletypes.AIStrategy{
-		ContractVersion:  ruletypes.AIStrategyContractVersion,
-		StrategyID:       deterministicLLMStrategyID(req),
-		IncidentID:       req.IncidentID,
-		AlertFingerprint: req.AlertFingerprint,
-		SOPID:            req.SOPDocument.SOPID,
-		SOPVersion:       req.SOPDocument.Version,
-		Language:         "ko-KR",
-		Status:           status,
-		Confidence:       confidence,
-		Headline:         partial.Headline,
-		Hypotheses:       partial.Hypotheses,
-		FirstActions:     partial.FirstActions,
-		EvidenceRefs:     req.EvidenceRefs,
-		Limitations:      partial.Limitations,
+		ContractVersion:     ruletypes.AIStrategyContractVersion,
+		StrategyID:          deterministicLLMStrategyID(req),
+		IncidentID:          req.IncidentID,
+		AlertFingerprint:    req.AlertFingerprint,
+		SOPID:               req.SOPDocument.SOPID,
+		SOPVersion:          req.SOPDocument.Version,
+		Language:            "ko-KR",
+		Status:              status,
+		Confidence:          confidence,
+		Headline:            partial.Headline,
+		Hypotheses:          partial.Hypotheses,
+		FirstActions:        partial.FirstActions,
+		CustomerUpdateDraft: partial.CustomerUpdateDraft,
+		VendorRequestDraft:  partial.VendorRequestDraft,
+		EvidenceRefs:        req.EvidenceRefs,
+		Limitations:         partial.Limitations,
 		Audit: ruletypes.AIStrategyAudit{
 			PromptVersion:    PromptVersion,
 			Model:            model,
@@ -74,11 +78,46 @@ func Parse(raw string, req ruletypes.AIStrategyRequest, model string) (ruletypes
 		},
 	}
 
+	// SOP grounding enforcement: when an SOP document was injected into the
+	// prompt, a ready draft must cite it via at least one SOP step reference.
+	// A ready draft grounded on evidence refs alone is not SOP-grounded and is
+	// downgraded so consumers are not misled into trusting a recommendation the
+	// model never tied back to the bound SOP (hallucination suppression).
+	if strategy.Status == ruletypes.AIStrategyStatusReady &&
+		strings.TrimSpace(req.SOPDocument.SOPID) != "" &&
+		!isSOPGrounded(strategy) {
+		strategy.Status = ruletypes.AIStrategyStatusLowConfidence
+		strategy.Confidence = ruletypes.AIConfidenceLow
+		strategy.Limitations = append(strategy.Limitations, groundingMissingLimitation)
+	}
+
 	if err := ruletypes.ValidateAIStrategy(strategy); err != nil {
 		return ruletypes.AIStrategy{}, err
 	}
 
 	return strategy, nil
+}
+
+// groundingMissingLimitation explains a draft that was downgraded because it
+// did not cite the bound SOP.
+const groundingMissingLimitation = "AI draft was not grounded in the bound SOP (no SOP step citation); confidence downgraded."
+
+// isSOPGrounded reports whether the strategy cites the SOP at least once via a
+// hypothesis sopStepRefs entry or a first-action sopStepRef.
+func isSOPGrounded(strategy ruletypes.AIStrategy) bool {
+	for _, h := range strategy.Hypotheses {
+		for _, ref := range h.SOPStepRefs {
+			if strings.TrimSpace(ref) != "" {
+				return true
+			}
+		}
+	}
+	for _, a := range strategy.FirstActions {
+		if strings.TrimSpace(a.SOPStepRef) != "" {
+			return true
+		}
+	}
+	return false
 }
 
 var allowedStatuses = map[string]struct{}{

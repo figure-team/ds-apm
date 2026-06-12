@@ -15,7 +15,7 @@ updated: 2026-06-08
 
 1. 산출물은 **사업 전략서(`_foundation/source-strategy-brief.md`)에서 top-down**: Vision → Target User·Jobs(JTBD) → User Journey(UJ) → Feature(CF) → FR. 코드(F0~F8)는 전략의 **현재 구현 표면**이며 FR의 *구현 근거*로 강등(FR 본문은 고객 voice).
 2. 기능명세 분해 축은 **CF(Capability Feature, 사용자 가치)**. 구 F0~F8은 코드 매핑(component-source-map)으로만 남고, 산출물 ID는 `CF-1..N` + `FR-CFn.m`.
-3. **범위 hybrid**: 구현 핵심(CF-1~6)은 FR 상세 + Given/When/Then. 미구현 로드맵(CF-7~10)은 저fidelity FR + 단계 태그.
+3. **범위 hybrid**: 구현 핵심(CF-1~6) + 이상 탐지(CF-7) + AI 코드베이스 RCA(CF-11)는 FR 상세 + Given/When/Then. 미구현 로드맵(CF-8~10, CF-7 학습형 후속)은 저fidelity FR + 단계 태그. (번호: CF-7=이상 탐지, CF-11=코드 RCA — 2026-06-12 통합 정합.)
 4. **Markdown = source of truth**. `.md`(풍부) + `.html`(사람용 큐레이션 뷰) 공존. md↔html 1:1 동기 불필요 — 사실(숫자·날짜·명명·상태·ID) 모순만 금지.
 5. **stable ID는 frontmatter + 파일명에 박힘** (`CF-1`, `WBS-1.1`, `FR-CF1.1`, `UJ-1`). 진실의 원천 = `source-strategy-brief.md`(top-down) + `_shared/traceability.md`(CF×UJ×WBS) + 코드(`component-source-map.md`).
 
@@ -47,7 +47,7 @@ updated: 2026-06-08
 | 4 | **범위** | **Hybrid** — 구현 CF는 FR+G/W/T 상세, 로드맵 CF는 저fidelity + 단계 태그. |
 | 5 | **산출물** | **PRD · 에픽 · 스토리 · WBS · Architecture** (`prd`/`epics`/`stories`/`wbs`/`architecture`). UJ는 PRD 내장. UseCase/Overview/Brief 폐지. |
 | 6 | 언어 / Gherkin | 본문 한국어 + ID/코드 영문. Gherkin 키워드 영문(`Given/When/Then`, godog), 스텝 한글. |
-| 7 | WBS·여정 | WBS Lv2 = component(6, CF와 1:1) + 일별 Excel 스케줄. 에러 여정 2건: **UJ-2**(채널 실패→DLQ→Replay), **UJ-3**(LLM fail-open→SOP fallback). |
+| 7 | WBS·여정 | WBS Lv2 = component(8, CF와 1:1; WBS-1.6=이상탐지/CF-7, WBS-1.7=코드RCA/CF-11) + 일별 Excel 스케줄. 에러 여정 2건: **UJ-2**(채널 실패→DLQ→Replay), **UJ-3**(LLM fail-open→SOP fallback). |
 
 ### 2.8 BMAD ↔ 한국 SI 용어·문체 변환 (필수)
 
@@ -105,7 +105,7 @@ docs/spec/
 │  └─ index.md
 ├─ 03-epics/                             # ★ BMAD 에픽 (목표 + 스토리 목록 링크)
 │  ├─ index.md
-│  └─ epic-{1..6}-*.md                 # Epic 목표 + 스토리 표(→ 04-stories/)
+│  └─ epic-{1..N}-*.md                 # Epic 목표 + 스토리 표(→ 04-stories/) — 현재 1~7,11
 ├─ 04-stories/                           # ★ BMAD 스토리 (별도 파일, 애자일 작업 정의)
 │  └─ {epic}.{story}.story.md          # 서술형 스토리 + 인수기준 + Tasks/Subtasks + Dev Notes
 └─ 05-wbs/                               # ★ PMI WBS (컴포넌트·일정, 에픽/스토리에서 파생)

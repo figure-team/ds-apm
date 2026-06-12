@@ -36,10 +36,11 @@ func applyHistoryDDL(ctx context.Context, ss sqlstore.SQLStore) error {
 			incident_id         TEXT      NOT NULL,
 			alert_fingerprint   TEXT      NOT NULL DEFAULT '',
 			contract_version    TEXT      NOT NULL,
+			generated_at        TEXT      NOT NULL DEFAULT '',
 			payload             TEXT      NOT NULL,
 			PRIMARY KEY (org_id, incident_id)
 		)`,
-		`CREATE UNIQUE INDEX idx_ds_ai_strategy_history_org_fp
+		`CREATE INDEX idx_ds_ai_strategy_history_org_fp
 			ON ds_ai_strategy_history(org_id, alert_fingerprint)
 			WHERE alert_fingerprint <> ''`,
 	}
@@ -72,6 +73,75 @@ func makeRecord(t *testing.T, incidentID, fingerprint string) ruletypes.AIStrate
 	record, err := ruletypes.NewAIStrategyHistoryRecord(strategy)
 	require.NoError(t, err)
 	return record
+}
+
+// makeRecordAt builds a record with an explicit generatedAt so recency
+// ordering can be asserted deterministically.
+func makeRecordAt(t *testing.T, incidentID, fingerprint, generatedAt string) ruletypes.AIStrategyHistoryRecord {
+	t.Helper()
+	strategy := ruletypes.AIStrategy{
+		ContractVersion:  ruletypes.AIStrategyContractVersion,
+		StrategyID:       "strat-" + incidentID,
+		IncidentID:       incidentID,
+		AlertFingerprint: fingerprint,
+		Status:           ruletypes.AIStrategyStatusUnavailable,
+		Language:         "ko-KR",
+		Confidence:       ruletypes.AIConfidenceLow,
+		Limitations:      []string{"test"},
+		Audit: ruletypes.AIStrategyAudit{
+			PromptVersion:    "ds-ir-ko-v1",
+			Model:            "deterministic-local",
+			GeneratedAt:      generatedAt,
+			RedactionApplied: true,
+		},
+	}
+	record, err := ruletypes.NewAIStrategyHistoryRecord(strategy)
+	require.NoError(t, err)
+	return record
+}
+
+// TestHistoryStore_ListRecentSameFailure pins task #3: multiple incidents that
+// share an alertFingerprint (recurrences of the same failure) accumulate as
+// distinct rows, and ListRecent returns up to limit of them, most recent first.
+func TestHistoryStore_ListRecentSameFailure(t *testing.T) {
+	ctx := context.Background()
+	store := newTestStore(t)
+
+	// Three occurrences of the same failure (same fingerprint), oldest first.
+	require.NoError(t, store.Upsert(ctx, "org-1", makeRecordAt(t, "inc-1", "fp-shared", "2026-05-20T09:00:00Z")))
+	require.NoError(t, store.Upsert(ctx, "org-1", makeRecordAt(t, "inc-2", "fp-shared", "2026-05-20T10:00:00Z")))
+	require.NoError(t, store.Upsert(ctx, "org-1", makeRecordAt(t, "inc-3", "fp-shared", "2026-05-20T11:00:00Z")))
+	// A different failure must not be mixed in.
+	require.NoError(t, store.Upsert(ctx, "org-1", makeRecordAt(t, "inc-x", "fp-other", "2026-05-20T12:00:00Z")))
+
+	got, err := store.ListRecent(ctx, "org-1",
+		ruletypes.AIStrategyHistoryLookupRequest{AlertFingerprint: "fp-shared"}, 2)
+	require.NoError(t, err)
+	require.Len(t, got, 2, "must cap results at limit")
+	require.Equal(t, "inc-3", got[0].IncidentID, "most recent occurrence first")
+	require.Equal(t, "inc-2", got[1].IncidentID)
+
+	// A higher limit returns every matching occurrence (3), still ordered.
+	all, err := store.ListRecent(ctx, "org-1",
+		ruletypes.AIStrategyHistoryLookupRequest{AlertFingerprint: "fp-shared"}, 10)
+	require.NoError(t, err)
+	require.Len(t, all, 3)
+	require.Equal(t, []string{"inc-3", "inc-2", "inc-1"},
+		[]string{all[0].IncidentID, all[1].IncidentID, all[2].IncidentID})
+}
+
+// TestHistoryStore_ListRecentTenantIsolation pins that ListRecent never leaks
+// another tenant's occurrences (C2 regression).
+func TestHistoryStore_ListRecentTenantIsolation(t *testing.T) {
+	ctx := context.Background()
+	store := newTestStore(t)
+
+	require.NoError(t, store.Upsert(ctx, "org-1", makeRecordAt(t, "inc-1", "fp-shared", "2026-05-20T09:00:00Z")))
+
+	got, err := store.ListRecent(ctx, "org-2",
+		ruletypes.AIStrategyHistoryLookupRequest{AlertFingerprint: "fp-shared"}, 10)
+	require.NoError(t, err)
+	require.Empty(t, got, "C2 regression: cross-tenant occurrences must not be visible")
 }
 
 func TestHistoryStore_UpsertGetByIncidentID(t *testing.T) {

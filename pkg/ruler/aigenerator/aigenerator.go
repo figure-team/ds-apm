@@ -64,6 +64,11 @@ type Config struct {
 	LLMAPIKey         string
 	LLMOAuthToken     string
 	LLMBinary         string
+	// LLMEndpoint optionally overrides the provider's default HTTP endpoint
+	// (only honored for LLMTransport="api"). Used to point the api transports
+	// at a mock server (e.g. wiremock) in tests; empty keeps the provider
+	// default (api.anthropic.com / api.openai.com).
+	LLMEndpoint string
 }
 
 // New constructs the AIStrategyGenerator selected by cfg.Provider.
@@ -107,6 +112,9 @@ func buildLLMProvider(cfg Config) (llmaigenerator.Provider, error) {
 			if cfg.LLMModel != "" {
 				opts = append(opts, claudeapi.WithModel(cfg.LLMModel))
 			}
+			if cfg.LLMEndpoint != "" {
+				opts = append(opts, claudeapi.WithEndpoint(cfg.LLMEndpoint))
+			}
 			return claudeapi.New(cfg.LLMAPIKey, opts...)
 		case "cli":
 			opts := []claudecli.Option{}
@@ -129,6 +137,9 @@ func buildLLMProvider(cfg Config) (llmaigenerator.Provider, error) {
 			opts := []codexapi.Option{}
 			if cfg.LLMModel != "" {
 				opts = append(opts, codexapi.WithModel(cfg.LLMModel))
+			}
+			if cfg.LLMEndpoint != "" {
+				opts = append(opts, codexapi.WithEndpoint(cfg.LLMEndpoint))
 			}
 			return codexapi.New(cfg.LLMAPIKey, opts...)
 		case "cli":

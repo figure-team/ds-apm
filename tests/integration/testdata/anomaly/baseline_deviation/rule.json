@@ -1,0 +1,58 @@
+{
+  "alert": "anomaly_baseline_deviation",
+  "ruleType": "anomaly_rule",
+  "alertType": "METRIC_BASED_ALERT",
+  "condition": {
+    "thresholds": {
+      "kind": "basic",
+      "spec": [
+        {
+          "name": "anomaly",
+          "target": 3,
+          "matchType": "1",
+          "op": "1",
+          "channels": [
+            "test channel"
+          ]
+        }
+      ]
+    },
+    "compositeQuery": {
+      "queryType": "clickhouse_sql",
+      "panelType": "graph",
+      "queries": [
+        {
+          "type": "clickhouse_sql",
+          "spec": {
+            "name": "A",
+            "query": "WITH __temporal_aggregation_cte AS (\n SELECT \n fingerprint, \n toStartOfInterval(toDateTime(intDiv(unix_milli, 1000)), toIntervalSecond(60)) AS ts, \n avg(value) AS per_series_value \n FROM signoz_metrics.distributed_samples_v4 AS points \n INNER JOIN (\n SELECT fingerprint \n FROM signoz_metrics.time_series_v4 \n WHERE metric_name IN ('latency_anomaly_baseline_deviation') \n AND LOWER(temporality) LIKE LOWER('cumulative') \n AND __normalized = false \n GROUP BY fingerprint\n ) AS filtered_time_series ON points.fingerprint = filtered_time_series.fingerprint \n WHERE metric_name IN ('latency_anomaly_baseline_deviation') \n AND unix_milli >= $start_timestamp_ms \n AND unix_milli < $end_timestamp_ms \n GROUP BY fingerprint, ts \n ORDER BY fingerprint, ts\n), \n__spatial_aggregation_cte AS (\n SELECT \n ts, \n sum(per_series_value) AS value \n FROM __temporal_aggregation_cte \n WHERE isNaN(per_series_value) = 0 \n GROUP BY ts\n) \nSELECT * FROM __spatial_aggregation_cte \nORDER BY ts"
+          }
+        }
+      ]
+    },
+    "selectedQueryName": "A"
+  },
+  "evaluation": {
+    "kind": "rolling",
+    "spec": {
+      "evalWindow": "12m0s",
+      "frequency": "15s"
+    }
+  },
+  "labels": {},
+  "annotations": {
+    "description": "Anomaly: latest value is {{$value}} standard deviations from the baseline (warning threshold {{$threshold}}σ)",
+    "summary": "Series deviated from its statistical baseline"
+  },
+  "notificationSettings": {
+    "groupBy": [],
+    "usePolicy": false,
+    "renotify": {
+      "enabled": false,
+      "interval": "30m",
+      "alertStates": []
+    }
+  },
+  "version": "v5",
+  "schemaVersion": "v2alpha1"
+}

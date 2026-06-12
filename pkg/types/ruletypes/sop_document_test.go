@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -228,4 +229,121 @@ func TestValidateSOPDocument_PropagatesRunbookValidationError(t *testing.T) {
 func validSOPDocument() SOPDocument {
 	source := validPilotManagedMarkdownSource()
 	return NewSOPDocumentFromManagedMarkdown(source, source.Documents[0], "payments", SOPApprovalStatusApproved)
+}
+
+// sopMatchNow is a fixed reference time so staleness assertions are
+// deterministic. sopFresh/sopStale are UpdatedAt values relative to it.
+var (
+	sopMatchNow = time.Date(2026, 6, 11, 0, 0, 0, 0, time.UTC)
+	sopFresh    = "2026-06-01T00:00:00Z" // 10 days old
+	sopStale    = "2025-12-01T00:00:00Z" // > 90 days old
+)
+
+func sopMatchLabels() map[string]string {
+	return map[string]string{
+		"project_id":   "customer-a",
+		"environment":  "prod",
+		"service.name": "payment-api",
+		"severity":     "critical",
+		"owner_team":   "payments",
+	}
+}
+
+func sopMatchDoc(sopID, ownerTeam string, tags []string, version, updatedAt string) SOPDocument {
+	return SOPDocument{
+		ContractVersion: SOPDocumentContractVersion,
+		SOPID:           sopID,
+		Title:           sopID + " runbook",
+		Version:         version,
+		Checksum:        "sha256:0000",
+		Source: SOPDocumentSource{
+			Type:     PilotSOPSourceKindManagedMarkdown,
+			SourceID: "src-" + sopID,
+		},
+		BodyMarkdown:   "## " + sopID,
+		OwnerTeam:      ownerTeam,
+		ApprovalStatus: SOPApprovalStatusApproved,
+		TenantScope: PilotTenantScope{
+			ProjectIDs:   []string{"customer-a"},
+			Environments: []string{"prod"},
+		},
+		Tags:      tags,
+		UpdatedAt: updatedAt,
+		SecurityContext: PilotAuditSecurityContext{
+			ServiceAccountProfile: "ds-sop-reader",
+			RedactionApplied:      true,
+		},
+	}
+}
+
+func TestMatch_MultiLabelRanking(t *testing.T) {
+	docs := []SOPDocument{
+		sopMatchDoc("SOP-PAY-001", "payments", []string{"payment-api", "critical"}, "2026-05-01.1", sopFresh), // team+service+severity = 3
+		sopMatchDoc("SOP-PAY-002", "payments", []string{"payment-api"}, "2026-05-02.1", sopFresh),             // team+service = 2
+		sopMatchDoc("SOP-OPS-001", "payments", []string{}, "2026-05-01.1", sopFresh),                          // team only = 1 (priority 4)
+		sopMatchDoc("SOP-INF-001", "infra", []string{"critical"}, "2026-05-01.1", sopFresh),                   // severity only = 1 (priority 1)
+	}
+
+	resp, err := previewSOPDocumentBindingAt(docs, SOPBindingPreviewRequest{Labels: sopMatchLabels()}, sopMatchNow)
+	require.NoError(t, err)
+	require.Equal(t, SOPBindingStatusBound, resp.Status)
+	require.Equal(t, SOPBindingResolutionLabelMatch, resp.Resolution)
+	require.Equal(t, "SOP-PAY-001", resp.SOPID)
+
+	require.Len(t, resp.Candidates, 4)
+	require.Equal(t, "SOP-PAY-001", resp.Candidates[0].SOPID)
+	require.Equal(t, 3, resp.Candidates[0].Score)
+	require.Equal(t, []string{"owner_team", "service.name", "severity"}, resp.Candidates[0].MatchedOn)
+	require.Equal(t, "SOP-PAY-002", resp.Candidates[1].SOPID)
+	require.Equal(t, 2, resp.Candidates[1].Score)
+	// Same score (1), team-priority (4) outranks severity-priority (1).
+	require.Equal(t, "SOP-OPS-001", resp.Candidates[2].SOPID)
+	require.Equal(t, "SOP-INF-001", resp.Candidates[3].SOPID)
+
+	require.NoError(t, ValidateSOPBindingPreviewResponse(resp))
+}
+
+func TestMatch_FallbackCandidates(t *testing.T) {
+	docs := []SOPDocument{
+		sopMatchDoc("SOP-PAY-002", "payments", []string{"payment-api"}, "2026-05-02.1", sopFresh), // team+service = 2
+		sopMatchDoc("SOP-INF-001", "infra", []string{"critical"}, "2026-05-01.1", sopFresh),       // severity = 1
+	}
+
+	resp, err := previewSOPDocumentBindingAt(docs, SOPBindingPreviewRequest{Labels: sopMatchLabels()}, sopMatchNow)
+	require.NoError(t, err)
+	require.Equal(t, SOPBindingStatusMissing, resp.Status)
+	require.Equal(t, SOPBindingResolutionFallback, resp.Resolution)
+	require.Empty(t, resp.SOPID, "fallback must not bind a SOP")
+	require.Contains(t, resp.Warnings, SOPBindingNoExactMatchWarning)
+
+	require.Len(t, resp.Candidates, 2)
+	require.Equal(t, "SOP-PAY-002", resp.Candidates[0].SOPID)
+	require.Equal(t, "SOP-INF-001", resp.Candidates[1].SOPID)
+}
+
+func TestMatch_StalenessExcluded(t *testing.T) {
+	// The stale doc matches all dimensions and carries a higher version, but a
+	// SOP not updated within 90 days is excluded so the fresh one binds.
+	docs := []SOPDocument{
+		sopMatchDoc("SOP-PAY-001", "payments", []string{"payment-api", "critical"}, "2026-05-01.1", sopFresh),
+		sopMatchDoc("SOP-PAY-009", "payments", []string{"payment-api", "critical"}, "2026-06-09.9", sopStale),
+	}
+
+	resp, err := previewSOPDocumentBindingAt(docs, SOPBindingPreviewRequest{Labels: sopMatchLabels()}, sopMatchNow)
+	require.NoError(t, err)
+	require.Equal(t, SOPBindingStatusBound, resp.Status)
+	require.Equal(t, "SOP-PAY-001", resp.SOPID)
+	for _, c := range resp.Candidates {
+		require.NotEqual(t, "SOP-PAY-009", c.SOPID, "stale SOP must be excluded from candidates")
+	}
+
+	// When only a stale SOP would match, there is no match at all.
+	onlyStale := []SOPDocument{
+		sopMatchDoc("SOP-PAY-009", "payments", []string{"payment-api", "critical"}, "2026-06-09.9", sopStale),
+	}
+	resp, err = previewSOPDocumentBindingAt(onlyStale, SOPBindingPreviewRequest{Labels: sopMatchLabels()}, sopMatchNow)
+	require.NoError(t, err)
+	require.Equal(t, SOPBindingStatusMissing, resp.Status)
+	require.Equal(t, SOPBindingResolutionNoMatch, resp.Resolution)
+	require.Empty(t, resp.Candidates)
 }

@@ -385,6 +385,7 @@ func New(
 		LLMTimeoutSeconds: envInt("DS_APM_LLM_TIMEOUT_SECONDS"),
 		LLMAPIKey:         pickAPIKey(os.Getenv("DS_APM_LLM_PROVIDER")),
 		LLMBinary:         os.Getenv("DS_APM_LLM_BINARY"),
+		LLMEndpoint:       os.Getenv("DS_APM_LLM_ENDPOINT"),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("ds-apm ai generator: %w", err)
@@ -412,6 +413,7 @@ func New(
 		LLMTimeoutSeconds: envInt("DS_APM_LLM_TIMEOUT_SECONDS"),
 		LLMAPIKey:         pickAPIKey(os.Getenv("DS_APM_LLM_PROVIDER")),
 		LLMBinary:         os.Getenv("DS_APM_LLM_BINARY"),
+		LLMEndpoint:       os.Getenv("DS_APM_LLM_ENDPOINT"),
 	}
 	runbookDrafter := aigenerator.NewRunbookDrafter(aiCfg)
 

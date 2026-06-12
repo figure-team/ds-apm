@@ -10,7 +10,9 @@ import (
 
 const (
 	// PromptVersion identifies the prompt template used by this package.
-	PromptVersion = "ds-ir-ko-llm-v1"
+	// v2 adds customer/vendor communication drafts and explicit SOP-step /
+	// evidence grounding refs to the requested output schema.
+	PromptVersion = "ds-ir-ko-llm-v2"
 
 	// DefaultTimeout is applied when New is called with timeout <= 0.
 	DefaultTimeout = 15 * time.Second

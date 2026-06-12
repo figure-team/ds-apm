@@ -19,6 +19,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import ts from 'typescript';
+import { keyOf, selectNewViolations } from './i18n-baseline-ratchet.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SRC_DIR = path.join(__dirname, '../src');
@@ -28,9 +29,8 @@ const ciMode = process.argv.includes('--ci');
 const summaryMode = process.argv.includes('--summary');
 const updateBaseline = process.argv.includes('--update-baseline');
 
-// Baseline identity ignores line numbers (which shift on unrelated edits) so the
-// ratchet only reacts to genuinely new strings, not reformatting.
-const keyOf = (f) => `${f.file}\t${f.kind}\t${f.text}`;
+// keyOf / selectNewViolations (the baseline ratchet) live in i18n-baseline-ratchet.js
+// so the ratchet decision is unit-testable without the TypeScript AST scan.
 
 // Attributes whose literal string values are shown to the user.
 const USER_FACING_ATTRS = new Set([
@@ -131,13 +131,7 @@ if (ciMode) {
 	const baseline = fs.existsSync(BASELINE_PATH)
 		? new Set(JSON.parse(fs.readFileSync(BASELINE_PATH, 'utf8')))
 		: new Set();
-	const seen = new Set();
-	const newViolations = findings.filter((f) => {
-		const k = keyOf(f);
-		if (baseline.has(k) || seen.has(k)) return false;
-		seen.add(k);
-		return true;
-	});
+	const newViolations = selectNewViolations(findings, baseline);
 
 	if (newViolations.length) {
 		console.error('New hardcoded user-facing string(s) detected (not in baseline):\n');

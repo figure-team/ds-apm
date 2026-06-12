@@ -193,8 +193,33 @@ func defaultPrepareTaskFunc(opts PrepareTaskOptions) (Task, error) {
 		// create promql rule task for evaluation
 		task = newTask(TaskTypeProm, opts.TaskName, taskNameSuffix, evaluation.GetFrequency().Duration(), rules, opts.ManagerOpts, opts.NotifyFunc, opts.MaintenanceStore, opts.OrgID)
 
+	} else if opts.Rule.RuleType == ruletypes.RuleTypeAnomaly {
+
+		// create anomaly rule
+		ar, err := NewAnomalyRule(
+			ruleID,
+			opts.OrgID,
+			opts.Rule,
+			opts.Querier,
+			opts.Logger,
+			WithEvalDelay(opts.ManagerOpts.EvalDelay),
+			WithSQLStore(opts.SQLStore),
+			WithQueryParser(opts.ManagerOpts.QueryParser),
+			WithMetadataStore(opts.ManagerOpts.MetadataStore),
+			WithRuleStateHistoryModule(opts.ManagerOpts.RuleStateHistoryModule),
+		)
+
+		if err != nil {
+			return task, err
+		}
+
+		rules = append(rules, ar)
+
+		// anomaly rules evaluate on the ClickHouse rule-task loop
+		task = NewAnomalyRuleTask(opts.TaskName, taskNameSuffix, evaluation.GetFrequency().Duration(), rules, opts.ManagerOpts, opts.NotifyFunc, opts.MaintenanceStore, opts.OrgID)
+
 	} else {
-		return nil, errors.NewInvalidInputf(errors.CodeInvalidInput, "unsupported rule type %s. Supported types: %s, %s", opts.Rule.RuleType, ruletypes.RuleTypeProm, ruletypes.RuleTypeThreshold)
+		return nil, errors.NewInvalidInputf(errors.CodeInvalidInput, "unsupported rule type %s. Supported types: %s, %s, %s", opts.Rule.RuleType, ruletypes.RuleTypeProm, ruletypes.RuleTypeThreshold, ruletypes.RuleTypeAnomaly)
 	}
 
 	return task, nil

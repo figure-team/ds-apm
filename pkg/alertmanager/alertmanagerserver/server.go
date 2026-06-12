@@ -2,7 +2,9 @@ package alertmanagerserver
 
 import (
 	"context"
+	"io"
 	"log/slog"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -23,6 +25,7 @@ import (
 	"github.com/prometheus/common/model"
 
 	"github.com/SigNoz/signoz/pkg/alertmanager/alertmanagernotify"
+	"github.com/SigNoz/signoz/pkg/alertmanager/alertmanagernotify/dlq"
 	"github.com/SigNoz/signoz/pkg/alertmanager/nfmanager"
 	"github.com/SigNoz/signoz/pkg/errors"
 	"github.com/SigNoz/signoz/pkg/ruler/aigenerator/dispatchhook"
@@ -35,6 +38,33 @@ var (
 	// and https://github.com/prometheus/server/blob/3b06b97af4d146e141af92885a185891eb79a5b0/nflog/nflog.go#L362.
 	snapfnoop string = "snapfnoop"
 )
+
+// DLQPathEnvVar is the environment variable that configures the location of
+// the alertmanager dead-letter store. When unset, DLQ persistence is
+// disabled and the dispatcher keeps its pre-DLQ behavior.
+const DLQPathEnvVar = "SIGNOZ_DLQ_PATH"
+
+// DefaultDLQPath is the agreed default location for the dead-letter store.
+// It is intentionally NOT applied in-process when SIGNOZ_DLQ_PATH is unset
+// (that would make hermetic unit tests write into the repo tree). Instead it
+// is the single source of truth the deployment/bootstrap seam (compose,
+// helm, cmd/community) should export as SIGNOZ_DLQ_PATH.
+const DefaultDLQPath = "var/ds-apm/alert-dlq.jsonl"
+
+// dlqSinkFromEnv resolves the dead-letter sink from SIGNOZ_DLQ_PATH.
+//
+// When the variable is empty the sink is disabled (nil, nil): the dispatcher
+// behaves exactly as it did before DLQ persistence existed, and tests that do
+// not opt in never touch the filesystem. When set, a JSONLDeadLetterSink is
+// opened at that path — creating the parent directory and the file — using
+// the 50 MiB production rotation default.
+func dlqSinkFromEnv() (dlq.Sink, error) {
+	path := os.Getenv(DLQPathEnvVar)
+	if path == "" {
+		return nil, nil
+	}
+	return dlq.NewJSONLDeadLetterSink(path, dlq.DefaultJSONLDeadLetterMaxSizeBytes)
+}
 
 type Server struct {
 	// logger is the logger for the alertmanager
@@ -75,6 +105,13 @@ type Server struct {
 	// created by SetConfig. It runs the DS-APM AI-strategy dispatch hook
 	// before delivery. Nil keeps pre-DS-APM behavior intact.
 	aiHook *dispatchhook.Hook
+
+	// dlqSink, when non-nil, is forwarded to every Dispatcher instance so
+	// terminal notify-stage failures are persisted to disk and can be
+	// replayed. It is resolved once at construction from SIGNOZ_DLQ_PATH
+	// (see dlqSinkFromEnv) and reused across SetConfig reloads to avoid
+	// leaking file handles. Nil disables DLQ persistence.
+	dlqSink dlq.Sink
 }
 
 // New creates a new alertmanager Server.
@@ -93,10 +130,26 @@ func New(ctx context.Context, logger *slog.Logger, registry prometheus.Registere
 		notificationManager: nfManager,
 		aiHook:              aiHook,
 	}
+
+	// Resolve the dead-letter sink once at construction and reuse it across
+	// SetConfig reloads (opening a fresh sink per reload would leak file
+	// handles). A DLQ misconfiguration must not prevent the alertmanager from
+	// booting — alert delivery takes precedence — so a resolution error is
+	// logged and DLQ persistence is left disabled rather than fatal.
+	if sink, err := dlqSinkFromEnv(); err != nil {
+		server.logger.ErrorContext(ctx, "failed to open dead-letter sink; DLQ persistence disabled", slog.String("env", DLQPathEnvVar), errors.Attr(err))
+	} else {
+		server.dlqSink = sink
+	}
+
 	signozRegisterer := prometheus.WrapRegistererWithPrefix("signoz_", registry)
 	signozRegisterer = prometheus.WrapRegistererWith(prometheus.Labels{"org_id": server.orgID}, signozRegisterer)
 	// initialize marker
 	server.marker = alertmanagertypes.NewMarker(signozRegisterer)
+	// expose the PII/secret redaction counter on the scrape endpoint. It is a
+	// process-global total (registered once on the raw registry, so its name is
+	// not org-prefixed and stays stable across organizations).
+	alertmanagertypes.RegisterRedactionMetrics(registry)
 
 	// get silences for initial state
 	state, err := server.stateStore.Get(ctx, server.orgID)
@@ -324,12 +377,11 @@ func (server *Server) SetConfig(ctx context.Context, alertmanagerConfig *alertma
 		server.dispatcherMetrics,
 		server.notificationManager,
 		server.orgID,
-		// TODO(ds-apm): wire a real dlq.JSONLDeadLetterSink here once the
-		// alertmanager bootstrap exposes a configurable DLQ path
-		// (proposed env knob: SIGNOZ_DLQ_PATH, default
-		// var/ds-apm/alert-dlq.jsonl). Passing nil keeps current behavior
-		// — terminal failures are still logged, just not persisted.
-		nil,
+		// DLQ sink resolved once from SIGNOZ_DLQ_PATH at construction (see
+		// dlqSinkFromEnv) and reused across reloads. Nil when unset, which
+		// preserves the pre-DLQ behavior — terminal failures are still
+		// logged, just not persisted.
+		server.dlqSink,
 		server.aiHook,
 	)
 
@@ -474,6 +526,14 @@ func (server *Server) Stop(ctx context.Context) error {
 
 	// Wait for all goroutines to finish.
 	server.wg.Wait()
+
+	// Close the dead-letter sink last: the dispatcher (the only writer) has
+	// already been stopped above, so no further Write can race with Close.
+	if closer, ok := server.dlqSink.(io.Closer); ok {
+		if err := closer.Close(); err != nil {
+			server.logger.ErrorContext(ctx, "failed to close dead-letter sink", errors.Attr(err))
+		}
+	}
 
 	return nil
 }
