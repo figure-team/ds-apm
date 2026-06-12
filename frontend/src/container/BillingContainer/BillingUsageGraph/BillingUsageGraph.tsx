@@ -112,7 +112,7 @@ export function BillingUsageGraph(props: BillingUsageGraphProps): JSX.Element {
 				graphCompatibleData.data.result[0]?.legend as string,
 			),
 			getGraphSeries(
-				'#4E74F8',
+				'#D81B2C',
 				graphCompatibleData.data.result[1]?.legend as string,
 			),
 			getGraphSeries(

@@ -30,7 +30,7 @@ type alterDSAIStrategyHistoryMulti struct {
 
 func NewAlterDSAIStrategyHistoryMultiFactory(sqlstore sqlstore.SQLStore) factory.ProviderFactory[SQLMigration, Config] {
 	return factory.NewProviderFactory(
-		factory.MustNewName("alter_ds_ai_strategy_history_multi"),
+		factory.MustNewName("alter_ds_ai_strategy_hist_multi"),
 		func(ctx context.Context, ps factory.ProviderSettings, c Config) (SQLMigration, error) {
 			return &alterDSAIStrategyHistoryMulti{sqlstore: sqlstore}, nil
 		},

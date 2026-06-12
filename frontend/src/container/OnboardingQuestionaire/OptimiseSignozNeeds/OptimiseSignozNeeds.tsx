@@ -215,7 +215,7 @@ function OptimiseSignozNeeds({
 									}
 									styles={{
 										track: {
-											background: '#4E74F8',
+											background: '#D81B2C',
 										},
 									}}
 									tooltip={{
@@ -242,7 +242,7 @@ function OptimiseSignozNeeds({
 									}
 									styles={{
 										track: {
-											background: '#4E74F8',
+											background: '#D81B2C',
 										},
 									}}
 									tooltip={{
@@ -269,7 +269,7 @@ function OptimiseSignozNeeds({
 									}
 									styles={{
 										track: {
-											background: '#4E74F8',
+											background: '#D81B2C',
 										},
 									}}
 									tooltip={{

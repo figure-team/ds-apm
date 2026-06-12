@@ -200,8 +200,8 @@ export function prepareHistogramPanelConfig({
 			colorMapping: widget.customLegendColors ?? {},
 			barWidthFactor: 1,
 			pointSize: 5,
-			lineColor: '#3f5ecc',
-			fillColor: '#4E74F8',
+			lineColor: '#AD1623',
+			fillColor: '#D81B2C',
 			isDarkMode,
 		});
 	} else if (apiResponse && apiResponse?.data?.result) {

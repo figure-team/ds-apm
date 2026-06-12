@@ -5,6 +5,54 @@
 
 @import '@signozhq/design-tokens/dist/themes/signoz-tokens.css';
 
+/* ===== KTDS 브랜드 테마 오버라이드 (표시 레벨, 배경 제외 액센트만) ===== */
+/* 브랜드 액센트: robin 스케일을 KT 레드(#D81B2C)로 리맵 — primary/ring/chart/sidebar/callout 등 전부 이 스케일을 참조함 */
+:root {
+	--bg-robin-50: #fcebed;
+	--bg-robin-100: #f6c4c9;
+	--bg-robin-150: #f6c4c9;
+	--bg-robin-200: #ef9aa2;
+	--bg-robin-300: #e76571;
+	--bg-robin-400: #e03a49;
+	--bg-robin-500: #d81b2c;
+	--bg-robin-600: #ad1623;
+	--bg-robin-700: #82101a;
+	--bg-robin-800: #570b12;
+	--bg-robin-900: #2b0509;
+	--bg-robin-950: #180304;
+	--text-robin-50: #fcebed;
+	--text-robin-100: #f6c4c9;
+	--text-robin-150: #f6c4c9;
+	--text-robin-200: #ef9aa2;
+	--text-robin-300: #e76571;
+	--text-robin-400: #e03a49;
+	--text-robin-500: #d81b2c;
+	--text-robin-600: #ad1623;
+	--text-robin-700: #82101a;
+	--text-robin-800: #570b12;
+	--text-robin-900: #2b0509;
+	--text-robin-950: #180304;
+}
+/* 에러/위험: 주황빛 레드(#F0531C)로 분리해 브랜드 레드와 시각적으로 구분 */
+[data-theme='default'],
+[data-theme='default'].dark {
+	--destructive: #f0531c;
+	--danger-background: #f0531c;
+	--danger-background-hover: #f47c4a;
+	--callout-error-background: color-mix(in srgb, #f0531c, transparent 88%);
+	--callout-error-border: color-mix(in srgb, #f0531c, transparent 78%);
+}
+[data-theme='default'] {
+	--callout-error-title: #d8430f;
+	--callout-error-description: #d8430f;
+	--callout-error-icon: #b8380c;
+}
+[data-theme='default'].dark {
+	--callout-error-title: #f47c4a;
+	--callout-error-description: #f47c4a;
+	--callout-error-icon: #f8a07a;
+}
+
 /* Import fonts from CDN */
 @import url('https://fonts.googleapis.com/css2?family=Work+Sans&wght@500&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono&display=swap');
