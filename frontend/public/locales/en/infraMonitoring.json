@@ -30,7 +30,7 @@
 	"error_team_resolving": "Our team is getting on top to resolve this. Please reach out to support if the issue persists.",
 	"no_host_metrics_yet": "No host metrics data received yet",
 	"send_host_metrics_help": "Please refer to <0>our documentation</0> to learn how to send host metrics.",
-	"upgrade_k8s_infra_chart": "To see K8s metrics, upgrade to the latest version of SigNoz k8s-infra chart. Please contact support if you need help.",
+	"upgrade_k8s_infra_chart": "To see K8s metrics, upgrade to the latest version of DS-APM k8s-infra chart. Please contact support if you need help.",
 	"queried_range_before_earliest": "Queried time range is before earliest K8s metrics",
 	"end_time_before_earliest": "Your requested end time is earlier than the earliest detected time of K8s metrics data, please adjust your end time.",
 	"query_no_results": "This query had no results. Edit your query and try again!",

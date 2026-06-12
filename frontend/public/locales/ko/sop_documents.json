@@ -1,6 +1,6 @@
 {
 	"page_title": "DS-APM SOP 문서",
-	"page_description": "SigNoz 알림 규칙이 sop_id 레이블로 바인딩하고 SOP 기반 AI 응답 전략에 활용할 관리형 Markdown SOP를 등록합니다.",
+	"page_description": "DS-APM 알림 규칙이 sop_id 레이블로 바인딩하고 SOP 기반 AI 응답 전략에 활용할 관리형 Markdown SOP를 등록합니다.",
 	"btn_template_download": "템플릿 다운로드",
 	"btn_file_upload": "파일 업로드",
 	"register_section_title": "관리형 Markdown SOP 등록",

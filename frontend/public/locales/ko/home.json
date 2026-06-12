@@ -1,7 +1,7 @@
 {
 	"page_title": "홈",
-	"welcome_title": "안녕하세요, SigNoz 워크스페이스에 오신 것을 환영합니다",
-	"not_sending_data_desc": "아직 데이터를 전송하지 않고 있습니다. 텔레메트리 데이터를 SigNoz로 전송해 시작하세요.",
+	"welcome_title": "안녕하세요, DS-APM 워크스페이스에 오신 것을 환영합니다",
+	"not_sending_data_desc": "아직 데이터를 전송하지 않고 있습니다. 텔레메트리 데이터를 DS-APM로 전송해 시작하세요.",
 	"workspace_ready": "워크스페이스가 준비되었습니다",
 	"connect_data_source": "데이터 소스 연결",
 	"ingestion_active_logs": "로그 수집이 활성화되었습니다",

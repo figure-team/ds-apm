@@ -21,7 +21,7 @@
 	"workspace_title": "Workspace",
 	"workspace_subtitle": "Manage your workspace settings.",
 	"retention_controls": "Retention Controls",
-	"license_key_label": "SigNoz License Key",
+	"license_key_label": "DS-APM License Key",
 	"copy_license_key": "Copy license key",
 	"license_key_copied": "License key copied to clipboard.",
 	"callout_not_your_key": "This is <0>NOT</0> your ingestion or Service account key.",

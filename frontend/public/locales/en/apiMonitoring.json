@@ -38,7 +38,7 @@
 	"cancelled_load_data": "Click \"Run Query\" to load API monitoring data.",
 	"no_external_api_calls": "No External API calls detected with applied filters.",
 	"ensure_http_client_spans": "Ensure all HTTP client spans are being sent with kind as <0>Client</0> and url set in <1>url.full</1> or <2>http.url</2> attribute.",
-	"learn_external_api": "Learn how External API monitoring works in SigNoz",
+	"learn_external_api": "Learn how External API monitoring works in DS-APM",
 	"search_for_filters": "Search for filters...",
 	"group_by": "Group by",
 	"search_for_attribute": "Search for attribute",

@@ -38,7 +38,7 @@
 	"cancelled_load_data": "API 모니터링 데이터를 불러오려면 \"Run Query\"를 클릭하세요.",
 	"no_external_api_calls": "적용된 필터로 감지된 외부 API 호출이 없습니다.",
 	"ensure_http_client_spans": "모든 HTTP 클라이언트 span의 kind가 <0>Client</0>로 전송되고 url이 <1>url.full</1> 또는 <2>http.url</2> 속성에 설정되어 있는지 확인하세요.",
-	"learn_external_api": "SigNoz에서 외부 API 모니터링이 어떻게 작동하는지 알아보기",
+	"learn_external_api": "DS-APM에서 외부 API 모니터링이 어떻게 작동하는지 알아보기",
 	"search_for_filters": "필터 검색...",
 	"group_by": "그룹화 기준",
 	"search_for_attribute": "속성 검색",

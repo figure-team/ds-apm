@@ -30,7 +30,7 @@
 	"error_team_resolving": "팀에서 문제 해결을 위해 노력하고 있습니다. 문제가 지속되면 지원팀에 문의해 주세요.",
 	"no_host_metrics_yet": "아직 수신된 host 메트릭 데이터가 없습니다",
 	"send_host_metrics_help": "host 메트릭 전송 방법은 <0>문서</0>를 참고하세요.",
-	"upgrade_k8s_infra_chart": "K8s 메트릭을 보려면 SigNoz k8s-infra 차트를 최신 버전으로 업그레이드하세요. 도움이 필요하면 지원팀에 문의해 주세요.",
+	"upgrade_k8s_infra_chart": "K8s 메트릭을 보려면 DS-APM k8s-infra 차트를 최신 버전으로 업그레이드하세요. 도움이 필요하면 지원팀에 문의해 주세요.",
 	"queried_range_before_earliest": "조회한 시간 범위가 가장 이른 K8s 메트릭보다 이전입니다",
 	"end_time_before_earliest": "요청한 종료 시간이 K8s 메트릭 데이터의 가장 이른 감지 시간보다 빠릅니다. 종료 시간을 조정해 주세요.",
 	"query_no_results": "이 쿼리에 결과가 없습니다. 쿼리를 수정한 후 다시 시도하세요!",

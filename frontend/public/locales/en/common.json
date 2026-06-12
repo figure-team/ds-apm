@@ -13,7 +13,7 @@
 	"pending_data_placeholder": "Retrieving your {{dataSource}}!",
 	"no_data_yet": "No {{dataSource}} yet.",
 	"data_show_up_here": "When we receive {{dataSource}}, they would show up here",
-	"send_data_to_signoz": "Sending {{dataSource}} to SigNoz",
+	"send_data_to_signoz": "Sending {{dataSource}} to DS-APM",
 	"data_source_logs": "logs",
 	"data_source_traces": "traces",
 	"data_source_metrics": "metrics",
