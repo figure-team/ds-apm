@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import RouteTab from 'components/RouteTab';
 import { TabRoutes } from 'components/RouteTab/types';
@@ -11,6 +12,23 @@ import MessagingQueues from './MessagingQueues';
 import MQDetailPage from './MQDetailPage/MQDetailPage';
 
 import './MessagingQueuesMainPage.styles.scss';
+
+// Tab labels live in components so useTranslation can run at render time
+// (TabRoutes objects are created at module scope where hooks are unavailable).
+function TabName({
+	icon,
+	i18nKey,
+}: {
+	icon: JSX.Element;
+	i18nKey: string;
+}): JSX.Element {
+	const { t } = useTranslation('messagingQueues');
+	return (
+		<div className="tab-item">
+			{icon} {t(i18nKey)}
+		</div>
+	);
+}
 
 export const Kafka: TabRoutes = {
 	Component: MessagingQueues,
@@ -47,11 +65,7 @@ export const Celery: TabRoutes = {
 
 export const Overview: TabRoutes = {
 	Component: CeleryOverview,
-	name: (
-		<div className="tab-item">
-			<Rows3 size={16} /> Overview
-		</div>
-	),
+	name: <TabName icon={<Rows3 size={16} />} i18nKey="tab_overview" />,
 	route: ROUTES.MESSAGING_QUEUES_OVERVIEW,
 	key: ROUTES.MESSAGING_QUEUES_OVERVIEW,
 };

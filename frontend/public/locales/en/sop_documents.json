@@ -1,6 +1,6 @@
 {
 	"page_title": "DS-APM SOP Documents",
-	"page_description": "Register managed Markdown SOPs that SigNoz alert rules can bind with sop_id and feed into SOP-grounded AI response strategy.",
+	"page_description": "Register managed Markdown SOPs that DS-APM alert rules can bind with sop_id and feed into SOP-grounded AI response strategy.",
 	"btn_template_download": "Template Download",
 	"btn_file_upload": "File Upload",
 	"register_section_title": "Register managed Markdown SOP",

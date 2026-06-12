@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation } from 'react-query';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Button, Card, Modal, Typography } from 'antd';
@@ -6,6 +7,7 @@ import logEvent from 'api/common/logEvent';
 import updateCreditCardApi from 'api/v1/checkout/create';
 import { FeatureKeys } from 'constants/features';
 import { useNotifications } from 'hooks/useNotifications';
+import { TFunction } from 'i18next';
 import {
 	ArrowUpRight,
 	Book,
@@ -34,6 +36,7 @@ interface Channel {
 	title?: string;
 	url: any;
 	btnText?: string;
+	isExternal?: boolean;
 }
 
 const channelsMap = {
@@ -45,51 +48,54 @@ const channelsMap = {
 	slack_connect: 'slack_connect',
 };
 
-const supportChannels = [
+const getSupportChannels = (t: TFunction): Channel[] => [
 	{
 		key: 'documentation',
-		name: 'Documentation',
+		name: t('helpSupport:channel_documentation_name').toString(),
 		icon: <Book size={16} />,
-		title: 'Find answers in the documentation.',
+		title: t('helpSupport:channel_documentation_title').toString(),
 		url: 'https://signoz.io/docs/',
-		btnText: 'Visit docs',
+		btnText: t('helpSupport:channel_documentation_btn').toString(),
 		isExternal: true,
 	},
 	{
 		key: 'github',
-		name: 'Github',
+		name: t('helpSupport:channel_github_name').toString(),
 		icon: <Github size={16} />,
-		title: 'Create an issue on GitHub to report bugs or request new features.',
+		title: t('helpSupport:channel_github_title').toString(),
 		url: 'https://github.com/SigNoz/signoz/issues',
-		btnText: 'Create issue',
+		btnText: t('helpSupport:channel_github_btn').toString(),
 		isExternal: true,
 	},
 	{
 		key: 'slack_community',
-		name: 'Slack Community',
+		name: t('helpSupport:channel_slack_name').toString(),
 		icon: <Slack size={16} />,
-		title: 'Get support from the SigNoz community on Slack.',
+		title: t('helpSupport:channel_slack_title').toString(),
 		url: 'https://signoz.io/slack',
-		btnText: 'Join Slack',
+		btnText: t('helpSupport:channel_slack_btn').toString(),
 		isExternal: true,
 	},
 	{
 		key: 'chat',
-		name: 'Chat',
+		name: t('helpSupport:channel_chat_name').toString(),
 		icon: <MessageSquare size={16} />,
-		title: 'Get quick support directly from the team.',
+		title: t('helpSupport:channel_chat_title').toString(),
 		url: '',
-		btnText: 'Launch chat',
+		btnText: t('helpSupport:channel_chat_btn').toString(),
 		isExternal: false,
 	},
 ];
 
 export default function Support(): JSX.Element {
+	const { t } = useTranslation(['helpSupport', 'common']);
 	const history = useHistory();
 	const { notifications } = useNotifications();
 	const { trialInfo, featureFlags } = useAppContext();
 	const [isAddCreditCardModalOpen, setIsAddCreditCardModalOpen] =
 		useState(false);
+
+	const supportChannels = getSupportChannels(t);
 
 	const { pathname } = useLocation();
 	const handleChannelWithRedirects = (url: string): void => {
@@ -190,14 +196,13 @@ export default function Support(): JSX.Element {
 			<header className="support-page-header">
 				<div className="support-page-header-title" data-testid="support-page-title">
 					<LifeBuoy size={16} />
-					Support
+					{t('helpSupport:page_title')}
 				</div>
 			</header>
 
 			<div className="support-page-content">
 				<div className="support-page-content-description">
-					We are here to help in case of questions or issues. Pick the channel that
-					is most convenient for you.
+					{t('helpSupport:page_description')}
 				</div>
 
 				<div className="support-channels">
@@ -231,7 +236,9 @@ export default function Support(): JSX.Element {
 			{/* Add Credit Card Modal */}
 			<Modal
 				className="add-credit-card-modal"
-				title={<span className="title">Add Credit Card for Chat Support</span>}
+				title={
+					<span className="title">{t('helpSupport:add_credit_card_title')}</span>
+				}
 				open={isAddCreditCardModalOpen}
 				closable
 				onCancel={(): void => setIsAddCreditCardModalOpen(false)}
@@ -243,7 +250,7 @@ export default function Support(): JSX.Element {
 						className="cancel-btn"
 						icon={<X size={16} />}
 					>
-						Cancel
+						{t('common:cancel')}
 					</Button>,
 					<Button
 						key="submit"
@@ -255,13 +262,14 @@ export default function Support(): JSX.Element {
 						onClick={handleAddCreditCard}
 						className="add-credit-card-btn periscope-btn primary"
 					>
-						Add Credit Card
+						{t('helpSupport:add_credit_card_btn')}
 					</Button>,
 				]}
 			>
 				<Typography.Text className="add-credit-card-text">
-					You&apos;re currently on <span className="highlight-text">Trial plan</span>
-					. Add a credit card to access SigNoz chat support to your workspace.
+					{t('helpSupport:credit_card_text_before')}
+					<span className="highlight-text">{t('helpSupport:trial_plan')}</span>
+					{t('helpSupport:credit_card_text_after')}
 				</Typography.Text>
 			</Modal>
 		</div>

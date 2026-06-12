@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { UseQueryResult } from 'react-query';
 import { Color } from '@signozhq/design-tokens';
 import { Button, Card, Skeleton, Typography } from 'antd';
@@ -56,6 +57,7 @@ function StatusCodeBarCharts({
 	// 0 : Status Code Count
 	// 1 : Status Code Latency
 	const [currentWidgetInfoIndex, setCurrentWidgetInfoIndex] = useState(0);
+	const { t } = useTranslation('apiMonitoring');
 
 	const { data: endPointStatusCodeBarChartsData } =
 		endPointStatusCodeBarChartsDataQuery;
@@ -245,7 +247,7 @@ function StatusCodeBarCharts({
 		<div>
 			<Card bordered className="endpoint-details-card">
 				<div className="header">
-					<Typography.Text>Call response status</Typography.Text>
+					<Typography.Text>{t('call_response_status')}</Typography.Text>
 					<Button.Group className="views-tabs">
 						<Button
 							value={0}
@@ -253,14 +255,14 @@ function StatusCodeBarCharts({
 							disabled={false}
 							onClick={(): void => setCurrentWidgetInfoIndex(0)}
 						>
-							Number of calls
+							{t('number_of_calls')}
 						</Button>
 						<Button
 							value={1}
 							className={currentWidgetInfoIndex === 1 ? 'selected_view tab' : 'tab'}
 							onClick={(): void => setCurrentWidgetInfoIndex(1)}
 						>
-							Latency
+							{t('col_latency')}
 						</Button>
 					</Button.Group>
 				</div>

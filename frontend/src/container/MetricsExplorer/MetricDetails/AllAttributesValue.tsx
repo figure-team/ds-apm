@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCopyToClipboard } from 'react-use';
 import { Button, Input, Menu, Popover, Tooltip, Typography } from 'antd';
 import { Check, Copy, Search, SquareArrowOutUpRight } from 'lucide-react';
@@ -13,6 +14,7 @@ export function AllAttributesEmptyText({
 	isErrorAttributes,
 	refetchAttributes,
 }: AllAttributesEmptyTextProps): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	if (isErrorAttributes) {
 		return (
 			<div className="all-attributes-error-state">
@@ -23,7 +25,7 @@ export function AllAttributesEmptyText({
 			</div>
 		);
 	}
-	return <Typography.Text>No attributes found</Typography.Text>;
+	return <Typography.Text>{t('no_attributes_found')}</Typography.Text>;
 }
 
 export function AllAttributesValue({
@@ -31,6 +33,7 @@ export function AllAttributesValue({
 	filterValue,
 	goToMetricsExploreWithAppliedAttribute,
 }: AllAttributesValueProps): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	const [attributePopoverKey, setAttributePopoverKey] = useState<string | null>(
 		null,
 	);
@@ -105,7 +108,7 @@ export function AllAttributesValue({
 	const allValuesPopoverContent = (
 		<div className="all-values-popover">
 			<Input
-				placeholder="Search values"
+				placeholder={t('search_values')}
 				size="small"
 				prefix={<Search size={12} />}
 				value={allValuesSearch}
@@ -133,7 +136,7 @@ export function AllAttributesValue({
 											}}
 										/>
 									</Tooltip>
-									<Tooltip title="Open in Metric Explorer">
+									<Tooltip title={t('open_in_metric_explorer')}>
 										<Button
 											type="text"
 											size="small"
@@ -150,7 +153,7 @@ export function AllAttributesValue({
 					})}
 				{allValuesOpen && filteredAllValues.length === 0 && (
 					<Typography.Text type="secondary" className="all-values-empty">
-						No values found
+						{t('no_values_found')}
 					</Typography.Text>
 				)}
 			</div>
@@ -203,7 +206,7 @@ export function AllAttributesValue({
 					overlayClassName="metric-details-popover all-values-popover-overlay"
 				>
 					<Button type="text" className="all-values-button">
-						All values ({filterValue.length})
+						{t('all_values', { count: filterValue.length })}
 					</Button>
 				</Popover>
 			)}

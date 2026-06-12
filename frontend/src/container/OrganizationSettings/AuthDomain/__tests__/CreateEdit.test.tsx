@@ -28,12 +28,10 @@ describe('CreateEdit Modal', () => {
 		it('renders provider selection when creating new domain', () => {
 			render(<CreateEdit isCreate onClose={mockOnClose} />);
 
-			expect(
-				screen.getByText(/configure authentication method/i),
-			).toBeInTheDocument();
-			expect(screen.getByText(/google apps authentication/i)).toBeInTheDocument();
-			expect(screen.getByText(/saml authentication/i)).toBeInTheDocument();
-			expect(screen.getByText(/oidc authentication/i)).toBeInTheDocument();
+			expect(screen.getByText('selector_title')).toBeInTheDocument();
+			expect(screen.getByText('selector_google_title')).toBeInTheDocument();
+			expect(screen.getByText('selector_saml_title')).toBeInTheDocument();
+			expect(screen.getByText('selector_oidc_title')).toBeInTheDocument();
 		});
 
 		it('returns to provider selection when back button is clicked', async () => {
@@ -46,16 +44,12 @@ describe('CreateEdit Modal', () => {
 			// Tooltip mouseEnterDelay timers it triggers on the Configure button.
 			fireEvent.click(configureButtons[0]);
 
-			expect(
-				await screen.findByText(/edit google authentication/i),
-			).toBeInTheDocument();
+			expect(await screen.findByText('google_title')).toBeInTheDocument();
 
-			const backButton = screen.getByRole('button', { name: /back/i });
+			const backButton = screen.getByRole('button', { name: 'back' });
 			fireEvent.click(backButton);
 
-			expect(
-				await screen.findByText(/configure authentication method/i),
-			).toBeInTheDocument();
+			expect(await screen.findByText('selector_title')).toBeInTheDocument();
 		});
 	});
 
@@ -69,10 +63,8 @@ describe('CreateEdit Modal', () => {
 				/>,
 			);
 
-			expect(screen.getByText(/edit google authentication/i)).toBeInTheDocument();
-			expect(
-				screen.queryByText(/configure authentication method/i),
-			).not.toBeInTheDocument();
+			expect(screen.getByText('google_title')).toBeInTheDocument();
+			expect(screen.queryByText('selector_title')).not.toBeInTheDocument();
 		});
 
 		it('pre-fills form with existing domain values', () => {
@@ -110,9 +102,11 @@ describe('CreateEdit Modal', () => {
 				/>,
 			);
 
-			expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
 			expect(
-				screen.queryByRole('button', { name: /back/i }),
+				screen.getByRole('button', { name: 'common:cancel' }),
+			).toBeInTheDocument();
+			expect(
+				screen.queryByRole('button', { name: 'back' }),
 			).not.toBeInTheDocument();
 		});
 	});
@@ -130,12 +124,12 @@ describe('CreateEdit Modal', () => {
 			await user.click(configureButtons[0]);
 
 			const saveButton = await screen.findByRole('button', {
-				name: /save changes/i,
+				name: 'save_changes',
 			});
 			await user.click(saveButton);
 
 			await waitFor(() => {
-				expect(screen.getByText(/domain is required/i)).toBeInTheDocument();
+				expect(screen.getByText('domain_required')).toBeInTheDocument();
 			});
 		});
 	});
@@ -152,11 +146,11 @@ describe('CreateEdit Modal', () => {
 			await user.click(configureButtons[0]);
 
 			await waitFor(() => {
-				expect(screen.getByText(/edit google authentication/i)).toBeInTheDocument();
-				expect(screen.getByLabelText(/domain/i)).toBeInTheDocument();
-				expect(screen.getByLabelText(/client id/i)).toBeInTheDocument();
-				expect(screen.getByLabelText(/client secret/i)).toBeInTheDocument();
-				expect(screen.getByText(/skip email verification/i)).toBeInTheDocument();
+				expect(screen.getByText('google_title')).toBeInTheDocument();
+				expect(screen.getByLabelText('field_domain')).toBeInTheDocument();
+				expect(screen.getByLabelText('field_client_id')).toBeInTheDocument();
+				expect(screen.getByLabelText('field_client_secret')).toBeInTheDocument();
+				expect(screen.getByText('skip_email_verification')).toBeInTheDocument();
 			});
 		});
 
@@ -171,12 +165,12 @@ describe('CreateEdit Modal', () => {
 				/>,
 			);
 
-			const workspaceHeader = screen.getByText(/google workspace groups/i);
+			const workspaceHeader = screen.getByText('google_workspace_groups_title');
 			await user.click(workspaceHeader);
 
 			await waitFor(() => {
-				expect(screen.getByText(/fetch groups/i)).toBeInTheDocument();
-				expect(screen.getByText(/service account json/i)).toBeInTheDocument();
+				expect(screen.getByText('google_fetch_groups')).toBeInTheDocument();
+				expect(screen.getByText('google_service_account_json')).toBeInTheDocument();
 			});
 		});
 	});
@@ -191,7 +185,7 @@ describe('CreateEdit Modal', () => {
 				/>,
 			);
 
-			expect(screen.getByText(/edit saml authentication/i)).toBeInTheDocument();
+			expect(screen.getByText('saml_title')).toBeInTheDocument();
 			expect(
 				screen.getByDisplayValue('https://idp.example.com/sso'),
 			).toBeInTheDocument();
@@ -209,17 +203,15 @@ describe('CreateEdit Modal', () => {
 				/>,
 			);
 
-			expect(
-				screen.getByText(/attribute mapping \(advanced\)/i),
-			).toBeInTheDocument();
+			expect(screen.getByText('attr_mapping_title')).toBeInTheDocument();
 
-			const attributeHeader = screen.getByText(/attribute mapping \(advanced\)/i);
+			const attributeHeader = screen.getByText('attr_mapping_title');
 			await user.click(attributeHeader);
 
 			await waitFor(() => {
-				expect(screen.getByLabelText(/name attribute/i)).toBeInTheDocument();
-				expect(screen.getByLabelText(/groups attribute/i)).toBeInTheDocument();
-				expect(screen.getByLabelText(/role attribute/i)).toBeInTheDocument();
+				expect(screen.getByLabelText('attr_mapping_name')).toBeInTheDocument();
+				expect(screen.getByLabelText('attr_mapping_groups')).toBeInTheDocument();
+				expect(screen.getByLabelText('attr_mapping_role')).toBeInTheDocument();
 			});
 		});
 	});
@@ -234,7 +226,7 @@ describe('CreateEdit Modal', () => {
 				/>,
 			);
 
-			expect(screen.getByText(/edit oidc authentication/i)).toBeInTheDocument();
+			expect(screen.getByText('oidc_title')).toBeInTheDocument();
 			expect(screen.getByDisplayValue('https://oidc.corp.io')).toBeInTheDocument();
 			expect(screen.getByDisplayValue('oidc-client-id')).toBeInTheDocument();
 		});
@@ -250,16 +242,16 @@ describe('CreateEdit Modal', () => {
 				/>,
 			);
 
-			expect(screen.getByText(/claim mapping \(advanced\)/i)).toBeInTheDocument();
+			expect(screen.getByText('claim_mapping_title')).toBeInTheDocument();
 
-			const claimHeader = screen.getByText(/claim mapping \(advanced\)/i);
+			const claimHeader = screen.getByText('claim_mapping_title');
 			await user.click(claimHeader);
 
 			await waitFor(() => {
-				expect(screen.getByLabelText(/email claim/i)).toBeInTheDocument();
-				expect(screen.getByLabelText(/name claim/i)).toBeInTheDocument();
-				expect(screen.getByLabelText(/groups claim/i)).toBeInTheDocument();
-				expect(screen.getByLabelText(/role claim/i)).toBeInTheDocument();
+				expect(screen.getByLabelText('claim_mapping_email')).toBeInTheDocument();
+				expect(screen.getByLabelText('claim_mapping_name')).toBeInTheDocument();
+				expect(screen.getByLabelText('claim_mapping_groups')).toBeInTheDocument();
+				expect(screen.getByLabelText('claim_mapping_role')).toBeInTheDocument();
 			});
 		});
 
@@ -272,8 +264,8 @@ describe('CreateEdit Modal', () => {
 				/>,
 			);
 
-			expect(screen.getByText(/skip email verification/i)).toBeInTheDocument();
-			expect(screen.getByText(/get user info/i)).toBeInTheDocument();
+			expect(screen.getByText('skip_email_verification')).toBeInTheDocument();
+			expect(screen.getByText('oidc_get_user_info')).toBeInTheDocument();
 		});
 	});
 
@@ -289,7 +281,7 @@ describe('CreateEdit Modal', () => {
 			await user.click(configureButtons[0]);
 
 			await waitFor(() => {
-				expect(screen.getByText(/role mapping \(advanced\)/i)).toBeInTheDocument();
+				expect(screen.getByText('role_mapping_title')).toBeInTheDocument();
 			});
 		});
 
@@ -304,13 +296,13 @@ describe('CreateEdit Modal', () => {
 				/>,
 			);
 
-			const roleMappingHeader = screen.getByText(/role mapping \(advanced\)/i);
+			const roleMappingHeader = screen.getByText('role_mapping_title');
 			await user.click(roleMappingHeader);
 
 			await waitFor(() => {
-				expect(screen.getByText(/default role/i)).toBeInTheDocument();
+				expect(screen.getByText('role_mapping_default_role')).toBeInTheDocument();
 				expect(
-					screen.getByText(/use role attribute directly/i),
+					screen.getByText('role_mapping_use_role_attribute'),
 				).toBeInTheDocument();
 			});
 		});
@@ -326,13 +318,13 @@ describe('CreateEdit Modal', () => {
 				/>,
 			);
 
-			const roleMappingHeader = screen.getByText(/role mapping \(advanced\)/i);
+			const roleMappingHeader = screen.getByText('role_mapping_title');
 			await user.click(roleMappingHeader);
 
 			await waitFor(() => {
-				expect(screen.getByText(/group to role mappings/i)).toBeInTheDocument();
+				expect(screen.getByText('role_mapping_group_title')).toBeInTheDocument();
 				expect(
-					screen.getByRole('button', { name: /add group mapping/i }),
+					screen.getByRole('button', { name: 'role_mapping_add' }),
 				).toBeInTheDocument();
 			});
 		});
@@ -351,7 +343,7 @@ describe('CreateEdit Modal', () => {
 				/>,
 			);
 
-			const cancelButton = screen.getByRole('button', { name: /cancel/i });
+			const cancelButton = screen.getByRole('button', { name: 'common:cancel' });
 			await user.click(cancelButton);
 
 			expect(mockOnClose).toHaveBeenCalled();

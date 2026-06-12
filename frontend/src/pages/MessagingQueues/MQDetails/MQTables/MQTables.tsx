@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation } from 'react-query';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Skeleton, Table, Typography } from 'antd';
@@ -14,6 +15,7 @@ import { SOMETHING_WENT_WRONG } from 'constants/api';
 import { QueryParams } from 'constants/query';
 import { History } from 'history';
 import { useNotifications } from 'hooks/useNotifications';
+import { TFunction } from 'i18next';
 import useUrlQuery from 'hooks/useUrlQuery';
 import { isEmpty } from 'lodash-es';
 import {
@@ -117,12 +119,17 @@ export function getTableData(
 	return tableData;
 }
 
-const showPaginationItem = (total: number, range: number[]): JSX.Element => (
+const showPaginationItem = (t: TFunction) => (
+	total: number,
+	range: number[],
+): JSX.Element => (
 	<>
 		<Typography.Text className="numbers">
 			{range[0]} &#8212; {range[1]}
 		</Typography.Text>
-		<Typography.Text className="total"> of {total}</Typography.Text>
+		<Typography.Text className="total">
+			{t('pagination_total', { total }).toString()}
+		</Typography.Text>
 	</>
 );
 
@@ -148,6 +155,7 @@ function MessagingQueuesTable({
 	type?: 'Detail' | 'Overview';
 	option?: ProducerLatencyOptions;
 }): JSX.Element {
+	const { t } = useTranslation('messagingQueues');
 	const [columns, setColumns] = useState<any[]>([]);
 	const [tableData, setTableData] = useState<any[]>([]);
 	const { notifications } = useNotifications();
@@ -177,11 +185,11 @@ function MessagingQueuesTable({
 		() =>
 			tableData?.length > INITIAL_PAGE_SIZE && {
 				pageSize: INITIAL_PAGE_SIZE,
-				showTotal: showPaginationItem,
+				showTotal: showPaginationItem(t),
 				showSizeChanger: false,
 				hideOnSinglePage: true,
 			},
-		[tableData],
+		[tableData, t],
 	);
 
 	const handleConsumerDetailsOnError = (error: Error): void => {

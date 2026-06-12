@@ -180,7 +180,7 @@ describe('Summary', () => {
 
 		render(<Summary />);
 
-		expect(screen.queryByText('Proportion View')).not.toBeInTheDocument();
+		expect(screen.queryByText('proportion_view')).not.toBeInTheDocument();
 	});
 
 	it('persists metric details modal state across page refresh', () => {
@@ -194,6 +194,6 @@ describe('Summary', () => {
 
 		render(<Summary />);
 
-		expect(screen.queryByText('Proportion View')).not.toBeInTheDocument();
+		expect(screen.queryByText('proportion_view')).not.toBeInTheDocument();
 	});
 });

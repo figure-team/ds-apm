@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Select, Spin, Typography } from 'antd';
 import { SelectMaxTagPlaceholder } from 'components/MessagingQueues/MQCommon/MQCommon';
@@ -13,6 +14,7 @@ import { useCeleryFilterOptions } from '../useCeleryFilterOptions';
 import './CeleryTaskConfigOptions.styles.scss';
 
 function CeleryTaskConfigOptions(): JSX.Element {
+	const { t } = useTranslation('messagingQueues');
 	const { handleSearch, isFetching, options } =
 		useCeleryFilterOptions('celery.task_name');
 	const history = useHistory();
@@ -24,10 +26,10 @@ function CeleryTaskConfigOptions(): JSX.Element {
 		<div className="celery-task-filters">
 			<div className="celery-filters">
 				<Typography.Text style={{ whiteSpace: 'nowrap' }}>
-					Task Name
+					{t('task_name')}
 				</Typography.Text>
 				<Select
-					placeholder="Task Name"
+					placeholder={t('task_name')}
 					showSearch
 					mode="multiple"
 					options={options}
@@ -40,10 +42,10 @@ function CeleryTaskConfigOptions(): JSX.Element {
 					notFoundContent={
 						isFetching ? (
 							<span>
-								<Spin size="small" /> Loading...
+								<Spin size="small" /> {t('loading')}
 							</span>
 						) : (
-							<span>No Task Name found</span>
+							<span>{t('no_task_name_found')}</span>
 						)
 					}
 					onChange={(value): void => {

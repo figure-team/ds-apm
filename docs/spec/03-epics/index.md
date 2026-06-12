@@ -2,8 +2,8 @@
 id: EPICS-INDEX
 title: DS-APM 에픽 & 스토리 (BMAD)
 type: epics-index
-status: implemented
-updated: 2026-06-08
+status: implemented (+ Epic 7 planned)
+updated: 2026-06-11
 ---
 
 # DS-APM 에픽 & 스토리
@@ -21,14 +21,16 @@ updated: 2026-06-08
 | **Epic 4** | 민감정보 노출 없이 전달받는다 | CF-4 | 1 | UJ-1 | WBS-1.4 | [epic-4-pii-safety.md](epic-4-pii-safety.md) |
 | **Epic 5** | 실패 알림이 유실 없이 재발송된다 | CF-5 | 3 | UJ-2 | WBS-1.5 | [epic-5-reliable-delivery.md](epic-5-reliable-delivery.md) |
 | **Epic 6** | 정책·감사 기반이 갖춰진다 | CF-6 | 3 | UJ-1·2·3 | WBS-1.0 | [epic-6-foundation-audit.md](epic-6-foundation-audit.md) |
+| **Epic 7** | 미등록 예외도 인지·분석·자산화된다 *(planned)* | CF-7 (1차) | 6 | UJ-5 | WBS-1.6 | [epic-7-unknown-exception.md](epic-7-unknown-exception.md) |
 
-> 스토리 21건 = PRD FR 21건과 1:1. 인수 기준 상세(Given/When/Then)는 각 에픽 + [PRD CF feature](../01-prd/index.md) §7.
+> 스토리 27건 = PRD FR 27건과 1:1 — 구현 21건(Epic 1~6, 20 done + 5.3 planned) + 설계 확정 6건(Epic 7, planned). 인수 기준 상세(Given/When/Then)는 각 에픽 + [PRD CF feature](../01-prd/index.md) §7. Epic 7 스토리 번호 7.1은 의도적 결번(FR-CF7.1=후속).
 
 ## 에픽 ↔ WBS ↔ CF 매핑
 
 | Epic (애자일 작업 정의) | WBS (PMI 컴포넌트·일정) | CF (기능) |
 |---|---|---|
 | Epic 1~6 | WBS-1.0~1.5 | CF-1~6 |
+| Epic 7 *(planned)* | WBS-1.6 | CF-7 (1차) |
 
 > 에픽은 *무엇을 사용자 가치로 전달하나*, WBS는 *어떤 컴포넌트를 언제 만드나*. 같은 작업의 두 관점.
 

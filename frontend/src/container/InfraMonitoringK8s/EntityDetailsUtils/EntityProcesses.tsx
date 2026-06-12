@@ -30,7 +30,7 @@ function EntityProcesses(): JSX.Element {
 
 					<div className="infra-container-working-msg">
 						<Space>
-							<img src={broomUrl} alt="broom" width={24} height={24} />
+							<img src={broomUrl} alt={t('broom_alt')} width={24} height={24} />
 							<Text className="infra-container-card-text">{t('working_message')}</Text>
 						</Space>
 					</div>

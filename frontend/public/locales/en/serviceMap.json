@@ -1,0 +1,7 @@
+{
+	"no_service_found": "No Service Found",
+	"loading": "Loading...",
+	"filter_tooltip": "Currently, service map supports filtering of {{keys}} only, in resource attributes",
+	"select_environment": "Select Environment/s",
+	"resource_attributes_filter_placeholder": "Search and Filter based on resource attributes."
+}

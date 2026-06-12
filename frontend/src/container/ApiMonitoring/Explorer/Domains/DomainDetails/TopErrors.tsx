@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { QueryFunctionContext, useQueries, useQuery } from 'react-query';
 import { LoadingOutlined } from '@ant-design/icons';
 import { Spin, Switch, Table, Tooltip, Typography } from 'antd';
@@ -43,6 +44,7 @@ function TopErrors({
 	};
 	initialFilters: IBuilderQuery['filters'];
 }): JSX.Element {
+	const { t } = useTranslation('apiMonitoring');
 	const isDarkMode = useIsDarkMode();
 	const { startTime: minTime, endTime: maxTime } = timeRange;
 
@@ -111,7 +113,9 @@ function TopErrors({
 		cacheTime: 0,
 	});
 
-	const topErrorsColumnsConfig = useMemo(() => getTopErrorsColumnsConfig(), []);
+	const topErrorsColumnsConfig = useMemo(() => getTopErrorsColumnsConfig(t), [
+		t,
+	]);
 
 	const formattedTopErrorsData = useMemo(
 		() =>
@@ -178,9 +182,9 @@ function TopErrors({
 						size="small"
 					/>
 					<span style={{ color: isDarkMode ? 'white' : '#374151', fontSize: '14px' }}>
-						Status Message Exists
+						{t('status_message_exists')}
 					</span>
-					<Tooltip title="When enabled, shows errors that have a status message. When disabled, shows all errors regardless of status message">
+					<Tooltip title={t('tooltip_status_message_exists')}>
 						<Info size={16} color={isDarkMode ? 'white' : '#374151'} />
 					</Tooltip>
 				</div>
@@ -188,12 +192,14 @@ function TopErrors({
 
 			<div className="endpoints-table-container">
 				<div className="endpoints-table-header">
-					{showStatusCodeErrors ? 'Errors with Status Message' : 'All Errors'}{' '}
+					{showStatusCodeErrors
+						? t('header_errors_with_status')
+						: t('header_all_errors')}{' '}
 					<Tooltip
 						title={
 							showStatusCodeErrors
-								? 'Shows errors that have a status message'
-								: 'Shows all errors regardless of status message'
+								? t('tooltip_shows_with_status')
+								: t('tooltip_shows_all')
 						}
 					>
 						<Info size={16} color="white" />
@@ -219,8 +225,8 @@ function TopErrors({
 
 										<Typography.Text className="no-filtered-endpoints-message">
 											{showStatusCodeErrors
-												? 'Please disable "Status Message Exists" toggle to see all errors'
-												: 'This query had no results. Edit your query and try again!'}
+												? t('empty_disable_toggle')
+												: t('query_no_results')}
 										</Typography.Text>
 									</div>
 								</div>

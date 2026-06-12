@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, toast } from '@signozhq/ui';
 import { Form, Modal } from 'antd';
 import { ErrorResponseHandlerV2 } from 'api/ErrorResponseHandlerV2';
@@ -56,6 +57,7 @@ interface CreateOrEditProps {
 
 function CreateOrEdit(props: CreateOrEditProps): JSX.Element {
 	const { isCreate, record, onClose } = props;
+	const { t } = useTranslation(['organizationsettings', 'common']);
 	const [form] = Form.useForm<FormValues>();
 	const [authnProvider, setAuthnProvider] = useState<string>(
 		record?.ssoType || '',
@@ -161,7 +163,7 @@ function CreateOrEdit(props: CreateOrEditProps): JSX.Element {
 				},
 				{
 					onSuccess: () => {
-						toast.success('Domain created successfully');
+						toast.success(t('domain_created_success'));
 						onClose();
 					},
 					onError: handleError,
@@ -188,7 +190,7 @@ function CreateOrEdit(props: CreateOrEditProps): JSX.Element {
 				},
 				{
 					onSuccess: () => {
-						toast.success('Domain updated successfully');
+						toast.success(t('domain_updated_success'));
 						onClose();
 					},
 					onError: handleError,
@@ -207,6 +209,7 @@ function CreateOrEdit(props: CreateOrEditProps): JSX.Element {
 		onClose,
 		record,
 		updateAuthDomain,
+		t,
 	]);
 
 	const onBackHandler = useCallback((): void => {
@@ -243,12 +246,12 @@ function CreateOrEdit(props: CreateOrEditProps): JSX.Element {
 						<section className="action-buttons">
 							{isCreate && (
 								<Button onClick={onBackHandler} variant="solid" color="secondary">
-									Back
+									{t('back')}
 								</Button>
 							)}
 							{!isCreate && (
 								<Button onClick={onClose} variant="solid" color="secondary">
-									Cancel
+									{t('common:cancel')}
 								</Button>
 							)}
 							<Button
@@ -257,7 +260,7 @@ function CreateOrEdit(props: CreateOrEditProps): JSX.Element {
 								color="primary"
 								loading={isCreating || isUpdating}
 							>
-								Save Changes
+								{t('save_changes')}
 							</Button>
 						</section>
 					</div>

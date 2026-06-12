@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button, DrawerWrapper } from '@signozhq/ui';
 
 import { InfraMonitoringEntity } from '../constants';
@@ -17,6 +18,7 @@ function K8sFiltersSidePanel({
 	onClose: () => void;
 	entity: InfraMonitoringEntity;
 }): JSX.Element {
+	const { t } = useTranslation('infraMonitoring');
 	const addColumn = useInfraMonitoringTableColumnsStore(
 		(state) => state.addColumn,
 	);
@@ -28,7 +30,7 @@ function K8sFiltersSidePanel({
 
 	const drawerContent = (
 		<>
-			<div className={styles.columnsTitle}>Added Columns (Click to remove)</div>
+			<div className={styles.columnsTitle}>{t('added_columns')}</div>
 
 			<div className={styles.columnsList}>
 				{columns
@@ -56,7 +58,7 @@ function K8sFiltersSidePanel({
 
 			<div className={styles.horizontalDivider} />
 
-			<div className={styles.columnsTitle}>Other Columns (Click to add)</div>
+			<div className={styles.columnsTitle}>{t('other_columns')}</div>
 
 			<div className={styles.columnsList}>
 				{columns
@@ -88,7 +90,7 @@ function K8sFiltersSidePanel({
 					onClose();
 				}
 			}}
-			title="Columns"
+			title={t('columns')}
 			direction="right"
 			showCloseButton
 			showOverlay={false}

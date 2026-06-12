@@ -6,6 +6,7 @@ import {
 	getTraceLink,
 } from 'container/TracesExplorer/ListView/utils';
 import dayjs from 'dayjs';
+import { TFunction } from 'i18next';
 import { RowData } from 'lib/query/createTableColumnsFromQuery';
 import { BaseAutocompleteData } from 'types/api/queryBuilder/queryAutocompleteResponse';
 
@@ -20,6 +21,7 @@ const keyToLabelMap: Record<string, string> = {
 
 export const getTraceListColumns = (
 	selectedColumns: BaseAutocompleteData[],
+	t: TFunction,
 ): ColumnsType<RowData> => {
 	const columns: ColumnsType<RowData> =
 		selectedColumns.map(({ dataType, key, type }) => ({
@@ -66,7 +68,10 @@ export const getTraceListColumns = (
 
 					return (
 						<BlockLink to={getTraceLink(item)} openInNewTab>
-							<Typography data-testid={key}>{getMs(durationNano)}ms</Typography>
+							<Typography data-testid={key}>
+								{getMs(durationNano)}
+								{t('col_ms').toString()}
+							</Typography>
 						</BlockLink>
 					);
 				}

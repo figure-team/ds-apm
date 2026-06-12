@@ -21,7 +21,7 @@
 	"workspace_title": "워크스페이스",
 	"workspace_subtitle": "워크스페이스 설정을 관리합니다.",
 	"retention_controls": "보존 기간 설정",
-	"license_key_label": "SigNoz 라이선스 키",
+	"license_key_label": "DS-APM 라이선스 키",
 	"copy_license_key": "라이선스 키 복사",
 	"license_key_copied": "라이선스 키가 클립보드에 복사되었습니다.",
 	"callout_not_your_key": "이것은 인제스션 또는 서비스 계정 키가 <0>아닙니다</0>.",

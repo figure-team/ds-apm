@@ -50,7 +50,7 @@ describe('GraphPopover', () => {
 			/>,
 		);
 
-		const button = screen.getByText('View details');
+		const button = screen.getByText('view_details');
 		fireEvent.click(button);
 
 		expect(mockOpenInExpandedView).toHaveBeenCalledTimes(1);

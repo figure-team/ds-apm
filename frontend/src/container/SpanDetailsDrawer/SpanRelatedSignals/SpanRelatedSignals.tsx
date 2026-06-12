@@ -168,10 +168,10 @@ function SpanRelatedSignals({
 
 	const emptyStateConfig = useMemo(
 		() => ({
-			...getEmptyLogsListConfig(() => {}),
+			...getEmptyLogsListConfig(() => {}, t),
 			showClearFiltersButton: false,
 		}),
-		[],
+		[t],
 	);
 
 	return (

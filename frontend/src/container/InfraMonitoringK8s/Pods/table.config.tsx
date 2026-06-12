@@ -1,5 +1,6 @@
 import React from 'react';
 import { TableColumnType as ColumnType, Tooltip } from 'antd';
+import { TFunction } from 'i18next';
 import { Group } from 'lucide-react';
 import { BaseAutocompleteData } from 'types/api/queryBuilder/queryAutocompleteResponse';
 
@@ -128,11 +129,13 @@ export const k8sPodColumns: IEntityColumn[] = [
 	// },
 ];
 
-export const k8sPodColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
+export const k8sPodColumnsConfig = (
+	t: TFunction,
+): ColumnType<K8sRenderedRowData>[] => [
 	{
 		title: (
 			<div className={styles.entityGroupHeader}>
-				<Group size={14} /> POD GROUP
+				<Group size={14} /> {t('col_pod_group').toString()}
 			</div>
 		),
 		dataIndex: 'podGroup',
@@ -142,7 +145,7 @@ export const k8sPodColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		sorter: false,
 	},
 	{
-		title: <div>Pod Name</div>,
+		title: <div>{t('col_pod_name').toString()}</div>,
 		dataIndex: 'podName',
 		key: 'podName',
 		width: 180,
@@ -150,7 +153,7 @@ export const k8sPodColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		sorter: false,
 	},
 	{
-		title: <div>CPU Req Usage (%)</div>,
+		title: <div>{t('col_cpu_req_usage_pct').toString()}</div>,
 		dataIndex: 'cpu_request',
 		key: 'cpu_request',
 		width: 180,
@@ -159,7 +162,7 @@ export const k8sPodColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>CPU Limit Usage (%)</div>,
+		title: <div>{t('col_cpu_limit_usage_pct').toString()}</div>,
 		dataIndex: 'cpu_limit',
 		key: 'cpu_limit',
 		width: 120,
@@ -167,7 +170,7 @@ export const k8sPodColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>CPU Usage (cores)</div>,
+		title: <div>{t('col_cpu_usage_cores').toString()}</div>,
 		dataIndex: 'cpu',
 		key: 'cpu',
 		width: 80,
@@ -175,7 +178,7 @@ export const k8sPodColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Mem Req Usage (%)</div>,
+		title: <div>{t('col_mem_req_usage_pct').toString()}</div>,
 		dataIndex: 'memory_request',
 		key: 'memory_request',
 		width: 120,
@@ -183,7 +186,7 @@ export const k8sPodColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Mem Limit Usage (%)</div>,
+		title: <div>{t('col_mem_limit_usage_pct').toString()}</div>,
 		dataIndex: 'memory_limit',
 		key: 'memory_limit',
 		width: 120,
@@ -191,7 +194,7 @@ export const k8sPodColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Mem Usage (WSS)</div>,
+		title: <div>{t('col_mem_usage_wss').toString()}</div>,
 		dataIndex: 'memory',
 		key: 'memory',
 		width: 120,
@@ -200,7 +203,7 @@ export const k8sPodColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Namespace</div>,
+		title: <div>{t('col_namespace').toString()}</div>,
 		dataIndex: 'namespace',
 		key: 'namespace',
 		width: 100,
@@ -209,7 +212,7 @@ export const k8sPodColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Node</div>,
+		title: <div>{t('col_node').toString()}</div>,
 		dataIndex: 'node',
 		key: 'node',
 		width: 100,
@@ -218,7 +221,7 @@ export const k8sPodColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Cluster</div>,
+		title: <div>{t('col_cluster').toString()}</div>,
 		dataIndex: 'cluster',
 		key: 'cluster',
 		width: 100,

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import * as Sentry from '@sentry/react';
@@ -45,6 +46,7 @@ import './Explorer.styles.scss';
 const ONE_CHART_PER_QUERY_ENABLED_KEY = 'isOneChartPerQueryEnabled';
 
 function Explorer(): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	const {
 		handleRunQuery,
 		stagedQuery,
@@ -307,7 +309,7 @@ function Explorer(): JSX.Element {
 			<div className="metrics-explorer-explore-container">
 				<div className="explore-header">
 					<div className="explore-header-left-actions">
-						<span>1 chart/query</span>
+						<span>{t('one_chart_per_query')}</span>
 						<Tooltip
 							open={disableOneChartPerQuery ? undefined : false}
 							title={oneChartPerQueryDisabledTooltip}

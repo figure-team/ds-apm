@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LoadingOutlined } from '@ant-design/icons';
 import {
 	Spin,
@@ -32,6 +33,7 @@ function MetricsTable({
 	queryFilterExpression,
 	onFilterChange,
 }: MetricsTableProps): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	const handleTableChange: TableProps<MetricsListItemRowData>['onChange'] =
 		useCallback(
 			(
@@ -67,10 +69,10 @@ function MetricsTable({
 		<div className="metrics-table-container">
 			<div className="metrics-table-title" data-testid="metrics-table-title">
 				<Typography.Title level={4} className="metrics-table-title">
-					List View
+					{t('list_view')}
 				</Typography.Title>
 				<Tooltip
-					title="The table displays all metrics in the selected time range. Each row represents a unique metric, and its metric name, and metadata like description, type, unit, and samples/timeseries cardinality observed in the selected time range."
+					title={t('table_tooltip')}
 					placement="right"
 				>
 					<Info size={16} />
@@ -90,7 +92,7 @@ function MetricsTable({
 						),
 					}}
 					dataSource={data}
-					columns={getMetricsTableColumns(queryFilterExpression, onFilterChange)}
+					columns={getMetricsTableColumns(queryFilterExpression, onFilterChange, t)}
 					locale={{
 						emptyText: isLoading ? null : (
 							<div
@@ -103,7 +105,7 @@ function MetricsTable({
 									className="empty-state-svg"
 								/>
 								<Typography.Text className="no-metrics-message">
-									This query had no results. Edit your query and try again!
+									{t('query_no_results')}
 								</Typography.Text>
 							</div>
 						),

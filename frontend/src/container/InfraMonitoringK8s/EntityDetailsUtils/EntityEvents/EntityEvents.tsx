@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from 'react-query';
 import { Color } from '@signozhq/design-tokens';
 import { Button, Table, TableColumnsType } from 'antd';
@@ -83,6 +84,7 @@ export default function Events({
 	category,
 	queryKey,
 }: IEntityEventsProps): JSX.Element {
+	const { t } = useTranslation('infraMonitoring');
 	const { currentQuery } = useQueryBuilder();
 
 	const [formattedEntityEvents, setFormattedEntityEvents] = useState<
@@ -310,7 +312,7 @@ export default function Events({
 						disabled={page === 1 || isFetching || isLoading}
 					>
 						{!isFetching && <ChevronLeft size={14} />}
-						Prev
+						{t('prev')}
 					</Button>
 
 					<Button
@@ -319,7 +321,7 @@ export default function Events({
 						onClick={handleNext}
 						disabled={hasReachedEndOfEvents || isFetching || isLoading}
 					>
-						Next
+						{t('next')}
 						{!isFetching && <ChevronRight size={14} />}
 					</Button>
 

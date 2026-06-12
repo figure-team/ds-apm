@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { PlusOutlined } from '@ant-design/icons';
 import { Trash2, X } from '@signozhq/icons';
 import { Button, toast } from '@signozhq/ui';
@@ -33,6 +34,7 @@ export const SSOType = new Map<string, string>([
 ]);
 
 function AuthDomain(): JSX.Element {
+	const { t } = useTranslation(['organizationsettings', 'common']);
 	const [record, setRecord] = useState<AuthtypesGettableAuthDomainDTO>();
 	const [addDomain, setAddDomain] = useState<boolean>(false);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -74,7 +76,7 @@ function AuthDomain(): JSX.Element {
 			{ pathParams: { id: activeDomain.id } },
 			{
 				onSuccess: () => {
-					toast.success('Domain deleted successfully');
+					toast.success(t('domain_deleted_success'));
 					refetchAuthDomainListResponse();
 					hideDeleteModal();
 				},
@@ -94,6 +96,7 @@ function AuthDomain(): JSX.Element {
 
 		refetchAuthDomainListResponse,
 		showErrorModal,
+		t,
 	]);
 
 	const formattedError = useMemo(() => {
@@ -113,14 +116,14 @@ function AuthDomain(): JSX.Element {
 	const columns: ColumnsType<AuthtypesGettableAuthDomainDTO> = useMemo(
 		() => [
 			{
-				title: 'Domain',
+				title: t('domain_column_domain'),
 				dataIndex: 'name',
 				key: 'name',
 				width: 100,
 				render: (val): JSX.Element => <span>{val}</span>,
 			},
 			{
-				title: 'Enforce SSO',
+				title: t('domain_column_enforce_sso'),
 				dataIndex: 'ssoEnabled',
 				key: 'ssoEnabled',
 				width: 80,
@@ -132,14 +135,14 @@ function AuthDomain(): JSX.Element {
 				),
 			},
 			{
-				title: 'IDP Initiated SSO URL',
+				title: t('domain_column_idp_sso_url'),
 				dataIndex: 'relayState',
 				key: 'relayState',
 				width: 80,
 				render: (_, record: AuthtypesGettableAuthDomainDTO): JSX.Element => {
 					const relayPath = record.authNProviderInfo?.relayStatePath;
 					if (!relayPath) {
-						return <span className="auth-domain-list-na">N/A</span>;
+						return <span className="auth-domain-list-na">{t('domain_na')}</span>;
 					}
 
 					const href = getAbsoluteUrl(`/${relayPath}`);
@@ -147,7 +150,7 @@ function AuthDomain(): JSX.Element {
 				},
 			},
 			{
-				title: 'Action',
+				title: t('domain_column_action'),
 				dataIndex: 'action',
 				key: 'action',
 				width: 100,
@@ -158,26 +161,28 @@ function AuthDomain(): JSX.Element {
 							onClick={(): void => setRecord(record)}
 							variant="link"
 						>
-							Configure {SSOType.get(record.ssoType || '')}
+							{t('domain_configure_provider', {
+								provider: SSOType.get(record.ssoType || ''),
+							})}
 						</Button>
 						<Button
 							className="auth-domain-list-action-link delete"
 							onClick={(): void => showDeleteModal(record)}
 							variant="link"
 						>
-							Delete
+							{t('domain_delete')}
 						</Button>
 					</section>
 				),
 			},
 		],
-		[showDeleteModal],
+		[showDeleteModal, t],
 	);
 
 	return (
 		<div className="auth-domain">
 			<section className="auth-domain-header">
-				<h3 className="auth-domain-title">Authenticated Domains</h3>
+				<h3 className="auth-domain-title">{t('authenticated_domains')}</h3>
 				<Button
 					prefix={<PlusOutlined />}
 					onClick={(): void => {
@@ -187,7 +192,7 @@ function AuthDomain(): JSX.Element {
 					size="sm"
 					color="primary"
 				>
-					Add Domain
+					{t('add_domain')}
 				</Button>
 			</section>
 			{formattedError && <ErrorContent error={formattedError} />}
@@ -217,7 +222,7 @@ function AuthDomain(): JSX.Element {
 
 			<Modal
 				className="delete-ingestion-key-modal"
-				title={<span className="title">Delete Domain</span>}
+				title={<span className="title">{t('delete_domain')}</span>}
 				open={isDeleteModalOpen}
 				closable
 				onCancel={hideDeleteModal}
@@ -229,7 +234,7 @@ function AuthDomain(): JSX.Element {
 						className="cancel-btn"
 						prefix={<X size={16} />}
 					>
-						Cancel
+						{t('common:cancel')}
 					</Button>,
 					<Button
 						key="submit"
@@ -238,13 +243,17 @@ function AuthDomain(): JSX.Element {
 						className="delete-btn"
 						loading={isLoading}
 					>
-						Delete Domain
+						{t('delete_domain')}
 					</Button>,
 				]}
 			>
 				<p className="delete-text">
-					Are you sure you want to delete the domain{' '}
-					<strong>{activeDomain?.name}</strong>? This action cannot be undone.
+					<Trans
+						t={t}
+						i18nKey="domain_delete_confirm"
+						values={{ name: activeDomain?.name }}
+						components={[<strong key="0" />]}
+					/>
 				</p>
 			</Modal>
 		</div>

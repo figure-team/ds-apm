@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { UseQueryResult } from 'react-query';
 import { SuccessResponse } from 'types/api';
 
@@ -12,6 +13,7 @@ function EndPointDetailsZeroState({
 	setSelectedEndPointName: (endPointName: string) => void;
 	endPointDropDownDataQuery: UseQueryResult<SuccessResponse<any>>;
 }): JSX.Element {
+	const { t } = useTranslation('apiMonitoring');
 	return (
 		<div className="end-point-details-zero-state-wrapper">
 			<div className="end-point-details-zero-state-content">
@@ -24,8 +26,8 @@ function EndPointDetailsZeroState({
 				/>
 				<div className="end-point-details-zero-state-content-wrapper">
 					<div className="end-point-details-zero-state-text-content">
-						<div className="title">No endpoint selected yet</div>
-						<div className="description">Select an endpoint to see the details</div>
+						<div className="title">{t('no_endpoint_selected')}</div>
+						<div className="description">{t('select_endpoint_to_see')}</div>
 					</div>
 					<EndPointsDropDown
 						setSelectedEndPointName={setSelectedEndPointName}

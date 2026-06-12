@@ -1,4 +1,5 @@
 import ROUTES from 'constants/routes';
+import { TFunction } from 'i18next';
 
 import { CustomTimeType, Option, Time, TimeFrame } from './types';
 
@@ -79,6 +80,40 @@ export const FixedDurationSuggestionOptions: Option[] = [
 	{ value: '2months', label: 'Last 2 months' },
 	{ value: '1d', label: 'today' },
 ];
+
+// Maps the English option labels above to i18n keys in the `common` namespace.
+// Option values stay English everywhere (URL params, redux state, lookups);
+// labels are translated only at display time via translateTimeRangeLabel.
+const TIME_RANGE_LABEL_I18N_KEYS: Record<string, string> = {
+	'Last 5 minutes': 'time_range.last_5_minutes',
+	'Last 15 minutes': 'time_range.last_15_minutes',
+	'Last 30 minutes': 'time_range.last_30_minutes',
+	'Last 45 mins': 'time_range.last_45_mins',
+	'Last 1 hour': 'time_range.last_1_hour',
+	'Last 3 hours': 'time_range.last_3_hours',
+	'Last 6 hours': 'time_range.last_6_hours',
+	'Last 6 hour': 'time_range.last_6_hours',
+	'Last 12 hours': 'time_range.last_12_hours',
+	'Last 1 day': 'time_range.last_1_day',
+	'Last 3 days': 'time_range.last_3_days',
+	'Last 4 days': 'time_range.last_4_days',
+	'Last 10 days': 'time_range.last_10_days',
+	'Last 1 week': 'time_range.last_1_week',
+	'Last 2 weeks': 'time_range.last_2_weeks',
+	'Last 6 weeks': 'time_range.last_6_weeks',
+	'Last 1 month': 'time_range.last_1_month',
+	'Last 2 months': 'time_range.last_2_months',
+	today: 'time_range.today',
+	'Custom Date Range': 'time_range.custom_date_range',
+};
+
+export const translateTimeRangeLabel = (
+	t: TFunction,
+	label: string,
+): string => {
+	const key = TIME_RANGE_LABEL_I18N_KEYS[label];
+	return key ? t(key).toString() : label;
+};
 
 export const convertOldTimeToNewValidCustomTimeFormat = (
 	time: string,

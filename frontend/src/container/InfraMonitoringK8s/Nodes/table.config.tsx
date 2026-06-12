@@ -1,4 +1,5 @@
 import { TableColumnType as ColumnType, Tooltip } from 'antd';
+import { TFunction } from 'i18next';
 import { Group } from 'lucide-react';
 import { BaseAutocompleteData } from 'types/api/queryBuilder/queryAutocompleteResponse';
 
@@ -90,11 +91,13 @@ export const getK8sNodesListQuery = (): K8sNodesListPayload => ({
 	orderBy: { columnName: 'cpu', order: 'desc' },
 });
 
-export const k8sNodesColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
+export const k8sNodesColumnsConfig = (
+	t: TFunction,
+): ColumnType<K8sRenderedRowData>[] => [
 	{
 		title: (
 			<div className={styles.entityGroupHeader}>
-				<Group size={14} /> NODE GROUP
+				<Group size={14} /> {t('col_node_group').toString()}
 			</div>
 		),
 		dataIndex: 'nodeGroup',
@@ -105,7 +108,7 @@ export const k8sNodesColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		sorter: false,
 	},
 	{
-		title: <div>Node Name</div>,
+		title: <div>{t('col_node_name').toString()}</div>,
 		dataIndex: 'nodeName',
 		key: 'nodeName',
 		ellipsis: true,
@@ -114,7 +117,7 @@ export const k8sNodesColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Cluster Name</div>,
+		title: <div>{t('col_cluster_name').toString()}</div>,
 		dataIndex: 'clusterName',
 		key: 'clusterName',
 		ellipsis: true,
@@ -123,7 +126,7 @@ export const k8sNodesColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>CPU Usage (cores)</div>,
+		title: <div>{t('col_cpu_usage_cores').toString()}</div>,
 		dataIndex: 'cpu',
 		key: 'cpu',
 		width: 80,
@@ -131,7 +134,7 @@ export const k8sNodesColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>CPU Alloc (cores)</div>,
+		title: <div>{t('col_cpu_alloc_cores').toString()}</div>,
 		dataIndex: 'cpu_allocatable',
 		key: 'cpu_allocatable',
 		width: 80,
@@ -139,7 +142,7 @@ export const k8sNodesColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Memory Usage (WSS)</div>,
+		title: <div>{t('col_memory_usage_wss').toString()}</div>,
 		dataIndex: 'memory',
 		key: 'memory',
 		width: 80,
@@ -147,7 +150,7 @@ export const k8sNodesColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Memory Allocatable</div>,
+		title: <div>{t('col_memory_allocatable').toString()}</div>,
 		dataIndex: 'memory_allocatable',
 		key: 'memory_allocatable',
 		width: 80,

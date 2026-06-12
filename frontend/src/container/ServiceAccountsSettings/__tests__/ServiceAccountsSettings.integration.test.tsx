@@ -114,7 +114,7 @@ describe('ServiceAccountsSettings (integration)', () => {
 		await screen.findByText('CI Bot');
 		expect(screen.getByText('Monitoring Agent')).toBeInTheDocument();
 		expect(screen.getByText('legacy@signoz.io')).toBeInTheDocument();
-		expect(screen.getAllByText('ACTIVE')).toHaveLength(2);
+		expect(screen.getAllByText('status_active')).toHaveLength(2);
 		expect(screen.getByText('DISABLED')).toBeInTheDocument();
 	});
 
@@ -129,9 +129,9 @@ describe('ServiceAccountsSettings (integration)', () => {
 
 		await screen.findByText('CI Bot');
 
-		await user.click(screen.getByRole('button', { name: /All accounts/i }));
+		await user.click(screen.getByRole('button', { name: 'filter_all' }));
 
-		const activeOption = await screen.findByText(/Active ⎯/i);
+		const activeOption = await screen.findByText('filter_active');
 		await user.click(activeOption);
 
 		await screen.findByText('CI Bot');
@@ -150,7 +150,7 @@ describe('ServiceAccountsSettings (integration)', () => {
 		await screen.findByText('CI Bot');
 
 		await user.type(
-			screen.getByPlaceholderText(/Search by name or email/i),
+			screen.getByPlaceholderText('search_placeholder'),
 			'legacy',
 		);
 
@@ -175,7 +175,7 @@ describe('ServiceAccountsSettings (integration)', () => {
 		);
 
 		expect(
-			await screen.findByRole('button', { name: /Delete Service Account/i }),
+			await screen.findByRole('button', { name: 'delete_service_account' }),
 		).toBeInTheDocument();
 	});
 
@@ -210,7 +210,7 @@ describe('ServiceAccountsSettings (integration)', () => {
 		await user.clear(nameInput);
 		await user.type(nameInput, 'CI Bot Updated');
 
-		await user.click(screen.getByRole('button', { name: /Save Changes/i }));
+		await user.click(screen.getByRole('button', { name: 'save_changes' }));
 
 		await screen.findByDisplayValue('CI Bot Updated');
 		await waitFor(() => {
@@ -230,11 +230,13 @@ describe('ServiceAccountsSettings (integration)', () => {
 		await screen.findByText('CI Bot');
 
 		await user.click(
-			screen.getByRole('button', { name: /New Service Account/i }),
+			screen.getByRole('button', { name: 'new_service_account' }),
 		);
 
-		await screen.findByRole('dialog', { name: /New Service Account/i });
-		expect(screen.getByPlaceholderText('Enter a name')).toBeInTheDocument();
+		await screen.findByRole('dialog', { name: 'create_modal_title' });
+		expect(
+			screen.getByPlaceholderText('create_name_placeholder'),
+		).toBeInTheDocument();
 	});
 
 	it('shows error state when API fails', async () => {

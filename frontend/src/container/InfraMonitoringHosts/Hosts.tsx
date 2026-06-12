@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { VerticalAlignTopOutlined } from '@ant-design/icons';
 import { Button, Tooltip, Typography } from 'antd';
 import logEvent from 'api/common/logEvent';
@@ -41,6 +42,7 @@ import { getHostsQuickFiltersConfig } from './utils';
 import styles from './InfraMonitoringHosts.module.scss';
 
 function Hosts(): JSX.Element {
+	const { t } = useTranslation('infraMonitoring');
 	const [showFilters, setShowFilters] = useState(true);
 	const [, setCurrentPage] = useInfraMonitoringCurrentPage();
 	const [urlFilters, setUrlFilters] = useInfraMonitoringFilters();
@@ -146,8 +148,8 @@ function Hosts(): JSX.Element {
 					{showFilters && (
 						<div className={styles.quickFiltersContainer}>
 							<div className={styles.quickFiltersContainerHeader}>
-								<Typography.Text>Filters</Typography.Text>
-								<Tooltip title="Collapse Filters">
+								<Typography.Text>{t('filters')}</Typography.Text>
+								<Tooltip title={t('collapse_filters')}>
 									<VerticalAlignTopOutlined
 										rotate={270}
 										onClick={handleFilterVisibilityChange}
@@ -171,7 +173,7 @@ function Hosts(): JSX.Element {
 							controlListPrefix={controlListPrefix}
 							entity={InfraMonitoringEntity.HOSTS}
 							tableColumnsDefinitions={hostColumns}
-							tableColumns={hostColumnsConfig}
+							tableColumns={hostColumnsConfig(t)}
 							fetchListData={fetchListData}
 							renderRowData={hostRenderRowData}
 							eventCategory={InfraMonitoringEvents.HostEntity}

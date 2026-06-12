@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@signozhq/ui';
 import { Select } from 'antd';
 import logEvent from 'api/common/logEvent';
@@ -38,6 +39,7 @@ function K8sHeader({
 	entity,
 	showAutoRefresh,
 }: K8sHeaderProps): JSX.Element {
+	const { t } = useTranslation('infraMonitoring');
 	const [isFiltersSidePanelOpen, setIsFiltersSidePanelOpen] = useState(false);
 	const [urlFilters, setUrlFilters] = useInfraMonitoringFilters();
 
@@ -179,7 +181,7 @@ function K8sHeader({
 				</div>
 
 				<div className={styles.k8SAttributeSearchContainer}>
-					<div className={styles.groupByLabel}> Group by </div>
+					<div className={styles.groupByLabel}> {t('group_by')} </div>
 					<Select
 						className={styles.groupBySelect}
 						loading={isLoadingGroupByFilters}
@@ -187,7 +189,7 @@ function K8sHeader({
 						value={groupBy}
 						allowClear
 						maxTagCount="responsive"
-						placeholder="Search for attribute"
+						placeholder={t('search_for_attribute')}
 						style={{ width: '100%' }}
 						options={groupByOptions}
 						onChange={handleGroupByChange}

@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueries } from 'react-query';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
@@ -32,6 +33,7 @@ export default function ValueInfo({
 }: {
 	filters?: TagFilterItem[];
 }): JSX.Element {
+	const { t } = useTranslation('messagingQueues');
 	const { maxTime, minTime } = useSelector<AppState, GlobalReducer>(
 		(state) => state.globalTime,
 	);
@@ -143,7 +145,7 @@ export default function ValueInfo({
 		<Card className="value-info-card">
 			<Row gutter={16}>
 				<Col span={8} className="metric-column">
-					<div className="metric-title">Request Rate</div>
+					<div className="metric-title">{t('request_rate')}</div>
 					<div className="metric-value-container">
 						<div
 							className={`metric-value ${getColorBasedOnValue(requestRate)} ${
@@ -174,11 +176,11 @@ export default function ValueInfo({
 							});
 						}}
 					>
-						View Traces
+						{t('view_traces')}
 					</Button>
 				</Col>
 				<Col span={8} className="metric-column">
-					<div className="metric-title">Error Rate</div>
+					<div className="metric-title">{t('error_rate')}</div>
 					<div className="metric-value-container">
 						<div
 							className={`metric-value ${getColorForErrorRate(errorRate)} ${
@@ -222,11 +224,11 @@ export default function ValueInfo({
 							});
 						}}
 					>
-						View Traces
+						{t('view_traces')}
 					</Button>
 				</Col>
 				<Col span={8} className="metric-column">
-					<div className="metric-title">Average Latency</div>
+					<div className="metric-title">{t('avg_latency')}</div>
 					<div className="metric-value-container">
 						<div
 							className={`metric-value ${getColorForLatency(avgLatencyInMs)} ${
@@ -257,7 +259,7 @@ export default function ValueInfo({
 							});
 						}}
 					>
-						View Traces
+						{t('view_traces')}
 					</Button>
 				</Col>
 			</Row>

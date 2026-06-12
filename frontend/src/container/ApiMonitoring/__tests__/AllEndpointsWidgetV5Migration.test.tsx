@@ -18,6 +18,10 @@ import { IBuilderQuery } from 'types/api/queryBuilder/queryBuilderData';
 
 import { SPAN_ATTRIBUTES } from '../Explorer/Domains/DomainDetails/constants';
 
+// i18n is not loaded in unit tests; the t-injected widget builder only needs a
+// stub that echoes the key back.
+const t = ((key: string): string => key) as any;
+
 describe('AllEndpointsWidget - V5 Migration Validation', () => {
 	const mockDomainName = 'api.example.com';
 	const emptyFilters: IBuilderQuery['filters'] = {
@@ -29,6 +33,7 @@ describe('AllEndpointsWidget - V5 Migration Validation', () => {
 	describe('1. V5 Format Migration - All Four Queries', () => {
 		it('all queries use filter.expression format (not filters.items)', () => {
 			const widget = getAllEndpointsWidgetData(
+				t,
 				emptyGroupBy,
 				mockDomainName,
 				emptyFilters,
@@ -51,6 +56,7 @@ describe('AllEndpointsWidget - V5 Migration Validation', () => {
 
 		it('all queries use aggregations array format (not aggregateAttribute)', () => {
 			const widget = getAllEndpointsWidgetData(
+				t,
 				emptyGroupBy,
 				mockDomainName,
 				emptyFilters,
@@ -85,6 +91,7 @@ describe('AllEndpointsWidget - V5 Migration Validation', () => {
 
 		it('all queries have correct base filter expressions', () => {
 			const widget = getAllEndpointsWidgetData(
+				t,
 				emptyGroupBy,
 				mockDomainName,
 				emptyFilters,
@@ -115,6 +122,7 @@ describe('AllEndpointsWidget - V5 Migration Validation', () => {
 	describe('2. GroupBy Structure', () => {
 		it(`default groupBy includes ${SPAN_ATTRIBUTES.HTTP_URL} with type attribute`, () => {
 			const widget = getAllEndpointsWidgetData(
+				t,
 				emptyGroupBy,
 				mockDomainName,
 				emptyFilters,
@@ -151,6 +159,7 @@ describe('AllEndpointsWidget - V5 Migration Validation', () => {
 			];
 
 			const widget = getAllEndpointsWidgetData(
+				t,
 				customGroupBy,
 				mockDomainName,
 				emptyFilters,
@@ -183,6 +192,7 @@ describe('AllEndpointsWidget - V5 Migration Validation', () => {
 	describe('3. Query-Specific Validations', () => {
 		it('query D has has_error filter and is disabled', () => {
 			const widget = getAllEndpointsWidgetData(
+				t,
 				emptyGroupBy,
 				mockDomainName,
 				emptyFilters,

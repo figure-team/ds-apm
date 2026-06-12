@@ -243,25 +243,32 @@ export enum MessagingQueuesViewTypeOptions {
 	MetricPage = 'metricPage',
 }
 
+// label stays English — it is sent to analytics (logEvent); i18nKey is the
+// messagingQueues-namespace key used when the label is displayed in the UI.
 export const MessagingQueuesViewType = {
 	consumerLag: {
 		label: 'Consumer Lag view',
+		i18nKey: 'view_consumer_lag',
 		value: MessagingQueuesViewTypeOptions.ConsumerLag,
 	},
 	partitionLatency: {
 		label: 'Partition Latency view',
+		i18nKey: 'view_partition_latency',
 		value: MessagingQueuesViewTypeOptions.PartitionLatency,
 	},
 	producerLatency: {
 		label: 'Producer Latency view',
+		i18nKey: 'view_producer_latency',
 		value: MessagingQueuesViewTypeOptions.ProducerLatency,
 	},
 	dropRate: {
 		label: 'Drop Rate view',
+		i18nKey: 'view_drop_rate',
 		value: MessagingQueuesViewTypeOptions.DropRate,
 	},
 	metricPage: {
 		label: 'Metric view',
+		i18nKey: 'view_metric',
 		value: MessagingQueuesViewTypeOptions.MetricPage,
 	},
 };

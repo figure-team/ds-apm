@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Card, Typography } from 'antd';
 import { ArrowRight } from 'lucide-react';
 
@@ -10,6 +11,7 @@ function GraphPopover({
 	popoverRef,
 	openInExpandedView,
 }: GraphPopoverProps): JSX.Element | null {
+	const { t } = useTranslation('metricsExplorer');
 	const { x, y, value, timestamp, timeSeries } = options || {
 		x: 0,
 		y: 0,
@@ -59,7 +61,7 @@ function GraphPopover({
 				</div>
 				<div className="inspect-graph-popover-button-row">
 					<Button size="small" type="primary" onClick={openInExpandedView}>
-						<Typography.Text>View details</Typography.Text>
+						<Typography.Text>{t('view_details')}</Typography.Text>
 						<ArrowRight size={10} />
 					</Button>
 				</div>

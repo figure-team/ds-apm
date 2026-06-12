@@ -20,7 +20,7 @@ describe('Stepper', () => {
 		);
 
 		expect(
-			screen.getByText('👋 Hello, welcome to the Metrics Inspector'),
+			screen.getByText('welcome_inspector'),
 		).toBeInTheDocument();
 	});
 
@@ -32,7 +32,7 @@ describe('Stepper', () => {
 			/>,
 		);
 
-		const temporalStep = screen.getByText(/First, align the data by selecting a/);
+		const temporalStep = screen.getByText(/first_align_select/);
 		expect(temporalStep.parentElement).toHaveClass('whats-next-checklist-item');
 	});
 
@@ -44,7 +44,7 @@ describe('Stepper', () => {
 			/>,
 		);
 
-		const temporalStep = screen.getByText(/First, align the data by selecting a/);
+		const temporalStep = screen.getByText(/first_align_select/);
 		expect(temporalStep.parentElement).toHaveClass('completed-checklist-item');
 	});
 

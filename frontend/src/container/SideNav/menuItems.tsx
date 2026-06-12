@@ -426,12 +426,14 @@ export const settingsNavSections: SettingsNavSection[] = [
 	},
 ];
 
-export const helpSupportDropdownMenuItems: SidebarItem[] = [
+export const getHelpSupportDropdownMenuItems = (
+	t: TFunction,
+): SidebarItem[] => [
 	{
 		key: 'documentation',
 		label: (
 			<div className="nav-item-label-container">
-				<span>Documentation</span>
+				<span>{t('helpSupport:documentation').toString()}</span>
 				<ArrowUpRight size={14} />
 			</div>
 		),
@@ -444,7 +446,7 @@ export const helpSupportDropdownMenuItems: SidebarItem[] = [
 		key: 'github',
 		label: (
 			<div className="nav-item-label-container">
-				<span>GitHub</span>
+				<span>{t('helpSupport:github').toString()}</span>
 				<ArrowUpRight size={14} />
 			</div>
 		),
@@ -458,7 +460,7 @@ export const helpSupportDropdownMenuItems: SidebarItem[] = [
 		key: 'slack',
 		label: (
 			<div className="nav-item-label-container">
-				<span>Community Slack</span>
+				<span>{t('helpSupport:community_slack').toString()}</span>
 				<ArrowUpRight size={14} />
 			</div>
 		),
@@ -469,13 +471,13 @@ export const helpSupportDropdownMenuItems: SidebarItem[] = [
 	},
 	{
 		key: 'chat-support',
-		label: 'Chat with Support',
+		label: t('helpSupport:chat_with_support').toString(),
 		icon: <MessageSquareText size={14} />,
 		itemKey: 'chat-support',
 	},
 	{
 		key: 'invite-collaborators',
-		label: 'Invite a Team Member',
+		label: t('helpSupport:invite_team_member').toString(),
 		icon: <Plus size={14} />,
 		itemKey: 'invite-collaborators',
 	},

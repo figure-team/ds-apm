@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Menu, Popover, Tooltip } from 'antd';
 import { MetrictypesTypeDTO } from 'api/generated/services/sigNoz.schemas';
 import { convertFiltersToExpression } from 'components/QueryBuilderV2/utils';
@@ -14,6 +15,7 @@ function MetricTypeSearch({
 	queryFilters: TagFilter;
 	onFilterChange: (expression: string) => void;
 }): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
 	const menuItems = useMemo(
@@ -83,7 +85,7 @@ function MetricTypeSearch({
 			open={isPopoverOpen}
 			onOpenChange={(val): void => setIsPopoverOpen(val)}
 		>
-			<Tooltip title="Filter by metric type">
+			<Tooltip title={t('filter_by_metric_type')}>
 				<Button type="text" shape="circle" icon={<Search size={14} />} />
 			</Tooltip>
 		</Popover>

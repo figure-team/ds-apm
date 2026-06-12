@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { Color } from '@signozhq/design-tokens';
@@ -31,6 +32,7 @@ function MetricDetails({
 	metricName,
 	openInspectModal,
 }: MetricDetailsProps): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	const isDarkMode = useIsDarkMode();
 	const { handleExplorerTabChange } = useHandleExplorerTabChange();
 	const { maxTime, minTime } = useSelector<AppState, GlobalReducer>(
@@ -147,13 +149,13 @@ function MetricDetails({
 							disabled={isActionButtonDisabled}
 							data-testid="open-in-explorer-button"
 						>
-							Open in Explorer
+							{t('open_in_explorer')}
 						</Button>
 						{/* Show the inspect button if the metric type is GAUGE */}
 						{showInspectFeature && openInspectModal && (
 							<Button
 								className="inspect-metrics-button"
-								aria-label="Inspect Metric"
+								aria-label={t('inspect_metric')}
 								disabled={isActionButtonDisabled}
 								icon={<Crosshair size={18} />}
 								onClick={(): void => {

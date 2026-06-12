@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation } from 'react-query';
 import { useLocation } from 'react-router-dom';
 import { Button, Modal, Tooltip, Typography } from 'antd';
@@ -38,6 +39,7 @@ function LaunchChatSupport({
 	onHoverText = '',
 	chatMessageDisabled = false,
 }: LaunchChatSupportProps): JSX.Element | null {
+	const { t } = useTranslation(['helpSupport', 'common']);
 	const { isCloudUser: isCloudUserVal } = useGetTenantLicense();
 	const { notifications } = useNotifications();
 	const {
@@ -171,14 +173,16 @@ function LaunchChatSupport({
 					onClick={handleFacingIssuesClick}
 					icon={<HelpCircle size={14} />}
 				>
-					{buttonText || 'Facing issues?'}
+					{buttonText || t('helpSupport:facing_issues')}
 				</Button>
 			</Tooltip>
 
 			{/* Add Credit Card Modal */}
 			<Modal
 				className="add-credit-card-modal"
-				title={<span className="title">Add Credit Card for Chat Support</span>}
+				title={
+					<span className="title">{t('helpSupport:add_credit_card_title')}</span>
+				}
 				open={isAddCreditCardModalOpen}
 				closable
 				onCancel={(): void => setIsAddCreditCardModalOpen(false)}
@@ -190,7 +194,7 @@ function LaunchChatSupport({
 						className="cancel-btn"
 						icon={<X size={16} />}
 					>
-						Cancel
+						{t('common:cancel')}
 					</Button>,
 					<Button
 						key="submit"
@@ -202,13 +206,14 @@ function LaunchChatSupport({
 						onClick={handleAddCreditCard}
 						className="add-credit-card-btn"
 					>
-						Add Credit Card
+						{t('helpSupport:add_credit_card_btn')}
 					</Button>,
 				]}
 			>
 				<Typography.Text className="add-credit-card-text">
-					You&apos;re currently on <span className="highlight-text">Trial plan</span>
-					. Add a credit card to access SigNoz chat support to your workspace.
+					{t('helpSupport:credit_card_text_before')}
+					<span className="highlight-text">{t('helpSupport:trial_plan')}</span>
+					{t('helpSupport:credit_card_text_after')}
 				</Typography.Text>
 			</Modal>
 		</div>

@@ -74,8 +74,8 @@ import { routeConfig } from './config';
 import { getQueryString } from './helper';
 import {
 	defaultMoreMenuItems,
+	getHelpSupportDropdownMenuItems,
 	getUserSettingsDropdownMenuItems,
-	helpSupportDropdownMenuItems as DefaultHelpSupportDropdownMenuItems,
 	helpSupportMenuItem,
 	primaryMenuItems,
 } from './menuItems';
@@ -143,7 +143,7 @@ function SortableFilter({ item }: { item: SidebarItem }): JSX.Element {
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
-	const { t } = useTranslation(['routes', 'settings']);
+	const { t } = useTranslation(['routes', 'settings', 'helpSupport']);
 	const { openCmdK } = useCmdK();
 	const { pathname, search } = useLocation();
 	const { currentVersion, latestVersion, isCurrentVersionError } = useSelector<
@@ -174,8 +174,8 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 	);
 
 	const [helpSupportDropdownMenuItems, setHelpSupportDropdownMenuItems] =
-		useState<(SidebarItem | DropdownSeparator)[]>(
-			DefaultHelpSupportDropdownMenuItems,
+		useState<(SidebarItem | DropdownSeparator)[]>(() =>
+			getHelpSupportDropdownMenuItems(t),
 		);
 
 	const [tempPinnedMenuItems, setTempPinnedMenuItems] = useState<SidebarItem[]>(
@@ -586,7 +586,7 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 							key: changelogKey,
 							label: (
 								<div className="nav-item-label-container">
-									<span>{CHANGELOG_LABEL}</span>
+									<span>{t('helpSupport:full_changelog')}</span>
 									<ArrowUpRight size={14} />
 								</div>
 							),
@@ -605,14 +605,14 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 					},
 					{
 						type: 'group',
-						label: "WHAT'S NEW",
+						label: t('helpSupport:whats_new'),
 					},
 					...dropdownItems,
 					{
 						key: changelogKey,
 						label: (
 							<div className="nav-item-label-container">
-								<span>{CHANGELOG_LABEL}</span>
+								<span>{t('helpSupport:full_changelog')}</span>
 								<ArrowUpRight size={14} />
 							</div>
 						),
@@ -1204,7 +1204,9 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 										<div className="nav-item-data" data-testid="help-support-nav-item">
 											<div className="nav-item-icon">{helpSupportMenuItem.icon}</div>
 
-											<div className="nav-item-label">{helpSupportMenuItem.label}</div>
+											<div className="nav-item-label">
+												{t('helpSupport:help_support')}
+											</div>
 										</div>
 									</div>
 								</Dropdown>

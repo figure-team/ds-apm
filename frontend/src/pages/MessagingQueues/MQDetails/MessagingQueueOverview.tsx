@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -78,6 +79,7 @@ function MessagingQueueOverview({
 	option: ProducerLatencyOptions;
 	setOption: Dispatch<SetStateAction<ProducerLatencyOptions>>;
 }): JSX.Element {
+	const { t } = useTranslation('messagingQueues');
 	const { maxTime, minTime } = useSelector<AppState, GlobalReducer>(
 		(state) => state.globalTime,
 	);
@@ -103,7 +105,7 @@ function MessagingQueueOverview({
 				<ProducerLatencyTabs option={option} setOption={setOption} />
 			) : (
 				<div className="mq-overview-title">
-					{MessagingQueuesViewType[selectedView as SelectedViewType].label}
+					{t(MessagingQueuesViewType[selectedView as SelectedViewType].i18nKey)}
 				</div>
 			)}
 			<MessagingQueuesTable

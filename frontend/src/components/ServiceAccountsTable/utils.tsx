@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { ScanSearch } from '@signozhq/icons';
 import { Badge } from '@signozhq/ui';
 import { Tooltip } from 'antd';
@@ -26,17 +27,18 @@ export function NameEmailCell({
 }
 
 export function StatusBadge({ status }: { status: string }): JSX.Element {
+	const { t } = useTranslation('serviceAccounts');
 	if (status?.toUpperCase() === 'ACTIVE') {
 		return (
 			<Badge color="forest" variant="outline">
-				ACTIVE
+				{t('status_active')}
 			</Badge>
 		);
 	}
 	if (status?.toUpperCase() === 'DELETED') {
 		return (
 			<Badge color="cherry" variant="outline">
-				DELETED
+				{t('status_deleted')}
 			</Badge>
 		);
 	}
@@ -52,17 +54,16 @@ export function ServiceAccountsEmptyState({
 }: {
 	searchQuery: string;
 }): JSX.Element {
+	const { t } = useTranslation('serviceAccounts');
 	return (
 		<div className="sa-empty-state">
 			<ScanSearch size={24} className="sa-empty-state__icon" />
 			{searchQuery ? (
 				<p className="sa-empty-state__text">
-					No results for <strong>{searchQuery}</strong>
+					{t('no_results_for')} <strong>{searchQuery}</strong>
 				</p>
 			) : (
-				<p className="sa-empty-state__text">
-					No service accounts. Start by creating one to manage keys.
-				</p>
+				<p className="sa-empty-state__text">{t('no_service_accounts')}</p>
 			)}
 		</div>
 	);
@@ -93,14 +94,28 @@ export const columns: ColumnsType<ServiceAccountRow> = [
 	},
 ];
 
+function PaginationTotal({
+	total,
+	range,
+}: {
+	total: number;
+	range: number[];
+}): JSX.Element {
+	const { t } = useTranslation('serviceAccounts');
+	return (
+		<>
+			<span className="sa-pagination-range">
+				{range[0]} &#8212; {range[1]}
+			</span>
+			<span className="sa-pagination-total">
+				{' '}
+				{t('pagination_total', { total })}
+			</span>
+		</>
+	);
+}
+
 export const showPaginationTotal = (
-	_total: number,
+	total: number,
 	range: number[],
-): JSX.Element => (
-	<>
-		<span className="sa-pagination-range">
-			{range[0]} &#8212; {range[1]}
-		</span>
-		<span className="sa-pagination-total"> of {_total}</span>
-	</>
-);
+): JSX.Element => <PaginationTotal total={total} range={range} />;

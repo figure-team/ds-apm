@@ -82,10 +82,8 @@ describe('KeysTab', () => {
 			</NuqsTestingAdapter>,
 		);
 
-		expect(
-			screen.getByText(/No keys. Start by creating one./i),
-		).toBeInTheDocument();
-		const addBtn = screen.getByRole('button', { name: /\+ Add your first key/i });
+		expect(screen.getByText('no_keys')).toBeInTheDocument();
+		const addBtn = screen.getByRole('button', { name: 'add_first_key' });
 		await user.click(addBtn);
 		expect(onUrlUpdate).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -99,7 +97,7 @@ describe('KeysTab', () => {
 
 		expect(screen.getByText('Production Key')).toBeInTheDocument();
 		expect(screen.getByText('Staging Key')).toBeInTheDocument();
-		expect(screen.getByText('Never')).toBeInTheDocument();
+		expect(screen.getByText('never')).toBeInTheDocument();
 		expect(screen.getByText('Dec 31, 2030')).toBeInTheDocument();
 	});
 
@@ -160,7 +158,7 @@ describe('KeysTab', () => {
 			.filter((btn) => btn.className.includes('keys-tab__revoke-btn'));
 		await user.click(revokeBtns[0]);
 
-		const confirmBtn = await screen.findByRole('button', { name: /Revoke Key/i });
+		const confirmBtn = await screen.findByRole('button', { name: 'revoke_key' });
 		await user.click(confirmBtn);
 
 		await waitFor(() => {

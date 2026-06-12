@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueries } from 'react-query';
 import { Color } from '@signozhq/design-tokens';
 import { Progress, Skeleton, Tooltip, Typography } from 'antd';
@@ -26,6 +27,7 @@ function DomainMetrics({
 	domainListFilters: IBuilderQuery['filters'];
 }): JSX.Element {
 	const { startTime: minTime, endTime: maxTime } = timeRange;
+	const { t } = useTranslation('apiMonitoring');
 
 	const queryPayloads = useMemo(
 		() =>
@@ -91,25 +93,25 @@ function DomainMetrics({
 						type="secondary"
 						className="domain-details-metadata-label"
 					>
-						EXTERNAL API
+						{t('external_api_caps')}
 					</Typography.Text>
 					<Typography.Text
 						type="secondary"
 						className="domain-details-metadata-label"
 					>
-						AVERAGE LATENCY
+						{t('average_latency_caps')}
 					</Typography.Text>
 					<Typography.Text
 						type="secondary"
 						className="domain-details-metadata-label"
 					>
-						ERROR %
+						{t('error_percent_caps')}
 					</Typography.Text>
 					<Typography.Text
 						type="secondary"
 						className="domain-details-metadata-label"
 					>
-						LAST USED
+						{t('last_used_caps')}
 					</Typography.Text>
 				</div>
 

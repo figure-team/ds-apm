@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCopyToClipboard } from 'react-use';
 import type { TableColumnsType as ColumnsType } from 'antd';
 import {
@@ -37,6 +38,7 @@ function AllAttributes({
 	minTime,
 	maxTime,
 }: AllAttributesProps): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	const [searchString, setSearchString] = useState('');
 	const [activeKey, setActiveKey] = useState<string[]>([ALL_ATTRIBUTES_KEY]);
 	const [keyPopoverOpen, setKeyPopoverOpen] = useState<string | null>(null);
@@ -273,14 +275,14 @@ function AllAttributes({
 				label: (
 					<div className="metrics-accordion-header">
 						<div className="all-attributes-header-title">
-							<Typography.Text>All Attributes</Typography.Text>
-							<Tooltip title="Showing attributes for the selected time range">
+							<Typography.Text>{t('all_attributes')}</Typography.Text>
+							<Tooltip title={t('showing_attributes_tooltip')}>
 								<Info size={14} />
 							</Tooltip>
 						</div>
 						<Input
 							className="all-attributes-search-input"
-							placeholder="Search"
+							placeholder={t('search_placeholder')}
 							value={searchString}
 							size="small"
 							suffix={<Search size={12} />}

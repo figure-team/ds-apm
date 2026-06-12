@@ -1,4 +1,5 @@
 import { TableColumnType as ColumnType, Tooltip } from 'antd';
+import { TFunction } from 'i18next';
 import { Group } from 'lucide-react';
 import { BaseAutocompleteData } from 'types/api/queryBuilder/queryAutocompleteResponse';
 
@@ -72,11 +73,13 @@ export const getK8sNamespacesListQuery = (): K8sNamespacesListPayload => ({
 	orderBy: { columnName: 'cpu', order: 'desc' },
 });
 
-export const k8sNamespacesColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
+export const k8sNamespacesColumnsConfig = (
+	t: TFunction,
+): ColumnType<K8sRenderedRowData>[] => [
 	{
 		title: (
 			<div className={styles.entityGroupHeader}>
-				<Group size={14} /> NAMESPACE GROUP
+				<Group size={14} /> {t('col_namespace_group').toString()}
 			</div>
 		),
 		dataIndex: 'namespaceGroup',
@@ -87,7 +90,7 @@ export const k8sNamespacesColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		sorter: false,
 	},
 	{
-		title: <div>Namespace Name</div>,
+		title: <div>{t('col_namespace_name').toString()}</div>,
 		dataIndex: 'namespaceName',
 		key: 'namespaceName',
 		ellipsis: true,
@@ -96,7 +99,7 @@ export const k8sNamespacesColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Cluster Name</div>,
+		title: <div>{t('col_cluster_name').toString()}</div>,
 		dataIndex: 'clusterName',
 		key: 'clusterName',
 		ellipsis: true,
@@ -105,7 +108,7 @@ export const k8sNamespacesColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>CPU Usage (cores)</div>,
+		title: <div>{t('col_cpu_usage_cores').toString()}</div>,
 		dataIndex: 'cpu',
 		key: 'cpu',
 		width: 100,
@@ -113,7 +116,7 @@ export const k8sNamespacesColumnsConfig: ColumnType<K8sRenderedRowData>[] = [
 		align: 'left',
 	},
 	{
-		title: <div>Mem Usage (WSS)</div>,
+		title: <div>{t('col_mem_usage_wss').toString()}</div>,
 		dataIndex: 'memory',
 		key: 'memory',
 		width: 120,

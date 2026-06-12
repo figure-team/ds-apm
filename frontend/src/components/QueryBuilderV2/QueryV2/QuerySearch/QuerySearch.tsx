@@ -1,5 +1,6 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircleFilled } from '@ant-design/icons';
 import {
 	autocompletion,
@@ -98,6 +99,7 @@ function QuerySearch({
 	showFilterSuggestionsWithoutMetric,
 }: QuerySearchProps): JSX.Element {
 	const isDarkMode = useIsDarkMode();
+	const { t } = useTranslation('common');
 	const [valueSuggestions, setValueSuggestions] = useState<any[]>([]);
 	const [activeKey, setActiveKey] = useState<string>('');
 	const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
@@ -1404,7 +1406,7 @@ function QuerySearch({
 							]),
 						),
 					]}
-					placeholder={placeholder}
+					placeholder={placeholder ?? t('filter_query_placeholder')}
 					basicSetup={{
 						lineNumbers: false,
 					}}
@@ -1552,8 +1554,7 @@ QuerySearch.defaultProps = {
 	onRun: undefined,
 	signalSource: '',
 	hardcodedAttributeKeys: undefined,
-	placeholder:
-		"Enter your filter query (e.g., http.status_code >= 500 AND service.name = 'frontend')",
+	placeholder: undefined,
 	showFilterSuggestionsWithoutMetric: false,
 };
 

@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Style } from '@signozhq/design-tokens';
 import { CircleHelp } from '@signozhq/icons';
 import { Callout, Checkbox, Input } from '@signozhq/ui';
@@ -17,6 +18,7 @@ function ConfigureSAMLAuthnProvider({
 	isCreate: boolean;
 }): JSX.Element {
 	const form = Form.useFormInstance();
+	const { t } = useTranslation('organizationsettings');
 
 	const [expandedSection, setExpandedSection] = useState<ExpandedSection>(null);
 
@@ -31,17 +33,21 @@ function ConfigureSAMLAuthnProvider({
 	return (
 		<div className="authn-provider">
 			<section className="authn-provider__header">
-				<h3 className="authn-provider__title">Edit SAML Authentication</h3>
+				<h3 className="authn-provider__title">{t('saml_title')}</h3>
 				<p className="authn-provider__description">
-					Configure SAML 2.0 Single Sign-On with your Identity Provider. Read the{' '}
-					<a
-						href="https://signoz.io/docs/userguide/sso-authentication"
-						target="_blank"
-						rel="noreferrer"
-					>
-						docs
-					</a>{' '}
-					for more information.
+					<Trans
+						t={t}
+						i18nKey="saml_description"
+						components={[
+							// eslint-disable-next-line jsx-a11y/anchor-has-content
+							<a
+								key="0"
+								href="https://signoz.io/docs/userguide/sso-authentication"
+								target="_blank"
+								rel="noreferrer"
+							/>,
+						]}
+					/>
 				</p>
 			</section>
 
@@ -50,8 +56,8 @@ function ConfigureSAMLAuthnProvider({
 				<div className="authn-provider__left">
 					<div className="authn-provider__field-group">
 						<label className="authn-provider__label" htmlFor="saml-domain">
-							Domain
-							<Tooltip title="The email domain for users who should use SSO (e.g., `example.com` for users with `@example.com` emails)">
+							{t('field_domain')}
+							<Tooltip title={t('tooltip_domain')}>
 								<CircleHelp size={14} color={Style.L3_FOREGROUND} cursor="help" />
 							</Tooltip>
 						</label>
@@ -59,7 +65,7 @@ function ConfigureSAMLAuthnProvider({
 							name="name"
 							className="authn-provider__form-item"
 							rules={[
-								{ required: true, message: 'Domain is required', whitespace: true },
+								{ required: true, message: t('domain_required'), whitespace: true },
 							]}
 						>
 							<Input id="saml-domain" disabled={!isCreate} />
@@ -68,8 +74,8 @@ function ConfigureSAMLAuthnProvider({
 
 					<div className="authn-provider__field-group">
 						<label className="authn-provider__label" htmlFor="saml-acs-url">
-							SAML ACS URL
-							<Tooltip title="The SSO endpoint of the SAML identity provider. It can typically be found in the SingleSignOnService element in the SAML metadata of the identity provider.">
+							{t('saml_acs_url')}
+							<Tooltip title={t('saml_tooltip_acs_url')}>
 								<CircleHelp size={14} color={Style.L3_FOREGROUND} cursor="help" />
 							</Tooltip>
 						</label>
@@ -79,7 +85,7 @@ function ConfigureSAMLAuthnProvider({
 							rules={[
 								{
 									required: true,
-									message: 'SAML ACS URL is required',
+									message: t('saml_acs_url_required'),
 									whitespace: true,
 								},
 							]}
@@ -90,8 +96,8 @@ function ConfigureSAMLAuthnProvider({
 
 					<div className="authn-provider__field-group">
 						<label className="authn-provider__label" htmlFor="saml-entity-id">
-							SAML Entity ID
-							<Tooltip title="The entityID of the SAML identity provider. It can typically be found in the EntityID attribute of the EntityDescriptor element in the SAML metadata.">
+							{t('saml_entity_id')}
+							<Tooltip title={t('saml_tooltip_entity_id')}>
 								<CircleHelp size={14} color={Style.L3_FOREGROUND} cursor="help" />
 							</Tooltip>
 						</label>
@@ -101,7 +107,7 @@ function ConfigureSAMLAuthnProvider({
 							rules={[
 								{
 									required: true,
-									message: 'SAML Entity ID is required',
+									message: t('saml_entity_id_required'),
 									whitespace: true,
 								},
 							]}
@@ -112,8 +118,8 @@ function ConfigureSAMLAuthnProvider({
 
 					<div className="authn-provider__field-group">
 						<label className="authn-provider__label" htmlFor="saml-certificate">
-							SAML X.509 Certificate
-							<Tooltip title="The certificate of the SAML identity provider. It can typically be found in the X509Certificate element in the SAML metadata.">
+							{t('saml_certificate')}
+							<Tooltip title={t('saml_tooltip_certificate')}>
 								<CircleHelp size={14} color={Style.L3_FOREGROUND} cursor="help" />
 							</Tooltip>
 						</label>
@@ -123,7 +129,7 @@ function ConfigureSAMLAuthnProvider({
 							rules={[
 								{
 									required: true,
-									message: 'SAML Certificate is required',
+									message: t('saml_certificate_required'),
 									whitespace: true,
 								},
 							]}
@@ -131,7 +137,7 @@ function ConfigureSAMLAuthnProvider({
 							<AntdInput.TextArea
 								id="saml-certificate"
 								rows={3}
-								placeholder="Paste X.509 certificate"
+								placeholder={t('saml_certificate_placeholder')}
 								className="authn-provider__textarea"
 							/>
 						</Form.Item>
@@ -152,17 +158,17 @@ function ConfigureSAMLAuthnProvider({
 									);
 								}}
 							>
-								Skip Signing AuthN Requests
+								{t('saml_skip_signing')}
 							</Checkbox>
 						</Form.Item>
-						<Tooltip title="Whether to skip signing the SAML requests. For providers like JumpCloud, this should be enabled.">
+						<Tooltip title={t('saml_tooltip_skip_signing')}>
 							<CircleHelp size={14} color={Style.L3_FOREGROUND} cursor="help" />
 						</Tooltip>
 					</div>
 
 					<div className="authn-provider__callout-wrapper">
 						<Callout type="warning" size="small" showIcon className="callout">
-							SAML won&apos;t be enabled unless you enter all the attributes above
+							{t('saml_callout')}
 						</Callout>
 					</div>
 				</div>

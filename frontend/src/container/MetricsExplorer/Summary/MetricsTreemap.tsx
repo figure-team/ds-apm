@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useWindowSize } from 'react-use';
 import { Group } from '@visx/group';
 import { Treemap } from '@visx/hierarchy';
@@ -33,6 +34,7 @@ function MetricsTreemapInternal({
 	viewType,
 	openMetricDetails,
 }: MetricsTreemapInternalProps): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	const { width: windowWidth } = useWindowSize();
 
 	const treemapWidth = useMemo(
@@ -100,7 +102,7 @@ function MetricsTreemapInternal({
 	if (isError) {
 		return (
 			<Empty
-				description="Error fetching metrics. If the problem persists, please contact support."
+				description={t('error_fetching_metrics')}
 				data-testid="metrics-treemap-error-state"
 				style={treemapStylesWithPadding}
 			/>
@@ -110,7 +112,7 @@ function MetricsTreemapInternal({
 	if (!data || !data?.[viewType]?.length) {
 		return (
 			<Empty
-				description="No metrics found"
+				description={t('no_metrics_found')}
 				data-testid="metrics-treemap-empty-state"
 				style={treemapStylesWithPadding}
 			/>
@@ -184,6 +186,7 @@ function MetricsTreemap({
 	openMetricDetails,
 	setHeatmapView,
 }: MetricsTreemapProps): JSX.Element {
+	const { t } = useTranslation('metricsExplorer');
 	return (
 		<div
 			className="metrics-treemap-container"
@@ -191,9 +194,9 @@ function MetricsTreemap({
 		>
 			<div className="metrics-treemap-title">
 				<div className="metrics-treemap-title-left">
-					<Typography.Title level={4}>Proportion View</Typography.Title>
+					<Typography.Title level={4}>{t('proportion_view')}</Typography.Title>
 					<Tooltip
-						title="The treemap displays the proportion of samples/timeseries in the selected time range. Each tile represents a unique metric, and its size indicates the percentage of samples/timeseries it contributes to the total."
+						title={t('treemap_tooltip')}
 						placement="right"
 					>
 						<Info size={16} />

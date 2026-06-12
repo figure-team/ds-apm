@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation } from 'react-query';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
@@ -11,9 +12,9 @@ import cx from 'classnames';
 import { SOMETHING_WENT_WRONG } from 'constants/api';
 import ROUTES from 'constants/routes';
 import { useNotifications } from 'hooks/useNotifications';
+import { TFunction } from 'i18next';
 import { isNumber } from 'lodash-es';
 import {
-	convertToTitleCase,
 	MessagingQueuesViewType,
 	RowData,
 } from 'pages/MessagingQueues/MessagingQueuesUtils';
@@ -51,6 +52,7 @@ export function getColumns(
 	data: DropRateResponse[],
 	visibleCounts: Record<number, number>,
 	handleShowMore: (index: number) => void,
+	t: TFunction,
 ): any[] {
 	if (data?.length === 0) {
 		return [];
@@ -70,7 +72,7 @@ export function getColumns(
 		dataIndex: string;
 		key: string;
 	}[] = columnsOrder.map((column) => ({
-		title: convertToTitleCase(column),
+		title: t(`column_${column}`).toString(),
 		dataIndex: column,
 		key: column,
 		render: (
@@ -107,7 +109,7 @@ export function getColumns(
 												onClick={(): void => handleShowMore(index)}
 												className="remaing-count"
 											>
-												+ {remainingCount} more
+												{t('show_more', { count: remainingCount }).toString()}
 											</Typography>
 										)}
 									</div>
@@ -150,16 +152,22 @@ export function getColumns(
 	return columns;
 }
 
-const showPaginationItem = (total: number, range: number[]): JSX.Element => (
+const showPaginationItem = (t: TFunction) => (
+	total: number,
+	range: number[],
+): JSX.Element => (
 	<>
 		<Typography.Text className="numbers">
 			{range[0]} &#8212; {range[1]}
 		</Typography.Text>
-		<Typography.Text className="total"> of {total}</Typography.Text>
+		<Typography.Text className="total">
+			{t('pagination_total', { total }).toString()}
+		</Typography.Text>
 	</>
 );
 
 function DropRateView(): JSX.Element {
+	const { t } = useTranslation('messagingQueues');
 	const [columns, setColumns] = useState<any[]>([]);
 	const [tableData, setTableData] = useState<any[]>([]);
 	const { notifications } = useNotifications();
@@ -177,11 +185,11 @@ function DropRateView(): JSX.Element {
 		() =>
 			tableData?.length > 10 && {
 				pageSize: 10,
-				showTotal: showPaginationItem,
+				showTotal: showPaginationItem(t),
 				showSizeChanger: false,
 				hideOnSinglePage: true,
 			},
-		[tableData],
+		[tableData, t],
 	);
 
 	const evaluationTime = useMemo(
@@ -221,10 +229,10 @@ function DropRateView(): JSX.Element {
 
 	useEffect(() => {
 		if (data?.length > 0) {
-			setColumns(getColumns(data, visibleCounts, handleShowMore));
+			setColumns(getColumns(data, visibleCounts, handleShowMore, t));
 			setTableData(getTableData(data));
 		}
-	}, [data, visibleCounts]);
+	}, [data, visibleCounts, t]);
 
 	useEffect(() => {
 		if (evaluationTime) {
@@ -252,7 +260,7 @@ function DropRateView(): JSX.Element {
 	return (
 		<div className={cx('mq-overview-container', 'droprate-view')}>
 			<div className="mq-overview-title">
-				{MessagingQueuesViewType.dropRate.label}
+				{t(MessagingQueuesViewType.dropRate.i18nKey)}
 				<EvaluationTimeSelector setInterval={setInterval} />
 			</div>
 			<Table

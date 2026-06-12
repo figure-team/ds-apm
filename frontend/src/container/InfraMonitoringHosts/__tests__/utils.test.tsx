@@ -103,7 +103,7 @@ describe('InfraMonitoringHosts utils', () => {
 			const iconWrapper = container.querySelector('.hostname-cell-warning-icon');
 			expect(iconWrapper).toBeTruthy();
 			expect(iconWrapper?.getAttribute('aria-label')).toBe(
-				'Missing host.name metadata',
+				'missing_hostname_metadata_aria',
 			);
 			expect(iconWrapper?.getAttribute('tabindex')).toBe('0');
 		});

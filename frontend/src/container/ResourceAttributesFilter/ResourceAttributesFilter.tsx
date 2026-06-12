@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CloseCircleFilled } from '@ant-design/icons';
 import { Button, Select, Spin } from 'antd';
 import useResourceAttribute, {
@@ -37,6 +38,8 @@ function ResourceAttributesFilter({
 		optionsData,
 		loading,
 	} = useResourceAttribute();
+
+	const { t } = useTranslation('serviceMap');
 
 	const [environments, setEnvironments] = useState<
 		SelectOption<string, string>[]
@@ -91,7 +94,7 @@ function ResourceAttributesFilter({
 					showSearch
 					mode="multiple"
 					value={selectedEnvironments}
-					placeholder="Select Environment/s"
+					placeholder={t('select_environment')}
 					data-testid="resource-environment-filter"
 					style={{ minWidth: 200, height: 34 }}
 					onChange={handleEnvironmentChange}
@@ -119,7 +122,7 @@ function ResourceAttributesFilter({
 					<Select
 						getPopupContainer={popupContainer}
 						placeholder={
-							!isEmpty && 'Search and Filter based on resource attributes.'
+							!isEmpty && t('resource_attributes_filter_placeholder')
 						}
 						onChange={handleChange}
 						bordered={false}

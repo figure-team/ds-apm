@@ -1,7 +1,7 @@
 {
 	"page_title": "Home",
-	"welcome_title": "Hello there, Welcome to your SigNoz workspace",
-	"not_sending_data_desc": "You're not sending any data yet. SigNoz is so much better with your data — start by sending your telemetry data to SigNoz.",
+	"welcome_title": "Hello there, Welcome to your DS-APM workspace",
+	"not_sending_data_desc": "You're not sending any data yet. DS-APM is so much better with your data — start by sending your telemetry data to DS-APM.",
 	"workspace_ready": "Your workspace is ready",
 	"connect_data_source": "Connect Data Source",
 	"ingestion_active_logs": "Logs ingestion is active",

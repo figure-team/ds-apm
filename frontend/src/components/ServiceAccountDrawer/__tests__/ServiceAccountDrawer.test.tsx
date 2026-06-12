@@ -106,7 +106,7 @@ describe('ServiceAccountDrawer', () => {
 
 		expect(await screen.findByDisplayValue('CI Bot')).toBeInTheDocument();
 		expect(screen.getByText('ci-bot@signoz.io')).toBeInTheDocument();
-		expect(screen.getByRole('button', { name: /Save Changes/i })).toBeDisabled();
+		expect(screen.getByRole('button', { name: 'save_changes' })).toBeDisabled();
 	});
 
 	it('editing name enables Save; clicking Save sends correct payload and calls onSuccess', async () => {
@@ -131,7 +131,7 @@ describe('ServiceAccountDrawer', () => {
 		await user.clear(nameInput);
 		await user.type(nameInput, 'CI Bot Updated');
 
-		const saveBtn = screen.getByRole('button', { name: /Save Changes/i });
+		const saveBtn = screen.getByRole('button', { name: 'save_changes' });
 		await waitFor(() => expect(saveBtn).not.toBeDisabled());
 		await user.click(saveBtn);
 
@@ -165,10 +165,10 @@ describe('ServiceAccountDrawer', () => {
 
 		await screen.findByDisplayValue('CI Bot');
 
-		await user.click(screen.getByLabelText('Roles'));
+		await user.click(screen.getByLabelText('roles'));
 		await user.click(await screen.findByTitle('signoz-viewer'));
 
-		const saveBtn = screen.getByRole('button', { name: /Save Changes/i });
+		const saveBtn = screen.getByRole('button', { name: 'save_changes' });
 		await waitFor(() => expect(saveBtn).not.toBeDisabled());
 		await user.click(saveBtn);
 
@@ -198,7 +198,7 @@ describe('ServiceAccountDrawer', () => {
 		await screen.findByDisplayValue('CI Bot');
 
 		await user.click(
-			screen.getByRole('button', { name: /Delete Service Account/i }),
+			screen.getByRole('button', { name: 'delete_service_account' }),
 		);
 
 		const dialog = await screen.findByRole('dialog', {
@@ -206,7 +206,7 @@ describe('ServiceAccountDrawer', () => {
 		});
 		expect(dialog).toBeInTheDocument();
 
-		const confirmBtns = screen.getAllByRole('button', { name: /^Delete$/i });
+		const confirmBtns = screen.getAllByRole('button', { name: 'delete' });
 		await user.click(confirmBtns[confirmBtns.length - 1]);
 
 		await waitFor(() => {
@@ -236,10 +236,10 @@ describe('ServiceAccountDrawer', () => {
 		await screen.findByText('CI Bot');
 
 		expect(
-			screen.queryByRole('button', { name: /Save Changes/i }),
+			screen.queryByRole('button', { name: 'save_changes' }),
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByRole('button', { name: /Delete Service Account/i }),
+			screen.queryByRole('button', { name: 'delete_service_account' }),
 		).not.toBeInTheDocument();
 		expect(screen.queryByDisplayValue('CI Bot')).not.toBeInTheDocument();
 	});
@@ -251,9 +251,9 @@ describe('ServiceAccountDrawer', () => {
 
 		await screen.findByDisplayValue('CI Bot');
 
-		await user.click(screen.getByRole('radio', { name: /Keys/i }));
+		await user.click(screen.getByRole('radio', { name: /tab_keys/i }));
 
-		await screen.findByText(/No keys/i);
+		await screen.findByText('no_keys');
 	});
 
 	it('shows skeleton while loading account data', () => {
@@ -345,7 +345,7 @@ describe('ServiceAccountDrawer – save-error UX', () => {
 		await user.clear(nameInput);
 		await user.type(nameInput, 'New Name');
 
-		const saveBtn = screen.getByRole('button', { name: /Save Changes/i });
+		const saveBtn = screen.getByRole('button', { name: 'save_changes' });
 		await waitFor(() => expect(saveBtn).not.toBeDisabled());
 		await user.click(saveBtn);
 
@@ -378,10 +378,10 @@ describe('ServiceAccountDrawer – save-error UX', () => {
 		await screen.findByDisplayValue('CI Bot');
 
 		// Add the signoz-viewer role (which is not currently assigned)
-		await user.click(screen.getByLabelText('Roles'));
+		await user.click(screen.getByLabelText('roles'));
 		await user.click(await screen.findByTitle('signoz-viewer'));
 
-		const saveBtn = screen.getByRole('button', { name: /Save Changes/i });
+		const saveBtn = screen.getByRole('button', { name: 'save_changes' });
 		await waitFor(() => expect(saveBtn).not.toBeDisabled());
 		await user.click(saveBtn);
 
@@ -415,10 +415,10 @@ describe('ServiceAccountDrawer – save-error UX', () => {
 
 		await screen.findByDisplayValue('CI Bot');
 
-		await user.click(screen.getByLabelText('Roles'));
+		await user.click(screen.getByLabelText('roles'));
 		await user.click(await screen.findByTitle('signoz-viewer'));
 
-		const saveBtn = screen.getByRole('button', { name: /Save Changes/i });
+		const saveBtn = screen.getByRole('button', { name: 'save_changes' });
 		await waitFor(() => expect(saveBtn).not.toBeDisabled());
 		await user.click(saveBtn);
 
@@ -456,7 +456,7 @@ describe('ServiceAccountDrawer – save-error UX', () => {
 		await user.clear(nameInput);
 		await user.type(nameInput, 'Retry Test');
 
-		const saveBtn = screen.getByRole('button', { name: /Save Changes/i });
+		const saveBtn = screen.getByRole('button', { name: 'save_changes' });
 		await waitFor(() => expect(saveBtn).not.toBeDisabled());
 		await user.click(saveBtn);
 
@@ -470,7 +470,7 @@ describe('ServiceAccountDrawer – save-error UX', () => {
 			),
 		);
 
-		const retryBtn = screen.getByRole('button', { name: /Retry/i });
+		const retryBtn = screen.getByRole('button', { name: 'retry' });
 		await user.click(retryBtn);
 
 		// Error item should be removed after successful retry

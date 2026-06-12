@@ -215,9 +215,8 @@ describe('EntityTraces', () => {
 		renderEntityTraces();
 		expect(screen.getByText('Previous')).toBeInTheDocument();
 		expect(screen.getByText('Next')).toBeInTheDocument();
-		expect(
-			screen.getByText(/Search Filter : select options from suggested values/),
-		).toBeInTheDocument();
+		// QB search placeholder is i18n'd; with i18n resources unloaded in tests it emits the raw key.
+		expect(screen.getByText('qb_search_placeholder')).toBeInTheDocument();
 		expect(screen.getByTestId('date-time-selection')).toBeInTheDocument();
 	});
 
@@ -230,7 +229,8 @@ describe('EntityTraces', () => {
 		});
 
 		renderEntityTraces();
-		expect(screen.getByText(/No traces yet./)).toBeInTheDocument();
+		// NoLogs is i18n'd; with i18n resources unloaded in tests it emits the raw key.
+		expect(screen.getByText('no_data_yet')).toBeInTheDocument();
 	});
 
 	it('renders loader when fetching traces', () => {
@@ -259,9 +259,7 @@ describe('EntityTraces', () => {
 
 	it('calls handleChangeTracesFilters when query builder search changes', () => {
 		renderEntityTraces();
-		expect(
-			screen.getByText(/Search Filter : select options from suggested values/),
-		).toBeInTheDocument();
+		expect(screen.getByText('qb_search_placeholder')).toBeInTheDocument();
 	});
 
 	it('calls handleTimeChange when datetime selection changes', () => {

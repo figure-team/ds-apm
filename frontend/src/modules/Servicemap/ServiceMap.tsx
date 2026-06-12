@@ -1,6 +1,7 @@
 //@ts-nocheck
 
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -65,6 +66,7 @@ export interface graphDataType {
 
 function ServiceMap(props: ServiceMapProps): JSX.Element {
 	const fgRef = useRef();
+	const { t } = useTranslation('serviceMap');
 
 	const { getDetailedServiceMapItems, globalTime, serviceMap } = props;
 
@@ -83,14 +85,14 @@ function ServiceMap(props: ServiceMapProps): JSX.Element {
 	});
 
 	if (serviceMap.loading) {
-		return <Spinner size="large" tip="Loading..." />;
+		return <Spinner size="large" tip={t('loading')} />;
 	}
 
 	if (!serviceMap.loading && serviceMap.items.length === 0) {
 		return (
 			<Container>
 				<ResourceAttributesFilter />
-				<Card>No Service Found</Card>
+				<Card>{t('no_service_found')}</Card>
 			</Container>
 		);
 	}
@@ -100,9 +102,9 @@ function ServiceMap(props: ServiceMapProps): JSX.Element {
 				suffixIcon={
 					<TextToolTip
 						{...{
-							text: `Currently, service map supports filtering of ${whilelistedKeys.join(
-								', ',
-							)} only, in resource attributes`,
+							text: t('filter_tooltip', {
+								keys: whilelistedKeys.join(', '),
+							}),
 						}}
 					/>
 				}

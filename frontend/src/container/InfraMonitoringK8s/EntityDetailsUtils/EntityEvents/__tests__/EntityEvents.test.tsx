@@ -241,8 +241,8 @@ describe('EntityEvents', () => {
 
 	it('should render events list with data', () => {
 		renderEntityEvents();
-		expect(screen.getByText('Prev')).toBeInTheDocument();
-		expect(screen.getByText('Next')).toBeInTheDocument();
+		expect(screen.getByText('prev')).toBeInTheDocument();
+		expect(screen.getByText('next')).toBeInTheDocument();
 		expect(screen.getByText('Test event 1')).toBeInTheDocument();
 		expect(screen.getByText('Test event 2')).toBeInTheDocument();
 		expect(screen.getByText('INFO')).toBeInTheDocument();
@@ -275,13 +275,13 @@ describe('EntityEvents', () => {
 
 	it('shows pagination controls when events are present', () => {
 		renderEntityEvents();
-		expect(screen.getByText('Prev')).toBeInTheDocument();
-		expect(screen.getByText('Next')).toBeInTheDocument();
+		expect(screen.getByText('prev')).toBeInTheDocument();
+		expect(screen.getByText('next')).toBeInTheDocument();
 	});
 
 	it('disables Prev button on first page', () => {
 		renderEntityEvents();
-		const prevButton = screen.getByText('Prev').closest('button');
+		const prevButton = screen.getByText('prev').closest('button');
 		expect(prevButton).toBeDisabled();
 	});
 
@@ -294,7 +294,7 @@ describe('EntityEvents', () => {
 		});
 
 		renderEntityEvents();
-		const nextButton = screen.getByText('Next').closest('button');
+		const nextButton = screen.getByText('next').closest('button');
 		expect(nextButton).not.toBeDisabled();
 	});
 
@@ -308,7 +308,7 @@ describe('EntityEvents', () => {
 
 		renderEntityEvents();
 
-		const nextButton = screen.getByText('Next').closest('button');
+		const nextButton = screen.getByText('next').closest('button');
 		expect(nextButton).not.toBeNull();
 		fireEvent.click(nextButton as Element);
 
@@ -330,11 +330,11 @@ describe('EntityEvents', () => {
 
 		renderEntityEvents();
 
-		const nextButton = screen.getByText('Next').closest('button');
+		const nextButton = screen.getByText('next').closest('button');
 		expect(nextButton).not.toBeNull();
 		fireEvent.click(nextButton as Element);
 
-		const prevButton = screen.getByText('Prev').closest('button');
+		const prevButton = screen.getByText('prev').closest('button');
 		expect(prevButton).not.toBeNull();
 		fireEvent.click(prevButton as Element);
 

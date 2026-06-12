@@ -103,6 +103,8 @@ jest.mock('react-i18next', () => ({
 			changeLanguage: (): Promise<void> => new Promise(() => {}),
 		},
 	}),
+	// Render <Trans> as its i18nKey so components using it are testable by key.
+	Trans: ({ i18nKey }: { i18nKey: string }): JSX.Element => <>{i18nKey}</>,
 }));
 
 export function getAppContextMock(

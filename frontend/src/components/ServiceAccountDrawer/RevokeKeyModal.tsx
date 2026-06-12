@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import { Trash2, X } from '@signozhq/icons';
 import { Button, DialogWrapper, toast } from '@signozhq/ui';
@@ -28,16 +29,14 @@ export function RevokeKeyContent({
 	onCancel,
 	onConfirm,
 }: RevokeKeyContentProps): JSX.Element {
+	const { t } = useTranslation(['serviceAccounts', 'common']);
 	return (
 		<>
-			<p className="delete-dialog__body">
-				Revoking this key will permanently invalidate it. Any systems using this key
-				will lose access immediately.
-			</p>
+			<p className="delete-dialog__body">{t('revoke_key_warning')}</p>
 			<div className="delete-dialog__footer">
 				<Button variant="solid" color="secondary" size="sm" onClick={onCancel}>
 					<X size={12} />
-					Cancel
+					{t('common:cancel')}
 				</Button>
 				<Button
 					variant="solid"
@@ -47,7 +46,7 @@ export function RevokeKeyContent({
 					onClick={onConfirm}
 				>
 					<Trash2 size={12} />
-					Revoke Key
+					{t('revoke_key')}
 				</Button>
 			</div>
 		</>
