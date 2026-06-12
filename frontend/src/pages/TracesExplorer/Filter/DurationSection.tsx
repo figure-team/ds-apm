@@ -7,6 +7,7 @@ import {
 	useMemo,
 	useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input, Slider } from 'antd';
 import type { SliderRangeProps } from 'antd/es/slider';
 import { getMs } from 'container/Trace/Filters/Panel/PanelBody/Duration/util';
@@ -21,6 +22,7 @@ interface DurationProps {
 
 export function DurationSection(props: DurationProps): JSX.Element {
 	const { setSelectedFilters, selectedFilters } = props;
+	const { t } = useTranslation('common');
 
 	const getDuration = useMemo(() => {
 		if (selectedFilters?.durationNanoMin || selectedFilters?.durationNanoMax) {
@@ -104,7 +106,7 @@ export function DurationSection(props: DurationProps): JSX.Element {
 			<div className="duration-inputs">
 				<Input
 					type="number"
-					addonBefore="MIN"
+					addonBefore={t('explorer.min')}
 					placeholder="0"
 					className="min-max-input"
 					onChange={onChangeMinHandler}
@@ -114,7 +116,7 @@ export function DurationSection(props: DurationProps): JSX.Element {
 				/>
 				<Input
 					type="number"
-					addonBefore="MAX"
+					addonBefore={t('explorer.max')}
 					placeholder="100000000"
 					className="min-max-input"
 					onChange={onChangeMaxHandler}

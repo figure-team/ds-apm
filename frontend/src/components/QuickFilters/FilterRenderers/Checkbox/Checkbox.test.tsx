@@ -150,7 +150,7 @@ describe('CheckboxFilter - User Flows', () => {
 		// User should see the filter is automatically opened (not collapsed)
 		expect(screen.getByText('Service Name')).toBeInTheDocument();
 		await waitFor(() => {
-			expect(screen.getByPlaceholderText('Filter values')).toBeInTheDocument();
+			expect(screen.getByPlaceholderText('explorer.filter_values_placeholder')).toBeInTheDocument();
 		});
 
 		// User should see visual separator between checked and unchecked items
@@ -184,7 +184,7 @@ describe('CheckboxFilter - User Flows', () => {
 
 		// Initially auto-opened due to active filters
 		await waitFor(() => {
-			expect(screen.getByPlaceholderText('Filter values')).toBeInTheDocument();
+			expect(screen.getByPlaceholderText('explorer.filter_values_placeholder')).toBeInTheDocument();
 		});
 
 		// User manually closes the filter
@@ -192,7 +192,7 @@ describe('CheckboxFilter - User Flows', () => {
 
 		// User should see filter is now closed (respecting user preference)
 		expect(
-			screen.queryByPlaceholderText('Filter values'),
+			screen.queryByPlaceholderText('explorer.filter_values_placeholder'),
 		).not.toBeInTheDocument();
 
 		// User manually opens the filter again
@@ -200,7 +200,7 @@ describe('CheckboxFilter - User Flows', () => {
 
 		// User should see filter is now open (respecting user preference)
 		await waitFor(() => {
-			expect(screen.getByPlaceholderText('Filter values')).toBeInTheDocument();
+			expect(screen.getByPlaceholderText('explorer.filter_values_placeholder')).toBeInTheDocument();
 		});
 	});
 
@@ -403,7 +403,7 @@ describe('CheckboxFilter - User Flows', () => {
 
 		// Filter should auto-open because it has active filters (key match via prefix stripping)
 		await waitFor(() => {
-			expect(screen.getByPlaceholderText('Filter values')).toBeInTheDocument();
+			expect(screen.getByPlaceholderText('explorer.filter_values_placeholder')).toBeInTheDocument();
 		});
 
 		// otel-demo should be checked (filter uses resource.service.name IN [otel-demo])

@@ -63,7 +63,7 @@ function ListView({
 	setIsLoadingQueries,
 	queryKeyRef,
 }: ListViewProps): JSX.Element {
-	const { t } = useTranslation(['trace']);
+	const { t } = useTranslation(['trace', 'common']);
 	const { stagedQuery, panelType: panelTypeFromQueryBuilder } =
 		useQueryBuilder();
 
@@ -231,7 +231,8 @@ function ListView({
 			<div className="trace-explorer-controls">
 				<div className="order-by-container">
 					<div className="order-by-label">
-						Order by <Minus size={14} /> <ArrowUp10 size={14} />
+						{t('common:explorer.order_by')} <Minus size={14} />{' '}
+						<ArrowUp10 size={14} />
 					</div>
 
 					<ListViewOrderBy

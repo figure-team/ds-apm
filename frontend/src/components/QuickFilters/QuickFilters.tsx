@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
 	FilterOutlined,
 	SyncOutlined,
@@ -49,6 +50,7 @@ export default function QuickFilters(props: IQuickFiltersProps): JSX.Element {
 		showFilterCollapse = true,
 		showQueryName = true,
 	} = props;
+	const { t } = useTranslation('common');
 	const { user } = useAppContext();
 	const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 	const isAdmin = user.role === USER_ROLES.ADMIN;
@@ -178,12 +180,12 @@ export default function QuickFilters(props: IQuickFiltersProps): JSX.Element {
 		<section className="left-actions">
 			<FilterOutlined />
 			<Typography.Text className="text">
-				{displayedQueryName ? 'Filters for' : 'Filters'}
+				{displayedQueryName ? t('explorer.filters_for') : t('explorer.filters')}
 			</Typography.Text>
 			{queryOptions.length > 1 && (!isListView || shouldShowDropdownInListView) ? (
 				<Combobox open={open} onOpenChange={setOpen}>
 					<ComboboxTrigger
-						placeholder="Select a query"
+						placeholder={t('explorer.select_a_query')}
 						value={queryOptions.find((f) => f.value === validQueryIndex)?.label || ''}
 						className="select-box"
 					/>
@@ -212,7 +214,9 @@ export default function QuickFilters(props: IQuickFiltersProps): JSX.Element {
 			) : (
 				displayedQueryName && (
 					<Tooltip
-						title={`Filter currently in sync with query ${displayedQueryName}`}
+						title={t('explorer.filter_in_sync_with', {
+							queryName: displayedQueryName,
+						})}
 					>
 						<Typography.Text className="sync-tag">
 							{displayedQueryName}
@@ -225,13 +229,13 @@ export default function QuickFilters(props: IQuickFiltersProps): JSX.Element {
 
 	const renderRightActions = (): JSX.Element => (
 		<section className="right-actions">
-			<Tooltip title="Reset All">
+			<Tooltip title={t('explorer.reset_all')}>
 				<div className="right-action-icon-container">
 					<SyncOutlined className="sync-icon" onClick={handleReset} />
 				</div>
 			</Tooltip>
 			{showFilterCollapse && (
-				<Tooltip title="Collapse Filters">
+				<Tooltip title={t('explorer.collapse_filters')}>
 					<div className="right-action-icon-container">
 						<VerticalAlignTopOutlined
 							rotate={270}
@@ -241,7 +245,7 @@ export default function QuickFilters(props: IQuickFiltersProps): JSX.Element {
 				</Tooltip>
 			)}
 			{isDynamicFilters && isAdmin && (
-				<Tooltip title="Settings">
+				<Tooltip title={t('explorer.settings')}>
 					<div
 						className={classNames('right-action-icon-container', {
 							active: isSettingsOpen,
@@ -257,8 +261,8 @@ export default function QuickFilters(props: IQuickFiltersProps): JSX.Element {
 						<AnnouncementTooltip
 							show={showAnnouncementTooltip}
 							position={{ top: -5, left: 15 }}
-							title="Edit your quick filters"
-							message="You can now customize and re-arrange your quick filters panel. Select the quick filters you’d need and hide away the rest for faster exploration."
+							title={t('explorer.edit_quick_filters_title')}
+							message={t('explorer.edit_quick_filters_message')}
 							onClose={(): void => {
 								setLocalStorageKey(
 									LOCALSTORAGE.QUICK_FILTERS_SETTINGS_ANNOUNCEMENT,
@@ -276,7 +280,7 @@ export default function QuickFilters(props: IQuickFiltersProps): JSX.Element {
 		<>
 			{source === QuickFiltersSource.API_MONITORING && (
 				<div className="api-quick-filters-header">
-					<Typography.Text>Show IP addresses</Typography.Text>
+					<Typography.Text>{t('explorer.show_ip_addresses')}</Typography.Text>
 					<Switch
 						size="small"
 						style={{ marginLeft: 'auto' }}
@@ -320,7 +324,7 @@ export default function QuickFilters(props: IQuickFiltersProps): JSX.Element {
 				{filterConfig.length === 0 && (
 					<div className="no-filters-container">
 						<Frown size={16} />
-						<Typography.Text>No filters found</Typography.Text>
+						<Typography.Text>{t('explorer.no_filters_found')}</Typography.Text>
 					</div>
 				)}
 			</section>

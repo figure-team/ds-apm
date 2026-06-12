@@ -543,8 +543,8 @@ describe('TracesExplorer - ', () => {
 		expect(getByText('options_menu.options')).toBeInTheDocument();
 
 		// test if pagination is there
-		expect(getByText('Previous')).toBeInTheDocument();
-		expect(getByText('Next')).toBeInTheDocument();
+		expect(getByText('explorer.previous')).toBeInTheDocument();
+		expect(getByText('explorer.next')).toBeInTheDocument();
 
 		// column interaction is covered in E2E tests as its a complex interaction
 	});

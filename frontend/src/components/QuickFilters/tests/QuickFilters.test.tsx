@@ -153,7 +153,7 @@ beforeEach(() => {
 describe('Quick Filters', () => {
 	it('displays the correct query name in the header', () => {
 		render(<TestQuickFilters />);
-		expect(screen.getByText('Filters for')).toBeInTheDocument();
+		expect(screen.getByText('explorer.filters_for')).toBeInTheDocument();
 		expect(screen.getByText(QUERY_NAME)).toBeInTheDocument();
 	});
 
@@ -292,7 +292,7 @@ describe('Quick Filters', () => {
 		render(<TestQuickFiltersApiMonitoring />);
 
 		// Switch should be rendered and initially checked
-		expect(screen.getByText('Show IP addresses')).toBeInTheDocument();
+		expect(screen.getByText('explorer.show_ip_addresses')).toBeInTheDocument();
 		const toggle = screen.getByRole('switch');
 		expect(toggle).toHaveAttribute('aria-checked', 'true');
 
@@ -312,7 +312,7 @@ describe('Quick Filters with custom filters', () => {
 
 		render(<TestQuickFilters signal={SIGNAL} />);
 
-		expect(screen.getByText('Filters for')).toBeInTheDocument();
+		expect(screen.getByText('explorer.filters_for')).toBeInTheDocument();
 		expect(screen.getByText(QUERY_NAME)).toBeInTheDocument();
 
 		await screen.findByText(FILTER_SERVICE_NAME);
@@ -472,10 +472,10 @@ describe('Quick Filters with custom filters', () => {
 
 		const { getByTestId } = render(<TestQuickFilters signal={SIGNAL} />);
 		await screen.findByText(FILTER_SERVICE_NAME);
-		expect(screen.getByText('Duration')).toBeInTheDocument();
+		expect(screen.getByText('explorer.filter_duration')).toBeInTheDocument();
 
 		// Open the duration section (use role if it’s a button/collapse)
-		await user.click(screen.getByText('Duration'));
+		await user.click(screen.getByText('explorer.filter_duration'));
 
 		const minDuration = getByTestId('min-input') as HTMLInputElement;
 		const maxDuration = getByTestId('max-input') as HTMLInputElement;
@@ -657,6 +657,6 @@ describe('Quick Filters refetch behavior', () => {
 
 		render(<TestQuickFilters signal={SIGNAL} config={[]} />);
 
-		expect(await screen.findByText('No filters found')).toBeInTheDocument();
+		expect(await screen.findByText('explorer.no_filters_found')).toBeInTheDocument();
 	});
 });

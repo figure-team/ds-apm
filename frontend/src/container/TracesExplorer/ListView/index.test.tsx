@@ -57,7 +57,7 @@ const renderListView = (
 // Helper to verify all controls are visible
 const verifyControlsVisibility = (): void => {
 	// Order by controls
-	expect(screen.getByText(/Order by/i)).toBeInTheDocument();
+	expect(screen.getByText(/order_by/i)).toBeInTheDocument();
 
 	// Pagination controls
 	expect(screen.getByRole('button', { name: /previous/i })).toBeInTheDocument();
@@ -102,7 +102,7 @@ describe('Traces ListView - Error and Empty States', () => {
 
 			// Wait for the component to render
 			await waitFor(() => {
-				expect(screen.getByText(/Order by/i)).toBeInTheDocument();
+				expect(screen.getByText(/order_by/i)).toBeInTheDocument();
 			});
 		});
 
@@ -118,7 +118,7 @@ describe('Traces ListView - Error and Empty States', () => {
 
 			// Wait for the component to render
 			await waitFor(() => {
-				expect(screen.getByText(/Order by/i)).toBeInTheDocument();
+				expect(screen.getByText(/order_by/i)).toBeInTheDocument();
 			});
 		});
 
@@ -136,7 +136,7 @@ describe('Traces ListView - Error and Empty States', () => {
 
 			// Wait for the component to render
 			await waitFor(() => {
-				expect(screen.getByText(/Order by/i)).toBeInTheDocument();
+				expect(screen.getByText(/order_by/i)).toBeInTheDocument();
 			});
 		});
 	});
@@ -149,7 +149,7 @@ describe('Traces ListView - Error and Empty States', () => {
 
 			// Wait for component to render
 			await waitFor(() => {
-				expect(screen.getByText(/Order by/i)).toBeInTheDocument();
+				expect(screen.getByText(/order_by/i)).toBeInTheDocument();
 			});
 
 			// Order by controls should be interactive

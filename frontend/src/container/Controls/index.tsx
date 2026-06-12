@@ -1,4 +1,5 @@
 import { memo, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { Button, Select } from 'antd';
 import { DEFAULT_PER_PAGE_OPTIONS, Pagination } from 'hooks/queryPagination';
@@ -19,6 +20,7 @@ function Controls({
 	isLogPanel = false,
 	showSizeChanger = true,
 }: ControlsProps): JSX.Element | null {
+	const { t } = useTranslation('common');
 	const isNextAndPreviousDisabled = useMemo(
 		() => isLoading || countPerPage < 0 || totalCount === 0,
 		[isLoading, countPerPage, totalCount],
@@ -42,7 +44,7 @@ function Controls({
 				disabled={isPreviousDisabled}
 				onClick={handleNavigatePrevious}
 			>
-				<LeftOutlined /> Previous
+				<LeftOutlined /> {t('explorer.previous')}
 			</Button>
 			<Button
 				loading={isLoading}
@@ -51,7 +53,7 @@ function Controls({
 				disabled={isNextDisabled}
 				onClick={handleNavigateNext}
 			>
-				Next <RightOutlined />
+				{t('explorer.next')} <RightOutlined />
 			</Button>
 
 			{showSizeChanger && (
@@ -63,10 +65,9 @@ function Controls({
 					getPopupContainer={popupContainer}
 				>
 					{perPageOptions.map((count) => (
-						<Select.Option
-							key={count}
-							value={count}
-						>{`${count} / page`}</Select.Option>
+						<Select.Option key={count} value={count}>
+							{t('explorer.per_page', { value: count })}
+						</Select.Option>
 					))}
 				</Select>
 			)}

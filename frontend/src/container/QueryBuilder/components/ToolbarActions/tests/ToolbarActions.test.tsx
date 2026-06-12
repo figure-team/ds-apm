@@ -101,7 +101,7 @@ describe('ToolbarActions', () => {
 			</MockQueryClientProvider>,
 		);
 
-		const runQueryBtn = queryByText('Run Query');
+		const runQueryBtn = queryByText('run_query');
 		expect(runQueryBtn).toBeInTheDocument();
 		await userEvent.click(runQueryBtn as HTMLElement);
 		expect(onStageRunQuery).toHaveBeenCalled();

@@ -130,7 +130,7 @@ describe('SpanScopeSelector', () => {
 
 	it('should render with default ALL_SPANS selected', () => {
 		renderWithContext();
-		expect(screen.getByText('All Spans')).toBeInTheDocument();
+		expect(screen.getByText('explorer.span_all')).toBeInTheDocument();
 	});
 
 	describe('when selecting different options', () => {
@@ -157,7 +157,7 @@ describe('SpanScopeSelector', () => {
 			]);
 			renderWithContext(queryWithSpanScope, undefined, defaultQueryBuilderQuery);
 
-			await selectOption('All Spans');
+			await selectOption('explorer.span_all');
 
 			expect(mockRedirectWithQueryBuilderData).toHaveBeenCalled();
 			const updatedQuery = mockRedirectWithQueryBuilderData.mock.calls[0][0];
@@ -171,7 +171,7 @@ describe('SpanScopeSelector', () => {
 
 		it('should add isRoot filter when selecting ROOT_SPANS', async () => {
 			renderWithContext(defaultQuery, undefined, defaultQueryBuilderQuery);
-			await selectOption('Root Spans');
+			await selectOption('explorer.span_root');
 
 			expect(mockRedirectWithQueryBuilderData).toHaveBeenCalled();
 			assertFilterAdded(
@@ -182,7 +182,7 @@ describe('SpanScopeSelector', () => {
 
 		it('should add isEntryPoint filter when selecting ENTRYPOINT_SPANS', async () => {
 			renderWithContext(defaultQuery, undefined, defaultQueryBuilderQuery);
-			await selectOption('Entrypoint Spans');
+			await selectOption('explorer.span_entrypoint');
 
 			expect(mockRedirectWithQueryBuilderData).toHaveBeenCalled();
 			assertFilterAdded(
@@ -194,8 +194,8 @@ describe('SpanScopeSelector', () => {
 
 	describe('when initializing with existing filters', () => {
 		it.each([
-			['Root Spans', 'isRoot'],
-			['Entrypoint Spans', 'isEntryPoint'],
+			['explorer.span_root', 'isRoot'],
+			['explorer.span_entrypoint', 'isEntryPoint'],
 		])(
 			'should initialize with %s selected when %s filter exists',
 			async (expectedText, filterKey) => {
@@ -259,37 +259,37 @@ describe('SpanScopeSelector', () => {
 		it('should initialize with ALL_SPANS if query prop has no scope filters', async () => {
 			const localQuery = createLocalQuery();
 			renderWithContext(defaultQuery, mockOnChange, localQuery);
-			expect(await screen.findByText('All Spans')).toBeInTheDocument();
+			expect(await screen.findByText('explorer.span_all')).toBeInTheDocument();
 		});
 
 		it('should initialize with ROOT_SPANS if query prop has isRoot filter', async () => {
 			const localQuery = createLocalQuery([createSpanScopeFilter('isRoot')]);
 			renderWithContext(defaultQuery, mockOnChange, localQuery);
-			expect(await screen.findByText('Root Spans')).toBeInTheDocument();
+			expect(await screen.findByText('explorer.span_root')).toBeInTheDocument();
 		});
 
 		it('should initialize with ENTRYPOINT_SPANS if query prop has isEntryPoint filter', async () => {
 			const localQuery = createLocalQuery([createSpanScopeFilter('isEntryPoint')]);
 			renderWithContext(defaultQuery, mockOnChange, localQuery);
-			expect(await screen.findByText('Entrypoint Spans')).toBeInTheDocument();
+			expect(await screen.findByText('explorer.span_entrypoint')).toBeInTheDocument();
 		});
 
 		it('should call onChange and not redirect when selecting ROOT_SPANS (from ALL_SPANS)', async () => {
-			const localQuery = createLocalQuery(); // Initially All Spans
+			const localQuery = createLocalQuery(); // Initially explorer.span_all
 			const { container } = renderWithContext(
 				defaultQuery,
 				mockOnChange,
 				localQuery,
 				true,
 			);
-			expect(await screen.findByText('All Spans')).toBeInTheDocument();
+			expect(await screen.findByText('explorer.span_all')).toBeInTheDocument();
 
-			await selectOption('Root Spans');
+			await selectOption('explorer.span_root');
 
 			expect(mockRedirectWithQueryBuilderData).not.toHaveBeenCalled();
 			assertOnChangePayload(0, 'isRoot', []);
 			expect(
-				container.querySelector('span[title="Root Spans"]'),
+				container.querySelector('span[title="explorer.span_root"]'),
 			).toBeInTheDocument();
 		});
 
@@ -302,15 +302,15 @@ describe('SpanScopeSelector', () => {
 				localQuery,
 				true,
 			);
-			expect(await screen.findByText('Root Spans')).toBeInTheDocument();
+			expect(await screen.findByText('explorer.span_root')).toBeInTheDocument();
 
-			await selectOption('All Spans');
+			await selectOption('explorer.span_all');
 
 			expect(mockRedirectWithQueryBuilderData).not.toHaveBeenCalled();
 			assertOnChangePayload(0, null, []);
 
 			expect(
-				container.querySelector('span[title="All Spans"]'),
+				container.querySelector('span[title="explorer.span_all"]'),
 			).toBeInTheDocument();
 		});
 
@@ -323,14 +323,14 @@ describe('SpanScopeSelector', () => {
 				localQuery,
 				true,
 			);
-			expect(await screen.findByText('Root Spans')).toBeInTheDocument();
+			expect(await screen.findByText('explorer.span_root')).toBeInTheDocument();
 
-			await selectOption('Entrypoint Spans');
+			await selectOption('explorer.span_entrypoint');
 
 			expect(mockRedirectWithQueryBuilderData).not.toHaveBeenCalled();
 			assertOnChangePayload(0, 'isEntryPoint', []);
 			expect(
-				container.querySelector('span[title="Entrypoint Spans"]'),
+				container.querySelector('span[title="explorer.span_entrypoint"]'),
 			).toBeInTheDocument();
 		});
 
@@ -345,14 +345,14 @@ describe('SpanScopeSelector', () => {
 				localQuery,
 				true,
 			);
-			expect(await screen.findByText('Root Spans')).toBeInTheDocument();
+			expect(await screen.findByText('explorer.span_root')).toBeInTheDocument();
 
-			await selectOption('Entrypoint Spans');
+			await selectOption('explorer.span_entrypoint');
 
 			expect(mockRedirectWithQueryBuilderData).not.toHaveBeenCalled();
 			assertOnChangePayload(0, 'isEntryPoint', [nonScopeItem]);
 			expect(
-				container.querySelector('span[title="Entrypoint Spans"]'),
+				container.querySelector('span[title="explorer.span_entrypoint"]'),
 			).toBeInTheDocument();
 		});
 
@@ -372,14 +372,14 @@ describe('SpanScopeSelector', () => {
 				localQuery,
 				true,
 			);
-			expect(await screen.findByText('Entrypoint Spans')).toBeInTheDocument();
+			expect(await screen.findByText('explorer.span_entrypoint')).toBeInTheDocument();
 
-			await selectOption('All Spans');
+			await selectOption('explorer.span_all');
 
 			expect(mockRedirectWithQueryBuilderData).not.toHaveBeenCalled();
 			assertOnChangePayload(0, null, [nonScopeItem1, nonScopeItem2]);
 			expect(
-				container.querySelector('span[title="All Spans"]'),
+				container.querySelector('span[title="explorer.span_all"]'),
 			).toBeInTheDocument();
 		});
 
@@ -418,9 +418,9 @@ describe('SpanScopeSelector', () => {
 				</QueryClientProvider>,
 			);
 
-			expect(await screen.findByText('All Spans')).toBeInTheDocument();
+			expect(await screen.findByText('explorer.span_all')).toBeInTheDocument();
 
-			await selectOption('Entrypoint Spans');
+			await selectOption('explorer.span_entrypoint');
 
 			expect(mockRedirectWithQueryBuilderData).toHaveBeenCalled();
 

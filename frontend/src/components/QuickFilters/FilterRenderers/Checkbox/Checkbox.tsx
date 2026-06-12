@@ -1,5 +1,6 @@
 /* eslint-disable sonarjs/no-identical-functions */
 import { Fragment, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Checkbox, Input, Skeleton, Typography } from 'antd';
 import cx from 'classnames';
 import { removeKeysFromExpression } from 'components/QueryBuilderV2/utils';
@@ -54,6 +55,7 @@ interface ICheckboxProps {
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export default function CheckboxFilter(props: ICheckboxProps): JSX.Element {
 	const { source, filter, onFilterChange } = props;
+	const { t } = useTranslation('common');
 	const [searchText, setSearchText] = useState<string>('');
 	// null = no user action, true = user opened, false = user closed
 	const [userToggleState, setUserToggleState] = useState<boolean | null>(null);
@@ -582,7 +584,7 @@ export default function CheckboxFilter(props: ICheckboxProps): JSX.Element {
 								handleClearFilterAttribute();
 							}}
 						>
-							Clear All
+							{t('explorer.clear_all')}
 						</Typography.Text>
 					)}
 				</section>
@@ -599,7 +601,7 @@ export default function CheckboxFilter(props: ICheckboxProps): JSX.Element {
 					{!isEmptyStateWithDocsEnabled && (
 						<section className="search">
 							<Input
-								placeholder="Filter values"
+								placeholder={t('explorer.filter_values_placeholder')}
 								onChange={(e): void => setSearchTextDebounced(e.target.value)}
 								disabled={isFilterDisabled}
 							/>
@@ -656,12 +658,12 @@ export default function CheckboxFilter(props: ICheckboxProps): JSX.Element {
 											<Button type="text" className="only-btn">
 												{isSomeFilterPresentForCurrentAttribute
 													? currentFilterState[value] && !isMultipleValuesTrueForTheKey
-														? 'All'
-														: 'Only'
-													: 'Only'}
+														? t('explorer.all')
+														: t('explorer.only')
+													: t('explorer.only')}
 											</Button>
 											<Button type="text" className="toggle-btn">
-												Toggle
+												{t('explorer.toggle')}
 											</Button>
 										</div>
 									</div>
@@ -672,7 +674,7 @@ export default function CheckboxFilter(props: ICheckboxProps): JSX.Element {
 						<LogsQuickFilterEmptyState attributeKey={filter.attributeKey.key} />
 					) : (
 						<section className="no-data">
-							<Typography.Text>No values found</Typography.Text>{' '}
+							<Typography.Text>{t('explorer.no_values_found')}</Typography.Text>{' '}
 						</section>
 					)}
 					{visibleItemsCount < attributeValues?.length && (
@@ -681,7 +683,7 @@ export default function CheckboxFilter(props: ICheckboxProps): JSX.Element {
 								className="show-more-text"
 								onClick={(): void => setVisibleItemsCount((prev) => prev + 10)}
 							>
-								Show More...
+								{t('explorer.show_more')}
 							</Typography.Text>
 						</section>
 					)}
