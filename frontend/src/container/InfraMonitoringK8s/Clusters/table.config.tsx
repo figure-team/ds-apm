@@ -25,7 +25,7 @@ export interface K8sClustersRowData {
 
 export const k8sClustersColumns: IEntityColumn[] = [
 	{
-		label: 'Cluster Group',
+		label: 'col_cluster_group',
 		value: 'clusterGroup',
 		id: 'clusterGroup',
 		canBeHidden: false,
@@ -33,7 +33,7 @@ export const k8sClustersColumns: IEntityColumn[] = [
 		behavior: 'hidden-on-collapse',
 	},
 	{
-		label: 'Cluster Name',
+		label: 'col_cluster_name',
 		value: 'clusterName',
 		id: 'clusterName',
 		canBeHidden: false,
@@ -41,7 +41,7 @@ export const k8sClustersColumns: IEntityColumn[] = [
 		behavior: 'hidden-on-expand',
 	},
 	{
-		label: 'CPU Usage (cores)',
+		label: 'col_cpu_usage_cores',
 		value: 'cpu',
 		id: 'cpu',
 		canBeHidden: false,
@@ -49,7 +49,7 @@ export const k8sClustersColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'CPU Alloc (cores)',
+		label: 'col_cpu_alloc_cores',
 		value: 'cpu_allocatable',
 		id: 'cpu_allocatable',
 		canBeHidden: false,
@@ -57,7 +57,7 @@ export const k8sClustersColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Memory Usage (WSS)',
+		label: 'col_memory_usage_wss',
 		value: 'memory',
 		id: 'memory',
 		canBeHidden: false,
@@ -65,7 +65,7 @@ export const k8sClustersColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Memory Alloc (bytes)',
+		label: 'col_memory_allocatable',
 		value: 'memory_allocatable',
 		id: 'memory_allocatable',
 		canBeHidden: false,

@@ -22,7 +22,7 @@ import styles from './table.module.scss';
 
 export const hostColumns: IEntityColumn[] = [
 	{
-		label: 'Host group',
+		label: 'col_host_group',
 		value: 'hostGroup',
 		id: 'hostGroup',
 		canBeHidden: false,
@@ -30,7 +30,7 @@ export const hostColumns: IEntityColumn[] = [
 		behavior: 'hidden-on-collapse',
 	},
 	{
-		label: 'Hostname',
+		label: 'col_hostname',
 		value: 'hostName',
 		id: 'hostName',
 		canBeHidden: false,
@@ -38,7 +38,7 @@ export const hostColumns: IEntityColumn[] = [
 		behavior: 'hidden-on-expand',
 	},
 	{
-		label: 'Status',
+		label: 'col_status',
 		value: 'active',
 		id: 'active',
 		canBeHidden: false,
@@ -46,7 +46,7 @@ export const hostColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'CPU Usage',
+		label: 'col_cpu_usage',
 		value: 'cpu',
 		id: 'cpu',
 		canBeHidden: false,
@@ -54,7 +54,7 @@ export const hostColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Memory Usage',
+		label: 'col_memory_usage',
 		value: 'memory',
 		id: 'memory',
 		canBeHidden: false,
@@ -62,7 +62,7 @@ export const hostColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'IOWait',
+		label: 'col_iowait',
 		value: 'wait',
 		id: 'wait',
 		canBeHidden: false,
@@ -70,7 +70,7 @@ export const hostColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Load Avg',
+		label: 'col_load_avg',
 		value: 'load15',
 		id: 'load15',
 		canBeHidden: false,

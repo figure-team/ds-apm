@@ -74,5 +74,7 @@
 	"click_run_query": "Click \"Run Query\" to load metrics.",
 	"query_cancelled": "Query cancelled.",
 	"metric": "METRIC",
-	"type": "TYPE"
+	"type": "TYPE",
+	"description": "DESCRIPTION",
+	"unit": "UNIT"
 }

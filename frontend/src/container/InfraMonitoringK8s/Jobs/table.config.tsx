@@ -18,7 +18,7 @@ import styles from './table.module.scss';
 
 export const k8sJobsColumns: IEntityColumn[] = [
 	{
-		label: 'Job Group',
+		label: 'col_job_group',
 		value: 'jobGroup',
 		id: 'jobGroup',
 		canBeHidden: false,
@@ -26,7 +26,7 @@ export const k8sJobsColumns: IEntityColumn[] = [
 		behavior: 'hidden-on-collapse',
 	},
 	{
-		label: 'Job Name',
+		label: 'col_job_name',
 		value: 'jobName',
 		id: 'jobName',
 		canBeHidden: false,
@@ -34,7 +34,7 @@ export const k8sJobsColumns: IEntityColumn[] = [
 		behavior: 'hidden-on-expand',
 	},
 	{
-		label: 'Namespace Name',
+		label: 'col_namespace_name',
 		value: 'namespaceName',
 		id: 'namespaceName',
 		canBeHidden: false,
@@ -42,7 +42,7 @@ export const k8sJobsColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Successful',
+		label: 'col_successful',
 		value: 'successful_pods',
 		id: 'successful_pods',
 		canBeHidden: false,
@@ -50,7 +50,7 @@ export const k8sJobsColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Failed',
+		label: 'col_failed',
 		value: 'failed_pods',
 		id: 'failed_pods',
 		canBeHidden: false,
@@ -58,7 +58,7 @@ export const k8sJobsColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Desired Successful',
+		label: 'col_desired_successful',
 		value: 'desired_successful_pods',
 		id: 'desired_successful_pods',
 		canBeHidden: false,
@@ -66,7 +66,7 @@ export const k8sJobsColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Active',
+		label: 'col_active',
 		value: 'active_pods',
 		id: 'active_pods',
 		canBeHidden: false,
@@ -74,7 +74,7 @@ export const k8sJobsColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'CPU Req Usage (%)',
+		label: 'col_cpu_req_usage_pct',
 		value: 'cpu_request',
 		id: 'cpu_request',
 		canBeHidden: false,
@@ -82,7 +82,7 @@ export const k8sJobsColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'CPU Limit Usage (%)',
+		label: 'col_cpu_limit_usage_pct',
 		value: 'cpu_limit',
 		id: 'cpu_limit',
 		canBeHidden: false,
@@ -90,7 +90,7 @@ export const k8sJobsColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'CPU Usage (cores)',
+		label: 'col_cpu_usage_cores',
 		value: 'cpu',
 		id: 'cpu',
 		canBeHidden: false,
@@ -98,7 +98,7 @@ export const k8sJobsColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Mem Req Usage (%)',
+		label: 'col_mem_req_usage_pct',
 		value: 'memory_request',
 		id: 'memory_request',
 		canBeHidden: false,
@@ -106,7 +106,7 @@ export const k8sJobsColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Mem Limit Usage (%)',
+		label: 'col_mem_limit_usage_pct',
 		value: 'memory_limit',
 		id: 'memory_limit',
 		canBeHidden: false,
@@ -114,7 +114,7 @@ export const k8sJobsColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Mem Usage (WSS)',
+		label: 'col_mem_usage_wss',
 		value: 'memory',
 		id: 'memory',
 		canBeHidden: false,

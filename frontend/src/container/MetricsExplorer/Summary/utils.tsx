@@ -39,7 +39,7 @@ export const getMetricsTableColumns = (
 		),
 	},
 	{
-		title: 'DESCRIPTION',
+		title: t('description').toString(),
 		dataIndex: 'description',
 		width: 400,
 		render: (value: string): React.ReactNode => (
@@ -63,18 +63,18 @@ export const getMetricsTableColumns = (
 		width: 150,
 	},
 	{
-		title: 'UNIT',
+		title: t('unit').toString(),
 		dataIndex: 'unit',
 		width: 150,
 	},
 	{
-		title: 'SAMPLES',
+		title: t('samples').toString(),
 		dataIndex: MetricsexplorertypesTreemapModeDTO.samples,
 		width: 150,
 		sorter: true,
 	},
 	{
-		title: 'TIME SERIES',
+		title: t('time_series').toString(),
 		dataIndex: MetricsexplorertypesTreemapModeDTO.timeseries,
 		width: 150,
 		sorter: true,

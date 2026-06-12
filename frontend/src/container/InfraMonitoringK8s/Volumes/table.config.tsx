@@ -13,7 +13,7 @@ import styles from './table.module.scss';
 
 export const k8sVolumesColumns: IEntityColumn[] = [
 	{
-		label: 'Volume Group',
+		label: 'col_volume_group',
 		value: 'volumeGroup',
 		id: 'volumeGroup',
 		canBeHidden: false,
@@ -21,7 +21,7 @@ export const k8sVolumesColumns: IEntityColumn[] = [
 		behavior: 'hidden-on-collapse',
 	},
 	{
-		label: 'PVC Name',
+		label: 'col_pvc_name',
 		value: 'pvcName',
 		id: 'pvcName',
 		canBeHidden: false,
@@ -29,7 +29,7 @@ export const k8sVolumesColumns: IEntityColumn[] = [
 		behavior: 'hidden-on-expand',
 	},
 	{
-		label: 'Namespace Name',
+		label: 'col_namespace_name',
 		value: 'namespaceName',
 		id: 'namespaceName',
 		canBeHidden: false,
@@ -37,7 +37,7 @@ export const k8sVolumesColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Volume Capacity',
+		label: 'col_volume_capacity',
 		value: 'capacity',
 		id: 'capacity',
 		canBeHidden: false,
@@ -45,7 +45,7 @@ export const k8sVolumesColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Volume Utilization',
+		label: 'col_volume_utilization',
 		value: 'usage',
 		id: 'usage',
 		canBeHidden: false,
@@ -53,7 +53,7 @@ export const k8sVolumesColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Volume Available',
+		label: 'col_volume_available',
 		value: 'available',
 		id: 'available',
 		canBeHidden: false,

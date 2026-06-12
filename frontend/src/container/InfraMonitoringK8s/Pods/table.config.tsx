@@ -33,7 +33,7 @@ export interface K8sPodsRowData {
 
 export const k8sPodColumns: IEntityColumn[] = [
 	{
-		label: 'Pod Group',
+		label: 'col_pod_group',
 		value: 'podGroup',
 		id: 'podGroup',
 		canBeHidden: false,
@@ -41,7 +41,7 @@ export const k8sPodColumns: IEntityColumn[] = [
 		behavior: 'hidden-on-collapse',
 	},
 	{
-		label: 'Pod name',
+		label: 'col_pod_name',
 		value: 'podName',
 		id: 'podName',
 		canBeHidden: false,
@@ -49,7 +49,7 @@ export const k8sPodColumns: IEntityColumn[] = [
 		behavior: 'hidden-on-expand',
 	},
 	{
-		label: 'CPU Req Usage (%)',
+		label: 'col_cpu_req_usage_pct',
 		value: 'cpu_request',
 		id: 'cpu_request',
 		canBeHidden: false,
@@ -57,7 +57,7 @@ export const k8sPodColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'CPU Limit Usage (%)',
+		label: 'col_cpu_limit_usage_pct',
 		value: 'cpu_limit',
 		id: 'cpu_limit',
 		canBeHidden: false,
@@ -65,7 +65,7 @@ export const k8sPodColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'CPU Usage (cores)',
+		label: 'col_cpu_usage_cores',
 		value: 'cpu',
 		id: 'cpu',
 		canBeHidden: false,
@@ -73,7 +73,7 @@ export const k8sPodColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Mem Req Usage (%)',
+		label: 'col_mem_req_usage_pct',
 		value: 'memory_request',
 		id: 'memory_request',
 		canBeHidden: false,
@@ -81,7 +81,7 @@ export const k8sPodColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Mem Limit Usage (%)',
+		label: 'col_mem_limit_usage_pct',
 		value: 'memory_limit',
 		id: 'memory_limit',
 		canBeHidden: false,
@@ -89,7 +89,7 @@ export const k8sPodColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Mem Usage (WSS)',
+		label: 'col_mem_usage_wss',
 		value: 'memory',
 		id: 'memory',
 		canBeHidden: false,
@@ -97,7 +97,7 @@ export const k8sPodColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Namespace name',
+		label: 'col_namespace_name',
 		value: 'namespace',
 		id: 'namespace',
 		canBeHidden: true,
@@ -105,7 +105,7 @@ export const k8sPodColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Node name',
+		label: 'col_node_name',
 		value: 'node',
 		id: 'node',
 		canBeHidden: true,
@@ -113,7 +113,7 @@ export const k8sPodColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Cluster name',
+		label: 'col_cluster_name',
 		value: 'cluster',
 		id: 'cluster',
 		canBeHidden: true,

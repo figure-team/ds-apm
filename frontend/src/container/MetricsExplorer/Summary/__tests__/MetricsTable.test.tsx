@@ -246,7 +246,7 @@ describe('MetricsTable', () => {
 			</MemoryRouter>,
 		);
 
-		const samplesHeader = screen.getByText('SAMPLES');
+		const samplesHeader = screen.getByText('samples');
 		fireEvent.click(samplesHeader);
 
 		expect(mockSetOrderBy).toHaveBeenCalledWith({

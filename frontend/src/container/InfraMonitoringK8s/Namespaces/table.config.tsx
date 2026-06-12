@@ -24,7 +24,7 @@ export interface K8sNamespacesRowData {
 
 export const k8sNamespacesColumns: IEntityColumn[] = [
 	{
-		label: 'Namespace Group',
+		label: 'col_namespace_group',
 		value: 'namespaceGroup',
 		id: 'namespaceGroup',
 		canBeHidden: false,
@@ -32,7 +32,7 @@ export const k8sNamespacesColumns: IEntityColumn[] = [
 		behavior: 'hidden-on-collapse',
 	},
 	{
-		label: 'Namespace Name',
+		label: 'col_namespace_name',
 		value: 'namespaceName',
 		id: 'namespaceName',
 		canBeHidden: false,
@@ -40,7 +40,7 @@ export const k8sNamespacesColumns: IEntityColumn[] = [
 		behavior: 'hidden-on-expand',
 	},
 	{
-		label: 'Cluster Name',
+		label: 'col_cluster_name',
 		value: 'clusterName',
 		id: 'clusterName',
 		canBeHidden: false,
@@ -48,7 +48,7 @@ export const k8sNamespacesColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'CPU Usage (cores)',
+		label: 'col_cpu_usage_cores',
 		value: 'cpu',
 		id: 'cpu',
 		canBeHidden: false,
@@ -56,7 +56,7 @@ export const k8sNamespacesColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Memory Usage (WSS)',
+		label: 'col_memory_usage_wss',
 		value: 'memory',
 		id: 'memory',
 		canBeHidden: false,

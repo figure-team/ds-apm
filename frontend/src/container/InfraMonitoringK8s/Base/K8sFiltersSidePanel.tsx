@@ -50,7 +50,7 @@ function K8sFiltersSidePanel({
 								data-testid={`remove-column-${column.id}`}
 								onClick={(): void => removeColumn(entity, column.id)}
 							>
-								{column.label}
+								{t(column.label).toString()}
 							</Button>
 						</div>
 					))}
@@ -74,7 +74,7 @@ function K8sFiltersSidePanel({
 								onClick={(): void => addColumn(entity, column.id)}
 								tabIndex={0}
 							>
-								{column.label}
+								{t(column.label).toString()}
 							</Button>
 						</div>
 					))}

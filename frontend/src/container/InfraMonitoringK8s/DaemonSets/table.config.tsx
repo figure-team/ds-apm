@@ -18,7 +18,7 @@ import styles from './table.module.scss';
 
 export const k8sDaemonSetsColumns: IEntityColumn[] = [
 	{
-		label: 'DaemonSet Group',
+		label: 'col_daemonset_group',
 		value: 'daemonSetGroup',
 		id: 'daemonSetGroup',
 		canBeHidden: false,
@@ -26,7 +26,7 @@ export const k8sDaemonSetsColumns: IEntityColumn[] = [
 		behavior: 'hidden-on-collapse',
 	},
 	{
-		label: 'DaemonSet Name',
+		label: 'col_daemonset_name',
 		value: 'daemonsetName',
 		id: 'daemonsetName',
 		canBeHidden: false,
@@ -34,7 +34,7 @@ export const k8sDaemonSetsColumns: IEntityColumn[] = [
 		behavior: 'hidden-on-expand',
 	},
 	{
-		label: 'Namespace Name',
+		label: 'col_namespace_name',
 		value: 'namespaceName',
 		id: 'namespaceName',
 		canBeHidden: false,
@@ -42,7 +42,7 @@ export const k8sDaemonSetsColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Available',
+		label: 'col_available',
 		value: 'available_nodes',
 		id: 'available_nodes',
 		canBeHidden: false,
@@ -50,7 +50,7 @@ export const k8sDaemonSetsColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Desired',
+		label: 'col_desired',
 		value: 'desired_nodes',
 		id: 'desired_nodes',
 		canBeHidden: false,
@@ -58,7 +58,7 @@ export const k8sDaemonSetsColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'CPU Req Usage (%)',
+		label: 'col_cpu_req_usage_pct',
 		value: 'cpu_request',
 		id: 'cpu_request',
 		canBeHidden: false,
@@ -66,7 +66,7 @@ export const k8sDaemonSetsColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'CPU Limit Usage (%)',
+		label: 'col_cpu_limit_usage_pct',
 		value: 'cpu_limit',
 		id: 'cpu_limit',
 		canBeHidden: false,
@@ -74,7 +74,7 @@ export const k8sDaemonSetsColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'CPU Usage (cores)',
+		label: 'col_cpu_usage_cores',
 		value: 'cpu',
 		id: 'cpu',
 		canBeHidden: false,
@@ -82,7 +82,7 @@ export const k8sDaemonSetsColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Mem Req Usage (%)',
+		label: 'col_mem_req_usage_pct',
 		value: 'memory_request',
 		id: 'memory_request',
 		canBeHidden: false,
@@ -90,7 +90,7 @@ export const k8sDaemonSetsColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Mem Limit Usage (%)',
+		label: 'col_mem_limit_usage_pct',
 		value: 'memory_limit',
 		id: 'memory_limit',
 		canBeHidden: false,
@@ -98,7 +98,7 @@ export const k8sDaemonSetsColumns: IEntityColumn[] = [
 		behavior: 'always-visible',
 	},
 	{
-		label: 'Mem Usage (WSS)',
+		label: 'col_mem_usage_wss',
 		value: 'memory',
 		id: 'memory',
 		canBeHidden: false,
