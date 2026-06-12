@@ -6,6 +6,7 @@ import {
 	useMemo,
 	useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import { Select, Spin } from 'antd';
 import { getAggregateKeys } from 'api/queryBuilder/getAttributeKeys';
@@ -33,6 +34,7 @@ export const GroupByFilter = memo(function GroupByFilter({
 	disabled,
 	signalSource,
 }: GroupByFilterProps): JSX.Element {
+	const { t } = useTranslation('common');
 	const queryClient = useQueryClient();
 	const [searchText, setSearchText] = useState<string>('');
 	const [optionsData, setOptionsData] = useState<
@@ -190,7 +192,11 @@ export const GroupByFilter = memo(function GroupByFilter({
 			notFoundContent={isFetching ? <Spin size="small" /> : null}
 			onChange={handleChange}
 			data-testid="group-by"
-			placeholder={localValues?.length === 0 ? 'Everything (no breakdown)' : ''}
+			placeholder={
+				localValues?.length === 0
+					? t('query_builder.everything_no_breakdown')
+					: ''
+			}
 		/>
 	);
 });

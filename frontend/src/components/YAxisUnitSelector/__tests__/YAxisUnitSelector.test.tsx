@@ -19,7 +19,9 @@ describe('YAxisUnitSelector', () => {
 				source={YAxisSource.ALERTS}
 			/>,
 		);
-		expect(screen.getByText('Please select a unit')).toBeInTheDocument();
+		expect(
+			screen.getByText('query_builder.please_select_a_unit'),
+		).toBeInTheDocument();
 	});
 
 	it('renders with custom placeholder', () => {

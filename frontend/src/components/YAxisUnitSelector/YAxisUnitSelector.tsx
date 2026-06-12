@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { WarningFilled } from '@ant-design/icons';
 import { Select, Tooltip } from 'antd';
 import type { DefaultOptionType } from 'antd/es/select';
@@ -17,7 +18,7 @@ import './styles.scss';
 function YAxisUnitSelector({
 	value,
 	onChange,
-	placeholder = 'Please select a unit',
+	placeholder,
 	loading = false,
 	'data-testid': dataTestId,
 	source,
@@ -25,6 +26,9 @@ function YAxisUnitSelector({
 	categoriesOverride,
 	containerClassName,
 }: YAxisUnitSelectorProps): JSX.Element {
+	const { t } = useTranslation('common');
+	const resolvedPlaceholder =
+		placeholder ?? t('query_builder.please_select_a_unit');
 	const universalUnit = mapMetricUnitToUniversalUnit(value);
 
 	const incompatibleUnitMessage = useMemo(() => {
@@ -79,7 +83,7 @@ function YAxisUnitSelector({
 				showSearch
 				value={universalUnit}
 				onChange={onChange}
-				placeholder={placeholder}
+				placeholder={resolvedPlaceholder}
 				filterOption={(input, option): boolean => handleSearch(input, option)}
 				loading={loading}
 				suffixIcon={

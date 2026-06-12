@@ -44,7 +44,7 @@ function QuerySection({
 	isAnomalyDetection,
 }: QuerySectionProps): JSX.Element {
 	// init namespace for translations
-	const { t } = useTranslation('alerts');
+	const { t } = useTranslation(['alerts', 'common']);
 	const [currentTab, setCurrentTab] = useState(queryCategory);
 	const [signalSource, setSignalSource] = useState<string>('metrics');
 
@@ -101,10 +101,12 @@ function QuerySection({
 	const tabs = [
 		{
 			label: (
-				<Tooltip title="Query Builder">
+				<Tooltip title={t('common:query_builder.type_query_builder')}>
 					<Button className="nav-btns">
 						<Atom size={14} />
-						<Typography.Text>Query Builder</Typography.Text>
+						<Typography.Text>
+							{t('common:query_builder.type_query_builder')}
+						</Typography.Text>
 					</Button>
 				</Tooltip>
 			),
@@ -121,7 +123,9 @@ function QuerySection({
 				>
 					<Button className="nav-btns" disabled={isAnomalyDetection}>
 						<Terminal size={14} />
-						<Typography.Text>ClickHouse Query</Typography.Text>
+						<Typography.Text>
+							{t('common:query_builder.type_clickhouse_query')}
+						</Typography.Text>
 					</Button>
 				</Tooltip>
 			),
@@ -141,10 +145,12 @@ function QuerySection({
 		() => [
 			{
 				label: (
-					<Tooltip title="Query Builder">
+					<Tooltip title={t('common:query_builder.type_query_builder')}>
 						<Button className="nav-btns" data-testid="query-builder-tab">
 							<Atom size={14} />
-							<Typography.Text>Query Builder</Typography.Text>
+							<Typography.Text>
+								{t('common:query_builder.type_query_builder')}
+							</Typography.Text>
 						</Button>
 					</Tooltip>
 				),
@@ -161,7 +167,9 @@ function QuerySection({
 					>
 						<Button className="nav-btns" disabled={isAnomalyDetection}>
 							<Terminal size={14} />
-							<Typography.Text>ClickHouse Query</Typography.Text>
+							<Typography.Text>
+								{t('common:query_builder.type_clickhouse_query')}
+							</Typography.Text>
 						</Button>
 					</Tooltip>
 				),
@@ -189,7 +197,7 @@ function QuerySection({
 				disabled: isAnomalyDetection,
 			},
 		],
-		[isDarkMode, isAnomalyDetection, anomalyDisabledTooltip],
+		[isDarkMode, isAnomalyDetection, anomalyDisabledTooltip, t],
 	);
 
 	const { registerShortcut, deregisterShortcut } = useKeyboardHotkeys();

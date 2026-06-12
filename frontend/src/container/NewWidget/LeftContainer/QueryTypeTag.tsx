@@ -1,12 +1,14 @@
+import { useTranslation } from 'react-i18next';
 import { EQueryType } from 'types/common/dashboard';
 
 function QueryTypeTag({ queryType }: IQueryTypeTagProps): JSX.Element {
+	const { t } = useTranslation('common');
 	switch (queryType) {
 		case EQueryType.QUERY_BUILDER:
-			return <span>Query Builder</span>;
+			return <span>{t('query_builder.type_query_builder')}</span>;
 
 		case EQueryType.CLICKHOUSE:
-			return <span>ClickHouse Query</span>;
+			return <span>{t('query_builder.type_clickhouse_query')}</span>;
 		case EQueryType.PROM:
 			return <span>PromQL</span>;
 		default:

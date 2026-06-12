@@ -15,6 +15,7 @@ function InputWithLabel({
 	onChange,
 	className,
 	closeIcon,
+	inputId,
 }: {
 	label: string;
 	initialValue?: string | number | null;
@@ -25,7 +26,11 @@ function InputWithLabel({
 	onChange: (value: string) => void;
 	className?: string;
 	closeIcon?: React.ReactNode;
+	// Stable identifier for the input's `name`/`data-testid`. Defaults to `label`,
+	// but should be set when `label` is a translated string so identifiers stay stable.
+	inputId?: string;
 }): JSX.Element {
+	const resolvedId = inputId ?? label;
 	const [inputValue, setInputValue] = useState<string>(
 		initialValue ? initialValue.toString() : '',
 	);
@@ -48,8 +53,8 @@ function InputWithLabel({
 				type={type}
 				value={inputValue}
 				onChange={handleChange}
-				name={label.toLowerCase()}
-				data-testid={`input-${label}`}
+				name={resolvedId.toLowerCase()}
+				data-testid={`input-${resolvedId}`}
 			/>
 			{labelAfter && <Typography.Text className="label">{label}</Typography.Text>}
 			{onClose && (
@@ -70,6 +75,7 @@ InputWithLabel.defaultProps = {
 	initialValue: undefined,
 	className: undefined,
 	closeIcon: undefined,
+	inputId: undefined,
 };
 
 export default InputWithLabel;

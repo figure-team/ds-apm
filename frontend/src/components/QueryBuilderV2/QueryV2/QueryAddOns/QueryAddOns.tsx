@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Radio, RadioChangeEvent, Tooltip } from 'antd';
 import InputWithLabel from 'components/InputWithLabel/InputWithLabel';
 import { PANEL_TYPES } from 'constants/queryBuilder';
@@ -44,48 +45,44 @@ const ADD_ONS_KEYS_TO_QUERY_PATH = {
 	[ADD_ONS_KEYS.REDUCE_TO]: 'reduceTo',
 };
 
+// `label` holds the i18n key (common namespace); resolved with t() at render time.
 const ADD_ONS = [
 	{
 		icon: <BarChart2 size={14} />,
-		label: 'Group By',
+		label: 'query_builder.group_by',
 		key: ADD_ONS_KEYS.GROUP_BY,
-		description:
-			'Break down data by attributes like service name, endpoint, status code, or region. Essential for spotting patterns and comparing performance across different segments.',
+		description: 'query_builder.group_by_desc',
 		docLink: 'https://signoz.io/docs/userguide/query-builder-v5/#grouping',
 	},
 	{
 		icon: <ScrollText size={14} />,
-		label: 'Having',
+		label: 'query_builder.having',
 		key: ADD_ONS_KEYS.HAVING,
-		description:
-			'Filter grouped results based on aggregate conditions. Show only groups meeting specific criteria, like error rates > 5% or p99 latency > 500',
+		description: 'query_builder.having_desc',
 		docLink:
 			'https://signoz.io/docs/userguide/query-builder-v5/#conditional-filtering-with-having',
 	},
 	{
 		icon: <ScrollText size={14} />,
-		label: 'Order By',
+		label: 'query_builder.order_by',
 		key: ADD_ONS_KEYS.ORDER_BY,
-		description:
-			'Sort results to surface what matters most. Quickly identify slowest operations, most frequent errors, or highest resource consumers.',
+		description: 'query_builder.order_by_desc',
 		docLink:
 			'https://signoz.io/docs/userguide/query-builder-v5/#sorting--limiting',
 	},
 	{
 		icon: <ScrollText size={14} />,
-		label: 'Limit',
+		label: 'query_builder.limit',
 		key: ADD_ONS_KEYS.LIMIT,
-		description:
-			'Show only the top/bottom N results. Perfect for focusing on outliers, reducing noise, and improving dashboard performance.',
+		description: 'query_builder.limit_desc',
 		docLink:
 			'https://signoz.io/docs/userguide/query-builder-v5/#sorting--limiting',
 	},
 	{
 		icon: <ScrollText size={14} />,
-		label: 'Legend format',
+		label: 'query_builder.legend_format',
 		key: ADD_ONS_KEYS.LEGEND_FORMAT,
-		description:
-			'Customize series labels using variables like {{service.name}}-{{endpoint}}. Makes charts readable at a glance during incident investigation.',
+		description: 'query_builder.legend_format_desc',
 		docLink:
 			'https://signoz.io/docs/userguide/query-builder-v5/#legend-formatting',
 	},
@@ -93,10 +90,9 @@ const ADD_ONS = [
 
 const REDUCE_TO = {
 	icon: <ScrollText size={14} />,
-	label: 'Reduce to',
+	label: 'query_builder.reduce_to',
 	key: ADD_ONS_KEYS.REDUCE_TO,
-	description:
-		'Apply mathematical operations like sum, average, min, max, or percentiles to reduce multiple time series into a single value.',
+	description: 'query_builder.reduce_to_desc',
 	docLink:
 		'https://signoz.io/docs/userguide/query-builder-v5/#reduce-operations',
 };
@@ -114,6 +110,7 @@ function TooltipContent({
 	description?: string;
 	docLink?: string;
 }): JSX.Element {
+	const { t } = useTranslation('common');
 	return (
 		<div
 			style={{
@@ -142,7 +139,7 @@ function TooltipContent({
 						marginTop: '4px',
 					}}
 				>
-					Learn more
+					{t('learn_more')}
 					<ExternalLink size={12} />
 				</a>
 			)}
@@ -167,6 +164,7 @@ function QueryAddOns({
 	index: number;
 	isForTraceOperator?: boolean;
 }): JSX.Element {
+	const { t } = useTranslation('common');
 	const [addOns, setAddOns] = useState<AddOn[]>(ADD_ONS);
 
 	const [selectedViews, setSelectedViews] = useState<AddOn[]>([]);
@@ -347,8 +345,8 @@ function QueryAddOns({
 								<Tooltip
 									title={
 										<TooltipContent
-											label="Group By"
-											description="Break down data by attributes like service name, endpoint, status code, or region. Essential for spotting patterns and comparing performance across different segments."
+											label={t('query_builder.group_by')}
+											description={t('query_builder.group_by_desc')}
 											docLink="https://signoz.io/docs/userguide/query-builder-v5/#grouping"
 										/>
 									}
@@ -356,7 +354,7 @@ function QueryAddOns({
 									mouseEnterDelay={0.5}
 								>
 									<div className="label" style={{ cursor: 'help' }}>
-										Group By
+										{t('query_builder.group_by')}
 									</div>
 								</Tooltip>
 								<div className="input">
@@ -383,8 +381,8 @@ function QueryAddOns({
 								<Tooltip
 									title={
 										<TooltipContent
-											label="Having"
-											description="Filter grouped results based on aggregate conditions. Show only groups meeting specific criteria, like error rates > 5% or p99 latency > 500"
+											label={t('query_builder.having')}
+											description={t('query_builder.having_desc')}
 											docLink="https://signoz.io/docs/userguide/query-builder-v5/#conditional-filtering-with-having"
 										/>
 									}
@@ -392,7 +390,7 @@ function QueryAddOns({
 									mouseEnterDelay={0.5}
 								>
 									<div className="label" style={{ cursor: 'help' }}>
-										Having
+										{t('query_builder.having')}
 									</div>
 								</Tooltip>
 								<div className="input">
@@ -412,17 +410,18 @@ function QueryAddOns({
 					{selectedViews.find((view) => view.key === 'limit') && (
 						<div className="add-on-content" data-testid="limit-content">
 							<InputWithLabel
-								label="Limit"
+								label={t('query_builder.limit')}
 								type="number"
 								onChange={handleChangeLimit}
 								initialValue={query?.limit ?? undefined}
-								placeholder="Enter limit"
+								placeholder={t('query_builder.limit_placeholder')}
 								onClose={(): void => {
 									setSelectedViews((prev) =>
 										prev.filter((view) => view.key !== 'limit'),
 									);
 								}}
 								closeIcon={<ChevronUp size={16} />}
+								inputId="Limit"
 							/>
 						</div>
 					)}
@@ -432,8 +431,8 @@ function QueryAddOns({
 								<Tooltip
 									title={
 										<TooltipContent
-											label="Order By"
-											description="Sort results to surface what matters most. Quickly identify slowest operations, most frequent errors, or highest resource consumers."
+											label={t('query_builder.order_by')}
+											description={t('query_builder.order_by_desc')}
 											docLink="https://signoz.io/docs/userguide/query-builder-v5/#sorting--limiting"
 										/>
 									}
@@ -441,7 +440,7 @@ function QueryAddOns({
 									mouseEnterDelay={0.5}
 								>
 									<div className="label" style={{ cursor: 'help' }}>
-										Order By
+										{t('query_builder.order_by')}
 									</div>
 								</Tooltip>
 								<div className="input">
@@ -471,8 +470,8 @@ function QueryAddOns({
 									<Tooltip
 										title={
 											<TooltipContent
-												label="Reduce to"
-												description="Apply mathematical operations like sum, average, min, max, or percentiles to reduce multiple time series into a single value."
+												label={t('query_builder.reduce_to')}
+												description={t('query_builder.reduce_to_desc')}
 												docLink="https://signoz.io/docs/userguide/query-builder-v5/#reduce-operations"
 											/>
 										}
@@ -480,7 +479,7 @@ function QueryAddOns({
 										mouseEnterDelay={0.5}
 									>
 										<div className="label" style={{ cursor: 'help' }}>
-											Reduce to
+											{t('query_builder.reduce_to')}
 										</div>
 									</Tooltip>
 									<div className="input">
@@ -499,8 +498,8 @@ function QueryAddOns({
 					{selectedViews.find((view) => view.key === 'legend_format') && (
 						<div className="add-on-content" data-testid="legend-format-content">
 							<InputWithLabel
-								label="Legend format"
-								placeholder="Write legend format"
+								label={t('query_builder.legend_format')}
+								placeholder={t('query_builder.legend_format_placeholder')}
 								onChange={handleChangeQueryLegend}
 								initialValue={isEmpty(query?.legend) ? undefined : query?.legend}
 								onClose={(): void => {
@@ -509,6 +508,7 @@ function QueryAddOns({
 									);
 								}}
 								closeIcon={<ChevronUp size={16} />}
+								inputId="Legend format"
 							/>
 						</div>
 					)}
@@ -526,8 +526,14 @@ function QueryAddOns({
 							key={addOn.key}
 							title={
 								<TooltipContent
-									label={addOn.label}
-									description={addOn.description}
+									label={t(addOn.label)}
+									description={
+										addOn.description
+											? t(addOn.description, {
+													example: '{{service.name}}-{{endpoint}}',
+											  })
+											: undefined
+									}
 									docLink={addOn.docLink}
 								/>
 							}
@@ -547,7 +553,7 @@ function QueryAddOns({
 									data-testid={`query-add-on-${addOn.key}`}
 								>
 									{addOn.icon}
-									{addOn.label}
+									{t(addOn.label)}
 								</div>
 							</Radio.Button>
 						</Tooltip>

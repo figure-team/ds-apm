@@ -140,10 +140,10 @@ const renderQuerySection = (): ReturnType<typeof render> =>
 		</Provider>,
 	);
 
-const METRICS_TEXT = 'Metrics';
+const METRICS_TEXT = 'query_builder.tab_metrics';
 const QUERY_BUILDER_TEXT = 'query_builder';
-const LOGS_TEXT = 'Logs';
-const TRACES_TEXT = 'Traces';
+const LOGS_TEXT = 'query_builder.tab_logs';
+const TRACES_TEXT = 'query_builder.tab_traces';
 const ACTIVE_TAB_CLASS = 'active-tab';
 
 describe('QuerySection', () => {
@@ -163,7 +163,7 @@ describe('QuerySection', () => {
 		expect(screen.getByTestId('stepper')).toBeInTheDocument();
 		expect(screen.getByTestId('step-number')).toHaveTextContent('1');
 		expect(screen.getByTestId('step-label')).toHaveTextContent(
-			'Define the query',
+			'query_builder.define_the_query',
 		);
 
 		// Check if ChartPreview is rendered
@@ -185,8 +185,8 @@ describe('QuerySection', () => {
 
 		// Check if all tabs are rendered
 		expect(screen.getByText(METRICS_TEXT)).toBeInTheDocument();
-		expect(screen.getByText('Logs')).toBeInTheDocument();
-		expect(screen.getByText('Traces')).toBeInTheDocument();
+		expect(screen.getByText(LOGS_TEXT)).toBeInTheDocument();
+		expect(screen.getByText(TRACES_TEXT)).toBeInTheDocument();
 
 		// Check if icons are rendered
 		expect(screen.getByTestId('metrics-view')).toBeInTheDocument();
@@ -288,8 +288,8 @@ describe('QuerySection', () => {
 		const user = userEvent.setup();
 		renderQuerySection();
 
-		const logsTab = screen.getByText('Logs');
-		const tracesTab = screen.getByText('Traces');
+		const logsTab = screen.getByText(LOGS_TEXT);
+		const tracesTab = screen.getByText(TRACES_TEXT);
 
 		// Rapidly click on different tabs
 		await user.click(logsTab);
@@ -307,7 +307,7 @@ describe('QuerySection', () => {
 		renderQuerySection();
 
 		// Click on Logs tab
-		const logsTab = screen.getByText('Logs');
+		const logsTab = screen.getByText(LOGS_TEXT);
 		await user.click(logsTab);
 
 		// Verify Logs is active

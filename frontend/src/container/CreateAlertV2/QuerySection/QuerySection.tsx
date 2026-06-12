@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import { Button } from 'antd';
 import classNames from 'classnames';
@@ -23,6 +24,7 @@ import { buildAlertDefForChartPreview } from './utils';
 import './styles.scss';
 
 function QuerySection(): JSX.Element {
+	const { t } = useTranslation('common');
 	const {
 		currentQuery,
 		stagedQuery,
@@ -103,22 +105,22 @@ function QuerySection(): JSX.Element {
 
 	const tabs = [
 		{
-			label: 'Metrics',
+			label: t('query_builder.tab_metrics'),
 			icon: <BarChart2 size={14} data-testid="metrics-view" />,
 			value: AlertTypes.METRICS_BASED_ALERT,
 		},
 		{
-			label: 'Logs',
+			label: t('query_builder.tab_logs'),
 			icon: <ScrollText size={14} data-testid="logs-view" />,
 			value: AlertTypes.LOGS_BASED_ALERT,
 		},
 		{
-			label: 'Traces',
+			label: t('query_builder.tab_traces'),
 			icon: <DraftingCompass size={14} data-testid="traces-view" />,
 			value: AlertTypes.TRACES_BASED_ALERT,
 		},
 		{
-			label: 'Exceptions',
+			label: t('query_builder.tab_exceptions'),
 			icon: <FileText size={14} data-testid="exceptions-view" />,
 			value: AlertTypes.EXCEPTIONS_BASED_ALERT,
 		},
@@ -126,7 +128,11 @@ function QuerySection(): JSX.Element {
 
 	return (
 		<div className="query-section">
-			<Stepper stepNumber={1} label="Define the query" required />
+			<Stepper
+				stepNumber={1}
+				label={t('query_builder.define_the_query')}
+				required
+			/>
 			<ChartPreview
 				alertDef={alertDef}
 				source={source}

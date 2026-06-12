@@ -165,7 +165,7 @@ describe('QueryBuilderV2 + QueryV2 - base render', () => {
 
 		// Ensure the Limit add-on input is present and is of type number
 		const limitInput = screen.getByPlaceholderText(
-			'Enter limit',
+			'query_builder.limit_placeholder',
 		) as HTMLInputElement;
 		expect(limitInput).toBeInTheDocument();
 		expect(limitInput).toHaveAttribute('type', 'number');
@@ -176,7 +176,7 @@ describe('QueryBuilderV2 + QueryV2 - base render', () => {
 	it('Cmd+Enter on an input triggers handleRunQuery via container handler', async () => {
 		render(<QueryBuilderV2 panelType={PANEL_TYPES.TABLE} version="v4" />);
 
-		const limitInput = screen.getByPlaceholderText('Enter limit');
+		const limitInput = screen.getByPlaceholderText('query_builder.limit_placeholder');
 		fireEvent.keyDown(limitInput, {
 			key: 'Enter',
 			code: 'Enter',
@@ -185,7 +185,9 @@ describe('QueryBuilderV2 + QueryV2 - base render', () => {
 
 		expect(handleRunQueryMock).toHaveBeenCalled();
 
-		const legendInput = screen.getByPlaceholderText('Write legend format');
+		const legendInput = screen.getByPlaceholderText(
+			'query_builder.legend_format_placeholder',
+		);
 		fireEvent.keyDown(legendInput, {
 			key: 'Enter',
 			code: 'Enter',

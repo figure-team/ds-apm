@@ -291,7 +291,9 @@ describe('Explorer', () => {
 
 		const yAxisUnitSelector = screen.queryByTestId(Y_AXIS_UNIT_SELECTOR_TEST_ID);
 		expect(yAxisUnitSelector).toBeInTheDocument();
-		expect(yAxisUnitSelector).toHaveTextContent('Please select a unit');
+		expect(yAxisUnitSelector).toHaveTextContent(
+			'query_builder.please_select_a_unit',
+		);
 	});
 
 	it('one chart per query should be off and disabled when there is only one query', () => {
