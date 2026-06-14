@@ -64,6 +64,20 @@ import (
 	"github.com/SigNoz/signoz/pkg/zeus"
 
 	"github.com/SigNoz/signoz/pkg/web"
+
+	codercaauditor "github.com/SigNoz/signoz/pkg/ruler/coderca/auditor"
+	"github.com/SigNoz/signoz/pkg/ruler/coderca/clirunner"
+	"github.com/SigNoz/signoz/pkg/ruler/coderca/codebaseconfigstore/sqlcodebaseconfigstore"
+	"github.com/SigNoz/signoz/pkg/ruler/coderca/codebaseconfigstore/sqlcodebasercaconfigstore"
+	"github.com/SigNoz/signoz/pkg/ruler/coderca/codebaseconfigstore/sqlcodebaseservicemapstore"
+	codercadelivery "github.com/SigNoz/signoz/pkg/ruler/coderca/delivery"
+	codercaengine "github.com/SigNoz/signoz/pkg/ruler/coderca/engine"
+	"github.com/SigNoz/signoz/pkg/ruler/coderca/reporesolver"
+	codercarunstore "github.com/SigNoz/signoz/pkg/ruler/coderca/runstore"
+	codercasourcestate "github.com/SigNoz/signoz/pkg/ruler/coderca/sourcestate"
+	codercatrigger "github.com/SigNoz/signoz/pkg/ruler/coderca/trigger"
+	codercaworker "github.com/SigNoz/signoz/pkg/ruler/coderca/worker"
+	"path/filepath"
 )
 
 type SigNoz struct {
@@ -452,6 +466,62 @@ func New(
 		return nil, err
 	}
 
+	// ── CF-11 code RCA (coderca) — integration wiring (design §11) ──────────
+	// Per-org stores + cost-control run store.
+	codercaRepoStore := sqlcodebaseconfigstore.New(sqlstore)
+	codercaMapStore := sqlcodebaseservicemapstore.New(sqlstore)
+	codercaCfgStore := sqlcodebasercaconfigstore.New(sqlstore)
+	codercaRunStore := codercarunstore.New(sqlstore)
+
+	// Trigger: injected into the dispatch hook (fail-open, fire-and-forget).
+	if aiDispatchHook != nil {
+		aiDispatchHook.SetCodeRCATrigger(codercatrigger.New(
+			codercaCfgStore, codercaMapStore, codercaRunStore,
+			providerSettings.Logger, nil,
+		))
+	}
+
+	// Engine: deployment-level agent/model/auth from env (per-org thresholds
+	// live in ds_codebase_config and are enforced at admission).
+	codercaAgent := os.Getenv("DS_APM_CODERCA_AGENT")
+	if codercaAgent == "" {
+		codercaAgent = "claude"
+	}
+	codercaBudget := os.Getenv("DS_APM_CODERCA_MAX_BUDGET_USD")
+	if codercaBudget == "" {
+		codercaBudget = "0.50"
+	}
+	codercaAuth := os.Getenv("DS_APM_CODERCA_AUTH_TOKEN")
+	if codercaAuth == "" {
+		codercaAuth = pickAPIKey(os.Getenv("DS_APM_LLM_PROVIDER"))
+	}
+	codercaBaseDir := os.Getenv("DS_APM_CODERCA_DIR")
+	if codercaBaseDir == "" {
+		codercaBaseDir = filepath.Join(os.TempDir(), "ds-coderca")
+	}
+	hostname, _ := os.Hostname()
+
+	gitRunner := codercasourcestate.NewShellGitRunner(filepath.Join(codercaBaseDir, "mirrors"))
+	codercaEngine := codercaengine.New(
+		codercaengine.Config{
+			Scope:        "global",
+			InstanceID:   hostname,
+			Agent:        clirunner.Agent(codercaAgent),
+			Model:        os.Getenv("DS_APM_CODERCA_MODEL"),
+			MaxBudgetUSD: codercaBudget,
+			AuthToken:    codercaAuth,
+		},
+		codercaengine.Deps{
+			Runs:    codercaRunStore,
+			Repos:   reporesolver.New(codercaMapStore, codercaRepoStore, aiCipher.DecryptFunc()),
+			Source:  codercasourcestate.NewManager(gitRunner, filepath.Join(codercaBaseDir, "checkouts")),
+			CLI:     clirunner.NewRunner(),
+			Deliver: codercadelivery.New(codercadelivery.NewAlertmanagerSink(alertmanager)),
+			Auditor: codercaauditor.New(codercaauditor.NewDSSink(auditor.Audit), nil),
+		},
+	)
+	codercaWorker := codercaworker.New(codercaEngine, codercaRunStore, "global", 0, 0, providerSettings.Logger, nil)
+
 	// Initialize authns
 	store := sqlauthnstore.NewStore(sqlstore)
 	authNs, err := authNsCallback(ctx, providerSettings, store, licensing)
@@ -566,6 +636,7 @@ func New(
 		factory.NewNamedService(factory.MustNewName("authz"), authz),
 		factory.NewNamedService(factory.MustNewName("user"), userService, factory.MustNewName("authz")),
 		factory.NewNamedService(factory.MustNewName("auditor"), auditor),
+		factory.NewNamedService(factory.MustNewName("codercaworker"), codercaWorker),
 		factory.NewNamedService(factory.MustNewName("ruler"), rulerInstance),
 	)
 	if err != nil {
@@ -574,7 +645,7 @@ func New(
 
 	// Initialize all handlers for the modules
 	registryHandler := factory.NewHandler(registry)
-	handlers := NewHandlers(modules, providerSettings, analytics, querierHandler, licensing, global, flagger, gateway, telemetryMetadataStore, authz, zeus, registryHandler, alertmanager, rulerInstance, sqlstore, storeAware, aiConfigStore, aiCipher, storeAware, runbookDrafter)
+	handlers := NewHandlers(modules, providerSettings, analytics, querierHandler, licensing, global, flagger, gateway, telemetryMetadataStore, authz, zeus, registryHandler, alertmanager, rulerInstance, sqlstore, storeAware, aiConfigStore, aiCipher, storeAware, runbookDrafter, codercaRepoStore, codercaMapStore, codercaCfgStore, codercaRunStore, insecure)
 
 	// Initialize the API server (after registry so it can access service health)
 	apiserverInstance, err := factory.NewProviderFromNamedMap(
