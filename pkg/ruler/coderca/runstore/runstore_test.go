@@ -28,7 +28,11 @@ func applyRunstoreDDL(ctx context.Context, ss sqlstore.SQLStore) error {
 			heartbeat_at    INTEGER NOT NULL DEFAULT 0,
 			attempts        INTEGER NOT NULL DEFAULT 0,
 			finished_at     INTEGER NOT NULL DEFAULT 0,
-			result_ref      TEXT    NOT NULL DEFAULT ''
+			result_ref      TEXT    NOT NULL DEFAULT '',
+			root_cause      TEXT    NOT NULL DEFAULT '',
+			proposed_fix    TEXT    NOT NULL DEFAULT '',
+			confidence      TEXT    NOT NULL DEFAULT '',
+			limitations     TEXT    NOT NULL DEFAULT ''
 		)`,
 		`CREATE TABLE coderca_admission (
 			org_id           TEXT    NOT NULL,

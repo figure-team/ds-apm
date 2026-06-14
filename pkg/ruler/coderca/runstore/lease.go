@@ -37,6 +37,13 @@ type FinalizeParams struct {
 	Status     coderca.RunStatus // done | failed | timeout | unparseable
 	ResultRef  string
 	Now        time.Time
+
+	// Persisted RCA report (integration stage): served by the run-history API.
+	BaselineCommit string
+	RootCause      string
+	ProposedFix    string
+	Confidence     string
+	Limitations    string
 }
 
 // ReapParams sweeps expired leases.
@@ -182,9 +189,12 @@ func (s *Store) Finalize(ctx context.Context, p FinalizeParams) (bool, error) {
 
 		// Fenced terminal transition.
 		r, err := db.ExecContext(ctx,
-			`UPDATE coderca_run SET status = ?, result_ref = ?, finished_at = ?, lease_until = 0
+			`UPDATE coderca_run SET status = ?, result_ref = ?, finished_at = ?, lease_until = 0,
+			        baseline_commit = ?, root_cause = ?, proposed_fix = ?, confidence = ?, limitations = ?
 			 WHERE run_id = ? AND lease_token = ? AND status = ?`,
-			string(p.Status), p.ResultRef, p.Now.Unix(), p.RunID, p.LeaseToken, string(coderca.RunStatusRunning),
+			string(p.Status), p.ResultRef, p.Now.Unix(),
+			p.BaselineCommit, p.RootCause, p.ProposedFix, p.Confidence, p.Limitations,
+			p.RunID, p.LeaseToken, string(coderca.RunStatusRunning),
 		)
 		if err != nil {
 			return err
