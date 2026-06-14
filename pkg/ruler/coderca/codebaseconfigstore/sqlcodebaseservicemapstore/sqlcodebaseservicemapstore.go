@@ -55,6 +55,18 @@ func (s *serviceMapStore) Get(ctx context.Context, orgID, serviceName string) (r
 	return storable.ToDomain(), nil
 }
 
+func (s *serviceMapStore) Delete(ctx context.Context, orgID, serviceName string) error {
+	return s.sqlstore.RunInTxCtx(ctx, nil, func(ctx context.Context) error {
+		_, err := s.sqlstore.BunDBCtx(ctx).
+			NewDelete().
+			TableExpr("ds_codebase_service_map").
+			Where("org_id = ?", orgID).
+			Where("service_name = ?", serviceName).
+			Exec(ctx)
+		return err
+	})
+}
+
 func (s *serviceMapStore) List(ctx context.Context, orgID string) ([]ruletypes.CodebaseServiceMap, error) {
 	var storables []ruletypes.StorableCodebaseServiceMap
 	err := s.sqlstore.BunDBCtx(ctx).

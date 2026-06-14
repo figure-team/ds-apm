@@ -74,6 +74,49 @@ func TestServiceMapStore_ListIsOrgScoped(t *testing.T) {
 	require.Len(t, got, 2, "List must be org-scoped")
 }
 
+func TestServiceMapStore_Delete(t *testing.T) {
+	ctx := context.Background()
+	store := newStore(t)
+
+	// Upsert → Get ok → Delete → Get returns NotFound.
+	require.NoError(t, store.Upsert(ctx, ruletypes.CodebaseServiceMap{OrgID: "org-1", ServiceName: "payments", RepoID: "repo-pay"}))
+	_, err := store.Get(ctx, "org-1", "payments")
+	require.NoError(t, err)
+
+	require.NoError(t, store.Delete(ctx, "org-1", "payments"))
+
+	_, err = store.Get(ctx, "org-1", "payments")
+	require.ErrorIs(t, err, ruletypes.ErrCodebaseServiceMapNotFound)
+}
+
+func TestServiceMapStore_DeleteTenantIsolation(t *testing.T) {
+	ctx := context.Background()
+	store := newStore(t)
+
+	require.NoError(t, store.Upsert(ctx, ruletypes.CodebaseServiceMap{OrgID: "org-1", ServiceName: "payments", RepoID: "r1"}))
+	require.NoError(t, store.Upsert(ctx, ruletypes.CodebaseServiceMap{OrgID: "org-2", ServiceName: "payments", RepoID: "r2"}))
+
+	// Delete only org-1's row.
+	require.NoError(t, store.Delete(ctx, "org-1", "payments"))
+
+	// org-1 row gone.
+	_, err := store.Get(ctx, "org-1", "payments")
+	require.ErrorIs(t, err, ruletypes.ErrCodebaseServiceMapNotFound)
+
+	// org-2 row still present.
+	got, err := store.Get(ctx, "org-2", "payments")
+	require.NoError(t, err)
+	require.Equal(t, "r2", got.RepoID)
+}
+
+func TestServiceMapStore_DeleteIdempotent(t *testing.T) {
+	ctx := context.Background()
+	store := newStore(t)
+
+	// Delete a non-existent row must return nil (idempotent).
+	require.NoError(t, store.Delete(ctx, "org-x", "no-such-service"))
+}
+
 func TestServiceMapStore_UpsertOverwrites(t *testing.T) {
 	ctx := context.Background()
 	store := newStore(t)

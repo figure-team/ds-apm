@@ -15,4 +15,5 @@ type CodebaseServiceMapStore interface {
 	Upsert(ctx context.Context, m CodebaseServiceMap) error
 	Get(ctx context.Context, orgID, serviceName string) (CodebaseServiceMap, error)
 	List(ctx context.Context, orgID string) ([]CodebaseServiceMap, error)
+	Delete(ctx context.Context, orgID, serviceName string) error
 }

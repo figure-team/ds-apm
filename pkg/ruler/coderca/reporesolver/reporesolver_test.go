@@ -15,6 +15,7 @@ type fakeMaps struct {
 }
 
 func (f *fakeMaps) Upsert(context.Context, ruletypes.CodebaseServiceMap) error { return nil }
+func (f *fakeMaps) Delete(_ context.Context, _, _ string) error                { return nil }
 func (f *fakeMaps) Get(context.Context, string, string) (ruletypes.CodebaseServiceMap, error) {
 	return ruletypes.CodebaseServiceMap{}, ruletypes.ErrCodebaseServiceMapNotFound
 }
@@ -39,6 +40,7 @@ type fakeRepos struct {
 func (f *fakeRepos) Upsert(context.Context, ruletypes.CodebaseRepo, func(string) (string, error)) error {
 	return nil
 }
+func (f *fakeRepos) Delete(_ context.Context, _, _ string) error { return nil }
 func (f *fakeRepos) List(context.Context, string, func(string) (string, error)) ([]ruletypes.CodebaseRepo, error) {
 	return nil, nil
 }

@@ -98,6 +98,49 @@ func TestCodebaseRepoStore_List(t *testing.T) {
 	require.Len(t, got, 2, "List must be org-scoped")
 }
 
+func TestCodebaseRepoStore_Delete(t *testing.T) {
+	ctx := context.Background()
+	store := newStore(t)
+
+	// Upsert → Get ok → Delete → Get returns NotFound.
+	require.NoError(t, store.Upsert(ctx, makeRepo("org-1", "payments"), idEnc))
+	_, err := store.Get(ctx, "org-1", "payments", idDec)
+	require.NoError(t, err)
+
+	require.NoError(t, store.Delete(ctx, "org-1", "payments"))
+
+	_, err = store.Get(ctx, "org-1", "payments", idDec)
+	require.ErrorIs(t, err, ruletypes.ErrCodebaseRepoNotFound)
+}
+
+func TestCodebaseRepoStore_DeleteTenantIsolation(t *testing.T) {
+	ctx := context.Background()
+	store := newStore(t)
+
+	require.NoError(t, store.Upsert(ctx, makeRepo("org-1", "payments"), idEnc))
+	require.NoError(t, store.Upsert(ctx, makeRepo("org-2", "payments"), idEnc))
+
+	// Delete only org-1's row.
+	require.NoError(t, store.Delete(ctx, "org-1", "payments"))
+
+	// org-1 row gone.
+	_, err := store.Get(ctx, "org-1", "payments", idDec)
+	require.ErrorIs(t, err, ruletypes.ErrCodebaseRepoNotFound)
+
+	// org-2 row still present.
+	got, err := store.Get(ctx, "org-2", "payments", idDec)
+	require.NoError(t, err)
+	require.Equal(t, "org-2", got.OrgID)
+}
+
+func TestCodebaseRepoStore_DeleteIdempotent(t *testing.T) {
+	ctx := context.Background()
+	store := newStore(t)
+
+	// Delete a non-existent row must return nil (idempotent).
+	require.NoError(t, store.Delete(ctx, "org-x", "no-such-repo"))
+}
+
 func TestCodebaseRepoStore_UpsertOverwriteAndSourceState(t *testing.T) {
 	ctx := context.Background()
 	store := newStore(t)

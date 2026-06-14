@@ -62,6 +62,18 @@ func (s *codebaseRepoStore) Get(ctx context.Context, orgID, repoID string, decry
 	return storable.ToDomain(decrypt)
 }
 
+func (s *codebaseRepoStore) Delete(ctx context.Context, orgID, repoID string) error {
+	return s.sqlstore.RunInTxCtx(ctx, nil, func(ctx context.Context) error {
+		_, err := s.sqlstore.BunDBCtx(ctx).
+			NewDelete().
+			TableExpr("ds_codebase_repo").
+			Where("org_id = ?", orgID).
+			Where("repo_id = ?", repoID).
+			Exec(ctx)
+		return err
+	})
+}
+
 func (s *codebaseRepoStore) List(ctx context.Context, orgID string, decrypt func(string) (string, error)) ([]ruletypes.CodebaseRepo, error) {
 	var storables []ruletypes.StorableCodebaseRepo
 	err := s.sqlstore.BunDBCtx(ctx).
