@@ -283,6 +283,9 @@ func (r *AnomalyRule) Eval(ctx context.Context, ts time.Time) (int, error) {
 		lb.Set(ruletypes.AlertNameLabel, r.Name())
 		lb.Set(ruletypes.AlertRuleIDLabel, r.ID())
 		lb.Set(ruletypes.RuleSourceLabel, r.GeneratorURL())
+		// CF-11 trigger signal (design §10): anomaly alerts carry an explicit
+		// marker so the code-RCA gate stays fail-closed for everything else.
+		lb.Set("anomaly", "true")
 
 		annotations := make(ruletypes.Labels, 0, len(r.annotations.Map()))
 		for name, value := range r.annotations.Map() {

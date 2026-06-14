@@ -1,13 +1,17 @@
 package rules
 
 import (
+	"context"
 	"testing"
 	"time"
 
+	cmock "github.com/srikanthccv/ClickHouse-go-mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/SigNoz/signoz/pkg/instrumentation/instrumentationtest"
+	"github.com/SigNoz/signoz/pkg/telemetrystore"
+	"github.com/SigNoz/signoz/pkg/telemetrystore/telemetrystoretest"
 	"github.com/SigNoz/signoz/pkg/types/metrictypes"
 	qbtypes "github.com/SigNoz/signoz/pkg/types/querybuildertypes/querybuildertypesv5"
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
@@ -129,4 +133,92 @@ func TestAnomalyRule_FiresOnDeviation(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Empty(t, res)
 	})
+}
+
+// TestAnomalyRuleStampsAnomalyLabel drives the full Eval() pipeline via a
+// ClickHouse mock (mirroring the pattern used in TestThresholdRuleNoData and
+// sibling threshold tests) and asserts that every produced alert carries the
+// "anomaly=true" label required by the CF-11 trigger gate (design §10).
+//
+// Baseline: {2,4,4,4,5,5,7,9} → mean=5, σ=2 (k=3 → band [-1, 11]).
+// Eval point: 13 → z-score=4 > k=3 → fires.
+func TestAnomalyRuleStampsAnomalyLabel(t *testing.T) {
+	// baseline {2,4,4,4,5,5,7,9} -> mean=5, stddev=2; eval point 13 -> z=4 > k=3
+	baseValues := []float64{2, 4, 4, 4, 5, 5, 7, 9, 13}
+	base := time.Now().Add(-time.Duration(len(baseValues)) * time.Minute)
+
+	cols := []cmock.ColumnType{
+		{Name: "ts", Type: "DateTime"},
+		{Name: "value", Type: "Float64"},
+	}
+	rows := make([][]any, 0, len(baseValues))
+	for i, v := range baseValues {
+		rows = append(rows, []any{base.Add(time.Duration(i) * time.Minute), v})
+	}
+
+	telemetryStore := telemetrystoretest.New(telemetrystore.Config{}, &queryMatcherAny{})
+	// 9 args: metric_name, start, end, temporality, normalized, metric_name, start2, end2, isNaN-check
+	// (nil matches any actual value per cmock semantics)
+	telemetryStore.Mock().
+		ExpectQuery("SELECT any").
+		WithArgs(nil, nil, nil, nil, nil, nil, nil, nil, nil).
+		WillReturnRows(cmock.NewRows(cols, rows))
+
+	q, mockMetadataStore := prepareQuerierForMetrics(t, telemetryStore)
+	mockMetadataStore.TypeMap["latency"] = metrictypes.GaugeType
+
+	logger := instrumentationtest.New().Logger()
+	k := float64(3)
+	postable := &ruletypes.PostableRule{
+		AlertName: "anomaly label test",
+		AlertType: ruletypes.AlertTypeMetric,
+		RuleType:  ruletypes.RuleTypeAnomaly,
+		Evaluation: &ruletypes.EvaluationEnvelope{Kind: ruletypes.RollingEvaluation, Spec: ruletypes.RollingWindow{
+			EvalWindow: valuer.MustParseTextDuration("30m"),
+			Frequency:  valuer.MustParseTextDuration("1m"),
+		}},
+		RuleCondition: &ruletypes.RuleCondition{
+			CompositeQuery: &ruletypes.AlertCompositeQuery{
+				QueryType: ruletypes.QueryTypeBuilder,
+				Queries: []qbtypes.QueryEnvelope{{
+					Type: qbtypes.QueryTypeBuilder,
+					Spec: qbtypes.QueryBuilderQuery[qbtypes.MetricAggregation]{
+						Name:         "A",
+						StepInterval: qbtypes.Step{Duration: time.Minute},
+						Aggregations: []qbtypes.MetricAggregation{{
+							MetricName:       "latency",
+							Temporality:      metrictypes.Unspecified,
+							TimeAggregation:  metrictypes.TimeAggregationAvg,
+							SpaceAggregation: metrictypes.SpaceAggregationSum,
+						}},
+						Signal: telemetrytypes.SignalMetrics,
+					},
+				}},
+			},
+			Target:          &k,
+			CompareOperator: ruletypes.ValueIsAbove,
+			MatchType:       ruletypes.AtleastOnce,
+			Thresholds: &ruletypes.RuleThresholdData{
+				Kind: ruletypes.BasicThresholdKind,
+				Spec: ruletypes.BasicRuleThresholds{{
+					Name:            "anomaly",
+					TargetValue:     &k,
+					MatchType:       ruletypes.AtleastOnce,
+					CompareOperator: ruletypes.ValueIsAbove,
+				}},
+			},
+		},
+	}
+
+	rule, err := NewAnomalyRule("anomaly-label-1", valuer.GenerateUUID(), postable, q, logger)
+	require.NoError(t, err)
+
+	alertsFound, err := rule.Eval(context.Background(), time.Now())
+	require.NoError(t, err)
+	require.Greater(t, alertsFound, 0, "expected at least one firing alert from the 4σ spike")
+
+	for _, alert := range rule.Active {
+		assert.Equal(t, "true", alert.Labels.Get("anomaly"),
+			"every anomaly alert must carry label anomaly=true (CF-11 trigger gate)")
+	}
 }
