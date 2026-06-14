@@ -90,6 +90,7 @@ const ROUTES = {
 	SERVICE_ACCOUNTS_SETTINGS: '/settings/service-accounts',
 	MCP_SERVER: '/settings/mcp-server',
 	AI_MODULE_SETTINGS: '/settings/ai-module',
+	CODE_RCA_SETTINGS: '/settings/code-rca',
 } as const;
 
 export default ROUTES;

@@ -32,6 +32,7 @@
 	"settings_title": "Settings",
 	"mcp_server": "MCP Server",
 	"ai_module": "AI Module",
+	"code_rca": "Code RCA",
 	"create_alert_channels": "Create Alert Channel",
 	"edit_alert_channels": "Edit Alert Channel",
 	"home": "Home",

@@ -4,6 +4,7 @@ import { ROLES, USER_ROLES } from 'types/roles';
 
 import {
 	aiModuleSettings,
+	codeRcaSettings,
 	alertChannels,
 	billingSettings,
 	createAlertChannels,
@@ -85,6 +86,7 @@ export const getRoutes = (
 		...keyboardShortcuts(t),
 		...mcpServerSettings(t),
 		...aiModuleSettings(t),
+		...codeRcaSettings(t),
 	);
 
 	return settings;

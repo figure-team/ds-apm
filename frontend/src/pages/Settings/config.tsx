@@ -9,6 +9,7 @@ import GeneralSettingsCloud from 'container/GeneralSettingsCloud';
 import IngestionSettings from 'container/IngestionSettings/IngestionSettings';
 import MultiIngestionSettings from 'container/IngestionSettings/MultiIngestionSettings';
 import AIModuleSettings from 'container/AIModuleSettings/AIModuleSettings';
+import CodeRcaSettings from 'container/CodeRcaSettings/CodeRcaSettings';
 import MCPServerSettings from 'container/MCPServerSettings/MCPServerSettings';
 import MySettings from 'container/MySettings';
 import OrganizationSettings from 'container/OrganizationSettings';
@@ -246,6 +247,19 @@ export const aiModuleSettings = (t: TFunction): RouteTabProps['routes'] => [
 		),
 		route: ROUTES.AI_MODULE_SETTINGS,
 		key: ROUTES.AI_MODULE_SETTINGS,
+	},
+];
+
+export const codeRcaSettings = (t: TFunction): RouteTabProps['routes'] => [
+	{
+		Component: CodeRcaSettings,
+		name: (
+			<div className="periscope-tab">
+				<Sparkles size={16} /> {t('routes:code_rca').toString()}
+			</div>
+		),
+		route: ROUTES.CODE_RCA_SETTINGS,
+		key: ROUTES.CODE_RCA_SETTINGS,
 	},
 ];
 

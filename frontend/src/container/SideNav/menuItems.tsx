@@ -361,6 +361,13 @@ export const settingsNavSections: SettingsNavSection[] = [
 				isEnabled: false,
 				itemKey: 'ai-module',
 			},
+			{
+				key: ROUTES.CODE_RCA_SETTINGS,
+				label: 'Code RCA',
+				icon: <Sparkles size={16} />,
+				isEnabled: false,
+				itemKey: 'code-rca',
+			},
 		],
 	},
 
