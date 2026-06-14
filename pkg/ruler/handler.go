@@ -27,6 +27,17 @@ type Handler interface {
 	UpdateAIConfig(http.ResponseWriter, *http.Request)
 	TestAIConfig(http.ResponseWriter, *http.Request)
 
+	GetCodebaseRCAConfig(http.ResponseWriter, *http.Request)
+	UpdateCodebaseRCAConfig(http.ResponseWriter, *http.Request)
+	ListCodebaseRepos(http.ResponseWriter, *http.Request)
+	UpsertCodebaseRepo(http.ResponseWriter, *http.Request)
+	DeleteCodebaseRepo(http.ResponseWriter, *http.Request)
+	ListCodebaseServiceMaps(http.ResponseWriter, *http.Request)
+	UpsertCodebaseServiceMap(http.ResponseWriter, *http.Request)
+	DeleteCodebaseServiceMap(http.ResponseWriter, *http.Request)
+	ListCodeRCARuns(http.ResponseWriter, *http.Request)
+	GetCodeRCARun(http.ResponseWriter, *http.Request)
+
 	ListRunbooks(http.ResponseWriter, *http.Request)
 	GetRunbook(http.ResponseWriter, *http.Request)
 	CreateRunbook(http.ResponseWriter, *http.Request)

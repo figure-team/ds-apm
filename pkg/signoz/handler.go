@@ -48,6 +48,7 @@ import (
 	"github.com/SigNoz/signoz/pkg/ruler/aiconfigstore/sqlaiconfigstore"
 	"github.com/SigNoz/signoz/pkg/ruler/aihistorystore/sqlaihistorystore"
 	"github.com/SigNoz/signoz/pkg/ruler/aigenerator"
+	codercarunstore "github.com/SigNoz/signoz/pkg/ruler/coderca/runstore"
 	"github.com/SigNoz/signoz/pkg/ruler/signozruler"
 	"github.com/SigNoz/signoz/pkg/ruler/sopstore/sqlsopstore"
 	"github.com/SigNoz/signoz/pkg/sqlstore"
@@ -104,6 +105,11 @@ func NewHandlers(
 	aiCipher *secretbox.Cipher,
 	storeAware *aigenerator.StoreAware,
 	runbookDrafter ruletypes.RunbookDrafter,
+	codebaseRepoStore ruletypes.CodebaseRepoStore,
+	codebaseMapStore ruletypes.CodebaseServiceMapStore,
+	codercaCfgStore ruletypes.CodebaseRCAConfigStore,
+	codercaRunStore *codercarunstore.Store,
+	aiCipherInsecure bool,
 ) Handlers {
 	return Handlers{
 		SavedView:               implsavedview.NewHandler(modules.SavedView),
@@ -138,6 +144,11 @@ func NewHandlers(
 			aiCipher,
 			storeAware,
 			runbookDrafter,
+			codebaseRepoStore,
+			codebaseMapStore,
+			codercaCfgStore,
+			codercaRunStore,
+			aiCipherInsecure,
 		),
 	}
 }

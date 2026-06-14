@@ -356,6 +356,141 @@ func (provider *provider) addRulerRoutes(router *mux.Router) error {
 		return err
 	}
 
+	if err := router.Handle("/api/v2/ds/coderca/config", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.GetCodebaseRCAConfig), handler.OpenAPIDef{
+		ID:                  "GetCodebaseRCAConfig",
+		Tags:                []string{"coderca"},
+		Summary:             "Get code RCA config",
+		Description:         "Returns the org's CF-11 code-RCA feature toggle and cost thresholds (defaults when unset).",
+		Response:            new(ruletypes.CodebaseRCAConfig),
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusUnauthorized, http.StatusForbidden, http.StatusInternalServerError},
+		SecuritySchemes:     newSecuritySchemes(types.RoleViewer),
+	})).Methods(http.MethodGet).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/coderca/config", handler.New(provider.authZ.EditAccess(provider.rulerHandler.UpdateCodebaseRCAConfig), handler.OpenAPIDef{
+		ID:                  "UpdateCodebaseRCAConfig",
+		Tags:                []string{"coderca"},
+		Summary:             "Update code RCA config",
+		Description:         "Upserts the org's CF-11 code-RCA feature toggle and cost thresholds.",
+		Request:             new(ruletypes.CodebaseRCAConfig),
+		RequestContentType:  "application/json",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusInternalServerError},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
+	})).Methods(http.MethodPut).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/coderca/repos", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.ListCodebaseRepos), handler.OpenAPIDef{
+		ID:                  "ListCodebaseRepos",
+		Tags:                []string{"coderca"},
+		Summary:             "List codebase repos",
+		Description:         "Returns all registered codebase repository entries for the org.",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusUnauthorized, http.StatusForbidden, http.StatusInternalServerError},
+		SecuritySchemes:     newSecuritySchemes(types.RoleViewer),
+	})).Methods(http.MethodGet).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/coderca/repos", handler.New(provider.authZ.EditAccess(provider.rulerHandler.UpsertCodebaseRepo), handler.OpenAPIDef{
+		ID:                  "UpsertCodebaseRepo",
+		Tags:                []string{"coderca"},
+		Summary:             "Upsert codebase repo",
+		Description:         "Creates or updates a codebase repository entry for the org.",
+		RequestContentType:  "application/json",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusInternalServerError},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
+	})).Methods(http.MethodPut).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/coderca/repos/{repoId}", handler.New(provider.authZ.EditAccess(provider.rulerHandler.DeleteCodebaseRepo), handler.OpenAPIDef{
+		ID:                  "DeleteCodebaseRepo",
+		Tags:                []string{"coderca"},
+		Summary:             "Delete codebase repo",
+		Description:         "Removes a registered codebase repository entry by ID.",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusNoContent,
+		ErrorStatusCodes:    []int{http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound, http.StatusInternalServerError},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
+	})).Methods(http.MethodDelete).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/coderca/service-maps", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.ListCodebaseServiceMaps), handler.OpenAPIDef{
+		ID:                  "ListCodebaseServiceMaps",
+		Tags:                []string{"coderca"},
+		Summary:             "List codebase service maps",
+		Description:         "Returns all service-to-repo mapping entries for the org.",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusUnauthorized, http.StatusForbidden, http.StatusInternalServerError},
+		SecuritySchemes:     newSecuritySchemes(types.RoleViewer),
+	})).Methods(http.MethodGet).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/coderca/service-maps", handler.New(provider.authZ.EditAccess(provider.rulerHandler.UpsertCodebaseServiceMap), handler.OpenAPIDef{
+		ID:                  "UpsertCodebaseServiceMap",
+		Tags:                []string{"coderca"},
+		Summary:             "Upsert codebase service map",
+		Description:         "Creates or updates a service-to-repo mapping entry for the org.",
+		RequestContentType:  "application/json",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusInternalServerError},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
+	})).Methods(http.MethodPut).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/coderca/service-maps/{serviceName}", handler.New(provider.authZ.EditAccess(provider.rulerHandler.DeleteCodebaseServiceMap), handler.OpenAPIDef{
+		ID:                  "DeleteCodebaseServiceMap",
+		Tags:                []string{"coderca"},
+		Summary:             "Delete codebase service map",
+		Description:         "Removes a service-to-repo mapping entry by service name.",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusNoContent,
+		ErrorStatusCodes:    []int{http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound, http.StatusInternalServerError},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
+	})).Methods(http.MethodDelete).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/coderca/runs", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.ListCodeRCARuns), handler.OpenAPIDef{
+		ID:                  "ListCodeRCARuns",
+		Tags:                []string{"coderca"},
+		Summary:             "List code RCA runs",
+		Description:         "Returns code RCA run records for the org, optionally filtered by service or alert fingerprint.",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusUnauthorized, http.StatusForbidden, http.StatusInternalServerError},
+		SecuritySchemes:     newSecuritySchemes(types.RoleViewer),
+	})).Methods(http.MethodGet).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/coderca/runs/{runId}", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.GetCodeRCARun), handler.OpenAPIDef{
+		ID:                  "GetCodeRCARun",
+		Tags:                []string{"coderca"},
+		Summary:             "Get code RCA run",
+		Description:         "Returns a single code RCA run record by ID.",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound, http.StatusInternalServerError},
+		SecuritySchemes:     newSecuritySchemes(types.RoleViewer),
+	})).Methods(http.MethodGet).GetError(); err != nil {
+		return err
+	}
+
 	if err := router.Handle("/api/v2/ds/sop/documents/{sopId}/versions/{version}/runbooks", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.ListRunbooks), handler.OpenAPIDef{
 		ID:                  "ListRunbooks",
 		Tags:                []string{"rules"},
