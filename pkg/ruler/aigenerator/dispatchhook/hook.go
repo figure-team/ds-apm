@@ -8,10 +8,9 @@
 // annotations are returned unchanged so the dispatcher's existing
 // behavior is preserved — the hook is intentionally additive.
 //
-// This package is not yet wired into pkg/alertmanager/alertmanagerserver.
-// The v0.1 demo invokes the hook via the existing PreviewAIStrategy
-// HTTP endpoint (which already calls the generator); a future task will
-// thread the hook into the dispatcher's notify path.
+// This hook is wired into the dispatcher's notify path via
+// pkg/alertmanager/alertmanagerserver/dispatcher.go (applyAIHook) and is
+// constructed in pkg/signoz/signoz.go.
 package dispatchhook
 
 import (
@@ -23,6 +22,13 @@ import (
 	"github.com/SigNoz/signoz/pkg/types/alertmanagertypes"
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
 )
+
+// CodeRCATrigger is the CF-11 trigger seam (design §11): called fire-and-forget
+// on the unbound branch. Implementations must never panic or block beyond their
+// own internal timeout.
+type CodeRCATrigger interface {
+	Maybe(ctx context.Context, orgID string, labels, annotations map[string]string)
+}
 
 // DefaultGenerateTimeout is the upper bound the hook imposes on the AI
 // generator. The dispatcher must never block on a slow provider, so this
@@ -43,7 +49,12 @@ type Hook struct {
 	generator      ruletypes.AIStrategyGenerator
 	logger         *slog.Logger
 	timeout        time.Duration
+	codeRCA        CodeRCATrigger
 }
+
+// SetCodeRCATrigger injects the CF-11 trigger after construction (the trigger
+// depends on stores built later in server wiring). nil-safe; optional.
+func (h *Hook) SetCodeRCATrigger(t CodeRCATrigger) { h.codeRCA = t }
 
 // New constructs a Hook. logger may be nil — the hook falls back to
 // slog.Default() in that case. timeout ≤ 0 falls back to
@@ -119,6 +130,12 @@ func (h *Hook) Apply(
 		// non-error outcomes from the dispatcher's perspective. We
 		// quietly return the input annotations so existing alerts
 		// continue to flow untouched.
+		if err == nil && binding.Status == ruletypes.SOPBindingStatusMissing && h.codeRCA != nil {
+			// CF-11 (UJ-5): only genuinely unbound (no SOP matched) alerts go to
+			// the code-RCA gate. The trigger is fail-open (never panics/blocks
+			// past its own timeout), so it adds no failure mode to dispatch.
+			h.codeRCA.Maybe(ctx, orgID, labels, annotations)
+		}
 		return annotations
 	}
 

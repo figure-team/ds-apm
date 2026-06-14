@@ -455,6 +455,115 @@ func cannedStrategy(incidentID, fingerprint string) ruletypes.AIStrategy {
 	}
 }
 
+// fakeTrigger records (orgID, labels, annotations) passed to Maybe so
+// tests can assert call count and captured values.
+type fakeTrigger struct {
+	calls       int
+	lastOrgID   string
+	lastLabels  map[string]string
+	lastAnnots  map[string]string
+}
+
+func (f *fakeTrigger) Maybe(_ context.Context, orgID string, labels, annotations map[string]string) {
+	f.calls++
+	f.lastOrgID = orgID
+	f.lastLabels = labels
+	f.lastAnnots = annotations
+}
+
+// unboundLabels strips the label-match dimensions from seed labels so that
+// PreviewSOPDocumentBinding yields SOPBindingStatusMissing (no SOP matched).
+func unboundLabels(seed dispatchSeed) map[string]string {
+	labels := cloneMap(seed.Alert.Labels)
+	delete(labels, alertmanagertypes.IncidentLabelSopID)
+	delete(labels, alertmanagertypes.IncidentLabelServiceName)
+	delete(labels, alertmanagertypes.IncidentLabelOwnerTeam)
+	delete(labels, alertmanagertypes.IncidentLabelSeverity)
+	return labels
+}
+
+// TestApplyCallsCodeRCATriggerOnUnbound: when the alert has no matching SOP
+// (SOPBindingStatusMissing), Apply must call codeRCA.Maybe exactly once with
+// the same orgID, labels, and annotations, and must return the input
+// annotations unchanged.
+func TestApplyCallsCodeRCATriggerOnUnbound(t *testing.T) {
+	const orgID = "customer-a"
+	gen := &stubGen{strategy: cannedStrategy("INC-x", "fp-x")}
+	hook, _, _, seed := seedHookFixture(t, orgID, gen)
+
+	fake := &fakeTrigger{}
+	hook.SetCodeRCATrigger(fake)
+
+	labels := unboundLabels(seed)
+
+	got := hook.Apply(
+		context.Background(),
+		orgID,
+		"INC-x",
+		"fp-x",
+		labels,
+		seed.Alert.Annotations,
+	)
+
+	// Annotations must be returned unchanged.
+	require.Equal(t, seed.Alert.Annotations, got)
+	// Trigger must have been called exactly once.
+	require.Equal(t, 1, fake.calls, "codeRCA.Maybe must be called once for unbound alert")
+	require.Equal(t, orgID, fake.lastOrgID)
+	require.Equal(t, labels, fake.lastLabels)
+	require.Equal(t, seed.Alert.Annotations, fake.lastAnnots)
+}
+
+// TestApplyDoesNotCallTriggerWhenBound: when an SOP is successfully bound,
+// Apply must NOT call codeRCA.Maybe.
+func TestApplyDoesNotCallTriggerWhenBound(t *testing.T) {
+	const orgID = "customer-a"
+	gen := &stubGen{strategy: cannedStrategy(
+		"INC-20260512-0001",
+		"fp-payment-api-5xx-demo",
+	)}
+	hook, _, _, seed := seedHookFixture(t, orgID, gen)
+
+	fake := &fakeTrigger{}
+	hook.SetCodeRCATrigger(fake)
+
+	// Use the full seed labels — the SOP-PAY-001 binding resolves to Bound.
+	_ = hook.Apply(
+		context.Background(),
+		orgID,
+		seed.Alert.IncidentID,
+		seed.Alert.Fingerprint,
+		seed.Alert.Labels,
+		seed.Alert.Annotations,
+	)
+
+	require.Equal(t, 0, fake.calls, "codeRCA.Maybe must NOT be called when SOP is bound")
+}
+
+// TestApplyUnchangedWhenTriggerNil: when SetCodeRCATrigger has not been
+// called (codeRCA is nil), the unbound path must not panic and must return
+// the input annotations unchanged — identical to existing unbound behavior.
+func TestApplyUnchangedWhenTriggerNil(t *testing.T) {
+	const orgID = "customer-a"
+	gen := &stubGen{strategy: cannedStrategy("INC-x", "fp-x")}
+	hook, _, _, seed := seedHookFixture(t, orgID, gen)
+	// Deliberately do NOT call SetCodeRCATrigger.
+
+	labels := unboundLabels(seed)
+
+	require.NotPanics(t, func() {
+		got := hook.Apply(
+			context.Background(),
+			orgID,
+			"INC-x",
+			"fp-x",
+			labels,
+			seed.Alert.Annotations,
+		)
+		require.Equal(t, seed.Alert.Annotations, got)
+	})
+}
+
 func cloneMap(in map[string]string) map[string]string {
 	out := make(map[string]string, len(in))
 	for k, v := range in {
