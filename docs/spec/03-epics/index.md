@@ -2,8 +2,8 @@
 id: EPICS-INDEX
 title: DS-APM 에픽 & 스토리 (BMAD)
 type: epics-index
-status: implemented (+ Epic 7 anomaly, Epic 11 code-RCA mvp)
-updated: 2026-06-12
+status: implemented (+ Epic 7 anomaly, Epic 11 code-RCA)
+updated: 2026-06-14
 ---
 
 # DS-APM 에픽 & 스토리
@@ -22,9 +22,9 @@ updated: 2026-06-12
 | **Epic 5** | 실패 알림이 유실 없이 재발송된다 | CF-5 | 3 | UJ-2 | WBS-1.5 | [epic-5-reliable-delivery.md](epic-5-reliable-delivery.md) |
 | **Epic 6** | 정책·감사 기반이 갖춰진다 | CF-6 | 3 | UJ-1·2·3 | WBS-1.0 | [epic-6-foundation-audit.md](epic-6-foundation-audit.md) |
 | **Epic 7** | 메트릭이 평소 패턴을 벗어나면 이상 알람을 받는다 | CF-7 | 1 | (트리거) | WBS-1.6 | [epic-7-anomaly.md](epic-7-anomaly.md) |
-| **Epic 11** | SOP 없는 이상 장애의 코드 근본원인을 AI가 분석한다 *(impl-mvp)* | CF-11 | 6 | UJ-5 | WBS-1.7 | [epic-11-code-rca.md](epic-11-code-rca.md) |
+| **Epic 11** | SOP 없는 이상 장애의 코드 근본원인을 AI가 분석한다 *(implemented)* | CF-11 | 6 | UJ-5 | WBS-1.7 | [epic-11-code-rca.md](epic-11-code-rca.md) |
 
-> 스토리 28건 = PRD 구현/구현-mvp FR 28건과 1:1 — 구현 21건(Epic 1~6, 20 done + 5.3 planned) + 이상 탐지 1건(Epic 7, done) + 코드 RCA 6건(Epic 11, done 코어/seam). 인수 기준 상세(Given/When/Then)는 각 에픽 + [PRD CF feature](../01-prd/index.md) §7. Epic 7=CF-7(이상 탐지), Epic 11=CF-11(코드 RCA) — 번호 정합(2026-06-12).
+> 스토리 28건 = PRD 구현/구현-mvp FR 28건과 1:1 — 구현 21건(Epic 1~6, 20 done + 5.3 planned) + 이상 탐지 1건(Epic 7, done) + 코드 RCA 6건(Epic 11, done — 코어 + 통합 seam 배선 완료). 인수 기준 상세(Given/When/Then)는 각 에픽 + [PRD CF feature](../01-prd/index.md) §7. Epic 7=CF-7(이상 탐지), Epic 11=CF-11(코드 RCA) — 번호 정합(2026-06-12).
 
 ## 에픽 ↔ WBS ↔ CF 매핑
 
@@ -32,7 +32,7 @@ updated: 2026-06-12
 |---|---|---|
 | Epic 1~6 | WBS-1.0~1.5 | CF-1~6 |
 | Epic 7 | WBS-1.6 | CF-7 (이상 탐지) |
-| Epic 11 *(impl-mvp)* | WBS-1.7 | CF-11 (코드 RCA) |
+| Epic 11 *(implemented)* | WBS-1.7 | CF-11 (코드 RCA) |
 
 > 에픽은 *무엇을 사용자 가치로 전달하나*, WBS는 *어떤 컴포넌트를 언제 만드나*. 같은 작업의 두 관점.
 

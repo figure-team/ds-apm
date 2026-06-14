@@ -5,14 +5,14 @@ type: wbs-index
 template: PMI WBS 2nd ed. + Agile (hybrid)
 decomposition_logic: component(Lv2) → epic → story(Lv3) 기반
 status: draft
-updated: 2026-06-12
+updated: 2026-06-14
 ---
 
 # DS-APM WBS
 
 > **PMI WBS** — 컴포넌트·일정 분해(독립 산출물). **WBS 항목 = 에픽/스토리에서 파생**([`../03-epics/`](../03-epics/index.md)·[`../04-stories/`](../04-stories/)) — 스토리/태스크가 바뀌면 항목도 따라 바뀐다. WBS는 거기에 **시작/종료일·상태**를 얹는 일정 층.
 > **에픽 ≠ WBS**: 에픽/스토리=애자일 작업 정의, WBS=PMI 컴포넌트·일정.
-> **상태 = as-built 수행 기록 + 계획**: Epic 1~6 스토리 **완료**(5.3 HMAC만 planned), Epic 7(WBS-1.6, 메트릭 이상 탐지) **완료**, Epic 11(WBS-1.7, AI 코드베이스 RCA) 코어 **완료**(HTTP·FE·디스패치 훅 트리거 seam 미배선 → impl-mvp). 날짜는 **추정 수행 기간**(실제 커밋 일자 아님 — 공개 repo squash). 완료 항목도 **삭제 않고 유지**.
+> **상태 = as-built 수행 기록 + 계획**: Epic 1~6 스토리 **완료**(5.3 HMAC만 planned), Epic 7(WBS-1.6, 메트릭 이상 탐지) **완료**, Epic 11(WBS-1.7, AI 코드베이스 RCA) **완료**(코어 + HTTP·FE·디스패치 훅 트리거·서버 배선 완료 → implemented). 날짜는 **추정 수행 기간**(실제 커밋 일자 아님 — 공개 repo squash). 완료 항목도 **삭제 않고 유지**.
 
 ## 100% Rule
 DS-APM 범위 = `WBS-1.0 ∪ … ∪ WBS-1.7` (자식 합 = 부모 100%). Excluded scope는 §Excluded Scope.
@@ -27,9 +27,9 @@ WBS-1   DS-APM Project (root)
 ├─ WBS-1.4  PII 마스킹 필터       ← Epic 4 · Covers CF-4
 ├─ WBS-1.5  DLQ 재처리 서비스     ← Epic 5 · Covers CF-5
 ├─ WBS-1.6  메트릭 이상 탐지       ← Epic 7 · Covers CF-7  ★ implemented
-└─ WBS-1.7  AI 코드베이스 RCA      ← Epic 11 · Covers CF-11 ◑ implemented-mvp
+└─ WBS-1.7  AI 코드베이스 RCA      ← Epic 11 · Covers CF-11 ★ implemented
 ```
-> Lv2 컴포넌트(8) = 에픽(8) = CF(8) 1:1(파운데이션만 WBS-1.0↔Epic 6↔CF-6). Lv3 = 스토리. WBS-1.7은 코어 구현·TDD 완료, 표면·디스패치 배선은 통합 seam.
+> Lv2 컴포넌트(8) = 에픽(8) = CF(8) 1:1(파운데이션만 WBS-1.0↔Epic 6↔CF-6). Lv3 = 스토리. WBS-1.7은 코어 구현·TDD 완료 + 표면·디스패치·서버·FE 배선 완료.
 
 ## 작업 패키지 일람
 
@@ -42,11 +42,11 @@ WBS-1   DS-APM Project (root)
 | WBS-1.4 | PII 마스킹 필터 | implemented | CF-4 | [Epic 4](../03-epics/epic-4-pii-safety.md) |
 | WBS-1.5 | DLQ 재처리 서비스 | implemented-mvp | CF-5 | [Epic 5](../03-epics/epic-5-reliable-delivery.md) |
 | WBS-1.6 | 메트릭 이상 탐지 (Anomaly Detection) | implemented | CF-7 | [Epic 7](../03-epics/epic-7-anomaly.md) |
-| WBS-1.7 | AI 코드베이스 RCA (coderca) | **implemented-mvp** (코어 완료 · 표면·디스패치 seam) | CF-11 | [Epic 11](../03-epics/epic-11-code-rca.md) |
+| WBS-1.7 | AI 코드베이스 RCA (coderca) | **implemented** (코어 + 표면·디스패치·서버·FE 배선 완료) | CF-11 | [Epic 11](../03-epics/epic-11-code-rca.md) |
 
 ## 컴포넌트 일정 (Lv2 · 추정 수행 기간)
 
-WBS-1.0~1.6 **완료**, WBS-1.7 코어 완료(표면 seam). 수행 기간(추정): **2026-05-25 ~ 2026-10-23** — 실제 커밋 일자 아님. 전략 로드맵 1~2단계 해당(§A).
+WBS-1.0~1.7 **완료**(WBS-1.7 코어 + 표면·디스패치·서버·FE 배선). 수행 기간(추정): **2026-05-25 ~ 2026-10-23** — 실제 커밋 일자 아님. 전략 로드맵 1~2단계 해당(§A).
 
 | 컴포넌트 | 기간 | 시작 | 종료 | 의존 |
 |---|---|---|---|---|
@@ -58,9 +58,9 @@ WBS-1.0~1.6 **완료**, WBS-1.7 코어 완료(표면 seam). 수행 기간(추정
 | WBS-1.5 DLQ 재처리 | 3주 | 2026-08-03 | 2026-08-21 | WBS-1.3 |
 | 통합·안정화 | 1주 | 2026-08-24 | 2026-08-28 | 전체 |
 | WBS-1.6 메트릭 이상 탐지 | 2주 | 2026-08-31 | 2026-09-11 | WBS-1.0 (rule 엔진 확장) |
-| **WBS-1.7 AI 코드베이스 RCA** *(impl-mvp)* | 6주 | 2026-09-14 | 2026-10-23 | WBS-1.0~1.6 (기존 인프라 재사용 + CF-7 트리거) |
+| **WBS-1.7 AI 코드베이스 RCA** *(implemented)* | 6주 | 2026-09-14 | 2026-10-23 | WBS-1.0~1.6 (기존 인프라 재사용 + CF-7 트리거) |
 
-> WBS-1.7 표면(HTTP·FE)·디스패치 훅 트리거는 **통합 seam**(설계 §11) — 위 종료일은 코어(M1~M3) 기준 추정. 배선 완료 시 갱신.
+> WBS-1.7 표면(HTTP·FE)·디스패치 훅 트리거·서버 배선 **완료**(설계 §11). 위 종료일은 코어(M1~M3) 기준 추정.
 
 ## 스토리 일정 (Lv3 · 에픽/스토리 파생 · 영업일 · 추정)
 
@@ -93,9 +93,9 @@ WBS-1.0~1.6 **완료**, WBS-1.7 코어 완료(표면 seam). 수행 기간(추정
 | WBS-1.7 (Epic 11) | [11.3](../04-stories/11.3.story.md) | 폭주 비용·볼륨 제어 (M1 게이팅) | 2026-09-14 | 2026-09-25 | ✅ 완료 |
 | WBS-1.7 (Epic 11) | [11.5](../04-stories/11.5.story.md) | 분석 기준 커밋 pin·echo (M2) | 2026-09-28 | 2026-10-02 | ✅ 완료 |
 | WBS-1.7 (Epic 11) | [11.4](../04-stories/11.4.story.md) | HITL 수정 제안·read-only (M2·M3) | 2026-10-05 | 2026-10-09 | ✅ 완료 |
-| WBS-1.7 (Epic 11) | [11.1](../04-stories/11.1.story.md) | 트리거 게이트 + AI 코드 RCA (M3) | 2026-10-12 | 2026-10-16 | ◐ 코어 완료 (디스패치 seam) |
-| WBS-1.7 (Epic 11) | [11.2](../04-stories/11.2.story.md) | 저장소·서비스 매핑·기능 토글 (M1·M4) | 2026-10-19 | 2026-10-21 | ◐ store 완료 (HTTP/FE seam) |
-| WBS-1.7 (Epic 11) | [11.6](../04-stories/11.6.story.md) | 분석 실패에도 알람 무영향 (M3) | 2026-10-22 | 2026-10-23 | ◐ 코어 완료 (e2e seam) |
+| WBS-1.7 (Epic 11) | [11.1](../04-stories/11.1.story.md) | 트리거 게이트 + AI 코드 RCA (M3) | 2026-10-12 | 2026-10-16 | ✅ 완료 (디스패치 훅 배선) |
+| WBS-1.7 (Epic 11) | [11.2](../04-stories/11.2.story.md) | 저장소·서비스 매핑·기능 토글 (M1·M4) | 2026-10-19 | 2026-10-21 | ✅ 완료 (HTTP·FE 배선) |
+| WBS-1.7 (Epic 11) | [11.6](../04-stories/11.6.story.md) | 분석 실패에도 알람 무영향 (M3) | 2026-10-22 | 2026-10-23 | ✅ 완료 (e2e 검증) |
 
 ```mermaid
 gantt
@@ -137,7 +137,7 @@ gantt
 | **M-4 신뢰성·Beta** | ◐ 부분 | WBS-1.5 코어 완료. **HMAC 미정·DLQ 기본 배선 nil**(open). | Story 5.3 · PRD §9.3 |
 | **M-5 Production** | ✗ 미달 | Multi-tenant RLS·PII OTel Collector 단 미적용. | PRD §9.2 |
 | **M-6 메트릭 이상 탐지** | ✅ 완료 | WBS-1.6. CF-7 z-score 기준선 이상 알람(`anomaly_rule.go`). | Epic 7 |
-| **M-7 AI 코드베이스 RCA** | ◐ 부분 | WBS-1.7. CF-11 코어(admission·lease·source·clirunner·engine·parser) TDD 완료. **HTTP·FE·디스패치 훅 트리거 seam 미배선.** | Epic 11 · 설계 §11·§13 |
+| **M-7 AI 코드베이스 RCA** | ✅ 완료 | WBS-1.7. CF-11 코어(admission·lease·source·clirunner·engine·parser) TDD 완료 + 트리거·워커·싱크·디스패치 훅·서버·HTTP(10 엔드포인트)·FE 전체 배선·테스트 완료. 잔여 follow-up은 CF-11 open_items. | Epic 11 · 설계 §11·§13 |
 
 > 로드맵 마일스톤(미일정): 이상탐지 학습형 후속(CF-7 계절성 기준선)·자동조치(CF-8)·자산화(CF-9)·ITSM(CF-10). → §A.
 
@@ -146,4 +146,4 @@ gantt
 
 ## Traceability
 - CF × UJ × WBS: [`../_shared/traceability.md`](../_shared/traceability.md) · Epic/Story: [`../03-epics/index.md`](../03-epics/index.md)
-- Open: HMAC(Story 5.3)·DLQ 배선·RLS·OTel·CF-11 통합 seam — PRD §9.3
+- Open: HMAC(Story 5.3)·DLQ 배선·RLS·OTel — PRD §9.3. (CF-11 통합 seam은 배선 완료; 잔여는 CF-11 open_items.)

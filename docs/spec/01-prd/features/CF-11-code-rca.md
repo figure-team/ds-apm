@@ -1,7 +1,7 @@
 ---
 id: CF-11
 title: AI 코드베이스 RCA — unbound∧anomaly 알람의 코드 근거 근본원인 분석 (HITL)
-status: implemented-mvp
+status: implemented
 jtbd: [JTBD-1, JTBD-2, JTBD-4]
 maps_modules: [F10]
 source_paths:
@@ -9,27 +9,38 @@ source_paths:
   - pkg/ruler/coderca/engine/
   - pkg/ruler/coderca/clirunner/
   - pkg/ruler/coderca/runstore/
+  - pkg/ruler/coderca/runstore/query.go
   - pkg/ruler/coderca/sourcestate/
   - pkg/ruler/coderca/reporesolver/
   - pkg/ruler/coderca/codebaseconfigstore/
+  - pkg/ruler/coderca/codebaseconfigstore/sqlcodebasercaconfigstore/
+  - pkg/ruler/coderca/trigger/
+  - pkg/ruler/coderca/worker/
+  - pkg/ruler/coderca/delivery/amsink.go
+  - pkg/ruler/coderca/auditor/dssink.go
+  - pkg/ruler/signozruler/coderca_handler.go
   - pkg/sqlmigration/082_add_ds_codebase_config.go
+  - pkg/sqlmigration/083_update_ds_codebase_config.go
+  - pkg/types/ruletypes/codebase_rca_config.go
+  - pkg/types/ruletypes/codebase_rca_config_store.go
+  - frontend/src/container/CodeRcaSettings/
+  - frontend/src/api/codeRca/
 implements_uj: [UJ-5]
 covered_by_wbs: [WBS-1.7]
 fr_ids: [FR-CF11.1, FR-CF11.2, FR-CF11.3, FR-CF11.4, FR-CF11.5, FR-CF11.6]
-updated: 2026-06-12
-caveats: "코어(M1~M3: admission·lease·source-state·resolver·clirunner·engine·parser) TDD 완료. HTTP 핸들러·FE 설정 페이지·디스패치 훅 트리거·서버 배선은 통합 seam(설계 §11, 미배선) → implemented-mvp."
+updated: 2026-06-14
+caveats: "코어(M1~M3) TDD 완료. 모든 통합 seam 배선 완료 — 트리거 파사드(fail-open 게이트 체인·anomaly fail-closed), 워커 서비스, 전달 싱크(CF-3 alertmanager), 감사 싱크(CF-6), runstore 보고서 영속·이력 조회, 엔진 보고서 패스스루, 디스패치 훅 연결, 서버 배선(signoz.go), HTTP 핸들러 10개 엔드포인트, FE 설정·이력 탭, 라우팅·메뉴·권한·i18n 등록. 마이그레이션 083(ds_codebase_config 테이블 + coderca_run 보고서 4컬럼) 등록 완료. 잔여 follow-up은 open_items 참조."
 open_items:
-  - 통합 seam — 디스패치 훅 트리거(coderca.Trigger.Maybe)·라우트 등록·서버 배선·FE 라우팅 (설계 §11)
-  - HTTP 핸들러(coderca_handler.go) + 설정 FE 페이지 (M4, 설계 §13 — 후행)
   - EvidenceCollector(logs/traces) 구현 — v1은 NoopEvidenceCollector (설계 §7)
   - OS 샌드박스 래핑(bubblewrap/firejail) — claude read-only 강화 follow-up (설계 §9)
   - 대형 monorepo shallow/partial clone 플래그 (설계 §8·§15)
+  - 수동 end-to-end 연기 테스트 (라이브 서버 환경 필요)
 ---
 
 # CF-11 — AI 코드베이스 RCA (코드 근거 근본원인 분석)
 
 > **고객 가치 (JTBD-1·2·4)**: 매칭되는 SOP가 없고(unbound) 이상(anomaly)이 감지된 알람은 따라야 할 사람이 작성한 Runbook이 없다. CF-11은 이 공백을 메운다 — **CLI 코딩 에이전트(claude/codex)를 read-only로 구동**해 해당 서비스의 소스 코드를 탐색하게 하고, **근본원인 가설 + 수정 *제안*** 을 만들어 운영자에게 검토용으로 전달한다. 수정은 **절대 자동 적용되지 않는다(HITL)**.
-> **상태**: implemented-mvp (코어 TDD 완료 — [설계서](../../../superpowers/specs/2026-06-11-cf11-code-rca-design.md), Codex 4라운드 APPROVE). HTTP·FE·디스패치 seam은 통합 단계.
+> **상태**: implemented (코어 TDD 완료 + 전체 통합 seam 배선 완료 — [설계서](../../../superpowers/specs/2026-06-11-cf11-code-rca-design.md), Codex 4라운드 APPROVE). 트리거·워커·싱크·훅·서버·HTTP·FE 모두 배선 완료. 잔여 follow-up(EvidenceCollector·OS 샌드박스·monorepo 플래그·smoke 테스트)은 open_items 참조.
 
 ## CF-11.1 개요 (사용자 관점)
 
@@ -63,7 +74,7 @@ CF-11은 이 케이스에 한정해 다음을 자동화한다.
   When unbound·고심각도라도 트리거가 평가되면
   Then 실행은 생성되지 않는다 (skip=no_anomaly, fail-closed)
   ```
-- **구현 근거**: 게이트 판정(`feature_off`/`no_anomaly`/`below_severity`/`no_repo_mapping` 등 `SkipReason`, [`coderca.go`](../../../../pkg/ruler/coderca/coderca.go)) → 비동기 오케스트레이션 [`engine/engine.go`](../../../../pkg/ruler/coderca/engine/engine.go) `ProcessNext`/`runOne` → 프롬프트 [`prompt.go`](../../../../pkg/ruler/coderca/prompt.go) `BuildPrompt` → CLI [`clirunner/`](../../../../pkg/ruler/coderca/clirunner/) → 결과 파서 [`rcaresult.go`](../../../../pkg/ruler/coderca/rcaresult.go). 디스패치 훅 진입점(`coderca.Trigger.Maybe`)·`AnomalySignal` 배선은 통합 seam(설계 §10·§11). · WBS-1.7
+- **구현 근거**: 게이트 판정(`feature_off`/`no_anomaly`/`below_severity`/`no_repo_mapping` 등 `SkipReason`, [`coderca.go`](../../../../pkg/ruler/coderca/coderca.go)) → 비동기 오케스트레이션 [`engine/engine.go`](../../../../pkg/ruler/coderca/engine/engine.go) `ProcessNext`/`runOne` → 프롬프트 [`prompt.go`](../../../../pkg/ruler/coderca/prompt.go) `BuildPrompt` → CLI [`clirunner/`](../../../../pkg/ruler/coderca/clirunner/) → 결과 파서 [`rcaresult.go`](../../../../pkg/ruler/coderca/rcaresult.go). 디스패치 훅 진입점(`coderca.Trigger.Maybe`) 배선 완료 [`pkg/ruler/aigenerator/dispatchhook/hook.go`](../../../../pkg/ruler/aigenerator/dispatchhook/hook.go); anomaly 신호는 CF-7 `anomaly=true` 라벨 기반(설계 §10). · WBS-1.7
 
 ### FR-CF11.2 — 관리자는 저장소 연결·서비스 매핑·기능 on/off를 설정으로 통제한다
 - **무엇을**: 관리자는 분석 대상 git 저장소와 `(org, 서비스명)→저장소[+subpath]` 매핑, org/서비스 단위 기능 on/off(기본 **OFF**, opt-in)와 비용 임계값을 설정한다. 자격증명은 secretbox로 암호화 저장되고 응답에 비노출된다. **암호화 키가 없으면 비공개 저장소 자격증명 저장·사용을 거부한다(fail-closed)** — 평문 저장 금지.
@@ -77,7 +88,7 @@ CF-11은 이 케이스에 한정해 다음을 자동화한다.
   When 비공개 저장소 자격증명 저장을 시도하면
   Then 설정 오류가 반환되고 평문 자격증명은 저장되지 않는다 (공개·무자격 저장소만 허용)
   ```
-- **구현 근거**: 도메인·스토어 [`codebaseconfigstore/`](../../../../pkg/ruler/coderca/codebaseconfigstore/)(`sqlcodebaseconfigstore`·`sqlcodebaseservicemapstore`), 테이블 `ds_codebase_repo`·`ds_codebase_service_map`·`ds_codebase_config`(마이그레이션 [`082_add_ds_codebase_config.go`](../../../../pkg/sqlmigration/082_add_ds_codebase_config.go)), secretbox(`aiconfigstore/secretbox` 재사용, fail-closed). HTTP 핸들러·설정 FE는 통합 seam(설계 §11). · WBS-1.7
+- **구현 근거**: 도메인·스토어 [`codebaseconfigstore/`](../../../../pkg/ruler/coderca/codebaseconfigstore/)(`sqlcodebaseconfigstore`·`sqlcodebaseservicemapstore`), 테이블 `ds_codebase_repo`·`ds_codebase_service_map`·`ds_codebase_config`(마이그레이션 [`082_add_ds_codebase_config.go`](../../../../pkg/sqlmigration/082_add_ds_codebase_config.go)), secretbox(`aiconfigstore/secretbox` 재사용, fail-closed). HTTP 핸들러([`coderca_handler.go`](../../../../pkg/ruler/signozruler/coderca_handler.go))·설정 FE([`CodeRcaSettings`](../../../../frontend/src/container/CodeRcaSettings/)) 배선 완료. · WBS-1.7
 
 ### FR-CF11.3 — 운영 조직은 폭주가 비용·볼륨 폭발로 이어지지 않음을 보장받는다
 - **무엇을**: 동일 오류 수백 건이 동시에 떠도 실행 수가 강제 제한된다. **원자적 DB admission**(슬라이딩 쿨다운 dedup·org 일일 예산·큐 깊이)과 **DB 기반 lease·동시성 캡**(잠금된 capacity 행 + fencing 토큰 + reaper 복구)으로, 토큰 introspection 없이 실행 횟수·동시성·중복을 묶는다.
@@ -149,7 +160,7 @@ CF-11은 이 케이스에 한정해 다음을 자동화한다.
   Then status=failed|unparseable로 기록되고 감사 이벤트가 남으며 (auditor.Audit, best-effort)
    And 알람 전달 경로는 영향받지 않는다 (silent drop 0)
   ```
-- **구현 근거**: 종료 상태 전이 [`engine/engine.go`](../../../../pkg/ruler/coderca/engine/engine.go) `runOne`(→ `RunStatusFailed`/`Timeout`/`Unparseable`), per-run 하드 ceiling(run_timeout·`--max-budget-usd`, 설계 §6.5), 감사 [`audit.go`](../../../../pkg/ruler/coderca/audit.go). 디스패치 훅 additive 보장은 unbound 분기 무변경(설계 §5.1) — 배선은 seam. · WBS-1.7
+- **구현 근거**: 종료 상태 전이 [`engine/engine.go`](../../../../pkg/ruler/coderca/engine/engine.go) `runOne`(→ `RunStatusFailed`/`Timeout`/`Unparseable`), per-run 하드 ceiling(run_timeout·`--max-budget-usd`, 설계 §6.5), 감사 [`audit.go`](../../../../pkg/ruler/coderca/audit.go). 디스패치 훅 additive 보장은 unbound 분기 무변경(설계 §5.1) — 디스패치 훅 배선 완료(unbound=Missing 분기에서 `trigger.Maybe` fire-and-forget 호출). · WBS-1.7
 
 ## CF-11.3 비기능 요건 (feature-specific)
 
@@ -195,8 +206,8 @@ stateDiagram-v2
 
 ## CF-11.6 Open / Non-goal
 
-- **통합 seam** — 디스패치 훅 트리거(`coderca.Trigger.Maybe`)·라우트 등록·서버 배선·FE 라우팅은 별도 새 파일/1줄 배선으로 통합 단계 처리(설계 §11). 코어는 구현·테스트 완료.
-- **HTTP 핸들러 + 설정 FE** — M4(설계 §13), 후행.
+- **통합 seam 배선 완료** — 디스패치 훅 트리거(`trigger.Maybe`, unbound=Missing 분기)·라우트 등록(`/api/v2/ds/coderca/*`)·서버 배선(`signoz.go`)·FE 라우팅(`/settings/code-rca`) 모두 배선·테스트 완료(설계 §11). 워커 서비스는 `factory.Service`로 등록.
+- **HTTP 핸들러 + 설정 FE 구현 완료** — `coderca_handler.go`(10 엔드포인트) + `CodeRcaSettings`(설정·이력 탭) (설계 §13, M4).
 - **EvidenceCollector(logs/traces)** — v1은 `NoopEvidenceCollector`. 입력은 labels/annotations + 파생 error signature. 로그·트레이스 수집기는 후행 additive 구현(설계 §7).
 - **자동 조치 없음** — 수정은 *제안*만(HITL). 자동 적용·자동 라우팅은 CF-8 영역, 영구 Non-goal.
 - **OS 샌드박스 래핑** — claude는 OS read-only 샌드박스가 없어 앱 레벨 도구 allow/deny + `--max-budget-usd` + 일회용 checkout으로 강제. bubblewrap/firejail 래핑은 hardening follow-up(설계 §9·§15).
@@ -207,7 +218,7 @@ stateDiagram-v2
 - JTBD: JTBD-1(상시 자동화), JTBD-2(반자동 RCA), JTBD-4(HITL 안전) · User Journey: UJ-5(코드 RCA)
 - Covered by WBS: WBS-1.7 · Epic: [Epic 11](../../03-epics/epic-11-code-rca.md) · Stories: 11.1~11.6
 - 설계서: [2026-06-11-cf11-code-rca-design.md](../../../superpowers/specs/2026-06-11-cf11-code-rca-design.md) (Codex 4라운드 APPROVE)
-- 모듈: F10 (AI codebase RCA — implemented-mvp) · 마이그레이션 **082** (`ds_codebase_repo`·`ds_codebase_service_map`·`ds_codebase_config`·`coderca_run`·`coderca_admission`·`coderca_budget`·`coderca_capacity`·`coderca_skip_stat`)
+- 모듈: F10 (AI codebase RCA — implemented) · 마이그레이션 **082**(`ds_codebase_repo`·`ds_codebase_service_map`·`coderca_run`·`coderca_admission`·`coderca_budget`·`coderca_capacity`·`coderca_skip_stat`) + **083**(`ds_codebase_config` 테이블 + `coderca_run` 보고서 4컬럼 `root_cause`·`proposed_fix`·`confidence`·`limitations`)
 - → 상위: [`../index.md`](../index.md) §6·§7.2 · 트리거 소스: [CF-7 메트릭 이상 탐지](CF-7-anomaly.md) · 전략: [`source-strategy-brief.md`](../../_foundation/source-strategy-brief.md) 2단계
 
 ---
