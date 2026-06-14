@@ -304,3 +304,98 @@ func TestProcessNextClaimErrorPropagates(t *testing.T) {
 		t.Error("processed = true on claim error, want false")
 	}
 }
+
+func TestProcessNextPersistsReportOnDone(t *testing.T) {
+	runs := &fakeRunStore{claim: claimedRun(), finalOK: true}
+	repos := &fakeRepos{repo: ruletypes.CodebaseRepo{OrgID: "org1", RepoID: "r1"}, ok: true}
+	src := &fakeSource{checkout: "/co/run-1", baseline: "src-baseline"}
+	cli := &fakeCLI{
+		status: coderca.RunStatusDone,
+		result: coderca.RCAResult{
+			BaselineCommit: "echo-commit",
+			RootCause:      "rc",
+			ProposedFix:    "fix",
+			Confidence:     "high",
+			Limitations:    "lim",
+		},
+	}
+	del := &fakeDeliverer{ref: "handoff-42"}
+	aud := &fakeAuditor{}
+
+	processed, err := newEngine(t, runs, repos, src, cli, del, aud).ProcessNext(context.Background())
+	if err != nil {
+		t.Fatalf("ProcessNext: %v", err)
+	}
+	if !processed {
+		t.Fatal("processed = false, want true")
+	}
+	fp := runs.finalized
+	if fp.RootCause != "rc" {
+		t.Errorf("RootCause = %q, want rc", fp.RootCause)
+	}
+	if fp.ProposedFix != "fix" {
+		t.Errorf("ProposedFix = %q, want fix", fp.ProposedFix)
+	}
+	if fp.Confidence != "high" {
+		t.Errorf("Confidence = %q, want high", fp.Confidence)
+	}
+	if fp.Limitations != "lim" {
+		t.Errorf("Limitations = %q, want lim", fp.Limitations)
+	}
+	// CLI echo wins over src baseline when non-empty.
+	if fp.BaselineCommit != "echo-commit" {
+		t.Errorf("BaselineCommit = %q, want echo-commit (CLI echo wins)", fp.BaselineCommit)
+	}
+}
+
+func TestProcessNextPersistsSourceBaselineWhenCLIEchoMissing(t *testing.T) {
+	runs := &fakeRunStore{claim: claimedRun(), finalOK: true}
+	repos := &fakeRepos{repo: ruletypes.CodebaseRepo{OrgID: "org1", RepoID: "r1"}, ok: true}
+	src := &fakeSource{checkout: "/co/run-1", baseline: "src-baseline"}
+	cli := &fakeCLI{
+		status: coderca.RunStatusDone,
+		result: coderca.RCAResult{
+			BaselineCommit: "", // CLI did not echo baseline
+			RootCause:      "rc2",
+		},
+	}
+	del := &fakeDeliverer{ref: "handoff-43"}
+	aud := &fakeAuditor{}
+
+	_, err := newEngine(t, runs, repos, src, cli, del, aud).ProcessNext(context.Background())
+	if err != nil {
+		t.Fatalf("ProcessNext: %v", err)
+	}
+	// src baseline used as fallback when CLI echo is empty.
+	if runs.finalized.BaselineCommit != "src-baseline" {
+		t.Errorf("BaselineCommit = %q, want src-baseline (source baseline fallback)", runs.finalized.BaselineCommit)
+	}
+}
+
+func TestProcessNextPersistsBaselineOnFailure(t *testing.T) {
+	runs := &fakeRunStore{claim: claimedRun(), finalOK: true}
+	repos := &fakeRepos{repo: ruletypes.CodebaseRepo{OrgID: "org1", RepoID: "r1"}, ok: true}
+	src := &fakeSource{checkout: "/co/run-1", baseline: "src-baseline"}
+	cli := &fakeCLI{
+		status: coderca.RunStatusFailed,
+		result: coderca.RCAResult{}, // zero result on failure
+	}
+	del := &fakeDeliverer{}
+	aud := &fakeAuditor{}
+
+	_, err := newEngine(t, runs, repos, src, cli, del, aud).ProcessNext(context.Background())
+	if err != nil {
+		t.Fatalf("ProcessNext: %v", err)
+	}
+	fp := runs.finalized
+	if fp.Status != coderca.RunStatusFailed {
+		t.Errorf("Status = %q, want failed", fp.Status)
+	}
+	if fp.RootCause != "" || fp.ProposedFix != "" || fp.Confidence != "" || fp.Limitations != "" {
+		t.Errorf("report fields must be empty on failure: %+v", fp)
+	}
+	// baseline is known after source prep succeeded — persist it even on failure.
+	if fp.BaselineCommit != "src-baseline" {
+		t.Errorf("BaselineCommit = %q, want src-baseline (baseline persisted on failure)", fp.BaselineCommit)
+	}
+}

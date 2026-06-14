@@ -145,7 +145,7 @@ func (e *Engine) ProcessNext(ctx context.Context) (processed bool, err error) {
 		return false, nil
 	}
 
-	status, resultRef, detail := e.runOne(ctx, claim)
+	status, resultRef, detail, baseline, result := e.runOne(ctx, claim)
 
 	e.deps.Auditor.Audit(ctx, AuditEvent{
 		OrgID:   claim.OrgID,
@@ -163,19 +163,27 @@ func (e *Engine) ProcessNext(ctx context.Context) (processed bool, err error) {
 		Status:     status,
 		ResultRef:  resultRef,
 		Now:        e.deps.Now(),
+
+		BaselineCommit: firstNonEmptyStr(result.BaselineCommit, baseline),
+		RootCause:      result.RootCause,
+		ProposedFix:    result.ProposedFix,
+		Confidence:     result.Confidence,
+		Limitations:    result.Limitations,
 	})
 	return true, ferr
 }
 
 // runOne executes the pipeline for a claimed run and returns its terminal
-// status, the delivery ref (set only when delivered), and an audit detail.
-func (e *Engine) runOne(ctx context.Context, claim runstore.ClaimResult) (coderca.RunStatus, string, string) {
+// status, the delivery ref (set only when delivered), an audit detail, the
+// prepared source baseline (empty if source prep was not reached), and the
+// parsed RCA result (zero value on non-done paths) for persistence.
+func (e *Engine) runOne(ctx context.Context, claim runstore.ClaimResult) (coderca.RunStatus, string, string, string, coderca.RCAResult) {
 	repo, subpath, ok, err := e.deps.Repos.ResolveRepo(ctx, claim.OrgID, claim.Service)
 	if err != nil {
-		return coderca.RunStatusFailed, "", "resolve repo: " + err.Error()
+		return coderca.RunStatusFailed, "", "resolve repo: " + err.Error(), "", coderca.RCAResult{}
 	}
 	if !ok {
-		return coderca.RunStatusFailed, "", string(coderca.SkipNoRepoMapping)
+		return coderca.RunStatusFailed, "", string(coderca.SkipNoRepoMapping), "", coderca.RCAResult{}
 	}
 
 	checkout, baseline, cleanup, err := e.deps.Source.Prepare(ctx, repo, subpath)
@@ -183,7 +191,7 @@ func (e *Engine) runOne(ctx context.Context, claim runstore.ClaimResult) (coderc
 		defer cleanup() // remove the disposable checkout, even on failure/timeout
 	}
 	if err != nil {
-		return coderca.RunStatusFailed, "", "source prepare: " + err.Error()
+		return coderca.RunStatusFailed, "", "source prepare: " + err.Error(), "", coderca.RCAResult{}
 	}
 
 	rc := coderca.RCAContext{
@@ -208,8 +216,9 @@ func (e *Engine) runOne(ctx context.Context, claim runstore.ClaimResult) (coderc
 	})
 	if status != coderca.RunStatusDone {
 		// timeout / failed / unparseable: never delivered (HITL gets only usable
-		// results); the status itself is the audit detail.
-		return status, "", string(status)
+		// results); the status itself is the audit detail. baseline is returned
+		// so the caller can persist it even for non-done runs.
+		return status, "", string(status), baseline, coderca.RCAResult{}
 	}
 
 	resultRef, derr := e.deps.Deliver.Deliver(ctx, Delivery{
@@ -220,9 +229,20 @@ func (e *Engine) runOne(ctx context.Context, claim runstore.ClaimResult) (coderc
 		Result:         result,
 	})
 	if derr != nil {
-		return coderca.RunStatusFailed, "", "deliver: " + derr.Error()
+		return coderca.RunStatusFailed, "", "deliver: " + derr.Error(), baseline, coderca.RCAResult{}
 	}
-	return coderca.RunStatusDone, resultRef, "delivered"
+	return coderca.RunStatusDone, resultRef, "delivered", baseline, result
+}
+
+// firstNonEmptyStr returns the first non-empty string from vals, or "" if all
+// are empty. Used to prefer a CLI-echoed baseline over the source-prepared one.
+func firstNonEmptyStr(vals ...string) string {
+	for _, v := range vals {
+		if v != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 // compile-time port assertions against the real implementations.
