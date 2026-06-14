@@ -201,6 +201,7 @@ func NewSQLMigrationProviderFactories(
 		sqlmigration.NewAddAIOAuthTokenFactory(sqlstore),
 		sqlmigration.NewAlterDSAIStrategyHistoryMultiFactory(sqlstore),
 		sqlmigration.NewAddDSCodebaseConfigFactory(sqlstore),
+		sqlmigration.NewUpdateDSCodebaseConfigFactory(sqlstore),
 	)
 }
 
