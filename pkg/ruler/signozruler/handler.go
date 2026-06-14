@@ -14,6 +14,7 @@ import (
 	"github.com/SigNoz/signoz/pkg/http/render"
 	"github.com/SigNoz/signoz/pkg/ruler"
 	"github.com/SigNoz/signoz/pkg/ruler/aiconfigstore/secretbox"
+	codercarunstore "github.com/SigNoz/signoz/pkg/ruler/coderca/runstore"
 	"github.com/SigNoz/signoz/pkg/types/authtypes"
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
 	"github.com/SigNoz/signoz/pkg/valuer"
@@ -33,6 +34,12 @@ type handler struct {
 	aiRebuilder   aiGeneratorRebuilder
 	// Runbook drafter (Task 7 wires this into NewHandler; Task 6 added the field).
 	runbookDrafter ruletypes.RunbookDrafter
+	// CF-11 code RCA settings + run history (coderca_handler.go).
+	codebaseRepoStore ruletypes.CodebaseRepoStore
+	codebaseMapStore  ruletypes.CodebaseServiceMapStore
+	codercaCfgStore   ruletypes.CodebaseRCAConfigStore
+	codercaRunStore   *codercarunstore.Store
+	aiCipherInsecure  bool
 }
 
 // NewHandler constructs a ruler HTTP handler. aiGenerator is the
@@ -49,16 +56,26 @@ func NewHandler(
 	aiCipher *secretbox.Cipher,
 	aiRebuilder aiGeneratorRebuilder,
 	runbookDrafter ruletypes.RunbookDrafter,
+	codebaseRepoStore ruletypes.CodebaseRepoStore,
+	codebaseMapStore ruletypes.CodebaseServiceMapStore,
+	codercaCfgStore ruletypes.CodebaseRCAConfigStore,
+	codercaRunStore *codercarunstore.Store,
+	aiCipherInsecure bool,
 ) ruler.Handler {
 	return &handler{
-		ruler:          ruler,
-		sopStore:       sopStore,
-		aiHistoryStore: aiHistoryStore,
-		aiGenerator:    aiGenerator,
-		aiConfigStore:  aiConfigStore,
-		aiCipher:       aiCipher,
-		aiRebuilder:    aiRebuilder,
-		runbookDrafter: runbookDrafter,
+		ruler:             ruler,
+		sopStore:          sopStore,
+		aiHistoryStore:    aiHistoryStore,
+		aiGenerator:       aiGenerator,
+		aiConfigStore:     aiConfigStore,
+		aiCipher:          aiCipher,
+		aiRebuilder:       aiRebuilder,
+		runbookDrafter:    runbookDrafter,
+		codebaseRepoStore: codebaseRepoStore,
+		codebaseMapStore:  codebaseMapStore,
+		codercaCfgStore:   codercaCfgStore,
+		codercaRunStore:   codercaRunStore,
+		aiCipherInsecure:  aiCipherInsecure,
 	}
 }
 
