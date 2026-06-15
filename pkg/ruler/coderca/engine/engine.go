@@ -203,7 +203,10 @@ func (e *Engine) runOne(ctx context.Context, claim runstore.ClaimResult) (coderc
 		// full error context at admission is a deferred additive enhancement.
 	}
 	evidence, _ := e.deps.Evidence.Collect(ctx, rc) // best-effort; v1 Noop → none
-	system, user := coderca.BuildPrompt(rc, evidence)
+	// The prompt's read-only inspection directive is resolved from the agent so
+	// it matches the CLI flags clirunner emits (Claude: file tools; Codex:
+	// read-only shell). Mismatching them blinds the agent to the checkout.
+	system, user := coderca.BuildPrompt(rc, evidence, clirunner.ToolingFor(e.cfg.Agent))
 
 	result, status, _ := e.deps.CLI.Run(ctx, clirunner.Spec{
 		Agent:        e.cfg.Agent,

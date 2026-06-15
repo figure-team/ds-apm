@@ -8,6 +8,14 @@ import (
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
 )
 
+// stubTooling is a test double for the AgentTooling port so prompt tests stay
+// independent of any concrete agent adapter.
+type stubTooling struct{ directive string }
+
+func (s stubTooling) ReadOnlyDirective() string { return s.directive }
+
+var testTooling = stubTooling{directive: "read-only inspection directive (test)"}
+
 func sampleContext() RCAContext {
 	return RCAContext{
 		OrgID:          "org1",
@@ -23,7 +31,7 @@ func sampleContext() RCAContext {
 }
 
 func TestBuildPromptSystemIsReadOnlyHITL(t *testing.T) {
-	system, _ := BuildPrompt(sampleContext(), nil)
+	system, _ := BuildPrompt(sampleContext(), nil, testTooling)
 	low := strings.ToLower(system)
 
 	mustContain := []string{
@@ -57,7 +65,7 @@ func TestBuildPromptSystemIsReadOnlyHITL(t *testing.T) {
 }
 
 func TestBuildPromptUserCarriesErrorContext(t *testing.T) {
-	_, user := BuildPrompt(sampleContext(), nil)
+	_, user := BuildPrompt(sampleContext(), nil, testTooling)
 
 	mustContain := []string{
 		"payments",   // service
@@ -79,12 +87,12 @@ func TestBuildPromptInjectsEvidenceWhenPresent(t *testing.T) {
 	ev := []ruletypes.AIEvidenceRef{
 		{RefID: "ev-1", Type: "log", Observation: "connection pool exhausted at 14:02"},
 	}
-	_, withEv := BuildPrompt(sampleContext(), ev)
+	_, withEv := BuildPrompt(sampleContext(), ev, testTooling)
 	if !strings.Contains(withEv, "connection pool exhausted at 14:02") {
 		t.Errorf("user prompt did not inject evidence observation: %q", withEv)
 	}
 
-	_, noEv := BuildPrompt(sampleContext(), nil)
+	_, noEv := BuildPrompt(sampleContext(), nil, testTooling)
 	if strings.Contains(noEv, "connection pool exhausted at 14:02") {
 		t.Error("evidence text leaked into a no-evidence prompt")
 	}
@@ -92,10 +100,25 @@ func TestBuildPromptInjectsEvidenceWhenPresent(t *testing.T) {
 
 func TestBuildPromptIsDeterministic(t *testing.T) {
 	rc := sampleContext()
-	s1, u1 := BuildPrompt(rc, nil)
-	s2, u2 := BuildPrompt(rc, nil)
+	s1, u1 := BuildPrompt(rc, nil, testTooling)
+	s2, u2 := BuildPrompt(rc, nil, testTooling)
 	if s1 != s2 || u1 != u2 {
 		t.Error("BuildPrompt is not deterministic across calls")
+	}
+}
+
+func TestBuildPromptInjectsToolingDirective(t *testing.T) {
+	const marker = "MARKER-read-via-shell-OK"
+	system, _ := BuildPrompt(sampleContext(), nil, stubTooling{directive: marker})
+	if !strings.Contains(system, marker) {
+		t.Errorf("system prompt did not inject the agent tooling directive; got:\n%s", system)
+	}
+	// The fixed task/output contract must still be present alongside the
+	// injected directive.
+	for _, sub := range []string{"```json", "baseline_commit", "read-only"} {
+		if !strings.Contains(strings.ToLower(system), strings.ToLower(sub)) {
+			t.Errorf("system prompt missing fixed section %q", sub)
+		}
 	}
 }
 

@@ -11,15 +11,17 @@ import (
 // PromptVersion identifies the coderca-owned prompt contract for audit.
 const PromptVersion = "coderca.rca.v1"
 
-// systemPrompt is the coderca-owned, read-only / HITL instruction. It is fixed
-// (versioned by PromptVersion) and names the exact output keys ParseRCAResult
-// consumes, so the agent's response stays machine-parseable.
-const systemPrompt = `You are a code root-cause analysis agent. You have READ-ONLY access to a source
-checkout pinned at a specific baseline commit. Do NOT modify, create, or delete
-any files, and do NOT run shell commands. This is a human-in-the-loop workflow:
-your proposed fix is a SUGGESTION only and is NEVER applied automatically.
+// systemPromptIntro states the read-only / HITL contract that holds for every
+// agent. The agent-specific "how to read the code" sentence is injected between
+// this and systemPromptTask from an AgentTooling port, so the prompt never
+// hardcodes one agent's tool model.
+const systemPromptIntro = `You are a code root-cause analysis agent. You have READ-ONLY access to a source
+checkout pinned at a specific baseline commit. This is a human-in-the-loop workflow:
+your proposed fix is a SUGGESTION only and is NEVER applied automatically.`
 
-Your task:
+// systemPromptTask is the fixed task + output contract. It names the exact JSON
+// keys ParseRCAResult consumes, so the agent's response stays machine-parseable.
+const systemPromptTask = `Your task:
 1. Explore the checkout to locate the code paths matching the reported error signature.
 2. Hypothesize the most likely root cause.
 3. Propose a fix as a suggestion (a diff sketch or concrete steps). Do not apply it.
@@ -35,10 +37,18 @@ Respond with a single fenced ` + "```json" + ` block and nothing after it, with 
   "limitations": "<limitations of this analysis>"
 }`
 
+// buildSystemPrompt assembles the full system prompt by sandwiching the agent's
+// read-only inspection directive between the fixed intro and task sections.
+func buildSystemPrompt(tooling AgentTooling) string {
+	return systemPromptIntro + "\n" + tooling.ReadOnlyDirective() + "\n\n" + systemPromptTask
+}
+
 // BuildPrompt returns the (system, user) prompt pair for a code-RCA run
-// (design §7). The system prompt is fixed; the user prompt is assembled from the
-// error context (labels/annotations sorted for determinism) plus any evidence.
-func BuildPrompt(rc RCAContext, evidence []ruletypes.AIEvidenceRef) (system string, user string) {
+// (design §7). The system prompt's read-only inspection directive comes from the
+// supplied AgentTooling port (so it matches the agent's actual CLI flags); the
+// user prompt is assembled from the error context (labels/annotations sorted for
+// determinism) plus any evidence.
+func BuildPrompt(rc RCAContext, evidence []ruletypes.AIEvidenceRef, tooling AgentTooling) (system string, user string) {
 	var b strings.Builder
 	b.WriteString("# Error context\n")
 	fmt.Fprintf(&b, "- Service: %s\n", rc.Service)
@@ -67,7 +77,7 @@ func BuildPrompt(rc RCAContext, evidence []ruletypes.AIEvidenceRef) (system stri
 		}
 	}
 
-	return systemPrompt, b.String()
+	return buildSystemPrompt(tooling), b.String()
 }
 
 func sortedKeys(m map[string]string) []string {
