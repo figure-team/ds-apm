@@ -21,6 +21,7 @@
 	"repo_default_branch": "기본 브랜치",
 	"repo_credential": "읽기 자격증명(PAT)",
 	"credential_unchanged_hint": "비워두면 기존 자격증명이 유지됩니다",
+	"credential_saved": "자격증명 저장됨",
 	"repo_enabled": "사용",
 	"repo_last_sync": "마지막 동기화",
 	"repo_baseline": "기준 커밋",

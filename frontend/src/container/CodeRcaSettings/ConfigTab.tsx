@@ -12,6 +12,7 @@ import {
 	Select,
 	Switch,
 	Table,
+	Tag,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import getConfig from 'api/codeRca/getConfig';
@@ -46,6 +47,7 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 	const [repos, setRepos] = useState<CodebaseRepo[]>([]);
 	const [repoModalOpen, setRepoModalOpen] = useState(false);
 	const [editingRepo, setEditingRepo] = useState<CodebaseRepo | null>(null);
+	const [credentialTouched, setCredentialTouched] = useState(false);
 	const [repoForm] = Form.useForm();
 
 	// ── Service maps state ────────────────────────────────────────────────────
@@ -95,6 +97,7 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 	// ── Repo modal ────────────────────────────────────────────────────────────
 	const openAddRepo = useCallback((): void => {
 		setEditingRepo(null);
+		setCredentialTouched(false);
 		repoForm.resetFields();
 		setRepoModalOpen(true);
 	}, [repoForm]);
@@ -102,6 +105,7 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 	const openEditRepo = useCallback(
 		(row: CodebaseRepo): void => {
 			setEditingRepo(row);
+			setCredentialTouched(false);
 			repoForm.setFieldsValue({
 				repoId: row.repoId,
 				gitUrl: row.gitUrl,
@@ -473,10 +477,18 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 						<Input />
 					</Form.Item>
 					<Form.Item name="credential" label={t('repo_credential')}>
+						{editingRepo && !credentialTouched && (
+							<Tag color="success" style={{ marginBottom: 6 }}>
+								{t('credential_saved')}
+							</Tag>
+						)}
 						<Input.Password
 							placeholder={
 								editingRepo ? t('credential_unchanged_hint') : undefined
 							}
+							onChange={(): void => {
+								if (editingRepo) setCredentialTouched(true);
+							}}
 						/>
 					</Form.Item>
 					<Form.Item name="enabled" label={t('repo_enabled')} valuePropName="checked">

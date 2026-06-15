@@ -21,6 +21,7 @@
 	"repo_default_branch": "Default Branch",
 	"repo_credential": "Read Credential (PAT)",
 	"credential_unchanged_hint": "Leave blank to keep the existing credential",
+	"credential_saved": "Credential saved",
 	"repo_enabled": "Enabled",
 	"repo_last_sync": "Last Sync",
 	"repo_baseline": "Baseline Commit",
