@@ -279,6 +279,7 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 							setConfig((prev) => (prev ? { ...prev, enabled: val } : prev))
 						}
 						disabled={!isAdmin}
+						style={{ alignSelf: 'flex-start' }}
 					/>
 				</div>
 
@@ -367,6 +368,7 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 							)
 						}
 						disabled={!isAdmin}
+						style={{ alignSelf: 'flex-start' }}
 					/>
 					{config?.allowUnboundWithoutAnomaly && (
 						<Alert
