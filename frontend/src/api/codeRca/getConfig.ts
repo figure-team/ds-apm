@@ -1,9 +1,12 @@
 import { ApiV2Instance } from 'api';
-import { AxiosResponse } from 'axios';
 
-import { CodeRcaConfig } from './types';
+import { ApiEnvelope, CodeRcaConfig } from './types';
 
-const getConfig = (): Promise<AxiosResponse<CodeRcaConfig>> =>
-	ApiV2Instance.get<CodeRcaConfig>('/ds/coderca/config');
+const getConfig = async (): Promise<{ data: CodeRcaConfig }> => {
+	const res = await ApiV2Instance.get<ApiEnvelope<CodeRcaConfig>>(
+		'/ds/coderca/config',
+	);
+	return { data: res.data.data };
+};
 
 export default getConfig;

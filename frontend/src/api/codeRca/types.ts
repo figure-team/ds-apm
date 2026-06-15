@@ -61,3 +61,10 @@ export interface CodeRcaRunDetail extends CodeRcaRunSummary {
 }
 
 export const CREDENTIAL_UNCHANGED = '<unchanged>';
+
+// Backend wraps every render.Success response in { status, data }.
+// Read clients unwrap one level so consumers receive the bare payload.
+export interface ApiEnvelope<T> {
+	status: string;
+	data: T;
+}

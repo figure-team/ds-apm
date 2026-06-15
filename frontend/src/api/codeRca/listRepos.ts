@@ -1,9 +1,12 @@
 import { ApiV2Instance } from 'api';
-import { AxiosResponse } from 'axios';
 
-import { CodebaseRepo } from './types';
+import { ApiEnvelope, CodebaseRepo } from './types';
 
-const listRepos = (): Promise<AxiosResponse<CodebaseRepo[]>> =>
-	ApiV2Instance.get<CodebaseRepo[]>('/ds/coderca/repos');
+const listRepos = async (): Promise<{ data: CodebaseRepo[] }> => {
+	const res = await ApiV2Instance.get<ApiEnvelope<CodebaseRepo[]>>(
+		'/ds/coderca/repos',
+	);
+	return { data: res.data.data };
+};
 
 export default listRepos;

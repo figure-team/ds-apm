@@ -1,11 +1,12 @@
 import { ApiV2Instance } from 'api';
-import { AxiosResponse } from 'axios';
 
-import { CodeRcaRunDetail } from './types';
+import { ApiEnvelope, CodeRcaRunDetail } from './types';
 
-const getRun = (runId: string): Promise<AxiosResponse<CodeRcaRunDetail>> =>
-	ApiV2Instance.get<CodeRcaRunDetail>(
+const getRun = async (runId: string): Promise<{ data: CodeRcaRunDetail }> => {
+	const res = await ApiV2Instance.get<ApiEnvelope<CodeRcaRunDetail>>(
 		`/ds/coderca/runs/${encodeURIComponent(runId)}`,
 	);
+	return { data: res.data.data };
+};
 
 export default getRun;
