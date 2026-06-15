@@ -68,6 +68,42 @@ const llmHappyJSON = `{
   "status": "ready"
 }`
 
+// sequenceProvider returns responses[i] on the i-th Complete call (clamping to
+// the last entry) and records how many times it was called.
+type sequenceProvider struct {
+	responses []string
+	calls     int
+}
+
+func (s *sequenceProvider) Complete(_ context.Context, _, _ string) (string, error) {
+	i := s.calls
+	s.calls++
+	if i >= len(s.responses) {
+		i = len(s.responses) - 1
+	}
+	return s.responses[i], nil
+}
+
+func TestGenerator_RetriesOnParseFailure(t *testing.T) {
+	// Two unparseable completions, then a valid one: Generate must keep trying
+	// and succeed on the third attempt.
+	stub := &sequenceProvider{responses: []string{"not json", "{still not valid}", llmHappyJSON}}
+	gen := New(stub, "model-x", 5*time.Second)
+	strategy, err := gen.Generate(context.Background(), llmTestReq)
+	require.NoError(t, err)
+	require.Equal(t, "LLM 테스트 헤드라인", strategy.Headline)
+	require.Equal(t, 3, stub.calls, "should retry until a valid completion")
+}
+
+func TestGenerator_FailsAfterMaxParseAttempts(t *testing.T) {
+	// Every completion is unparseable: Generate gives up after maxParseAttempts.
+	stub := &sequenceProvider{responses: []string{"never valid"}}
+	gen := New(stub, "model-x", 5*time.Second)
+	_, err := gen.Generate(context.Background(), llmTestReq)
+	require.Error(t, err)
+	require.Equal(t, maxParseAttempts, stub.calls, "should stop after maxParseAttempts")
+}
+
 // TestGenerator_ImplementsInterface verifies the compile-time assertion holds.
 func TestGenerator_ImplementsInterface(t *testing.T) {
 	var _ ruletypes.AIStrategyGenerator = (*Generator)(nil)

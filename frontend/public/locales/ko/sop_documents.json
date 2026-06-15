@@ -17,6 +17,8 @@
 	"field_tags": "태그",
 	"field_service_account_profile": "서비스 계정 프로필",
 	"field_body_markdown": "본문 Markdown",
+	"field_customer_update_template": "고객 공지 템플릿 (선택)",
+	"field_vendor_request_template": "공급사 확인 요청 템플릿 (선택)",
 	"status_approved": "승인됨",
 	"status_draft": "초안",
 	"status_deprecated": "사용 중단",

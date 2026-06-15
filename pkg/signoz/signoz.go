@@ -433,12 +433,20 @@ func New(
 
 	var aiDispatchHook *dispatchhook.Hook
 	if aiGen != nil {
+		// Best-effort AI enrichment must not stall alert dispatch, so the hook
+		// caps generation time. The default suits a fast/local generator; slow
+		// LLM transports (e.g. a CLI agent) need a larger budget, configurable
+		// via DS_APM_AI_DISPATCH_TIMEOUT_SECONDS.
+		dispatchAITimeout := 5 * time.Second
+		if secs := envInt("DS_APM_AI_DISPATCH_TIMEOUT_SECONDS"); secs > 0 {
+			dispatchAITimeout = time.Duration(secs) * time.Second
+		}
 		aiDispatchHook = dispatchhook.New(
 			sqlsopstore.NewSOPStore(sqlstore),
 			sqlaihistorystore.NewAIStrategyHistoryStore(sqlstore),
 			storeAware,
 			providerSettings.Logger,
-			5*time.Second,
+			dispatchAITimeout,
 		)
 	}
 

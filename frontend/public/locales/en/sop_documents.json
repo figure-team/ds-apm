@@ -17,6 +17,8 @@
 	"field_tags": "Tags",
 	"field_service_account_profile": "Service account profile",
 	"field_body_markdown": "Body Markdown",
+	"field_customer_update_template": "Customer notice template (optional)",
+	"field_vendor_request_template": "Vendor request template (optional)",
 	"status_approved": "Approved",
 	"status_draft": "Draft",
 	"status_deprecated": "Deprecated",

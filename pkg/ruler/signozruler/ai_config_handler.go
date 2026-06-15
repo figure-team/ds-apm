@@ -274,6 +274,11 @@ func scrubAPIKey(apiKey string) string {
 // cannedPaymentRequest builds a minimal synthetic AIStrategyRequest for
 // connectivity / smoke tests on the Test endpoint.
 func cannedPaymentRequest(orgID string) ruletypes.AIStrategyRequest {
+	// A self-contained, groundable scenario: a bound SOP plus one evidence ref,
+	// so a real LLM can return a valid "ready" strategy that cites them. Without
+	// these the generated draft cannot satisfy AIStrategy validation (sopId /
+	// evidence / per-hypothesis citation are required), which is the whole point
+	// of the connectivity test — exercise the real Render→LLM→Parse→ground path.
 	return ruletypes.AIStrategyRequest{
 		IncidentID:       "INC-TEST-0",
 		AlertFingerprint: "fp-test-payment",
@@ -285,6 +290,20 @@ func cannedPaymentRequest(orgID string) ruletypes.AIStrategyRequest {
 		},
 		Annotations: map[string]string{
 			"summary": "Payment service p99 latency exceeded 2s threshold",
+		},
+		SOPDocument: ruletypes.SOPDocument{
+			SOPID:        "SOP-TEST-PAY",
+			Version:      "test-1",
+			Title:        "Payment latency 대응 절차 (테스트)",
+			BodyMarkdown: "## 1단계\n- 결제 성공률/지연 대시보드 확인\n- 외부 PG 응답시간 점검\n## 2단계\n- 영향 채널 식별 후 우회 라우팅 검토",
+		},
+		EvidenceRefs: []ruletypes.AIEvidenceRef{
+			{
+				RefID:       "metric:latency:payment",
+				Type:        "metric",
+				Observation: "p99 latency 2.4s for 5 minutes",
+				Confidence:  "high",
+			},
 		},
 	}
 }

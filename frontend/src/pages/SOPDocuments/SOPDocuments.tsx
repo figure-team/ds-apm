@@ -17,7 +17,10 @@ import {
 import RunbooksSection from 'container/Runbooks/RunbooksSection';
 
 import './SOPDocuments.styles.scss';
-import { downloadSopExcelTemplate, type ParseSopExcelResult } from './parseSopExcel';
+import {
+	downloadSopExcelTemplate,
+	type ParseSopExcelResult,
+} from './parseSopExcel';
 import SopBulkUploadModal from './SopBulkUploadModal';
 import SopBulkPreviewDrawer from './SopBulkPreviewDrawer';
 
@@ -27,6 +30,8 @@ type SopDocumentFormState = {
 	version: string;
 	sourceId: string;
 	bodyMarkdown: string;
+	customerUpdateTemplate: string;
+	vendorRequestTemplate: string;
 	displayUrl: string;
 	ownerTeam: string;
 	approvalStatus: SopApprovalStatus;
@@ -42,6 +47,8 @@ const DEFAULT_FORM_STATE: SopDocumentFormState = {
 	version: '',
 	sourceId: 'src-managed-markdown-default',
 	bodyMarkdown: '',
+	customerUpdateTemplate: '',
+	vendorRequestTemplate: '',
 	displayUrl: '',
 	ownerTeam: '',
 	approvalStatus: 'approved',
@@ -74,6 +81,8 @@ function buildSopDocument(form: SopDocumentFormState): SopDocument {
 			sourceId: form.sourceId.trim(),
 		},
 		bodyMarkdown: form.bodyMarkdown,
+		customerUpdateTemplate: form.customerUpdateTemplate.trim() || undefined,
+		vendorRequestTemplate: form.vendorRequestTemplate.trim() || undefined,
 		displayUrl: form.displayUrl.trim() || undefined,
 		ownerTeam: form.ownerTeam.trim(),
 		approvalStatus: form.approvalStatus,
@@ -126,12 +135,13 @@ function isSubmitDisabled(form: SopDocumentFormState): boolean {
 function SOPDocuments(): JSX.Element {
 	const { t } = useTranslation(['sop_documents']);
 
-	const APPROVAL_STATUS_OPTIONS: { label: string; value: SopApprovalStatus }[] = [
-		{ label: t('status_approved'), value: 'approved' },
-		{ label: t('status_draft'), value: 'draft' },
-		{ label: t('status_deprecated'), value: 'deprecated' },
-		{ label: t('status_disabled'), value: 'disabled' },
-	];
+	const APPROVAL_STATUS_OPTIONS: { label: string; value: SopApprovalStatus }[] =
+		[
+			{ label: t('status_approved'), value: 'approved' },
+			{ label: t('status_draft'), value: 'draft' },
+			{ label: t('status_deprecated'), value: 'deprecated' },
+			{ label: t('status_disabled'), value: 'disabled' },
+		];
 
 	const [documents, setDocuments] = useState<SopDocumentSummary[]>([]);
 	const [form, setForm] = useState<SopDocumentFormState>(DEFAULT_FORM_STATE);
@@ -147,7 +157,9 @@ function SOPDocuments(): JSX.Element {
 	const [error, setError] = useState('');
 	const [uploadModalOpen, setUploadModalOpen] = useState(false);
 	const [previewDrawerOpen, setPreviewDrawerOpen] = useState(false);
-	const [parseResult, setParseResult] = useState<ParseSopExcelResult | null>(null);
+	const [parseResult, setParseResult] = useState<ParseSopExcelResult | null>(
+		null,
+	);
 
 	const loadDocuments = useCallback(async (): Promise<void> => {
 		setIsLoading(true);
@@ -286,10 +298,7 @@ function SOPDocuments(): JSX.Element {
 						<p>{t('page_description')}</p>
 					</div>
 					<div className="sop-documents-page__header-actions">
-						<Button
-							icon={<DownloadOutlined />}
-							onClick={downloadSopExcelTemplate}
-						>
+						<Button icon={<DownloadOutlined />} onClick={downloadSopExcelTemplate}>
 							{t('btn_template_download')}
 						</Button>
 						<Button
@@ -453,6 +462,42 @@ function SOPDocuments(): JSX.Element {
 							}
 							rows={7}
 							value={form.bodyMarkdown}
+						/>
+					</label>
+					<label
+						className="sop-documents-page__markdown"
+						htmlFor="sop-document-customer-update-template-input"
+					>
+						<span>{t('field_customer_update_template')}</span>
+						<Input.TextArea
+							data-testid="sop-document-customer-update-template"
+							id="sop-document-customer-update-template-input"
+							onChange={(event): void =>
+								handleFormFieldChange('customerUpdateTemplate', event.target.value)
+							}
+							placeholder={
+								'[○○ 서비스 이용 안내]\n\n■ 발생 현황: {현재 상황}\n■ 영향 범위: {영향 범위}\n■ 조치 사항: {조치}\n■ 향후 안내: {다음 안내}\n■ 문의처: 고객센터 1588-0000'
+							}
+							rows={6}
+							value={form.customerUpdateTemplate}
+						/>
+					</label>
+					<label
+						className="sop-documents-page__markdown"
+						htmlFor="sop-document-vendor-request-template-input"
+					>
+						<span>{t('field_vendor_request_template')}</span>
+						<Input.TextArea
+							data-testid="sop-document-vendor-request-template"
+							id="sop-document-vendor-request-template-input"
+							onChange={(event): void =>
+								handleFormFieldChange('vendorRequestTemplate', event.target.value)
+							}
+							placeholder={
+								'안녕하세요. {서비스}에서 {증상}이 확인되었습니다. {확인 요청 항목} 확인 부탁드립니다.'
+							}
+							rows={4}
+							value={form.vendorRequestTemplate}
 						/>
 					</label>
 				</div>

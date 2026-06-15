@@ -32,21 +32,28 @@ const (
 )
 
 type SOPDocument struct {
-	ContractVersion string                    `json:"contractVersion"`
-	SOPID           string                    `json:"sopId"`
-	Title           string                    `json:"title"`
-	Version         string                    `json:"version"`
-	Checksum        string                    `json:"checksum"`
-	Source          SOPDocumentSource         `json:"source"`
-	BodyMarkdown    string                    `json:"bodyMarkdown"`
-	DisplayURL      string                    `json:"displayUrl,omitempty"`
-	OwnerTeam       string                    `json:"ownerTeam"`
-	ApprovalStatus  string                    `json:"approvalStatus"`
-	TenantScope     PilotTenantScope          `json:"tenantScope"`
-	Tags            []string                  `json:"tags,omitempty"`
-	Runbooks        []Runbook                 `json:"runbooks,omitempty"`
-	UpdatedAt       string                    `json:"updatedAt"`
-	SecurityContext PilotAuditSecurityContext `json:"securityContext"`
+	ContractVersion string            `json:"contractVersion"`
+	SOPID           string            `json:"sopId"`
+	Title           string            `json:"title"`
+	Version         string            `json:"version"`
+	Checksum        string            `json:"checksum"`
+	Source          SOPDocumentSource `json:"source"`
+	BodyMarkdown    string            `json:"bodyMarkdown"`
+	// CustomerUpdateTemplate / VendorRequestTemplate are optional org-approved
+	// comms templates. When present, the AI generator fills their slots rather
+	// than free-writing the customer/vendor draft, so external-facing wording
+	// stays consistent and within approved bounds (CF-2 comms grounding).
+	// Stored in the SOP payload blob — additive, no migration, no contract bump.
+	CustomerUpdateTemplate string                    `json:"customerUpdateTemplate,omitempty"`
+	VendorRequestTemplate  string                    `json:"vendorRequestTemplate,omitempty"`
+	DisplayURL             string                    `json:"displayUrl,omitempty"`
+	OwnerTeam              string                    `json:"ownerTeam"`
+	ApprovalStatus         string                    `json:"approvalStatus"`
+	TenantScope            PilotTenantScope          `json:"tenantScope"`
+	Tags                   []string                  `json:"tags,omitempty"`
+	Runbooks               []Runbook                 `json:"runbooks,omitempty"`
+	UpdatedAt              string                    `json:"updatedAt"`
+	SecurityContext        PilotAuditSecurityContext `json:"securityContext"`
 }
 
 type SOPDocumentSource struct {

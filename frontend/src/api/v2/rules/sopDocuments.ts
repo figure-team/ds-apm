@@ -36,6 +36,9 @@ export type SopDocument = {
 	checksum: string;
 	source: SopDocumentSource;
 	bodyMarkdown: string;
+	// Optional org-approved comms templates filled by the AI generator (CF-2).
+	customerUpdateTemplate?: string;
+	vendorRequestTemplate?: string;
 	displayUrl?: string;
 	ownerTeam: string;
 	approvalStatus: SopApprovalStatus;
