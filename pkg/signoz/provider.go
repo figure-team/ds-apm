@@ -5,7 +5,6 @@ import (
 	"github.com/SigNoz/signoz/pkg/alertmanager/nfmanager"
 	"github.com/SigNoz/signoz/pkg/alertmanager/nfmanager/rulebasednotification"
 	"github.com/SigNoz/signoz/pkg/alertmanager/signozalertmanager"
-	"github.com/SigNoz/signoz/pkg/ruler/aigenerator/dispatchhook"
 	"github.com/SigNoz/signoz/pkg/analytics"
 	"github.com/SigNoz/signoz/pkg/analytics/noopanalytics"
 	"github.com/SigNoz/signoz/pkg/analytics/segmentanalytics"
@@ -45,6 +44,7 @@ import (
 	"github.com/SigNoz/signoz/pkg/prometheus/clickhouseprometheus"
 	"github.com/SigNoz/signoz/pkg/querier"
 	"github.com/SigNoz/signoz/pkg/querier/signozquerier"
+	"github.com/SigNoz/signoz/pkg/ruler/aigenerator/dispatchhook"
 	"github.com/SigNoz/signoz/pkg/sharder"
 	"github.com/SigNoz/signoz/pkg/sharder/noopsharder"
 	"github.com/SigNoz/signoz/pkg/sharder/singlesharder"
@@ -202,6 +202,7 @@ func NewSQLMigrationProviderFactories(
 		sqlmigration.NewAlterDSAIStrategyHistoryMultiFactory(sqlstore),
 		sqlmigration.NewAddDSCodebaseConfigFactory(sqlstore),
 		sqlmigration.NewUpdateDSCodebaseConfigFactory(sqlstore),
+		sqlmigration.NewAddDSIncidentReportTemplateFactory(sqlstore),
 	)
 }
 

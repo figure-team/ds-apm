@@ -385,6 +385,47 @@ func (provider *provider) addRulerRoutes(router *mux.Router) error {
 		return err
 	}
 
+	if err := router.Handle("/api/v2/ds/incident/report/template", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.GetIncidentReportTemplate), handler.OpenAPIDef{
+		ID:                  "GetIncidentReportTemplate",
+		Tags:                []string{"incident_report"},
+		Summary:             "Get incident report template",
+		Description:         "Returns the org's incident-report 양식 template (built-in default when unset).",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusUnauthorized, http.StatusForbidden, http.StatusInternalServerError},
+		SecuritySchemes:     newSecuritySchemes(types.RoleViewer),
+	})).Methods(http.MethodGet).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/incident/report/template", handler.New(provider.authZ.EditAccess(provider.rulerHandler.UpdateIncidentReportTemplate), handler.OpenAPIDef{
+		ID:                  "UpdateIncidentReportTemplate",
+		Tags:                []string{"incident_report"},
+		Summary:             "Update incident report template",
+		Description:         "Upserts the org's incident-report 양식 template (Go text/template; validated before save).",
+		RequestContentType:  "application/json",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusInternalServerError},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
+	})).Methods(http.MethodPut).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/incident/report", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.GenerateIncidentReport), handler.OpenAPIDef{
+		ID:                  "GenerateIncidentReport",
+		Tags:                []string{"incident_report"},
+		Summary:             "Generate incident report",
+		Description:         "Aggregates the incident's CF-2 strategy and CF-11 finding into a Korean-SI 장애보고서, rendered with the org template.",
+		RequestContentType:  "application/json",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusInternalServerError},
+		SecuritySchemes:     newSecuritySchemes(types.RoleViewer),
+	})).Methods(http.MethodPost).GetError(); err != nil {
+		return err
+	}
+
 	if err := router.Handle("/api/v2/ds/coderca/repos", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.ListCodebaseRepos), handler.OpenAPIDef{
 		ID:                  "ListCodebaseRepos",
 		Tags:                []string{"coderca"},

@@ -46,9 +46,10 @@ import (
 	"github.com/SigNoz/signoz/pkg/ruler"
 	"github.com/SigNoz/signoz/pkg/ruler/aiconfigstore/secretbox"
 	"github.com/SigNoz/signoz/pkg/ruler/aiconfigstore/sqlaiconfigstore"
-	"github.com/SigNoz/signoz/pkg/ruler/aihistorystore/sqlaihistorystore"
 	"github.com/SigNoz/signoz/pkg/ruler/aigenerator"
+	"github.com/SigNoz/signoz/pkg/ruler/aihistorystore/sqlaihistorystore"
 	codercarunstore "github.com/SigNoz/signoz/pkg/ruler/coderca/runstore"
+	sqlincidentreporttemplatestore "github.com/SigNoz/signoz/pkg/ruler/incidentreport/sqltemplatestore"
 	"github.com/SigNoz/signoz/pkg/ruler/signozruler"
 	"github.com/SigNoz/signoz/pkg/ruler/sopstore/sqlsopstore"
 	"github.com/SigNoz/signoz/pkg/sqlstore"
@@ -149,6 +150,7 @@ func NewHandlers(
 			codercaCfgStore,
 			codercaRunStore,
 			aiCipherInsecure,
+			sqlincidentreporttemplatestore.New(sqlStore),
 		),
 	}
 }

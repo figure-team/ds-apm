@@ -38,6 +38,10 @@ type Handler interface {
 	ListCodeRCARuns(http.ResponseWriter, *http.Request)
 	GetCodeRCARun(http.ResponseWriter, *http.Request)
 
+	GetIncidentReportTemplate(http.ResponseWriter, *http.Request)
+	UpdateIncidentReportTemplate(http.ResponseWriter, *http.Request)
+	GenerateIncidentReport(http.ResponseWriter, *http.Request)
+
 	ListRunbooks(http.ResponseWriter, *http.Request)
 	GetRunbook(http.ResponseWriter, *http.Request)
 	CreateRunbook(http.ResponseWriter, *http.Request)
