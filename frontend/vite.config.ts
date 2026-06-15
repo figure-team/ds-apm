@@ -56,13 +56,20 @@ export default defineConfig(({ mode }): UserConfig => {
 				},
 			},
 		}),
-		vitePluginChecker({
-			typescript: true,
-			// this doubles the build tim
-			// disabled to use Biome/tsgo (in the future) as alternative
-			enableBuild: false,
-		}),
 	];
+
+	// The TS type-checker worker is memory-hungry; allow disabling it on
+	// low-RAM dev machines via VITE_DISABLE_CHECKER=true (default: enabled).
+	if (env.VITE_DISABLE_CHECKER !== 'true') {
+		plugins.push(
+			vitePluginChecker({
+				typescript: true,
+				// this doubles the build tim
+				// disabled to use Biome/tsgo (in the future) as alternative
+				enableBuild: false,
+			}),
+		);
+	}
 
 	if (env.VITE_SENTRY_AUTH_TOKEN) {
 		plugins.push(
