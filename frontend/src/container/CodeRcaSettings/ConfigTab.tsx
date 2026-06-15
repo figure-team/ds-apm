@@ -148,8 +148,8 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 			setRepoModalOpen(false);
 			repoForm.resetFields();
 			toast.success(t('saved'));
-		} catch {
-			// form validation errors are handled by antd; API errors:
+		} catch (err: unknown) {
+			if (err && typeof err === 'object' && 'errorFields' in err) return;
 			toast.error(t('save_failed'));
 		}
 	}, [repoForm, editingRepo, t]);
@@ -182,7 +182,8 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 			setServiceMaps(mapsRes.data);
 			mapForm.resetFields();
 			toast.success(t('saved'));
-		} catch {
+		} catch (err: unknown) {
+			if (err && typeof err === 'object' && 'errorFields' in err) return;
 			toast.error(t('save_failed'));
 		}
 	}, [mapForm, t]);
@@ -476,12 +477,19 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 					>
 						<Input />
 					</Form.Item>
-					<Form.Item name="credential" label={t('repo_credential')}>
-						{editingRepo && !credentialTouched && (
-							<Tag color="success" style={{ marginBottom: 6 }}>
-								{t('credential_saved')}
-							</Tag>
-						)}
+					<Form.Item
+						name="credential"
+						label={
+							<span>
+								{t('repo_credential')}
+								{editingRepo && !credentialTouched && (
+									<Tag color="success" style={{ marginLeft: 8 }}>
+										{t('credential_saved')}
+									</Tag>
+								)}
+							</span>
+						}
+					>
 						<Input.Password
 							placeholder={
 								editingRepo ? t('credential_unchanged_hint') : undefined

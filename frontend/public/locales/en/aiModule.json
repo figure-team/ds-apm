@@ -33,5 +33,6 @@
 	"toast_load_error": "Failed to load AI config",
 	"toast_save_error": "Failed to save AI config",
 	"toast_test_error": "Test request failed",
-	"test_ok_fallback": "Connection OK"
+	"test_ok_fallback": "Connection OK",
+	"credential_saved": "Saved"
 }

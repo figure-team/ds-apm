@@ -33,5 +33,6 @@
 	"toast_load_error": "AI 설정 로드 실패",
 	"toast_save_error": "AI 설정 저장 실패",
 	"toast_test_error": "테스트 요청 실패",
-	"test_ok_fallback": "연결 성공"
+	"test_ok_fallback": "연결 성공",
+	"credential_saved": "저장됨"
 }

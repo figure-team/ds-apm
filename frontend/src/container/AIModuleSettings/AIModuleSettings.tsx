@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Badge, toast } from '@signozhq/ui';
-import { Alert, Button, Input, Radio } from 'antd';
+import { Alert, Button, Input, Radio, Tag } from 'antd';
 import getAIConfig from 'api/aiModule/getAIConfig';
 import testAIConfig from 'api/aiModule/testAIConfig';
 import updateAIConfig from 'api/aiModule/updateAIConfig';
@@ -109,6 +109,8 @@ function AIModuleSettings(): JSX.Element {
 	// so the masks don't leak across transports.
 	const apiKeyMasked = useRef(false);
 	const oauthTokenMasked = useRef(false);
+	const [apiKeySaved, setApiKeySaved] = useState(false);
+	const [oauthTokenSaved, setOauthTokenSaved] = useState(false);
 
 	const { control, handleSubmit, watch, setValue, reset } = useForm<FormValues>(
 		{
@@ -145,6 +147,8 @@ function AIModuleSettings(): JSX.Element {
 				const cfg = res.data;
 				apiKeyMasked.current = cfg.apiKey === API_KEY_UNCHANGED;
 				oauthTokenMasked.current = cfg.oauthToken === API_KEY_UNCHANGED;
+				setApiKeySaved(apiKeyMasked.current);
+				setOauthTokenSaved(oauthTokenMasked.current);
 				reset({
 					provider: cfg.provider ?? 'local',
 					llmProvider: cfg.llmProvider ?? 'claude',
@@ -212,10 +216,12 @@ function AIModuleSettings(): JSX.Element {
 				setAuthIssue(null);
 				if (values.apiKey !== '') {
 					apiKeyMasked.current = true;
+					setApiKeySaved(true);
 					setValue('apiKey', '');
 				}
 				if (values.oauthToken !== '') {
 					oauthTokenMasked.current = true;
+					setOauthTokenSaved(true);
 					setValue('oauthToken', '');
 				}
 				setUpdatedAt(new Date().toISOString());
@@ -269,6 +275,7 @@ function AIModuleSettings(): JSX.Element {
 	const handleApiKeyFocus = useCallback(() => {
 		if (apiKeyMasked.current) {
 			apiKeyMasked.current = false;
+			setApiKeySaved(false);
 			setValue('apiKey', '');
 		}
 		setAuthIssue(null);
@@ -278,6 +285,7 @@ function AIModuleSettings(): JSX.Element {
 		setAuthIssue(null);
 		if (oauthTokenMasked.current) {
 			oauthTokenMasked.current = false;
+			setOauthTokenSaved(false);
 			setValue('oauthToken', '');
 		}
 	}, [setValue]);
@@ -406,7 +414,14 @@ function AIModuleSettings(): JSX.Element {
 
 						{isLLM && isAPI && (
 							<div className="ai-module-settings__field">
-								<label className="ai-module-settings__field-label">{t('field_api_key')}</label>
+								<label className="ai-module-settings__field-label">
+									{t('field_api_key')}
+									{apiKeySaved && (
+										<Tag color="success" style={{ marginLeft: 8 }}>
+											{t('credential_saved')}
+										</Tag>
+									)}
+								</label>
 								<Controller
 									name="apiKey"
 									control={control}
@@ -430,7 +445,14 @@ function AIModuleSettings(): JSX.Element {
 						{isLLM && !isAPI && (
 							<>
 								<div className="ai-module-settings__field">
-									<label className="ai-module-settings__field-label">{t('field_oauth_token')}</label>
+									<label className="ai-module-settings__field-label">
+										{t('field_oauth_token')}
+										{oauthTokenSaved && (
+											<Tag color="success" style={{ marginLeft: 8 }}>
+												{t('credential_saved')}
+											</Tag>
+										)}
+									</label>
 									<Controller
 										name="oauthToken"
 										control={control}
