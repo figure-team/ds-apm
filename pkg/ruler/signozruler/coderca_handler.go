@@ -337,3 +337,63 @@ func (handler *handler) GetCodeRCARun(rw http.ResponseWriter, req *http.Request)
 	}
 	render.Success(rw, http.StatusOK, run)
 }
+
+// EnqueueCodeRCARun handles POST /api/v2/ds/coderca/runs — an on-demand "test
+// run" surface. Code-RCA runs are normally admitted by anomaly-alarm dispatch;
+// this lets a user trigger one for a service from the UI. The run is queued via
+// the same admission path (cooldown/quota/queue-depth still apply) and picked up
+// by the worker; the client polls GET /coderca/runs/{runId} for the result.
+func (handler *handler) EnqueueCodeRCARun(rw http.ResponseWriter, req *http.Request) {
+	orgID, err := extractOrgID(req.Context())
+	if err != nil {
+		render.Error(rw, err)
+		return
+	}
+	if orgID == "" {
+		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
+		return
+	}
+
+	var body struct {
+		Service string `json:"service"`
+	}
+	if err := binding.JSON.BindBody(req.Body, &body); err != nil {
+		render.Error(rw, err)
+		return
+	}
+	defer req.Body.Close() //nolint:errcheck
+	service := strings.TrimSpace(body.Service)
+	if service == "" {
+		render.Error(rw, errors.Newf(errors.TypeInvalidInput, errors.CodeInvalidInput, "service is required"))
+		return
+	}
+
+	cfg, cErr := handler.codercaCfgStore.Get(req.Context(), orgID)
+	if errors.Is(cErr, ruletypes.ErrCodebaseRCAConfigNotFound) {
+		cfg = ruletypes.DefaultCodebaseRCAConfig(orgID)
+	} else if cErr != nil {
+		render.Error(rw, errors.WrapInternalf(cErr, errors.CodeInternal, "fetch codebase RCA config"))
+		return
+	}
+
+	now := time.Now()
+	res, err := handler.codercaRunStore.Admit(req.Context(), codercarunstore.AdmitParams{
+		OrgID:   orgID,
+		Service: service,
+		// Unique dedup key so a manual test is never deduped against a prior run.
+		DedupKey:       "manual-" + service + "-" + strconv.FormatInt(now.UnixNano(), 10),
+		Now:            now,
+		CooldownWindow: time.Duration(cfg.CooldownWindowSecs) * time.Second,
+		MaxRunsPerDay:  cfg.MaxRunsPerDay,
+		MaxQueueDepth:  cfg.MaxQueueDepth,
+	})
+	if err != nil {
+		render.Error(rw, errors.WrapInternalf(err, errors.CodeInternal, "enqueue code RCA run"))
+		return
+	}
+	render.Success(rw, http.StatusOK, map[string]any{
+		"admitted": res.Admitted,
+		"runId":    res.RunID,
+		"reason":   string(res.Reason),
+	})
+}

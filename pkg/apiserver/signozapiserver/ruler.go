@@ -519,6 +519,20 @@ func (provider *provider) addRulerRoutes(router *mux.Router) error {
 		return err
 	}
 
+	if err := router.Handle("/api/v2/ds/coderca/runs", handler.New(provider.authZ.EditAccess(provider.rulerHandler.EnqueueCodeRCARun), handler.OpenAPIDef{
+		ID:                  "EnqueueCodeRCARun",
+		Tags:                []string{"coderca"},
+		Summary:             "Enqueue a code RCA run",
+		Description:         "Manually enqueues an on-demand code-RCA run for a service (admission limits apply). The worker processes it; poll the run by id for the result.",
+		RequestContentType:  "application/json",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusInternalServerError},
+		SecuritySchemes:     newSecuritySchemes(types.RoleEditor),
+	})).Methods(http.MethodPost).GetError(); err != nil {
+		return err
+	}
+
 	if err := router.Handle("/api/v2/ds/coderca/runs/{runId}", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.GetCodeRCARun), handler.OpenAPIDef{
 		ID:                  "GetCodeRCARun",
 		Tags:                []string{"coderca"},
