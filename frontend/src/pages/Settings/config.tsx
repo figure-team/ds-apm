@@ -10,6 +10,7 @@ import IngestionSettings from 'container/IngestionSettings/IngestionSettings';
 import MultiIngestionSettings from 'container/IngestionSettings/MultiIngestionSettings';
 import AIModuleSettings from 'container/AIModuleSettings/AIModuleSettings';
 import CodeRcaSettings from 'container/CodeRcaSettings/CodeRcaSettings';
+import IncidentReportSettings from 'container/IncidentReportSettings/IncidentReportSettings';
 import MCPServerSettings from 'container/MCPServerSettings/MCPServerSettings';
 import MySettings from 'container/MySettings';
 import OrganizationSettings from 'container/OrganizationSettings';
@@ -260,6 +261,21 @@ export const codeRcaSettings = (t: TFunction): RouteTabProps['routes'] => [
 		),
 		route: ROUTES.CODE_RCA_SETTINGS,
 		key: ROUTES.CODE_RCA_SETTINGS,
+	},
+];
+
+export const incidentReportSettings = (
+	t: TFunction,
+): RouteTabProps['routes'] => [
+	{
+		Component: IncidentReportSettings,
+		name: (
+			<div className="periscope-tab">
+				<Sparkles size={16} /> {t('routes:incident_report').toString()}
+			</div>
+		),
+		route: ROUTES.INCIDENT_REPORT_SETTINGS,
+		key: ROUTES.INCIDENT_REPORT_SETTINGS,
 	},
 ];
 

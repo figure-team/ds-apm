@@ -15,6 +15,7 @@ import (
 	"github.com/SigNoz/signoz/pkg/ruler"
 	"github.com/SigNoz/signoz/pkg/ruler/aiconfigstore/secretbox"
 	codercarunstore "github.com/SigNoz/signoz/pkg/ruler/coderca/runstore"
+	sqltemplatestore "github.com/SigNoz/signoz/pkg/ruler/incidentreport/sqltemplatestore"
 	"github.com/SigNoz/signoz/pkg/types/authtypes"
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
 	"github.com/SigNoz/signoz/pkg/valuer"
@@ -40,6 +41,8 @@ type handler struct {
 	codercaCfgStore   ruletypes.CodebaseRCAConfigStore
 	codercaRunStore   *codercarunstore.Store
 	aiCipherInsecure  bool
+	// Incident report 양식 template store (incident_report_handler.go).
+	reportTemplateStore *sqltemplatestore.Store
 }
 
 // NewHandler constructs a ruler HTTP handler. aiGenerator is the
@@ -61,21 +64,23 @@ func NewHandler(
 	codercaCfgStore ruletypes.CodebaseRCAConfigStore,
 	codercaRunStore *codercarunstore.Store,
 	aiCipherInsecure bool,
+	reportTemplateStore *sqltemplatestore.Store,
 ) ruler.Handler {
 	return &handler{
-		ruler:             ruler,
-		sopStore:          sopStore,
-		aiHistoryStore:    aiHistoryStore,
-		aiGenerator:       aiGenerator,
-		aiConfigStore:     aiConfigStore,
-		aiCipher:          aiCipher,
-		aiRebuilder:       aiRebuilder,
-		runbookDrafter:    runbookDrafter,
-		codebaseRepoStore: codebaseRepoStore,
-		codebaseMapStore:  codebaseMapStore,
-		codercaCfgStore:   codercaCfgStore,
-		codercaRunStore:   codercaRunStore,
-		aiCipherInsecure:  aiCipherInsecure,
+		ruler:               ruler,
+		sopStore:            sopStore,
+		aiHistoryStore:      aiHistoryStore,
+		aiGenerator:         aiGenerator,
+		aiConfigStore:       aiConfigStore,
+		aiCipher:            aiCipher,
+		aiRebuilder:         aiRebuilder,
+		runbookDrafter:      runbookDrafter,
+		codebaseRepoStore:   codebaseRepoStore,
+		codebaseMapStore:    codebaseMapStore,
+		codercaCfgStore:     codercaCfgStore,
+		codercaRunStore:     codercaRunStore,
+		aiCipherInsecure:    aiCipherInsecure,
+		reportTemplateStore: reportTemplateStore,
 	}
 }
 
@@ -743,4 +748,3 @@ func (handler *handler) GetLatestAIStrategyHistory(rw http.ResponseWriter, req *
 
 	render.Success(rw, http.StatusOK, record)
 }
-

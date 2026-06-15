@@ -33,6 +33,7 @@ const navItemKeyMap: Record<string, string> = {
 	'mcp-server': 'routes:mcp_server',
 	'ai-module': 'routes:ai_module',
 	'code-rca': 'routes:code_rca',
+	'incident-report': 'routes:incident_report',
 	roles: 'routes:roles',
 	members: 'routes:members',
 	'service-accounts': 'routes:service_accounts',
@@ -109,7 +110,8 @@ function SettingsPage(): JSX.Element {
 							item.key === ROUTES.SHORTCUTS ||
 							item.key === ROUTES.MCP_SERVER ||
 							item.key === ROUTES.AI_MODULE_SETTINGS ||
-							item.key === ROUTES.CODE_RCA_SETTINGS
+							item.key === ROUTES.CODE_RCA_SETTINGS ||
+							item.key === ROUTES.INCIDENT_REPORT_SETTINGS
 								? true
 								: item.isEnabled,
 					}));
@@ -124,7 +126,8 @@ function SettingsPage(): JSX.Element {
 							item.key === ROUTES.SHORTCUTS ||
 							item.key === ROUTES.MCP_SERVER ||
 							item.key === ROUTES.AI_MODULE_SETTINGS ||
-							item.key === ROUTES.CODE_RCA_SETTINGS
+							item.key === ROUTES.CODE_RCA_SETTINGS ||
+							item.key === ROUTES.INCIDENT_REPORT_SETTINGS
 								? true
 								: item.isEnabled,
 					}));
@@ -146,7 +149,8 @@ function SettingsPage(): JSX.Element {
 							item.key === ROUTES.INGESTION_SETTINGS ||
 							item.key === ROUTES.MCP_SERVER ||
 							item.key === ROUTES.AI_MODULE_SETTINGS ||
-							item.key === ROUTES.CODE_RCA_SETTINGS
+							item.key === ROUTES.CODE_RCA_SETTINGS ||
+							item.key === ROUTES.INCIDENT_REPORT_SETTINGS
 								? true
 								: item.isEnabled,
 					}));
@@ -160,7 +164,8 @@ function SettingsPage(): JSX.Element {
 							item.key === ROUTES.INGESTION_SETTINGS ||
 							item.key === ROUTES.MCP_SERVER ||
 							item.key === ROUTES.AI_MODULE_SETTINGS ||
-							item.key === ROUTES.CODE_RCA_SETTINGS
+							item.key === ROUTES.CODE_RCA_SETTINGS ||
+							item.key === ROUTES.INCIDENT_REPORT_SETTINGS
 								? true
 								: item.isEnabled,
 					}));
@@ -178,7 +183,8 @@ function SettingsPage(): JSX.Element {
 							item.key === ROUTES.ROLES_SETTINGS ||
 							item.key === ROUTES.ROLE_DETAILS ||
 							item.key === ROUTES.AI_MODULE_SETTINGS ||
-							item.key === ROUTES.CODE_RCA_SETTINGS
+							item.key === ROUTES.CODE_RCA_SETTINGS ||
+							item.key === ROUTES.INCIDENT_REPORT_SETTINGS
 								? true
 								: item.isEnabled,
 					}));

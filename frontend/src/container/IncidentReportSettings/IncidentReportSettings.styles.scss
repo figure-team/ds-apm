@@ -1,0 +1,47 @@
+.incident-report-settings {
+	max-width: 920px;
+	padding: var(--padding-4) var(--padding-1);
+	color: var(--foreground);
+
+	&__block {
+		margin-top: var(--margin-6);
+		padding-top: var(--padding-5);
+		border-top: 1px solid var(--l2-border);
+	}
+
+	&__actions {
+		display: flex;
+		gap: var(--spacing-2);
+		margin-top: var(--margin-3);
+	}
+
+	&__form {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--spacing-3) var(--spacing-4);
+
+		label {
+			display: flex;
+			flex-direction: column;
+			gap: var(--spacing-1);
+			font-size: var(--font-size-sm);
+			color: var(--foreground);
+		}
+	}
+
+	&__result {
+		margin-top: var(--margin-4);
+		padding: var(--padding-3) var(--padding-4);
+		border: 1px solid var(--l2-border);
+		border-radius: 8px;
+		background: var(--l2-background);
+		color: var(--foreground);
+		white-space: pre-wrap;
+		word-break: break-word;
+		font-family: monospace;
+		font-size: var(--font-size-xs);
+		line-height: 1.6;
+		max-height: 520px;
+		overflow: auto;
+	}
+}
