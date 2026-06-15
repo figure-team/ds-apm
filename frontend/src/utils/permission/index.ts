@@ -136,4 +136,5 @@ export const routePermission: Record<keyof typeof ROUTES, ROLES[]> = {
 	MCP_SERVER: ['ADMIN', 'EDITOR', 'VIEWER'],
 	AI_MODULE_SETTINGS: ['ADMIN'],
 	CODE_RCA_SETTINGS: ['ADMIN'],
+	INCIDENT_REPORT_SETTINGS: ['ADMIN'],
 };

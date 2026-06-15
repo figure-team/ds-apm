@@ -368,6 +368,13 @@ export const settingsNavSections: SettingsNavSection[] = [
 				isEnabled: false,
 				itemKey: 'code-rca',
 			},
+			{
+				key: ROUTES.INCIDENT_REPORT_SETTINGS,
+				label: 'Incident Report',
+				icon: <Sparkles size={16} />,
+				isEnabled: false,
+				itemKey: 'incident-report',
+			},
 		],
 	},
 

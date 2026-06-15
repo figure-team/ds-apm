@@ -15,6 +15,7 @@
 	"mcp_server": "MCP 서버",
 	"ai_module": "AI 모듈",
 	"code_rca": "코드 RCA",
+	"incident_report": "장애보고서",
 	"roles": "역할",
 	"role_details": "역할 상세",
 	"members": "멤버",
