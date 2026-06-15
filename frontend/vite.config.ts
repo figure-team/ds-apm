@@ -157,7 +157,6 @@ export default defineConfig(({ mode }): UserConfig => {
 		server: {
 			open: true,
 			port: 3301,
-			host: true,
 			proxy: {
 				// Forward all API and WebSocket traffic to the local signoz backend (Docker)
 				'/api': {
