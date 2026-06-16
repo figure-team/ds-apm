@@ -85,6 +85,17 @@
 	margin-top: var(--spacing-2);
 }
 
+.ai-module-settings__input-with-test {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	gap: var(--spacing-3);
+
+	.ai-module-settings__test-inline {
+		margin-top: 0;
+	}
+}
+
 .ai-module-settings__actions {
 	display: flex;
 	gap: var(--spacing-3);

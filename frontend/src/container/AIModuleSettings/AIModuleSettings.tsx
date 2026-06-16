@@ -478,40 +478,42 @@ function AIModuleSettings(): JSX.Element {
 											</Tag>
 										)}
 									</label>
-									<Controller
-										name="oauthToken"
-										control={control}
-										render={({ field }): JSX.Element =>
-											// Codex+CLI accepts either a raw OPENAI_API_KEY or the full
-											// ~/.codex/auth.json content (ChatGPT subscription). JSON paste
-											// needs multi-line, so use TextArea. Claude+CLI tokens are
-											// single-line; keep Password masking there.
-											watch('llmProvider') === 'codex' ? (
-												<Input.TextArea
-													{...field}
-													placeholder={t('oauth_token_placeholder')}
-													onFocus={handleOAuthTokenFocus}
-													autoSize={{ minRows: 1, maxRows: 8 }}
-													style={{ maxWidth: 560, fontFamily: 'monospace' }}
-													disabled={!isAdmin}
-												/>
-											) : (
-												<Input.Password
-													{...field}
-													placeholder={t('oauth_token_placeholder')}
-													onFocus={handleOAuthTokenFocus}
-													style={{ maxWidth: 360 }}
-													disabled={!isAdmin}
-												/>
-											)
-										}
-									/>
+									<div className="ai-module-settings__input-with-test">
+										<Controller
+											name="oauthToken"
+											control={control}
+											render={({ field }): JSX.Element =>
+												// Codex+CLI accepts either a raw OPENAI_API_KEY or the full
+												// ~/.codex/auth.json content (ChatGPT subscription). JSON paste
+												// needs multi-line, so use TextArea. Claude+CLI tokens are
+												// single-line; keep Password masking there.
+												watch('llmProvider') === 'codex' ? (
+													<Input.TextArea
+														{...field}
+														placeholder={t('oauth_token_placeholder')}
+														onFocus={handleOAuthTokenFocus}
+														autoSize={{ minRows: 1, maxRows: 8 }}
+														style={{ maxWidth: 560, fontFamily: 'monospace' }}
+														disabled={!isAdmin}
+													/>
+												) : (
+													<Input.Password
+														{...field}
+														placeholder={t('oauth_token_placeholder')}
+														onFocus={handleOAuthTokenFocus}
+														style={{ maxWidth: 360 }}
+														disabled={!isAdmin}
+													/>
+												)
+											}
+										/>
+										{renderTestControl()}
+									</div>
 									<p className="ai-module-settings__field-hint">
 										{watch('llmProvider') === 'claude'
 											? t('oauth_hint_claude')
 											: t('oauth_hint_codex')}
 									</p>
-									{renderTestControl()}
 								</div>
 
 								<div className="ai-module-settings__field">
