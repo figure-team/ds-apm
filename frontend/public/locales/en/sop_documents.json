@@ -3,8 +3,6 @@
 	"page_description": "Register managed Markdown SOPs that DS-APM alert rules can bind with sop_id and feed into SOP-grounded AI response strategy.",
 	"btn_template_download": "Template Download",
 	"btn_file_upload": "File Upload",
-	"register_section_title": "Register managed Markdown SOP",
-	"register_section_description": "The browser submits only managed Markdown content and public metadata. Connector credentials remain server-side.",
 	"field_sop_id": "SOP ID",
 	"field_title": "Title",
 	"field_version": "Version",
@@ -24,7 +22,6 @@
 	"status_deprecated": "Deprecated",
 	"status_disabled": "Disabled",
 	"btn_register": "Register SOP document",
-	"register_checksum_note": "Checksum is generated from the Markdown body before submit.",
 	"binding_section_title": "Binding preview",
 	"binding_section_description": "Verify that an alert label resolves to an approved SOP document.",
 	"btn_preview_binding": "Preview binding",
@@ -35,5 +32,15 @@
 	"col_version": "Version",
 	"col_owner": "Owner",
 	"col_status": "Status",
-	"col_tenant": "Tenant"
+	"col_tenant": "Tenant",
+	"col_actions": "Actions",
+	"btn_edit": "Edit",
+	"btn_add_document": "Register SOP document",
+	"btn_cancel": "Cancel",
+	"drawer_create_title": "Register SOP document",
+	"drawer_edit_title": "Edit SOP document (publish new version)",
+	"btn_save_new_version": "Save as new version",
+	"edit_version_hint": "Enter a new version. Saving automatically deprecates the previous version.",
+	"edit_version_same_error": "Enter a version different from the previous one.",
+	"msg_save_success_prefix": "Saved:"
 }

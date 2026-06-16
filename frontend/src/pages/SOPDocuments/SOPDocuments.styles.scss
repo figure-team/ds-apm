@@ -92,6 +92,17 @@
 		grid-column: 1 / -1;
 	}
 
+	&__drawer-footer {
+		display: flex;
+		justify-content: flex-end;
+		gap: var(--spacing-4);
+	}
+
+	&__field-error {
+		color: #f0531c;
+		font-size: var(--font-size-xs);
+	}
+
 	&__actions,
 	&__binding {
 		display: flex;

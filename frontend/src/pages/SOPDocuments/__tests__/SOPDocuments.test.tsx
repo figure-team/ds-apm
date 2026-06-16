@@ -9,6 +9,7 @@ import SOPDocuments from '../SOPDocuments';
 
 jest.mock('api/v2/rules/sopDocuments', () => ({
 	createSopDocument: jest.fn(),
+	getSopDocument: jest.fn(),
 	listSopDocuments: jest.fn(),
 	previewSopDocumentBinding: jest.fn(),
 	SOP_DOCUMENT_CONTRACT_VERSION: 'ds.sop_document.v1',
@@ -80,7 +81,9 @@ describe('SOPDocuments', () => {
 			screen.findByText('Payment API 5xx response'),
 		).resolves.toBeInTheDocument();
 
-		fireEvent.change(screen.getByTestId('sop-document-sop-id'), {
+		fireEvent.click(screen.getByTestId('open-register-drawer'));
+
+		fireEvent.change(await screen.findByTestId('sop-document-sop-id'), {
 			target: { value: 'SOP-CHECKOUT-001' },
 		});
 		fireEvent.change(screen.getByTestId('sop-document-title'), {

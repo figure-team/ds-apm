@@ -98,6 +98,18 @@ export function listSopDocuments(): Promise<
 	});
 }
 
+export function getSopDocument(
+	sopId: string,
+	version: string,
+): Promise<ApiResponse<SopDocument>> {
+	return GeneratedAPIInstance<ApiResponse<SopDocument>>({
+		url: `/api/v2/ds/sop/documents/${encodeURIComponent(
+			sopId,
+		)}/versions/${encodeURIComponent(version)}`,
+		method: 'GET',
+	});
+}
+
 export function previewSopDocumentBinding(
 	data: SopBindingPreviewRequest,
 ): Promise<ApiResponse<SopBindingPreviewResult>> {

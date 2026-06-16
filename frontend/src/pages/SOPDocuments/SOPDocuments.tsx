@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DownloadOutlined, UploadOutlined } from '@ant-design/icons';
-import { Alert, Button, Input, Select, Table, Tag } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import SHA256 from 'crypto-js/sha256';
 import {
-	createSopDocument,
+	DownloadOutlined,
+	PlusOutlined,
+	UploadOutlined,
+} from '@ant-design/icons';
+import { Alert, Button, Input, Table, Tag } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import {
 	listSopDocuments,
 	previewSopDocumentBinding,
-	SOP_DOCUMENT_CONTRACT_VERSION,
 	type SopApprovalStatus,
 	type SopBindingPreviewResult,
-	type SopDocument,
 	type SopDocumentSummary,
 } from 'api/v2/rules/sopDocuments';
 import RunbooksSection from 'container/Runbooks/RunbooksSection';
@@ -23,83 +23,9 @@ import {
 } from './parseSopExcel';
 import SopBulkUploadModal from './SopBulkUploadModal';
 import SopBulkPreviewDrawer from './SopBulkPreviewDrawer';
-
-type SopDocumentFormState = {
-	sopId: string;
-	title: string;
-	version: string;
-	sourceId: string;
-	bodyMarkdown: string;
-	customerUpdateTemplate: string;
-	vendorRequestTemplate: string;
-	displayUrl: string;
-	ownerTeam: string;
-	approvalStatus: SopApprovalStatus;
-	projectIds: string;
-	environments: string;
-	tags: string;
-	serviceAccountProfile: string;
-};
-
-const DEFAULT_FORM_STATE: SopDocumentFormState = {
-	sopId: '',
-	title: '',
-	version: '',
-	sourceId: 'src-managed-markdown-default',
-	bodyMarkdown: '',
-	customerUpdateTemplate: '',
-	vendorRequestTemplate: '',
-	displayUrl: '',
-	ownerTeam: '',
-	approvalStatus: 'approved',
-	projectIds: 'customer-a',
-	environments: 'prod',
-	tags: '',
-	serviceAccountProfile: 'managed-markdown-local',
-};
-
-function parseTags(value: string): string[] {
-	return value
-		.split(',')
-		.map((tag) => tag.trim())
-		.filter(Boolean);
-}
-
-function checksumForMarkdown(bodyMarkdown: string): string {
-	return `sha256:${SHA256(bodyMarkdown).toString()}`;
-}
-
-function buildSopDocument(form: SopDocumentFormState): SopDocument {
-	return {
-		contractVersion: SOP_DOCUMENT_CONTRACT_VERSION,
-		sopId: form.sopId.trim(),
-		title: form.title.trim(),
-		version: form.version.trim(),
-		checksum: checksumForMarkdown(form.bodyMarkdown),
-		source: {
-			type: 'managed_markdown',
-			sourceId: form.sourceId.trim(),
-		},
-		bodyMarkdown: form.bodyMarkdown,
-		customerUpdateTemplate: form.customerUpdateTemplate.trim() || undefined,
-		vendorRequestTemplate: form.vendorRequestTemplate.trim() || undefined,
-		displayUrl: form.displayUrl.trim() || undefined,
-		ownerTeam: form.ownerTeam.trim(),
-		approvalStatus: form.approvalStatus,
-		tenantScope: {
-			projectIds: parseTags(form.projectIds),
-			environments: parseTags(form.environments),
-		},
-		tags: parseTags(form.tags),
-		updatedAt: new Date().toISOString(),
-		securityContext: {
-			serviceAccountProfile: form.serviceAccountProfile.trim(),
-			secretRefVisible: false,
-			browserCredentialsUsed: false,
-			redactionApplied: true,
-		},
-	};
-}
+import SopDocumentFormDrawer, {
+	type SopDocumentEditTarget,
+} from './SopDocumentFormDrawer';
 
 function getErrorMessage(error: unknown): string {
 	if (typeof error === 'object' && error !== null && 'response' in error) {
@@ -118,40 +44,16 @@ function getErrorMessage(error: unknown): string {
 	return error instanceof Error ? error.message : 'Request failed.';
 }
 
-function isSubmitDisabled(form: SopDocumentFormState): boolean {
-	return !(
-		form.sopId.trim() &&
-		form.title.trim() &&
-		form.version.trim() &&
-		form.sourceId.trim() &&
-		form.bodyMarkdown.trim() &&
-		form.ownerTeam.trim() &&
-		form.projectIds.trim() &&
-		form.environments.trim() &&
-		form.serviceAccountProfile.trim()
-	);
-}
-
 function SOPDocuments(): JSX.Element {
 	const { t } = useTranslation(['sop_documents']);
 
-	const APPROVAL_STATUS_OPTIONS: { label: string; value: SopApprovalStatus }[] =
-		[
-			{ label: t('status_approved'), value: 'approved' },
-			{ label: t('status_draft'), value: 'draft' },
-			{ label: t('status_deprecated'), value: 'deprecated' },
-			{ label: t('status_disabled'), value: 'disabled' },
-		];
-
 	const [documents, setDocuments] = useState<SopDocumentSummary[]>([]);
-	const [form, setForm] = useState<SopDocumentFormState>(DEFAULT_FORM_STATE);
 	const [bindingSopId, setBindingSopId] = useState('');
 	const [bindingProjectId, setBindingProjectId] = useState('customer-a');
 	const [bindingEnvironment, setBindingEnvironment] = useState('prod');
 	const [bindingPreview, setBindingPreview] =
 		useState<SopBindingPreviewResult>();
 	const [isLoading, setIsLoading] = useState(false);
-	const [isSaving, setIsSaving] = useState(false);
 	const [isPreviewing, setIsPreviewing] = useState(false);
 	const [message, setMessage] = useState('');
 	const [error, setError] = useState('');
@@ -160,6 +62,11 @@ function SOPDocuments(): JSX.Element {
 	const [parseResult, setParseResult] = useState<ParseSopExcelResult | null>(
 		null,
 	);
+	const [formDrawerOpen, setFormDrawerOpen] = useState(false);
+	const [formDrawerMode, setFormDrawerMode] = useState<'create' | 'edit'>(
+		'create',
+	);
+	const [editTarget, setEditTarget] = useState<SopDocumentEditTarget>();
 
 	const loadDocuments = useCallback(async (): Promise<void> => {
 		setIsLoading(true);
@@ -178,36 +85,29 @@ function SOPDocuments(): JSX.Element {
 		void loadDocuments();
 	}, [loadDocuments]);
 
-	const handleFormFieldChange = useCallback(
-		<Key extends keyof SopDocumentFormState>(
-			key: Key,
-			value: SopDocumentFormState[Key],
-		): void => {
-			setForm((prev) => ({ ...prev, [key]: value }));
-			setMessage('');
-			setError('');
-		},
-		[],
-	);
-
-	const handleCreateDocument = useCallback(async (): Promise<void> => {
-		setIsSaving(true);
+	const openCreateDrawer = useCallback((): void => {
 		setMessage('');
 		setError('');
-		try {
-			const document = buildSopDocument(form);
-			const response = await createSopDocument(document);
-			setMessage(
-				`Saved ${response.data.sopId} ${response.data.version} for SOP binding.`,
-			);
-			setForm(DEFAULT_FORM_STATE);
-			await loadDocuments();
-		} catch (requestError) {
-			setError(getErrorMessage(requestError));
-		} finally {
-			setIsSaving(false);
-		}
-	}, [form, loadDocuments]);
+		setFormDrawerMode('create');
+		setEditTarget(undefined);
+		setFormDrawerOpen(true);
+	}, []);
+
+	const openEditDrawer = useCallback((record: SopDocumentSummary): void => {
+		setMessage('');
+		setError('');
+		setFormDrawerMode('edit');
+		setEditTarget({ sopId: record.sopId, version: record.version });
+		setFormDrawerOpen(true);
+	}, []);
+
+	const handleFormSaved = useCallback(
+		(savedMessage: string): void => {
+			setMessage(savedMessage);
+			void loadDocuments();
+		},
+		[loadDocuments],
+	);
 
 	const handleParsed = useCallback((result: ParseSopExcelResult): void => {
 		setParseResult(result);
@@ -285,8 +185,23 @@ function SOPDocuments(): JSX.Element {
 					);
 				},
 			},
+			{
+				title: t('col_actions'),
+				key: 'actions',
+				width: 96,
+				render: (_, record: SopDocumentSummary): JSX.Element => (
+					<Button
+						data-testid="edit-sop-document"
+						onClick={(): void => openEditDrawer(record)}
+						size="small"
+						type="link"
+					>
+						{t('btn_edit')}
+					</Button>
+				),
+			},
 		],
-		[t],
+		[t, openEditDrawer],
 	);
 
 	return (
@@ -304,9 +219,16 @@ function SOPDocuments(): JSX.Element {
 						<Button
 							icon={<UploadOutlined />}
 							onClick={(): void => setUploadModalOpen(true)}
-							type="primary"
 						>
 							{t('btn_file_upload')}
+						</Button>
+						<Button
+							data-testid="open-register-drawer"
+							icon={<PlusOutlined />}
+							onClick={openCreateDrawer}
+							type="primary"
+						>
+							{t('btn_add_document')}
 						</Button>
 					</div>
 				</div>
@@ -317,202 +239,24 @@ function SOPDocuments(): JSX.Element {
 
 			<section className="sop-documents-page__section">
 				<div className="sop-documents-page__section-header">
-					<h2>{t('register_section_title')}</h2>
-					<p>{t('register_section_description')}</p>
+					<h2>{t('documents_section_title')}</h2>
+					<p>{t('documents_section_description')}</p>
 				</div>
-				<div className="sop-documents-page__form-grid">
-					<label htmlFor="sop-document-sop-id-input">
-						<span>{t('field_sop_id')}</span>
-						<Input
-							data-testid="sop-document-sop-id"
-							id="sop-document-sop-id-input"
-							onChange={(event): void =>
-								handleFormFieldChange('sopId', event.target.value)
-							}
-							placeholder="SOP-PAY-001"
-							value={form.sopId}
-						/>
-					</label>
-					<label htmlFor="sop-document-title-input">
-						<span>{t('field_title')}</span>
-						<Input
-							data-testid="sop-document-title"
-							id="sop-document-title-input"
-							onChange={(event): void =>
-								handleFormFieldChange('title', event.target.value)
-							}
-							placeholder="Payment API 5xx response"
-							value={form.title}
-						/>
-					</label>
-					<label htmlFor="sop-document-version-input">
-						<span>{t('field_version')}</span>
-						<Input
-							data-testid="sop-document-version"
-							id="sop-document-version-input"
-							onChange={(event): void =>
-								handleFormFieldChange('version', event.target.value)
-							}
-							placeholder="2026-05-12.1"
-							value={form.version}
-						/>
-					</label>
-					<label htmlFor="sop-document-owner-team-input">
-						<span>{t('field_owner_team')}</span>
-						<Input
-							data-testid="sop-document-owner-team"
-							id="sop-document-owner-team-input"
-							onChange={(event): void =>
-								handleFormFieldChange('ownerTeam', event.target.value)
-							}
-							placeholder="payments"
-							value={form.ownerTeam}
-						/>
-					</label>
-					<label htmlFor="sop-document-approval-status-input">
-						<span>{t('field_approval_status')}</span>
-						<Select
-							id="sop-document-approval-status-input"
-							options={APPROVAL_STATUS_OPTIONS}
-							onChange={(value): void =>
-								handleFormFieldChange('approvalStatus', value)
-							}
-							value={form.approvalStatus}
-						/>
-					</label>
-					<label htmlFor="sop-document-source-id-input">
-						<span>{t('field_source_id')}</span>
-						<Input
-							id="sop-document-source-id-input"
-							onChange={(event): void =>
-								handleFormFieldChange('sourceId', event.target.value)
-							}
-							value={form.sourceId}
-						/>
-					</label>
-					<label htmlFor="sop-document-project-ids-input">
-						<span>{t('field_project_ids')}</span>
-						<Input
-							data-testid="sop-document-project-ids"
-							id="sop-document-project-ids-input"
-							onChange={(event): void =>
-								handleFormFieldChange('projectIds', event.target.value)
-							}
-							placeholder="customer-a"
-							value={form.projectIds}
-						/>
-					</label>
-					<label htmlFor="sop-document-environments-input">
-						<span>{t('field_environments')}</span>
-						<Input
-							data-testid="sop-document-environments"
-							id="sop-document-environments-input"
-							onChange={(event): void =>
-								handleFormFieldChange('environments', event.target.value)
-							}
-							placeholder="prod"
-							value={form.environments}
-						/>
-					</label>
-					<label htmlFor="sop-document-display-url-input">
-						<span>{t('field_display_url')}</span>
-						<Input
-							id="sop-document-display-url-input"
-							onChange={(event): void =>
-								handleFormFieldChange('displayUrl', event.target.value)
-							}
-							placeholder="https://kb.example/sop/SOP-PAY-001"
-							value={form.displayUrl}
-						/>
-					</label>
-					<label htmlFor="sop-document-tags-input">
-						<span>{t('field_tags')}</span>
-						<Input
-							id="sop-document-tags-input"
-							onChange={(event): void =>
-								handleFormFieldChange('tags', event.target.value)
-							}
-							placeholder="payment-api, critical"
-							value={form.tags}
-						/>
-					</label>
-					<label htmlFor="sop-document-service-account-profile-input">
-						<span>{t('field_service_account_profile')}</span>
-						<Input
-							id="sop-document-service-account-profile-input"
-							onChange={(event): void =>
-								handleFormFieldChange('serviceAccountProfile', event.target.value)
-							}
-							value={form.serviceAccountProfile}
-						/>
-					</label>
-					<label
-						className="sop-documents-page__markdown"
-						htmlFor="sop-document-body-markdown-input"
-					>
-						<span>{t('field_body_markdown')}</span>
-						<Input.TextArea
-							data-testid="sop-document-body-markdown"
-							id="sop-document-body-markdown-input"
-							onChange={(event): void =>
-								handleFormFieldChange('bodyMarkdown', event.target.value)
-							}
-							placeholder={
-								'# Payment API 5xx response\n\n1. Check payment success dashboard\n2. Inspect PG timeout logs'
-							}
-							rows={7}
-							value={form.bodyMarkdown}
-						/>
-					</label>
-					<label
-						className="sop-documents-page__markdown"
-						htmlFor="sop-document-customer-update-template-input"
-					>
-						<span>{t('field_customer_update_template')}</span>
-						<Input.TextArea
-							data-testid="sop-document-customer-update-template"
-							id="sop-document-customer-update-template-input"
-							onChange={(event): void =>
-								handleFormFieldChange('customerUpdateTemplate', event.target.value)
-							}
-							placeholder={
-								'[○○ 서비스 이용 안내]\n\n■ 발생 현황: {현재 상황}\n■ 영향 범위: {영향 범위}\n■ 조치 사항: {조치}\n■ 향후 안내: {다음 안내}\n■ 문의처: 고객센터 1588-0000'
-							}
-							rows={6}
-							value={form.customerUpdateTemplate}
-						/>
-					</label>
-					<label
-						className="sop-documents-page__markdown"
-						htmlFor="sop-document-vendor-request-template-input"
-					>
-						<span>{t('field_vendor_request_template')}</span>
-						<Input.TextArea
-							data-testid="sop-document-vendor-request-template"
-							id="sop-document-vendor-request-template-input"
-							onChange={(event): void =>
-								handleFormFieldChange('vendorRequestTemplate', event.target.value)
-							}
-							placeholder={
-								'안녕하세요. {서비스}에서 {증상}이 확인되었습니다. {확인 요청 항목} 확인 부탁드립니다.'
-							}
-							rows={4}
-							value={form.vendorRequestTemplate}
-						/>
-					</label>
-				</div>
-				<div className="sop-documents-page__actions">
-					<Button
-						data-testid="register-sop-document"
-						disabled={isSubmitDisabled(form)}
-						loading={isSaving}
-						onClick={handleCreateDocument}
-						type="primary"
-					>
-						{t('btn_register')}
-					</Button>
-					<span>{t('register_checksum_note')}</span>
-				</div>
+				<Table
+					columns={columns}
+					dataSource={documents}
+					expandable={{
+						expandedRowRender: (record: SopDocumentSummary): JSX.Element => (
+							<RunbooksSection sopId={record.sopId} version={record.version} />
+						),
+						rowExpandable: (record: SopDocumentSummary): boolean =>
+							Boolean(record.sopId && record.version),
+					}}
+					loading={isLoading}
+					pagination={false}
+					rowKey={(document): string => `${document.sopId}:${document.version}`}
+					size="small"
+				/>
 			</section>
 
 			<section className="sop-documents-page__section">
@@ -570,27 +314,13 @@ function SOPDocuments(): JSX.Element {
 				)}
 			</section>
 
-			<section className="sop-documents-page__section">
-				<div className="sop-documents-page__section-header">
-					<h2>{t('documents_section_title')}</h2>
-					<p>{t('documents_section_description')}</p>
-				</div>
-				<Table
-					columns={columns}
-					dataSource={documents}
-					expandable={{
-						expandedRowRender: (record: SopDocumentSummary): JSX.Element => (
-							<RunbooksSection sopId={record.sopId} version={record.version} />
-						),
-						rowExpandable: (record: SopDocumentSummary): boolean =>
-							Boolean(record.sopId && record.version),
-					}}
-					loading={isLoading}
-					pagination={false}
-					rowKey={(document): string => `${document.sopId}:${document.version}`}
-					size="small"
-				/>
-			</section>
+			<SopDocumentFormDrawer
+				editTarget={editTarget}
+				mode={formDrawerMode}
+				onClose={(): void => setFormDrawerOpen(false)}
+				onSaved={handleFormSaved}
+				open={formDrawerOpen}
+			/>
 			<SopBulkUploadModal
 				onClose={(): void => setUploadModalOpen(false)}
 				onParsed={handleParsed}
