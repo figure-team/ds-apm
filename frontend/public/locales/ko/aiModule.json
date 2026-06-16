@@ -22,7 +22,7 @@
 	"binary_path_hint_before": "기본값은 컨테이너 PATH의",
 	"binary_path_hint_after": "입니다.",
 	"field_timeout": "타임아웃 (초)",
-	"timeout_hint": "호출당 제한 시간. 0이면 패키지 기본값(15초)을 사용합니다.",
+	"timeout_hint": "호출당 제한 시간. 0이면 기본값(API 15초, CLI 120초)을 사용합니다.",
 	"btn_test": "테스트",
 	"btn_save": "변경사항 저장",
 	"last_updated": "마지막 업데이트 ·",

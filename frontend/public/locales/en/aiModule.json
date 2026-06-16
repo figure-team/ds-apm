@@ -22,7 +22,7 @@
 	"binary_path_hint_before": "Defaults to",
 	"binary_path_hint_after": "on the container's PATH.",
 	"field_timeout": "Timeout (seconds)",
-	"timeout_hint": "Per-call deadline. 0 picks the package default (15 s).",
+	"timeout_hint": "Per-call deadline. 0 picks the default (API 15 s, CLI 120 s).",
 	"btn_test": "Test",
 	"btn_save": "Save changes",
 	"last_updated": "Last updated ·",

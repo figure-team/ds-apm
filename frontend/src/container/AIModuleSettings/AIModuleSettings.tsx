@@ -301,6 +301,23 @@ function AIModuleSettings(): JSX.Element {
 		return <Spinner tip="Loading..." height="70vh" />;
 	}
 
+	// Inline test control rendered next to the active credential field (LLM) or
+	// below the timeout field (local/mock). Tests the *current* form values, so
+	// no save is required before testing.
+	const renderTestControl = (): JSX.Element => (
+		<div className="ai-module-settings__field ai-module-settings__test-inline">
+			<Button onClick={onTest} loading={isTesting} disabled={isSaving || !isAdmin}>
+				{t('btn_test')}
+			</Button>
+			{testStatus === 'success' && (
+				<Tag color="success">{t('test_status_success')}</Tag>
+			)}
+			{testStatus === 'failure' && (
+				<Tag color="error">{t('test_status_failure')}</Tag>
+			)}
+		</div>
+	);
+
 	return (
 		<div className="ai-module-settings" data-testid="ai-module-settings">
 			<header className="ai-module-settings__header">
@@ -446,6 +463,7 @@ function AIModuleSettings(): JSX.Element {
 									{t('api_key_hint_before')}
 									<code> &lt;unchanged&gt;</code>{t('api_key_hint_after')}
 								</p>
+								{renderTestControl()}
 							</div>
 						)}
 
@@ -493,6 +511,7 @@ function AIModuleSettings(): JSX.Element {
 											? t('oauth_hint_claude')
 											: t('oauth_hint_codex')}
 									</p>
+									{renderTestControl()}
 								</div>
 
 								<div className="ai-module-settings__field">
@@ -526,7 +545,7 @@ function AIModuleSettings(): JSX.Element {
 										{...field}
 										type="number"
 										min={0}
-										placeholder="15"
+										placeholder={isLLM && !isAPI ? '120' : '15'}
 										style={{ maxWidth: 120 }}
 										disabled={!isAdmin}
 										onChange={(e): void =>
@@ -541,6 +560,9 @@ function AIModuleSettings(): JSX.Element {
 								{t('timeout_hint')}
 							</p>
 						</div>
+
+						{/* local/mock have no credential field — surface Test here. */}
+						{!isLLM && renderTestControl()}
 					</section>
 				)}
 
@@ -548,9 +570,6 @@ function AIModuleSettings(): JSX.Element {
 					className="ai-module-settings__actions"
 					style={{ marginTop: 'var(--spacing-6)' }}
 				>
-					<Button onClick={onTest} loading={isTesting} disabled={isSaving || !isAdmin}>
-						{t('btn_test')}
-					</Button>
 					<Button
 						type="primary"
 						htmlType="submit"
@@ -563,12 +582,6 @@ function AIModuleSettings(): JSX.Element {
 						<span className="ai-module-settings__actions-meta">
 							{t('last_updated')} {updatedAt}
 						</span>
-					)}
-					{testStatus === 'success' && (
-						<Tag color="success">{t('test_status_success')}</Tag>
-					)}
-					{testStatus === 'failure' && (
-						<Tag color="error">{t('test_status_failure')}</Tag>
 					)}
 				</div>
 			</form>
