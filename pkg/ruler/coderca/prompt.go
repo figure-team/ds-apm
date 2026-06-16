@@ -28,6 +28,10 @@ const systemPromptTask = `Your task:
 4. State your confidence (high, medium, or low) and the limitations of this analysis.
 5. Echo the baseline commit you analyzed.
 
+Write all human-readable analysis text — the values of "root_cause", "proposed_fix", and
+"limitations" — in Korean (한국어) by default. Keep the JSON keys and the "confidence" value
+(one of high, medium, low) in English exactly as specified below.
+
 Respond with a single fenced ` + "```json" + ` block and nothing after it, with exactly these keys:
 {
   "baseline_commit": "<the commit you analyzed>",
