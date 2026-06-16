@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -47,7 +48,36 @@ func New(opts ...Option) *Provider {
 	for _, opt := range opts {
 		opt(p)
 	}
+	p.binary = resolveBinary(p.binary)
 	return p
+}
+
+// resolveBinary returns the executable path for name.
+// It tries exec.LookPath first; if that fails it asks npm where its global
+// prefix lives and probes there. This recovers the common case where the server
+// process inherits a narrow PATH that omits the user-scoped npm global bin
+// directory (typical on Windows where npm installs per-user).
+// If name is already an absolute path it is returned as-is.
+func resolveBinary(name string) string {
+	if filepath.IsAbs(name) {
+		return name
+	}
+	if p, err := exec.LookPath(name); err == nil {
+		return p
+	}
+	// Ask npm for its global prefix and probe <prefix>/<name> (Windows) and
+	// <prefix>/bin/<name> (Unix/macOS).
+	out, err := exec.Command("npm", "config", "get", "prefix").Output()
+	if err != nil {
+		return name
+	}
+	prefix := strings.TrimSpace(string(out))
+	for _, rel := range []string{name, filepath.Join("bin", name)} {
+		if p, err := exec.LookPath(filepath.Join(prefix, rel)); err == nil {
+			return p
+		}
+	}
+	return name
 }
 
 // commandEnv returns the env slice to pass to cmd.Env. If an OAuth token is
