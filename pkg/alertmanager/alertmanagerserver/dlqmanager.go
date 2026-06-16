@@ -116,11 +116,16 @@ func newDLQManager(
 	dlqPath string,
 	notifyFn func(ctx context.Context, channel string, alerts []*types.Alert) error,
 ) (*DLQManager, error) {
-	ledger, err := dlq.NewReplayLedger(dlqPath + ".replay-ledger")
+	// Ledger and sidecar must NOT share a prefix with dlqPath because
+	// dlq.ReadEntries globs dlqPath+"*" and would try to JSON-parse them.
+	// Store them in a sibling .dlq-meta/ directory instead.
+	metaDir := filepath.Join(filepath.Dir(dlqPath), ".dlq-meta")
+	base := filepath.Base(dlqPath)
+	ledger, err := dlq.NewReplayLedger(filepath.Join(metaDir, base+".replay-ledger"))
 	if err != nil {
 		return nil, fmt.Errorf("dlq manager: ledger: %w", err)
 	}
-	sidecar, err := newFailureSidecar(dlqPath + ".replay-failures")
+	sidecar, err := newFailureSidecar(filepath.Join(metaDir, base+".replay-failures"))
 	if err != nil {
 		_ = ledger.Close()
 		return nil, fmt.Errorf("dlq manager: sidecar: %w", err)
@@ -133,8 +138,8 @@ func newDLQManager(
 	}, nil
 }
 
-func (m *DLQManager) status(eventID string) string {
-	if m.ledger.Has(eventID) {
+func (m *DLQManager) status(eventID, channel string) string {
+	if m.ledger.Has(dlq.IdempotencyKey(eventID, channel, 0)) {
 		return "replayed"
 	}
 	if m.sidecar.Has(eventID) {
@@ -152,7 +157,7 @@ func (m *DLQManager) ListEntries(channel, status string) ([]*alertmanagertypes.D
 	}
 	out := make([]*alertmanagertypes.DLQEntry, 0, len(raw))
 	for _, e := range raw {
-		s := m.status(e.EventID)
+		s := m.status(e.EventID, e.Channel)
 		if channel != "" && e.Channel != channel {
 			continue
 		}
@@ -171,8 +176,9 @@ func (m *DLQManager) ListEntries(channel, status string) ([]*alertmanagertypes.D
 	return out, nil
 }
 
-// ReplayEntries re-delivers the entries matching eventIDs. Idempotency is
-// guaranteed via the ReplayLedger: duplicate calls are counted as skipped.
+// ReplayEntries re-delivers the entries matching eventIDs. The ReplayLedger is
+// marked only after a successful delivery, so successful replays are idempotent
+// (re-runs are skipped) while failed deliveries remain retryable.
 func (m *DLQManager) ReplayEntries(ctx context.Context, eventIDs []string) (*alertmanagertypes.ReplayResult, error) {
 	raw, err := dlq.ReadEntries(m.dlqPath)
 	if err != nil {
@@ -191,7 +197,10 @@ func (m *DLQManager) ReplayEntries(ctx context.Context, eventIDs []string) (*ale
 			continue
 		}
 		key := dlq.IdempotencyKey(e.EventID, e.Channel, 0)
-		if !m.ledger.MarkIfNew(key) {
+		// Skip entries already successfully replayed (idempotency). Entries that
+		// only failed before are NOT marked in the ledger, so they remain
+		// retryable on a later call.
+		if m.ledger.Has(key) {
 			result.Skipped++
 			continue
 		}
@@ -204,9 +213,13 @@ func (m *DLQManager) ReplayEntries(ctx context.Context, eventIDs []string) (*ale
 		if err := m.notifyFn(ctx, e.Channel, alerts); err != nil {
 			m.sidecar.Record(e.EventID)
 			result.Failed++
-		} else {
-			result.Replayed++
+			continue
 		}
+		// Mark replayed ONLY after a successful delivery so failures stay
+		// retryable. A prior sidecar failure marker is superseded because
+		// status() checks the ledger first.
+		m.ledger.MarkIfNew(key)
+		result.Replayed++
 	}
 	return result, nil
 }
