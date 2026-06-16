@@ -22,6 +22,7 @@ type RunSummary struct {
 	FinishedAt     int64             `json:"finishedAt"` // 0 = not finished
 	Attempts       int               `json:"attempts"`
 	ResultRef      string            `json:"resultRef"`
+	FailureReason  string            `json:"failureReason"` // why a non-done run ended; "" for done
 }
 
 // RunDetail is a run with its persisted RCA report.
@@ -50,7 +51,7 @@ func (s *Store) ListRuns(ctx context.Context, orgID string, p ListRunsParams) ([
 	if limit > 200 {
 		limit = 200
 	}
-	q := `SELECT run_id, org_id, service, status, baseline_commit, created_at, finished_at, attempts, result_ref
+	q := `SELECT run_id, org_id, service, status, baseline_commit, created_at, finished_at, attempts, result_ref, failure_reason
 	      FROM coderca_run WHERE org_id = ?`
 	args := []interface{}{orgID}
 	if p.Status != "" {
@@ -75,7 +76,7 @@ func (s *Store) ListRuns(ctx context.Context, orgID string, p ListRunsParams) ([
 		var r RunSummary
 		var status string
 		if err := rows.Scan(&r.RunID, &r.OrgID, &r.Service, &status, &r.BaselineCommit,
-			&r.CreatedAt, &r.FinishedAt, &r.Attempts, &r.ResultRef); err != nil {
+			&r.CreatedAt, &r.FinishedAt, &r.Attempts, &r.ResultRef, &r.FailureReason); err != nil {
 			return nil, err
 		}
 		r.Status = coderca.RunStatus(status)
@@ -91,12 +92,12 @@ func (s *Store) GetRun(ctx context.Context, orgID, runID string) (RunDetail, err
 	var status string
 	err := s.sqlstore.BunDBCtx(ctx).QueryRowContext(ctx,
 		`SELECT run_id, org_id, service, status, baseline_commit, created_at, finished_at, attempts, result_ref,
-		        root_cause, proposed_fix, confidence, limitations
+		        failure_reason, root_cause, proposed_fix, confidence, limitations
 		 FROM coderca_run WHERE org_id = ? AND run_id = ?`,
 		orgID, runID,
 	).Scan(&d.RunID, &d.OrgID, &d.Service, &status, &d.BaselineCommit,
 		&d.CreatedAt, &d.FinishedAt, &d.Attempts, &d.ResultRef,
-		&d.RootCause, &d.ProposedFix, &d.Confidence, &d.Limitations)
+		&d.FailureReason, &d.RootCause, &d.ProposedFix, &d.Confidence, &d.Limitations)
 	if errors.Is(err, sql.ErrNoRows) {
 		return RunDetail{}, ErrRunNotFound
 	}

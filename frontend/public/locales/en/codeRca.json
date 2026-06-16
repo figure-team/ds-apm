@@ -43,6 +43,7 @@
 	"run_proposed_fix": "Proposed Fix (not applied)",
 	"run_confidence": "Confidence",
 	"run_limitations": "Limitations",
+	"run_failure_reason": "Failure Reason",
 	"run_hitl_notice": "This is an AI-generated suggestion. A human must review it before applying.",
 	"run_empty": "No analysis history"
 }

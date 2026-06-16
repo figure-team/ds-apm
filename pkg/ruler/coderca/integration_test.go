@@ -76,7 +76,8 @@ func applyE2EDDL(ctx context.Context, ss sqlstore.SQLStore) error {
 			root_cause      TEXT    NOT NULL DEFAULT '',
 			proposed_fix    TEXT    NOT NULL DEFAULT '',
 			confidence      TEXT    NOT NULL DEFAULT '',
-			limitations     TEXT    NOT NULL DEFAULT ''
+			limitations     TEXT    NOT NULL DEFAULT '',
+			failure_reason  TEXT    NOT NULL DEFAULT ''
 		)`,
 		`CREATE TABLE IF NOT EXISTS coderca_admission (
 			org_id           TEXT    NOT NULL,

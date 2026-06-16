@@ -167,6 +167,14 @@ function RunsTab(): JSX.Element {
 			dataIndex: 'attempts',
 			key: 'attempts',
 		},
+		{
+			title: t('run_failure_reason'),
+			dataIndex: 'failureReason',
+			key: 'failureReason',
+			ellipsis: true,
+			render: (val: string): JSX.Element =>
+				val ? <span style={{ color: '#cf1322' }}>{val}</span> : <span>-</span>,
+		},
 	];
 
 	return (
@@ -216,22 +224,40 @@ function RunsTab(): JSX.Element {
 				<Spin spinning={loadingDetail}>
 					{detail && (
 						<div>
-							<h3>{t('run_root_cause')}</h3>
-							<pre className="code-rca-settings__report">{detail.rootCause}</pre>
+							{detail.failureReason && (
+								<Alert
+									type="error"
+									showIcon
+									message={t('run_failure_reason')}
+									description={
+										<pre className="code-rca-settings__report">
+											{detail.failureReason}
+										</pre>
+									}
+									style={{ marginBottom: 16 }}
+								/>
+							)}
 
-							<h3>{t('run_proposed_fix')}</h3>
-							<pre className="code-rca-settings__report">{detail.proposedFix}</pre>
+							{detail.status === 'done' && (
+								<>
+									<h3>{t('run_root_cause')}</h3>
+									<pre className="code-rca-settings__report">{detail.rootCause}</pre>
 
-							<div style={{ marginTop: 12 }}>
-								<strong>{t('run_confidence')}: </strong>
-								<Tag>{detail.confidence}</Tag>
-							</div>
+									<h3>{t('run_proposed_fix')}</h3>
+									<pre className="code-rca-settings__report">{detail.proposedFix}</pre>
 
-							{detail.limitations && (
-								<div style={{ marginTop: 12 }}>
-									<strong>{t('run_limitations')}: </strong>
-									<span>{detail.limitations}</span>
-								</div>
+									<div style={{ marginTop: 12 }}>
+										<strong>{t('run_confidence')}: </strong>
+										<Tag>{detail.confidence}</Tag>
+									</div>
+
+									{detail.limitations && (
+										<div style={{ marginTop: 12 }}>
+											<strong>{t('run_limitations')}: </strong>
+											<span>{detail.limitations}</span>
+										</div>
+									)}
+								</>
 							)}
 
 							<div style={{ marginTop: 12 }}>
@@ -239,12 +265,14 @@ function RunsTab(): JSX.Element {
 								<code>{detail.baselineCommit}</code>
 							</div>
 
-							<Alert
-								type="warning"
-								showIcon
-								message={t('run_hitl_notice')}
-								style={{ marginTop: 16 }}
-							/>
+							{detail.status === 'done' && (
+								<Alert
+									type="warning"
+									showIcon
+									message={t('run_hitl_notice')}
+									style={{ marginTop: 16 }}
+								/>
+							)}
 						</div>
 					)}
 				</Spin>

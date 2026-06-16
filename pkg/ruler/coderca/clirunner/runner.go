@@ -104,8 +104,12 @@ func (r *Runner) Run(ctx context.Context, s Spec) (coderca.RCAResult, coderca.Ru
 			fmt.Errorf("clirunner: run exceeded %s: %w", r.timeout, runCtx.Err())
 	}
 	if runErr != nil {
+		// Agent CLIs (notably claude -p) write their error to stdout, not stderr,
+		// so include a stdout snippet too — otherwise the surfaced reason is just
+		// "exit status 1 (stderr: )" with no clue why.
 		return coderca.RCAResult{Raw: raw}, coderca.RunStatusFailed,
-			fmt.Errorf("clirunner: %s: %w (stderr: %s)", binary, runErr, truncate(stderr.String(), 512))
+			fmt.Errorf("clirunner: %s: %w (stderr: %s) (stdout: %s)",
+				binary, runErr, truncate(stderr.String(), 512), truncate(raw, 512))
 	}
 
 	out := raw

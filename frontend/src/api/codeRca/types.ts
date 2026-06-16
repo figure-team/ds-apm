@@ -51,6 +51,7 @@ export interface CodeRcaRunSummary {
 	finishedAt: number;
 	attempts: number;
 	resultRef: string;
+	failureReason: string; // why a non-done run ended; '' for done
 }
 
 export interface CodeRcaRunDetail extends CodeRcaRunSummary {

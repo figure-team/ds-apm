@@ -44,6 +44,10 @@ type FinalizeParams struct {
 	ProposedFix    string
 	Confidence     string
 	Limitations    string
+
+	// FailureReason explains a non-done terminal status (empty for done runs);
+	// served by the run-history API so the UI can show why a run failed.
+	FailureReason string
 }
 
 // ReapParams sweeps expired leases.
@@ -190,10 +194,12 @@ func (s *Store) Finalize(ctx context.Context, p FinalizeParams) (bool, error) {
 		// Fenced terminal transition.
 		r, err := db.ExecContext(ctx,
 			`UPDATE coderca_run SET status = ?, result_ref = ?, finished_at = ?, lease_until = 0,
-			        baseline_commit = ?, root_cause = ?, proposed_fix = ?, confidence = ?, limitations = ?
+			        baseline_commit = ?, root_cause = ?, proposed_fix = ?, confidence = ?, limitations = ?,
+			        failure_reason = ?
 			 WHERE run_id = ? AND lease_token = ? AND status = ?`,
 			string(p.Status), p.ResultRef, p.Now.Unix(),
 			p.BaselineCommit, p.RootCause, p.ProposedFix, p.Confidence, p.Limitations,
+			p.FailureReason,
 			p.RunID, p.LeaseToken, string(coderca.RunStatusRunning),
 		)
 		if err != nil {
