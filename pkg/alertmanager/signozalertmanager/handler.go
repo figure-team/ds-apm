@@ -361,6 +361,71 @@ func (handler *handler) DeleteRoutePolicyByID(rw http.ResponseWriter, req *http.
 	render.Success(rw, http.StatusNoContent, nil)
 }
 
+func (handler *handler) GetDLQEntries(rw http.ResponseWriter, req *http.Request) {
+	ctx, cancel := context.WithTimeout(req.Context(), 30*time.Second)
+	defer cancel()
+
+	claims, err := authtypes.ClaimsFromContext(ctx)
+	if err != nil {
+		render.Error(rw, err)
+		return
+	}
+
+	channel := req.URL.Query().Get("channel")
+	status := req.URL.Query().Get("status")
+
+	entries, err := handler.alertmanager.ListDLQEntries(ctx, claims.OrgID, channel, status)
+	if err != nil {
+		render.Error(rw, err)
+		return
+	}
+
+	if len(entries) == 0 {
+		entries = make([]*alertmanagertypes.DLQEntry, 0)
+	}
+
+	render.Success(rw, http.StatusOK, entries)
+}
+
+func (handler *handler) ReplayDLQEntries(rw http.ResponseWriter, req *http.Request) {
+	ctx, cancel := context.WithTimeout(req.Context(), 60*time.Second)
+	defer cancel()
+
+	claims, err := authtypes.ClaimsFromContext(ctx)
+	if err != nil {
+		render.Error(rw, err)
+		return
+	}
+
+	body, err := io.ReadAll(req.Body)
+	if err != nil {
+		render.Error(rw, err)
+		return
+	}
+	defer req.Body.Close() //nolint:errcheck
+
+	var reqBody struct {
+		EventIDs []string `json:"event_ids"`
+	}
+	if err := json.Unmarshal(body, &reqBody); err != nil {
+		render.Error(rw, errors.Newf(errors.TypeInvalidInput, errors.CodeInvalidInput, "invalid request body: %v", err))
+		return
+	}
+
+	if len(reqBody.EventIDs) == 0 {
+		render.Error(rw, errors.Newf(errors.TypeInvalidInput, errors.CodeInvalidInput, "event_ids must not be empty"))
+		return
+	}
+
+	result, err := handler.alertmanager.ReplayDLQEntries(ctx, claims.OrgID, reqBody.EventIDs)
+	if err != nil {
+		render.Error(rw, err)
+		return
+	}
+
+	render.Success(rw, http.StatusOK, result)
+}
+
 func (handler *handler) UpdateRoutePolicy(rw http.ResponseWriter, req *http.Request) {
 	ctx, cancel := context.WithTimeout(req.Context(), 30*time.Second)
 	defer cancel()

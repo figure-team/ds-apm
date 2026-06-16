@@ -584,3 +584,11 @@ func (provider *provider) DeleteAllInhibitRulesByRuleId(ctx context.Context, org
 
 	return provider.configStore.Set(ctx, config)
 }
+
+func (provider *provider) ListDLQEntries(ctx context.Context, orgID, channel, status string) ([]*alertmanagertypes.DLQEntry, error) {
+	return provider.service.ListDLQEntries(ctx, orgID, channel, status)
+}
+
+func (provider *provider) ReplayDLQEntries(ctx context.Context, orgID string, eventIDs []string) (*alertmanagertypes.ReplayResult, error) {
+	return provider.service.ReplayDLQEntries(ctx, orgID, eventIDs)
+}

@@ -1845,3 +1845,157 @@ func (_c *MockAlertmanager_UpdateRoutePolicyByID_Call) RunAndReturn(run func(ctx
 	_c.Call.Return(run)
 	return _c
 }
+
+// ListDLQEntries provides a mock function for the type MockAlertmanager
+func (_mock *MockAlertmanager) ListDLQEntries(ctx context.Context, orgID string, channel string, status string) ([]*alertmanagertypes.DLQEntry, error) {
+	ret := _mock.Called(ctx, orgID, channel, status)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListDLQEntries")
+	}
+
+	var r0 []*alertmanagertypes.DLQEntry
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string) ([]*alertmanagertypes.DLQEntry, error)); ok {
+		return returnFunc(ctx, orgID, channel, status)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string) []*alertmanagertypes.DLQEntry); ok {
+		r0 = returnFunc(ctx, orgID, channel, status)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*alertmanagertypes.DLQEntry)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
+		r1 = returnFunc(ctx, orgID, channel, status)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockAlertmanager_ListDLQEntries_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListDLQEntries'
+type MockAlertmanager_ListDLQEntries_Call struct {
+	*mock.Call
+}
+
+// ListDLQEntries is a helper method to define mock.On call
+//   - ctx context.Context
+//   - orgID string
+//   - channel string
+//   - status string
+func (_e *MockAlertmanager_Expecter) ListDLQEntries(ctx interface{}, orgID interface{}, channel interface{}, status interface{}) *MockAlertmanager_ListDLQEntries_Call {
+	return &MockAlertmanager_ListDLQEntries_Call{Call: _e.mock.On("ListDLQEntries", ctx, orgID, channel, status)}
+}
+
+func (_c *MockAlertmanager_ListDLQEntries_Call) Run(run func(ctx context.Context, orgID string, channel string, status string)) *MockAlertmanager_ListDLQEntries_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockAlertmanager_ListDLQEntries_Call) Return(dlqEntrys []*alertmanagertypes.DLQEntry, err error) *MockAlertmanager_ListDLQEntries_Call {
+	_c.Call.Return(dlqEntrys, err)
+	return _c
+}
+
+func (_c *MockAlertmanager_ListDLQEntries_Call) RunAndReturn(run func(ctx context.Context, orgID string, channel string, status string) ([]*alertmanagertypes.DLQEntry, error)) *MockAlertmanager_ListDLQEntries_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ReplayDLQEntries provides a mock function for the type MockAlertmanager
+func (_mock *MockAlertmanager) ReplayDLQEntries(ctx context.Context, orgID string, eventIDs []string) (*alertmanagertypes.ReplayResult, error) {
+	ret := _mock.Called(ctx, orgID, eventIDs)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ReplayDLQEntries")
+	}
+
+	var r0 *alertmanagertypes.ReplayResult
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []string) (*alertmanagertypes.ReplayResult, error)); ok {
+		return returnFunc(ctx, orgID, eventIDs)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []string) *alertmanagertypes.ReplayResult); ok {
+		r0 = returnFunc(ctx, orgID, eventIDs)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*alertmanagertypes.ReplayResult)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, []string) error); ok {
+		r1 = returnFunc(ctx, orgID, eventIDs)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockAlertmanager_ReplayDLQEntries_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ReplayDLQEntries'
+type MockAlertmanager_ReplayDLQEntries_Call struct {
+	*mock.Call
+}
+
+// ReplayDLQEntries is a helper method to define mock.On call
+//   - ctx context.Context
+//   - orgID string
+//   - eventIDs []string
+func (_e *MockAlertmanager_Expecter) ReplayDLQEntries(ctx interface{}, orgID interface{}, eventIDs interface{}) *MockAlertmanager_ReplayDLQEntries_Call {
+	return &MockAlertmanager_ReplayDLQEntries_Call{Call: _e.mock.On("ReplayDLQEntries", ctx, orgID, eventIDs)}
+}
+
+func (_c *MockAlertmanager_ReplayDLQEntries_Call) Run(run func(ctx context.Context, orgID string, eventIDs []string)) *MockAlertmanager_ReplayDLQEntries_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []string
+		if args[2] != nil {
+			arg2 = args[2].([]string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockAlertmanager_ReplayDLQEntries_Call) Return(replayResult *alertmanagertypes.ReplayResult, err error) *MockAlertmanager_ReplayDLQEntries_Call {
+	_c.Call.Return(replayResult, err)
+	return _c
+}
+
+func (_c *MockAlertmanager_ReplayDLQEntries_Call) RunAndReturn(run func(ctx context.Context, orgID string, eventIDs []string) (*alertmanagertypes.ReplayResult, error)) *MockAlertmanager_ReplayDLQEntries_Call {
+	_c.Call.Return(run)
+	return _c
+}

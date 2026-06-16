@@ -74,6 +74,13 @@ type Alertmanager interface {
 	CreateInhibitRules(ctx context.Context, orgID valuer.UUID, rules []amConfig.InhibitRule) error
 	DeleteAllInhibitRulesByRuleId(ctx context.Context, orgID valuer.UUID, ruleId string) error
 
+	// ListDLQEntries lists dead-letter entries for the org, filtered by optional
+	// channel and status ("pending" | "replayed" | "replay_failed").
+	ListDLQEntries(ctx context.Context, orgID, channel, status string) ([]*alertmanagertypes.DLQEntry, error)
+
+	// ReplayDLQEntries re-delivers the entries matching eventIDs, idempotently.
+	ReplayDLQEntries(ctx context.Context, orgID string, eventIDs []string) (*alertmanagertypes.ReplayResult, error)
+
 	// Collects stats for the organization.
 	statsreporter.StatsCollector
 }

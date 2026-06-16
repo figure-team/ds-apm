@@ -28,4 +28,7 @@ type Handler interface {
 	UpdateRoutePolicy(http.ResponseWriter, *http.Request)
 
 	DeleteRoutePolicyByID(http.ResponseWriter, *http.Request)
+
+	GetDLQEntries(http.ResponseWriter, *http.Request)
+	ReplayDLQEntries(http.ResponseWriter, *http.Request)
 }

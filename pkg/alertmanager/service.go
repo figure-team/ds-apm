@@ -287,3 +287,23 @@ func (service *Service) getServer(orgID string) (*alertmanagerserver.Server, err
 
 	return server, nil
 }
+
+func (service *Service) ListDLQEntries(ctx context.Context, orgID, channel, status string) ([]*alertmanagertypes.DLQEntry, error) {
+	service.serversMtx.RLock()
+	server, ok := service.servers[orgID]
+	service.serversMtx.RUnlock()
+	if !ok {
+		return []*alertmanagertypes.DLQEntry{}, nil
+	}
+	return server.ListDLQEntries(channel, status)
+}
+
+func (service *Service) ReplayDLQEntries(ctx context.Context, orgID string, eventIDs []string) (*alertmanagertypes.ReplayResult, error) {
+	service.serversMtx.RLock()
+	server, ok := service.servers[orgID]
+	service.serversMtx.RUnlock()
+	if !ok {
+		return &alertmanagertypes.ReplayResult{Skipped: len(eventIDs)}, nil
+	}
+	return server.ReplayDLQEntries(ctx, eventIDs)
+}

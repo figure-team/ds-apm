@@ -231,5 +231,39 @@ func (provider *provider) addAlertmanagerRoutes(router *mux.Router) error {
 		return err
 	}
 
+	if err := router.Handle("/api/v1/alertmanager/dlq/entries", handler.New(provider.authZ.ViewAccess(provider.alertmanagerHandler.GetDLQEntries), handler.OpenAPIDef{
+		ID:                  "GetDLQEntries",
+		Tags:                []string{"dlq"},
+		Summary:             "List DLQ entries",
+		Description:         "Lists dead-letter notification entries, filterable by channel and status",
+		Request:             nil,
+		RequestContentType:  "",
+		Response:            make([]*alertmanagertypes.DLQEntry, 0),
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{},
+		Deprecated:          false,
+		SecuritySchemes:     newSecuritySchemes(types.RoleViewer),
+	})).Methods(http.MethodGet).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v1/alertmanager/dlq/replay", handler.New(provider.authZ.EditAccess(provider.alertmanagerHandler.ReplayDLQEntries), handler.OpenAPIDef{
+		ID:                  "ReplayDLQEntries",
+		Tags:                []string{"dlq"},
+		Summary:             "Replay DLQ entries",
+		Description:         "Re-delivers dead-letter entries by event ID, idempotently",
+		Request:             nil,
+		RequestContentType:  "application/json",
+		Response:            new(alertmanagertypes.ReplayResult),
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusBadRequest},
+		Deprecated:          false,
+		SecuritySchemes:     newSecuritySchemes(types.RoleEditor),
+	})).Methods(http.MethodPost).GetError(); err != nil {
+		return err
+	}
+
 	return nil
 }

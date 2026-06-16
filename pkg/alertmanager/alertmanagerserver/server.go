@@ -2,6 +2,7 @@ package alertmanagerserver
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log/slog"
 	"os"
@@ -112,6 +113,13 @@ type Server struct {
 	// (see dlqSinkFromEnv) and reused across SetConfig reloads to avoid
 	// leaking file handles. Nil disables DLQ persistence.
 	dlqSink dlq.Sink
+
+	// dlqPath is the resolved DLQ file path (empty = DLQ disabled).
+	dlqPath string
+
+	// dlqManager, when non-nil, exposes ListEntries and ReplayEntries via the
+	// API. Initialised from SIGNOZ_DLQ_PATH alongside dlqSink.
+	dlqManager *DLQManager
 }
 
 // New creates a new alertmanager Server.
@@ -140,6 +148,40 @@ func New(ctx context.Context, logger *slog.Logger, registry prometheus.Registere
 		server.logger.ErrorContext(ctx, "failed to open dead-letter sink; DLQ persistence disabled", slog.String("env", DLQPathEnvVar), errors.Attr(err))
 	} else {
 		server.dlqSink = sink
+	}
+
+	// When DLQ persistence is enabled, also open the replay ledger and
+	// failure sidecar so the API can serve status and trigger replays.
+	dlqPath := os.Getenv(DLQPathEnvVar)
+	if dlqPath != "" {
+		server.dlqPath = dlqPath
+		notifyFn := func(ctx context.Context, channel string, alerts []*types.Alert) error {
+			if server.alertmanagerConfig == nil {
+				return fmt.Errorf("alertmanager not yet configured")
+			}
+			receiver, err := server.alertmanagerConfig.GetReceiver(channel)
+			if err != nil {
+				return fmt.Errorf("dlq replay: unknown channel %q: %w", channel, err)
+			}
+			integrations, err := alertmanagernotify.NewReceiverIntegrations(receiver, server.tmpl, server.logger)
+			if err != nil {
+				return fmt.Errorf("dlq replay: build integrations for %q: %w", channel, err)
+			}
+			var notifyErr error
+			for _, integration := range integrations {
+				if _, err := integration.Notify(ctx, alerts...); err != nil {
+					notifyErr = err
+				}
+			}
+			return notifyErr
+		}
+		mgr, err := newDLQManager(dlqPath, notifyFn)
+		if err != nil {
+			server.logger.ErrorContext(ctx, "failed to open DLQ manager; replay API disabled",
+				slog.String("path", dlqPath), errors.Attr(err))
+		} else {
+			server.dlqManager = mgr
+		}
 	}
 
 	signozRegisterer := prometheus.WrapRegistererWithPrefix("signoz_", registry)
@@ -535,5 +577,25 @@ func (server *Server) Stop(ctx context.Context) error {
 		}
 	}
 
+	if server.dlqManager != nil {
+		if err := server.dlqManager.Close(); err != nil {
+			server.logger.ErrorContext(ctx, "failed to close DLQ manager", errors.Attr(err))
+		}
+	}
+
 	return nil
+}
+
+func (server *Server) ListDLQEntries(channel, status string) ([]*alertmanagertypes.DLQEntry, error) {
+	if server.dlqManager == nil {
+		return []*alertmanagertypes.DLQEntry{}, nil
+	}
+	return server.dlqManager.ListEntries(channel, status)
+}
+
+func (server *Server) ReplayDLQEntries(ctx context.Context, eventIDs []string) (*alertmanagertypes.ReplayResult, error) {
+	if server.dlqManager == nil {
+		return &alertmanagertypes.ReplayResult{Skipped: len(eventIDs)}, nil
+	}
+	return server.dlqManager.ReplayEntries(ctx, eventIDs)
 }
