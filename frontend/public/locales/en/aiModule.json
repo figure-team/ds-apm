@@ -34,5 +34,7 @@
 	"toast_save_error": "Failed to save AI config",
 	"toast_test_error": "Test request failed",
 	"test_ok_fallback": "Connection OK",
-	"credential_saved": "Saved"
+	"credential_saved": "Saved",
+	"test_status_success": "Test passed",
+	"test_status_failure": "Test failed"
 }

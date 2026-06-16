@@ -100,6 +100,9 @@ function AIModuleSettings(): JSX.Element {
 	// auth failure (expired/invalid token). Cleared by a successful save or
 	// a successful test re-run, or when the user starts editing a secret.
 	const [authIssue, setAuthIssue] = useState<string | null>(null);
+	const [testStatus, setTestStatus] = useState<'success' | 'failure' | null>(
+		null,
+	);
 	// Mask refs track the *persisted* secret state, not the form state. They
 	// are set on initial load from cfg.{apiKey,oauthToken} === API_KEY_UNCHANGED
 	// and updated only after a successful save. Toggling the transport radio
@@ -242,14 +245,17 @@ function AIModuleSettings(): JSX.Element {
 	const onTest = useCallback(async (): Promise<void> => {
 		const values = watch() as FormValues;
 		setIsTesting(true);
+		setTestStatus(null);
 		try {
 			const res = await testAIConfig(buildPayload(values));
 			const result = res.data;
 			if (result.ok) {
 				toast.success(truncate(result.headline ?? t('test_ok_fallback'), 80));
 				setAuthIssue(null);
+				setTestStatus('success');
 			} else {
 				toast.error(result.error ?? 'Test failed');
+				setTestStatus('failure');
 				if (result.errorKind === 'auth') {
 					setAuthIssue(
 						values.transport === 'cli'
@@ -267,6 +273,7 @@ function AIModuleSettings(): JSX.Element {
 			});
 		} catch (err) {
 			toast.error(getErrorMessage(err, t('toast_test_error')));
+			setTestStatus('failure');
 		} finally {
 			setIsTesting(false);
 		}
@@ -556,6 +563,12 @@ function AIModuleSettings(): JSX.Element {
 						<span className="ai-module-settings__actions-meta">
 							{t('last_updated')} {updatedAt}
 						</span>
+					)}
+					{testStatus === 'success' && (
+						<Tag color="success">{t('test_status_success')}</Tag>
+					)}
+					{testStatus === 'failure' && (
+						<Tag color="error">{t('test_status_failure')}</Tag>
 					)}
 				</div>
 			</form>
