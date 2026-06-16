@@ -1,17 +1,18 @@
-import { useCallback, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useQuery } from 'react-query';
 import { PlusOutlined } from '@ant-design/icons';
-import { Tooltip, Typography } from 'antd';
+import { Tabs, Tooltip, Typography } from 'antd';
 import getAll from 'api/channels/getAll';
 import logEvent from 'api/common/logEvent';
 import Spinner from 'components/Spinner';
 import TextToolTip from 'components/TextToolTip';
 import ROUTES from 'constants/routes';
+import DLQFailures from 'container/DLQFailures';
 import useComponentPermission from 'hooks/useComponentPermission';
 import history from 'lib/history';
 import { isUndefined } from 'lodash-es';
 import { useAppContext } from 'providers/App/App';
+import { useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useQuery } from 'react-query';
 import { SuccessResponseV2 } from 'types/api';
 import { Channels } from 'types/api/channels/getAll';
 import APIError from 'types/api/error';
@@ -23,7 +24,7 @@ import './AllAlertChannels.styles.scss';
 
 const { Paragraph } = Typography;
 
-function AlertChannels(): JSX.Element {
+function ChannelListTab(): JSX.Element {
 	const { t } = useTranslation(['channels']);
 	const { user } = useAppContext();
 	const [addNewChannelPermission] = useComponentPermission(
@@ -89,6 +90,27 @@ function AlertChannels(): JSX.Element {
 			</ButtonContainer>
 
 			<AlertChannelsComponent allChannels={data?.data || []} />
+		</div>
+	);
+}
+
+const TAB_ITEMS = [
+	{
+		key: 'channels',
+		label: '채널 목록',
+		children: <ChannelListTab />,
+	},
+	{
+		key: 'dlq',
+		label: '전송 실패 내역',
+		children: <DLQFailures />,
+	},
+];
+
+function AlertChannels(): JSX.Element {
+	return (
+		<div style={{ padding: '16px 24px' }}>
+			<Tabs items={TAB_ITEMS} defaultActiveKey="channels" />
 		</div>
 	);
 }
