@@ -31,7 +31,15 @@ FROM alpine:3.20.3
 LABEL maintainer="signoz"
 WORKDIR /root
 
-RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+# ca-certificates: TLS roots for outbound HTTPS (LLM api transport / git fetch).
+# nodejs+npm: runtime for the `claude` CLI (LLM cli transport).
+# ripgrep+git: claude-code shells out to these; the bundled musl-incompatible
+#   ripgrep is disabled via USE_BUILTIN_RIPGREP=0 so the system one is used.
+RUN apk update && \
+    apk add --no-cache ca-certificates nodejs npm ripgrep git && \
+    npm install -g @anthropic-ai/claude-code && \
+    rm -rf /var/cache/apk/* /root/.npm
+ENV USE_BUILTIN_RIPGREP=0
 
 COPY --from=go-builder /out/signoz-community ./signoz
 COPY --from=js-builder /frontend/build/ /etc/signoz/web/
