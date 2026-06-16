@@ -91,6 +91,29 @@ type fakeAuditor struct{ events []AuditEvent }
 
 func (f *fakeAuditor) Audit(_ context.Context, e AuditEvent) { f.events = append(f.events, e) }
 
+type fakeCreds struct {
+	agent     clirunner.Agent
+	model     string
+	authToken string
+	ok        bool
+	gotOrg    string
+}
+
+func (f *fakeCreds) Resolve(_ context.Context, orgID string) (clirunner.Agent, string, string, bool) {
+	f.gotOrg = orgID
+	return f.agent, f.model, f.authToken, f.ok
+}
+
+func newEngineWithCreds(creds CredsResolver, runs *fakeRunStore, repos *fakeRepos, src *fakeSource, cli *fakeCLI) *Engine {
+	return New(Config{
+		InstanceID: "inst-1", Agent: clirunner.AgentClaude, Model: "env-model", MaxBudgetUSD: "1", AuthToken: "env-tok",
+	}, Deps{
+		Runs: runs, Repos: repos, Source: src, CLI: cli,
+		Deliver: &fakeDeliverer{ref: "h"}, Auditor: &fakeAuditor{}, Creds: creds,
+		Now: func() time.Time { return time.Unix(1_700_000_000, 0) },
+	})
+}
+
 // --- harness ---
 
 func claimedRun() runstore.ClaimResult {
@@ -140,6 +163,9 @@ func TestProcessNextHappyPath(t *testing.T) {
 	}
 	if runs.finalized.Status != coderca.RunStatusDone {
 		t.Errorf("finalize status = %q, want done", runs.finalized.Status)
+	}
+	if runs.finalized.FailureReason != "" {
+		t.Errorf("done run must not persist a failure reason, got %q", runs.finalized.FailureReason)
 	}
 	if runs.finalized.ResultRef != "handoff-9" {
 		t.Errorf("finalize resultRef = %q, want handoff-9", runs.finalized.ResultRef)
@@ -215,6 +241,10 @@ func TestProcessNextUnmappedRepoFails(t *testing.T) {
 	if len(aud.events) != 1 || !strings.Contains(aud.events[0].Detail, "no_repo_mapping") {
 		t.Errorf("audit should record no_repo_mapping: %+v", aud.events)
 	}
+	// The reason is also persisted on the run so the history UI can show it.
+	if !strings.Contains(runs.finalized.FailureReason, "no_repo_mapping") {
+		t.Errorf("FailureReason = %q, want no_repo_mapping", runs.finalized.FailureReason)
+	}
 }
 
 func TestProcessNextSourcePrepareFails(t *testing.T) {
@@ -249,6 +279,10 @@ func TestProcessNextCLITimeoutFinalizesTimeoutNoDelivery(t *testing.T) {
 	}
 	if runs.finalized.Status != coderca.RunStatusTimeout {
 		t.Errorf("status = %q, want timeout", runs.finalized.Status)
+	}
+	// The CLI error is surfaced as the persisted reason, not a bare "timeout".
+	if !strings.Contains(runs.finalized.FailureReason, "timed out") {
+		t.Errorf("FailureReason = %q, want it to include the CLI error", runs.finalized.FailureReason)
 	}
 	if del.called {
 		t.Error("must not deliver a timed-out run")
@@ -290,6 +324,41 @@ func TestProcessNextDeliveryFailureIsFailed(t *testing.T) {
 	}
 	if runs.finalized.Status != coderca.RunStatusFailed {
 		t.Errorf("status = %q, want failed (delivery failed)", runs.finalized.Status)
+	}
+}
+
+func TestProcessNextUsesPerOrgCreds(t *testing.T) {
+	cli := doneCLI()
+	creds := &fakeCreds{agent: clirunner.AgentCodex, model: "stored-model", authToken: "stored-tok", ok: true}
+	eng := newEngineWithCreds(creds,
+		&fakeRunStore{claim: claimedRun(), finalOK: true},
+		&fakeRepos{repo: ruletypes.CodebaseRepo{RepoID: "r1"}, ok: true},
+		&fakeSource{checkout: "/co/run-1", baseline: "b"}, cli)
+
+	if _, err := eng.ProcessNext(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if creds.gotOrg != "org1" {
+		t.Errorf("resolver got org %q, want org1 (per-claim)", creds.gotOrg)
+	}
+	if cli.gotSpec.Agent != clirunner.AgentCodex || cli.gotSpec.Model != "stored-model" || cli.gotSpec.AuthToken != "stored-tok" {
+		t.Errorf("spec must use per-org creds, got %+v", cli.gotSpec)
+	}
+}
+
+func TestProcessNextFallsBackToEnvCredsWhenResolverMisses(t *testing.T) {
+	cli := doneCLI()
+	creds := &fakeCreds{ok: false} // no usable per-org credential
+	eng := newEngineWithCreds(creds,
+		&fakeRunStore{claim: claimedRun(), finalOK: true},
+		&fakeRepos{repo: ruletypes.CodebaseRepo{RepoID: "r1"}, ok: true},
+		&fakeSource{checkout: "/co/run-1", baseline: "b"}, cli)
+
+	if _, err := eng.ProcessNext(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if cli.gotSpec.Agent != clirunner.AgentClaude || cli.gotSpec.Model != "env-model" || cli.gotSpec.AuthToken != "env-tok" {
+		t.Errorf("spec must fall back to env Config when resolver misses, got %+v", cli.gotSpec)
 	}
 }
 

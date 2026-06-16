@@ -45,6 +45,14 @@ type CLIRunner interface {
 	Run(ctx context.Context, s clirunner.Spec) (coderca.RCAResult, coderca.RunStatus, error)
 }
 
+// CredsResolver resolves the per-org agent CLI credentials (the same per-org AI
+// config the AI module uses), so an on-demand RCA reuses the token configured in
+// the UI instead of a separate env var. ok=false ⇒ no usable per-org credential;
+// the engine then falls back to its env-derived Config defaults.
+type CredsResolver interface {
+	Resolve(ctx context.Context, orgID string) (agent clirunner.Agent, model, authToken string, ok bool)
+}
+
 // Delivery is a completed RCA handed to a human reviewer (CF-3 / HITL).
 type Delivery struct {
 	OrgID          string
@@ -95,7 +103,10 @@ type Deps struct {
 	Deliver  Deliverer
 	Auditor  Auditor
 	Evidence coderca.EvidenceCollector
-	Now      func() time.Time
+	// Creds optionally resolves per-org agent credentials at run time; nil keeps
+	// the env-derived Config (Agent/Model/AuthToken) as the only source.
+	Creds CredsResolver
+	Now   func() time.Time
 }
 
 // Engine processes queued code-RCA runs one at a time.
@@ -155,6 +166,13 @@ func (e *Engine) ProcessNext(ctx context.Context) (processed bool, err error) {
 		Detail:  detail,
 	})
 
+	// Persist the reason for a non-done run so the run-history UI can show why
+	// it failed; a done run's detail ("delivered") is not a failure reason.
+	failureReason := ""
+	if status != coderca.RunStatusDone {
+		failureReason = detail
+	}
+
 	// Fenced terminal transition (design §6.3): only the live lease owner wins.
 	_, ferr := e.deps.Runs.Finalize(ctx, runstore.FinalizeParams{
 		Scope:      e.cfg.Scope,
@@ -169,6 +187,7 @@ func (e *Engine) ProcessNext(ctx context.Context) (processed bool, err error) {
 		ProposedFix:    result.ProposedFix,
 		Confidence:     result.Confidence,
 		Limitations:    result.Limitations,
+		FailureReason:  failureReason,
 	})
 	return true, ferr
 }
@@ -203,25 +222,42 @@ func (e *Engine) runOne(ctx context.Context, claim runstore.ClaimResult) (coderc
 		// full error context at admission is a deferred additive enhancement.
 	}
 	evidence, _ := e.deps.Evidence.Collect(ctx, rc) // best-effort; v1 Noop → none
+
+	// Resolve per-org agent credentials (reusing the AI-module stored config)
+	// before building the prompt: the prompt's tooling directive must match the
+	// agent we actually run. Fall back to the env-derived Config when no usable
+	// per-org credential exists.
+	agent, model, authToken := e.cfg.Agent, e.cfg.Model, e.cfg.AuthToken
+	if e.deps.Creds != nil {
+		if a, m, tok, ok := e.deps.Creds.Resolve(ctx, claim.OrgID); ok {
+			agent, model, authToken = a, m, tok
+		}
+	}
+
 	// The prompt's read-only inspection directive is resolved from the agent so
 	// it matches the CLI flags clirunner emits (Claude: file tools; Codex:
 	// read-only shell). Mismatching them blinds the agent to the checkout.
-	system, user := coderca.BuildPrompt(rc, evidence, clirunner.ToolingFor(e.cfg.Agent))
+	system, user := coderca.BuildPrompt(rc, evidence, clirunner.ToolingFor(agent))
 
-	result, status, _ := e.deps.CLI.Run(ctx, clirunner.Spec{
-		Agent:        e.cfg.Agent,
-		Model:        e.cfg.Model,
+	result, status, cliErr := e.deps.CLI.Run(ctx, clirunner.Spec{
+		Agent:        agent,
+		Model:        model,
 		Checkout:     checkout,
 		SystemPrompt: system,
 		Prompt:       user,
 		MaxBudgetUSD: e.cfg.MaxBudgetUSD,
-		AuthToken:    e.cfg.AuthToken,
+		AuthToken:    authToken,
 	})
 	if status != coderca.RunStatusDone {
 		// timeout / failed / unparseable: never delivered (HITL gets only usable
-		// results); the status itself is the audit detail. baseline is returned
-		// so the caller can persist it even for non-done runs.
-		return status, "", string(status), baseline, coderca.RCAResult{}
+		// results). Surface the CLI error (binary / exit code / stderr) as the
+		// reason so the run-history UI shows *why* it failed, not a bare "failed".
+		// baseline is returned so the caller can persist it even for non-done runs.
+		detail := string(status)
+		if cliErr != nil {
+			detail = string(status) + ": " + cliErr.Error()
+		}
+		return status, "", detail, baseline, coderca.RCAResult{}
 	}
 
 	resultRef, derr := e.deps.Deliver.Deliver(ctx, Delivery{

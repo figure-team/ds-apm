@@ -429,7 +429,11 @@ func New(
 		LLMBinary:         os.Getenv("DS_APM_LLM_BINARY"),
 		LLMEndpoint:       os.Getenv("DS_APM_LLM_ENDPOINT"),
 	}
-	runbookDrafter := aigenerator.NewRunbookDrafter(aiCfg)
+	// Reuse the per-org AI-module credential when present; the env-built drafter
+	// is the fallback.
+	runbookDrafter := aigenerator.NewStoreAwareRunbookDrafter(
+		aiConfigStore, aiCipher, aigenerator.NewRunbookDrafter(aiCfg),
+	)
 
 	var aiDispatchHook *dispatchhook.Hook
 	if aiGen != nil {
@@ -495,6 +499,15 @@ func New(
 	if codercaAgent == "" {
 		codercaAgent = "claude"
 	}
+	// The clirunner requires a model (ErrNoModel otherwise). Default the claude
+	// agent to its documented model so on-demand RCA works without extra env,
+	// matching how agent/budget/auth already default. codex models are
+	// account-specific (ChatGPT-subscription codex rejects gpt-5/gpt-5-codex),
+	// so we never guess one — codex must set DS_APM_CODERCA_MODEL explicitly.
+	codercaModel := os.Getenv("DS_APM_CODERCA_MODEL")
+	if codercaModel == "" && codercaAgent == "claude" {
+		codercaModel = "claude-sonnet-4-6"
+	}
 	codercaBudget := os.Getenv("DS_APM_CODERCA_MAX_BUDGET_USD")
 	if codercaBudget == "" {
 		codercaBudget = "0.50"
@@ -515,7 +528,7 @@ func New(
 			Scope:        "global",
 			InstanceID:   hostname,
 			Agent:        clirunner.Agent(codercaAgent),
-			Model:        os.Getenv("DS_APM_CODERCA_MODEL"),
+			Model:        codercaModel,
 			MaxBudgetUSD: codercaBudget,
 			AuthToken:    codercaAuth,
 		},
@@ -526,6 +539,8 @@ func New(
 			CLI:     clirunner.NewRunner(),
 			Deliver: codercadelivery.New(codercadelivery.NewAlertmanagerSink(alertmanager)),
 			Auditor: codercaauditor.New(codercaauditor.NewDSSink(auditor.Audit), nil),
+			// Reuse the per-org AI-module credential (env Config is the fallback).
+			Creds: newCodercaCredsResolver(aiConfigStore, aiCipher),
 		},
 	)
 	codercaWorker := codercaworker.New(codercaEngine, codercaRunStore, "global", 0, 0, providerSettings.Logger, nil)

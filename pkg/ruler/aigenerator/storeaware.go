@@ -103,13 +103,11 @@ func (s *StoreAware) generatorFor(ctx context.Context, orgID string) (ruletypes.
 	return gen, nil
 }
 
-// buildFromAIConfig constructs an AIStrategyGenerator from a stored AIConfig.
-// Mock provider is rejected with a descriptive error (see package comment).
-func buildFromAIConfig(cfg ruletypes.AIConfig) (ruletypes.AIStrategyGenerator, error) {
-	if cfg.Provider == "mock" {
-		return nil, fmt.Errorf("aigenerator: per-org mock provider is not supported via DB config (use env DS_APM_AI_GENERATOR=mock for demo); falling back to envFallback")
-	}
-	return New(Config{
+// ConfigFromAIConfig maps a stored per-org AIConfig to an aigenerator.Config.
+// Shared by the strategy-generator and runbook-drafter store-aware wrappers so
+// the field mapping lives in one place.
+func ConfigFromAIConfig(cfg ruletypes.AIConfig) Config {
+	return Config{
 		Provider:          cfg.Provider,
 		LLMProvider:       cfg.LLMProvider,
 		LLMTransport:      cfg.Transport,
@@ -118,7 +116,16 @@ func buildFromAIConfig(cfg ruletypes.AIConfig) (ruletypes.AIStrategyGenerator, e
 		LLMAPIKey:         cfg.APIKey,
 		LLMOAuthToken:     cfg.OAuthToken,
 		LLMBinary:         cfg.BinaryPath,
-	})
+	}
+}
+
+// buildFromAIConfig constructs an AIStrategyGenerator from a stored AIConfig.
+// Mock provider is rejected with a descriptive error (see package comment).
+func buildFromAIConfig(cfg ruletypes.AIConfig) (ruletypes.AIStrategyGenerator, error) {
+	if cfg.Provider == "mock" {
+		return nil, fmt.Errorf("aigenerator: per-org mock provider is not supported via DB config (use env DS_APM_AI_GENERATOR=mock for demo); falling back to envFallback")
+	}
+	return New(ConfigFromAIConfig(cfg))
 }
 
 // orgIDFromRequest extracts the org identifier from the request labels.

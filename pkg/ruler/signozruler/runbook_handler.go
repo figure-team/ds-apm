@@ -312,6 +312,7 @@ func (h *handler) DraftRunbook(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	rb, draftErr := h.runbookDrafter.Draft(req.Context(), ruletypes.RunbookDraftRequest{
+		OrgID:         orgID,
 		SOP:           sop,
 		ErrorExamples: body.ErrorExamples,
 		Source:        "manual-paste",
