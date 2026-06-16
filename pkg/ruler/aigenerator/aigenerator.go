@@ -88,9 +88,20 @@ func New(cfg Config) (ruletypes.AIStrategyGenerator, error) {
 	}
 }
 
+// DefaultCLITimeout is the per-call deadline used for LLMTransport="cli" when
+// the config leaves LLMTimeoutSeconds unset (<= 0). CLI transports boot node and
+// initialize the agent before the model call even starts, which routinely
+// exceeds the 15s api default and gets the child process killed mid-run; give
+// them a roomier default. API transports keep llmaigenerator.DefaultTimeout.
+const DefaultCLITimeout = 120 * time.Second
+
 func newLLM(cfg Config) (ruletypes.AIStrategyGenerator, error) {
 	timeout := time.Duration(cfg.LLMTimeoutSeconds) * time.Second
-	// llmaigenerator.New applies its own default when timeout <= 0.
+	// llmaigenerator.New applies its own (api) default when timeout <= 0; CLI
+	// needs a longer floor, applied here before that default kicks in.
+	if cfg.LLMTimeoutSeconds <= 0 && cfg.LLMTransport == "cli" {
+		timeout = DefaultCLITimeout
+	}
 
 	provider, err := buildLLMProvider(cfg)
 	if err != nil {
