@@ -1,4 +1,5 @@
 import { ReactNode, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { Space, Typography } from 'antd';
 import TextToolTip from 'components/TextToolTip';
@@ -11,10 +12,7 @@ import { ENTITY_VERSION_V4 } from 'constants/app';
 import { PANEL_TYPES } from 'constants/queryBuilder';
 import Graph from 'container/GridCardLayout/GridCard';
 import DisplayThreshold from 'container/GridCardLayout/WidgetHeader/DisplayThreshold';
-import {
-	GraphTitle,
-	SERVICE_CHART_ID,
-} from 'container/MetricsApplication/constant';
+import { SERVICE_CHART_ID } from 'container/MetricsApplication/constant';
 import { getWidgetQueryBuilder } from 'container/MetricsApplication/MetricsApplication.factory';
 import { apDexMetricsQueryBuilderQueries } from 'container/MetricsApplication/MetricsPageQueries/OverviewQueries';
 import { EQueryType } from 'types/common/dashboard';
@@ -34,6 +32,7 @@ function ApDexMetrics({
 	topLevelOperationsRoute,
 	handleGraphClick,
 }: ApDexMetricsProps): JSX.Element {
+	const { t } = useTranslation(['services']);
 	const { servicename: encodedServiceName } = useParams<IServiceName>();
 	const servicename = decodeURIComponent(encodedServiceName);
 	const { featureFlags } = useAppContext();
@@ -60,7 +59,7 @@ function ApDexMetrics({
 				},
 				title: (
 					<Space>
-						<Typography>{GraphTitle.APDEX}</Typography>
+						<Typography>{t('services:graph_apdex')}</Typography>
 						<TextToolTip
 							text={apDexToolTipText}
 							url={apDexToolTipUrl}
@@ -80,6 +79,7 @@ function ApDexMetrics({
 			thresholdValue,
 			topLevelOperationsRoute,
 			dotMetricsEnabled,
+			t,
 		],
 	);
 

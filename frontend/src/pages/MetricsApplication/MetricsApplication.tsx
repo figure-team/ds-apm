@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { Tabs, TabsProps } from 'antd';
 import { QueryParams } from 'constants/query';
@@ -9,7 +10,7 @@ import { useSafeNavigate } from 'hooks/useSafeNavigate';
 import useUrlQuery from 'hooks/useUrlQuery';
 
 import ApDexApplication from './ApDex/ApDexApplication';
-import { MetricsApplicationTab, TAB_KEY_VS_LABEL } from './types';
+import { MetricsApplicationTab } from './types';
 import useMetricsApplicationTabKey from './useMetricsApplicationTabKey';
 
 import './MetricsApplication.styles.scss';
@@ -20,23 +21,24 @@ function MetricsApplication(): JSX.Element {
 	}>();
 
 	const activeKey = useMetricsApplicationTabKey();
+	const { t } = useTranslation(['services']);
 
 	const urlQuery = useUrlQuery();
 	const { safeNavigate } = useSafeNavigate();
 
 	const items: TabsProps['items'] = [
 		{
-			label: TAB_KEY_VS_LABEL[MetricsApplicationTab.OVER_METRICS],
+			label: t('services:tab_overview'),
 			key: MetricsApplicationTab.OVER_METRICS,
 			children: <Overview />,
 		},
 		{
-			label: TAB_KEY_VS_LABEL[MetricsApplicationTab.DB_CALL_METRICS],
+			label: t('services:tab_db_call_metrics'),
 			key: MetricsApplicationTab.DB_CALL_METRICS,
 			children: <DBCall />,
 		},
 		{
-			label: TAB_KEY_VS_LABEL[MetricsApplicationTab.EXTERNAL_METRICS],
+			label: t('services:tab_external_metrics'),
 			key: MetricsApplicationTab.EXTERNAL_METRICS,
 			children: <External />,
 		},

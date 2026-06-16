@@ -1,8 +1,17 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import { APPLICATION_SETTINGS } from '../constants';
 import { thresholdMockData } from './__mock__/thresholdMockData';
 import ApDexApplication from './ApDexApplication';
+
+jest.mock('react-i18next', () => ({
+	useTranslation: (): {
+		t: (str: string) => string;
+		i18n: { changeLanguage: () => Promise<void> };
+	} => ({
+		t: (str: string): string => str,
+		i18n: { changeLanguage: (): Promise<void> => Promise.resolve() },
+	}),
+}));
 
 jest.mock('react-router-dom', () => ({
 	...jest.requireActual('react-router-dom'),
@@ -34,32 +43,38 @@ describe('ApDexApplication', () => {
 	it('should render the component', () => {
 		render(<ApDexApplication />);
 
-		expect(screen.getByText('Settings')).toBeInTheDocument();
+		expect(screen.getByText('services:settings')).toBeInTheDocument();
 	});
 
 	it('should open the popover when the settings button is clicked', async () => {
 		render(<ApDexApplication />);
 
-		const button = screen.getByText('Settings');
+		const button = screen.getByText('services:settings');
 		fireEvent.click(button);
 		await waitFor(() => {
-			expect(screen.getByText(APPLICATION_SETTINGS)).toBeInTheDocument();
+			expect(
+				screen.getByText('services:application_settings'),
+			).toBeInTheDocument();
 		});
 	});
 
 	it('should close the popover when the close button is clicked', async () => {
 		render(<ApDexApplication />);
 
-		const button = screen.getByText('Settings');
+		const button = screen.getByText('services:settings');
 		fireEvent.click(button);
 		await waitFor(() => {
-			expect(screen.getByText(APPLICATION_SETTINGS)).toBeInTheDocument();
+			expect(
+				screen.getByText('services:application_settings'),
+			).toBeInTheDocument();
 		});
 
-		const closeButton = screen.getByText('Cancel');
+		const closeButton = screen.getByText('common:cancel');
 		fireEvent.click(closeButton);
 		await waitFor(() => {
-			expect(screen.queryByText(APPLICATION_SETTINGS)).not.toBeInTheDocument();
+			expect(
+				screen.queryByText('services:application_settings'),
+			).not.toBeInTheDocument();
 		});
 	});
 });

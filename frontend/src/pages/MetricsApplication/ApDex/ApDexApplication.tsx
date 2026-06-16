@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { SettingOutlined } from '@ant-design/icons';
 import { Popover } from 'antd';
@@ -10,6 +11,7 @@ import { Button } from '../styles';
 import ApDexSettings from './ApDexSettings';
 
 function ApDexApplication(): JSX.Element {
+	const { t } = useTranslation(['services']);
 	const { servicename: encodedServiceName } = useParams<IServiceName>();
 	const servicename = decodeURIComponent(encodedServiceName);
 
@@ -60,7 +62,7 @@ function ApDexApplication(): JSX.Element {
 		>
 			<div className="ap-dex-settings-popover-content">
 				<Button size="middle" icon={<SettingOutlined />}>
-					Settings
+					{t('services:settings')}
 				</Button>
 			</div>
 		</Popover>

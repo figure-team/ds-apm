@@ -1,11 +1,11 @@
 // This component is not been used in the application as we support only metrics for ApDex as of now.
 // This component is been kept for future reference.
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { ENTITY_VERSION_V4 } from 'constants/app';
 import { PANEL_TYPES } from 'constants/queryBuilder';
 import Graph from 'container/GridCardLayout/GridCard';
-import { GraphTitle } from 'container/MetricsApplication/constant';
 import { getWidgetQueryBuilder } from 'container/MetricsApplication/MetricsApplication.factory';
 import { apDexTracesQueryBuilderQueries } from 'container/MetricsApplication/MetricsPageQueries/OverviewQueries';
 import { EQueryType } from 'types/common/dashboard';
@@ -21,6 +21,7 @@ function ApDexTraces({
 	tagFilterItems,
 	thresholdValue,
 }: ApDexDataSwitcherProps): JSX.Element {
+	const { t } = useTranslation(['services']);
 	const { servicename: encodedServiceName } = useParams<IServiceName>();
 	const servicename = decodeURIComponent(encodedServiceName);
 
@@ -39,10 +40,10 @@ function ApDexTraces({
 					clickhouse_sql: [],
 					id: uuid(),
 				},
-				title: GraphTitle.APDEX,
+				title: t('services:graph_apdex'),
 				panelTypes: PANEL_TYPES.TIME_SERIES,
 			}),
-		[servicename, tagFilterItems, thresholdValue, topLevelOperationsRoute],
+		[servicename, tagFilterItems, thresholdValue, topLevelOperationsRoute, t],
 	);
 
 	const isQueryEnabled =

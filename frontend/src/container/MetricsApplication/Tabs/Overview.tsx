@@ -38,7 +38,7 @@ import { openInNewTab } from 'utils/navigation';
 import { secondsToMilliseconds } from 'utils/timeUtils';
 import { v4 as uuid } from 'uuid';
 
-import { GraphTitle, SERVICE_CHART_ID } from '../constant';
+import { SERVICE_CHART_ID } from '../constant';
 import { getWidgetQueryBuilder } from '../MetricsApplication.factory';
 import {
 	errorPercentage,
@@ -166,12 +166,12 @@ function Application(): JSX.Element {
 					clickhouse_sql: [],
 					id: uuid(),
 				},
-				title: GraphTitle.RATE_PER_OPS,
+				title: t('services:graph_rate_ops'),
 				panelTypes: PANEL_TYPES.TIME_SERIES,
 				yAxisUnit: 'ops',
 				id: SERVICE_CHART_ID.rps,
 			}),
-		[servicename, tagFilterItems, topLevelOperationsRoute, dotMetricsEnabled],
+		[servicename, tagFilterItems, topLevelOperationsRoute, dotMetricsEnabled, t],
 	);
 
 	const errorPercentageWidget = useMemo(
@@ -189,13 +189,13 @@ function Application(): JSX.Element {
 					clickhouse_sql: [],
 					id: uuid(),
 				},
-				title: GraphTitle.ERROR_PERCENTAGE,
+				title: t('services:graph_error_percentage'),
 				panelTypes: PANEL_TYPES.TIME_SERIES,
 				yAxisUnit: '%',
 				id: SERVICE_CHART_ID.errorPercentage,
 				fillSpans: true,
 			}),
-		[servicename, tagFilterItems, topLevelOperationsRoute, dotMetricsEnabled],
+		[servicename, tagFilterItems, topLevelOperationsRoute, dotMetricsEnabled, t],
 	);
 
 	const stepInterval = useMemo(
@@ -365,7 +365,7 @@ function Application(): JSX.Element {
 								safeNavigate,
 							})}
 						>
-							View Traces
+							{t('services:view_traces')}
 						</Button>
 						<ApDex
 							handleGraphClick={handleGraphClick}

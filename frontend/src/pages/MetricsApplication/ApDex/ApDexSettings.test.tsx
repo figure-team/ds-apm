@@ -3,6 +3,16 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { axiosResponseThresholdData } from './__mock__/axiosResponseMockThresholdData';
 import ApDexSettings from './ApDexSettings';
 
+jest.mock('react-i18next', () => ({
+	useTranslation: (): {
+		t: (str: string) => string;
+		i18n: { changeLanguage: () => Promise<void> };
+	} => ({
+		t: (str: string): string => str,
+		i18n: { changeLanguage: (): Promise<void> => Promise.resolve() },
+	}),
+}));
+
 jest.mock('hooks/apDex/useSetApDexSettings', () => ({
 	__esModule: true,
 	useSetApDexSettings: jest.fn().mockReturnValue({
@@ -24,7 +34,9 @@ describe('ApDexSettings', () => {
 			/>,
 		);
 
-		expect(screen.getByText('Application Settings')).toBeInTheDocument();
+		expect(
+			screen.getByText('services:application_settings'),
+		).toBeInTheDocument();
 	});
 
 	it('should render the spinner when the data is loading', () => {
@@ -56,7 +68,7 @@ describe('ApDexSettings', () => {
 			/>,
 		);
 
-		const button = screen.getByText('Cancel');
+		const button = screen.getByText('common:cancel');
 		fireEvent.click(button);
 		await waitFor(() => {
 			expect(mockHandlePopOverClose).toHaveBeenCalled();

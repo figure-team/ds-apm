@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CloseOutlined } from '@ant-design/icons';
 import { Card, InputNumber } from 'antd';
 import Spinner from 'components/Spinner';
@@ -12,7 +13,6 @@ import { themeColors } from 'constants/theme';
 import { useSetApDexSettings } from 'hooks/apDex/useSetApDexSettings';
 import { useNotifications } from 'hooks/useNotifications';
 
-import { APPLICATION_SETTINGS } from '../constants';
 import {
 	AppDexThresholdContainer,
 	Button,
@@ -30,6 +30,7 @@ function ApDexSettings({
 	data,
 	refetchGetApDexSetting,
 }: ApDexSettingsProps): JSX.Element {
+	const { t } = useTranslation(['services', 'common']);
 	const [thresholdValue, setThresholdValue] = useState(() => {
 		if (data) {
 			return data.data[0].threshold;
@@ -53,18 +54,18 @@ function ApDexSettings({
 	if (isLoading) {
 		return (
 			<Typography.Text style={{ color: themeColors.white }}>
-				<Spinner height="5vh" tip="Loading..." />
+				<Spinner height="5vh" tip={t('services:loading')} />
 			</Typography.Text>
 		);
 	}
 
 	return (
 		<Card
-			title={APPLICATION_SETTINGS}
+			title={t('services:application_settings')}
 			extra={<CloseOutlined width={10} height={10} onClick={handlePopOverClose} />}
 			actions={[
 				<SaveAndCancelContainer key="SaveAndCancelContainer">
-					<Button onClick={handlePopOverClose}>Cancel</Button>
+					<Button onClick={handlePopOverClose}>{t('common:cancel')}</Button>
 					<SaveButton
 						onClick={onSaveApDexSettings({
 							handlePopOverClose,
@@ -77,14 +78,14 @@ function ApDexSettings({
 						type="primary"
 						loading={isApDexLoading}
 					>
-						Save
+						{t('common:save')}
 					</SaveButton>
 				</SaveAndCancelContainer>,
 			]}
 		>
 			<AppDexThresholdContainer>
 				<Typography>
-					Apdex threshold (in seconds){' '}
+					{t('services:apdex_threshold_in_seconds')}{' '}
 					<TextToolTip
 						text={apDexToolTipText}
 						url={apDexToolTipUrl}

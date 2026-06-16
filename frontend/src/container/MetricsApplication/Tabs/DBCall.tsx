@@ -108,13 +108,13 @@ function DBCall(): JSX.Element {
 					clickhouse_sql: [],
 					id: uuid(),
 				},
-				title: GraphTitle.DATABASE_CALLS_RPS,
+				title: t('services:graph_database_calls_rps'),
 				panelTypes: PANEL_TYPES.TIME_SERIES,
 				yAxisUnit: 'reqps',
 				id: SERVICE_CHART_ID.dbCallsRPS,
 				fillSpans: false,
 			}),
-		[servicename, tagFilterItems, dotMetricsEnabled, legend],
+		[servicename, tagFilterItems, dotMetricsEnabled, legend, t],
 	);
 	const databaseCallsAverageDurationWidget = useMemo(
 		() =>
@@ -130,13 +130,13 @@ function DBCall(): JSX.Element {
 					clickhouse_sql: [],
 					id: uuid(),
 				},
-				title: GraphTitle.DATABASE_CALLS_AVG_DURATION,
+				title: t('services:graph_database_calls_avg_duration'),
 				panelTypes: PANEL_TYPES.TIME_SERIES,
 				yAxisUnit: 'ms',
 				id: GraphTitle.DATABASE_CALLS_AVG_DURATION,
 				fillSpans: true,
 			}),
-		[servicename, tagFilterItems, dotMetricsEnabled],
+		[servicename, tagFilterItems, dotMetricsEnabled, t],
 	);
 
 	const stepInterval = useMemo(

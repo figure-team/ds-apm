@@ -1,14 +1,12 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { Skeleton } from 'antd';
 import { ENTITY_VERSION_V4 } from 'constants/app';
 import { FeatureKeys } from 'constants/features';
 import { PANEL_TYPES } from 'constants/queryBuilder';
 import Graph from 'container/GridCardLayout/GridCard';
-import {
-	GraphTitle,
-	SERVICE_CHART_ID,
-} from 'container/MetricsApplication/constant';
+import { SERVICE_CHART_ID } from 'container/MetricsApplication/constant';
 import { getWidgetQueryBuilder } from 'container/MetricsApplication/MetricsApplication.factory';
 import { latency } from 'container/MetricsApplication/MetricsPageQueries/OverviewQueries';
 import { Card, GraphContainer } from 'container/MetricsApplication/styles';
@@ -38,6 +36,7 @@ function ServiceOverview({
 	topLevelOperationsIsLoading,
 	stepInterval,
 }: ServiceOverviewProps): JSX.Element {
+	const { t } = useTranslation(['services']);
 	const { servicename: encodedServiceName } = useParams<IServiceName>();
 	const servicename = decodeURIComponent(encodedServiceName);
 
@@ -76,7 +75,7 @@ function ServiceOverview({
 					clickhouse_sql: [],
 					id: uuid(),
 				},
-				title: GraphTitle.LATENCY,
+				title: t('services:graph_latency'),
 				panelTypes: PANEL_TYPES.TIME_SERIES,
 				yAxisUnit: 'ns',
 				id: SERVICE_CHART_ID.latency,
@@ -87,6 +86,7 @@ function ServiceOverview({
 			tagFilterItems,
 			topLevelOperationsRoute,
 			dotMetricsEnabled,
+			t,
 		],
 	);
 
