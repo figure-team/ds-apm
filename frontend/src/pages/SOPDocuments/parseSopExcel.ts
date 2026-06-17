@@ -76,6 +76,12 @@ export function parseSopRows(rows: Record<string, string>[]): ParseSopExcelResul
 		}
 
 		const bodyMarkdown = String(row.body_markdown ?? '').trim();
+		const customerUpdateTemplate = String(
+			row.customer_update_template ?? '',
+		).trim();
+		const vendorRequestTemplate = String(
+			row.vendor_request_template ?? '',
+		).trim();
 		const document: SopDocument = {
 			contractVersion: SOP_DOCUMENT_CONTRACT_VERSION,
 			sopId: String(row.sop_id).trim(),
@@ -88,6 +94,8 @@ export function parseSopRows(rows: Record<string, string>[]): ParseSopExcelResul
 					String(row.source_id ?? '').trim() || 'src-managed-markdown-default',
 			},
 			bodyMarkdown,
+			customerUpdateTemplate: customerUpdateTemplate || undefined,
+			vendorRequestTemplate: vendorRequestTemplate || undefined,
 			displayUrl: String(row.display_url ?? '').trim() || undefined,
 			ownerTeam: String(row.owner_team).trim(),
 			approvalStatus,
@@ -169,6 +177,8 @@ export function downloadSopExcelTemplate(): void {
 		'tags',
 		'service_account_profile',
 		'body_markdown',
+		'customer_update_template',
+		'vendor_request_template',
 	];
 	const example = [
 		'SOP-PAY-001',
@@ -183,6 +193,8 @@ export function downloadSopExcelTemplate(): void {
 		'payment-api,critical',
 		'managed-markdown-local',
 		'# Payment API 5xx response\n\n1. Check payment dashboard\n2. Inspect PG timeout logs',
+		'[안내] {증상} 발생. 영향: {범위}. 조치: {조치}. 문의: 고객센터',
+		'안녕하세요. {서비스}에서 {증상} 확인됩니다. {확인 요청 항목} 확인 부탁드립니다.',
 	];
 
 	const wb = XLSX.utils.book_new();
@@ -200,6 +212,8 @@ export function downloadSopExcelTemplate(): void {
 		{ wch: 25 }, // tags
 		{ wch: 25 }, // service_account_profile
 		{ wch: 60 }, // body_markdown
+		{ wch: 45 }, // customer_update_template
+		{ wch: 45 }, // vendor_request_template
 	];
 	XLSX.utils.book_append_sheet(wb, ws, 'SOP Template');
 	XLSX.writeFile(wb, 'sop-template.xlsx');
