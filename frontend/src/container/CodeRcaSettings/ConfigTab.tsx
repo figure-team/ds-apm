@@ -299,7 +299,6 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 						style={{ width: 180 }}
 						options={[
 							{ value: 'critical', label: 'critical' },
-							{ value: 'high', label: 'high' },
 							{ value: 'error', label: 'error' },
 							{ value: 'warning', label: 'warning' },
 							{ value: 'info', label: 'info' },

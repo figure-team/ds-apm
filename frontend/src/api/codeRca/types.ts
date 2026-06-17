@@ -2,7 +2,7 @@ export interface CodeRcaConfig {
 	contractVersion: string;
 	orgId: string;
 	enabled: boolean;
-	minSeverity: 'critical' | 'high' | 'error' | 'warning' | 'info';
+	minSeverity: 'critical' | 'error' | 'warning' | 'info';
 	cooldownWindowSecs: number;
 	maxRunsPerDay: number;
 	maxQueueDepth: number;

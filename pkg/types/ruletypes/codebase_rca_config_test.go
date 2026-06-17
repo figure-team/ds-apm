@@ -11,7 +11,7 @@ func TestDefaultCodebaseRCAConfig(t *testing.T) {
 	cfg := DefaultCodebaseRCAConfig("org-1")
 	assert.Equal(t, "org-1", cfg.OrgID)
 	assert.False(t, cfg.Enabled) // 기본 OFF, opt-in (설계 §6.1)
-	assert.Equal(t, "high", cfg.MinSeverity)
+	assert.Equal(t, "error", cfg.MinSeverity)
 	assert.Equal(t, 21600, cfg.CooldownWindowSecs) // 6h
 	assert.Equal(t, 20, cfg.MaxRunsPerDay)
 	assert.Equal(t, 50, cfg.MaxQueueDepth)
@@ -58,9 +58,11 @@ func TestValidateCodebaseRCAConfig(t *testing.T) {
 }
 
 func TestSeverityAtLeast(t *testing.T) {
-	assert.True(t, SeverityAtLeast("critical", "high"))
-	assert.True(t, SeverityAtLeast("HIGH", "high")) // 대소문자 무시
-	assert.False(t, SeverityAtLeast("warning", "high"))
-	assert.False(t, SeverityAtLeast("", "high"))       // 라벨 부재 → fail-closed
-	assert.False(t, SeverityAtLeast("unknown", "high")) // 미지 등급 → fail-closed
+	assert.True(t, SeverityAtLeast("critical", "error"))
+	assert.True(t, SeverityAtLeast("ERROR", "error"))    // 대소문자 무시
+	assert.False(t, SeverityAtLeast("warning", "error"))
+	assert.False(t, SeverityAtLeast("", "error"))        // 라벨 부재 → fail-closed
+	assert.False(t, SeverityAtLeast("unknown", "error")) // 미지 등급 → fail-closed
+	assert.False(t, SeverityAtLeast("high", "error"))    // high 폐기 → 미지 등급 fail-closed
+	assert.False(t, SeverityAtLeast("critical", "high")) // min "high"도 폐기 → fail-closed
 }

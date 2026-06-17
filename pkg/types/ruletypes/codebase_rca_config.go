@@ -9,10 +9,12 @@ import (
 const CodebaseRCAConfigContractVersion = "ds.codebase_rca_config.v1"
 
 // severityRank orders alert severities for the min-severity gate. Unknown or
-// missing severities rank 0 so the gate fails closed (design §10).
+// missing severities rank 0 so the gate fails closed (design §10). The
+// recognized set is critical|error|warning|info, matching the alert routing
+// severities (ruletypes.*ThresholdName); "high" was retired (it ranked equal
+// to "error") so all surfaces share one severity vocabulary.
 var severityRank = map[string]int{
 	"critical": 4,
-	"high":     3,
 	"error":    3,
 	"warning":  2,
 	"info":     1,
@@ -36,7 +38,7 @@ type CodebaseRCAConfig struct {
 	ContractVersion string `json:"contractVersion"`
 	OrgID           string `json:"orgId"`
 	Enabled         bool   `json:"enabled"`
-	// MinSeverity gates the trigger predicate (default "high" → high|critical).
+	// MinSeverity gates the trigger predicate (default "error" → error|critical).
 	MinSeverity        string `json:"minSeverity"`
 	CooldownWindowSecs int    `json:"cooldownWindowSecs"`
 	MaxRunsPerDay      int    `json:"maxRunsPerDay"`
@@ -55,7 +57,7 @@ func DefaultCodebaseRCAConfig(orgID string) CodebaseRCAConfig {
 		ContractVersion:    CodebaseRCAConfigContractVersion,
 		OrgID:              orgID,
 		Enabled:            false,
-		MinSeverity:        "high",
+		MinSeverity:        "error",
 		CooldownWindowSecs: 21600,
 		MaxRunsPerDay:      20,
 		MaxQueueDepth:      50,
@@ -73,7 +75,7 @@ func ValidateCodebaseRCAConfig(cfg CodebaseRCAConfig) error {
 		errs = append(errs, "orgId: must not be empty")
 	}
 	if _, ok := severityRank[strings.ToLower(strings.TrimSpace(cfg.MinSeverity))]; !ok {
-		errs = append(errs, fmt.Sprintf("minSeverity: %q is not one of critical|high|error|warning|info", cfg.MinSeverity))
+		errs = append(errs, fmt.Sprintf("minSeverity: %q is not one of critical|error|warning|info", cfg.MinSeverity))
 	}
 	if cfg.CooldownWindowSecs < 1 {
 		errs = append(errs, "cooldownWindowSecs: must be >= 1")
