@@ -13,6 +13,7 @@ package clirunner
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -43,7 +44,10 @@ type Spec struct {
 	SystemPrompt string
 	Prompt       string
 	MaxBudgetUSD string // claude hard $ ceiling, e.g. "0.50" — REQUIRED for claude
-	AuthToken    string // agent's model-API auth (claude OAuth / codex key|auth.json)
+	// MaxTurns caps the claude agentic-turn loop (the primary cost bound). The $
+	// ceiling stays as a safety net. <=0 omits the flag (no cap).
+	MaxTurns  int
+	AuthToken string // agent's model-API auth (claude OAuth / codex key|auth.json)
 	// ExtraEnv is appended verbatim to the child env. It must NOT carry secrets
 	// (model auth goes via AuthToken; git creds never reach the agent).
 	ExtraEnv []string
@@ -85,7 +89,7 @@ func BuildArgs(s Spec) ([]string, error) {
 		if strings.TrimSpace(s.MaxBudgetUSD) == "" {
 			return nil, ErrNoBudgetCap
 		}
-		return []string{
+		args := []string{
 			"-p", s.Prompt,
 			"--append-system-prompt", s.SystemPrompt,
 			"--model", s.Model,
@@ -94,7 +98,11 @@ func BuildArgs(s Spec) ([]string, error) {
 			"--allowed-tools", claudeAllowedTools,
 			"--disallowed-tools", claudeDisallowedTools,
 			"--max-budget-usd", s.MaxBudgetUSD,
-		}, nil
+		}
+		if s.MaxTurns > 0 {
+			args = append(args, "--max-turns", strconv.Itoa(s.MaxTurns))
+		}
+		return args, nil
 	case AgentCodex:
 		return []string{
 			"exec",

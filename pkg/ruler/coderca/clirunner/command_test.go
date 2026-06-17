@@ -57,6 +57,27 @@ func TestBuildArgsClaudeIsReadOnly(t *testing.T) {
 	if contains(args, "--dangerously-skip-permissions") {
 		t.Error("claude invocation must never skip permissions")
 	}
+	// MaxTurns unset (0) → no --max-turns flag.
+	if contains(args, "--max-turns") {
+		t.Errorf("claude args must omit --max-turns when MaxTurns<=0; got %v", args)
+	}
+}
+
+func TestBuildArgsClaudeMaxTurns(t *testing.T) {
+	args, err := BuildArgs(Spec{
+		Agent:        AgentClaude,
+		Model:        "claude-sonnet-4-6",
+		Checkout:     "/work/co/run1",
+		Prompt:       "find the root cause",
+		MaxBudgetUSD: "2.00",
+		MaxTurns:     40,
+	})
+	if err != nil {
+		t.Fatalf("BuildArgs: %v", err)
+	}
+	if !hasFlagValue(args, "--max-turns", "40") {
+		t.Errorf("claude args missing --max-turns 40; got %v", args)
+	}
 }
 
 func TestBuildArgsCodexIsReadOnly(t *testing.T) {

@@ -89,6 +89,7 @@ type Config struct {
 	Agent         clirunner.Agent // claude | codex
 	Model         string
 	MaxBudgetUSD  string // claude hard $ ceiling
+	MaxTurns      int    // claude agentic-turn cap (primary cost bound)
 	AuthToken     string // agent model-API auth (never a git credential)
 	MaxConcurrent int
 	LeaseTTL      time.Duration // >= run_timeout + grace (design §6.3)
@@ -246,6 +247,7 @@ func (e *Engine) runOne(ctx context.Context, claim runstore.ClaimResult) (coderc
 		SystemPrompt: system,
 		Prompt:       user,
 		MaxBudgetUSD: e.cfg.MaxBudgetUSD,
+		MaxTurns:     e.cfg.MaxTurns,
 		AuthToken:    authToken,
 	})
 	if status != coderca.RunStatusDone {

@@ -508,9 +508,19 @@ func New(
 	if codercaModel == "" && codercaAgent == "claude" {
 		codercaModel = "claude-sonnet-4-6"
 	}
+	// MaxTurns is the primary cost bound (deterministic): the agent's read-only
+	// explore loop stops after this many turns. MaxBudgetUSD stays as a safety net
+	// for the rare runaway. $0.50 alone was too tight — a turn-uncapped explore of
+	// a real repo nondeterministically blew it before reaching a conclusion.
 	codercaBudget := os.Getenv("DS_APM_CODERCA_MAX_BUDGET_USD")
 	if codercaBudget == "" {
-		codercaBudget = "0.50"
+		codercaBudget = "2.00"
+	}
+	codercaMaxTurns := 40
+	if v := os.Getenv("DS_APM_CODERCA_MAX_TURNS"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			codercaMaxTurns = n
+		}
 	}
 	codercaAuth := os.Getenv("DS_APM_CODERCA_AUTH_TOKEN")
 	if codercaAuth == "" {
@@ -530,6 +540,7 @@ func New(
 			Agent:        clirunner.Agent(codercaAgent),
 			Model:        codercaModel,
 			MaxBudgetUSD: codercaBudget,
+			MaxTurns:     codercaMaxTurns,
 			AuthToken:    codercaAuth,
 		},
 		codercaengine.Deps{
