@@ -9,12 +9,17 @@ import (
 const CodebaseRCAConfigContractVersion = "ds.codebase_rca_config.v1"
 
 // severityRank orders alert severities for the min-severity gate. Unknown or
-// missing severities rank 0 so the gate fails closed (design §10). The
-// recognized set is critical|error|warning|info, matching the alert routing
-// severities (ruletypes.*ThresholdName); "high" was retired (it ranked equal
-// to "error") so all surfaces share one severity vocabulary.
+// missing severities rank 0 so the gate fails closed (design §10). The canonical
+// set is critical|error|warning|info, matching the alert routing severities
+// (ruletypes.*ThresholdName). "high" is kept as a backward-compat alias (rank 3,
+// equal to "error"): an alert's severity label is derived from its threshold
+// NAME (threshold.go PrepareSampleLabelsForRule), and pre-existing rules/labels
+// named "high" cannot be migrated — dropping it here would make the gate
+// fail-closed for those live alerts. New configs/UI only offer the 4 canonical
+// names.
 var severityRank = map[string]int{
 	"critical": 4,
+	"high":     3,
 	"error":    3,
 	"warning":  2,
 	"info":     1,

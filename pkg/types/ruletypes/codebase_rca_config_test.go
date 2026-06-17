@@ -63,6 +63,6 @@ func TestSeverityAtLeast(t *testing.T) {
 	assert.False(t, SeverityAtLeast("warning", "error"))
 	assert.False(t, SeverityAtLeast("", "error"))        // 라벨 부재 → fail-closed
 	assert.False(t, SeverityAtLeast("unknown", "error")) // 미지 등급 → fail-closed
-	assert.False(t, SeverityAtLeast("high", "error"))    // high 폐기 → 미지 등급 fail-closed
-	assert.False(t, SeverityAtLeast("critical", "high")) // min "high"도 폐기 → fail-closed
+	assert.True(t, SeverityAtLeast("high", "error"))     // high=error 별칭(레거시 알람 라벨 호환)
+	assert.True(t, SeverityAtLeast("critical", "high"))  // min "high"=error 별칭
 }
