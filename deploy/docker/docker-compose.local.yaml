@@ -115,6 +115,11 @@ services:
       - SIGNOZ_SQLSTORE_SQLITE_PATH=/var/lib/signoz/signoz.db
       - SIGNOZ_TOKENIZER_JWT_SECRET=secret
       - DS_APM_AI_CONFIG_ENCRYPTION_KEY=${DS_APM_AI_CONFIG_ENCRYPTION_KEY}
+      # Enables the alert dead-letter queue: terminal notify failures are
+      # persisted here and surfaced/replayable via the "전송 실패 내역" tab.
+      # Lives on the sqlite volume so it survives restarts (.dlq-meta/ sidecar
+      # files are created alongside).
+      - SIGNOZ_DLQ_PATH=/var/lib/signoz/alert-dlq.jsonl
     healthcheck:
       test:
         - CMD
