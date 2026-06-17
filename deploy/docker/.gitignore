@@ -1,0 +1,2 @@
+# Host-built backend binary used by docker-compose.dev.yaml (dev-backend.ps1)
+.bin/

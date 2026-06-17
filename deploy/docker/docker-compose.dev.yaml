@@ -1,0 +1,18 @@
+# Dev overlay: skip the in-Docker Go/yarn build entirely.
+#
+# Use with the local stack:
+#   docker compose -f docker-compose.local.yaml -f docker-compose.dev.yaml up -d
+#
+# The `signoz` container reuses the already-built `signoz-ds-apm:local` image
+# (alpine + node + claude CLI + a previously-baked frontend bundle) but runs a
+# host-cross-compiled Linux binary mounted over /root/signoz. The frontend is
+# served by the vite dev server on :3301 (proxies to :8080), so the stale
+# bundle inside the image is irrelevant during development.
+#
+# Rebuild loop: edit Go -> run ./dev-backend.ps1 -> done. No yarn build, no
+# Docker layer build; the Go compile runs on the Windows host instead of inside
+# the 4-core / 8GB WSL VM.
+services:
+  signoz:
+    volumes:
+      - ./.bin/signoz:/root/signoz:ro
