@@ -9,6 +9,7 @@ import { v4 } from 'uuid';
 
 import { useCreateAlertState } from '../context';
 import {
+	INITIAL_ERROR_THRESHOLD,
 	INITIAL_EVALUATION_WINDOW_STATE,
 	INITIAL_INFO_THRESHOLD,
 	INITIAL_RANDOM_THRESHOLD,
@@ -78,6 +79,8 @@ function AlertThreshold({
 			newThreshold = { ...INITIAL_WARNING_THRESHOLD, id: v4() };
 		} else if (thresholdState.thresholds.length === 2) {
 			newThreshold = { ...INITIAL_INFO_THRESHOLD, id: v4() };
+		} else if (thresholdState.thresholds.length === 3) {
+			newThreshold = { ...INITIAL_ERROR_THRESHOLD, id: v4() };
 		} else {
 			newThreshold = {
 				...INITIAL_RANDOM_THRESHOLD,

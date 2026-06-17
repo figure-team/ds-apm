@@ -9,7 +9,6 @@ const ALL_FILLED_LABELS = {
 	owner_team: 'sm-payments',
 	project_id: 'customer-a',
 	'service.name': 'payment-api',
-	severity: 'critical',
 };
 
 describe('operationalMetadata', () => {
@@ -26,7 +25,6 @@ describe('operationalMetadata', () => {
 				owner_team: 'sm-payments',
 				project_id: 'customer-a',
 				'service.name': 'payment-api',
-				severity: 'critical',
 			}).map(({ key }) => key),
 		).toStrictEqual(['environment']);
 	});
@@ -39,16 +37,16 @@ describe('operationalMetadata', () => {
 	describe('missing → filled status transitions', () => {
 		it('transitions a single label from missing to filled', () => {
 			const before = {};
-			const after = { severity: 'critical' };
+			const after = { owner_team: 'sm-payments' };
 
-			expect(hasOperationalLabel(before, 'severity')).toBe(false);
-			expect(hasOperationalLabel(after, 'severity')).toBe(true);
+			expect(hasOperationalLabel(before, 'owner_team')).toBe(false);
+			expect(hasOperationalLabel(after, 'owner_team')).toBe(true);
 
 			const missingBefore = getMissingOperationalLabels(before).map(({ key }) => key);
 			const missingAfter = getMissingOperationalLabels(after).map(({ key }) => key);
 
-			expect(missingBefore).toContain('severity');
-			expect(missingAfter).not.toContain('severity');
+			expect(missingBefore).toContain('owner_team');
+			expect(missingAfter).not.toContain('owner_team');
 		});
 
 		it('reduces missing count as labels are filled one by one', () => {
@@ -69,18 +67,17 @@ describe('operationalMetadata', () => {
 			expect(hasOperationalLabel({ environment: '   ' }, 'environment')).toBe(false);
 		});
 
-		it('reaches zero missing labels once all 5 are filled', () => {
+		it('reaches zero missing labels once all 4 are filled', () => {
 			const partialLabels = {
 				project_id: 'customer-a',
 				environment: 'prod',
 				'service.name': 'payment-api',
 			};
-			expect(getMissingOperationalLabels(partialLabels)).toHaveLength(2);
+			expect(getMissingOperationalLabels(partialLabels)).toHaveLength(1);
 
 			const completeLabels = {
 				...partialLabels,
 				owner_team: 'sm-payments',
-				severity: 'critical',
 			};
 			expect(getMissingOperationalLabels(completeLabels)).toHaveLength(0);
 		});

@@ -56,6 +56,16 @@ export const INITIAL_INFO_THRESHOLD: Threshold = {
 	color: Color.BG_ROBIN_500,
 };
 
+export const INITIAL_ERROR_THRESHOLD: Threshold = {
+	id: v4(),
+	label: 'error',
+	thresholdValue: 0,
+	recoveryThresholdValue: null,
+	unit: '',
+	channels: [],
+	color: Color.BG_CHERRY_500,
+};
+
 export const INITIAL_RANDOM_THRESHOLD: Threshold = {
 	id: v4(),
 	label: '',

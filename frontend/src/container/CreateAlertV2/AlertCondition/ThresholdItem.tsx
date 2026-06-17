@@ -26,6 +26,19 @@ function ThresholdItem({
 	const { thresholdState, notificationSettings } = useCreateAlertState();
 	const [showRecoveryThreshold, setShowRecoveryThreshold] = useState(false);
 
+	// Severity is the single source of truth: the threshold name becomes the
+	// `threshold.name` label (routing key) and the auto-derived `severity` label
+	// at fire time. Constrain it to the shared 4-value vocabulary, but keep any
+	// legacy/custom name so editing an existing rule never silently drops it.
+	const severityOptions = useMemo(() => {
+		const base = ['critical', 'error', 'warning', 'info'];
+		const values =
+			!threshold.label || base.includes(threshold.label)
+				? base
+				: [...base, threshold.label];
+		return values.map((value) => ({ value, label: value }));
+	}, [threshold.label]);
+
 	const yAxisUnitSelect = useMemo(() => {
 		let component = (
 			<Select
@@ -91,14 +104,15 @@ function ThresholdItem({
 					/>
 				</div>
 				<div className="threshold-controls">
-					<Input
+					<Select
 						placeholder={t('v2_threshold_name_placeholder')}
-						value={threshold.label}
-						onChange={(e): void =>
-							updateThreshold(threshold.id, 'label', e.target.value)
+						value={threshold.label || undefined}
+						onChange={(value): void =>
+							updateThreshold(threshold.id, 'label', value)
 						}
 						style={{ width: 200 }}
-						data-testid="threshold-name-input"
+						options={severityOptions}
+						data-testid="threshold-name-select"
 					/>
 					<Typography.Text className="sentence-text">{t('v2_on_value_text')}</Typography.Text>
 					<Typography.Text className="sentence-text highlighted-text">

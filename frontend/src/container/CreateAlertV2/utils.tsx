@@ -46,6 +46,9 @@ export function getColorForThreshold(thresholdLabel: string): string {
 	if (thresholdLabel === 'critical') {
 		return Color.BG_SAKURA_500;
 	}
+	if (thresholdLabel === 'error') {
+		return Color.BG_CHERRY_500;
+	}
 	if (thresholdLabel === 'warning') {
 		return Color.BG_AMBER_500;
 	}

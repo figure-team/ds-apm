@@ -27,11 +27,9 @@ export const RECOMMENDED_OPERATIONAL_LABELS: RequiredOperationalLabel[] = [
 		label: 'Owner Team',
 		description: '알림 발송 payload에 Owner team 필드로 포함됩니다.',
 	},
-	{
-		key: 'severity',
-		label: 'Severity',
-		description: '라우팅 정책 자동 생성 시 임계값 expression 값으로 사용됩니다.',
-	},
+	// severity는 더 이상 수동 라벨이 아니다: 임계값(threshold) 이름이 곧 severity이며
+	// 발화 시 severity 라벨로 자동 파생되고 라우팅 정책 매칭(threshold.name)에 쓰인다.
+	// 정적 라벨로 추천하면 자동 파생값을 덮어써 라우팅/표시 등급이 어긋나므로 제외한다.
 ];
 
 export function getMissingOperationalLabels(

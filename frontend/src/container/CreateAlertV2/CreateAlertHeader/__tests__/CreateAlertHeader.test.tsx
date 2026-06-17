@@ -133,7 +133,7 @@ describe('CreateAlertHeader', () => {
 		renderCreateAlertHeader();
 
 		expect(screen.getByText('SI/SM routing metadata')).toBeInTheDocument();
-		expect(screen.getByText('Missing 5 recommended labels')).toBeInTheDocument();
+		expect(screen.getByText('Missing 4 recommended labels')).toBeInTheDocument();
 		expect(screen.getByText('service.name')).toBeInTheDocument();
 		expect(screen.getByText('owner_team')).toBeInTheDocument();
 	});
@@ -150,7 +150,6 @@ describe('CreateAlertHeader', () => {
 						owner_team: 'sm-payments',
 						project_id: 'customer-a',
 						'service.name': 'payment-api',
-						severity: 'critical',
 					},
 				})}
 			>
@@ -161,7 +160,7 @@ describe('CreateAlertHeader', () => {
 		expect(
 			screen.getByText('All recommended SI/SM labels are present'),
 		).toBeInTheDocument();
-		expect(screen.getAllByText('Set')).toHaveLength(5);
+		expect(screen.getAllByText('Set')).toHaveLength(4);
 	});
 
 	it('renders SOP binding metadata and updates label plus annotations', () => {
