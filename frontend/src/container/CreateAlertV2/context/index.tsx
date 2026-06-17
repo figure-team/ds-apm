@@ -19,8 +19,11 @@ import { QueryParams } from 'constants/query';
 import { AlertDetectionTypes } from 'container/FormAlertRules';
 import { useQueryBuilder } from 'hooks/queryBuilder/useQueryBuilder';
 import { mapQueryDataFromApi } from 'lib/newQueryBuilder/queryBuilderMappers/mapQueryDataFromApi';
+import { isEqual } from 'lodash-es';
 import { AlertTypes } from 'types/api/alerts/alertTypes';
+import { EQueryType } from 'types/common/dashboard';
 
+import { extractManagedLabels, mergeManagedLabels } from '../syncedLabels';
 import { INITIAL_CREATE_ALERT_STATE } from './constants';
 import {
 	AdvancedOptionsAction,
@@ -121,6 +124,25 @@ export function CreateAlertProvider(
 		},
 		[setCreateAlertState],
 	);
+
+	// Auto-sync managed resource-attribute filters (service.name, ...) from the
+	// metric query into the alert labels: query -> labels direction.
+	const firstQueryFilterExpression =
+		currentQuery.builder.queryData?.[0]?.filter?.expression || '';
+	useEffect(() => {
+		if (currentQuery.queryType !== EQueryType.QUERY_BUILDER) {
+			return;
+		}
+		const managedFromQuery = extractManagedLabels(firstQueryFilterExpression);
+		const nextLabels = mergeManagedLabels(
+			createAlertState.basic.labels,
+			managedFromQuery,
+		);
+		if (!isEqual(createAlertState.basic.labels, nextLabels)) {
+			setAlertState({ type: 'SET_ALERT_LABELS', payload: nextLabels });
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [currentQuery.queryType, firstQueryFilterExpression]);
 
 	const location = useLocation();
 	const queryParams = new URLSearchParams(location.search);

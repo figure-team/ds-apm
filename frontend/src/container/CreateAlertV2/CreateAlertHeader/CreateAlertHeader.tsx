@@ -18,6 +18,7 @@ import { RotateCcw } from 'lucide-react';
 import type { Labels } from 'types/api/alerts/def';
 
 import { useCreateAlertState } from '../context';
+import { syncLabelsToExpression } from '../syncedLabels';
 import {
 	EVIDENCE_METADATA_FIELDS,
 	validateEvidenceMetadata,
@@ -56,8 +57,28 @@ function CreateAlertHeader(): JSX.Element {
 			.catch(() => {});
 	}, []);
 
-	const { currentQuery } = useQueryBuilder();
+	const { currentQuery, handleSetQueryData } = useQueryBuilder();
 	const { safeNavigate } = useSafeNavigate();
+
+	// labels -> query direction: mirror managed resource-attribute labels
+	// (service.name, ...) back into the first builder query's filter expression.
+	const handleLabelsChange = useCallback(
+		(labels: Labels): void => {
+			const firstQuery = currentQuery.builder.queryData?.[0];
+			if (firstQuery) {
+				const expression = firstQuery.filter?.expression || '';
+				const nextExpression = syncLabelsToExpression(expression, labels);
+				if (nextExpression !== expression) {
+					handleSetQueryData(0, {
+						...firstQuery,
+						filter: { ...firstQuery.filter, expression: nextExpression },
+					});
+				}
+			}
+			setAlertState({ type: 'SET_ALERT_LABELS', payload: labels });
+		},
+		[currentQuery.builder.queryData, handleSetQueryData, setAlertState],
+	);
 	const urlQuery = useUrlQuery();
 
 	const groupByLabels = useMemo(() => {
@@ -304,9 +325,7 @@ function CreateAlertHeader(): JSX.Element {
 				</div>
 				<LabelsInput
 					labels={alertState.labels}
-					onLabelsChange={(labels: Labels): void =>
-						setAlertState({ type: 'SET_ALERT_LABELS', payload: labels })
-					}
+					onLabelsChange={handleLabelsChange}
 					validateLabelsKey={validateLabelsKey}
 				/>
 				<div className="sop-metadata" aria-label="SOP binding metadata">
