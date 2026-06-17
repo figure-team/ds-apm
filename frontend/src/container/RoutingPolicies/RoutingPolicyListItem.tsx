@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import { Button, Collapse, Flex, Tag, Typography } from 'antd';
 import { DATE_TIME_FORMATS } from 'constants/dateTimeFormats';
@@ -70,16 +71,17 @@ function PolicyListItemHeader({
 function PolicyListItemContent({
 	routingPolicy,
 }: PolicyListItemContentProps): JSX.Element {
+	const { t } = useTranslation('alerts');
 	const { formatTimezoneAdjustedTimestamp } = useTimezone();
 
 	return (
 		<div className="policy-list-item-content">
 			<div className="policy-list-item-content-row">
-				<Typography>Created by</Typography>
+				<Typography>{t('rp_created_by')}</Typography>
 				<Typography>{routingPolicy.createdBy}</Typography>
 			</div>
 			<div className="policy-list-item-content-row">
-				<Typography>Created on</Typography>
+				<Typography>{t('rp_created_on')}</Typography>
 				<Typography>
 					{routingPolicy.createdAt
 						? formatTimezoneAdjustedTimestamp(
@@ -90,11 +92,11 @@ function PolicyListItemContent({
 				</Typography>
 			</div>
 			<div className="policy-list-item-content-row">
-				<Typography>Updated by</Typography>
+				<Typography>{t('rp_updated_by')}</Typography>
 				<Typography>{routingPolicy.updatedBy || '-'}</Typography>
 			</div>
 			<div className="policy-list-item-content-row">
-				<Typography>Updated on</Typography>
+				<Typography>{t('rp_updated_on')}</Typography>
 				<Typography>
 					{routingPolicy.updatedAt
 						? formatTimezoneAdjustedTimestamp(
@@ -105,19 +107,19 @@ function PolicyListItemContent({
 				</Typography>
 			</div>
 			<div className="policy-list-item-content-row">
-				<Typography>Expression</Typography>
+				<Typography>{t('rp_expression')}</Typography>
 				<Typography.Text ellipsis={{ tooltip: routingPolicy.expression || '-' }}>
 					{routingPolicy.expression || '-'}
 				</Typography.Text>
 			</div>
 			<div className="policy-list-item-content-row">
-				<Typography>Description</Typography>
+				<Typography>{t('rp_description')}</Typography>
 				<Typography.Text ellipsis={{ tooltip: routingPolicy.description || '-' }}>
 					{routingPolicy.description || '-'}
 				</Typography.Text>
 			</div>
 			<div className="policy-list-item-content-row">
-				<Typography>Channels</Typography>
+				<Typography>{t('rp_channels')}</Typography>
 				<div>
 					{routingPolicy.channels.map((channel) => (
 						<Tag key={channel}>{channel}</Tag>

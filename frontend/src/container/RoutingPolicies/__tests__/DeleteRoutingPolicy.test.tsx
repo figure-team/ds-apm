@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
+import { render } from 'tests/test-utils';
 
 import DeleteRoutingPolicy from '../DeleteRoutingPolicy';
 import { MOCK_ROUTING_POLICY_1 } from './testUtils';
@@ -7,8 +8,9 @@ const mockRoutingPolicy = MOCK_ROUTING_POLICY_1;
 const mockHandleDelete = jest.fn();
 const mockHandleClose = jest.fn();
 
-const DELETE_BUTTON_TEXT = 'Delete Routing Policy';
-const CANCEL_BUTTON_TEXT = 'Cancel';
+const DELETE_DIALOG_TITLE = 'rp_delete_title';
+const DELETE_BUTTON_TEXT = 'rp_delete_confirm';
+const CANCEL_BUTTON_TEXT = 'rp_delete_cancel';
 
 describe('DeleteRoutingPolicy', () => {
 	it('renders base layout with routing policy', () => {
@@ -21,17 +23,9 @@ describe('DeleteRoutingPolicy', () => {
 			/>,
 		);
 		expect(
-			screen.getByRole('dialog', { name: DELETE_BUTTON_TEXT }),
+			screen.getByRole('dialog', { name: DELETE_DIALOG_TITLE }),
 		).toBeInTheDocument();
-		expect(
-			screen.getByText(/Are you sure you want to delete/i),
-		).toBeInTheDocument();
-		expect(screen.getByText(mockRoutingPolicy.name)).toBeInTheDocument();
-		expect(
-			screen.getByText(
-				/Deleting a routing policy is irreversible and cannot be undone\./i,
-			),
-		).toBeInTheDocument();
+		expect(screen.getByText('alerts:rp_delete_text')).toBeInTheDocument();
 		expect(
 			screen.getByRole('button', { name: CANCEL_BUTTON_TEXT }),
 		).toBeInTheDocument();

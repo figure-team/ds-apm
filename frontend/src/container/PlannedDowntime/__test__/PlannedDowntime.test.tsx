@@ -15,7 +15,7 @@ import { USER_ROLES } from 'types/roles';
 import { PlannedDowntime } from '../PlannedDowntime';
 import { buildSchedule, createMockDowntime } from './testUtils';
 
-const SEARCH_PLACEHOLDER = 'Search for a planned downtime...';
+const SEARCH_PLACEHOLDER = 'pd_search_placeholder';
 
 const MOCK_DOWNTIME_1_NAME = 'Mock Downtime 1';
 const MOCK_DOWNTIME_2_NAME = 'Mock Downtime 2';
@@ -134,19 +134,17 @@ describe('PlannedDowntime Component', () => {
 		render(<PlannedDowntime />, {}, { role: 'ADMIN' });
 
 		// Check if title is rendered
-		expect(screen.getByText('Planned Downtime')).toBeInTheDocument();
+		expect(screen.getByText('planned_downtime')).toBeInTheDocument();
 
 		// Check if subtitle is rendered
-		expect(
-			screen.getByText('Create and manage planned downtimes.'),
-		).toBeInTheDocument();
+		expect(screen.getByText('pd_subtitle')).toBeInTheDocument();
 
 		// Check if search input is rendered
 		expect(screen.getByPlaceholderText(SEARCH_PLACEHOLDER)).toBeInTheDocument();
 
 		// Check if "New downtime" button is enabled for ADMIN
 		const newDowntimeButton = screen.getByRole('button', {
-			name: /new downtime/i,
+			name: /pd_new_btn/i,
 		});
 		expect(newDowntimeButton).toBeInTheDocument();
 		expect(newDowntimeButton).not.toBeDisabled();
@@ -157,7 +155,7 @@ describe('PlannedDowntime Component', () => {
 
 		// Check if "New downtime" button is disabled for VIEWER
 		const newDowntimeButton = screen.getByRole('button', {
-			name: /new downtime/i,
+			name: /pd_new_btn/i,
 		});
 		expect(newDowntimeButton).toBeInTheDocument();
 		expect(newDowntimeButton).toBeDisabled();

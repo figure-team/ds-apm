@@ -1,4 +1,5 @@
 import { SetStateAction } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Modal, Typography } from 'antd';
 import { Trash2, X } from 'lucide-react';
 
@@ -22,13 +23,14 @@ export function PlannedDowntimeDeleteModal(
 		onDeleteHandler,
 		downtimeSchedule,
 	} = props;
+	const { t } = useTranslation('alerts');
 	const hideDeleteScheduleModal = (): void => {
 		setIsDeleteModalOpen(false);
 	};
 	return (
 		<Modal
 			className="delete-schedule-modal"
-			title={<span className="title">Delete Schedule</span>}
+			title={<span className="title">{t('pd_delete_title')}</span>}
 			open={isDeleteModalOpen}
 			closable={false}
 			onCancel={hideDeleteScheduleModal}
@@ -39,7 +41,7 @@ export function PlannedDowntimeDeleteModal(
 					className="cancel-btn"
 					icon={<X size={16} />}
 				>
-					Cancel
+					{t('pd_delete_cancel')}
 				</Button>,
 				<Button
 					key="submit"
@@ -48,12 +50,12 @@ export function PlannedDowntimeDeleteModal(
 					className="delete-btn"
 					disabled={isDeleteLoading}
 				>
-					Delete Schedule
+					{t('pd_delete_confirm_btn')}
 				</Button>,
 			]}
 		>
 			<Typography.Text className="delete-text">
-				{`Are you sure you want to delete - ${downtimeSchedule} schedule? Deleting a schedule is irreversible and cannot be undone.`}
+				{t('pd_delete_text', { name: downtimeSchedule })}
 			</Typography.Text>
 		</Modal>
 	);

@@ -99,10 +99,10 @@ describe('RoutingPoliciesList', () => {
 			/>,
 		);
 		expect(
-			screen.getByText('Something went wrong while fetching routing policies.'),
+			screen.getByText('rp_fetch_error'),
 		).toBeInTheDocument();
 
-		const retryButton = screen.getByRole('button', { name: 'Retry' });
+		const retryButton = screen.getByRole('button', { name: 'rp_retry' });
 		expect(retryButton).toBeInTheDocument();
 		fireEvent.click(retryButton);
 		expect(mockRefetchRoutingPolicies).toHaveBeenCalled();
@@ -121,6 +121,6 @@ describe('RoutingPoliciesList', () => {
 				isRoutingPoliciesFetching={false}
 			/>,
 		);
-		expect(screen.getByText('No routing policies yet,')).toBeInTheDocument();
+		expect(screen.getByText('rp_empty_prefix')).toBeInTheDocument();
 	});
 });

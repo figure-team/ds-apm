@@ -20,8 +20,8 @@ const mockRefreshChannels = jest.fn();
 const NEW_NAME = 'New Name';
 const NEW_EXPRESSION = 'New Expression';
 const NEW_DESCRIPTION = 'New Description';
-const SAVE_BUTTON_TEXT = 'Save Routing Policy';
-const NO_CHANNELS_FOUND_TEXT = 'No channels yet.';
+const SAVE_BUTTON_TEXT = 'rp_save';
+const NO_CHANNELS_FOUND_TEXT = 'rp_no_channels';
 
 describe('RoutingPolicyDetails', () => {
 	it('renders base create layout with header, 3 inputs and footer', () => {
@@ -40,11 +40,11 @@ describe('RoutingPolicyDetails', () => {
 		);
 
 		expect(screen.getByRole('dialog')).toBeInTheDocument();
-		expect(screen.getByText('Create routing policy')).toBeInTheDocument();
-		expect(screen.getByText('Routing Policy Name')).toBeInTheDocument();
-		expect(screen.getByText('Expression')).toBeInTheDocument();
-		expect(screen.getByText('Notification Channels')).toBeInTheDocument();
-		expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+		expect(screen.getByText('rp_modal_create')).toBeInTheDocument();
+		expect(screen.getByText('rp_field_name')).toBeInTheDocument();
+		expect(screen.getByText('rp_field_expression')).toBeInTheDocument();
+		expect(screen.getByText('rp_field_channels')).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'rp_cancel' })).toBeInTheDocument();
 		expect(
 			screen.getByRole('button', { name: SAVE_BUTTON_TEXT }),
 		).toBeInTheDocument();
@@ -66,12 +66,12 @@ describe('RoutingPolicyDetails', () => {
 		);
 
 		expect(screen.getByRole('dialog')).toBeInTheDocument();
-		expect(screen.getByText('Edit routing policy')).toBeInTheDocument();
-		expect(screen.getByText('Routing Policy Name')).toBeInTheDocument();
-		expect(screen.getByText('Expression')).toBeInTheDocument();
-		expect(screen.getByText('Notification Channels')).toBeInTheDocument();
+		expect(screen.getByText('rp_modal_edit')).toBeInTheDocument();
+		expect(screen.getByText('rp_field_name')).toBeInTheDocument();
+		expect(screen.getByText('rp_field_expression')).toBeInTheDocument();
+		expect(screen.getByText('rp_field_channels')).toBeInTheDocument();
 
-		expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'rp_cancel' })).toBeInTheDocument();
 		expect(
 			screen.getByRole('button', { name: SAVE_BUTTON_TEXT }),
 		).toBeInTheDocument();
@@ -118,7 +118,7 @@ describe('RoutingPolicyDetails', () => {
 			/>,
 		);
 
-		const nameInput = screen.getByPlaceholderText('e.g. Base routing policy...');
+		const nameInput = screen.getByPlaceholderText('rp_name_placeholder');
 		expect(nameInput).toBeInTheDocument();
 
 		const expressionTextarea = screen.getByPlaceholderText(
@@ -127,7 +127,7 @@ describe('RoutingPolicyDetails', () => {
 		expect(expressionTextarea).toBeInTheDocument();
 
 		const descriptionTextarea = screen.getByPlaceholderText(
-			'e.g. This is a routing policy that...',
+			'rp_description_placeholder',
 		);
 		expect(descriptionTextarea).toBeInTheDocument();
 
@@ -146,7 +146,7 @@ describe('RoutingPolicyDetails', () => {
 		});
 
 		const saveButton = screen.getByRole('button', {
-			name: 'Save Routing Policy',
+			name: 'rp_save',
 		});
 		fireEvent.click(saveButton);
 
@@ -233,7 +233,7 @@ describe('RoutingPolicyDetails', () => {
 			/>,
 		);
 
-		const cancelButton = screen.getByRole('button', { name: 'Cancel' });
+		const cancelButton = screen.getByRole('button', { name: 'rp_cancel' });
 		fireEvent.click(cancelButton);
 		expect(mockCloseModal).toHaveBeenCalled();
 	});
@@ -253,7 +253,7 @@ describe('RoutingPolicyDetails', () => {
 			/>,
 		);
 
-		const cancelButton = screen.getByRole('button', { name: 'Cancel' });
+		const cancelButton = screen.getByRole('button', { name: 'rp_cancel' });
 		expect(cancelButton).toBeDisabled();
 
 		const saveButton = screen.getByRole('button', {
@@ -369,7 +369,7 @@ describe('RoutingPolicyDetails', () => {
 		fireEvent.mouseDown(channelSelect);
 
 		expect(screen.getByText(NO_CHANNELS_FOUND_TEXT)).toBeInTheDocument();
-		expect(screen.getByText('Create one')).toBeInTheDocument();
+		expect(screen.getByText('rp_create_one')).toBeInTheDocument();
 	});
 
 	it('should show admin message for non-admin users in empty state', () => {
@@ -396,9 +396,9 @@ describe('RoutingPolicyDetails', () => {
 
 		expect(screen.getByText(NO_CHANNELS_FOUND_TEXT)).toBeInTheDocument();
 		expect(
-			screen.getByText('Please ask your admin to create one.'),
+			screen.getByText('rp_ask_admin'),
 		).toBeInTheDocument();
-		expect(screen.queryByText('Create one')).not.toBeInTheDocument();
+		expect(screen.queryByText('rp_create_one')).not.toBeInTheDocument();
 	});
 
 	it('should call refreshChannels when refresh button is clicked in empty state', () => {
@@ -419,7 +419,7 @@ describe('RoutingPolicyDetails', () => {
 		const channelSelect = screen.getByRole('combobox');
 		fireEvent.mouseDown(channelSelect);
 
-		const refreshButton = screen.getByText('Refresh');
+		const refreshButton = screen.getByText('rp_refresh');
 		expect(refreshButton).toBeInTheDocument();
 
 		fireEvent.click(refreshButton);

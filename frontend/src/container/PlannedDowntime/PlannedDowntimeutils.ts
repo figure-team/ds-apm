@@ -12,17 +12,43 @@ import type { ErrorType } from 'api/generatedAPIInstance';
 import { AxiosError } from 'axios';
 import { DATE_TIME_FORMATS } from 'constants/dateTimeFormats';
 import dayjs from 'dayjs';
+import { TFunction } from 'i18next';
 import { isEmpty, isEqual } from 'lodash-es';
 import APIError from 'types/api/error';
 
 type DateTimeString = string | null | undefined;
 
+export const translateRecurrenceType = (
+	t: TFunction,
+	value?: string | null,
+): string => {
+	switch (value) {
+		case recurrenceOptions.daily.value:
+			return t('pd_recur_daily');
+		case recurrenceOptions.weekly.value:
+			return t('pd_recur_weekly');
+		case recurrenceOptions.monthly.value:
+			return t('pd_recur_monthly');
+		case recurrenceOptions.doesNotRepeat.value:
+			return t('pd_recur_does_not_repeat');
+		default:
+			return value || '';
+	}
+};
+
+export const translateWeekday = (t: TFunction, value: string): string => {
+	const key = `pd_day_${value}`;
+	const translated = t(key);
+	return translated === key ? value : translated;
+};
+
 export const getDuration = (
+	t: TFunction,
 	startTime: DateTimeString,
 	endTime: DateTimeString,
 ): string => {
 	if (!startTime || !endTime) {
-		return 'N/A';
+		return t('pd_na');
 	}
 
 	const start = dayjs(startTime);
@@ -33,14 +59,17 @@ export const getDuration = (
 	const hours = Math.floor(durationMs / (1000 * 60 * 60));
 
 	if (minutes < 60) {
-		return `${minutes} min`;
+		return t('pd_duration_min', { count: minutes });
 	}
-	return `${hours} hours`;
+	return t('pd_duration_hours', { count: hours });
 };
 
-export const formatDateTime = (dateTimeString?: string | null): string => {
+export const formatDateTime = (
+	t: TFunction,
+	dateTimeString?: string | null,
+): string => {
 	if (!dateTimeString) {
-		return 'N/A';
+		return t('pd_na');
 	}
 
 	return dayjs(dateTimeString.slice(0, 19)).format(
@@ -60,24 +89,39 @@ export const getAlertOptionsFromIds = (
 	);
 
 export const recurrenceInfo = (
+	t: TFunction,
 	recurrence?: RuletypesRecurrenceDTO | null,
 ): string => {
 	if (!recurrence) {
-		return 'No';
+		return t('pd_recur_no');
 	}
 
 	const { startTime, duration, repeatOn, repeatType, endTime } = recurrence;
 
 	const formattedStartTime = startTime
-		? formatDateTime(dayjs(startTime).toISOString())
+		? formatDateTime(t, dayjs(startTime).toISOString())
 		: '';
 	const formattedEndTime = endTime
-		? `to ${formatDateTime(dayjs(endTime).toISOString())}`
+		? t('pd_recurrence_to', {
+				end: formatDateTime(t, dayjs(endTime).toISOString()),
+			})
 		: '';
-	const weeklyRepeatString = repeatOn ? `on ${repeatOn.join(', ')}` : '';
-	const durationString = duration ? `- Duration: ${duration}` : '';
+	const weeklyRepeatString = repeatOn
+		? t('pd_recurrence_on', {
+				days: repeatOn.map((day) => translateWeekday(t, day)).join(', '),
+			})
+		: '';
+	const durationString = duration
+		? t('pd_recurrence_duration', { duration })
+		: '';
 
-	return `Repeats - ${repeatType} ${weeklyRepeatString} from ${formattedStartTime} ${formattedEndTime} ${durationString}`;
+	return t('pd_recurrence_info', {
+		repeatType: translateRecurrenceType(t, repeatType),
+		weekly: weeklyRepeatString,
+		start: formattedStartTime,
+		end: formattedEndTime,
+		duration: durationString,
+	});
 };
 
 export const defautlInitialValues: Partial<
@@ -109,6 +153,7 @@ type DeleteDowntimeScheduleProps = {
 	deleteId?: string;
 	hideDeleteDowntimeScheduleModal: () => void;
 	clearSearch: () => void;
+	t: TFunction;
 };
 
 export const deleteDowntimeHandler = ({
@@ -119,10 +164,11 @@ export const deleteDowntimeHandler = ({
 	clearSearch,
 	notifications,
 	showErrorModal,
+	t,
 }: DeleteDowntimeScheduleProps): void => {
 	if (!deleteId) {
 		console.error('Unable to delete, please provide correct deleteId');
-		notifications.error({ message: 'Something went wrong' });
+		notifications.error({ message: t('pd_something_wrong') });
 	} else {
 		deleteDowntimeScheduleAsync(
 			{ pathParams: { id: String(deleteId) } },
@@ -131,7 +177,7 @@ export const deleteDowntimeHandler = ({
 					hideDeleteDowntimeScheduleModal();
 					clearSearch();
 					notifications.success({
-						message: 'Downtime schedule Deleted Successfully',
+						message: t('pd_schedule_deleted'),
 					});
 					refetchAllSchedules();
 				},

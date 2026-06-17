@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckOutlined } from '@ant-design/icons';
 import {
 	Button,
@@ -51,6 +52,8 @@ import {
 	recurrenceOptions,
 	recurrenceOptionWithSubmenu,
 	recurrenceWeeklyOptions,
+	translateRecurrenceType,
+	translateWeekday,
 } from './PlannedDowntimeutils';
 
 import './PlannedDowntime.styles.scss';
@@ -105,6 +108,7 @@ export function PlannedDowntimeForm(
 		isEditMode,
 		form,
 	} = props;
+	const { t } = useTranslation('alerts');
 
 	const [selectedTags, setSelectedTags] = React.useState<
 		DefaultOptionType | DefaultOptionType[]
@@ -134,7 +138,7 @@ export function PlannedDowntimeForm(
 
 	const datePickerFooter = (mode: any): any =>
 		mode === 'time' ? (
-			<span style={{ color: 'gray' }}>Please select the time</span>
+			<span style={{ color: 'gray' }}>{t('pd_please_select_time')}</span>
 		) : null;
 
 	const saveHanlder = useCallback(
@@ -178,10 +182,10 @@ export function PlannedDowntimeForm(
 				}
 				setIsOpen(false);
 				notifications.success({
-					message: 'Success',
+					message: t('pd_toast_success'),
 					description: isEditMode
-						? 'Schedule updated successfully'
-						: 'Schedule created successfully',
+						? t('pd_schedule_updated')
+						: t('pd_schedule_created'),
 				});
 				refetchAllSchedules();
 			} catch (e: unknown) {
@@ -199,6 +203,7 @@ export function PlannedDowntimeForm(
 			setIsOpen,
 			timezoneInitialValue,
 			showErrorModal,
+			t,
 		],
 	);
 	const onFinish = async (values: PlannedDowntimeFormData): Promise<void> => {
@@ -374,20 +379,34 @@ export function PlannedDowntimeForm(
 			ORDINAL_FORMAT,
 		);
 
-		const formattedDaysOfWeek = daysOfWeek?.join(', ');
+		const formattedDaysOfWeek = daysOfWeek
+			?.map((day) => translateWeekday(t, day))
+			.join(', ');
 		switch (recurrenceType) {
 			case 'daily':
-				return `Scheduled from ${formattedStartDate}, daily starting at ${formattedStartTime}.`;
+				return t('pd_sched_daily', {
+					date: formattedStartDate,
+					time: formattedStartTime,
+				});
 			case 'monthly':
-				return `Scheduled from ${formattedStartDate}, monthly on the ${ordinalFormat} starting at ${formattedStartTime}.`;
+				return t('pd_sched_monthly', {
+					date: formattedStartDate,
+					ordinal: ordinalFormat,
+					time: formattedStartTime,
+				});
 			case 'weekly':
-				return `Scheduled from ${formattedStartDate}, weekly ${
-					formattedDaysOfWeek ? `on [${formattedDaysOfWeek}]` : ''
-				} starting at ${formattedStartTime}`;
+				return t('pd_sched_weekly', {
+					date: formattedStartDate,
+					days: formattedDaysOfWeek ? `[${formattedDaysOfWeek}]` : '',
+					time: formattedStartTime,
+				});
 			default:
-				return `Scheduled for ${formattedStartDate} starting at ${formattedStartTime}.`;
+				return t('pd_sched_default', {
+					date: formattedStartDate,
+					time: formattedStartTime,
+				});
 		}
-	}, [formData, recurrenceType, isEditMode, timezoneInitialValue]);
+	}, [formData, recurrenceType, isEditMode, timezoneInitialValue, t]);
 
 	const endTimeText = useMemo((): string => {
 		let endTime = formData?.endTime;
@@ -428,14 +447,17 @@ export function PlannedDowntimeForm(
 			!isEditMode,
 			DATE_FORMAT,
 		);
-		return `Scheduled to end maintenance on ${formattedEndDate} at ${formattedEndTime}.`;
-	}, [formData, recurrenceType, isEditMode, timezoneInitialValue]);
+		return t('pd_sched_end', {
+			date: formattedEndDate,
+			time: formattedEndTime,
+		});
+	}, [formData, recurrenceType, isEditMode, timezoneInitialValue, t]);
 
 	return (
 		<Modal
 			title={
 				<ModalTitle level={4}>
-					{isEditMode ? 'Edit planned downtime' : 'New planned downtime'}
+					{isEditMode ? t('pd_modal_edit') : t('pd_modal_new')}
 				</ModalTitle>
 			}
 			centered
@@ -456,11 +478,11 @@ export function PlannedDowntimeForm(
 				}}
 				autoComplete="off"
 			>
-				<Form.Item label="Name" name="name" rules={formValidationRules}>
-					<Input placeholder="e.g. Upgrade downtime" />
+				<Form.Item label={t('pd_field_name')} name="name" rules={formValidationRules}>
+					<Input placeholder={t('pd_name_placeholder')} />
 				</Form.Item>
 				<Form.Item
-					label="Starts from"
+					label={t('pd_field_starts_from')}
 					name="startTime"
 					rules={formValidationRules}
 					className={!isEmpty(startTimeText) ? 'formItemWithBullet' : ''}
@@ -482,32 +504,38 @@ export function PlannedDowntimeForm(
 					<div className="scheduleTimeInfoText">{startTimeText}</div>
 				)}
 				<Form.Item
-					label="Repeats every"
+					label={t('pd_field_repeats_every')}
 					name={['recurrence', 'repeatType']}
 					rules={formValidationRules}
 				>
 					<Select
-						placeholder="Select option..."
-						options={recurrenceOptionWithSubmenu}
+						placeholder={t('pd_select_option')}
+						options={recurrenceOptionWithSubmenu.map((option) => ({
+							...option,
+							label: translateRecurrenceType(t, option.value),
+						}))}
 					/>
 				</Form.Item>
 				{recurrenceType === recurrenceOptions.weekly.value && (
 					<Form.Item
-						label="Weekly occurernce"
+						label={t('pd_field_weekly')}
 						name={['recurrence', 'repeatOn']}
 						rules={formValidationRules}
 					>
 						<Select
-							placeholder="Select option..."
+							placeholder={t('pd_select_option')}
 							mode="multiple"
-							options={Object.values(recurrenceWeeklyOptions)}
+							options={Object.values(recurrenceWeeklyOptions).map((option) => ({
+								...option,
+								label: translateWeekday(t, option.value),
+							}))}
 						/>
 					</Form.Item>
 				)}
 				{recurrenceType &&
 					recurrenceType !== recurrenceOptions.doesNotRepeat.value && (
 						<Form.Item
-							label="Duration"
+							label={t('pd_field_duration')}
 							name={['recurrence', 'duration']}
 							rules={formValidationRules}
 						>
@@ -520,23 +548,31 @@ export function PlannedDowntimeForm(
 											setDurationUnit(value);
 										}}
 									>
-										<Select.Option value="m">Mins</Select.Option>
-										<Select.Option value="h">Hours</Select.Option>
+										<Select.Option value="m">{t('pd_unit_mins')}</Select.Option>
+										<Select.Option value="h">{t('pd_unit_hours')}</Select.Option>
 									</Select>
 								}
 								className="duration-input"
 								type="number"
-								placeholder="Enter duration"
+								placeholder={t('pd_duration_placeholder')}
 								min={1}
 								onWheel={(e): void => e.currentTarget.blur()}
 							/>
 						</Form.Item>
 					)}
-				<Form.Item label="Timezone" name="timezone" rules={formValidationRules}>
-					<Select options={timeZoneItems} placeholder="Select timezone" showSearch />
+				<Form.Item
+					label={t('pd_field_timezone')}
+					name="timezone"
+					rules={formValidationRules}
+				>
+					<Select
+						options={timeZoneItems}
+						placeholder={t('pd_timezone_placeholder')}
+						showSearch
+					/>
 				</Form.Item>
 				<Form.Item
-					label="Ends on"
+					label={t('pd_field_ends_on')}
 					name="endTime"
 					required={recurrenceType === recurrenceOptions.doesNotRepeat.value}
 					rules={[
@@ -564,9 +600,11 @@ export function PlannedDowntimeForm(
 				)}
 				<div>
 					<div className="alert-rule-form">
-						<Typography style={{ marginBottom: 8 }}>Silence Alerts</Typography>
+						<Typography style={{ marginBottom: 8 }}>
+							{t('pd_silence_alerts')}
+						</Typography>
 						<Typography style={{ marginBottom: 8 }} className="alert-rule-info">
-							(Leave empty to silence all alerts)
+							{t('pd_silence_all_hint')}
 						</Typography>
 					</div>
 					<Form.Item noStyle shouldUpdate>
@@ -578,7 +616,7 @@ export function PlannedDowntimeForm(
 					</Form.Item>
 					<Form.Item name={alertRuleFormName}>
 						<Select
-							placeholder="Search for alerts rules or groups..."
+							placeholder={t('pd_alerts_search_placeholder')}
 							mode="multiple"
 							status={isError ? 'error' : undefined}
 							loading={isLoading}
@@ -592,10 +630,10 @@ export function PlannedDowntimeForm(
 							notFoundContent={
 								isLoading ? (
 									<span>
-										<Spin size="small" /> Loading...
+										<Spin size="small" /> {t('pd_loading')}
 									</span>
 								) : (
-									<span>No alert available.</span>
+									<span>{t('pd_no_alert')}</span>
 								)
 							}
 						>
@@ -617,7 +655,7 @@ export function PlannedDowntimeForm(
 							onClick={handleOk}
 							loading={saveLoading || isLoading}
 						>
-							{isEditMode ? 'Update downtime schedule' : 'Add downtime schedule'}
+							{isEditMode ? t('pd_btn_update') : t('pd_btn_add')}
 						</Button>
 					</ModalButtonWrapper>
 				</Form.Item>

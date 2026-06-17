@@ -1,4 +1,5 @@
 import { ReactNode, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { UseQueryResult } from 'react-query';
 import { Color } from '@signozhq/design-tokens';
 import {
@@ -151,6 +152,7 @@ export function CollapseListContent({
 	alertOptions?: DefaultOptionType[];
 	timezone?: string;
 }): JSX.Element {
+	const { t } = useTranslation('alerts');
 	const renderItems = (title: string, value: ReactNode): JSX.Element => (
 		<div className="render-item-collapse-list">
 			<Typography>{title}</Typography>
@@ -161,7 +163,7 @@ export function CollapseListContent({
 	return (
 		<Flex vertical>
 			{renderItems(
-				'Created by',
+				t('pd_created_by'),
 				created_by_name ? (
 					<Flex gap={8}>
 						<Typography>{created_by_name}</Typography>
@@ -174,35 +176,39 @@ export function CollapseListContent({
 				),
 			)}
 			{renderItems(
-				'Created on',
+				t('pd_created_on'),
 				created_at ? (
-					<Typography>{`${formatDateTime(created_at)}`}</Typography>
+					<Typography>{`${formatDateTime(t, created_at)}`}</Typography>
 				) : (
 					'-'
 				),
 			)}
 			{updated_at &&
 				renderItems(
-					'Updated on',
-					<Typography>{`${formatDateTime(updated_at)}`}</Typography>,
+					t('pd_updated_on'),
+					<Typography>{`${formatDateTime(t, updated_at)}`}</Typography>,
 				)}
 			{updated_by_name &&
-				renderItems('Updated by', <Typography>{updated_by_name}</Typography>)}
+				renderItems(t('pd_updated_by'), <Typography>{updated_by_name}</Typography>)}
 
 			{renderItems(
-				'Timeframe',
+				t('pd_timeframe'),
 				timeframe[0] || timeframe[1] ? (
-					<Typography>{`${formatDateTime(timeframe[0])} ⎯ ${formatDateTime(
+					<Typography>{`${formatDateTime(t, timeframe[0])} ⎯ ${formatDateTime(
+						t,
 						timeframe[1],
 					)}`}</Typography>
 				) : (
 					'-'
 				),
 			)}
-			{renderItems('Timezone', <Typography>{timezone || '-'}</Typography>)}
-			{renderItems('Repeats', <Typography>{recurrenceInfo(repeats)}</Typography>)}
+			{renderItems(t('pd_field_timezone'), <Typography>{timezone || '-'}</Typography>)}
 			{renderItems(
-				'Alerts silenced',
+				t('pd_repeats'),
+				<Typography>{recurrenceInfo(t, repeats)}</Typography>,
+			)}
+			{renderItems(
+				t('pd_alerts_silenced'),
 				alertOptions?.length ? (
 					<AlertRuleTags
 						closable={false}
@@ -242,6 +248,7 @@ export function CustomCollapseList(
 		setEditMode,
 		kind,
 	} = props;
+	const { t } = useTranslation('alerts');
 
 	const scheduleTime = schedule?.startTime
 		? dayjs(schedule.startTime).toISOString()
@@ -249,7 +256,8 @@ export function CustomCollapseList(
 			? dayjs(createdAt).toISOString()
 			: '';
 	// Combine time and date
-	const formattedDateAndTime = `Start time ⎯ ${formatDateTime(
+	const formattedDateAndTime = `${t('pd_start_time')} ⎯ ${formatDateTime(
+		t,
 		defaultTo(scheduleTime, ''),
 	)} ${schedule?.timezone}`;
 	const endTime = getEndTime({
@@ -267,6 +275,7 @@ export function CustomCollapseList(
 								schedule?.recurrence?.duration
 									? (schedule?.recurrence?.duration as string)
 									: getDuration(
+											t,
 											schedule?.startTime ? dayjs(schedule.startTime).toISOString() : '',
 											schedule?.endTime ? dayjs(schedule.endTime).toISOString() : '',
 										)
@@ -335,9 +344,10 @@ export function PlannedDowntimeList({
 	setEditMode: React.Dispatch<React.SetStateAction<boolean>>;
 	searchValue: string | number;
 }): JSX.Element {
+	const { t } = useTranslation('alerts');
 	const columns: TableProps<DowntimeSchedulesTableData>['columns'] = [
 		{
-			title: 'Downtime',
+			title: t('pd_col_downtime'),
 			key: 'downtime',
 			render: (data: DowntimeSchedulesTableData): JSX.Element =>
 				CustomCollapseList({

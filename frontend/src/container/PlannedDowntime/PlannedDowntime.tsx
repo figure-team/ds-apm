@@ -1,4 +1,5 @@
 import React, { ChangeEvent, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { PlusOutlined } from '@ant-design/icons';
 import { Color } from '@signozhq/design-tokens';
@@ -33,6 +34,7 @@ import './PlannedDowntime.styles.scss';
 dayjs.locale('en');
 
 export function PlannedDowntime(): JSX.Element {
+	const { t } = useTranslation('alerts');
 	const {
 		data: alertsData,
 		isError,
@@ -121,29 +123,26 @@ export function PlannedDowntime(): JSX.Element {
 			deleteId: deleteData?.id,
 			hideDeleteDowntimeScheduleModal,
 			clearSearch,
+			t,
 		});
 	};
 
 	return (
 		<div className="planned-downtime-container">
 			<div className="planned-downtime-content">
-				<Typography.Title className="title">Planned Downtime</Typography.Title>
-				<Typography.Text className="subtitle">
-					Create and manage planned downtimes.
-				</Typography.Text>
+				<Typography.Title className="title">
+					{t('planned_downtime')}
+				</Typography.Title>
+				<Typography.Text className="subtitle">{t('pd_subtitle')}</Typography.Text>
 				<Flex className="toolbar">
 					<Input
-						placeholder="Search for a planned downtime..."
+						placeholder={t('pd_search_placeholder')}
 						prefix={<Search size={12} color={Color.BG_VANILLA_400} />}
 						value={searchValue}
 						onChange={handleSearch}
 					/>
 					<Tooltip
-						title={
-							user?.role === USER_ROLES.VIEWER
-								? 'You need edit permissions to create a planned downtime'
-								: ''
-						}
+						title={user?.role === USER_ROLES.VIEWER ? t('pd_viewer_tooltip') : ''}
 					>
 						<Button
 							icon={<PlusOutlined />}
@@ -156,7 +155,7 @@ export function PlannedDowntime(): JSX.Element {
 							}}
 							disabled={user?.role === USER_ROLES.VIEWER}
 						>
-							New downtime
+							{t('pd_new_btn')}
 						</Button>
 					</Tooltip>
 				</Flex>

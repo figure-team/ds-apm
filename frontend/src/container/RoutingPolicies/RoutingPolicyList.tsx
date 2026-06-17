@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Table, TableProps, Typography } from 'antd';
 import { RotateCw } from 'lucide-react';
 
@@ -18,9 +19,10 @@ function RoutingPolicyList({
 	handleDeleteModalOpen,
 	hasSearchTerm,
 }: RoutingPolicyListProps): JSX.Element {
+	const { t } = useTranslation('alerts');
 	const columns: TableProps<RoutingPolicy>['columns'] = [
 		{
-			title: 'Routing Policy',
+			title: t('rp_col'),
 			key: 'routingPolicy',
 			render: (data: RoutingPolicy): JSX.Element => (
 				<RoutingPolicyListItem
@@ -49,30 +51,28 @@ function RoutingPolicyList({
 				)}
 				{showError ? (
 					<div className="error-state">
-						<Typography.Text>
-							Something went wrong while fetching routing policies.
-						</Typography.Text>
+						<Typography.Text>{t('rp_fetch_error')}</Typography.Text>
 						<Button icon={<RotateCw size={14} />} onClick={refetchRoutingPolicies}>
-							Retry
+							{t('rp_retry')}
 						</Button>
 					</div>
 				) : hasSearchTerm ? (
-					<Typography.Text>No matching routing policies found.</Typography.Text>
+					<Typography.Text>{t('rp_no_match')}</Typography.Text>
 				) : (
 					<Typography.Text>
-						No routing policies yet,{' '}
+						{t('rp_empty_prefix')}{' '}
 						<a
 							href="https://signoz.io/docs/alerts-management/routing-policy"
 							target="_blank"
 							rel="noopener noreferrer"
 						>
-							Learn more here
+							{t('rp_learn_more')}
 						</a>
 					</Typography.Text>
 				)}
 			</div>
 		),
-		[showError, hasSearchTerm, refetchRoutingPolicies],
+		[showError, hasSearchTerm, refetchRoutingPolicies, t],
 	);
 
 	return (

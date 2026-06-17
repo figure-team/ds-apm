@@ -1,4 +1,5 @@
 import { ChangeEvent, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PlusOutlined } from '@ant-design/icons';
 import { Color } from '@signozhq/design-tokens';
 import { Button, Flex, Input, Tooltip, Typography } from 'antd';
@@ -14,6 +15,7 @@ import useRoutingPolicies from './useRoutingPolicies';
 import './styles.scss';
 
 function RoutingPolicies(): JSX.Element {
+	const { t } = useTranslation('alerts');
 	const { user } = useAppContext();
 	const {
 		// Routing Policies
@@ -49,10 +51,10 @@ function RoutingPolicies(): JSX.Element {
 
 	const tooltipTitle = useMemo(() => {
 		if (user?.role === USER_ROLES.VIEWER) {
-			return 'You need edit permissions to create a routing policy';
+			return t('rp_viewer_tooltip');
 		}
 		return '';
-	}, [user?.role]);
+	}, [user?.role, t]);
 
 	const handleSearch = (e: ChangeEvent<HTMLInputElement>): void => {
 		setSearchTerm(e.target.value || '');
@@ -61,13 +63,13 @@ function RoutingPolicies(): JSX.Element {
 	return (
 		<div className="routing-policies-container">
 			<div className="routing-policies-content">
-				<Typography.Title className="title">Routing Policies</Typography.Title>
-				<Typography.Text className="subtitle">
-					Create and manage routing policies.
-				</Typography.Text>
+				<Typography.Title className="title">
+					{t('routing_policies')}
+				</Typography.Title>
+				<Typography.Text className="subtitle">{t('rp_subtitle')}</Typography.Text>
 				<Flex className="toolbar">
 					<Input
-						placeholder="Search for a routing policy..."
+						placeholder={t('rp_search_placeholder')}
 						prefix={<Search size={12} color={Color.BG_VANILLA_400} />}
 						value={searchTerm}
 						onChange={handleSearch}
@@ -79,7 +81,7 @@ function RoutingPolicies(): JSX.Element {
 							onClick={(): void => handlePolicyDetailsModalOpen('create', null)}
 							disabled={disableCreateButton}
 						>
-							New routing policy
+							{t('rp_new_btn')}
 						</Button>
 					</Tooltip>
 				</Flex>

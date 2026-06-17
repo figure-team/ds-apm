@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from 'react-query';
 import { useHistory } from 'react-router-dom';
 import { toast } from '@signozhq/ui';
@@ -30,6 +31,7 @@ import {
 import './styles.scss';
 
 function useRoutingPolicies(): UseRoutingPoliciesReturn {
+	const { t } = useTranslation('alerts');
 	const queryClient = useQueryClient();
 	const urlQuery = useUrlQuery();
 	const history = useHistory();
@@ -158,12 +160,12 @@ function useRoutingPolicies(): UseRoutingPoliciesReturn {
 				},
 				{
 					onSuccess: () => {
-						toast.success('Routing policy created successfully');
+						toast.success(t('rp_toast_created'));
 						queryClient.invalidateQueries(REACT_QUERY_KEY.GET_ROUTING_POLICIES);
 						handlePolicyDetailsModalClose();
 					},
 					onError: (error) => {
-						toast.error(`Error: ${error.message}`);
+						toast.error(t('rp_toast_error', { message: error.message }));
 					},
 				},
 			);
@@ -180,12 +182,12 @@ function useRoutingPolicies(): UseRoutingPoliciesReturn {
 				},
 				{
 					onSuccess: () => {
-						toast.success('Routing policy updated successfully');
+						toast.success(t('rp_toast_updated'));
 						queryClient.invalidateQueries(REACT_QUERY_KEY.GET_ROUTING_POLICIES);
 						handlePolicyDetailsModalClose();
 					},
 					onError: () => {
-						toast.error('Failed to update routing policy');
+						toast.error(t('rp_toast_update_failed'));
 					},
 				},
 			);
@@ -213,12 +215,12 @@ function useRoutingPolicies(): UseRoutingPoliciesReturn {
 		}
 		deleteRoutingPolicy(selectedRoutingPolicy.id, {
 			onSuccess: () => {
-				toast.success('Routing policy deleted successfully');
+				toast.success(t('rp_toast_deleted'));
 				queryClient.invalidateQueries(REACT_QUERY_KEY.GET_ROUTING_POLICIES);
 				handleDeleteModalClose();
 			},
 			onError: () => {
-				toast.error('Failed to delete routing policy');
+				toast.error(t('rp_toast_delete_failed'));
 			},
 		});
 	};

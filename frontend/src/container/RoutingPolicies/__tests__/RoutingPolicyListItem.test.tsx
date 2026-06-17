@@ -117,10 +117,10 @@ describe('RoutingPolicyListItem', () => {
 		// Expand the details panel
 		fireEvent.click(screen.getByText(mockRoutingPolicy.name));
 
-		const updatedByRow = screen.getByText('Updated by').parentElement;
+		const updatedByRow = screen.getByText('rp_updated_by').parentElement;
 		expect(updatedByRow).toHaveTextContent('-');
 
-		const updatedOnRow = screen.getByText('Updated on').parentElement;
+		const updatedOnRow = screen.getByText('rp_updated_on').parentElement;
 		expect(updatedOnRow).toHaveTextContent('-');
 	});
 });

@@ -12,7 +12,7 @@ import {
 } from './testUtils';
 
 const ROUTING_POLICY_DETAILS_TEST_ID = 'routing-policy-details';
-const SEARCH_PLACEHOLDER = 'Search for a routing policy...';
+const SEARCH_PLACEHOLDER = 'rp_search_placeholder';
 
 jest.spyOn(appHooks, 'useAppContext').mockReturnValue(getAppContextMockState());
 
@@ -72,13 +72,13 @@ describe('RoutingPolicies', () => {
 
 	it('should render components properly', () => {
 		render(<RoutingPolicies />);
-		expect(screen.getByText('Routing Policies')).toBeInTheDocument();
+		expect(screen.getByText('routing_policies')).toBeInTheDocument();
 		expect(
-			screen.getByText('Create and manage routing policies.'),
+			screen.getByText('rp_subtitle'),
 		).toBeInTheDocument();
 		expect(screen.getByPlaceholderText(SEARCH_PLACEHOLDER)).toBeInTheDocument();
 		expect(
-			screen.getByRole('button', { name: /New routing policy/ }),
+			screen.getByRole('button', { name: /rp_new_btn/ }),
 		).toBeInTheDocument();
 		expect(screen.getByTestId('routing-policy-list')).toBeInTheDocument();
 		expect(
@@ -90,7 +90,7 @@ describe('RoutingPolicies', () => {
 	it('should enable the "New routing policy" button for users with ADMIN role', () => {
 		render(<RoutingPolicies />);
 		expect(
-			screen.getByRole('button', { name: /New routing policy/ }),
+			screen.getByRole('button', { name: /rp_new_btn/ }),
 		).toBeEnabled();
 	});
 
@@ -100,7 +100,7 @@ describe('RoutingPolicies', () => {
 			.mockReturnValueOnce(getAppContextMockState({ role: 'VIEWER' }));
 		render(<RoutingPolicies />);
 		expect(
-			screen.getByRole('button', { name: /New routing policy/ }),
+			screen.getByRole('button', { name: /rp_new_btn/ }),
 		).toBeDisabled();
 	});
 
@@ -117,7 +117,7 @@ describe('RoutingPolicies', () => {
 	it('clicking on the "New routing policy" button opens the policy details modal', () => {
 		render(<RoutingPolicies />);
 		const newRoutingPolicyButton = screen.getByRole('button', {
-			name: /New routing policy/,
+			name: /rp_new_btn/,
 		});
 		fireEvent.click(newRoutingPolicyButton);
 		expect(mockHandlePolicyDetailsModalOpen).toHaveBeenCalledWith('create', null);
