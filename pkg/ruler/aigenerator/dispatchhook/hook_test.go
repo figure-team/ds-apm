@@ -564,6 +564,90 @@ func TestApplyUnchangedWhenTriggerNil(t *testing.T) {
 	})
 }
 
+// countingGenerator wraps any AIStrategyGenerator and counts Generate calls.
+// Used by TestApplyReusesCachedCustomerNoticeWithoutRegenerating to assert
+// the cache-reuse path skips the generator on the 2nd dispatch.
+type countingGenerator struct {
+	inner ruletypes.AIStrategyGenerator
+	calls int
+}
+
+func (c *countingGenerator) Generate(ctx context.Context, req ruletypes.AIStrategyRequest) (ruletypes.AIStrategy, error) {
+	c.calls++
+	return c.inner.Generate(ctx, req)
+}
+
+// TestApplyReusesCachedCustomerNoticeWithoutRegenerating pins the cost-guardrail
+// cache-reuse path: dispatching the SAME incident twice must call Generate exactly
+// once (the 2nd dispatch hits the history store and reuses the cached notice).
+func TestApplyReusesCachedCustomerNoticeWithoutRegenerating(t *testing.T) {
+	const orgID = "customer-a"
+
+	// Use a strategy whose SOPVersion matches the seed SOP ("2026-05-12.1")
+	// and whose CustomerUpdateDraft is non-empty — both are required for a
+	// cache hit under the reuse guard.
+	inner := &stubGen{strategy: ruletypes.AIStrategy{
+		ContractVersion:     ruletypes.AIStrategyContractVersion,
+		StrategyID:          "strategy-cache-reuse-001",
+		IncidentID:          "INC-20260512-0001", // matches seed.Alert.IncidentID
+		AlertFingerprint:    "fp-payment-api-5xx-demo",
+		Status:              ruletypes.AIStrategyStatusReady,
+		Language:            "ko-KR",
+		SOPID:               "SOP-PAY-001",
+		SOPVersion:          "2026-05-12.1", // must match seed SOP version / binding.Version
+		Headline:            "캐시 재사용 테스트 headline",
+		CustomerUpdateDraft: "현재 결제 API 장애 확인 중입니다. 15분 내 업데이트 드리겠습니다.",
+		Hypotheses: []ruletypes.AIHypothesis{
+			{
+				Rank:        1,
+				Text:        "PG timeout",
+				Confidence:  ruletypes.AIConfidenceMedium,
+				SOPStepRefs: []string{"step-1"},
+			},
+		},
+		FirstActions: []ruletypes.AIFirstAction{
+			{
+				Text:                  "결제 성공률 확인",
+				SOPStepRef:            "step-1",
+				RequiresHumanApproval: true,
+			},
+		},
+		EvidenceRefs: []ruletypes.AIEvidenceRef{
+			{
+				RefID:       "metric:error_rate:payment-api",
+				Type:        "metric",
+				Observation: "5xx rate 상승",
+				Confidence:  ruletypes.AIConfidenceMedium,
+			},
+		},
+		Confidence: ruletypes.AIConfidenceMedium,
+		Audit: ruletypes.AIStrategyAudit{
+			PromptVersion:    "ds-ir-ko-v1",
+			Model:            "stub-cache-test",
+			GeneratedAt:      "2026-05-12T00:00:00Z",
+			RedactionApplied: true,
+		},
+	}}
+
+	seed := loadSeed(t)
+	countingGen := &countingGenerator{inner: inner}
+	hook, _, _, _ := seedHookFixture(t, orgID, countingGen)
+
+	// 1st dispatch: generates and upserts history.
+	_ = hook.Apply(context.Background(), orgID,
+		seed.Alert.IncidentID, seed.Alert.Fingerprint,
+		seed.Alert.Labels, seed.Alert.Annotations)
+	require.Equal(t, 1, countingGen.calls, "first dispatch must call the generator once")
+
+	// 2nd dispatch of the SAME incident: must reuse cache, NOT regenerate.
+	got := hook.Apply(context.Background(), orgID,
+		seed.Alert.IncidentID, seed.Alert.Fingerprint,
+		seed.Alert.Labels, seed.Alert.Annotations)
+	require.Equal(t, 1, countingGen.calls, "second dispatch must not call the generator")
+	require.NotEmpty(t, got[alertmanagertypes.IncidentAnnotationCustomerUpdate],
+		"cached customer notice must be merged into returned annotations")
+}
+
 func cloneMap(in map[string]string) map[string]string {
 	out := make(map[string]string, len(in))
 	for k, v := range in {

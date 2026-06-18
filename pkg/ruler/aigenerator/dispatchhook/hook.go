@@ -154,6 +154,21 @@ func (h *Hook) Apply(
 	// block generation, so errors are logged and we proceed with no history.
 	priorIncidents := h.lookupPriorIncidents(ctx, orgID, incidentID, alertFingerprint)
 
+	// DS-APM cost guardrail: reuse a previously generated customer notice for
+	// this incident instead of paying for another LLM call. Storms and
+	// re-notifications of the SAME incident (same fingerprint) hit this path.
+	// Reuse only when the stored strategy still matches the bound SOP version.
+	if h.aiHistoryStore != nil {
+		if rec, ok, err := h.aiHistoryStore.GetLatest(ctx, orgID, ruletypes.AIStrategyHistoryLookupRequest{
+			IncidentID:       incidentID,
+			AlertFingerprint: alertFingerprint,
+		}); err == nil && ok &&
+			strings.TrimSpace(rec.Strategy.CustomerUpdateDraft) != "" &&
+			strings.TrimSpace(rec.Strategy.SOPVersion) == strings.TrimSpace(binding.Version) {
+			return h.mergeStrategyWithSOP(annotations, rec.Strategy, doc, binding)
+		}
+	}
+
 	genCtx, cancel := context.WithTimeout(ctx, h.timeout)
 	defer cancel()
 
@@ -176,25 +191,7 @@ func (h *Hook) Apply(
 		return annotations
 	}
 
-	merged := mergeAnnotations(annotations, ruletypes.AIStrategyIncidentAnnotations(strategy))
-	// Public SOP metadata sourced from the bound document. These are
-	// the keys consumed by alertmanagertypes.BuildIncidentInfo / the
-	// Slack and webhook templates.
-	if doc.DisplayURL != "" {
-		merged[alertmanagertypes.IncidentAnnotationSopURL] = doc.DisplayURL
-	}
-	if doc.Source.SourceID != "" {
-		merged[alertmanagertypes.IncidentAnnotationSopSource] = doc.Source.SourceID
-	}
-	if binding.Title != "" {
-		merged[alertmanagertypes.IncidentAnnotationSopTitle] = binding.Title
-	}
-	if binding.Version != "" {
-		merged[alertmanagertypes.IncidentAnnotationSopVersion] = binding.Version
-	}
-	if binding.Resolution != "" {
-		merged[alertmanagertypes.IncidentAnnotationSopBindingID] = binding.Resolution
-	}
+	merged := h.mergeStrategyWithSOP(annotations, strategy, doc, binding)
 
 	if h.aiHistoryStore != nil {
 		record, recErr := ruletypes.NewAIStrategyHistoryRecord(strategy)
@@ -245,6 +242,32 @@ func (h *Hook) lookupPriorIncidents(ctx context.Context, orgID, incidentID, aler
 		}
 	}
 	return priors
+}
+
+// mergeStrategyWithSOP overlays the AI strategy annotations and the bound SOP's
+// public metadata onto base, returning a fresh map. Shared by the generate path
+// and the cache-reuse path so both emit identical annotations.
+func (h *Hook) mergeStrategyWithSOP(base map[string]string, strategy ruletypes.AIStrategy, doc ruletypes.SOPDocument, binding ruletypes.SOPBindingPreviewResponse) map[string]string {
+	merged := mergeAnnotations(base, ruletypes.AIStrategyIncidentAnnotations(strategy))
+	// Public SOP metadata sourced from the bound document. These are
+	// the keys consumed by alertmanagertypes.BuildIncidentInfo / the
+	// Slack and webhook templates.
+	if doc.DisplayURL != "" {
+		merged[alertmanagertypes.IncidentAnnotationSopURL] = doc.DisplayURL
+	}
+	if doc.Source.SourceID != "" {
+		merged[alertmanagertypes.IncidentAnnotationSopSource] = doc.Source.SourceID
+	}
+	if binding.Title != "" {
+		merged[alertmanagertypes.IncidentAnnotationSopTitle] = binding.Title
+	}
+	if binding.Version != "" {
+		merged[alertmanagertypes.IncidentAnnotationSopVersion] = binding.Version
+	}
+	if binding.Resolution != "" {
+		merged[alertmanagertypes.IncidentAnnotationSopBindingID] = binding.Resolution
+	}
+	return merged
 }
 
 // mergeAnnotations returns a fresh map containing base overlaid with
