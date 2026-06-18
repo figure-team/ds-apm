@@ -648,6 +648,60 @@ func TestApplyReusesCachedCustomerNoticeWithoutRegenerating(t *testing.T) {
 		"cached customer notice must be merged into returned annotations")
 }
 
+// TestApplyFallbackOmitsCustomerNotice is a regression guard for the fallback
+// path: when the generator returns a non-ready strategy (status=unavailable,
+// empty CustomerUpdateDraft), Apply must NOT set the customer_update annotation
+// so the default alert body is left in place by the downstream template.
+func TestApplyFallbackOmitsCustomerNotice(t *testing.T) {
+	const orgID = "customer-a"
+
+	// Build a valid fallback strategy: non-ready status requires Limitations
+	// (ValidateAIStrategy §268) and empty CustomerUpdateDraft.
+	fallbackStrategy := ruletypes.AIStrategy{
+		ContractVersion:     ruletypes.AIStrategyContractVersion,
+		StrategyID:          "strategy-fallback-001",
+		IncidentID:          "INC-20260512-0001", // matches seed.Alert.IncidentID
+		AlertFingerprint:    "fp-payment-api-5xx-demo",
+		Status:              ruletypes.AIStrategyStatusUnavailable,
+		Language:            "ko-KR",
+		Confidence:          ruletypes.AIConfidenceLow,
+		Headline:            "AI 제공자 응답 없음 — 기본 SOP 알림 전송",
+		CustomerUpdateDraft: "", // explicit: fallback must not produce a notice
+		Limitations:         []string{"LLM provider unavailable; falling back to default alert body"},
+		Audit: ruletypes.AIStrategyAudit{
+			PromptVersion:    "ds-ir-ko-v1",
+			Model:            "stub-fallback",
+			GeneratedAt:      "2026-05-12T00:00:00Z",
+			RedactionApplied: true,
+		},
+	}
+
+	gen := &stubGen{strategy: fallbackStrategy}
+	hook, _, _, seed := seedHookFixture(t, orgID, gen)
+
+	got := hook.Apply(
+		context.Background(),
+		orgID,
+		seed.Alert.IncidentID,
+		seed.Alert.Fingerprint,
+		seed.Alert.Labels,
+		seed.Alert.Annotations,
+	)
+
+	// Generator must have been called (SOP is bound via seed labels).
+	require.Equal(t, 1, gen.calls, "generator must run when SOP is bound")
+
+	// customer_update must be absent: fallback strategy has no CustomerUpdateDraft,
+	// so the default alert body must be left intact by the dispatch hook.
+	require.Empty(t, got[alertmanagertypes.IncidentAnnotationCustomerUpdate],
+		"fallback strategy must not set customer_update annotation")
+
+	// AI strategy annotations are still merged (status/headline/limitations),
+	// confirming the hook processed the fallback strategy (not a no-op).
+	require.Equal(t, ruletypes.AIStrategyStatusUnavailable, got[alertmanagertypes.IncidentAnnotationAIStrategyStatus],
+		"fallback status must be recorded in annotation")
+}
+
 func cloneMap(in map[string]string) map[string]string {
 	out := make(map[string]string, len(in))
 	for k, v := range in {
