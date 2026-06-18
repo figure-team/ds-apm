@@ -3,5 +3,6 @@
 	"loading": "로딩 중...",
 	"filter_tooltip": "현재 서비스 맵은 리소스 속성 중 {{keys}} 필터링만 지원합니다",
 	"select_environment": "환경 선택",
-	"resource_attributes_filter_placeholder": "리소스 속성으로 검색 및 필터링"
+	"resource_attributes_filter_placeholder": "리소스 속성으로 검색 및 필터링",
+	"resource_attributes_empty": "필터링할 리소스 속성이 없습니다. 속성 전송 방법은 문서를 참고하세요."
 }
