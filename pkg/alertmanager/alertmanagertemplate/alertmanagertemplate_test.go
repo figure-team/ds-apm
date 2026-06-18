@@ -248,6 +248,45 @@ Description: Request rate exceeded 10k/s`},
 			wantIsDefaultBody: true,
 		},
 		{
+			name: "DS-APM: SOP-bound customer notice replaces channel body",
+			alerts: []*types.Alert{
+				createAlert(
+					map[string]string{
+						ruletypes.LabelAlertName: "PaymentLatency",
+						"sop_id":                 "SOP-PAY-001",
+					},
+					map[string]string{
+						"customer_update": "[결제 서비스 이용 장애 안내]\n\n■ 발생 현황: 확인 중",
+					},
+					true,
+				),
+			},
+			input: alertmanagertypes.ExpandRequest{
+				// operator body template MUST be ignored when a notice exists
+				BodyTemplate: "운영자 템플릿 본문 $service.name",
+			},
+			wantBody:          []string{"[결제 서비스 이용 장애 안내]\n\n■ 발생 현황: 확인 중"},
+			wantIsDefaultBody: false,
+		},
+		{
+			name: "DS-APM: unbound alert keeps operator body template",
+			alerts: []*types.Alert{
+				createAlert(
+					map[string]string{
+						ruletypes.LabelAlertName: "PaymentLatency",
+						"service.name":           "payment-service",
+					},
+					map[string]string{"description": "no sop, no notice"},
+					true,
+				),
+			},
+			input: alertmanagertypes.ExpandRequest{
+				BodyTemplate: "운영자 템플릿 본문 $service.name",
+			},
+			wantBody:          []string{"운영자 템플릿 본문 payment-service"},
+			wantIsDefaultBody: false,
+		},
+		{
 			name: "using non-existing function in template",
 			alerts: []*types.Alert{
 				createAlert(map[string]string{ruletypes.LabelAlertName: "HighCPU", ruletypes.LabelSeverityName: "critical"}, nil, true),
@@ -332,9 +371,8 @@ func TestExpandBuildsIncidentContext(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, "[prod] checkout-api impact — SOP-PAY-001", got.Title)
-	require.Equal(t, []string{
-		"Impact: Checkout latency can affect customer payments.\nNext: Ask vendor to inspect slow traces.\nOwner: sm-payments\nVendor: Need cause, mitigation, and ETA.\nSOP: Payment API 5xx response <https://runbooks.example.com/payment-latency>\nSource: confluence\nAI: ready/medium SOP 기준 결제 지연 확인이 필요합니다.\nActions: PG timeout 로그를 확인\nLimits: 최근 배포 정보는 연결되지 않음",
-	}, got.Body)
+	// Task 4: customer_update notice supersedes the operator body template when present.
+	require.Equal(t, []string{"Payment latency is under investigation."}, got.Body)
 	require.Equal(t, alertmanagertypes.IncidentInfo{
 		ProjectID:        "customer-a",
 		Environment:      "prod",

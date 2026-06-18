@@ -70,7 +70,23 @@ func (at *templater) Expand(
 			return nil, err
 		}
 		body = []string{defaultBody} // default template combines all alerts message into a single body
-	} else {
+	}
+
+	// DS-APM SOP-bound customer-notice override. When the incident is SOP-bound
+	// and the AI dispatch hook produced a customer notice, that notice REPLACES
+	// the channel body — the operator template / default body is used only when
+	// no notice exists (unbound alerts or guardrail fallback). customer_update is
+	// set exclusively by the bound generation path, so its presence is the gate.
+	if notice := strings.TrimSpace(ntd.Incident.CustomerUpdate); notice != "" {
+		body = []string{notice}
+		isDefaultBody = false
+		// bodyMissingVars from the operator template are irrelevant — the
+		// notice supersedes the template output entirely, so do not surface
+		// its missing variables to the caller.
+		bodyMissingVars = nil
+	} else if !isDefaultBody {
+		// Only merge body missing vars when the operator template was used
+		// (not the default template, not the notice override).
 		mergeMissingVars(missingVars, bodyMissingVars)
 	}
 
