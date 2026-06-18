@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/SigNoz/signoz/pkg/alertmanager"
@@ -400,6 +401,11 @@ func New(
 		LLMAPIKey:         pickAPIKey(os.Getenv("DS_APM_LLM_PROVIDER")),
 		LLMBinary:         os.Getenv("DS_APM_LLM_BINARY"),
 		LLMEndpoint:       os.Getenv("DS_APM_LLM_ENDPOINT"),
+		LLMMaxOutputTokens: noticeMaxOutputTokens(
+			envInt("DS_APM_AINOTICE_MAX_OUTPUT_TOKENS"),
+			envFloat("DS_APM_AINOTICE_MAX_BUDGET_USD"),
+			envFloat("DS_APM_AINOTICE_OUTPUT_USD_PER_MTOK"),
+		),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("ds-apm ai generator: %w", err)
@@ -733,6 +739,20 @@ func envInt(key string) int {
 		return 0
 	}
 	return n
+}
+
+// envFloat parses an environment variable as float64; returns 0 when unset or
+// unparseable.
+func envFloat(key string) float64 {
+	v := strings.TrimSpace(os.Getenv(key))
+	if v == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(v, 64)
+	if err != nil {
+		return 0
+	}
+	return f
 }
 
 func pickAPIKey(llmProvider string) string {
