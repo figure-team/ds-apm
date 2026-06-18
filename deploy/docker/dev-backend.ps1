@@ -26,21 +26,29 @@ $env:GOARCH      = 'amd64'
 # Newer host Go (1.26+) breaks bytedance/sonic v1.14.1 (undefined GoMapIterator),
 # so don't let GOTOOLCHAIN=auto fall through to the local toolchain.
 $env:GOTOOLCHAIN = 'go1.25.7'
-go build -tags timetzdata `
+# -v prints each package as it compiles so a long cold build shows progress
+# instead of looking hung (go build is otherwise silent).
+go build -tags timetzdata -v `
   -ldflags '-s -w -X github.com/SigNoz/signoz/pkg/version.variant=community' `
   -o $outBin ./cmd/community
 if ($LASTEXITCODE -ne 0) { throw 'go build failed' }
 
-$compose = @(
-  '-f', 'deploy/docker/docker-compose.local.yaml',
-  '-f', 'deploy/docker/docker-compose.dev.yaml'
-)
+$compose = @('-f', 'deploy/docker/docker-compose.local.yaml')
 
-Write-Host '==> Ensuring signoz container is up (no build)...' -ForegroundColor Cyan
+Write-Host '==> Ensuring signoz container exists (no build)...' -ForegroundColor Cyan
 docker compose @compose up -d --no-build signoz
 if ($LASTEXITCODE -ne 0) { throw 'docker compose up failed (build the base image once with --build)' }
 
-Write-Host '==> Restarting signoz to load the new binary...' -ForegroundColor Cyan
-docker restart signoz | Out-Null
+# Stop before copying: the running server holds /root/signoz open, so an
+# in-place `docker cp` over the live binary would fail with "text file busy".
+Write-Host '==> Stopping signoz to swap the binary...' -ForegroundColor Cyan
+docker stop signoz | Out-Null
+
+Write-Host '==> Copying freshly built binary into the container...' -ForegroundColor Cyan
+docker cp $outBin signoz:/root/signoz
+if ($LASTEXITCODE -ne 0) { throw 'docker cp failed' }
+
+Write-Host '==> Starting signoz with the new binary...' -ForegroundColor Cyan
+docker start signoz | Out-Null
 
 Write-Host '==> Done. API on :8080, frontend dev server on :3301.' -ForegroundColor Green

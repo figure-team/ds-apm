@@ -1,2 +1,2 @@
-# Host-built backend binary used by docker-compose.dev.yaml (dev-backend.ps1)
+# Host-built backend binary produced by dev-backend.ps1 (docker cp hot-swap)
 .bin/
