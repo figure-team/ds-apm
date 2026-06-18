@@ -1,5 +1,7 @@
 {
 	"something_went_wrong": "Something went wrong",
+	"source": "Source",
+	"failed_to_load_metrics": "Failed to load metrics",
 	"already_logged_in": "Already Logged In",
 	"success": "Success",
 	"cancel": "Cancel",
