@@ -69,6 +69,11 @@ type Config struct {
 	// at a mock server (e.g. wiremock) in tests; empty keeps the provider
 	// default (api.anthropic.com / api.openai.com).
 	LLMEndpoint string
+	// LLMMaxOutputTokens caps the model's output tokens per call (api transports
+	// only). It is the primary cost/latency guardrail for customer-notice
+	// generation: a small cap bounds worst-case spend without needing post-hoc
+	// usage accounting. <= 0 leaves the transport default.
+	LLMMaxOutputTokens int
 }
 
 // New constructs the AIStrategyGenerator selected by cfg.Provider.
@@ -125,6 +130,9 @@ func buildLLMProvider(cfg Config) (llmaigenerator.Provider, error) {
 			}
 			if cfg.LLMEndpoint != "" {
 				opts = append(opts, claudeapi.WithEndpoint(cfg.LLMEndpoint))
+			}
+			if cfg.LLMMaxOutputTokens > 0 {
+				opts = append(opts, claudeapi.WithMaxTokens(cfg.LLMMaxOutputTokens))
 			}
 			return claudeapi.New(cfg.LLMAPIKey, opts...)
 		case "cli":

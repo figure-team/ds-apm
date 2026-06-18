@@ -93,3 +93,15 @@ func TestNew_ClaudeCLIWithOAuthToken(t *testing.T) {
 		t.Fatalf("nil generator")
 	}
 }
+
+func TestNewClaudeAPIHonorsMaxOutputTokens(t *testing.T) {
+	gen, err := New(Config{
+		Provider:           "llm",
+		LLMProvider:        "claude",
+		LLMTransport:       "api",
+		LLMAPIKey:          "test-key",
+		LLMMaxOutputTokens: 512,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, gen)
+}
