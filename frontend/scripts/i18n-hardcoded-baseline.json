@@ -87,7 +87,6 @@
   "src/components/HeaderRightSection/ShareURLModal.tsx\tjsx-text\tPlease select / enter valid relative time to toggle.",
   "src/components/HeaderRightSection/ShareURLModal.tsx\tjsx-text\tShare page link",
   "src/components/HeaderRightSection/ShareURLModal.tsx\tjsx-text\tShare the current page link with your team member",
-  "src/components/HostMetricsDetail/WaitlistFragment/WaitlistFragment.tsx\tjsx-text\tGet early access",
   "src/components/InviteMembersModal/InviteMembersModal.tsx\tattr:aria-label\tRemove row",
   "src/components/InviteMembersModal/InviteMembersModal.tsx\tattr:placeholder\tSelect roles",
   "src/components/InviteMembersModal/InviteMembersModal.tsx\tattr:title\tInvite Team Members",
