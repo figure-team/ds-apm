@@ -20,6 +20,7 @@ import {
 	KAFKA_SETUP_DOC_LINK,
 	MessagingQueueHealthCheckService,
 } from 'pages/MessagingQueues/MessagingQueuesUtils';
+import i18n from 'ReactI18';
 import { openInNewTab } from 'utils/navigation';
 import { v4 as uuid } from 'uuid';
 
@@ -96,7 +97,7 @@ function ErrorTitleAndKey({
 						}}
 					>
 						<OctagonAlert size={14} />
-						Fix
+						{i18n.t('messagingQueues:fix')}
 					</div>
 				</Tooltip>
 			</div>
@@ -130,7 +131,7 @@ function treeTitleAndKey({
 				</Typography.Text>
 				{isLeaf && (
 					<div className="success-attribute-icon">
-						<Tooltip title="Success">
+						<Tooltip title={i18n.t('messagingQueues:success')}>
 							<Check size={14} />
 						</Tooltip>
 					</div>
@@ -220,7 +221,7 @@ function AttributeCheckList({
 
 	return (
 		<Modal
-			title="Kafka Service Attributes"
+			title={i18n.t('messagingQueues:kafka_service_attributes')}
 			open={visible}
 			onCancel={onClose}
 			footer={false}

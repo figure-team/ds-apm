@@ -1,4 +1,7 @@
 {
+	"fix": "수정",
+	"success": "성공",
+	"kafka_service_attributes": "Kafka 서비스 속성",
 	"tab_overview": "개요",
 	"breadcrumb_kafka_views": "Kafka / 보기 /",
 	"view_consumer_lag": "컨슈머 지연(랙) 보기",
