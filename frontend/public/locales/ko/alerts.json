@@ -292,6 +292,8 @@
 	"rc_copy_incident_briefing": "브리핑 복사",
 	"rc_copy_response_context": "컨텍스트 복사",
 	"rc_copy_evidence_status": "증거 상태 복사",
+	"rc_view_details": "자세히보기",
+	"rc_view_less": "간략히보기",
 	"pd_subtitle": "계획된 다운타임을 생성하고 관리합니다.",
 	"pd_search_placeholder": "계획된 다운타임 검색...",
 	"pd_new_btn": "새 다운타임",

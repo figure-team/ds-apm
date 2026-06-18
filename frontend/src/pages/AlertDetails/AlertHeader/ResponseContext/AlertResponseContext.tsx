@@ -591,6 +591,7 @@ function AlertResponseContext({
 	};
 	const [, copyToClipboard] = useCopyToClipboard();
 	const [copiedTarget, setCopiedTarget] = useState<string>();
+	const [isNoticeExpanded, setIsNoticeExpanded] = useState(false);
 	const copiedResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	useEffect(() => {
@@ -707,7 +708,40 @@ function AlertResponseContext({
 								.filter(Boolean)
 								.join(' ');
 
-							return (
+							if (key === 'customer_update') {
+									const firstLine = value.split('\n')[0];
+									return (
+										<div className="alert-response-context__item" key={key}>
+											<span className="alert-response-context__label">{label}</span>
+											<span
+												className={`${valueClassName} alert-response-context__value--notice`}
+											>
+												{isNoticeExpanded ? value : firstLine}
+											</span>
+											<Button
+												className="alert-response-context__item-copy"
+												onClick={(): void => setIsNoticeExpanded((v) => !v)}
+												size="small"
+												type="text"
+											>
+												{isNoticeExpanded ? t('rc_view_less') : t('rc_view_details')}
+											</Button>
+											{copyLabel && (
+												<Button
+													aria-label={isCopied ? `Copied ${label}` : copyLabel}
+													className="alert-response-context__item-copy"
+													icon={isCopied ? <Check size={12} /> : <Copy size={12} />}
+													onClick={(): void => handleCopyItem(item)}
+													size="small"
+													title={copyLabel}
+													type="text"
+												/>
+											)}
+										</div>
+									);
+								}
+
+								return (
 								<div className="alert-response-context__item" key={key}>
 									<span className="alert-response-context__label">{label}</span>
 									{safeHttpUrl && sanitizedHttpUrl ? (

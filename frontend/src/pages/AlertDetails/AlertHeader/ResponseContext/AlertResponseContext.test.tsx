@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import AlertResponseContext from './AlertResponseContext';
@@ -480,5 +480,23 @@ describe('AlertResponseContext', () => {
 		expect(
 			screen.queryByRole('link', { name: 'javascript:alert(1)' }),
 		).not.toBeInTheDocument();
+	});
+
+	it('collapses a long customer update and toggles full text', () => {
+		const annotations = {
+			customer_update: '[결제 장애 안내]\n\n■ 발생 현황: 확인 중\n■ 영향 범위: 결제 일부',
+		};
+		render(<AlertResponseContext annotations={annotations} labels={{ sop_id: 'SOP-PAY-001' }} />);
+
+		// collapsed by default: full body (영향 범위 line) is not shown
+		expect(screen.queryByText(/영향 범위/)).not.toBeInTheDocument();
+
+		// toggle expands (i18n mock returns the key)
+		fireEvent.click(screen.getByText('rc_view_details'));
+		expect(screen.getByText(/영향 범위/)).toBeInTheDocument();
+
+		// toggle collapses back
+		fireEvent.click(screen.getByText('rc_view_less'));
+		expect(screen.queryByText(/영향 범위/)).not.toBeInTheDocument();
 	});
 });

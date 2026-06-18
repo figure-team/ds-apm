@@ -292,6 +292,8 @@
 	"rc_copy_incident_briefing": "Copy briefing",
 	"rc_copy_response_context": "Copy context",
 	"rc_copy_evidence_status": "Copy evidence status",
+	"rc_view_details": "View details",
+	"rc_view_less": "View less",
 	"pd_subtitle": "Create and manage planned downtimes.",
 	"pd_search_placeholder": "Search for a planned downtime...",
 	"pd_new_btn": "New downtime",
