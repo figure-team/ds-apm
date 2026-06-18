@@ -264,8 +264,8 @@ describe('Public Dashboard Container', () => {
 			);
 
 			expect(screen.getByText(TEST_DASHBOARD_TITLE)).toBeInTheDocument();
-			expect(screen.getByText('SigNoz')).toBeInTheDocument();
-			expect(screen.getByAltText('SigNoz')).toBeInTheDocument();
+			expect(screen.getByText('public_dashboard_brand')).toBeInTheDocument();
+			expect(screen.getByAltText('public_dashboard_brand')).toBeInTheDocument();
 		});
 
 		it('should render time range selector when timeRangeEnabled is true', () => {
@@ -713,7 +713,7 @@ describe('Public Dashboard Container', () => {
 				/>,
 			);
 
-			expect(screen.getByText('SigNoz')).toBeInTheDocument();
+			expect(screen.getByText('public_dashboard_brand')).toBeInTheDocument();
 		});
 
 		it('should handle missing layout data', () => {

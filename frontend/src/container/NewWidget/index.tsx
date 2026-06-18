@@ -1,4 +1,4 @@
-/* eslint-disable sonarjs/cognitive-complexity */
+﻿/* eslint-disable sonarjs/cognitive-complexity */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { UseQueryResult } from 'react-query';
@@ -809,7 +809,7 @@ function NewWidget({
 					/>
 					<Flex align="center" gap={24}>
 						<Typography.Text className="configure-panel">
-							Configure panel
+							{t('configure_panel')}
 						</Typography.Text>
 					</Flex>
 				</div>
@@ -821,7 +821,7 @@ function NewWidget({
 							disabled={isSaveDisabled || !currentQuery}
 							onClick={handleSwitchToViewMode}
 						>
-							Switch to View Mode
+							{t('switch_to_view_mode')}
 						</Button>
 					)}
 					{isSaveDisabled && (
@@ -833,7 +833,7 @@ function NewWidget({
 							onClick={onSaveDashboard}
 							className="save-btn"
 						>
-							Save Changes
+							{t('save_changes')}
 						</Button>
 					)}
 					{!isSaveDisabled && (
@@ -846,7 +846,7 @@ function NewWidget({
 							prefix={<Check size={14} />}
 							className="save-btn"
 						>
-							Save Changes
+							{t('save_changes')}
 						</Button>
 					)}
 				</div>
@@ -956,7 +956,7 @@ function NewWidget({
 					isQueryModified ? (
 						<Space>
 							<WarningOutlined style={{ fontSize: '16px', color: '#fdd600' }} />
-							Unsaved Changes
+							{t('unsaved_changes')}
 						</Space>
 					) : (
 						'Save Widget'
@@ -987,7 +987,7 @@ function NewWidget({
 				title={
 					<Space>
 						<WarningOutlined style={{ fontSize: '16px', color: '#fdd600' }} />
-						Unsaved Changes
+						{t('unsaved_changes')}
 					</Space>
 				}
 				focusTriggerAfterClose

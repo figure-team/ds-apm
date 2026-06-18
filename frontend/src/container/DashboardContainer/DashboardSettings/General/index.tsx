@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Col, Input, Select, Space, Typography } from 'antd';
 import AddTags from 'container/DashboardContainer/DashboardSettings/General/AddTags';
@@ -37,7 +37,7 @@ function GeneralDashboardSettings(): JSX.Element {
 	const [numberOfUnsavedChanges, setNumberOfUnsavedChanges] =
 		useState<number>(0);
 
-	const { t } = useTranslation('common');
+	const { t } = useTranslation('dashboard');
 
 	const onSaveHandler = (): void => {
 		if (!dashboardData) {
@@ -113,7 +113,7 @@ function GeneralDashboardSettings(): JSX.Element {
 				>
 					<div>
 						<Typography style={{ marginBottom: '0.5rem' }} className="dashboard-name">
-							Dashboard Name
+							{t('dashboard_name_settings_label')}
 						</Typography>
 						<section className="name-icon-input">
 							<Select
@@ -141,7 +141,7 @@ function GeneralDashboardSettings(): JSX.Element {
 
 					<div>
 						<Typography style={{ marginBottom: '0.5rem' }} className="dashboard-name">
-							Description
+							{t('variable_description_label')}
 						</Typography>
 						<Input.TextArea
 							data-testid="dashboard-desc"
@@ -153,7 +153,7 @@ function GeneralDashboardSettings(): JSX.Element {
 					</div>
 					<div>
 						<Typography style={{ marginBottom: '0.5rem' }} className="dashboard-name">
-							Tags
+							{t('tags_label')}
 						</Typography>
 						<AddTags tags={updatedTags} setTags={setUpdatedTags} />
 					</div>
@@ -164,8 +164,7 @@ function GeneralDashboardSettings(): JSX.Element {
 					<div className="unsaved">
 						<div className="unsaved-dot" />
 						<Typography.Text className="unsaved-changes">
-							{numberOfUnsavedChanges} unsaved change
-							{numberOfUnsavedChanges > 1 && 's'}
+							{numberOfUnsavedChanges} {t('unsaved_change')}{numberOfUnsavedChanges > 1 ? 's' : ''}
 						</Typography.Text>
 					</div>
 					<div className="footer-action-btns">
@@ -176,7 +175,7 @@ function GeneralDashboardSettings(): JSX.Element {
 							type="text"
 							className="discard-btn"
 						>
-							Discard
+							{t('discard')}
 						</Button>
 						<Button
 							style={{
@@ -190,7 +189,7 @@ function GeneralDashboardSettings(): JSX.Element {
 							type="primary"
 							className="save-btn"
 						>
-							{t('save')}
+							{t('save', { ns: 'common' })}
 						</Button>
 					</div>
 				</div>

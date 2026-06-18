@@ -1,4 +1,5 @@
-/* eslint-disable sonarjs/cognitive-complexity */
+﻿/* eslint-disable sonarjs/cognitive-complexity */
+import { useTranslation } from 'react-i18next';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 // eslint-disable-next-line no-restricted-imports
@@ -81,6 +82,7 @@ function VariableItem({
 	validateAttributeKey,
 	mode,
 }: VariableItemProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const [variableName, setVariableName] = useState<string>(
 		variableData.name || '',
 	);
@@ -445,17 +447,17 @@ function VariableItem({
 						icon={<ArrowLeft size={14} />}
 						onClick={onCancel}
 					>
-						All variables
+						{t('all_variables')}
 					</Button>
 				</div>
 				<div className="variable-item-content">
 					<VariableItemRow className="variable-name-section">
 						<LabelContainer>
-							<Typography className="typography-variables">Name</Typography>
+							<Typography className="typography-variables">{t('variable_name_label')}</Typography>
 						</LabelContainer>
 						<div>
 							<Input
-								placeholder="Unique name of the variable"
+								placeholder={t('variable_name_placeholder')}
 								value={variableName}
 								className="name-input"
 								onChange={({ target: { value } }): void => {
@@ -491,12 +493,12 @@ function VariableItem({
 					</VariableItemRow>
 					<VariableItemRow className="variable-description-section">
 						<LabelContainer>
-							<Typography className="typography-variables">Description</Typography>
+							<Typography className="typography-variables">{t('variable_description_label')}</Typography>
 						</LabelContainer>
 
 						<Input.TextArea
 							value={variableDescription}
-							placeholder="Enter a description for the variable"
+							placeholder={t('variable_description_placeholder')}
 							className="description-input"
 							rows={3}
 							onChange={(e): void => setVariableDescription(e.target.value)}
@@ -504,7 +506,7 @@ function VariableItem({
 					</VariableItemRow>
 					<VariableItemRow className="variable-type-section">
 						<LabelContainer className="variable-type-label-container">
-							<Typography className="typography-variables">Variable Type</Typography>
+							<Typography className="typography-variables">{t('variable_type_label')}</Typography>
 							<TextToolTip
 								text="Learn more about supported variable types"
 								url="https://signoz.io/docs/userguide/manage-variables/#supported-variable-types"
@@ -539,9 +541,9 @@ function VariableItem({
 									}
 								}}
 							>
-								Dynamic
+								{t('variable_type_dynamic')}
 								<Tag bordered={false} className="sidenav-beta-tag" color="geekblue">
-									Beta
+									{t('variable_type_beta')}
 								</Tag>
 							</Button>
 							<Button
@@ -560,7 +562,7 @@ function VariableItem({
 									}
 								}}
 							>
-								Textbox
+								{t('variable_type_textbox')}
 							</Button>
 							<Button
 								type="text"
@@ -578,7 +580,7 @@ function VariableItem({
 									}
 								}}
 							>
-								Custom
+								{t('variable_type_custom')}
 							</Button>
 							<Button
 								type="text"
@@ -596,9 +598,9 @@ function VariableItem({
 									}
 								}}
 							>
-								Query
+								{t('variable_type_query')}
 								<Tag bordered={false} className="sidenav-beta-tag" color="warning">
-									Not Recommended
+									{t('variable_type_not_recommended')}
 								</Tag>
 								<div onClick={(e): void => e.stopPropagation()}>
 									<TextToolTip
@@ -632,7 +634,7 @@ function VariableItem({
 					{queryType === 'QUERY' && (
 						<div className="query-container">
 							<LabelContainer>
-								<Typography>Query</Typography>
+								<Typography>{t('variable_type_query')}</Typography>
 							</LabelContainer>
 
 							<div style={{ flex: 1, position: 'relative' }}>
@@ -664,7 +666,7 @@ function VariableItem({
 									}}
 									loading={previewLoading}
 								>
-									Test Run Query
+									{t('test_run_query')}
 								</Button>
 							</div>
 						</div>
@@ -682,7 +684,7 @@ function VariableItem({
 										children: (
 											<Input.TextArea
 												value={variableCustomValue}
-												placeholder="Enter options separated by commas."
+												placeholder={t('custom_options_placeholder')}
 												rootClassName="comma-input"
 												onChange={(e): void => {
 													setVariableCustomValue(e.target.value);
@@ -703,7 +705,7 @@ function VariableItem({
 					{queryType === 'TEXTBOX' && (
 						<VariableItemRow className="variable-textbox-section">
 							<LabelContainer>
-								<Typography className="typography-variables">Default Value</Typography>
+								<Typography className="typography-variables">{t('default_value_label')}</Typography>
 							</LabelContainer>
 							<Input
 								value={variableTextboxValue}
@@ -711,7 +713,7 @@ function VariableItem({
 								onChange={(e): void => {
 									setVariableTextboxValue(e.target.value);
 								}}
-								placeholder="Enter a default value (if any)..."
+								placeholder={t('default_value_placeholder')}
 								style={{ width: 400 }}
 							/>
 						</VariableItemRow>
@@ -723,7 +725,7 @@ function VariableItem({
 							<VariableItemRow className="variables-preview-section">
 								<LabelContainer style={{ width: '100%' }}>
 									<Typography className="typography-variables">
-										Preview of Values
+						{t('preview_of_values')}
 									</Typography>
 								</LabelContainer>
 								<div className="preview-values">
@@ -738,7 +740,7 @@ function VariableItem({
 							</VariableItemRow>
 							<VariableItemRow className="sort-values-section">
 								<LabelContainer>
-									<Typography className="typography-variables">Sort Values</Typography>
+									<Typography className="typography-variables">{t('sort_values_label')}</Typography>
 								</LabelContainer>
 
 								<Select
@@ -750,15 +752,15 @@ function VariableItem({
 									}
 									className="sort-input"
 								>
-									<Option value={VariableSortTypeArr[0]}>Disabled</Option>
-									<Option value={VariableSortTypeArr[1]}>Ascending</Option>
-									<Option value={VariableSortTypeArr[2]}>Descending</Option>
+									<Option value={VariableSortTypeArr[0]}>{t('sort_disabled')}</Option>
+									<Option value={VariableSortTypeArr[1]}>{t('sort_ascending')}</Option>
+									<Option value={VariableSortTypeArr[2]}>{t('sort_descending')}</Option>
 								</Select>
 							</VariableItemRow>
 							<VariableItemRow className="multiple-values-section">
 								<LabelContainer>
 									<Typography className="typography-variables">
-										Enable multiple values to be checked
+						{t('enable_multiple_values')}
 									</Typography>
 								</LabelContainer>
 								<Switch
@@ -775,7 +777,7 @@ function VariableItem({
 								<VariableItemRow className="all-option-section">
 									<LabelContainer>
 										<Typography className="typography-variables">
-											Include an option for ALL values
+						{t('include_all_option')}
 										</Typography>
 									</LabelContainer>
 									<Switch
@@ -786,7 +788,7 @@ function VariableItem({
 							)}
 							<VariableItemRow className="default-value-section">
 								<LabelContainer>
-									<Typography className="typography-variables">Default Value</Typography>
+									<Typography className="typography-variables">{t('default_value_label')}</Typography>
 									<Typography className="default-value-description">
 										{queryType === 'QUERY'
 											? 'Click Test Run Query to see the values or add custom value'
@@ -794,7 +796,7 @@ function VariableItem({
 									</Typography>
 								</LabelContainer>
 								<CustomSelect
-									placeholder="Select a default value"
+									placeholder={t('default_value_select_placeholder')}
 									value={variableDefaultValue}
 									onChange={(value): void => setVariableDefaultValue(value)}
 									options={previewValues.map((value) => ({
@@ -809,7 +811,7 @@ function VariableItem({
 						<VariableItemRow className="dynamic-variable-section">
 							<LabelContainer>
 								<Typography className="typography-variables">
-									Select Panels to apply this variable
+						{t('select_panels_label')}
 								</Typography>
 							</LabelContainer>
 							<WidgetSelector
@@ -828,7 +830,7 @@ function VariableItem({
 						icon={<X size={14} />}
 						className="footer-btn-discard"
 					>
-						Discard
+						{t('discard')}
 					</Button>
 					<Button
 						type="primary"
@@ -837,7 +839,7 @@ function VariableItem({
 						icon={<Check size={14} />}
 						className="footer-btn-save"
 					>
-						Save Variable
+						{t('save_variable')}
 					</Button>
 				</VariableItemRow>
 			</div>

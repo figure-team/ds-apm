@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction } from 'react';
 import { Switch, Typography } from 'antd';
+import { useTranslation } from 'react-i18next';
 import {
 	FillMode,
 	LineInterpolation,
@@ -50,8 +51,9 @@ export default function ChartAppearanceSection({
 	allowSpanGaps,
 	stepInterval,
 }: ChartAppearanceSectionProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	return (
-		<SettingsSection title="Chart Appearance" icon={<Paintbrush size={14} />}>
+		<SettingsSection title={t('section_chart_appearance')} icon={<Paintbrush size={14} />}>
 			{allowFillMode && (
 				<FillModeSelector value={fillMode} onChange={setFillMode} />
 			)}
@@ -67,9 +69,9 @@ export default function ChartAppearanceSection({
 			{allowShowPoints && (
 				<section className="show-points toggle-card">
 					<div className="toggle-card-text-container">
-						<Typography.Text className="section-heading">Show points</Typography.Text>
+						<Typography.Text className="section-heading">{t('show_points')}</Typography.Text>
 						<Typography.Text className="toggle-card-description">
-							Display individual data points on the chart
+							{t('show_points_description')}
 						</Typography.Text>
 					</div>
 					<Switch size="small" checked={showPoints} onChange={setShowPoints} />

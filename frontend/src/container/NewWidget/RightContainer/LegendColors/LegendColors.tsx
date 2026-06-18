@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { UseQueryResult } from 'react-query';
 import { Button, Collapse, ColorPicker, Tooltip, Typography } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { themeColors } from 'constants/theme';
 import { useQueryBuilder } from 'hooks/queryBuilder/useQueryBuilder';
 import { useIsDarkMode } from 'hooks/useDarkMode';
@@ -64,6 +65,7 @@ function LegendColors({
 	setCustomLegendColors,
 	queryResponse = null as any,
 }: LegendColorsProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const { currentQuery } = useQueryBuilder();
 	const isDarkMode = useIsDarkMode();
 
@@ -135,14 +137,14 @@ function LegendColors({
 			label: (
 				<section className="legend-colors-header">
 					<Palette size={16} />
-					<Typography.Text className="typography">Legend Colors</Typography.Text>
+					<Typography.Text className="typography">{t('legend_colors')}</Typography.Text>
 				</section>
 			),
 			children: (
 				<div className="legend-colors-content">
 					{legendLabels.length === 0 ? (
 						<Typography.Text type="secondary">
-							No legends available. Run a query to see legend options.
+							{t('no_legends_available')}
 						</Typography.Text>
 					) : (
 						<>
@@ -153,7 +155,7 @@ function LegendColors({
 									onClick={resetAllColors}
 									disabled={Object.keys(customLegendColors).length === 0}
 								>
-									Reset All
+									{t('reset_all')}
 								</Button>
 							</div>
 							<div className="legend-items">
@@ -185,7 +187,7 @@ function LegendColors({
 																resetToDefault(label);
 															}}
 														>
-															Reset
+															{t('reset')}
 														</Typography.Link>
 													</div>
 												)}

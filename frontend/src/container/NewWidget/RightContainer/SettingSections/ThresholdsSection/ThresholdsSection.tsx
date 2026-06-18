@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from 'react';
 import { PANEL_TYPES } from 'constants/queryBuilder';
 import { Antenna } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ColumnUnit } from 'types/api/dashboard/getAll';
 
 import SettingsSection from '../../components/SettingsSection/SettingsSection';
@@ -24,9 +25,10 @@ export default function ThresholdsSection({
 	selectedGraph,
 	columnUnits,
 }: ThresholdsSectionProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	return (
 		<SettingsSection
-			title="Thresholds"
+			title={t('section_thresholds')}
 			icon={<Antenna size={14} />}
 			defaultOpen={!!thresholds.length}
 		>

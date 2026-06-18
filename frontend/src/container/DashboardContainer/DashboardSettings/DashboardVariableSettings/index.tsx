@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HolderOutlined, PlusOutlined } from '@ant-design/icons';
 import type { DragEndEvent, UniqueIdentifier } from '@dnd-kit/core';
@@ -312,13 +312,13 @@ function VariablesSettings({
 
 	const columns = [
 		{
-			title: 'Variable',
+			title: t('variable_name_label'),
 			dataIndex: 'name',
 			width: '50%',
 			key: 'name',
 		},
 		{
-			title: 'Description',
+			title: t('variable_description_label'),
 			width: '50%',
 			key: 'description',
 			render: (variable: IDashboardVariable): JSX.Element => (
@@ -334,7 +334,7 @@ function VariablesSettings({
 								className="apply-to-all-button"
 								loading={updateMutation.isLoading}
 							>
-								<Typography.Text>Apply to all</Typography.Text>
+								<Typography.Text>{t('apply_to_all')}</Typography.Text>
 							</Button>
 						)}
 						<Button
@@ -437,7 +437,7 @@ function VariablesSettings({
 								onVariableViewModeEnter('ADD', {} as IDashboardVariable)
 							}
 						>
-							<PlusOutlined /> Add Variable
+							<PlusOutlined /> {t('add_variable')}
 						</Button>
 					</Row>
 
@@ -467,14 +467,14 @@ function VariablesSettings({
 				</>
 			)}
 			<Modal
-				title="Delete variable"
+				title={t('delete_variable_title')}
 				centered
 				open={deleteVariableModal}
 				onOk={handleDeleteConfirm}
 				onCancel={handleDeleteCancel}
 			>
 				<Typography.Text>
-					Are you sure you want to delete variable{' '}
+					{t('delete_variable_confirm')}{' '}
 					<span className="delete-variable-name">
 						{variableToDelete?.current?.name}
 					</span>
@@ -482,21 +482,20 @@ function VariablesSettings({
 				</Typography.Text>
 			</Modal>
 			<Modal
-				title="Apply variable to all panels"
+				title={t('apply_variable_to_all_panels_title')}
 				centered
 				open={applyToAllModal}
 				onOk={handleApplyToAllConfirm}
 				onCancel={handleApplyToAllCancel}
-				okText="Apply to all"
-				cancelText="Cancel"
+				okText={t('apply_to_all')}
+				cancelText={t('cancel', { ns: 'common' })}
 			>
 				<Typography.Text>
-					Are you sure you want to apply variable{' '}
+					{t('apply_variable_to_all_panels_confirm_prefix')}{' '}
 					<span className="apply-to-all-variable-name">
 						{variableToApplyToAll?.current?.name}
 					</span>{' '}
-					to all panels? This action may affect panels where this variable is not
-					applicable.
+					{t('apply_variable_to_all_panels_confirm_suffix')}
 				</Typography.Text>
 			</Modal>
 		</>

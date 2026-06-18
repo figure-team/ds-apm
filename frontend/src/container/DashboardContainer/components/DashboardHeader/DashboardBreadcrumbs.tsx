@@ -1,4 +1,5 @@
 import { useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from 'antd';
 import getSessionStorageApi from 'api/browser/sessionstorage/get';
 import ROUTES from 'constants/routes';
@@ -15,6 +16,7 @@ import './DashboardBreadcrumbs.styles.scss';
 function DashboardBreadcrumbs(): JSX.Element {
 	const { safeNavigate } = useSafeNavigate();
 	const { dashboardData } = useDashboardStore();
+	const { t } = useTranslation('dashboard');
 	const updatedAtRef = useRef(dashboardData?.updatedAt);
 
 	const selectedData = dashboardData
@@ -51,7 +53,7 @@ function DashboardBreadcrumbs(): JSX.Element {
 				className="dashboard-btn"
 				onClick={goToListPage}
 			>
-				Dashboard /
+				{t('dashboard_breadcrumb')}
 			</Button>
 			<Button type="text" className="id-btn dashboard-name-btn">
 				<img src={image} alt="dashboard-icon" className="dashboard-icon-image" />

@@ -35,8 +35,7 @@ const mockToast = jest.mocked(toast);
 // Test constants
 const MOCK_DASHBOARD_ID = 'test-dashboard-id';
 const MOCK_PUBLIC_PATH = '/public/dashboard/test-dashboard-id';
-const DASHBOARD_VARIABLES_WARNING =
-	"Dashboard variables won't work in public dashboards";
+const DASHBOARD_VARIABLES_WARNING = 'dashboard_variables_no_public';
 
 // Use wildcard pattern to match both relative and absolute URLs in MSW
 const publicDashboardURL = `*/api/v1/dashboards/${MOCK_DASHBOARD_ID}/public`;
@@ -110,10 +109,10 @@ describe('PublicDashboardSetting', () => {
 			});
 
 			expect(
-				await screen.findByRole('checkbox', { name: /enable time range/i }),
+				await screen.findByRole('checkbox', { name: /enable_time_range/i }),
 			).toBeInTheDocument();
 
-			expect(await screen.findByText(/default time range/i)).toBeInTheDocument();
+			expect(await screen.findByText(/default_time_range_label/i)).toBeInTheDocument();
 
 			expect(screen.getByText(/Last 30 minutes/i)).toBeInTheDocument();
 
@@ -124,7 +123,7 @@ describe('PublicDashboardSetting', () => {
 			});
 
 			expect(
-				await screen.findByRole('button', { name: /publish dashboard/i }),
+				await screen.findByRole('button', { name: /publish_dashboard/i }),
 			).toBeInTheDocument();
 		});
 	});
@@ -150,25 +149,25 @@ describe('PublicDashboardSetting', () => {
 			});
 
 			expect(
-				await screen.findByRole('checkbox', { name: /enable time range/i }),
+				await screen.findByRole('checkbox', { name: /enable_time_range/i }),
 			).toBeChecked();
 
 			await waitFor(() => {
-				expect(screen.getByText(/default time range/i)).toBeInTheDocument();
+				expect(screen.getByText(/default_time_range_label/i)).toBeInTheDocument();
 			});
 
 			expect(screen.getByText(/Last 30 minutes/i)).toBeInTheDocument();
 
 			await waitFor(() => {
-				expect(screen.getByText(/Public Dashboard URL/i)).toBeInTheDocument();
+				expect(screen.getByText(/public_dashboard_url/i)).toBeInTheDocument();
 			});
 
 			expect(
-				await screen.findByRole('button', { name: /update published dashboard/i }),
+				await screen.findByRole('button', { name: /update_published_dashboard/i }),
 			).toBeInTheDocument();
 
 			expect(
-				await screen.findByRole('button', { name: /unpublish dashboard/i }),
+				await screen.findByRole('button', { name: /unpublish_dashboard/i }),
 			).toBeInTheDocument();
 		});
 	});
@@ -191,7 +190,7 @@ describe('PublicDashboardSetting', () => {
 
 			// Wait for checkbox to be rendered and verify initial state
 			const checkbox = await screen.findByRole('checkbox', {
-				name: /enable time range/i,
+				name: /enable_time_range/i,
 			});
 			expect(checkbox).toBeChecked();
 
@@ -270,7 +269,7 @@ describe('PublicDashboardSetting', () => {
 
 			// Find and click publish button
 			const publishButton = await screen.findByRole('button', {
-				name: /publish dashboard/i,
+				name: /publish_dashboard/i,
 			});
 			await user.click(publishButton);
 
@@ -311,7 +310,7 @@ describe('PublicDashboardSetting', () => {
 			// Wait for API response and component update
 			const updateButton = await screen.findByRole(
 				'button',
-				{ name: /update published dashboard/i },
+				{ name: /update_published_dashboard/i },
 				{ timeout: 5000 },
 			);
 			await user.click(updateButton);
@@ -357,7 +356,7 @@ describe('PublicDashboardSetting', () => {
 			// Wait for API response and component update
 			const unpublishButton = await screen.findByRole(
 				'button',
-				{ name: /unpublish dashboard/i },
+				{ name: /unpublish_dashboard/i },
 				{ timeout: 5000 },
 			);
 			await user.click(unpublishButton);
@@ -388,7 +387,7 @@ describe('PublicDashboardSetting', () => {
 			render(<PublicDashboardSetting />, {}, { role: USER_ROLES.VIEWER });
 
 			const publishButton = await screen.findByRole('button', {
-				name: /publish dashboard/i,
+				name: /publish_dashboard/i,
 			});
 			expect(publishButton).toBeInTheDocument();
 			expect(publishButton).toBeDisabled();
@@ -410,7 +409,7 @@ describe('PublicDashboardSetting', () => {
 				render(<PublicDashboardSetting />, {}, { role: USER_ROLES.VIEWER });
 
 				const unpublishButton = await screen.findByRole('button', {
-					name: /unpublish dashboard/i,
+					name: /unpublish_dashboard/i,
 				});
 				expect(unpublishButton).toBeInTheDocument();
 				expect(unpublishButton).toBeDisabled();
@@ -421,7 +420,7 @@ describe('PublicDashboardSetting', () => {
 				render(<PublicDashboardSetting />, {}, { role: USER_ROLES.VIEWER });
 
 				const updateButton = await screen.findByRole('button', {
-					name: /update published dashboard/i,
+					name: /update_published_dashboard/i,
 				});
 				expect(updateButton).toBeInTheDocument();
 				expect(updateButton).toBeDisabled();

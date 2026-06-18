@@ -1,3 +1,4 @@
+﻿import { useTranslation } from 'react-i18next';
 import { ChangeEvent, Dispatch, SetStateAction, useCallback } from 'react';
 import { Input } from 'antd';
 
@@ -9,6 +10,7 @@ function Description({
 	description,
 	setDescription,
 }: DescriptionProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const onChangeHandler = useCallback(
 		(e: ChangeEvent<HTMLTextAreaElement>) => {
 			setDescription(e.target.value);
@@ -19,7 +21,7 @@ function Description({
 	return (
 		<Container>
 			<TextArea
-				placeholder="Description of the dashboard"
+				placeholder={t('description_of_dashboard')}
 				onChange={onChangeHandler}
 				value={description}
 			/>

@@ -1,3 +1,4 @@
+﻿import { useTranslation } from 'react-i18next';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { Col, Tooltip } from 'antd';
 import Input from 'components/Input';
@@ -7,6 +8,7 @@ import { InputContainer, NewTagContainer, TagsContainer } from './styles';
 import './AddTags.styles.scss';
 
 function AddTags({ tags, setTags }: AddTagsProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const [inputValue, setInputValue] = useState<string>('');
 	const [editInputIndex, setEditInputIndex] = useState(-1);
 	const [editInputValue, setEditInputValue] = useState('');
@@ -92,7 +94,7 @@ function AddTags({ tags, setTags }: AddTagsProps): JSX.Element {
 					type="text"
 					value={inputValue}
 					rootClassName="tags-input"
-					placeholder="Start typing your tag name"
+					placeholder={t('tag_name_placeholder')}
 					onChangeHandler={(event): void =>
 						onChangeHandler(event.target.value, setInputValue)
 					}

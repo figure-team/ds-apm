@@ -54,12 +54,12 @@ describe('LegendColors', () => {
 			/>,
 		);
 
-		expect(screen.getByText('Legend Colors')).toBeInTheDocument();
+		expect(screen.getByText('legend_colors')).toBeInTheDocument();
 
 		// Expand the collapse to reveal legend items
 		await user.click(
 			screen.getByRole('tab', {
-				name: /Legend Colors/i,
+				name: /legend_colors/i,
 			}),
 		);
 
@@ -81,7 +81,7 @@ describe('LegendColors', () => {
 		// Expand to render the mocked ColorPicker button
 		await user.click(
 			screen.getByRole('tab', {
-				name: /Legend Colors/i,
+				name: /legend_colors/i,
 			}),
 		);
 
@@ -108,7 +108,7 @@ describe('LegendColors', () => {
 		// Expand panel to render the mocked ColorPicker button
 		await user.click(
 			screen.getByRole('tab', {
-				name: /Legend Colors/i,
+				name: /legend_colors/i,
 			}),
 		);
 

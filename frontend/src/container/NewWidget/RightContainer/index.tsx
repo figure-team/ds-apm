@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useMemo } from 'react';
 import { UseQueryResult } from 'react-query';
 import { Typography } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { ExecStats } from 'api/v5/v5';
 import { PrecisionOption, PrecisionOptionsEnum } from 'components/Graph/types';
 import { PANEL_TYPES, PanelDisplay } from 'constants/queryBuilder';
@@ -111,6 +112,7 @@ function RightContainer({
 	enableDrillDown = false,
 	isNewDashboard,
 }: RightContainerProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const { dashboardVariables } = useDashboardVariables();
 
 	const selectedPanelDisplay = PanelTypesWithData.find(
@@ -206,7 +208,7 @@ function RightContainer({
 		<div className="right-container">
 			<section className="header">
 				<div className="purple-dot" />
-				<Typography.Text className="header-text">Panel Settings</Typography.Text>
+				<Typography.Text className="header-text">{t('panel_settings')}</Typography.Text>
 			</section>
 
 			<GeneralSettingsSection

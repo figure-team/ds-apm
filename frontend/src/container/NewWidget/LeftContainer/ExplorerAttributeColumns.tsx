@@ -1,3 +1,4 @@
+﻿import { useTranslation } from 'react-i18next';
 import { Checkbox, Empty } from 'antd';
 import { AxiosResponse } from 'axios';
 import Spinner from 'components/Spinner';
@@ -22,6 +23,8 @@ function ExplorerAttributeColumns({
 	handleCheckboxChange,
 	dataSource,
 }: ExplorerAttributeColumnsProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
+
 	if (isLoading) {
 		return (
 			<div className="attribute-columns">
@@ -41,7 +44,7 @@ function ExplorerAttributeColumns({
 	if (filteredAttributeKeys.length === 0) {
 		return (
 			<div className="attribute-columns">
-				<Empty description="No columns found" />
+				<Empty description={t('no_columns_found')} />
 			</div>
 		);
 	}

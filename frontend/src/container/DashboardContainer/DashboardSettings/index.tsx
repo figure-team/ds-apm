@@ -1,3 +1,4 @@
+﻿import { useTranslation } from 'react-i18next';
 import { Button, Tabs, Tooltip } from 'antd';
 import { useGetTenantLicense } from 'hooks/useGetTenantLicense';
 import { Braces, Globe, Table } from 'lucide-react';
@@ -16,6 +17,7 @@ function DashboardSettings({
 }: {
 	variablesSettingsTabHandle: VariablesSettingsTabHandle;
 }): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const { user } = useAppContext();
 	const { isCloudUser, isEnterpriseSelfHostedUser } = useGetTenantLicense();
 
@@ -38,7 +40,7 @@ function DashboardSettings({
 						user?.role !== USER_ROLES.ADMIN ? 'disabled-btn' : ''
 					}`}
 				>
-					Publish
+					{t('publish_tab')}
 				</Button>
 			</Tooltip>
 		),
@@ -51,7 +53,7 @@ function DashboardSettings({
 		{
 			label: (
 				<Button type="text" icon={<Table size="14" />} className="overview-btn">
-					Overview
+					{t('overview_tab')}
 				</Button>
 			),
 			key: 'general',
@@ -60,7 +62,7 @@ function DashboardSettings({
 		{
 			label: (
 				<Button type="text" icon={<Braces size={14} />} className="variables-btn">
-					Variables
+					{t('variables_tab')}
 				</Button>
 			),
 			key: 'variables',

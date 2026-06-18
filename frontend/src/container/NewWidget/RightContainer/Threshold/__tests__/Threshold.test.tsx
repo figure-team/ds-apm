@@ -92,9 +92,7 @@ describe('Threshold Component Unit Validation', () => {
 
 		const errorMessage = screen.getByTestId('invalid-unit-comparison');
 		// Assert - Validation error should be displayed
-		expect(errorMessage.textContent).toBe(
-			`Threshold unit (${UniversalYAxisUnit.MILLISECONDS}) is not valid in comparison with the column unit (${UniversalYAxisUnit.PERCENT})`,
-		);
+		expect(errorMessage.textContent).toBe('threshold_unit_invalid');
 	});
 
 	it('should not show validation error when threshold unit matches column unit', () => {
@@ -121,9 +119,7 @@ describe('Threshold Component Unit Validation', () => {
 
 		const errorMessage = screen.getByTestId('invalid-unit-comparison');
 		// Assert - Validation error should be displayed
-		expect(errorMessage.textContent).toBe(
-			`Threshold unit (${UniversalYAxisUnit.MILLISECONDS}) is not valid in comparison with the y-axis unit (${UniversalYAxisUnit.PERCENT})`,
-		);
+		expect(errorMessage.textContent).toBe('threshold_unit_invalid');
 	});
 
 	it('should not show validation error for time series graph when threshold unit is "none"', () => {
@@ -163,8 +159,6 @@ describe('Threshold Component Unit Validation', () => {
 
 		const errorMessage = screen.getByTestId('invalid-unit-comparison');
 		// Assert - Validation error should be displayed
-		expect(errorMessage.textContent).toBe(
-			`Threshold unit (${UniversalYAxisUnit.BYTES}) is not valid in comparison with the column unit (${UniversalYAxisUnit.PERCENT})`,
-		);
+		expect(errorMessage.textContent).toBe('threshold_unit_invalid');
 	});
 });

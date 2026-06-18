@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useCallback, useEffect } from 'react';
 import { Typography } from 'antd';
 import { useQueryBuilder } from 'hooks/queryBuilder/useQueryBuilder';
+import { useTranslation } from 'react-i18next';
 import { useGetQueryLabels } from 'hooks/useGetQueryLabels';
 import { isEmpty } from 'lodash-es';
 import { ColumnUnit } from 'types/api/dashboard/getAll';
@@ -19,6 +20,7 @@ interface ColumnUnitSelectorProps {
 export function ColumnUnitSelector(
 	props: ColumnUnitSelectorProps,
 ): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const { currentQuery } = useQueryBuilder();
 	const { columnUnits, setColumnUnits, isNewDashboard } = props;
 
@@ -75,7 +77,7 @@ export function ColumnUnitSelector(
 
 	return (
 		<section className="column-unit-selector">
-			<Typography.Text className="heading">Column Units</Typography.Text>
+			<Typography.Text className="heading">{t('column_units')}</Typography.Text>
 			<div className="column-unit-selector-content">
 				{aggregationQueries.map(({ value, label }) => {
 					const baseQueryName = value.split('.')[0];

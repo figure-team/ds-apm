@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction } from 'react';
 import { Link as LinkIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ContextLinksData, Widgets } from 'types/api/dashboard/getAll';
 
 import SettingsSection from '../../components/SettingsSection/SettingsSection';
@@ -18,9 +19,10 @@ export default function ContextLinksSection({
 	setContextLinks,
 	selectedWidget,
 }: ContextLinksSectionProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	return (
 		<SettingsSection
-			title="Context Links"
+			title={t('section_context_links')}
 			icon={<LinkIcon size={14} />}
 			defaultOpen={!!contextLinks.linksData.length}
 		>

@@ -1,5 +1,6 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 import { useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDrag, useDrop, XYCoord } from 'react-dnd';
 import { Button, Input, InputNumber, Select, Space, Typography } from 'antd';
 import YAxisUnitSelector from 'components/YAxisUnitSelector';
@@ -48,6 +49,7 @@ function Threshold({
 	columnUnits,
 	yAxisUnit,
 }: ThresholdProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const [isEditMode, setIsEditMode] = useState<boolean>(isEditEnabled);
 	const [operator, setOperator] = useState<string | number>(
 		thresholdOperator as string | number,
@@ -243,7 +245,7 @@ function Threshold({
 				<div style={{ width: '100%' }}>
 					{selectedGraph === PANEL_TYPES.TIME_SERIES && (
 						<div className="time-series-alerts">
-							<Typography.Text className="label">Label</Typography.Text>
+							<Typography.Text className="label">{t('threshold_label')}</Typography.Text>
 							{isEditMode ? (
 								<Input
 									defaultValue={label}
@@ -261,7 +263,10 @@ function Threshold({
 						selectedGraph === PANEL_TYPES.TABLE) && (
 						<div className="value-table-alerts">
 							<Typography.Text className="typography">
-								If value {selectedGraph === PANEL_TYPES.TABLE ? 'in' : 'is'}
+								{t('threshold_if_value')}{' '}
+								{selectedGraph === PANEL_TYPES.TABLE
+									? t('threshold_condition_in')
+									: t('threshold_condition_is')}
 							</Typography.Text>
 							{isEditMode ? (
 								<div>
@@ -277,7 +282,9 @@ function Threshold({
 												className="operator-input"
 												data-testid="table-operator-input-selector"
 											/>
-											<Typography.Text className="typography">is</Typography.Text>
+											<Typography.Text className="typography">
+											{t('threshold_condition_is')}
+										</Typography.Text>
 										</Space>
 									)}
 									<Select
@@ -303,7 +310,7 @@ function Threshold({
 												className="typography"
 												style={{ marginRight: '10px' }}
 											>
-												is
+												{t('threshold_condition_is')}
 											</Typography.Text>
 										</Space>
 									)}
@@ -332,7 +339,7 @@ function Threshold({
 						<YAxisUnitSelector
 							value={unit}
 							onChange={handleUnitChange}
-							placeholder="Select unit"
+							placeholder={t('threshold_select_unit_placeholder')}
 							source={YAxisSource.DASHBOARDS}
 							initialValue={unit}
 							data-testid="threshold-unit-input"
@@ -376,12 +383,17 @@ function Threshold({
 						className="invalid-unit"
 						data-testid="invalid-unit-comparison"
 					>
-						Threshold unit ({unit}) is not valid in comparison with the{' '}
-						{selectedGraph === PANEL_TYPES.TABLE ? 'column' : 'y-axis'} unit (
-						{selectedGraph === PANEL_TYPES.TABLE
-							? getColumnUnit(tableSelectedOption, columnUnits || {}) || 'none'
-							: yAxisUnit || 'none'}
-						)
+						{t('threshold_unit_invalid', {
+							unit,
+							axis:
+								selectedGraph === PANEL_TYPES.TABLE
+									? t('threshold_axis_column')
+									: t('threshold_axis_y'),
+							axisUnit:
+								selectedGraph === PANEL_TYPES.TABLE
+									? getColumnUnit(tableSelectedOption, columnUnits || {}) || 'none'
+									: yAxisUnit || 'none',
+						})}
 					</Typography.Text>
 				)}
 				{isEditMode && (
@@ -391,14 +403,14 @@ function Threshold({
 							icon={<X size={14} />}
 							onClick={discardHandler}
 						>
-							Discard
+							{t('discard')}
 						</Button>
 						<Button
 							className="save-changes"
 							icon={<Check size={14} />}
 							onClick={saveHandler}
 						>
-							Save Changes
+							{t('save_changes')}
 						</Button>
 					</div>
 				)}

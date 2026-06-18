@@ -1,6 +1,7 @@
 import { ToggleGroup, ToggleGroupItem } from '@signozhq/ui';
 import { Typography } from 'antd';
 import { FillMode } from 'lib/uPlotV2/config/types';
+import { useTranslation } from 'react-i18next';
 
 import './FillModeSelector.styles.scss';
 
@@ -13,9 +14,10 @@ export default function FillModeSelector({
 	value,
 	onChange,
 }: FillModeSelectorProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	return (
 		<section className="fill-mode-selector control-container">
-			<Typography.Text className="section-heading">Fill mode</Typography.Text>
+			<Typography.Text className="section-heading">{t('fill_mode')}</Typography.Text>
 			<ToggleGroup
 				type="single"
 				value={value}
@@ -26,7 +28,7 @@ export default function FillModeSelector({
 					}
 				}}
 			>
-				<ToggleGroupItem value={FillMode.None} aria-label="None">
+				<ToggleGroupItem value={FillMode.None} aria-label={t('fill_mode_none')}>
 					<svg
 						className="fill-mode-icon"
 						viewBox="0 0 48 48"
@@ -38,9 +40,9 @@ export default function FillModeSelector({
 					>
 						<rect x="8" y="16" width="32" height="16" stroke="#888" fill="none" />
 					</svg>
-					<Typography.Text className="section-heading-small">None</Typography.Text>
+					<Typography.Text className="section-heading-small">{t('fill_mode_none')}</Typography.Text>
 				</ToggleGroupItem>
-				<ToggleGroupItem value={FillMode.Solid} aria-label="Solid">
+				<ToggleGroupItem value={FillMode.Solid} aria-label={t('fill_mode_solid')}>
 					<svg
 						className="fill-mode-icon"
 						viewBox="0 0 48 48"
@@ -52,9 +54,9 @@ export default function FillModeSelector({
 					>
 						<rect x="8" y="16" width="32" height="16" fill="#888" />
 					</svg>
-					<Typography.Text className="section-heading-small">Solid</Typography.Text>
+					<Typography.Text className="section-heading-small">{t('fill_mode_solid')}</Typography.Text>
 				</ToggleGroupItem>
-				<ToggleGroupItem value={FillMode.Gradient} aria-label="Gradient">
+				<ToggleGroupItem value={FillMode.Gradient} aria-label={t('fill_mode_gradient')}>
 					<svg
 						className="fill-mode-icon"
 						viewBox="0 0 48 48"
@@ -80,7 +82,7 @@ export default function FillModeSelector({
 						/>
 					</svg>
 					<Typography.Text className="section-heading-small">
-						Gradient
+						{t('fill_mode_gradient')}
 					</Typography.Text>
 				</ToggleGroupItem>
 			</ToggleGroup>

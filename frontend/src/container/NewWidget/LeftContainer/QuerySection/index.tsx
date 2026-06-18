@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+﻿import { useCallback, useEffect, useMemo } from 'react';
 import { Color } from '@signozhq/design-tokens';
 import { Button, Tabs, Typography } from 'antd';
 import logEvent from 'api/common/logEvent';
@@ -11,6 +11,7 @@ import { PANEL_TYPE_TO_QUERY_TYPES } from 'container/NewWidget/utils';
 import RunQueryBtn from 'container/QueryBuilder/components/RunQueryBtn/RunQueryBtn';
 import { QueryBuilderProps } from 'container/QueryBuilder/QueryBuilder.interfaces';
 import { useKeyboardHotkeys } from 'hooks/hotkeys/useKeyboardHotkeys';
+import { useTranslation } from 'react-i18next';
 import { useQueryBuilder } from 'hooks/queryBuilder/useQueryBuilder';
 import { useShareBuilderUrl } from 'hooks/queryBuilder/useShareBuilderUrl';
 import { useIsDarkMode } from 'hooks/useDarkMode';
@@ -32,6 +33,7 @@ function QuerySection({
 	dashboardName,
 	isNewPanel,
 }: QueryProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const {
 		currentQuery,
 		handleRunQuery: handleRunQueryFromQueryBuilder,
@@ -175,7 +177,7 @@ function QuerySection({
 						<TextToolTip text="This will temporarily save the current query and graph state. This will persist across tab change" />
 						<RunQueryBtn
 							className="run-query-dashboard-btn"
-							label="Stage & Run Query"
+							label={t('stage_run_query')}
 							onStageRunQuery={handleRunQuery}
 							isLoadingQueries={isLoadingQueries}
 							handleCancelQuery={handleCancelQuery}
