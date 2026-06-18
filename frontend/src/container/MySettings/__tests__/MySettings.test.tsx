@@ -8,6 +8,12 @@ import {
 	waitFor,
 	within,
 } from 'tests/test-utils';
+import { Logout } from 'api/utils';
+
+jest.mock('api/utils', () => ({
+	...jest.requireActual('api/utils'),
+	Logout: jest.fn(),
+}));
 
 const toggleThemeFunction = jest.fn();
 const logEventFunction = jest.fn();
@@ -309,6 +315,15 @@ describe('MySettings Flows', () => {
 					message: 'settings:copied_to_clipboard',
 				});
 			});
+		});
+	});
+
+	describe('UserInfo logout button', () => {
+		it('renders a logout button and calls Logout on click', async () => {
+			const logoutBtn = await screen.findByTestId('logout-account-btn');
+			expect(logoutBtn).toBeInTheDocument();
+			fireEvent.click(logoutBtn);
+			expect(Logout).toHaveBeenCalledTimes(1);
 		});
 	});
 });

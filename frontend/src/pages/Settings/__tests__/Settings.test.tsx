@@ -1,6 +1,6 @@
 import React from 'react';
 import SettingsPage from 'pages/Settings/Settings';
-import { render, screen, within } from 'tests/test-utils';
+import { render, screen } from 'tests/test-utils';
 import { LicensePlatform } from 'types/api/licensesV3/getActive';
 import { USER_ROLES } from 'types/roles';
 
@@ -35,108 +35,33 @@ const getSelfHostedAdminOverrides = (): any => ({
 	},
 });
 
-describe('SettingsPage nav sections', () => {
-	describe('Cloud Admin', () => {
-		beforeEach(() => {
+describe('SettingsPage', () => {
+	it.each([
+		['cloud admin', USER_ROLES.ADMIN, getCloudAdminOverrides()],
+		['self-hosted admin', USER_ROLES.ADMIN, getSelfHostedAdminOverrides()],
+		['cloud viewer', USER_ROLES.VIEWER, getCloudAdminOverrides()],
+	])(
+		'renders the settings page header for %s',
+		(_label, role, appContextOverrides) => {
 			render(<SettingsPage />, undefined, {
-				role: USER_ROLES.ADMIN,
-				appContextOverrides: getCloudAdminOverrides(),
-				initialRoute: '/settings',
-			});
-		});
-
-		it.each([
-			'settings-page-sidenav',
-			'workspace',
-			'account',
-			'notification-channels',
-			'billing',
-			'roles',
-			'members',
-			'sso',
-			'integrations',
-			'ingestion',
-			'mcp-server',
-		])('renders "%s" element', (id) => {
-			expect(screen.getByTestId(id)).toBeInTheDocument();
-		});
-
-		it.each(['Identity & Access', 'Authentication'])(
-			'renders "%s" section title',
-			(text) => {
-				expect(screen.getByText(text)).toBeInTheDocument();
-			},
-		);
-	});
-
-	describe('Cloud Viewer', () => {
-		beforeEach(() => {
-			render(<SettingsPage />, undefined, {
-				role: USER_ROLES.VIEWER,
-				appContextOverrides: getCloudAdminOverrides(),
-				initialRoute: '/settings',
-			});
-		});
-
-		it.each(['workspace', 'account'])('renders "%s" element', (id) => {
-			expect(screen.getByTestId(id)).toBeInTheDocument();
-		});
-
-		it.each(['billing', 'roles', 'mcp-server'])(
-			'does not render "%s" element',
-			(id) => {
-				expect(screen.queryByTestId(id)).not.toBeInTheDocument();
-			},
-		);
-	});
-
-	describe('Self-hosted Admin', () => {
-		beforeEach(() => {
-			render(<SettingsPage />, undefined, {
-				role: USER_ROLES.ADMIN,
-				appContextOverrides: getSelfHostedAdminOverrides(),
-				initialRoute: '/settings',
-			});
-		});
-
-		it.each([
-			'roles',
-			'members',
-			'integrations',
-			'sso',
-			'ingestion',
-			'mcp-server',
-		])('renders "%s" element', (id) => {
-			expect(screen.getByTestId(id)).toBeInTheDocument();
-		});
-	});
-
-	describe('section structure', () => {
-		it('renders items in correct sections for cloud admin', () => {
-			const { container } = render(<SettingsPage />, undefined, {
-				role: USER_ROLES.ADMIN,
-				appContextOverrides: getCloudAdminOverrides(),
+				role,
+				appContextOverrides,
 				initialRoute: '/settings',
 			});
 
-			const sidenav = within(container).getByTestId('settings-page-sidenav');
-			const sections = sidenav.querySelectorAll('.settings-nav-section');
+			expect(screen.getByTestId('settings-page-title')).toBeInTheDocument();
+		},
+	);
 
-			// Should have at least 2 sections (general + identity-access) for cloud admin
-			expect(sections.length).toBeGreaterThanOrEqual(2);
+	it('does not render a secondary sidenav', () => {
+		render(<SettingsPage />, undefined, {
+			role: USER_ROLES.ADMIN,
+			appContextOverrides: getCloudAdminOverrides(),
+			initialRoute: '/settings',
 		});
 
-		it('hides section entirely when all items in it are disabled', () => {
-			// Community user has very limited access — identity section should be hidden
-			render(<SettingsPage />, undefined, {
-				role: USER_ROLES.VIEWER,
-				appContextOverrides: {
-					activeLicense: null,
-				},
-				initialRoute: '/settings',
-			});
-
-			expect(screen.queryByText('IDENTITY & ACCESS')).not.toBeInTheDocument();
-		});
+		expect(
+			screen.queryByTestId('settings-page-sidenav'),
+		).not.toBeInTheDocument();
 	});
 });

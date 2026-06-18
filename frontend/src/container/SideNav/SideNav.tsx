@@ -6,57 +6,30 @@ import {
 	useRef,
 	useState,
 } from 'react';
-import { useMutation } from 'react-query';
 import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import {
-	closestCenter,
-	DndContext,
-	DragEndEvent,
-	PointerSensor,
-	useSensor,
-	useSensors,
-} from '@dnd-kit/core';
-import {
-	arrayMove,
-	SortableContext,
-	useSortable,
-	verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { Button, Dropdown, MenuProps, Modal, Tooltip } from 'antd';
+import { Button, Dropdown, Tooltip } from 'antd';
 import logEvent from 'api/common/logEvent';
-import { Logout } from 'api/utils';
-import updateUserPreference from 'api/v1/user/preferences/name/update';
 import cx from 'classnames';
 import { FeatureKeys } from 'constants/features';
 import ROUTES from 'constants/routes';
 import { GlobalShortcuts } from 'constants/shortcuts/globalShortcuts';
-import { USER_PREFERENCES } from 'constants/userPreferences';
 import { useKeyboardHotkeys } from 'hooks/hotkeys/useKeyboardHotkeys';
-import useComponentPermission from 'hooks/useComponentPermission';
 import { useGetTenantLicense } from 'hooks/useGetTenantLicense';
-import { useNotifications } from 'hooks/useNotifications';
 import history from 'lib/history';
-import { isArray } from 'lodash-es';
 import {
 	ArrowUpRight,
-	Check,
 	ChevronDown,
 	ChevronsDown,
 	ChevronUp,
 	Cog,
 	Ellipsis,
 	GitCommitVertical,
-	GripVertical,
 	LampDesk,
-	Logs,
-	MousePointerClick,
 	PackagePlus,
 	ScrollText,
-	X,
 } from 'lucide-react';
 import { useAppContext } from 'providers/App/App';
 import { AppState } from 'store/reducers';
@@ -64,7 +37,6 @@ import AppReducer from 'types/reducer/app';
 import { USER_ROLES } from 'types/roles';
 import { checkVersionState } from 'utils/app';
 import { isModifierKeyPressed } from 'utils/app';
-import { showErrorNotification } from 'utils/error';
 import { openInNewTab } from 'utils/navigation';
 
 import signozBrandLogoUrl from '@/assets/Logos/signoz-brand-logo.svg';
@@ -75,10 +47,11 @@ import { getQueryString } from './helper';
 import {
 	defaultMoreMenuItems,
 	getHelpSupportDropdownMenuItems,
-	getUserSettingsDropdownMenuItems,
 	helpSupportMenuItem,
 	primaryMenuItems,
+	settingsNavItemKeyMap,
 } from './menuItems';
+import { useSettingsNavItems } from './useSettingsNavItems';
 import NavItem from './NavItem/NavItem';
 import {
 	CHANGELOG_LABEL,
@@ -106,41 +79,6 @@ const sideNavItemKeyMap: Record<string, string> = {
 	'meter-explorer': 'cost_meter',
 };
 
-function SortableFilter({ item }: { item: SidebarItem }): JSX.Element {
-	const { attributes, listeners, setNodeRef, transform, transition } =
-		useSortable({ id: item.key });
-	const { t } = useTranslation(['routes']);
-
-	const style = {
-		transform: CSS.Transform.toString(transform),
-		transition,
-	};
-
-	const label =
-		item.itemKey && sideNavItemKeyMap[item.itemKey as string]
-			? t(sideNavItemKeyMap[item.itemKey as string])
-			: item.label;
-
-	return (
-		<div ref={setNodeRef} style={style} className="reorder-shortcut-nav-item">
-			<div
-				{...attributes}
-				{...listeners}
-				className="reorder-shortcut-nav-item drag-handle"
-				key={item.key}
-			>
-				<div className="reorder-shortcut-nav-item-grab-icon">
-					<GripVertical size={16} />
-				</div>
-
-				<div className="reorder-shortcut-nav-item-icon">{item.icon}</div>
-
-				<div className="reorder-shortcut-nav-item-label">{label}</div>
-			</div>
-		</div>
-	);
-}
-
 // eslint-disable-next-line sonarjs/cognitive-complexity
 function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 	const { t } = useTranslation(['routes', 'settings', 'helpSupport']);
@@ -159,35 +97,18 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 		userPreferences,
 		changelog,
 		toggleChangelogModal,
-		updateUserPreferenceInContext,
 	} = useAppContext();
-
-	const { notifications } = useNotifications();
-
-	const { mutate: updateUserPreferenceMutation } = useMutation(
-		updateUserPreference,
-		{
-			onError: (error: Error) => {
-				showErrorNotification(notifications, error);
-			},
-		},
-	);
 
 	const [helpSupportDropdownMenuItems, setHelpSupportDropdownMenuItems] =
 		useState<(SidebarItem | DropdownSeparator)[]>(() =>
 			getHelpSupportDropdownMenuItems(t),
 		);
 
-	const [tempPinnedMenuItems, setTempPinnedMenuItems] = useState<SidebarItem[]>(
-		[],
-	);
-
 	const [hasScroll, setHasScroll] = useState(false);
 	const navTopSectionRef = useRef<HTMLDivElement>(null);
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
 	const [isHovered, setIsHovered] = useState(false);
-	const [pinnedMenuItems, setPinnedMenuItems] = useState<SidebarItem[]>([]);
 	const [secondaryMenuItems, setSecondaryMenuItems] = useState<SidebarItem[]>(
 		[],
 	);
@@ -247,54 +168,19 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 	const isAdmin = user.role === USER_ROLES.ADMIN;
 	const isEditor = user.role === USER_ROLES.EDITOR;
 
-	// Compute initial pinned items and secondary menu items synchronously to avoid flash
-	const computedPinnedMenuItems = useMemo(() => {
-		const navShortcutsPreference = userPreferences?.find(
-			(preference) => preference.name === USER_PREFERENCES.NAV_SHORTCUTS,
-		);
-		const navShortcuts = navShortcutsPreference?.value as unknown as
-			| string[]
-			| undefined;
-
-		// If userPreferences not loaded yet, return empty to avoid showing defaults before preferences load
-		if (userPreferences === null) {
-			return [];
-		}
-
-		// If preference exists with non-empty array, use stored shortcuts
-		if (isArray(navShortcuts) && navShortcuts.length > 0) {
-			return navShortcuts
-				.map((shortcut) =>
-					defaultMoreMenuItems.find((item) => item.itemKey === shortcut),
-				)
-				.filter((item): item is SidebarItem => item !== undefined);
-		}
-
-		// No preference, or empty array → use defaults
-		return defaultMoreMenuItems.filter((item) => item.isPinned);
-	}, [userPreferences]);
-
 	const computedSecondaryMenuItems = useMemo(() => {
 		const shouldShowIntegrationsValue =
 			(isCloudUser || isEnterpriseSelfHostedUser) && (isAdmin || isEditor);
 
 		return defaultMoreMenuItems.map((item) => ({
 			...item,
-			isPinned: computedPinnedMenuItems.some(
-				(pinned) => pinned.itemKey === item.itemKey,
-			),
+			isPinned: false,
 			isEnabled:
 				item.key === ROUTES.INTEGRATIONS
 					? shouldShowIntegrationsValue
 					: item.isEnabled,
 		}));
-	}, [
-		computedPinnedMenuItems,
-		isCloudUser,
-		isEnterpriseSelfHostedUser,
-		isAdmin,
-		isEditor,
-	]);
+	}, [isCloudUser, isEnterpriseSelfHostedUser, isAdmin, isEditor]);
 
 	// Track if we've done the initial sync (to avoid overwriting user actions during session)
 	const hasInitializedRef = useRef(false);
@@ -303,11 +189,10 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 	useEffect(() => {
 		// Only sync once: when userPreferences loads for the first time
 		if (!hasInitializedRef.current && userPreferences !== null) {
-			setPinnedMenuItems(computedPinnedMenuItems);
 			setSecondaryMenuItems(computedSecondaryMenuItems);
 			hasInitializedRef.current = true;
 		}
-	}, [computedPinnedMenuItems, computedSecondaryMenuItems, userPreferences]);
+	}, [computedSecondaryMenuItems, userPreferences]);
 
 	const isOnboardingV3Enabled = featureFlags?.find(
 		(flag) => flag.name === FeatureKeys.ONBOARDING_V3,
@@ -321,133 +206,12 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 		(flag) => flag.name === FeatureKeys.PREMIUM_SUPPORT,
 	)?.active;
 
-	const userSettingsMenuItem = {
-		key: ROUTES.SETTINGS,
-		label: t('settings_title'),
-		icon: <Cog size={16} />,
-	};
-
 	const isLatestVersion = checkVersionState(currentVersion, latestVersion);
 
 	const [showVersionUpdateNotification, setShowVersionUpdateNotification] =
 		useState(false);
 
 	const [isMoreMenuCollapsed, setIsMoreMenuCollapsed] = useState(false);
-
-	const [
-		isReorderShortcutNavItemsModalOpen,
-		setIsReorderShortcutNavItemsModalOpen,
-	] = useState(false);
-
-	const handleDragEnd = (event: DragEndEvent): void => {
-		const { active, over } = event;
-
-		if (over && active.id !== over.id) {
-			setTempPinnedMenuItems((items) => {
-				const oldIndex = items.findIndex((item) => item.key === active.id);
-				const newIndex = items.findIndex((item) => item.key === over.id);
-
-				return arrayMove(items, oldIndex, newIndex);
-			});
-		}
-	};
-
-	const updateNavShortcutsPreference = useCallback(
-		(items: SidebarItem[]): void => {
-			const navShortcuts = items
-				.map((item) => item.itemKey)
-				.filter(Boolean) as string[];
-
-			// Update context immediately (optimistically) so computed values reflect the change
-			updateUserPreferenceInContext({
-				name: USER_PREFERENCES.NAV_SHORTCUTS,
-				description: USER_PREFERENCES.NAV_SHORTCUTS,
-				valueType: 'array',
-				defaultValue: false,
-				allowedValues: [],
-				allowedScopes: ['user'],
-				value: navShortcuts,
-			});
-
-			updateUserPreferenceMutation(
-				{
-					name: USER_PREFERENCES.NAV_SHORTCUTS,
-					value: navShortcuts,
-				},
-				{
-					onSuccess: (response) => {
-						if (response.data) {
-							// Update context again on success to ensure consistency
-							updateUserPreferenceInContext({
-								name: USER_PREFERENCES.NAV_SHORTCUTS,
-								description: USER_PREFERENCES.NAV_SHORTCUTS,
-								valueType: 'array',
-								defaultValue: false,
-								allowedValues: [],
-								allowedScopes: ['user'],
-								value: navShortcuts,
-							});
-						}
-					},
-				},
-			);
-		},
-		[updateUserPreferenceInContext, updateUserPreferenceMutation],
-	);
-
-	const onTogglePin = useCallback(
-		(item: SidebarItem): void => {
-			// Update secondary menu items first with new isPinned state
-			setSecondaryMenuItems((prevItems) =>
-				prevItems.map((i) => ({
-					...i,
-					isPinned: i.key === item.key ? !i.isPinned : i.isPinned,
-				})),
-			);
-
-			// Update pinned menu items
-			setPinnedMenuItems((prevItems) => {
-				const isCurrentlyPinned = prevItems.some((i) => i.key === item.key);
-				if (isCurrentlyPinned) {
-					return prevItems.filter((i) => i.key !== item.key);
-				}
-				return [...prevItems, item];
-			});
-
-			// Get the updated pinned menu items for preference update
-			const updatedPinnedItems = pinnedMenuItems.some((i) => i.key === item.key)
-				? pinnedMenuItems.filter((i) => i.key !== item.key)
-				: [...pinnedMenuItems, item];
-
-			// Update user preference with the ordered list of item keys
-			updateNavShortcutsPreference(updatedPinnedItems);
-		},
-		[pinnedMenuItems, updateNavShortcutsPreference],
-	);
-
-	const handleReorderShortcutNavItems = (): void => {
-		logEvent('Sidebar V2: Save shortcuts clicked', {
-			shortcuts: tempPinnedMenuItems.map((item) => item.key),
-		});
-		setPinnedMenuItems(tempPinnedMenuItems);
-
-		// Update user preference with the new order
-		updateNavShortcutsPreference(tempPinnedMenuItems);
-
-		setIsReorderShortcutNavItemsModalOpen(false);
-	};
-
-	const sensors = useSensors(useSensor(PointerSensor));
-
-	const hideReorderShortcutNavItemsModal = (): void => {
-		setIsReorderShortcutNavItemsModalOpen(false);
-	};
-
-	useEffect(() => {
-		if (isReorderShortcutNavItemsModalOpen) {
-			setTempPinnedMenuItems(pinnedMenuItems);
-		}
-	}, [isReorderShortcutNavItemsModalOpen, pinnedMenuItems]);
 
 	const { registerShortcut, deregisterShortcut } = useKeyboardHotkeys();
 
@@ -495,28 +259,33 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 		[pathname],
 	);
 
-	const isSettingsPage = useMemo(
-		() => pathname.startsWith(ROUTES.SETTINGS),
+	// Settings sub-items live under /settings/* and share the same base path,
+	// so the base-path-derived activeMenuKey can't distinguish them. Match on the
+	// full pathname instead (with the same sub-route handling the settings page used).
+	const isSettingsItemActive = useCallback(
+		(item: SidebarItem): boolean => {
+			const key = item.key as string;
+			if (
+				(pathname.startsWith(ROUTES.ALL_CHANNELS) ||
+					pathname.startsWith(ROUTES.CHANNELS_EDIT)) &&
+				key === ROUTES.ALL_CHANNELS
+			) {
+				return true;
+			}
+			if (
+				pathname.startsWith(ROUTES.ROLES_SETTINGS) &&
+				key === ROUTES.ROLES_SETTINGS
+			) {
+				return true;
+			}
+			return pathname === key;
+		},
 		[pathname],
 	);
 
-	const userSettingsDropdownMenuItems: MenuProps['items'] = useMemo(
-		() =>
-			getUserSettingsDropdownMenuItems({
-				userEmail: user.email,
-				isWorkspaceBlocked,
-				isEnterpriseSelfHostedUser,
-				isCommunityEnterpriseUser,
-				t,
-			}),
-		[
-			isEnterpriseSelfHostedUser,
-			isCommunityEnterpriseUser,
-			user.email,
-			isWorkspaceBlocked,
-			t,
-		],
-	);
+	const [isSettingsMenuCollapsed, setIsSettingsMenuCollapsed] = useState(true);
+
+	const gatedSettingsSections = useSettingsNavItems();
 
 	useEffect(() => {
 		if (isCloudUser) {
@@ -634,23 +403,8 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 		changelog,
 	]);
 
-	const [isCurrentOrgSettings] = useComponentPermission(
-		['current_org_settings'],
-		user.role,
-	);
-
-	const settingsRoute = isCurrentOrgSettings
-		? ROUTES.ORG_SETTINGS
-		: ROUTES.SETTINGS;
-
 	const handleMenuItemClick = (event: MouseEvent, item: SidebarItem): void => {
-		if (item.key === ROUTES.SETTINGS) {
-			if (isModifierKeyPressed(event)) {
-				openInNewTab(settingsRoute);
-			} else {
-				history.push(settingsRoute);
-			}
-		} else if (item.key === 'quick-search') {
+		if (item.key === 'quick-search') {
 			openCmdK();
 		} else if (item) {
 			onClickHandler(item?.key as string, event);
@@ -758,15 +512,8 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 		};
 	}, [deregisterShortcut, onClickHandler, registerShortcut]);
 
-	const isPinnedItem = useMemo(
-		() =>
-			(item: SidebarItem): boolean =>
-				secondaryMenuItems.some((i) => i.key === item.key && i.isPinned),
-		[secondaryMenuItems],
-	);
-
 	const moreMenuItems = useMemo(
-		() => secondaryMenuItems.filter((i) => !i.isPinned && i.isEnabled),
+		() => secondaryMenuItems.filter((i) => i.isEnabled),
 		[secondaryMenuItems],
 	);
 
@@ -781,7 +528,7 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 
 	const renderNavItems = (
 		items: SidebarItem[],
-		allowPin?: boolean,
+		getIsActive?: (item: SidebarItem) => boolean,
 	): JSX.Element => (
 		<>
 			{items.map((item, index) => {
@@ -794,30 +541,17 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 						showIcon
 						key={item.key || index}
 						item={{ ...item, label: translatedLabel }}
-						isActive={activeMenuKey === item.key}
+						isActive={
+							getIsActive ? getIsActive(item) : activeMenuKey === item.key
+						}
 						isDisabled={
 							isWorkspaceBlocked &&
 							item.key !== ROUTES.BILLING &&
 							item.key !== ROUTES.SETTINGS
 						}
-						onTogglePin={
-							allowPin
-								? (item): void => {
-										logEvent(
-											`Sidebar V2: Menu item ${item.isPinned ? 'unpinned' : 'pinned'}`,
-											{
-												menuRoute: item.key,
-												menuLabel: item.label,
-											},
-										);
-										onTogglePin(item);
-									}
-								: undefined
-						}
 						onClick={(event): void => {
 							handleMenuItemClick(event, item);
 						}}
-						isPinned={isPinnedItem(item)}
 					/>
 				);
 			})}
@@ -827,7 +561,7 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 	// Check scroll when menu items change
 	useEffect(() => {
 		checkScroll();
-	}, [checkScroll, pinnedMenuItems, moreMenuItems]);
+	}, [checkScroll, moreMenuItems]);
 
 	const handleScrollForMore = (): void => {
 		if (navTopSectionRef.current) {
@@ -883,63 +617,6 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 				default:
 					break;
 			}
-		}
-	};
-
-	// eslint-disable-next-line sonarjs/cognitive-complexity
-	const handleSettingsMenuItemClick = (info: SidebarItem): void => {
-		const item = (userSettingsDropdownMenuItems ?? []).find(
-			(item) => item?.key === info.key,
-		);
-		let menuLabel = '';
-		if (
-			item &&
-			!('type' in item && item.type === 'divider') &&
-			typeof item.label === 'string'
-		) {
-			menuLabel = item.label;
-		}
-
-		logEvent('Settings Popover: Item clicked', {
-			menuRoute: item?.key,
-			menuLabel,
-		});
-
-		const event = (info as SidebarItem & { domEvent?: MouseEvent }).domEvent;
-
-		switch (info.key) {
-			case 'account':
-				if (event && isModifierKeyPressed(event)) {
-					openInNewTab(ROUTES.MY_SETTINGS);
-				} else {
-					history.push(ROUTES.MY_SETTINGS);
-				}
-				break;
-			case 'workspace':
-				if (event && isModifierKeyPressed(event)) {
-					openInNewTab(ROUTES.SETTINGS);
-				} else {
-					history.push(ROUTES.SETTINGS);
-				}
-				break;
-			case 'license':
-				if (event && isModifierKeyPressed(event)) {
-					openInNewTab(ROUTES.LIST_LICENSES);
-				} else {
-					history.push(ROUTES.LIST_LICENSES);
-				}
-				break;
-			case 'keyboard-shortcuts':
-				if (event && isModifierKeyPressed(event)) {
-					openInNewTab(ROUTES.SHORTCUTS);
-				} else {
-					history.push(ROUTES.SHORTCUTS);
-				}
-				break;
-			case 'logout':
-				Logout();
-				break;
-			default:
 		}
 	};
 
@@ -1073,53 +750,6 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 							{renderNavItems(primaryMenuItems)}
 						</div>
 
-						{(pinnedMenuItems.length > 0 || !isCollapsed) && (
-							<div
-								className={cx('shortcut-nav-items', isCollapsed && 'sidebar-collapsed')}
-							>
-								{!isCollapsed && (
-									<div className="nav-title-section">
-										<div className="nav-section-title">
-											<div className="nav-section-title-icon">
-												<MousePointerClick size={16} />
-											</div>
-
-											<div className="nav-section-title-text">SHORTCUTS</div>
-
-											{pinnedMenuItems.length > 1 && (
-												<Tooltip title="Manage shortcuts" placement="right">
-													<div
-														className="nav-section-title-icon reorder"
-														onClick={(): void => {
-															logEvent('Sidebar V2: Manage shortcuts clicked', {});
-															setIsReorderShortcutNavItemsModalOpen(true);
-														}}
-													>
-														<Logs size={16} />
-													</div>
-												</Tooltip>
-											)}
-										</div>
-
-										{pinnedMenuItems.length === 0 && (
-											<div className="nav-section-subtitle">
-												You have not added any shortcuts yet.
-											</div>
-										)}
-									</div>
-								)}
-
-								{(pinnedMenuItems.length > 0 || isCollapsed) && (
-									<div className="nav-items-section">
-										{renderNavItems(
-											pinnedMenuItems.filter((item) => item.isEnabled),
-											true,
-										)}
-									</div>
-								)}
-							</div>
-						)}
-
 						{moreMenuItems.length > 0 && (
 							<div
 								className={cx(
@@ -1164,15 +794,63 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 								<div className="nav-items-section">
 									{/* Show all items when expanded, only active items when collapsed */}
 									{isCollapsed
-										? renderNavItems(
-												activeMoreMenuItems.filter((item) => item.isEnabled),
-												true,
-											)
-										: renderNavItems(
-												moreMenuItems.filter((item) => item.isEnabled),
-												true,
-											)}
+										? renderNavItems(activeMoreMenuItems)
+										: renderNavItems(moreMenuItems)}
 								</div>
+							</div>
+						)}
+
+						{!isCollapsed && (
+							<div className={cx('more-nav-items', 'settings-nav-items')}>
+								<div className="nav-title-section">
+									<div
+										className="nav-section-title"
+										data-testid="settings-group-header"
+										onClick={(): void => {
+											setIsSettingsMenuCollapsed(false);
+											history.push(ROUTES.MY_SETTINGS);
+											logEvent('Sidebar V2: Settings group clicked', {});
+										}}
+									>
+										<div className="nav-section-title-icon">
+											<Cog size={16} />
+										</div>
+										<div className="nav-section-title-text">
+											{t('routes:settings_title')}
+										</div>
+										<div
+											className="collapse-expand-section-icon"
+											onClick={(e): void => {
+												e.stopPropagation();
+												setIsSettingsMenuCollapsed((v) => !v);
+											}}
+										>
+											{isSettingsMenuCollapsed ? (
+												<ChevronDown size={16} />
+											) : (
+												<ChevronUp size={16} />
+											)}
+										</div>
+									</div>
+								</div>
+
+								{!isSettingsMenuCollapsed && (
+									<div className="nav-items-section">
+										{renderNavItems(
+											gatedSettingsSections
+												.flatMap((section) => section.items)
+												.filter((i) => i.isEnabled)
+												.map((i) => ({
+													...i,
+													label: t(
+														settingsNavItemKeyMap[i.itemKey as string] ??
+															(i.label as string),
+													),
+												})),
+											isSettingsItemActive,
+										)}
+									</div>
+								)}
 							</div>
 						)}
 
@@ -1211,84 +889,10 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 									</div>
 								</Dropdown>
 							</div>
-
-							<div className="nav-dropdown-item">
-								<Dropdown
-									menu={{
-										items: userSettingsDropdownMenuItems,
-										onClick: handleSettingsMenuItemClick,
-									}}
-									placement="topLeft"
-									overlayClassName="nav-dropdown-overlay settings-dropdown"
-									trigger={['click']}
-									onOpenChange={(open): void => setIsDropdownOpen(open)}
-								>
-									<div className={cx('nav-item', isSettingsPage && 'active')}>
-										<div className="nav-item-active-marker" />
-										<div className="nav-item-data" data-testid="settings-nav-item">
-											<div className="nav-item-icon">{userSettingsMenuItem.icon}</div>
-
-											<div className="nav-item-label">{userSettingsMenuItem.label}</div>
-										</div>
-									</div>
-								</Dropdown>
-							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-
-			<Modal
-				className="reorder-shortcut-nav-items-modal"
-				title={<span className="title">Manage Shortcuts</span>}
-				open={isReorderShortcutNavItemsModalOpen}
-				closable
-				onCancel={(): void => {
-					logEvent('Sidebar V2: Manage shortcuts dismissed', {});
-					hideReorderShortcutNavItemsModal();
-				}}
-				footer={[
-					<Button
-						key="cancel"
-						onClick={(): void => {
-							logEvent('Sidebar V2: Manage shortcuts dismissed', {});
-							hideReorderShortcutNavItemsModal();
-						}}
-						className="periscope-btn cancel-btn secondary-btn"
-						icon={<X size={16} />}
-					>
-						Cancel
-					</Button>,
-					<Button
-						key="submit"
-						type="primary"
-						icon={<Check size={16} />}
-						onClick={handleReorderShortcutNavItems}
-						data-testid="save-changes-btn"
-					>
-						Save Changes
-					</Button>,
-				]}
-			>
-				<div className="reorder-shortcut-nav-items-container">
-					<div className="reorder-shortcut-nav-items">
-						<DndContext
-							sensors={sensors}
-							collisionDetection={closestCenter}
-							onDragEnd={handleDragEnd}
-						>
-							<SortableContext
-								items={tempPinnedMenuItems.map((f) => f.key)}
-								strategy={verticalListSortingStrategy}
-							>
-								{tempPinnedMenuItems.map((item) => (
-									<SortableFilter key={item.key} item={item} />
-								))}
-							</SortableContext>
-						</DndContext>
-					</div>
-				</div>
-			</Modal>
 		</div>
 	);
 }

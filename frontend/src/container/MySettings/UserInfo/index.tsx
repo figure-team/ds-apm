@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Input, Modal, Typography } from 'antd';
 import logEvent from 'api/common/logEvent';
+import { Logout } from 'api/utils';
 import {
 	updateMyPassword,
 	useUpdateMyUserV2,
 } from 'api/generated/services/users';
 import { useNotifications } from 'hooks/useNotifications';
-import { Check, FileTerminal, MailIcon, UserIcon } from 'lucide-react';
+import { Check, FileTerminal, LogOut, MailIcon, UserIcon } from 'lucide-react';
 import { useAppContext } from 'providers/App/App';
 import APIError from 'types/api/error';
 
@@ -150,6 +151,20 @@ function UserInfo(): JSX.Element {
 					onClick={(): void => setIsResetPasswordModalOpen(true)}
 				>
 					{t('settings:reset_password')}
+				</Button>
+
+				<Button
+					type="default"
+					danger
+					className="periscope-btn logout-btn"
+					icon={<LogOut size={16} />}
+					data-testid="logout-account-btn"
+					onClick={(): void => {
+						logEvent('Account Settings: Logout clicked', {});
+						Logout();
+					}}
+				>
+					{t('settings:sign_out')}
 				</Button>
 			</div>
 

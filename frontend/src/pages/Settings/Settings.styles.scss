@@ -25,55 +25,10 @@
 
 	.settings-page-content-container {
 		display: flex;
-		flex-direction: row;
-		align-items: flex-start;
-
-		.settings-page-sidenav {
-			width: 240px;
-			height: calc(100vh - 48px);
-			border-right: 1px solid var(--l1-border);
-			background: var(--l1-background);
-			padding-top: var(--padding-1);
-			display: flex;
-			flex-direction: column;
-			gap: var(--spacing-12);
-			overflow-y: auto;
-
-			.settings-nav-section {
-				display: flex;
-				flex-direction: column;
-			}
-
-			.settings-nav-section--with-divider {
-				border-top: 1px solid var(--l1-border);
-				padding-top: var(--padding-4);
-			}
-
-			.settings-nav-section-title {
-				font-size: var(--uppercase-small-600-font-size);
-				font-weight: var(--uppercase-small-600-font-weight);
-				letter-spacing: 0.88px;
-				text-transform: uppercase;
-				color: var(--l3-foreground);
-				margin-bottom: var(--margin-2);
-				padding: var(--padding-1) var(--padding-3);
-			}
-
-			.nav-item {
-				.nav-item-data {
-					margin: 0px 8px 0px 4px;
-				}
-
-				&.active {
-					.nav-item-data .nav-item-label {
-						color: var(--l1-foreground);
-					}
-				}
-			}
-		}
+		flex-direction: column;
 
 		.settings-page-content {
-			flex: 1;
+			width: 100%;
 			height: calc(100vh - 48px);
 			background: var(--l1-background);
 			padding: 10px 8px;

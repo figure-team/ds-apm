@@ -1,65 +1,20 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
-import logEvent from 'api/common/logEvent';
 import RouteTab from 'components/RouteTab';
 import { FeatureKeys } from 'constants/features';
-import ROUTES from 'constants/routes';
-import { routeConfig } from 'container/SideNav/config';
-import { getQueryString } from 'container/SideNav/helper';
-import { settingsNavSections } from 'container/SideNav/menuItems';
-import NavItem from 'container/SideNav/NavItem/NavItem';
-import { SidebarItem } from 'container/SideNav/sideNav.types';
 import useComponentPermission from 'hooks/useComponentPermission';
 import { useGetTenantLicense } from 'hooks/useGetTenantLicense';
 import history from 'lib/history';
 import { Cog } from 'lucide-react';
 import { useAppContext } from 'providers/App/App';
-import { USER_ROLES } from 'types/roles';
-import { isModifierKeyPressed } from 'utils/app';
-import { openInNewTab } from 'utils/navigation';
 
 import { getRoutes } from './utils';
 
 import './Settings.styles.scss';
 
-const navItemKeyMap: Record<string, string> = {
-	workspace: 'routes:workspace',
-	account: 'routes:account',
-	'notification-channels': 'routes:alert_channels',
-	'sop-documents': 'routes:sop_documents',
-	billing: 'routes:billing',
-	integrations: 'routes:integrations',
-	'mcp-server': 'routes:mcp_server',
-	'ai-module': 'routes:ai_module',
-	'code-rca': 'routes:code_rca',
-	'incident-report': 'routes:incident_report',
-	roles: 'routes:roles',
-	members: 'routes:members',
-	'service-accounts': 'routes:service_accounts',
-	ingestion: 'routes:ingestion',
-	sso: 'routes:single_sign_on',
-	'keyboard-shortcuts': 'routes:keyboard_shortcuts',
-};
-
-const sectionTitleKeyMap: Record<string, string> = {
-	'identity-access': 'routes:identity_access',
-	authentication: 'routes:authentication',
-};
-
 function SettingsPage(): JSX.Element {
-	const { pathname, search } = useLocation();
-
-	const { user, featureFlags, trialInfo, isFetchingActiveLicense } =
-		useAppContext();
+	const { user, featureFlags, trialInfo } = useAppContext();
 	const { isCloudUser, isEnterpriseSelfHostedUser } = useGetTenantLicense();
-
-	const [settingsMenuItems, setSettingsMenuItems] = useState<SidebarItem[]>(
-		settingsNavSections.flatMap((section) => section.items),
-	);
-
-	const isAdmin = user.role === USER_ROLES.ADMIN;
-	const isEditor = user.role === USER_ROLES.EDITOR;
 
 	const isWorkspaceBlocked = trialInfo?.workSpaceBlock || false;
 
@@ -72,145 +27,6 @@ function SettingsPage(): JSX.Element {
 	const isGatewayEnabled =
 		featureFlags?.find((feature) => feature.name === FeatureKeys.GATEWAY)
 			?.active || false;
-
-	// eslint-disable-next-line sonarjs/cognitive-complexity
-	useEffect(() => {
-		setSettingsMenuItems((prevItems) => {
-			let updatedItems = [...prevItems];
-
-			if (trialInfo?.workSpaceBlock && !isFetchingActiveLicense) {
-				updatedItems = updatedItems.map((item) => ({
-					...item,
-					isEnabled: !!(
-						isAdmin &&
-						(item.key === ROUTES.BILLING ||
-							item.key === ROUTES.ORG_SETTINGS ||
-							item.key === ROUTES.MEMBERS_SETTINGS ||
-							item.key === ROUTES.MY_SETTINGS ||
-							item.key === ROUTES.SHORTCUTS)
-					),
-				}));
-
-				return updatedItems;
-			}
-
-			if (isCloudUser) {
-				if (isAdmin) {
-					updatedItems = updatedItems.map((item) => ({
-						...item,
-						isEnabled:
-							item.key === ROUTES.BILLING ||
-							item.key === ROUTES.ROLES_SETTINGS ||
-							item.key === ROUTES.ROLE_DETAILS ||
-							item.key === ROUTES.INTEGRATIONS ||
-							item.key === ROUTES.INGESTION_SETTINGS ||
-							item.key === ROUTES.ORG_SETTINGS ||
-							item.key === ROUTES.MEMBERS_SETTINGS ||
-							item.key === ROUTES.SERVICE_ACCOUNTS_SETTINGS ||
-							item.key === ROUTES.SHORTCUTS ||
-							item.key === ROUTES.MCP_SERVER ||
-							item.key === ROUTES.AI_MODULE_SETTINGS ||
-							item.key === ROUTES.CODE_RCA_SETTINGS ||
-							item.key === ROUTES.INCIDENT_REPORT_SETTINGS
-								? true
-								: item.isEnabled,
-					}));
-				}
-
-				if (isEditor) {
-					updatedItems = updatedItems.map((item) => ({
-						...item,
-						isEnabled:
-							item.key === ROUTES.INGESTION_SETTINGS ||
-							item.key === ROUTES.INTEGRATIONS ||
-							item.key === ROUTES.SHORTCUTS ||
-							item.key === ROUTES.MCP_SERVER ||
-							item.key === ROUTES.AI_MODULE_SETTINGS ||
-							item.key === ROUTES.CODE_RCA_SETTINGS ||
-							item.key === ROUTES.INCIDENT_REPORT_SETTINGS
-								? true
-								: item.isEnabled,
-					}));
-				}
-			}
-
-			if (isEnterpriseSelfHostedUser) {
-				if (isAdmin) {
-					updatedItems = updatedItems.map((item) => ({
-						...item,
-						isEnabled:
-							item.key === ROUTES.BILLING ||
-							item.key === ROUTES.ROLES_SETTINGS ||
-							item.key === ROUTES.ROLE_DETAILS ||
-							item.key === ROUTES.INTEGRATIONS ||
-							item.key === ROUTES.ORG_SETTINGS ||
-							item.key === ROUTES.MEMBERS_SETTINGS ||
-							item.key === ROUTES.SERVICE_ACCOUNTS_SETTINGS ||
-							item.key === ROUTES.INGESTION_SETTINGS ||
-							item.key === ROUTES.MCP_SERVER ||
-							item.key === ROUTES.AI_MODULE_SETTINGS ||
-							item.key === ROUTES.CODE_RCA_SETTINGS ||
-							item.key === ROUTES.INCIDENT_REPORT_SETTINGS
-								? true
-								: item.isEnabled,
-					}));
-				}
-
-				if (isEditor) {
-					updatedItems = updatedItems.map((item) => ({
-						...item,
-						isEnabled:
-							item.key === ROUTES.INTEGRATIONS ||
-							item.key === ROUTES.INGESTION_SETTINGS ||
-							item.key === ROUTES.MCP_SERVER ||
-							item.key === ROUTES.AI_MODULE_SETTINGS ||
-							item.key === ROUTES.CODE_RCA_SETTINGS ||
-							item.key === ROUTES.INCIDENT_REPORT_SETTINGS
-								? true
-								: item.isEnabled,
-					}));
-				}
-			}
-
-			if (!isCloudUser && !isEnterpriseSelfHostedUser) {
-				if (isAdmin) {
-					updatedItems = updatedItems.map((item) => ({
-						...item,
-						isEnabled:
-							item.key === ROUTES.ORG_SETTINGS ||
-							item.key === ROUTES.MEMBERS_SETTINGS ||
-							item.key === ROUTES.SERVICE_ACCOUNTS_SETTINGS ||
-							item.key === ROUTES.ROLES_SETTINGS ||
-							item.key === ROUTES.ROLE_DETAILS ||
-							item.key === ROUTES.AI_MODULE_SETTINGS ||
-							item.key === ROUTES.CODE_RCA_SETTINGS ||
-							item.key === ROUTES.INCIDENT_REPORT_SETTINGS
-								? true
-								: item.isEnabled,
-					}));
-				}
-
-				// disable billing and integrations for non-cloud users
-				updatedItems = updatedItems.map((item) => ({
-					...item,
-					isEnabled:
-						item.key === ROUTES.BILLING || item.key === ROUTES.INTEGRATIONS
-							? false
-							: item.isEnabled,
-				}));
-			}
-
-			return updatedItems;
-		});
-	}, [
-		isAdmin,
-		isEditor,
-		isCloudUser,
-		isEnterpriseSelfHostedUser,
-		isFetchingActiveLicense,
-		trialInfo?.workSpaceBlock,
-		pathname,
-	]);
 
 	const routes = useMemo(
 		() =>
@@ -234,52 +50,6 @@ function SettingsPage(): JSX.Element {
 		],
 	);
 
-	const onClickHandler = useCallback(
-		(key: string, event: MouseEvent | null) => {
-			const params = new URLSearchParams(search);
-			const availableParams = routeConfig[key];
-
-			const queryString = getQueryString(availableParams || [], params);
-
-			if (pathname !== key) {
-				if (event && isModifierKeyPressed(event)) {
-					openInNewTab(`${key}?${queryString.join('&')}`);
-				} else {
-					history.push(`${key}?${queryString.join('&')}`, {
-						from: pathname,
-					});
-				}
-			}
-		},
-		[pathname, search],
-	);
-
-	const handleMenuItemClick = (event: MouseEvent, item: SidebarItem): void => {
-		onClickHandler(item?.key as string, event);
-	};
-
-	const isActiveNavItem = (key: string): boolean => {
-		if (pathname.startsWith(ROUTES.ALL_CHANNELS) && key === ROUTES.ALL_CHANNELS) {
-			return true;
-		}
-
-		if (
-			pathname.startsWith(ROUTES.CHANNELS_EDIT) &&
-			key === ROUTES.ALL_CHANNELS
-		) {
-			return true;
-		}
-
-		if (
-			pathname.startsWith(ROUTES.ROLES_SETTINGS) &&
-			key === ROUTES.ROLES_SETTINGS
-		) {
-			return true;
-		}
-
-		return pathname === key;
-	};
-
 	return (
 		<div className="settings-page">
 			<header className="settings-page-header">
@@ -293,61 +63,10 @@ function SettingsPage(): JSX.Element {
 			</header>
 
 			<div className="settings-page-content-container">
-				<div className="settings-page-sidenav" data-testid="settings-page-sidenav">
-					{settingsNavSections.map((section) => {
-						const enabledItems = section.items.filter((sectionItem) =>
-							settingsMenuItems.some(
-								(item) => item.key === sectionItem.key && item.isEnabled,
-							),
-						);
-						if (enabledItems.length === 0) {
-							return null;
-						}
-						return (
-							<div
-								key={section.key}
-								className={`settings-nav-section${
-									section.hasDivider ? ' settings-nav-section--with-divider' : ''
-								}`}
-							>
-								{section.title && (
-									<div className="settings-nav-section-title">
-										{sectionTitleKeyMap[section.key]
-											? t(sectionTitleKeyMap[section.key])
-											: section.title}
-									</div>
-								)}
-								{enabledItems.map((item) => (
-									<NavItem
-										key={item.key}
-										item={{
-											...item,
-											label: navItemKeyMap[item.itemKey as string]
-												? t(navItemKeyMap[item.itemKey as string])
-												: item.label,
-										}}
-										isActive={isActiveNavItem(item.key as string)}
-										isDisabled={false}
-										showIcon={false}
-										onClick={(event): void => {
-											logEvent('Settings V2: Menu clicked', {
-												menuLabel: item.label,
-												menuRoute: item.key,
-											});
-											handleMenuItemClick(event as unknown as MouseEvent, item);
-										}}
-										dataTestId={item.itemKey}
-									/>
-								))}
-							</div>
-						);
-					})}
-				</div>
-
 				<div className="settings-page-content">
 					<RouteTab
 						routes={routes}
-						activeKey={pathname}
+						activeKey={history.location.pathname}
 						history={history}
 						tabBarStyle={{ display: 'none' }}
 					/>

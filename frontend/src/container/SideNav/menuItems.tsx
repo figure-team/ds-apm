@@ -1,6 +1,4 @@
 import { RocketOutlined } from '@ant-design/icons';
-import { Style } from '@signozhq/design-tokens';
-import { MenuProps } from 'antd';
 import ROUTES from 'constants/routes';
 import { TFunction } from 'i18next';
 import {
@@ -12,7 +10,6 @@ import {
 	Bot,
 	Boxes,
 	BugIcon,
-	Building2,
 	ChartArea,
 	Cloudy,
 	DraftingCompass,
@@ -25,7 +22,6 @@ import {
 	Layers2,
 	LayoutGrid,
 	ListMinus,
-	LogOut,
 	MessageSquareText,
 	Plus,
 	Receipt,
@@ -218,7 +214,6 @@ export const defaultMoreMenuItems: SidebarItem[] = [
 		key: ROUTES.APPLICATION,
 		label: 'Services',
 		icon: <HardDrive size={16} />,
-		isPinned: true,
 		isEnabled: true,
 		itemKey: 'services',
 	},
@@ -226,7 +221,6 @@ export const defaultMoreMenuItems: SidebarItem[] = [
 		key: ROUTES.LOGS,
 		label: 'Logs',
 		icon: <ScrollText size={16} />,
-		isPinned: true,
 		isEnabled: true,
 		itemKey: 'logs',
 	},
@@ -234,7 +228,6 @@ export const defaultMoreMenuItems: SidebarItem[] = [
 		key: ROUTES.TRACES_EXPLORER,
 		label: 'Traces',
 		icon: <DraftingCompass size={16} />,
-		isPinned: true,
 		isEnabled: true,
 		itemKey: 'traces',
 	},
@@ -250,7 +243,6 @@ export const defaultMoreMenuItems: SidebarItem[] = [
 		key: ROUTES.INFRASTRUCTURE_MONITORING_HOSTS,
 		label: 'Infrastructure',
 		icon: <Boxes size={16} />,
-		isPinned: true,
 		isEnabled: true,
 		itemKey: 'infrastructure',
 	},
@@ -375,6 +367,13 @@ export const settingsNavSections: SettingsNavSection[] = [
 				isEnabled: false,
 				itemKey: 'incident-report',
 			},
+			{
+				key: ROUTES.LIST_LICENSES,
+				label: 'Manage Licenses',
+				icon: <FileKey2 size={16} />,
+				isEnabled: false,
+				itemKey: 'manage-license',
+			},
 		],
 	},
 
@@ -497,83 +496,30 @@ export const getHelpSupportDropdownMenuItems = (
 	},
 ];
 
-export interface UserSettingsMenuItemsParams {
-	userEmail: string;
-	isWorkspaceBlocked: boolean;
-	isEnterpriseSelfHostedUser: boolean;
-	isCommunityEnterpriseUser: boolean;
-	t: TFunction;
-}
+export const settingsNavItemKeyMap: Record<string, string> = {
+	workspace: 'routes:workspace',
+	account: 'routes:account',
+	'notification-channels': 'routes:alert_channels',
+	'sop-documents': 'routes:sop_documents',
+	billing: 'routes:billing',
+	integrations: 'routes:integrations',
+	'mcp-server': 'routes:mcp_server',
+	'ai-module': 'routes:ai_module',
+	'code-rca': 'routes:code_rca',
+	'incident-report': 'routes:incident_report',
+	roles: 'routes:roles',
+	members: 'routes:members',
+	'service-accounts': 'routes:service_accounts',
+	ingestion: 'routes:ingestion',
+	sso: 'routes:single_sign_on',
+	'keyboard-shortcuts': 'routes:keyboard_shortcuts',
+	'manage-license': 'settings:manage_license',
+};
 
-export const getUserSettingsDropdownMenuItems = ({
-	userEmail,
-	isWorkspaceBlocked,
-	isEnterpriseSelfHostedUser,
-	isCommunityEnterpriseUser,
-	t,
-}: UserSettingsMenuItemsParams): MenuProps['items'] =>
-	[
-		{
-			key: 'label',
-			label: (
-				<div className="user-settings-dropdown-logged-in-section">
-					<span className="user-settings-dropdown-label-text">
-						{t('settings:logged_in_as').toString()}
-					</span>
-					<span className="user-settings-dropdown-label-email">{userEmail}</span>
-				</div>
-			),
-			disabled: true,
-			dataTestId: 'logged-in-as-nav-item',
-		},
-		{ type: 'divider' as const },
-		{
-			key: 'workspace',
-			label: t('settings:workspace_settings').toString(),
-			icon: <Building2 size={14} color={Style.L1_FOREGROUND} />,
-			disabled: isWorkspaceBlocked,
-			dataTestId: 'workspace-settings-nav-item',
-		},
-		{
-			key: 'account',
-			label: t('settings:account_settings').toString(),
-			icon: <User size={14} color={Style.L1_FOREGROUND} />,
-			dataTestId: 'account-settings-nav-item',
-		},
-		...(isEnterpriseSelfHostedUser || isCommunityEnterpriseUser
-			? [
-					{
-						key: 'license',
-						label: t('settings:manage_license').toString(),
-						icon: <Shield size={14} color={Style.L1_FOREGROUND} />,
-						dataTestId: 'manage-license-nav-item',
-					},
-				]
-			: []),
-		{
-			key: 'keyboard-shortcuts',
-			label: t('settings:keyboard_shortcuts').toString(),
-			icon: <Keyboard size={14} color={Style.L1_FOREGROUND} />,
-			dataTestId: 'keyboard-shortcuts-nav-item',
-		},
-		{ type: 'divider' as const },
-		{
-			key: 'logout',
-			label: (
-				<span className="user-settings-dropdown-logout-section">
-					{t('settings:sign_out').toString()}
-				</span>
-			),
-			icon: (
-				<LogOut
-					size={14}
-					className="user-settings-dropdown-logout-section"
-					color={Style.DANGER_BACKGROUND}
-				/>
-			),
-			dataTestId: 'logout-nav-item',
-		},
-	].filter(Boolean);
+export const settingsSectionTitleKeyMap: Record<string, string> = {
+	'identity-access': 'routes:identity_access',
+	authentication: 'routes:authentication',
+};
 
 /** Mapping of some newly added routes and their corresponding active sidebar menu key */
 export const NEW_ROUTES_MENU_ITEM_KEY_MAP: Record<string, string> = {

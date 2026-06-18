@@ -1,79 +1,48 @@
-import { getUserSettingsDropdownMenuItems } from 'container/SideNav/menuItems';
-import type { TFunction } from 'i18next';
+import {
+	settingsNavItemKeyMap,
+	settingsSectionTitleKeyMap,
+	settingsNavSections,
+} from 'container/SideNav/menuItems';
+import ROUTES from 'constants/routes';
 
-// Identity stub: returns the key, enough for these structure-only assertions.
-const tStub = ((key: string): string => key) as unknown as TFunction;
+describe('settingsNavItemKeyMap', () => {
+	it('maps known item keys to i18n keys', () => {
+		expect(settingsNavItemKeyMap['account']).toBe('routes:account');
+		expect(settingsNavItemKeyMap['workspace']).toBe('routes:workspace');
+		expect(settingsNavItemKeyMap['manage-license']).toBe('settings:manage_license');
+		expect(settingsNavItemKeyMap['keyboard-shortcuts']).toBe(
+			'routes:keyboard_shortcuts',
+		);
+	});
+});
 
-const BASE_PARAMS = {
-	userEmail: 'test@signoz.io',
-	isWorkspaceBlocked: false,
-	isEnterpriseSelfHostedUser: false,
-	isCommunityEnterpriseUser: false,
-	t: tStub,
-};
+describe('settingsSectionTitleKeyMap', () => {
+	it('maps section keys to i18n keys', () => {
+		expect(settingsSectionTitleKeyMap['identity-access']).toBe(
+			'routes:identity_access',
+		);
+		expect(settingsSectionTitleKeyMap['authentication']).toBe(
+			'routes:authentication',
+		);
+	});
+});
 
-describe('getUserSettingsDropdownMenuItems', () => {
-	it('always includes logged-in-as label, workspace, account, keyboard shortcuts, and sign out', () => {
-		const items = getUserSettingsDropdownMenuItems(BASE_PARAMS);
-		const keys = items?.map((item) => item?.key);
-
-		expect(keys).toContain('label');
-		expect(keys).toContain('workspace');
-		expect(keys).toContain('account');
-		expect(keys).toContain('keyboard-shortcuts');
-		expect(keys).toContain('logout');
-
-		// workspace item is enabled when workspace is not blocked
-		const workspaceItem = items?.find(
-			(item: any) => item.key === 'workspace',
-		) as any;
-
-		expect(workspaceItem?.disabled).toBe(false);
-
-		// does not include license item for regular cloud user
-		expect(keys).not.toContain('license');
+describe('settingsNavSections', () => {
+	it('includes manage-license item in general section', () => {
+		const general = settingsNavSections.find((s) => s.key === 'general');
+		const manageLicense = general?.items.find(
+			(i) => i.itemKey === 'manage-license',
+		);
+		expect(manageLicense).toBeDefined();
+		expect(manageLicense?.key).toBe(ROUTES.LIST_LICENSES);
+		expect(manageLicense?.isEnabled).toBe(false);
 	});
 
-	it('includes manage license item for enterprise self-hosted users', () => {
-		const items = getUserSettingsDropdownMenuItems({
-			...BASE_PARAMS,
-			isEnterpriseSelfHostedUser: true,
-		});
-		const keys = items?.map((item) => item?.key);
-
-		expect(keys).toContain('license');
-	});
-
-	it('includes manage license item for community enterprise users', () => {
-		const items = getUserSettingsDropdownMenuItems({
-			...BASE_PARAMS,
-			isCommunityEnterpriseUser: true,
-		});
-		const keys = items?.map((item) => item?.key);
-
-		expect(keys).toContain('license');
-	});
-
-	it('workspace item is disabled when workspace is blocked', () => {
-		const items = getUserSettingsDropdownMenuItems({
-			...BASE_PARAMS,
-			isWorkspaceBlocked: true,
-		});
-		const workspaceItem = items?.find(
-			(item: any) => item.key === 'workspace',
-		) as any;
-
-		expect(workspaceItem?.disabled).toBe(true);
-	});
-
-	it('returns items in correct order: label, divider, workspace, account, ..., shortcuts, divider, logout', () => {
-		const items = getUserSettingsDropdownMenuItems(BASE_PARAMS) ?? [];
-		const keys = items.map((item: any) => item.key ?? item.type);
-
-		expect(keys[0]).toBe('label');
-		expect(keys[1]).toBe('divider');
-		expect(keys[2]).toBe('workspace');
-		expect(keys[3]).toBe('account');
-		expect(keys[keys.length - 1]).toBe('logout');
+	it('preserves all expected sections', () => {
+		const keys = settingsNavSections.map((s) => s.key);
+		expect(keys).toContain('general');
+		expect(keys).toContain('identity-access');
+		expect(keys).toContain('authentication');
+		expect(keys).toContain('shortcuts');
 	});
 });
