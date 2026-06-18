@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { DEFAULT_ENTITY_VERSION } from 'constants/app';
 import {
 	initialFilters,
@@ -17,6 +18,7 @@ function LogsCountInInterval({
 	filter,
 	timeInterval,
 }: LogsCountInIntervalProps): JSX.Element | null {
+	const { t } = useTranslation(['pipeline']);
 	const query = useMemo(() => {
 		const q = cloneDeep(initialQueriesMap.logs);
 		q.builder.queryData[0] = {
@@ -46,7 +48,7 @@ function LogsCountInInterval({
 			?.values?.[0]?.value;
 	return (
 		<div className="logs-filter-preview-matched-logs-count">
-			{count} matches in
+			{count} {t('pipeline:matches_in')}
 		</div>
 	);
 }

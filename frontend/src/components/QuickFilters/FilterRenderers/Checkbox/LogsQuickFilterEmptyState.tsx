@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import { Button } from 'antd';
 import EmptyQuickFilterIcon from 'assets/CustomIcons/EmptyQuickFilterIcon';
@@ -19,6 +20,7 @@ function LogsQuickFilterEmptyState({
 }: {
 	attributeKey: string;
 }): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const handleLearnMoreClick = (): void => {
 		const section = QUICK_FILTER_DOC_PATHS[attributeKey];
 
@@ -43,7 +45,7 @@ function LogsQuickFilterEmptyState({
 				className="go-to-docs__button"
 				onClick={handleLearnMoreClick}
 			>
-				<div className="go-to-docs__button-text">Learn more</div>
+				<div className="go-to-docs__button-text">{t('logs:learn_more')}</div>
 				<ArrowUpRight size={14} color={Color.BG_ROBIN_400} />
 			</Button>
 		</section>

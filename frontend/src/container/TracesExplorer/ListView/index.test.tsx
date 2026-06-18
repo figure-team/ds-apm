@@ -86,7 +86,7 @@ describe('Traces ListView - Error and Empty States', () => {
 
 			// Empty state with filter message should be visible
 			await waitFor(() => {
-				expect(screen.getByText(/This query had no results/i)).toBeInTheDocument();
+				expect(screen.getByText(/query_no_results/i)).toBeInTheDocument();
 			});
 		});
 	});

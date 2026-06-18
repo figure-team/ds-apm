@@ -253,7 +253,7 @@ describe('PipelinePage container test', () => {
 		expect(
 			await findByText(
 				viewPipelineModal as unknown as HTMLElement,
-				'Simulate Processing',
+				'pipeline:simulate_processing',
 			),
 		).toBeInTheDocument();
 

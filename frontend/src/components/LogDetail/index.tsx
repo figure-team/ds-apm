@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux'; // old code, TODO: fix this correctly
+import { useTranslation } from 'react-i18next';
 import { useCopyToClipboard, useLocation } from 'react-use';
 import { Color, Spacing } from '@signozhq/design-tokens';
 import { Button } from '@signozhq/ui';
@@ -71,6 +72,7 @@ function LogDetailInner({
 	onNavigateLog,
 	onScrollToLog,
 }: LogDetailInnerProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const initialContextQuery = useInitialQuery(log);
 	const [contextQuery, setContextQuery] = useState<Query | undefined>(
 		initialContextQuery,
@@ -354,7 +356,7 @@ function LogDetailInner({
 				<div className="log-detail-drawer__title" data-log-detail-ignore="true">
 					<div className="log-detail-drawer__title-left">
 						<Divider type="vertical" className={cx('log-type-indicator', LogType)} />
-						<Typography.Text className="title">Log details</Typography.Text>
+						<Typography.Text className="title">{t('logs:log_details')}</Typography.Text>
 					</div>
 					<div className="log-detail-drawer__title-right">
 						<div className="log-arrows">
@@ -396,7 +398,7 @@ function LogDetailInner({
 									className="open-in-explorer-btn"
 									onClick={handleOpenInExplorer}
 								>
-									Open in Explorer
+									{t('logs:open_in_explorer')}
 								</Button>
 							</div>
 						)}
@@ -442,7 +444,7 @@ function LogDetailInner({
 						>
 							<div className="view-title">
 								<Table size={14} />
-								Overview
+								{t('logs:tab_overview')}
 							</div>
 						</Radio.Button>
 						<Radio.Button
@@ -453,7 +455,7 @@ function LogDetailInner({
 						>
 							<div className="view-title">
 								<Braces size={14} />
-								JSON
+								{t('logs:tab_json')}
 							</div>
 						</Radio.Button>
 						<Radio.Button
@@ -464,7 +466,7 @@ function LogDetailInner({
 						>
 							<div className="view-title">
 								<TextSelect size={14} />
-								Context
+								{t('logs:tab_context')}
 							</div>
 						</Radio.Button>
 						<Radio.Button
@@ -475,7 +477,7 @@ function LogDetailInner({
 						>
 							<div className="view-title">
 								<BarChart2 size={14} />
-								Metrics
+								{t('logs:tab_metrics')}
 							</div>
 						</Radio.Button>
 					</Radio.Group>
@@ -483,9 +485,9 @@ function LogDetailInner({
 					<div className="log-detail-drawer__actions">
 						{selectedView === VIEW_TYPES.CONTEXT && (
 							<Tooltip
-								title="Show Filters"
+								title={t('logs:show_filters')}
 								placement="topLeft"
-								aria-label="Show Filters"
+								aria-label={t('logs:show_filters')}
 								mouseLeaveDelay={0}
 							>
 								<Button
@@ -566,7 +568,7 @@ function LogDetailInner({
 								type="secondary"
 								className="log-detail-drawer__footer-hint-text"
 							>
-								Use
+								{t('logs:use_arrow_keys')}
 							</Typography.Text>
 							<ArrowUp size={14} className="log-detail-drawer__footer-hint-icon" />
 							<span>/</span>
@@ -575,7 +577,7 @@ function LogDetailInner({
 								type="secondary"
 								className="log-detail-drawer__footer-hint-text"
 							>
-								to view previous/next log
+								{t('logs:to_view_prev_next_log')}
 							</Typography.Text>
 						</div>
 					</div>

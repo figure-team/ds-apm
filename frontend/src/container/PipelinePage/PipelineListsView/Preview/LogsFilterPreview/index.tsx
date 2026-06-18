@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { RelativeDurationOptions } from 'container/TopNav/DateTimeSelectionV2/constants';
 import { TagFilter } from 'types/api/queryBuilder/queryBuilderData';
 
@@ -8,6 +9,7 @@ import SampleLogs from '../components/SampleLogs';
 import './styles.scss';
 
 function LogsFilterPreview({ filter }: LogsFilterPreviewProps): JSX.Element {
+	const { t } = useTranslation(['pipeline']);
 	const last1HourInterval = RelativeDurationOptions[3].value;
 	const [previewTimeInterval, setPreviewTimeInterval] =
 		useState(last1HourInterval);
@@ -17,7 +19,7 @@ function LogsFilterPreview({ filter }: LogsFilterPreviewProps): JSX.Element {
 	return (
 		<div>
 			<div className="logs-filter-preview-header">
-				<div>Filtered Logs Preview</div>
+				<div>{t('pipeline:filtered_logs_preview')}</div>
 				<PreviewIntervalSelector
 					previewFilter={filter}
 					value={previewTimeInterval}
@@ -26,7 +28,7 @@ function LogsFilterPreview({ filter }: LogsFilterPreviewProps): JSX.Element {
 			</div>
 			<div className="logs-filter-preview-content">
 				{isEmptyFilter ? (
-					<div>Please select a filter</div>
+					<div>{t('pipeline:please_select_a_filter')}</div>
 				) : (
 					<SampleLogs filter={filter} timeInterval={previewTimeInterval} count={5} />
 				)}
