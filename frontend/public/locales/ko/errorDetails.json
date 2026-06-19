@@ -2,6 +2,7 @@
 	"see_trace_graph": "트레이스 그래프에서 이 오류 전후에 발생한 일을 확인하세요",
 	"see_error_in_trace_graph": "트레이스 그래프에서 오류 보기",
 	"stack_trace": "스택 트레이스",
+	"event": "이벤트",
 	"older": "이전",
 	"newer": "다음",
 	"something_went_wrong": "이런!!! 문제가 발생했습니다",
