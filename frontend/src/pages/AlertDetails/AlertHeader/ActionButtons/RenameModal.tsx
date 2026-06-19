@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Button, Input, InputRef, Modal, Typography } from 'antd';
 import { Check, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import './RenameModal.styles.scss';
 
@@ -21,6 +22,7 @@ function RenameModal({
 	intermediateName,
 	setIntermediateName,
 }: Props): JSX.Element {
+	const { t } = useTranslation('alerts');
 	const inputRef = useRef<InputRef>(null);
 
 	useEffect(() => {
@@ -52,7 +54,7 @@ function RenameModal({
 	return (
 		<Modal
 			open={isOpen}
-			title="Rename Alert"
+			title={t('rename_alert_title')}
 			onOk={onNameChangeHandler}
 			onCancel={handleClose}
 			rootClassName="rename-alert"
@@ -65,7 +67,7 @@ function RenameModal({
 						onClick={onNameChangeHandler}
 						disabled={isLoading}
 					>
-						Rename Alert
+						{t('rename_alert_btn')}
 					</Button>
 					<Button
 						type="text"
@@ -73,13 +75,13 @@ function RenameModal({
 						className="cancel-btn"
 						onClick={handleClose}
 					>
-						Cancel
+						{t('rename_cancel')}
 					</Button>
 				</div>
 			}
 		>
 			<div className="alert-content">
-				<Typography.Text className="name-text">Enter a new name</Typography.Text>
+				<Typography.Text className="name-text">{t('rename_enter_name')}</Typography.Text>
 				<Input
 					ref={inputRef}
 					data-testid="alert-name"

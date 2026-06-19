@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { NotificationInstance } from 'antd/es/notification/interface';
 import { convertToApiError } from 'api/ErrorResponseHandlerForGeneratedAPIs';
 import { deleteRuleByID } from 'api/generated/services/rules';
@@ -29,6 +30,7 @@ function DeleteAlert({
 		payload: undefined,
 	});
 
+	const { t } = useTranslation('alerts');
 	const { showErrorModal } = useErrorModal();
 
 	const onDeleteHandler = async (id: string): Promise<void> => {
@@ -72,7 +74,7 @@ function DeleteAlert({
 			onClick={onClickHandler}
 			type="link"
 		>
-			Delete
+			{t('list_delete')}
 		</ColumnButton>
 	);
 }

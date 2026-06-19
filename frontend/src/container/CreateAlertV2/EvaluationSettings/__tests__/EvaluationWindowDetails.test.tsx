@@ -31,7 +31,7 @@ describe('EvaluationWindowDetails', () => {
 					) ?? false,
 			)[0],
 		).toBeInTheDocument();
-		expect(screen.getByText('Specify custom duration')).toBeInTheDocument();
+		expect(screen.getByText('v2_window_specify_custom_duration')).toBeInTheDocument();
 		expect(screen.getByText('Last 5 Minutes')).toBeInTheDocument();
 	});
 
@@ -112,7 +112,7 @@ describe('EvaluationWindowDetails', () => {
 			/>,
 		);
 
-		const valueInput = screen.getByPlaceholderText('Enter value');
+		const valueInput = screen.getByPlaceholderText('v2_window_value_placeholder');
 		fireEvent.change(valueInput, { target: { value: '10' } });
 		expect(mockSetEvaluationWindow).toHaveBeenCalledWith({
 			type: 'SET_STARTING_AT',

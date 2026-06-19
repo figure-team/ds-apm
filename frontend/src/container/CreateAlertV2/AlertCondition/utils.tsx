@@ -201,22 +201,23 @@ function TooltipExample({
 	thresholdValue: number;
 	matchType: AlertThresholdMatchType;
 }): JSX.Element {
+	const { t } = useTranslation(['alerts']);
 	return (
 		<div className="tooltip-example">
-			<strong>Example:</strong>
+			<strong>{t('v2_tooltip_example_label')}</strong>
 			<br />
-			Say, For a 5-minute window (configured in Evaluation settings), 1 min
-			aggregation interval (set up in query) → 5{' '}
+			{t('v2_tooltip_example_window')}{' '}
 			{matchType === AlertThresholdMatchType.IN_TOTAL
 				? 'error counts'
 				: 'data points'}
 			: [{dataPoints.join(', ')}]<br />
-			With threshold {operatorSymbol} {thresholdValue}: {children}
+			{t('v2_tooltip_example_threshold')} {operatorSymbol} {thresholdValue}: {children}
 		</div>
 	);
 }
 
 function TooltipLink(): JSX.Element {
+	const { t } = useTranslation(['alerts']);
 	return (
 		<div className="tooltip-link">
 			<a
@@ -225,16 +226,20 @@ function TooltipLink(): JSX.Element {
 				rel="noopener noreferrer"
 				className="tooltip-link-text"
 			>
-				Learn more
+				{t('v2_tooltip_learn_more')}
 			</a>
 		</div>
 	);
 }
 
-export const getMatchTypeTooltip = (
-	matchType: AlertThresholdMatchType,
-	operator: AlertThresholdOperator,
-): React.ReactNode => {
+export function MatchTypeTooltip({
+	matchType,
+	operator,
+}: {
+	matchType: AlertThresholdMatchType;
+	operator: AlertThresholdOperator;
+}): JSX.Element {
+	const { t } = useTranslation(['alerts']);
 	const operatorSymbol = getTooltipOperatorSymbol(operator);
 	const operatorWord = getOperatorWord(operator);
 	const thresholdValue = getThresholdValue(operator);
@@ -260,9 +265,7 @@ export const getMatchTypeTooltip = (
 			return (
 				<TooltipContent>
 					<div className="tooltip-description">
-						Data is aggregated at each interval within your evaluation window,
-						creating multiple data points. This option triggers if <span>ANY</span> of
-						those aggregated data points crosses the threshold.
+						{t('v2_tooltip_any_desc')}
 					</div>
 					<TooltipExample
 						dataPoints={dataPoints}
@@ -270,8 +273,7 @@ export const getMatchTypeTooltip = (
 						thresholdValue={thresholdValue}
 						matchType={matchType}
 					>
-						Alert triggers ({getMatchingPointsCount()} points {operatorWord}{' '}
-						{thresholdValue})
+						{t('v2_tooltip_any_trigger', { count: getMatchingPointsCount(), op: operatorWord, threshold: thresholdValue })}
 					</TooltipExample>
 					<TooltipLink />
 				</TooltipContent>
@@ -281,9 +283,7 @@ export const getMatchTypeTooltip = (
 			return (
 				<TooltipContent>
 					<div className="tooltip-description">
-						Data is aggregated at each interval within your evaluation window,
-						creating multiple data points. This option triggers if <span>ALL</span>{' '}
-						aggregated data points cross the threshold.
+						{t('v2_tooltip_all_desc')}
 					</div>
 					<TooltipExample
 						dataPoints={dataPoints}
@@ -291,8 +291,8 @@ export const getMatchTypeTooltip = (
 						thresholdValue={thresholdValue}
 						matchType={matchType}
 					>
-						Alert triggers (all points {operatorWord} {thresholdValue})<br />
-						If any point was {thresholdValue}, no alert would fire
+						{t('v2_tooltip_all_trigger', { op: operatorWord, threshold: thresholdValue })}<br />
+						{t('v2_tooltip_all_no_fire', { threshold: thresholdValue })}
 					</TooltipExample>
 					<TooltipLink />
 				</TooltipContent>
@@ -305,9 +305,7 @@ export const getMatchTypeTooltip = (
 			return (
 				<TooltipContent>
 					<div className="tooltip-description">
-						Data is aggregated at each interval within your evaluation window,
-						creating multiple data points. This option triggers if the{' '}
-						<span>AVERAGE</span> of all aggregated data points crosses the threshold.
+						{t('v2_tooltip_avg_desc')}
 					</div>
 					<TooltipExample
 						dataPoints={dataPoints}
@@ -315,7 +313,7 @@ export const getMatchTypeTooltip = (
 						thresholdValue={thresholdValue}
 						matchType={matchType}
 					>
-						Alert triggers (average = {average})
+						{t('v2_tooltip_avg_trigger', { average })}
 					</TooltipExample>
 					<TooltipLink />
 				</TooltipContent>
@@ -327,9 +325,7 @@ export const getMatchTypeTooltip = (
 			return (
 				<TooltipContent>
 					<div className="tooltip-description">
-						Data is aggregated at each interval within your evaluation window,
-						creating multiple data points. This option triggers if the{' '}
-						<span>SUM</span> of all aggregated data points crosses the threshold.
+						{t('v2_tooltip_sum_desc')}
 					</div>
 					<TooltipExample
 						dataPoints={dataPoints}
@@ -337,7 +333,7 @@ export const getMatchTypeTooltip = (
 						thresholdValue={thresholdValue}
 						matchType={matchType}
 					>
-						Alert triggers (total = {total})
+						{t('v2_tooltip_sum_trigger', { total })}
 					</TooltipExample>
 					<TooltipLink />
 				</TooltipContent>
@@ -349,9 +345,7 @@ export const getMatchTypeTooltip = (
 			return (
 				<TooltipContent>
 					<div className="tooltip-description">
-						Data is aggregated at each interval within your evaluation window,
-						creating multiple data points. This option triggers based on the{' '}
-						<span>MOST RECENT</span> aggregated data point only.
+						{t('v2_tooltip_last_desc')}
 					</div>
 					<TooltipExample
 						dataPoints={dataPoints}
@@ -359,7 +353,7 @@ export const getMatchTypeTooltip = (
 						thresholdValue={thresholdValue}
 						matchType={matchType}
 					>
-						Alert triggers (last point = {lastPoint})
+						{t('v2_tooltip_last_trigger', { last: lastPoint })}
 					</TooltipExample>
 					<TooltipLink />
 				</TooltipContent>
@@ -367,9 +361,9 @@ export const getMatchTypeTooltip = (
 		}
 
 		default:
-			return '';
+			return <span />;
 	}
-};
+}
 
 export function NotificationChannelsNotFoundContent({
 	user,

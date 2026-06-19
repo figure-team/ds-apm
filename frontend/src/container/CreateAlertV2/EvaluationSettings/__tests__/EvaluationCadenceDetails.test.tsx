@@ -6,7 +6,7 @@ import { AdvancedOptionsState } from 'container/CreateAlertV2/context/types';
 import EvaluationCadenceDetails from '../EvaluationCadence/EvaluationCadenceDetails';
 import { createMockAlertContextState } from './testUtils';
 
-const ENTER_RRULE_PLACEHOLDER = 'Enter RRule';
+const ENTER_RRULE_PLACEHOLDER = 'v2_cadence_rrule_placeholder';
 
 jest.mock('dayjs', () => {
 	const actualDayjs = jest.requireActual('dayjs');
@@ -52,7 +52,7 @@ const SCHEDULE_PREVIEW_TEST_ID = 'schedule-preview';
 const NO_SCHEDULE_TEST_ID = 'no-schedule';
 const EDITOR_VIEW_TEST_ID = 'editor-view';
 const RULE_VIEW_TEST_ID = 'rrule-view';
-const SAVE_CUSTOM_SCHEDULE_TEXT = 'Save Custom Schedule';
+const SAVE_CUSTOM_SCHEDULE_TEXT = 'v2_save_custom_schedule';
 
 describe('EvaluationCadenceDetails', () => {
 	it('should render the evaluation cadence details component with editor mode in daily occurence by default', () => {
@@ -63,18 +63,18 @@ describe('EvaluationCadenceDetails', () => {
 				setIsCustomScheduleButtonVisible={mockSetIsCustomScheduleButtonVisible}
 			/>,
 		);
-		expect(screen.getByText('Add Custom Schedule')).toBeInTheDocument();
+		expect(screen.getByText('v2_add_custom_schedule')).toBeInTheDocument();
 
 		expect(screen.getByTestId(EDITOR_VIEW_TEST_ID)).toBeInTheDocument();
 		expect(screen.queryByTestId('rrule-view')).not.toBeInTheDocument();
 
-		expect(screen.getByText('REPEAT EVERY')).toBeInTheDocument();
-		expect(screen.getByText('AT')).toBeInTheDocument();
-		expect(screen.getByText('TIMEZONE')).toBeInTheDocument();
+		expect(screen.getByText('v2_cadence_repeat_every')).toBeInTheDocument();
+		expect(screen.getByText('v2_cadence_at')).toBeInTheDocument();
+		expect(screen.getByText('v2_cadence_timezone')).toBeInTheDocument();
 
 		expect(screen.getByTestId(SCHEDULE_PREVIEW_TEST_ID)).toBeInTheDocument();
 
-		expect(screen.getByText('Discard')).toBeInTheDocument();
+		expect(screen.getByText('v2_discard_schedule')).toBeInTheDocument();
 		expect(screen.getByText(SAVE_CUSTOM_SCHEDULE_TEXT)).toBeInTheDocument();
 	});
 
@@ -94,13 +94,13 @@ describe('EvaluationCadenceDetails', () => {
 		).not.toBeInTheDocument();
 		expect(screen.getByTestId(NO_SCHEDULE_TEST_ID)).toBeInTheDocument();
 
-		expect(screen.getByText('STARTING ON')).toBeInTheDocument();
-		expect(screen.getByText('AT')).toBeInTheDocument();
+		expect(screen.getByText('v2_cadence_starting_on')).toBeInTheDocument();
+		expect(screen.getByText('v2_cadence_at')).toBeInTheDocument();
 		expect(
 			screen.getByPlaceholderText(ENTER_RRULE_PLACEHOLDER),
 		).toBeInTheDocument();
 
-		expect(screen.getByText('Discard')).toBeInTheDocument();
+		expect(screen.getByText('v2_discard_schedule')).toBeInTheDocument();
 		expect(screen.getByText(SAVE_CUSTOM_SCHEDULE_TEXT)).toBeInTheDocument();
 	});
 
@@ -129,7 +129,7 @@ describe('EvaluationCadenceDetails', () => {
 		);
 
 		// Verify that the "ON DAY(S)" section is rendered for weekly occurrence
-		expect(screen.getByText('ON DAY(S)')).toBeInTheDocument();
+		expect(screen.getByText('v2_cadence_on_days')).toBeInTheDocument();
 
 		// Verify that the schedule preview is shown as today is selected by default
 		expect(screen.getByTestId(SCHEDULE_PREVIEW_TEST_ID)).toBeInTheDocument();
@@ -191,7 +191,7 @@ describe('EvaluationCadenceDetails', () => {
 		);
 
 		// Verify that the "ON DAY(S)" section is rendered for monthly occurrence
-		expect(screen.getByText('ON DAY(S)')).toBeInTheDocument();
+		expect(screen.getByText('v2_cadence_on_days')).toBeInTheDocument();
 
 		// Verify that the schedule preview is  shown as today is selected by default
 		expect(screen.getByTestId(SCHEDULE_PREVIEW_TEST_ID)).toBeInTheDocument();
@@ -236,7 +236,7 @@ describe('EvaluationCadenceDetails', () => {
 				setIsCustomScheduleButtonVisible={mockSetIsCustomScheduleButtonVisible}
 			/>,
 		);
-		fireEvent.click(screen.getByText('Discard'));
+		fireEvent.click(screen.getByText('v2_discard_schedule'));
 		expect(mockSetIsOpen).toHaveBeenCalledWith(false);
 		expect(mockSetIsCustomScheduleButtonVisible).toHaveBeenCalledWith(true);
 	});

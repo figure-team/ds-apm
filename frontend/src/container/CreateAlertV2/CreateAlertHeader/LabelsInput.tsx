@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CloseOutlined } from '@ant-design/icons';
 import { useNotifications } from 'hooks/useNotifications';
 
@@ -9,6 +10,7 @@ function LabelsInput({
 	onLabelsChange,
 	validateLabelsKey,
 }: LabelsInputProps): JSX.Element {
+	const { t } = useTranslation(['alerts']);
 	const { notifications } = useNotifications();
 	const [inputState, setInputState] = useState<LabelInputState>({
 		key: '',
@@ -35,7 +37,7 @@ function LabelsInput({
 						if (key.trim() && value.trim()) {
 							if (labels[key.trim()]) {
 								notifications.error({
-									message: 'Label with this key already exists',
+									message: t('v2_label_duplicate_error'),
 								});
 								return;
 							}
@@ -123,7 +125,7 @@ function LabelsInput({
 		) {
 			// Save the label when focus leaves the value input with both key and value filled
 			if (labels[inputState.key.trim()]) {
-				notifications.error({ message: 'Label with this key already exists' });
+				notifications.error({ message: t('v2_label_duplicate_error') });
 				return;
 			}
 			const error = validateLabelsKey(inputState.key.trim());
@@ -169,7 +171,7 @@ function LabelsInput({
 					onClick={handleAddLabelsClick}
 					data-testid="alert-add-label-button"
 				>
-					+ Add labels
+					{t('v2_add_labels_btn')}
 				</button>
 			) : (
 				<div className="labels-input__input-container">
@@ -180,7 +182,7 @@ function LabelsInput({
 						onKeyDown={handleKeyDown}
 						onBlur={handleBlur}
 						className="labels-input__input"
-						placeholder={inputState.isKeyInput ? 'Enter key' : 'Enter value'}
+						placeholder={inputState.isKeyInput ? t('v2_label_key_placeholder') : t('v2_label_value_placeholder')}
 						autoFocus
 						data-testid="alert-add-label-input"
 					/>

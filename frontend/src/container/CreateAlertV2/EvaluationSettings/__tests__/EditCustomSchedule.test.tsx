@@ -48,9 +48,9 @@ describe('EditCustomSchedule', () => {
 
 		// Use textContent to verify the complete text across multiple Typography components
 		const container = screen
-			.getByText('Every')
+			.getByText('v2_edit_custom_schedule_every')
 			.closest(EDIT_CUSTOM_SCHEDULE_TEST_ID);
-		expect(container).toHaveTextContent('EveryDayat00:00:00');
+		expect(container).toHaveTextContent('v2_edit_custom_schedule_everyDayv2_edit_custom_schedule_at00:00:00');
 	});
 
 	it('should render the correct display text for custom mode with weekly occurrence', () => {
@@ -82,10 +82,10 @@ describe('EditCustomSchedule', () => {
 		);
 
 		const container = screen
-			.getByText('Every')
+			.getByText('v2_edit_custom_schedule_every')
 			.closest(EDIT_CUSTOM_SCHEDULE_TEST_ID);
 		expect(container).toHaveTextContent(
-			'EveryWeekonMonday, Tuesday, Wednesday, Thursday, Fridayat00:00:00',
+			'v2_edit_custom_schedule_everyWeekv2_edit_custom_schedule_onMonday, Tuesday, Wednesday, Thursday, Fridayv2_edit_custom_schedule_at00:00:00',
 		);
 	});
 
@@ -118,9 +118,9 @@ describe('EditCustomSchedule', () => {
 		);
 
 		const container = screen
-			.getByText('Every')
+			.getByText('v2_edit_custom_schedule_every')
 			.closest(EDIT_CUSTOM_SCHEDULE_TEST_ID);
-		expect(container).toHaveTextContent('EveryMonthon1at00:00:00');
+		expect(container).toHaveTextContent('v2_edit_custom_schedule_everyMonthv2_edit_custom_schedule_on1v2_edit_custom_schedule_at00:00:00');
 	});
 
 	it('edit custom schedule action works correctly', () => {
@@ -133,7 +133,7 @@ describe('EditCustomSchedule', () => {
 			/>,
 		);
 
-		fireEvent.click(screen.getByText('Edit custom schedule'));
+		fireEvent.click(screen.getByText('v2_edit_custom_schedule_btn'));
 		expect(mockSetIsEvaluationCadenceDetailsVisible).toHaveBeenCalledWith(true);
 		expect(mockSetIsPreviewVisible).not.toHaveBeenCalled();
 	});
@@ -148,7 +148,7 @@ describe('EditCustomSchedule', () => {
 			/>,
 		);
 
-		fireEvent.click(screen.getByText('Preview'));
+		fireEvent.click(screen.getByText('v2_schedule_preview_btn'));
 		expect(mockSetIsPreviewVisible).toHaveBeenCalledWith(true);
 		expect(mockSetIsEvaluationCadenceDetailsVisible).not.toHaveBeenCalled();
 	});

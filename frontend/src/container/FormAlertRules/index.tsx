@@ -867,7 +867,7 @@ function FormAlertRules({
 						onClick={(): void => handleRedirection(alertDef.alertType as AlertTypes)}
 						icon={<ExternalLink size={14} />}
 					>
-						Alert Setup Guide
+						{t('rule_alert_setup_guide')}
 					</Button>
 				</div>
 

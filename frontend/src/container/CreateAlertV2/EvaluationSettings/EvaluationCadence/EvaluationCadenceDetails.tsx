@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, DatePicker, Input, Select, Typography } from 'antd';
 import classNames from 'classnames';
 import { useCreateAlertState } from 'container/CreateAlertV2/context';
@@ -25,6 +26,7 @@ function EvaluationCadenceDetails({
 	setIsOpen,
 	setIsCustomScheduleButtonVisible,
 }: IEvaluationCadenceDetailsProps): JSX.Element {
+	const { t } = useTranslation(['alerts']);
 	const { advancedOptions, setAdvancedOptions } = useCreateAlertState();
 	const [evaluationCadence, setEvaluationCadence] = useState<
 		AdvancedOptionsState['evaluationCadence']
@@ -91,7 +93,7 @@ function EvaluationCadenceDetails({
 	const EditorView = (
 		<div className="editor-view" data-testid="editor-view">
 			<div className="select-group">
-				<Typography.Text>REPEAT EVERY</Typography.Text>
+				<Typography.Text>{t('v2_cadence_repeat_every')}</Typography.Text>
 				<Select
 					options={EVALUATION_CADENCE_REPEAT_EVERY_OPTIONS}
 					value={evaluationCadence.custom.repeatEvery || null}
@@ -105,7 +107,7 @@ function EvaluationCadenceDetails({
 							},
 						})
 					}
-					placeholder="Select repeat every"
+					placeholder={t('v2_cadence_repeat_every_placeholder')}
 					showSearch
 					searchValue={repeatEverySearchString}
 					onSearch={setRepeatEverySearchString}
@@ -113,7 +115,7 @@ function EvaluationCadenceDetails({
 			</div>
 			{evaluationCadence.custom.repeatEvery !== 'day' && (
 				<div className="select-group">
-					<Typography.Text>ON DAY(S)</Typography.Text>
+					<Typography.Text>{t('v2_cadence_on_days')}</Typography.Text>
 					<Select
 						options={occurenceOptions}
 						value={evaluationCadence.custom.occurence || null}
@@ -127,7 +129,7 @@ function EvaluationCadenceDetails({
 								},
 							})
 						}
-						placeholder="Select day(s)"
+						placeholder={t('v2_cadence_on_days_placeholder')}
 						showSearch
 						searchValue={occurenceSearchString}
 						onSearch={setOccurenceSearchString}
@@ -135,7 +137,7 @@ function EvaluationCadenceDetails({
 				</div>
 			)}
 			<div className="select-group">
-				<Typography.Text>AT</Typography.Text>
+				<Typography.Text>{t('v2_cadence_at')}</Typography.Text>
 				<TimeInput
 					value={evaluationCadence.custom.startAt}
 					onChange={(value): void =>
@@ -150,7 +152,7 @@ function EvaluationCadenceDetails({
 				/>
 			</div>
 			<div className="select-group">
-				<Typography.Text>TIMEZONE</Typography.Text>
+				<Typography.Text>{t('v2_cadence_timezone')}</Typography.Text>
 				<Select
 					options={TIMEZONE_DATA}
 					value={evaluationCadence.custom.timezone || null}
@@ -163,7 +165,7 @@ function EvaluationCadenceDetails({
 							},
 						})
 					}
-					placeholder="Select timezone"
+					placeholder={t('v2_cadence_timezone_placeholder')}
 					onSearch={setSearchTimezoneString}
 					searchValue={searchTimezoneString}
 					showSearch
@@ -175,7 +177,7 @@ function EvaluationCadenceDetails({
 	const RRuleView = (
 		<div className="rrule-view" data-testid="rrule-view">
 			<div className="select-group">
-				<Typography.Text>STARTING ON</Typography.Text>
+				<Typography.Text>{t('v2_cadence_starting_on')}</Typography.Text>
 				<DatePicker
 					value={evaluationCadence.rrule.date}
 					onChange={(value): void =>
@@ -187,11 +189,11 @@ function EvaluationCadenceDetails({
 							},
 						})
 					}
-					placeholder="Select date"
+					placeholder={t('v2_cadence_starting_on_placeholder')}
 				/>
 			</div>
 			<div className="select-group">
-				<Typography.Text>AT</Typography.Text>
+				<Typography.Text>{t('v2_cadence_at')}</Typography.Text>
 				<TimeInput
 					value={evaluationCadence.rrule.startAt}
 					onChange={(value): void =>
@@ -207,7 +209,7 @@ function EvaluationCadenceDetails({
 			</div>
 			<Input.TextArea
 				value={evaluationCadence.rrule.rrule}
-				placeholder="Enter RRule"
+				placeholder={t('v2_cadence_rrule_placeholder')}
 				onChange={(value): void =>
 					setEvaluationCadence({
 						...evaluationCadence,
@@ -295,7 +297,7 @@ function EvaluationCadenceDetails({
 	return (
 		<div className="evaluation-cadence-details">
 			<Typography.Text className="evaluation-cadence-details-title">
-				Add Custom Schedule
+				{t('v2_add_custom_schedule')}
 			</Typography.Text>
 			<div className="evaluation-cadence-details-content">
 				<div className="evaluation-cadence-details-content-row">
@@ -321,14 +323,14 @@ function EvaluationCadenceDetails({
 					{activeTab === 'rrule' && RRuleView}
 					<div className="buttons-row">
 						<Button type="default" onClick={handleDiscard}>
-							Discard
+							{t('v2_discard_schedule')}
 						</Button>
 						<Button
 							type="primary"
 							onClick={handleSaveCustomSchedule}
 							disabled={disableSaveButton}
 						>
-							Save Custom Schedule
+							{t('v2_save_custom_schedule')}
 						</Button>
 					</div>
 				</div>

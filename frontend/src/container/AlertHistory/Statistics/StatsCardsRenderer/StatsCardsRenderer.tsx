@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useGetAlertRuleDetailsStats } from 'pages/AlertDetails/hooks';
 import DataStateRenderer from 'periscope/components/DataStateRenderer/DataStateRenderer';
 
@@ -28,6 +29,7 @@ type StatsCardsRendererProps = {
 function StatsCardsRenderer({
 	setTotalCurrentTriggers,
 }: StatsCardsRendererProps): JSX.Element {
+	const { t } = useTranslation('alerts');
 	const { isLoading, isRefetching, isError, data, isValidRuleId, ruleId } =
 		useGetAlertRuleDetailsStats();
 
@@ -64,9 +66,9 @@ function StatsCardsRenderer({
 							/>
 						) : (
 							<StatsCard
-								title="Total Triggered"
+								title={t('hist_total_triggered')}
 								isEmpty
-								emptyMessage="None Triggered."
+								emptyMessage={t('hist_none_triggered')}
 							/>
 						)}
 
@@ -81,9 +83,9 @@ function StatsCardsRenderer({
 							/>
 						) : (
 							<StatsCard
-								title="Avg. Resolution Time"
+								title={t('hist_avg_resolution_time')}
 								isEmpty
-								emptyMessage="No Resolutions."
+								emptyMessage={t('hist_no_resolutions')}
 							/>
 						)}
 					</>

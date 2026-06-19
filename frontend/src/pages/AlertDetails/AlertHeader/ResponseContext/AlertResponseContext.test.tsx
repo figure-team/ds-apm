@@ -23,8 +23,8 @@ describe('AlertResponseContext', () => {
 			/>,
 		);
 
-		expect(screen.queryByText('Response context')).not.toBeInTheDocument();
-		expect(screen.queryByText('Incident briefing')).not.toBeInTheDocument();
+		expect(screen.queryByText('rc_section_response_context')).not.toBeInTheDocument();
+		expect(screen.queryByText('rc_section_incident_briefing')).not.toBeInTheDocument();
 		expect(container).toBeEmptyDOMElement();
 	});
 
@@ -44,15 +44,13 @@ describe('AlertResponseContext', () => {
 			/>,
 		);
 
-		expect(screen.getByText('Incident briefing')).toBeInTheDocument();
-		expect(screen.getByText('PM handoff')).toBeInTheDocument();
+		expect(screen.getByText('rc_section_incident_briefing')).toBeInTheDocument();
+		expect(screen.getByText('rc_heading')).toBeInTheDocument();
 		expect(
-			screen.getByText(
-				'Copy-ready incident packet for PM, operator, vendor, and customer updates.',
-			),
+			screen.getByText('rc_description'),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole('button', { name: /Copy handoff/ }),
+			screen.getByRole('button', { name: /rc_copy_handoff/ }),
 		).toBeInTheDocument();
 		expect(screen.getByText('Impact')).toBeInTheDocument();
 		expect(
@@ -81,7 +79,7 @@ describe('AlertResponseContext', () => {
 			screen.getByRole('button', { name: 'Copy customer update' }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole('button', { name: /Copy briefing/ }),
+			screen.getByRole('button', { name: /rc_copy_incident_briefing/ }),
 		).toBeInTheDocument();
 	});
 
@@ -99,7 +97,7 @@ describe('AlertResponseContext', () => {
 			/>,
 		);
 
-		await user.click(screen.getByRole('button', { name: /Copy briefing/ }));
+		await user.click(screen.getByRole('button', { name: /rc_copy_incident_briefing/ }));
 
 		expect(mockCopyToClipboard).toHaveBeenCalledWith(
 			[
@@ -131,7 +129,7 @@ describe('AlertResponseContext', () => {
 			/>,
 		);
 
-		await user.click(screen.getByRole('button', { name: /Copy handoff/ }));
+		await user.click(screen.getByRole('button', { name: /rc_copy_handoff/ }));
 
 		expect(mockCopyToClipboard).toHaveBeenCalledWith(
 			[
@@ -154,7 +152,7 @@ describe('AlertResponseContext', () => {
 				'Alert URL: http://localhost/alerts/rules/checkout-latency',
 			].join('\n'),
 		);
-		expect(screen.getByRole('button', { name: /Copied/ })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: /rc_copied/ })).toBeInTheDocument();
 	});
 
 	it('copies individual vendor and customer handoff snippets', async () => {
@@ -201,7 +199,7 @@ describe('AlertResponseContext', () => {
 			/>,
 		);
 
-		expect(screen.getByText('Response context')).toBeInTheDocument();
+		expect(screen.getByText('rc_section_response_context')).toBeInTheDocument();
 		expect(screen.getByText('Owner')).toBeInTheDocument();
 		expect(screen.getByText('payments-team')).toBeInTheDocument();
 		expect(screen.getByText('Escalation')).toBeInTheDocument();
@@ -221,7 +219,7 @@ describe('AlertResponseContext', () => {
 		expect(sopLink).toHaveAttribute('rel', 'noopener noreferrer');
 		expect(screen.queryByText(/token=hidden/)).not.toBeInTheDocument();
 		expect(
-			screen.getByRole('button', { name: /Copy context/ }),
+			screen.getByRole('button', { name: /rc_copy_response_context/ }),
 		).toBeInTheDocument();
 	});
 
@@ -241,7 +239,7 @@ describe('AlertResponseContext', () => {
 			/>,
 		);
 
-		expect(screen.getByText('SOP status')).toBeInTheDocument();
+		expect(screen.getByText('rc_section_sop_status')).toBeInTheDocument();
 		expect(screen.getByText('Status')).toBeInTheDocument();
 		expect(screen.getByText('Bound')).toBeInTheDocument();
 		expect(screen.getByText('SOP ID')).toBeInTheDocument();
@@ -264,7 +262,7 @@ describe('AlertResponseContext', () => {
 		);
 		expect(screen.queryByText(/token=hidden/)).not.toBeInTheDocument();
 		expect(
-			screen.getByRole('button', { name: /Copy SOP status/ }),
+			screen.getByRole('button', { name: /rc_copy_sop_status/ }),
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole('button', { name: 'Copy SOP URL' }),
@@ -280,13 +278,13 @@ describe('AlertResponseContext', () => {
 			/>,
 		);
 
-		expect(screen.getByText('SOP status')).toBeInTheDocument();
+		expect(screen.getByText('rc_section_sop_status')).toBeInTheDocument();
 		expect(screen.getByText('Missing')).toBeInTheDocument();
 		expect(
 			screen.getByText('Add sop_id or sop_url to this alert rule.'),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole('button', { name: /Copy SOP status/ }),
+			screen.getByRole('button', { name: /rc_copy_sop_status/ }),
 		).toBeInTheDocument();
 	});
 
@@ -309,7 +307,7 @@ describe('AlertResponseContext', () => {
 			/>,
 		);
 
-		expect(screen.getByText('AI strategy')).toBeInTheDocument();
+		expect(screen.getByText('rc_section_ai_strategy')).toBeInTheDocument();
 		expect(screen.getByText('ready')).toBeInTheDocument();
 		expect(
 			screen.getByText('SOP 기준 결제 지연 확인이 필요합니다.'),
@@ -322,7 +320,7 @@ describe('AlertResponseContext', () => {
 			screen.getByText('metric:error_rate:1, trace:error:1'),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole('button', { name: /Copy AI strategy/ }),
+			screen.getByRole('button', { name: /rc_copy_ai_strategy/ }),
 		).toBeInTheDocument();
 
 		await user.click(
@@ -346,7 +344,7 @@ describe('AlertResponseContext', () => {
 			/>,
 		);
 
-		expect(screen.getByText('AI strategy')).toBeInTheDocument();
+		expect(screen.getByText('rc_section_ai_strategy')).toBeInTheDocument();
 		expect(screen.getByText('evidence_unavailable')).toBeInTheDocument();
 		expect(
 			screen.getByText('No evidence refs were available.'),
@@ -376,7 +374,7 @@ describe('AlertResponseContext', () => {
 			/>,
 		);
 
-		expect(screen.getByText('AI strategy')).toBeInTheDocument();
+		expect(screen.getByText('rc_section_ai_strategy')).toBeInTheDocument();
 		expect(screen.getByText('quota_exhausted')).toBeInTheDocument();
 		expect(
 			screen.getByText('AI 사용량 한도에 도달하여 SOP 기본 알림만 전송합니다.'),
@@ -404,7 +402,7 @@ describe('AlertResponseContext', () => {
 			/>,
 		);
 
-		await user.click(screen.getByRole('button', { name: /Copy SOP status/ }));
+		await user.click(screen.getByRole('button', { name: /rc_copy_sop_status/ }));
 
 		expect(mockCopyToClipboard).toHaveBeenLastCalledWith(
 			[
@@ -434,7 +432,7 @@ describe('AlertResponseContext', () => {
 			/>,
 		);
 
-		expect(screen.getByText('Evidence status')).toBeInTheDocument();
+		expect(screen.getByText('rc_section_evidence_status')).toBeInTheDocument();
 		expect(screen.getAllByText('Status')).toHaveLength(2);
 		expect(screen.getByText('ready')).toBeInTheDocument();
 		expect(screen.getByText('Generated')).toBeInTheDocument();
@@ -442,7 +440,7 @@ describe('AlertResponseContext', () => {
 		expect(screen.getByText('Confidence')).toBeInTheDocument();
 		expect(screen.getByText('high')).toBeInTheDocument();
 		expect(
-			screen.getByRole('button', { name: /Copy evidence status/ }),
+			screen.getByRole('button', { name: /rc_copy_evidence_status/ }),
 		).toBeInTheDocument();
 	});
 
@@ -455,7 +453,7 @@ describe('AlertResponseContext', () => {
 			/>,
 		);
 
-		expect(screen.getByText('Evidence status')).toBeInTheDocument();
+		expect(screen.getByText('rc_section_evidence_status')).toBeInTheDocument();
 		expect(screen.getByText('Ready')).toBeInTheDocument();
 	});
 

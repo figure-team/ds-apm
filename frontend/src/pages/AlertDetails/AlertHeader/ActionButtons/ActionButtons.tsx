@@ -3,6 +3,7 @@ import { Color } from '@signozhq/design-tokens';
 import { Divider, Dropdown, MenuProps, Switch, Tooltip } from 'antd';
 import { useIsDarkMode } from 'hooks/useDarkMode';
 import { Copy, Ellipsis, PenLine, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
 	useAlertRuleDelete,
 	useAlertRuleDuplicate,
@@ -39,6 +40,7 @@ function AlertActionButtons({
 	alertDetails: AlertHeaderProps['alertDetails'];
 	setUpdatedName: (name: string) => void;
 }): JSX.Element {
+	const { t } = useTranslation('alerts');
 	const { alertRuleState, setAlertRuleState } = useAlertRule();
 	const [intermediateName, setIntermediateName] = useState<string>(
 		alertDetails.alert,
@@ -139,7 +141,7 @@ function AlertActionButtons({
 				<Divider type="vertical" />
 
 				<Dropdown trigger={['click']} menu={{ items: menuItems }}>
-					<Tooltip title="More options">
+					<Tooltip title={t('action_more_options')}>
 						<Ellipsis
 							size={16}
 							color={isDarkMode ? Color.BG_VANILLA_400 : Color.BG_INK_400}

@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import GraphWrapper from './GraphWrapper/GraphWrapper';
 import TimelineTable from './Table/Table';
 import TabsAndFilters from './TabsAndFilters/TabsAndFilters';
@@ -13,9 +15,10 @@ function Timeline({
 }: {
 	totalCurrentTriggers: number;
 }): JSX.Element {
+	const { t } = useTranslation('alerts');
 	return (
 		<div className="timeline">
-			<div className="timeline__title">Timeline</div>
+			<div className="timeline__title">{t('hist_timeline')}</div>
 			<div className="timeline__tabs-and-filters">
 				<TabsAndFilters />
 			</div>

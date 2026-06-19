@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from 'react';
 import { Form, Input, Select } from 'antd';
 import { LabelFilterStatement } from 'container/CreateAlertChannels/config';
+import { useTranslation } from 'react-i18next';
 
 const { Option } = Select;
 
@@ -8,8 +9,9 @@ const { Option } = Select;
 // presently un-used but will be introduced to the channel creation at some
 // point
 function LabelFilterForm({ setFilter }: LabelFilterProps): JSX.Element {
+	const { t } = useTranslation('channels');
 	return (
-		<Form.Item name="label_filter" label="Notify When (Optional)">
+		<Form.Item name="label_filter" label={t('label_filter_notify_when')}>
 			<Input.Group compact>
 				<Select
 					defaultValue="Severity"
@@ -40,7 +42,7 @@ function LabelFilterForm({ setFilter }: LabelFilterProps): JSX.Element {
 				</Select>
 				<Input
 					style={{ width: '20%' }}
-					placeholder="enter a text here"
+					placeholder={t('label_filter_placeholder')}
 					onChange={(event): void => {
 						setFilter((value) => {
 							const first: LabelFilterStatement = value[0] as LabelFilterStatement;

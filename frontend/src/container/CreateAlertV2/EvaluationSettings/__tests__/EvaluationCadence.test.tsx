@@ -50,11 +50,9 @@ const EVALUATION_CADENCE_INPUT_GROUP = 'evaluation-cadence-input-group';
 describe('EvaluationCadence', () => {
 	it('should render the title, description, tooltip and input group with default values', () => {
 		render(<EvaluationCadence />);
-		expect(screen.getByText('How often to check')).toBeInTheDocument();
+		expect(screen.getByText('v2_how_often_check_title')).toBeInTheDocument();
 		expect(
-			screen.getByText(
-				'How frequently this alert checks your data. Default: Every 1 minute',
-			),
+			screen.getByText('v2_how_often_check_desc'),
 		).toBeInTheDocument();
 		expect(
 			screen.getByTestId('evaluation-cadence-tooltip-icon'),
@@ -62,7 +60,7 @@ describe('EvaluationCadence', () => {
 		expect(
 			screen.getByTestId(EVALUATION_CADENCE_INPUT_GROUP),
 		).toBeInTheDocument();
-		expect(screen.getByPlaceholderText('Enter time')).toHaveValue(1);
+		expect(screen.getByPlaceholderText('v2_enter_time_placeholder')).toHaveValue(1);
 		expect(screen.getByText('Minutes')).toBeInTheDocument();
 		// TODO: Uncomment this when add custom schedule button is implemented
 		// expect(screen.getByText(ADD_CUSTOM_SCHEDULE_TEXT)).toBeInTheDocument();

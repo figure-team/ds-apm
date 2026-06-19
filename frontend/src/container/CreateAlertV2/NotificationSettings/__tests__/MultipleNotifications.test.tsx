@@ -71,13 +71,11 @@ describe('MultipleNotifications', () => {
 
 	it('should render the multiple notifications component with no grouping fields and disabled input by default', () => {
 		render(<MultipleNotifications />);
-		expect(screen.getByText('Group alerts by')).toBeInTheDocument();
+		expect(screen.getByText('v2_group_alerts_by_title')).toBeInTheDocument();
 		expect(
-			screen.getByText(
-				'Combine alerts with the same field values into a single notification.',
-			),
+			screen.getByText('v2_group_alerts_by_desc'),
 		).toBeInTheDocument();
-		expect(screen.getByText('No grouping fields available')).toBeInTheDocument();
+		expect(screen.getByText('v2_no_grouping_fields_placeholder')).toBeInTheDocument();
 		const select = screen.getByRole(COMBOBOX_ROLE);
 		expect(select).toHaveAttribute(ARIA_DISABLED_ATTR, TRUE);
 	});
@@ -98,9 +96,7 @@ describe('MultipleNotifications', () => {
 		render(<MultipleNotifications />);
 
 		expect(
-			screen.getByText(
-				'Empty = all matching alerts combined into one notification',
-			),
+			screen.getByText('v2_empty_grouping'),
 		).toBeInTheDocument();
 		const select = screen.getByRole(COMBOBOX_ROLE);
 		expect(select).toHaveAttribute(ARIA_DISABLED_ATTR, FALSE);
@@ -136,7 +132,7 @@ describe('MultipleNotifications', () => {
 		render(<MultipleNotifications />);
 
 		expect(
-			screen.getByText('Alerts with same service, environment will be grouped'),
+			screen.getByText('v2_alerts_grouped'),
 		).toBeInTheDocument();
 		const select = screen.getByRole(COMBOBOX_ROLE);
 		expect(select).toHaveAttribute(ARIA_DISABLED_ATTR, FALSE);
@@ -195,7 +191,7 @@ describe('MultipleNotifications', () => {
 		render(<MultipleNotifications />);
 
 		expect(
-			screen.getByText('All = grouping of alerts is disabled'),
+			screen.getByText('v2_all_grouping_disabled'),
 		).toBeInTheDocument();
 	});
 

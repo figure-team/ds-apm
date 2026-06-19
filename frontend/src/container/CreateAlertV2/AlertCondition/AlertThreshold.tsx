@@ -28,7 +28,7 @@ import { AnomalyAndThresholdProps, UpdateThreshold } from './types';
 import {
 	getCategoryByOptionId,
 	getCategorySelectOptionByName,
-	getMatchTypeTooltip,
+	MatchTypeTooltip,
 	getQueryNames,
 	RoutingPolicyBanner,
 } from './utils';
@@ -149,7 +149,7 @@ function AlertThreshold({
 			...option,
 			label: (
 				<Tooltip
-					title={getMatchTypeTooltip(option.value, normalizedOperator)}
+					title={<MatchTypeTooltip matchType={option.value} operator={normalizedOperator} />}
 					placement="left"
 					overlayClassName="copyable-tooltip"
 					overlayStyle={{

@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef } from 'react';
 import type { SelectProps } from 'antd';
 import { Tag, Tooltip } from 'antd';
 import type { BaseOptionType } from 'antd/es/select';
+import { useTranslation } from 'react-i18next';
 import { Alerts } from 'types/api/alerts/getTriggered';
 
 import { Container, Select } from './styles';
@@ -35,6 +36,7 @@ function Filter({
 	selectedGroup,
 	selectedFilter,
 }: FilterProps): JSX.Element {
+	const { t } = useTranslation('alerts');
 	const onChangeSelectGroupHandler = useCallback(
 		(value: unknown) => {
 			if (typeof value === 'object' && Array.isArray(value)) {
@@ -101,7 +103,7 @@ function Filter({
 				onChange={onChangeSelectedFilterHandler}
 				mode="tags"
 				value={selectedFilter.map((e) => e.value)}
-				placeholder="Filter by Tags - e.g. severity:warning, alertname:Sample Alert"
+				placeholder={t('triggered_filter_placeholder')}
 				tagRender={(props): JSX.Element => getTags(props)}
 				options={[]}
 			/>
@@ -111,7 +113,7 @@ function Filter({
 				mode="tags"
 				defaultValue={selectedGroup.map((e) => e.value)}
 				showArrow
-				placeholder="Group by any tag"
+				placeholder={t('triggered_group_placeholder')}
 				tagRender={(props): JSX.Element => getTags(props)}
 				options={options}
 				optionRender={(option): JSX.Element => (

@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useTranslation } from 'react-i18next';
 import { generatePath, useLocation } from 'react-router-dom';
 import { TablePaginationConfig, TableProps } from 'antd';
 import type { FilterValue, SorterResult } from 'antd/es/table/interface';
@@ -97,6 +98,7 @@ export const useAlertHistoryQueryParams = (): {
 	};
 };
 export const useRouteTabUtils = (): { routes: TabRoutes[] } => {
+	const { t } = useTranslation('alerts');
 	const urlQuery = useUrlQuery();
 
 	const getRouteUrl = (tab: AlertDetailsTab): string => {

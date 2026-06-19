@@ -82,7 +82,7 @@ function EvaluationCadence(): JSX.Element {
 							/>
 							<Select
 								options={ADVANCED_OPTIONS_TIME_UNIT_OPTIONS}
-								placeholder="Select time unit"
+								placeholder={t('v2_cadence_select_time_unit')}
 								style={{ width: 120 }}
 								value={advancedOptions.evaluationCadence.default.timeUnit}
 								onChange={(value): void =>

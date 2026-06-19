@@ -5,6 +5,7 @@ import { Button } from 'antd';
 import { useIsDarkMode } from 'hooks/useDarkMode';
 import history from 'lib/history';
 import { ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import TopContributorsContent from './TopContributorsContent';
 import { TopContributorsCardProps } from './types';
@@ -26,6 +27,7 @@ function TopContributorsCard({
 	);
 
 	const isDarkMode = useIsDarkMode();
+	const { t } = useTranslation('alerts');
 
 	const toggleViewAllParam = (isOpen: boolean): void => {
 		if (isOpen) {
@@ -50,10 +52,10 @@ function TopContributorsCard({
 		<>
 			<div className="top-contributors-card">
 				<div className="top-contributors-card__header">
-					<div className="title">top contributors</div>
+					<div className="title">{t('hist_top_contributors')}</div>
 					{topContributorsData.length > 3 && (
 						<Button type="text" className="view-all" onClick={toggleViewAllDrawer}>
-							<div className="label">View all</div>
+							<div className="label">{t('hist_view_all')}</div>
 							<div className="icon">
 								<ArrowRight
 									size={14}

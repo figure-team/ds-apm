@@ -83,5 +83,7 @@
 	"channel_name_required": "채널 이름은 필수입니다",
 	"label_advanced_settings": "고급 설정",
 	"help_channel_title": "Go 템플릿을 사용하여 알림 제목을 사용자 정의하세요. 예: {{ .CommonLabels.alertname }}, {{ .Status }}",
-	"help_channel_description": "Go 템플릿을 사용하여 메시지 본문을 사용자 정의하세요. {{ range .Alerts -}}를 사용하여 각 알림을 순회하세요."
+	"help_channel_description": "Go 템플릿을 사용하여 메시지 본문을 사용자 정의하세요. {{ range .Alerts -}}를 사용하여 각 알림을 순회하세요.",
+	"label_filter_notify_when": "알림 조건 (선택 사항)",
+	"label_filter_placeholder": "텍스트를 입력하세요"
 }

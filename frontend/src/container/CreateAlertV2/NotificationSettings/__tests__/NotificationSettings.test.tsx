@@ -36,21 +36,19 @@ jest.spyOn(createAlertContext, 'useCreateAlertState').mockReturnValue(
 	}),
 );
 
-const REPEAT_NOTIFICATIONS_TEXT = 'Repeat notifications';
-const ENTER_TIME_INTERVAL_TEXT = 'Enter time interval...';
+const REPEAT_NOTIFICATIONS_TEXT = 'v2_repeat_notifications_title';
+const ENTER_TIME_INTERVAL_TEXT = 'v2_time_interval_placeholder';
 
 describe('NotificationSettings', () => {
 	it('renders the notification settings tab with step number 3 and default values', () => {
 		render(<NotificationSettings />);
-		expect(screen.getByText('Notification settings')).toBeInTheDocument();
+		expect(screen.getByText('v2_step_notification_settings')).toBeInTheDocument();
 		expect(screen.getByText('3')).toBeInTheDocument();
 		expect(screen.getByTestId('multiple-notifications')).toBeInTheDocument();
 		expect(screen.getByTestId('notification-message')).toBeInTheDocument();
 		expect(screen.getByText(REPEAT_NOTIFICATIONS_TEXT)).toBeInTheDocument();
 		expect(
-			screen.getByText(
-				'Send periodic notifications while the alert condition remains active.',
-			),
+			screen.getByText('v2_repeat_notifications_desc'),
 		).toBeInTheDocument();
 	});
 
@@ -58,7 +56,7 @@ describe('NotificationSettings', () => {
 		it('renders the repeat notifications with inputs hidden when the repeat notifications switch is off', () => {
 			render(<NotificationSettings />);
 			expect(screen.getByText(REPEAT_NOTIFICATIONS_TEXT)).toBeInTheDocument();
-			expect(screen.getByText('Every')).not.toBeVisible();
+			expect(screen.getByText('v2_every_text')).not.toBeVisible();
 			expect(
 				screen.getByPlaceholderText(ENTER_TIME_INTERVAL_TEXT),
 			).not.toBeVisible();
@@ -68,14 +66,14 @@ describe('NotificationSettings', () => {
 			render(<NotificationSettings />);
 			expect(screen.getByText(REPEAT_NOTIFICATIONS_TEXT)).toBeInTheDocument();
 
-			expect(screen.getByText('Every')).not.toBeVisible();
+			expect(screen.getByText('v2_every_text')).not.toBeVisible();
 			expect(
 				screen.getByPlaceholderText(ENTER_TIME_INTERVAL_TEXT),
 			).not.toBeVisible();
 
 			fireEvent.click(screen.getByRole('switch'));
 
-			expect(screen.getByText('Every')).toBeVisible();
+			expect(screen.getByText('v2_every_text')).toBeVisible();
 			expect(screen.getByPlaceholderText(ENTER_TIME_INTERVAL_TEXT)).toBeVisible();
 		});
 

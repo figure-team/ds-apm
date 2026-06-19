@@ -1,5 +1,5 @@
 import { UniversalYAxisUnit } from 'components/YAxisUnitSelector/types';
-import { initialQueriesMap } from 'constants/queryBuilder';
+import { initialAutocompleteData, initialQueriesMap } from 'constants/queryBuilder';
 import {
 	INITIAL_ADVANCED_OPTIONS_STATE,
 	INITIAL_ALERT_STATE,
@@ -51,12 +51,23 @@ describe('Footer utils', () => {
 			advancedOptions: INITIAL_ADVANCED_OPTIONS_STATE,
 			evaluationWindow: INITIAL_EVALUATION_WINDOW_STATE,
 			notificationSettings: INITIAL_NOTIFICATION_SETTINGS_STATE,
-			query: initialQueriesMap.metrics,
+			query: {
+				...initialQueriesMap.metrics,
+				builder: {
+					...initialQueriesMap.metrics.builder,
+					queryData: [
+						{
+							...initialQueriesMap.metrics.builder.queryData[0],
+							aggregateAttribute: { ...initialAutocompleteData, key: 'test_metric' },
+						},
+					],
+				},
+			},
 		};
 
 		it('when alert name is not provided', () => {
 			expect(validateCreateAlertState(args)).toBeDefined();
-			expect(validateCreateAlertState(args)).toBe('Please enter an alert name');
+			expect(validateCreateAlertState(args)).toBe('v2_validation_name_required');
 		});
 
 		it('when threshold label is not provided', () => {
@@ -65,6 +76,7 @@ describe('Footer utils', () => {
 				basicAlertState: {
 					...args.basicAlertState,
 					name: 'test name',
+					labels: { sop_id: 'test-sop' },
 				},
 				thresholdState: {
 					...args.thresholdState,
@@ -78,7 +90,7 @@ describe('Footer utils', () => {
 			};
 			expect(validateCreateAlertState(currentArgs)).toBeDefined();
 			expect(validateCreateAlertState(currentArgs)).toBe(
-				'Please enter a label for each threshold',
+				'v2_validation_threshold_label_required',
 			);
 		});
 
@@ -88,11 +100,12 @@ describe('Footer utils', () => {
 				basicAlertState: {
 					...args.basicAlertState,
 					name: 'test name',
+					labels: { sop_id: 'test-sop' },
 				},
 			};
 			expect(validateCreateAlertState(currentArgs)).toBeDefined();
 			expect(validateCreateAlertState(currentArgs)).toBe(
-				'Please select at least one channel for each threshold or enable routing policies',
+				'v2_validation_channel_required',
 			);
 		});
 
@@ -102,6 +115,7 @@ describe('Footer utils', () => {
 				basicAlertState: {
 					...args.basicAlertState,
 					name: 'test name',
+					labels: { sop_id: 'test-sop' },
 				},
 				notificationSettings: {
 					...args.notificationSettings,
@@ -117,6 +131,7 @@ describe('Footer utils', () => {
 				basicAlertState: {
 					...args.basicAlertState,
 					name: 'test name',
+					labels: { sop_id: 'test-sop' },
 				},
 				thresholdState: {
 					...args.thresholdState,

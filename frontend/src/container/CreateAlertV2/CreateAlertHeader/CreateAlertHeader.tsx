@@ -280,7 +280,7 @@ function CreateAlertHeader(): JSX.Element {
 				</div>
 				<div
 					className="operational-metadata"
-					aria-label="SI/SM routing metadata completeness"
+					aria-label={t('v2_sisam_routing_title')}
 				>
 					<div className="operational-metadata__header">
 						<div className="operational-metadata__title">{t('v2_sisam_routing_title')}</div>
@@ -328,7 +328,7 @@ function CreateAlertHeader(): JSX.Element {
 					onLabelsChange={handleLabelsChange}
 					validateLabelsKey={validateLabelsKey}
 				/>
-				<div className="sop-metadata" aria-label="SOP binding metadata">
+				<div className="sop-metadata" aria-label={t('v2_sop_binding_title')}>
 					<div className="sop-metadata__header">
 						<div className="sop-metadata__title">{t('v2_sop_binding_title')}</div>
 						<div className="sop-metadata__description">
@@ -348,13 +348,13 @@ function CreateAlertHeader(): JSX.Element {
 					</div>
 					{!hasSopBinding(alertState.labels, alertState.annotations) && (
 						<div className="sop-metadata__missing-banner" role="alert">
-							SOP binding이 없으면 장애 발생 시 SOP 문서를 조회할 수 없습니다. 아래에 <strong>SOP ID</strong> 또는 <strong>SOP URL</strong>을 입력하세요.
+							{t('v2_sop_missing_banner')} <strong>{t('v2_sop_id_field')}</strong> 또는 <strong>{t('v2_sop_url_field')}</strong>을 입력하세요.
 						</div>
 					)}
 					<div className="sop-metadata__grid">
 						<label className="sop-metadata__field">
 							<span className="sop-metadata__label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-								SOP ID
+								{t('v2_sop_id_field')}
 								<span className="alert-header__required-badge">{t('v2_alert_name_required')}</span>
 							</span>
 							<Input
@@ -417,7 +417,7 @@ function CreateAlertHeader(): JSX.Element {
 							);
 						})}
 						<label className="sop-metadata__field">
-							<span className="sop-metadata__label">Project ID</span>
+							<span className="sop-metadata__label">{t('v2_sop_project_id_field')}</span>
 							<Input
 								className="sop-metadata__input"
 								data-testid="sop-metadata-project_id"
@@ -430,7 +430,7 @@ function CreateAlertHeader(): JSX.Element {
 							/>
 						</label>
 						<label className="sop-metadata__field">
-							<span className="sop-metadata__label">Owner Team</span>
+							<span className="sop-metadata__label">{t('v2_sop_owner_team_field')}</span>
 							<Input
 								className="sop-metadata__input"
 								data-testid="sop-metadata-owner_team"
@@ -443,14 +443,14 @@ function CreateAlertHeader(): JSX.Element {
 							/>
 						</label>
 						<label className="sop-metadata__field">
-							<span className="sop-metadata__label">Environment</span>
+							<span className="sop-metadata__label">{t('v2_sop_environment_field')}</span>
 							<Input
 								className="sop-metadata__input"
 								data-testid="sop-metadata-environment"
 								onChange={(event): void =>
 									handleLabelChange('environment', event.target.value)
 								}
-								placeholder="production"
+								placeholder={t('v2_sop_environment_placeholder')}
 								type="text"
 								value={alertState.labels['environment'] || ''}
 							/>
@@ -640,7 +640,7 @@ function CreateAlertHeader(): JSX.Element {
 				<Collapse.Panel header={t('v2_pm_briefing_collapse')} key="pm-briefing">
 				<div
 					className="pm-briefing-metadata"
-					aria-label="PM-friendly incident briefing metadata"
+					aria-label={t('v2_pm_briefing_collapse')}
 				>
 					<div className="pm-briefing-metadata__header">
 						<div className="pm-briefing-metadata__description">
@@ -686,7 +686,7 @@ function CreateAlertHeader(): JSX.Element {
 				</div>
 				</Collapse.Panel>
 				<Collapse.Panel header={t('v2_ai_evidence_collapse')} key="ai-evidence">
-				<div className="evidence-metadata" aria-label="AI evidence status metadata">
+				<div className="evidence-metadata" aria-label={t('v2_ai_evidence_collapse')}>
 					<div className="evidence-metadata__header">
 						<div className="evidence-metadata__description">
 							{t('v2_ai_evidence_desc')}
