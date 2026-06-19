@@ -232,7 +232,7 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 						disabled={!isAdmin}
 						style={{ marginRight: 8 }}
 					>
-						Edit
+						{t('edit')}
 					</Button>
 					<Popconfirm
 						title={t('repo_delete_confirm')}
@@ -240,7 +240,7 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 						disabled={!isAdmin}
 					>
 						<Button size="small" danger disabled={!isAdmin}>
-							Delete
+							{t('delete')}
 						</Button>
 					</Popconfirm>
 				</>
@@ -263,7 +263,7 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 					disabled={!isAdmin}
 				>
 					<Button size="small" danger disabled={!isAdmin}>
-						Delete
+						{t('delete')}
 					</Button>
 				</Popconfirm>
 			),

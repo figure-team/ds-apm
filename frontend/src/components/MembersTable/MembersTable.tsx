@@ -1,4 +1,5 @@
 import type React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@signozhq/ui';
 import { Table, Tooltip } from 'antd';
 import type { ColumnsType, SorterResult } from 'antd/es/table/interface';
@@ -53,17 +54,18 @@ function NameEmailCell({
 }
 
 function StatusBadge({ status }: { status: MemberRow['status'] }): JSX.Element {
+	const { t } = useTranslation('organizationsettings');
 	if (status === MemberStatus.Active) {
 		return (
 			<Badge color="forest" variant="outline">
-				ACTIVE
+				{t('status_active')}
 			</Badge>
 		);
 	}
 	if (status === MemberStatus.Deleted) {
 		return (
 			<Badge color="cherry" variant="outline">
-				DELETED
+				{t('status_deleted')}
 			</Badge>
 		);
 	}
@@ -71,7 +73,7 @@ function StatusBadge({ status }: { status: MemberRow['status'] }): JSX.Element {
 	if (status === MemberStatus.Invited) {
 		return (
 			<Badge color="amber" variant="outline">
-				INVITED
+				{t('status_invited')}
 			</Badge>
 		);
 	}
@@ -84,21 +86,22 @@ function MembersEmptyState({
 }: {
 	searchQuery: string;
 }): JSX.Element {
+	const { t } = useTranslation('organizationsettings');
 	return (
 		<div className="members-empty-state">
 			<span
 				className="members-empty-state__emoji"
 				role="img"
-				aria-label="monocle face"
+				aria-label={t('aria_monocle_face')}
 			>
 				🧐
 			</span>
 			{searchQuery ? (
 				<p className="members-empty-state__text">
-					No results for <strong>{searchQuery}</strong>
+					{t('no_results_for')} <strong>{searchQuery}</strong>
 				</p>
 			) : (
-				<p className="members-empty-state__text">No members found</p>
+				<p className="members-empty-state__text">{t('no_members_found')}</p>
 			)}
 		</div>
 	);
@@ -116,6 +119,7 @@ function MembersTable({
 	onSortChange,
 }: MembersTableProps): JSX.Element {
 	const { formatTimezoneAdjustedTimestamp } = useTimezone();
+	const { t } = useTranslation('organizationsettings');
 
 	const formatJoinedOn = (date: string | null): string => {
 		if (!date) {
@@ -185,7 +189,7 @@ function MembersTable({
 			<span className="members-pagination-range">
 				{range[0]} &#8212; {range[1]}
 			</span>
-			<span className="members-pagination-total"> of {_total}</span>
+			<span className="members-pagination-total"> {t('pagination_of')} {_total}</span>
 		</>
 	);
 

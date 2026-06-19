@@ -11,6 +11,7 @@
 	"permissions": "Permissions",
 	"overview": "Overview",
 	"members": "Members",
+	"aria_monocle_face": "monocle face",
 	"pagination_of": "of",
 	"role_prefix": "Role —",
 	"delete_role": "Delete Role",

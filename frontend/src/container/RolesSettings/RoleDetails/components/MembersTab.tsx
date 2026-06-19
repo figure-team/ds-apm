@@ -25,7 +25,7 @@ function MembersTab(): JSX.Element {
 					<span
 						className="role-details-members-empty-emoji"
 						role="img"
-						aria-label="monocle face"
+						aria-label={t('aria_monocle_face')}
 					>
 						🧐
 					</span>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useQuery } from 'react-query';
 import {
 	Skeleton,
@@ -13,6 +14,7 @@ import './IngestionSettings.styles.scss';
 
 export default function IngestionSettings(): JSX.Element {
 	const { user } = useAppContext();
+	const { t } = useTranslation('ingestionKeys');
 
 	const { data: ingestionData, isFetching } = useQuery({
 		queryFn: getIngestionData,
@@ -75,8 +77,7 @@ export default function IngestionSettings(): JSX.Element {
 					margin: '16px 0px',
 				}}
 			>
-				You can use the following ingestion credentials to start sending your
-				telemetry data to SigNoz
+				{t('credentials_intro')}
 			</Typography>
 
 			<Table
