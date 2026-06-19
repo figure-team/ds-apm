@@ -168,7 +168,7 @@ export const deleteDowntimeHandler = ({
 }: DeleteDowntimeScheduleProps): void => {
 	if (!deleteId) {
 		console.error('Unable to delete, please provide correct deleteId');
-		notifications.error({ message: t('pd_something_wrong') });
+		notifications.error({ message: t('pd_something_wrong').toString() });
 	} else {
 		deleteDowntimeScheduleAsync(
 			{ pathParams: { id: String(deleteId) } },
@@ -177,7 +177,7 @@ export const deleteDowntimeHandler = ({
 					hideDeleteDowntimeScheduleModal();
 					clearSearch();
 					notifications.success({
-						message: t('pd_schedule_deleted'),
+						message: t('pd_schedule_deleted').toString(),
 					});
 					refetchAllSchedules();
 				},

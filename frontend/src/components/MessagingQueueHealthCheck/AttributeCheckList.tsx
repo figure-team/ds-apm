@@ -97,7 +97,7 @@ function ErrorTitleAndKey({
 						}}
 					>
 						<OctagonAlert size={14} />
-						{i18n.t('messagingQueues:fix')}
+						{i18n.t('messagingQueues:fix').toString()}
 					</div>
 				</Tooltip>
 			</div>
@@ -131,7 +131,7 @@ function treeTitleAndKey({
 				</Typography.Text>
 				{isLeaf && (
 					<div className="success-attribute-icon">
-						<Tooltip title={i18n.t('messagingQueues:success')}>
+						<Tooltip title={i18n.t('messagingQueues:success').toString()}>
 							<Check size={14} />
 						</Tooltip>
 					</div>
@@ -221,7 +221,7 @@ function AttributeCheckList({
 
 	return (
 		<Modal
-			title={i18n.t('messagingQueues:kafka_service_attributes')}
+			title={i18n.t('messagingQueues:kafka_service_attributes').toString()}
 			open={visible}
 			onCancel={onClose}
 			footer={false}

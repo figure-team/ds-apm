@@ -34,6 +34,7 @@ const useDashboardVarConfig = ({
 	};
 	// contextItems: React.ReactNode;
 } => {
+	const { t } = useTranslation('dashboard');
 	const dashboardDynamicVariables = useDashboardVariablesByType('DYNAMIC');
 	const { onValueUpdate, createVariable } = useDashboardVariableUpdate();
 
@@ -175,6 +176,7 @@ const useDashboardVarConfig = ({
 			handleSetVariable,
 			handleUnsetVariable,
 			handleCreateVariable,
+			t,
 		],
 	);
 
@@ -211,7 +213,7 @@ const useDashboardVarConfig = ({
 				</>
 			),
 		}),
-		[contextItems, handleBackClick],
+		[contextItems, handleBackClick, t],
 	);
 
 	return { dashbaordVariablesConfig };

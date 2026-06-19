@@ -7,24 +7,16 @@ import {
 	useMemo,
 	useState,
 } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
-import { useTranslation } from 'react-i18next';
 import { Select, Typography } from 'antd';
 import CustomSelect from 'components/NewSelect/CustomSelect';
 import TextToolTip from 'components/TextToolTip';
-import { useTranslation } from 'react-i18next';
 import { DEBOUNCE_DELAY } from 'constants/queryBuilderFilterConfig';
-import { useTranslation } from 'react-i18next';
 import { useGetFieldKeys } from 'hooks/dynamicVariables/useGetFieldKeys';
-import { useTranslation } from 'react-i18next';
 import { useIsDarkMode } from 'hooks/useDarkMode';
 import useDebounce from 'hooks/useDebounce';
-import { useTranslation } from 'react-i18next';
 import { Info } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { FieldKey } from 'types/api/dynamicVariables/getFieldKeys';
-import { useTranslation } from 'react-i18next';
 import { isRetryableError as checkIfRetryableError } from 'utils/errorUtils';
 
 import './DynamicVariable.styles.scss';
