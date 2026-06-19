@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Tabs } from '@signozhq/ui';
 import LearnMore from 'components/LearnMore/LearnMore';
 import { Download } from '@signozhq/icons';
@@ -27,6 +28,7 @@ function ClientTabs({
 	onInstallClick,
 	onDocsLinkClick,
 }: ClientTabsProps): JSX.Element {
+	const { t } = useTranslation('mcpServer');
 	const items = useMemo(
 		() =>
 			MCP_CLIENTS.map((client: McpClient) => {
@@ -59,7 +61,7 @@ function ClientTabs({
 											{endpoint || ENDPOINT_PLACEHOLDER}
 										</pre>
 										<CopyIconButton
-											ariaLabel="Copy MCP endpoint"
+											ariaLabel={t('copy_endpoint_aria')}
 											disabled={!endpoint}
 											onCopy={(): void => onCopySnippet(client.key, endpoint)}
 										/>
@@ -95,7 +97,7 @@ function ClientTabs({
 										</Button>
 									)}
 									<span className="mcp-client-tabs__helper-text">
-										Or copy the config below for manual setup.
+										{t('manual_setup_hint')}
 									</span>
 								</div>
 							)}
