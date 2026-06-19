@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Table } from 'antd';
 import {
 	CloudintegrationtypesCollectedLogAttributeDTO,
@@ -14,6 +15,7 @@ function CloudServiceDataCollected({
 	logsData: CloudintegrationtypesCollectedLogAttributeDTO[] | null | undefined;
 	metricsData: CloudintegrationtypesCollectedMetricDTO[] | null | undefined;
 }): JSX.Element {
+	const { t } = useTranslation('integrations');
 	const logsColumns = [
 		{
 			title: 'NAME',
@@ -69,7 +71,7 @@ function CloudServiceDataCollected({
 				<div className="cloud-service-data-collected-table">
 					<div className="cloud-service-data-collected-table-heading">
 						<ScrollText size={14} />
-						Logs
+						{t('common.logs')}
 					</div>
 					<Table
 						columns={logsColumns}
@@ -83,7 +85,7 @@ function CloudServiceDataCollected({
 				<div className="cloud-service-data-collected-table">
 					<div className="cloud-service-data-collected-table-heading">
 						<BarChart2 size={14} />
-						Metrics
+						{t('common.metrics')}
 					</div>
 					<Table
 						columns={metricsColumns}

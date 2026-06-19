@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom-v5-compat';
 import { Skeleton } from 'antd';
 import { useListServicesMetadata } from 'api/generated/services/cloudintegration';
@@ -13,6 +14,7 @@ interface ServicesListProps {
 }
 
 function ServicesList({ cloudAccountId }: ServicesListProps): JSX.Element {
+	const { t } = useTranslation('integrations');
 	const urlQuery = useUrlQuery();
 	const navigate = useNavigate();
 	const hasValidCloudAccountId = Boolean(cloudAccountId);
@@ -92,7 +94,7 @@ function ServicesList({ cloudAccountId }: ServicesListProps): JSX.Element {
 					alt="no-services-found"
 					className="empty-state-svg"
 				/>{' '}
-				No services found
+				{t('services_list.no_services_found')}
 			</div>
 		);
 	}
@@ -129,23 +131,23 @@ function ServicesList({ cloudAccountId }: ServicesListProps): JSX.Element {
 				<div className="aws-services-list-view-sidebar-content">
 					<div className="aws-services-enabled">
 						<div className="aws-services-list-view-sidebar-content-header">
-							Enabled
+							{t('services_list.enabled')}
 						</div>
 						{enabledServices.map((service) => renderServiceItem(service))}
 
 						{isEnabledServicesEmpty && (
 							<div className="aws-services-list-view-sidebar-content-item-empty-message">
-								No enabled services
+								{t('services_list.no_enabled_services')}
 							</div>
 						)}
 					</div>
 
 					{!isNotEnabledServicesEmpty && (
 						<div className="aws-services-not-enabled">
-							<div className="aws-services-list-view-sidebar-content-header">
-								Not Enabled
-							</div>
-							{notEnabledServices.map((service) => renderServiceItem(service))}
+						<div className="aws-services-list-view-sidebar-content-header">
+							{t('services_list.not_enabled')}
+						</div>
+						{notEnabledServices.map((service) => renderServiceItem(service))}
 						</div>
 					)}
 				</div>

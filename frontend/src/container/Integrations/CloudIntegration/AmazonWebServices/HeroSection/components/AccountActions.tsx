@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom-v5-compat';
 import { Color } from '@signozhq/design-tokens';
 import { Button } from '@signozhq/ui';
@@ -35,6 +36,7 @@ function AccountActionsRenderer({
 	onIntegrationModalOpen: () => void;
 	onAccountSettingsModalOpen: () => void;
 }): JSX.Element {
+	const { t } = useTranslation('integrations');
 	if (isLoading) {
 		return (
 			<div className="hero-section__actions-with-account">
@@ -51,7 +53,7 @@ function AccountActionsRenderer({
 						<Dot size={24} color={Color.BG_FOREST_500} />
 					</div>
 
-					<div className="account-selector-label">Account:</div>
+					<div className="account-selector-label">{t('account.account_label')}</div>
 
 					<span className="account-selector">
 						<Select
@@ -59,7 +61,7 @@ function AccountActionsRenderer({
 							options={selectOptions}
 							rootClassName="cloud-account-selector"
 							popupMatchSelectWidth={false}
-							placeholder="Select AWS Account"
+							placeholder={t('account.select_aws_account')}
 							suffixIcon={<ChevronDown size={16} color={Color.BG_VANILLA_400} />}
 							onChange={onAccountChange}
 						/>
@@ -73,7 +75,7 @@ function AccountActionsRenderer({
 						prefix={<PencilLine size={14} />}
 						onClick={onAccountSettingsModalOpen}
 					>
-						Edit Account
+						{t('account.edit_account')}
 					</Button>
 
 					<Button
@@ -83,7 +85,7 @@ function AccountActionsRenderer({
 						onClick={onIntegrationModalOpen}
 						prefix={<Plus size={14} />}
 					>
-						Add New Account
+						{t('account.add_new_account')}
 					</Button>
 				</div>
 			</div>
@@ -97,7 +99,7 @@ function AccountActionsRenderer({
 			onClick={onIntegrationModalOpen}
 			size="sm"
 		>
-			Integrate Now
+			{t('account.integrate_now')}
 		</Button>
 	);
 }

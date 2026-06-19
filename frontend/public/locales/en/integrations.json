@@ -1,0 +1,122 @@
+{
+	"common": {
+		"integrations": "Integrations",
+		"get_help": "Get Help",
+		"all_integrations": "All Integrations",
+		"something_went_wrong": "Something went wrong :/ Please retry or contact support.",
+		"retry": "Retry",
+		"contact_support": "Contact Support",
+		"no_integrations_found_for": "No integrations found for",
+		"submit": "Submit",
+		"save": "Save",
+		"discard": "Discard",
+		"logs": "Logs",
+		"metrics": "Metrics"
+	},
+	"header": {
+		"subtitle": "Manage integrations for this workspace.",
+		"search_placeholder": "Search for an integration...",
+		"request_integration": "Request Integration",
+		"request_new_integration": "Request New Integration",
+		"which_integration": "Which integration are you looking for?",
+		"integration_name_placeholder": "Enter integration name...",
+		"view_data_sources": "View 150+ Data Sources"
+	},
+	"hero": {
+		"aws": "AWS",
+		"aws_description": "AWS is a cloud computing platform that provides a range of services for building and running applications."
+	},
+	"account": {
+		"account_label": "Account:",
+		"select_aws_account": "Select AWS Account",
+		"edit_account": "Edit Account",
+		"add_new_account": "Add New Account",
+		"integrate_now": "Integrate Now",
+		"connected_account_details": "Connected Account details",
+		"aws_account_label": "AWS Account:",
+		"update_changes": "Update Changes",
+		"account_settings": "Account Settings"
+	},
+	"regions": {
+		"which_regions": "Which regions do you want to monitor?",
+		"choose_regions_short": "Choose only the regions you want DS-APM to monitor.",
+		"choose_regions_long": "Choose only the regions you want DS-APM to monitor. You can enable all at once, or pick specific ones:",
+		"select_all_regions": "Select All Regions"
+	},
+	"setup": {
+		"deploy_stack_title": "Where should we deploy the DS-APM Cloud stack?",
+		"deploy_stack_description": "Choose the AWS region for CloudFormation stack deployment",
+		"region_placeholder": "e.g. US East (N. Virginia)",
+		"compliance_note": "Note: Some organizations may require the CloudFormation stack to be deployed in the same region as their primary infrastructure for compliance or latency reasons.",
+		"launch_cf_template": "Launch Cloud Formation Template"
+	},
+	"connection_params": {
+		"ingestion_url_label": "Ingestion URL",
+		"ingestion_url_placeholder": "Enter ingestion URL",
+		"ingestion_key_label": "Ingestion Key",
+		"ingestion_key_placeholder": "Enter ingestion key",
+		"api_url_label": "DS-APM API URL",
+		"api_url_placeholder": "Enter DS-APM API URL",
+		"api_key_label": "DS-APM API KEY",
+		"api_key_placeholder": "Enter DS-APM API Key"
+	},
+	"remove_account": {
+		"disconnect": "Disconnect",
+		"remove_integration_title": "Remove integration",
+		"remove_account": "Remove Account",
+		"desc1": "Removing this account will remove all components created for sending telemetry to DS-APM in your AWS account within the next ~15 minutes (cloudformation stacks named signoz-integration-telemetry-collection in enabled regions).",
+		"desc2": "After that, you can delete the cloudformation stack that was created manually when connecting this account."
+	},
+	"s3": {
+		"select_buckets": "Select S3 Buckets by Region",
+		"region_disabled": "Region disabled in account settings; S3 buckets here will not be synced."
+	},
+	"service_details": {
+		"log_collection": "Log Collection",
+		"metric_collection": "Metric Collection"
+	},
+	"services_list": {
+		"no_services_found": "No services found",
+		"enabled": "Enabled",
+		"no_enabled_services": "No enabled services",
+		"not_enabled": "Not Enabled"
+	},
+	"service_dashboards": {
+		"dashboards": "Dashboards"
+	},
+	"detail": {
+		"overview": "Overview",
+		"configure": "Configure",
+		"data_collected": "Data Collected",
+		"category": "Category",
+		"assets": "Assets",
+		"last_received_from": "Last recieved from",
+		"last_received_at": "Last recieved at",
+		"testing_no_data": "We have not received data from your {{title}} Instance yet. You need to manually configure your {{title}} instance to start sending data to DS-APM.",
+		"not_installed_no_data": "You would need to manually configure your {{title}} instance to start sending data to DS-APM.",
+		"no_data_help": "If you have already configured your resources to send data, sit tight and wait for the data to flow in, Or else, see the steps to configure your resources to start sending data."
+	},
+	"uninstall": {
+		"remove_integration": "Remove Integration",
+		"subtitle": "Removing the {{title}} integration would make your workspace stop listening for data from {{title}} instances.",
+		"modal_title": "Remove integration",
+		"remove_integration_btn": "Remove Integration",
+		"remove_text": "Removing this integration makes DS-APM stop listening for data from {{title}} instances. You would still have to manually remove the configuration in your code to stop sending data.",
+		"remove_from_signoz": "Remove from DS-APM"
+	},
+	"list": {
+		"name": "Name",
+		"published_by": "Published By",
+		"status": "Status",
+		"signoz": "DS-APM"
+	},
+	"one_click": {
+		"title": "One Click Integrations",
+		"new": "NEW"
+	},
+	"alert": {
+		"waiting_connection": "Waiting for connection, retrying in",
+		"secs": "secs...",
+		"connection_failed": "We couldn't establish a connection to your AWS account. Please try again"
+	}
+}

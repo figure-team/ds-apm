@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import { Button, DrawerWrapper } from '@signozhq/ui';
 import { Form } from 'antd';
@@ -27,6 +28,7 @@ function AccountSettingsModal({
 	account,
 	setActiveAccount,
 }: AccountSettingsModalProps): JSX.Element {
+	const { t } = useTranslation('integrations');
 	const {
 		form,
 		isLoading,
@@ -78,10 +80,10 @@ function AccountSettingsModal({
 					<div className="account-settings-modal__body-account-info">
 						<div className="account-settings-modal__body-account-info-connected-account-details">
 							<div className="account-settings-modal__body-account-info-connected-account-details-title">
-								Connected Account details
+								{t('account.connected_account_details')}
 							</div>
 							<div className="account-settings-modal__body-account-info-connected-account-details-account-id">
-								AWS Account:{' '}
+								{t('account.aws_account_label')}{' '}
 								<span className="account-settings-modal__body-account-info-connected-account-details-account-id-account-id">
 									{account?.providerAccountId}
 								</span>
@@ -91,10 +93,10 @@ function AccountSettingsModal({
 
 					<div className="account-settings-modal__body-region-selector">
 						<div className="account-settings-modal__body-region-selector-title">
-							Which regions do you want to monitor?
+							{t('regions.which_regions')}
 						</div>
 						<div className="account-settings-modal__body-region-selector-description">
-							Choose only the regions you want SigNoz to monitor.
+							{t('regions.choose_regions_short')}
 						</div>
 
 						<RegionSelector
@@ -143,7 +145,7 @@ function AccountSettingsModal({
 				loading={isLoading}
 				prefix={<Save size={14} />}
 			>
-				Update Changes
+				{t('account.update_changes')}
 			</Button>
 		</div>
 	);
@@ -152,7 +154,7 @@ function AccountSettingsModal({
 		<DrawerWrapper
 			open={true}
 			className="account-settings-modal"
-			title="Account Settings"
+			title={t('account.account_settings')}
 			direction="right"
 			showCloseButton
 			onOpenChange={handleDrawerOpenChange}

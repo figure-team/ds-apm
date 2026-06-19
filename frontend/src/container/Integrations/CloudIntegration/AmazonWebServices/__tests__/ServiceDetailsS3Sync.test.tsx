@@ -170,9 +170,7 @@ describe('ServiceDetails for S3 Sync service', () => {
 		testInitialBuckets = {};
 		renderServiceDetails({}, 'ec2');
 		await waitFor(() => {
-			expect(
-				screen.queryByText(/select s3 buckets by region/i),
-			).not.toBeInTheDocument();
+			expect(screen.queryByText('s3.select_buckets')).not.toBeInTheDocument();
 		});
 	});
 });

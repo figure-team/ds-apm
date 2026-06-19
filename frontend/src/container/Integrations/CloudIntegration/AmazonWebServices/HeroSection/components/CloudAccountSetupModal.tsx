@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import { Button, DrawerWrapper } from '@signozhq/ui';
 import { useIntegrationModal } from 'hooks/integration/aws/useIntegrationModal';
@@ -16,6 +17,7 @@ import './CloudAccountSetupModal.style.scss';
 function CloudAccountSetupModal({
 	onClose,
 }: IntegrationModalProps): JSX.Element {
+	const { t } = useTranslation('integrations');
 	const {
 		form,
 		modalState,
@@ -95,7 +97,7 @@ function CloudAccountSetupModal({
 					modalState === ModalStateEnum.WAITING
 				}
 			>
-				Launch Cloud Formation Template
+				{t('setup.launch_cf_template')}
 			</Button>
 		</div>
 	);
@@ -111,7 +113,7 @@ function CloudAccountSetupModal({
 				title: 'Add AWS Account',
 				okText: (
 					<div className="cloud-account-setup-form__submit-button-content">
-						Launch Cloud Formation Template{' '}
+						{t('setup.launch_cf_template')}{' '}
 						<SquareArrowOutUpRight size={17} color={Color.BG_VANILLA_100} />
 					</div>
 				),

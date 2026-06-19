@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@signozhq/ui';
 import { IntegrationsProps } from 'types/api/integrations/types';
 
@@ -15,6 +16,7 @@ interface OneClickIntegrationsProps {
 }
 
 function OneClickIntegrations(props: OneClickIntegrationsProps): JSX.Element {
+	const { t } = useTranslation('integrations');
 	const { searchQuery, setSelectedIntegration } = props;
 
 	const filteredIntegrations = useMemo(() => {
@@ -37,7 +39,7 @@ function OneClickIntegrations(props: OneClickIntegrationsProps): JSX.Element {
 		<div className="one-click-integrations">
 			<div className="one-click-integrations-header">
 				<div className="one-click-integrations-header-title">
-					One Click Integrations
+					{t('one_click.title')}
 				</div>
 
 				<div className="one-click-integrations-header-dotted-double-line">
@@ -60,7 +62,7 @@ function OneClickIntegrations(props: OneClickIntegrationsProps): JSX.Element {
 								className="integrations-not-found-image"
 							/>
 							<div className="integrations-not-found-text">
-								No integrations found for &ldquo;{searchQuery.trim()}&rdquo;
+								{t('common.no_integrations_found_for')} &ldquo;{searchQuery.trim()}&rdquo;
 							</div>
 						</div>
 					</div>
@@ -82,7 +84,7 @@ function OneClickIntegrations(props: OneClickIntegrationsProps): JSX.Element {
 									{integration.is_new && (
 										<div className="one-click-integrations-list-item-new-tag">
 											<Badge color="robin" variant="default">
-												NEW
+												{t('one_click.new')}
 											</Badge>
 										</div>
 									)}

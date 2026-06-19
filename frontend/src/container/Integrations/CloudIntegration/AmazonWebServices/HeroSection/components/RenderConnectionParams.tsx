@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Form, Input } from 'antd';
 import { CloudintegrationtypesCredentialsDTO } from 'api/generated/services/sigNoz.schemas';
 
@@ -10,6 +11,7 @@ function RenderConnectionFields({
 	connectionParams?: CloudintegrationtypesCredentialsDTO | null;
 	isFormDisabled?: boolean;
 }): JSX.Element | null {
+	const { t } = useTranslation('integrations');
 	if (
 		isConnectionParamsLoading ||
 		(!!connectionParams?.ingestionUrl &&
@@ -25,37 +27,37 @@ function RenderConnectionFields({
 			{!connectionParams?.ingestionUrl && (
 				<Form.Item
 					name="ingestionUrl"
-					label="Ingestion URL"
+					label={t('connection_params.ingestion_url_label')}
 					rules={[{ required: true, message: 'Please enter ingestion URL' }]}
 				>
-					<Input placeholder="Enter ingestion URL" disabled={isFormDisabled} />
+					<Input placeholder={t('connection_params.ingestion_url_placeholder')} disabled={isFormDisabled} />
 				</Form.Item>
 			)}
 			{!connectionParams?.ingestionKey && (
 				<Form.Item
 					name="ingestionKey"
-					label="Ingestion Key"
+					label={t('connection_params.ingestion_key_label')}
 					rules={[{ required: true, message: 'Please enter ingestion key' }]}
 				>
-					<Input placeholder="Enter ingestion key" disabled={isFormDisabled} />
+					<Input placeholder={t('connection_params.ingestion_key_placeholder')} disabled={isFormDisabled} />
 				</Form.Item>
 			)}
 			{!connectionParams?.sigNozApiUrl && (
 				<Form.Item
 					name="sigNozApiUrl"
-					label="SigNoz API URL"
+					label={t('connection_params.api_url_label')}
 					rules={[{ required: true, message: 'Please enter SigNoz API URL' }]}
 				>
-					<Input placeholder="Enter SigNoz API URL" disabled={isFormDisabled} />
+					<Input placeholder={t('connection_params.api_url_placeholder')} disabled={isFormDisabled} />
 				</Form.Item>
 			)}
 			{!connectionParams?.sigNozApiKey && (
 				<Form.Item
 					name="sigNozApiKey"
-					label="SigNoz API KEY"
+					label={t('connection_params.api_key_label')}
 					rules={[{ required: true, message: 'Please enter SigNoz API Key' }]}
 				>
-					<Input placeholder="Enter SigNoz API Key" disabled={isFormDisabled} />
+					<Input placeholder={t('connection_params.api_key_placeholder')} disabled={isFormDisabled} />
 				</Form.Item>
 			)}
 		</Form.Item>

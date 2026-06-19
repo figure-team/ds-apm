@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button, Tabs, TabsProps, Typography } from 'antd';
 import ConfigureIcon from 'assets/Integrations/ConfigureIcon';
 import { CableCar, Group } from 'lucide-react';
@@ -19,6 +20,7 @@ interface IntegrationDetailContentProps {
 function IntegrationDetailContent(
 	props: IntegrationDetailContentProps,
 ): JSX.Element {
+	const { t } = useTranslation('integrations');
 	const { activeDetailTab, integrationData, integrationId, setActiveDetailTab } =
 		props;
 	const items: TabsProps['items'] = [
@@ -30,7 +32,7 @@ function IntegrationDetailContent(
 					className="integration-tab-btns"
 					icon={<CableCar size={14} />}
 				>
-					<Typography.Text className="typography">Overview</Typography.Text>
+					<Typography.Text className="typography">{t('detail.overview')}</Typography.Text>
 				</Button>
 			),
 			children: (
@@ -49,7 +51,7 @@ function IntegrationDetailContent(
 					className="integration-tab-btns"
 					icon={<ConfigureIcon />}
 				>
-					<Typography.Text className="typography">Configure</Typography.Text>
+					<Typography.Text className="typography">{t('detail.configure')}</Typography.Text>
 				</Button>
 			),
 			children: (
@@ -67,7 +69,7 @@ function IntegrationDetailContent(
 					className="integration-tab-btns"
 					icon={<Group size={14} />}
 				>
-					<Typography.Text className="typography">Data Collected</Typography.Text>
+					<Typography.Text className="typography">{t('detail.data_collected')}</Typography.Text>
 				</Button>
 			),
 			children: (

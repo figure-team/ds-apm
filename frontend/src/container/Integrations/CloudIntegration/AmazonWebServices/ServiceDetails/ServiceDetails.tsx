@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Controller, useForm } from 'react-hook-form';
 import { useQueryClient } from 'react-query';
 import { Button, Switch, Tabs, toast } from '@signozhq/ui';
@@ -37,6 +38,7 @@ type ServiceDetailsData = CloudintegrationtypesServiceDTO & {
 };
 
 function ServiceDetails(): JSX.Element | null {
+	const { t } = useTranslation('integrations');
 	const urlQuery = useUrlQuery();
 	const cloudAccountId = urlQuery.get('cloudAccountId');
 	const serviceId = urlQuery.get('service');
@@ -284,7 +286,7 @@ function ServiceDetails(): JSX.Element | null {
 							<div className="aws-service-details-overview-configuration-logs">
 								<div className="aws-service-details-overview-configuration-title">
 									<div className="aws-service-details-overview-configuration-title-text">
-										<span>Log Collection</span>
+										<span>{t('service_details.log_collection')}</span>
 									</div>
 									<div className="configuration-action">
 										<Controller<ServiceConfigFormValues, 'logsEnabled'>
@@ -325,7 +327,7 @@ function ServiceDetails(): JSX.Element | null {
 							<div className="aws-service-details-overview-configuration-metrics">
 								<div className="aws-service-details-overview-configuration-title">
 									<div className="aws-service-details-overview-configuration-title-text">
-										<span>Metric Collection</span>
+										<span>{t('service_details.metric_collection')}</span>
 									</div>
 									<div className="configuration-action">
 										<Controller<ServiceConfigFormValues, 'metricsEnabled'>
@@ -356,7 +358,7 @@ function ServiceDetails(): JSX.Element | null {
 									className="discard-btn"
 									type="button"
 								>
-									Discard
+									{t('common.discard')}
 								</Button>
 								<Button
 									variant="solid"
@@ -368,7 +370,7 @@ function ServiceDetails(): JSX.Element | null {
 									loading={isUpdatingServiceConfig}
 									disabled={isS3SyncBucketsMissing || isUpdatingServiceConfig}
 								>
-									Save
+									{t('common.save')}
 								</Button>
 							</div>
 						)}

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Table, Typography } from 'antd';
 import { BarChart2, ScrollText } from 'lucide-react';
 
@@ -9,6 +10,7 @@ interface DataCollectedProps {
 }
 
 function DataCollected(props: DataCollectedProps): JSX.Element {
+	const { t } = useTranslation('integrations');
 	const { logsData, metricsData } = props;
 	const logsColumns = [
 		{
@@ -53,7 +55,7 @@ function DataCollected(props: DataCollectedProps): JSX.Element {
 			<div className="logs-section">
 				<div className="logs-heading">
 					<ScrollText size={14} />
-					<Typography.Text>Logs</Typography.Text>
+					<Typography.Text>{t('common.logs')}</Typography.Text>
 				</div>
 				<Table
 					columns={logsColumns}
@@ -68,7 +70,7 @@ function DataCollected(props: DataCollectedProps): JSX.Element {
 			<div className="metrics-section">
 				<div className="metrics-heading">
 					<BarChart2 size={14} />
-					<Typography.Text>Metrics</Typography.Text>
+					<Typography.Text>{t('common.metrics')}</Typography.Text>
 				</div>
 				<Table
 					columns={metricsColumns}

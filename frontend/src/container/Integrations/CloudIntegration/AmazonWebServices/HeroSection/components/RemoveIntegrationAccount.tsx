@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@signozhq/ui';
 import { Modal } from 'antd/lib';
 import logEvent from 'api/common/logEvent';
@@ -17,6 +18,7 @@ function RemoveIntegrationAccount({
 	accountId: string;
 	onRemoveIntegrationAccountSuccess: () => void;
 }): JSX.Element {
+	const { t } = useTranslation('integrations');
 	const { notifications } = useNotifications();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -63,28 +65,24 @@ function RemoveIntegrationAccount({
 				onClick={handleDisconnect}
 				disabled={isRemoveIntegrationLoading}
 			>
-				Disconnect
+				{t('remove_account.disconnect')}
 			</Button>
 
 			<Modal
 				className="remove-integration-account-modal"
 				open={isModalOpen}
-				title="Remove integration"
+				title={t('remove_account.remove_integration_title')}
 				onOk={handleOk}
 				onCancel={handleCancel}
-				okText="Remove Account"
+				okText={t('remove_account.remove_account')}
 				okButtonProps={{
 					danger: true,
 					loading: isRemoveIntegrationLoading,
 				}}
 			>
-				Removing this account will remove all components created for sending
-				telemetry to SigNoz in your AWS account within the next ~15 minutes
-				(cloudformation stacks named signoz-integration-telemetry-collection in
-				enabled regions). <br />
+				{t('remove_account.desc1')} <br />
 				<br />
-				After that, you can delete the cloudformation stack that was created
-				manually when connecting this account.
+				{t('remove_account.desc2')}
 			</Modal>
 		</div>
 	);
