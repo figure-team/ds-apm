@@ -1,0 +1,548 @@
+/* ===== DS-APM 관제(NOC) 대시보드 · 레드/화이트/블랙 ===== */
+/* 브랜드 레드는 styles.scss에서 KT 레드(#d81b2c)로 리맵된 robin 스케일을 참조 */
+
+.noc-root {
+	--noc-brand: var(--bg-robin-500, #d81b2c);
+	--noc-r: 12px;
+
+	width: 100%;
+	padding: 14px 20px 26px;
+
+	font-family: 'Segoe UI', 'Inter', Pretendard, Roboto, -apple-system, sans-serif;
+	letter-spacing: -0.01em;
+
+	&.noc-dark {
+		--noc-bg: #0c0c0e;
+		--noc-panel: #141416;
+		--noc-panel2: #1b1b1e;
+		--noc-panel3: #202024;
+		--noc-line: #2a2a2f;
+		--noc-line2: #37373d;
+		--noc-txt: #f1f1f3;
+		--noc-txt2: #9596a0;
+		--noc-txt3: #5f6068;
+		--noc-brand-soft: rgba(216, 27, 44, 0.12);
+		--noc-brand-line: rgba(216, 27, 44, 0.35);
+		--noc-ok: #5e9b77;
+		--noc-warn: #c29638;
+		--noc-err: #cf5430;
+		--noc-crit: var(--noc-brand);
+		--noc-crit-soft: rgba(216, 27, 44, 0.14);
+		--noc-err-soft: rgba(207, 84, 48, 0.14);
+		--noc-warn-soft: rgba(194, 150, 56, 0.14);
+		--noc-c-sec: #76777f;
+		--noc-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+	}
+
+	&.noc-light {
+		--noc-bg: #f1f2f4;
+		--noc-panel: #ffffff;
+		--noc-panel2: #f6f7f9;
+		--noc-panel3: #eef0f3;
+		--noc-line: #e3e4e8;
+		--noc-line2: #d3d5db;
+		--noc-txt: #1a1b1f;
+		--noc-txt2: #62646e;
+		--noc-txt3: #9a9ca6;
+		--noc-brand-soft: rgba(216, 27, 44, 0.08);
+		--noc-brand-line: rgba(216, 27, 44, 0.28);
+		--noc-ok: #3e895c;
+		--noc-warn: #a77a24;
+		--noc-err: #c0461e;
+		--noc-crit: var(--noc-brand);
+		--noc-crit-soft: rgba(216, 27, 44, 0.08);
+		--noc-err-soft: rgba(192, 70, 30, 0.1);
+		--noc-warn-soft: rgba(167, 122, 36, 0.1);
+		--noc-c-sec: #9a9ca6;
+		--noc-shadow: 0 6px 18px rgba(20, 22, 30, 0.08);
+	}
+
+	* {
+		box-sizing: border-box;
+	}
+
+	.noc-mono {
+		font-family: 'JetBrains Mono', 'Consolas', monospace;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.noc-dot {
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		display: inline-block;
+
+		&.noc-ok {
+			background: var(--noc-ok);
+		}
+		&.noc-warn {
+			background: var(--noc-warn);
+		}
+		&.noc-crit {
+			background: var(--noc-crit);
+		}
+	}
+
+	/* ---- toolbar ---- */
+	.noc-toolbar {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+		margin-bottom: 13px;
+	}
+	.noc-env-tabs {
+		display: flex;
+		gap: 3px;
+
+		button {
+			background: transparent;
+			border: 1px solid transparent;
+			color: var(--noc-txt2);
+			padding: 6px 13px;
+			border-radius: 7px;
+			font-size: 12.5px;
+			font-weight: 600;
+			cursor: pointer;
+
+			&.active {
+				background: var(--noc-brand-soft);
+				color: var(--noc-brand);
+				border-color: var(--noc-brand-line);
+			}
+		}
+	}
+	.noc-toolbar-spacer {
+		flex: 1;
+	}
+	.noc-live {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		color: var(--noc-ok);
+		font-size: 12.5px;
+		font-weight: 600;
+
+		.noc-live-pulse {
+			width: 8px;
+			height: 8px;
+			border-radius: 50%;
+			background: var(--noc-ok);
+			box-shadow: 0 0 0 0 rgba(94, 155, 119, 0.5);
+			animation: noc-pulse 1.8s infinite;
+		}
+	}
+	.noc-toolbar-pill {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		background: var(--noc-panel2);
+		border: 1px solid var(--noc-line);
+		padding: 6px 12px;
+		border-radius: 8px;
+		font-size: 12px;
+		color: var(--noc-txt2);
+	}
+
+	/* ---- layout ---- */
+	.noc-console {
+		display: grid;
+		grid-template-columns: 300px 1fr 320px;
+		gap: 13px;
+		align-items: start;
+	}
+	.noc-rail,
+	.noc-col {
+		display: flex;
+		flex-direction: column;
+		gap: 13px;
+	}
+
+	/* ---- panel ---- */
+	.noc-panel {
+		background: var(--noc-panel);
+		border: 1px solid var(--noc-line);
+		border-radius: var(--noc-r);
+		padding: 15px 16px;
+		position: relative;
+		overflow: hidden;
+	}
+	.noc-panel-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 13px;
+	}
+	.noc-panel-title {
+		display: flex;
+		align-items: center;
+		gap: 9px;
+		font-size: 12.5px;
+		font-weight: 700;
+		color: var(--noc-txt);
+	}
+	.noc-panel-icon {
+		width: 21px;
+		height: 21px;
+		border-radius: 6px;
+		background: var(--noc-panel2);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--noc-txt2);
+	}
+	.noc-panel-action {
+		font-size: 11px;
+		color: var(--noc-txt3);
+		font-weight: 600;
+		cursor: pointer;
+
+		&:hover {
+			color: var(--noc-txt2);
+		}
+	}
+
+	/* ---- KPI cards ---- */
+	.noc-kpi-stack {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 9px;
+	}
+	.noc-kpi {
+		background: var(--noc-panel2);
+		border: 1px solid var(--noc-line);
+		border-radius: 9px;
+		padding: 11px 12px;
+		position: relative;
+		overflow: hidden;
+	}
+	.noc-kpi-lbl {
+		font-size: 9.5px;
+		color: var(--noc-txt2);
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+	.noc-kpi-val {
+		font-size: 20px;
+		font-weight: 800;
+		margin-top: 4px;
+		line-height: 1;
+		color: var(--noc-txt);
+
+		small {
+			font-size: 11px;
+			color: var(--noc-txt2);
+			font-weight: 600;
+		}
+	}
+	.noc-kpi-d {
+		font-size: 10px;
+		font-weight: 700;
+		margin-top: 3px;
+
+		&.noc-d-up {
+			color: var(--noc-err);
+		}
+		&.noc-d-down {
+			color: var(--noc-ok);
+		}
+		&.noc-d-flat {
+			color: var(--noc-txt2);
+		}
+	}
+	.noc-spark {
+		position: absolute;
+		right: 8px;
+		bottom: 8px;
+		opacity: 0.7;
+	}
+
+	/* ---- golden signals ---- */
+	.noc-golden {
+		display: flex;
+		border: 1px solid var(--noc-line);
+		border-radius: 9px;
+		overflow: hidden;
+	}
+	.noc-golden-item {
+		flex: 1;
+		padding: 9px 11px;
+		border-right: 1px solid var(--noc-line);
+
+		&:last-child {
+			border-right: none;
+		}
+	}
+	.noc-golden-lbl {
+		font-size: 9.5px;
+		color: var(--noc-txt2);
+		font-weight: 600;
+		text-transform: uppercase;
+	}
+	.noc-golden-val {
+		font-size: 15px;
+		font-weight: 800;
+		margin-top: 3px;
+		color: var(--noc-txt);
+	}
+
+	/* ---- alerts ---- */
+	.noc-alert {
+		display: flex;
+		gap: 11px;
+		padding: 10px 2px;
+		border-bottom: 1px solid var(--noc-line);
+
+		&:last-child {
+			border-bottom: none;
+		}
+	}
+	.noc-alert-bar {
+		width: 3px;
+		border-radius: 3px;
+		flex-shrink: 0;
+
+		&.noc-crit {
+			background: var(--noc-crit);
+		}
+		&.noc-err {
+			background: var(--noc-err);
+		}
+		&.noc-warn {
+			background: var(--noc-warn);
+		}
+	}
+	.noc-alert-body {
+		flex: 1;
+		min-width: 0;
+	}
+	.noc-alert-top {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin-bottom: 3px;
+	}
+	.noc-alert-msg {
+		font-size: 12.5px;
+		font-weight: 600;
+		color: var(--noc-txt);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.noc-alert-meta {
+		font-size: 11px;
+		color: var(--noc-txt2);
+	}
+	.noc-alert-time {
+		font-size: 10.5px;
+		color: var(--noc-txt3);
+		white-space: nowrap;
+	}
+	.noc-empty {
+		font-size: 12px;
+		color: var(--noc-txt2);
+		padding: 14px 2px;
+		text-align: center;
+	}
+	.noc-badge {
+		font-size: 9.5px;
+		font-weight: 800;
+		padding: 2px 7px;
+		border-radius: 5px;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+
+		&.noc-crit {
+			background: var(--noc-crit-soft);
+			color: var(--noc-crit);
+		}
+		&.noc-err {
+			background: var(--noc-err-soft);
+			color: var(--noc-err);
+		}
+		&.noc-warn {
+			background: var(--noc-warn-soft);
+			color: var(--noc-warn);
+		}
+	}
+
+	/* ---- chips ---- */
+	.noc-chip {
+		font-size: 10.5px;
+		background: var(--noc-panel2);
+		border: 1px solid var(--noc-line);
+		color: var(--noc-txt2);
+		padding: 4px 9px;
+		border-radius: 6px;
+
+		&.noc-chip-brand {
+			border-color: var(--noc-brand-line);
+			color: var(--noc-brand);
+		}
+	}
+
+	/* ---- service health list ---- */
+	.noc-health-panel {
+		min-height: 0;
+	}
+	.noc-health-head {
+		display: flex;
+		align-items: center;
+		padding: 0 6px 8px;
+		font-size: 9.5px;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--noc-txt3);
+		border-bottom: 1px solid var(--noc-line);
+	}
+	.noc-health-row {
+		display: flex;
+		align-items: center;
+		padding: 9px 6px;
+		border-bottom: 1px solid var(--noc-line);
+		font-size: 12.5px;
+	}
+	.noc-health-row:last-child {
+		border-bottom: none;
+	}
+	.noc-health-row.crit {
+		background: var(--noc-crit-soft);
+	}
+	.noc-health-name {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		align-items: center;
+		gap: 9px;
+		color: var(--noc-txt);
+		font-weight: 600;
+	}
+	.noc-health-nm {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.noc-health-m {
+		width: 72px;
+		text-align: right;
+		flex-shrink: 0;
+		color: var(--noc-txt2);
+		font-variant-numeric: tabular-nums;
+	}
+	.noc-health-head .noc-health-m {
+		color: var(--noc-txt3);
+	}
+	.noc-health-m.noc-health-bad {
+		color: var(--noc-err);
+		font-weight: 700;
+	}
+	.noc-health-msg {
+		padding: 28px 2px;
+		text-align: center;
+		font-size: 12.5px;
+		color: var(--noc-txt2);
+	}
+
+	/* ---- RCA ---- */
+	.noc-rca {
+		background: var(--noc-crit-soft);
+		border: 1px solid var(--noc-brand-line);
+		border-radius: 10px;
+		padding: 12px 13px;
+	}
+	.noc-rca-head {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 12px;
+		font-weight: 700;
+		color: var(--noc-txt);
+		margin-bottom: 7px;
+	}
+	.noc-rca-ai {
+		font-size: 9px;
+		font-weight: 800;
+		background: var(--noc-brand);
+		color: #fff;
+		padding: 2px 6px;
+		border-radius: 4px;
+	}
+	.noc-rca-desc {
+		font-size: 11.5px;
+		color: var(--noc-txt2);
+		line-height: 1.6;
+	}
+	.noc-rca-chips {
+		display: flex;
+		gap: 6px;
+		margin-top: 9px;
+		flex-wrap: wrap;
+	}
+	.noc-rca-actions {
+		display: flex;
+		gap: 6px;
+		margin-top: 10px;
+		flex-wrap: wrap;
+	}
+
+	/* ---- logs ---- */
+	.noc-logs {
+		font-size: 11.5px;
+		line-height: 1.85;
+		font-family: 'JetBrains Mono', 'Consolas', monospace;
+		font-variant-numeric: tabular-nums;
+		max-height: 206px;
+		overflow: hidden;
+	}
+	.noc-logline {
+		display: flex;
+		gap: 9px;
+		white-space: nowrap;
+	}
+	.noc-lv {
+		font-weight: 800;
+		width: 42px;
+		flex-shrink: 0;
+
+		&.noc-lv-e {
+			color: var(--noc-err);
+		}
+		&.noc-lv-w {
+			color: var(--noc-warn);
+		}
+		&.noc-lv-i {
+			color: var(--noc-txt2);
+		}
+		&.noc-lv-d {
+			color: var(--noc-txt3);
+		}
+	}
+	.noc-log-svc {
+		color: var(--noc-brand);
+		flex-shrink: 0;
+	}
+	.noc-log-tx {
+		color: var(--noc-txt2);
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+}
+
+@keyframes noc-dash {
+	to {
+		stroke-dashoffset: -12;
+	}
+}
+@keyframes noc-pulse {
+	0% {
+		box-shadow: 0 0 0 0 rgba(94, 155, 119, 0.5);
+	}
+	70% {
+		box-shadow: 0 0 0 9px rgba(94, 155, 119, 0);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba(94, 155, 119, 0);
+	}
+}

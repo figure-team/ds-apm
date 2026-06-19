@@ -48,6 +48,7 @@ import { defaultChecklistItemsState } from './constants';
 import Dashboards from './Dashboards/Dashboards';
 import DataSourceInfo from './DataSourceInfo/DataSourceInfo';
 import HomeChecklist, { ChecklistItem } from './HomeChecklist/HomeChecklist';
+import NocDashboard from './NocDashboard/NocDashboard';
 import SavedViews from './SavedViews/SavedViews';
 import Services from './Services/Services';
 import StepsProgress from './StepsProgress/StepsProgress';
@@ -55,6 +56,10 @@ import StepsProgress from './StepsProgress/StepsProgress';
 import './Home.styles.scss';
 
 const homeInterval = 30 * 60 * 1000;
+
+// Toggle: render the NOC/control-center dashboard once telemetry is flowing.
+// New workspaces (no data yet) keep the onboarding checklist experience.
+const USE_NOC_HOME = true;
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export default function Home(): JSX.Element {
@@ -271,6 +276,10 @@ export default function Home(): JSX.Element {
 		logEvent('Homepage: Visited', {});
 	}, []);
 
+	const isAnyIngestionActive =
+		isLogsIngestionActive || isTracesIngestionActive || isMetricsIngestionActive;
+	const showNocDashboard = USE_NOC_HOME && isAnyIngestionActive;
+
 	return (
 		<div className="home-container">
 			{user?.role === USER_ROLES.ADMIN && (
@@ -339,6 +348,10 @@ export default function Home(): JSX.Element {
 			</div>
 
 			<div className="home-content">
+				{showNocDashboard ? (
+					<NocDashboard />
+				) : (
+					<>
 				<div className="home-left-content">
 					<DataSourceInfo
 						dataSentToSigNoz={
@@ -740,6 +753,8 @@ export default function Home(): JSX.Element {
 						</>
 					)}
 				</div>
+					</>
+				)}
 			</div>
 		</div>
 	);
