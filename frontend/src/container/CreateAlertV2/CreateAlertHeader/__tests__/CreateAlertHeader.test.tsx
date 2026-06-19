@@ -54,7 +54,7 @@ jest.mock('react-router-dom', () => ({
 	}),
 }));
 
-const ENTER_ALERT_RULE_NAME_PLACEHOLDER = 'Enter alert rule name';
+const ENTER_ALERT_RULE_NAME_PLACEHOLDER = 'v2_alert_name_placeholder';
 const mockPreviewSop = previewSop as jest.MockedFunction<typeof previewSop>;
 
 const renderCreateAlertHeader = (): ReturnType<typeof render> =>
@@ -113,7 +113,7 @@ describe('CreateAlertHeader', () => {
 
 	it('renders the header with title', () => {
 		renderCreateAlertHeader();
-		expect(screen.getByText('New Alert Rule')).toBeInTheDocument();
+		expect(screen.getByText('v2_new_alert_rule')).toBeInTheDocument();
 	});
 
 	it('renders name input with placeholder', () => {
@@ -126,14 +126,14 @@ describe('CreateAlertHeader', () => {
 
 	it('renders LabelsInput component', () => {
 		renderCreateAlertHeader();
-		expect(screen.getByText('+ Add labels')).toBeInTheDocument();
+		expect(screen.getByText('v2_add_labels_btn')).toBeInTheDocument();
 	});
 
 	it('shows missing SI/SM routing metadata labels for new alerts', () => {
 		renderCreateAlertHeader();
 
-		expect(screen.getByText('SI/SM routing metadata')).toBeInTheDocument();
-		expect(screen.getByText('Missing 4 recommended labels')).toBeInTheDocument();
+		expect(screen.getByText('v2_sisam_routing_title')).toBeInTheDocument();
+		expect(screen.getByText('v2_missing_labels')).toBeInTheDocument();
 		expect(screen.getByText('service.name')).toBeInTheDocument();
 		expect(screen.getByText('owner_team')).toBeInTheDocument();
 	});
@@ -158,15 +158,15 @@ describe('CreateAlertHeader', () => {
 		);
 
 		expect(
-			screen.getByText('All recommended SI/SM labels are present'),
+			screen.getByText('v2_all_labels_present'),
 		).toBeInTheDocument();
-		expect(screen.getAllByText('Set')).toHaveLength(4);
+		expect(screen.getAllByText('v2_label_set')).toHaveLength(4);
 	});
 
 	it('renders SOP binding metadata and updates label plus annotations', () => {
 		renderCreateAlertHeader();
 
-		expect(screen.getByText('SOP binding')).toBeInTheDocument();
+		expect(screen.getByText('v2_sop_binding_title')).toBeInTheDocument();
 		expect(
 			screen.getByText('SOP missing: add sop_id or sop_url before production use'),
 		).toBeInTheDocument();
@@ -209,7 +209,7 @@ describe('CreateAlertHeader', () => {
 			target: { value: 'Payment API 5xx response' },
 		});
 
-		fireEvent.click(screen.getByRole('button', { name: 'Preview SOP source' }));
+		fireEvent.click(screen.getByRole('button', { name: 'v2_preview_sop_source_btn' }));
 
 		expect(mockPreviewSop).toHaveBeenCalledWith({
 			labels: {
@@ -224,16 +224,16 @@ describe('CreateAlertHeader', () => {
 		await expect(
 			screen.findByTestId('sop-source-preview'),
 		).resolves.toBeInTheDocument();
-		expect(screen.getByText('Review summary')).toBeInTheDocument();
+		expect(screen.getByText('v2_review_summary')).toBeInTheDocument();
 		expect(
-			screen.getByText('SOP metadata is ready for PM handoff review.'),
+			screen.getByText('v2_sop_ready_for_review'),
 		).toBeInTheDocument();
-		expect(screen.getByText('Browser credentials blocked')).toBeInTheDocument();
+		expect(screen.getByText('v2_browser_creds_blocked')).toBeInTheDocument();
 		expect(
-			screen.getByText('Server-side connector required'),
+			screen.getByText('v2_server_side_connector_required'),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText('Audit required before live fetch'),
+			screen.getByText('v2_audit_required'),
 		).toBeInTheDocument();
 		expect(screen.getByText('ds-apm.sop-preview.v1')).toBeInTheDocument();
 		expect(screen.getByText('bound')).toBeInTheDocument();
@@ -255,7 +255,7 @@ describe('CreateAlertHeader', () => {
 			screen.getByText('server_side_connector · source_connector_secret'),
 		).toBeInTheDocument();
 		expect(screen.getByText('ds-sop-reader')).toBeInTheDocument();
-		expect(screen.getByText('Never accepted')).toBeInTheDocument();
+		expect(screen.getByText('v2_creds_never_accepted')).toBeInTheDocument();
 		expect(
 			screen.getByText(
 				'Live SOP content must be fetched server-side with source connector credentials; browser credentials are never accepted.',
@@ -306,7 +306,8 @@ describe('CreateAlertHeader', () => {
 	it('renders and updates PM incident briefing metadata fields', () => {
 		renderCreateAlertHeader();
 
-		expect(screen.getByText('PM incident briefing')).toBeInTheDocument();
+		expect(screen.getByText('v2_pm_briefing_collapse')).toBeInTheDocument();
+		fireEvent.click(screen.getByText('v2_pm_briefing_collapse'));
 		const impactInput = screen.getByTestId('pm-briefing-impact_summary');
 		const nextActionInput = screen.getByTestId('pm-briefing-next_action');
 
@@ -326,6 +327,7 @@ describe('CreateAlertHeader', () => {
 	it('warns when PM incident briefing metadata contains secret-like values', () => {
 		renderCreateAlertHeader();
 
+		fireEvent.click(screen.getByText('v2_pm_briefing_collapse'));
 		const customerUpdateInput = screen.getByTestId('pm-briefing-customer_update');
 
 		fireEvent.change(customerUpdateInput, {
@@ -343,7 +345,8 @@ describe('CreateAlertHeader', () => {
 	it('renders and updates AI evidence status metadata fields', () => {
 		renderCreateAlertHeader();
 
-		expect(screen.getByText('AI/evidence status')).toBeInTheDocument();
+		expect(screen.getByText('v2_ai_evidence_collapse')).toBeInTheDocument();
+		fireEvent.click(screen.getByText('v2_ai_evidence_collapse'));
 		const strategyStatusInput = screen.getByTestId(
 			'evidence-metadata-ai_strategy_status',
 		);
@@ -375,6 +378,7 @@ describe('CreateAlertHeader', () => {
 	it('warns when AI evidence metadata uses unsafe values', () => {
 		renderCreateAlertHeader();
 
+		fireEvent.click(screen.getByText('v2_ai_evidence_collapse'));
 		const statusInput = screen.getByTestId('evidence-metadata-evidence_status');
 		const strategyStatusInput = screen.getByTestId(
 			'evidence-metadata-ai_strategy_status',
@@ -401,7 +405,7 @@ describe('CreateAlertHeader', () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByText(
-				'Use one of: ready, unavailable, timeout, blocked_by_policy, sop_missing, evidence_unavailable, low_confidence.',
+				'Use one of: ready, unavailable, timeout, blocked_by_policy, quota_exhausted, sop_missing, evidence_unavailable, low_confidence.',
 			),
 		).toBeInTheDocument();
 		expect(statusInput).toHaveAttribute('aria-invalid', 'true');
@@ -432,7 +436,7 @@ describe('CreateAlertHeader', () => {
 				<CreateAlertHeader />
 			</CreateAlertProvider>,
 		);
-		expect(screen.queryByText('New Alert Rule')).not.toBeInTheDocument();
+		expect(screen.queryByText('v2_new_alert_rule')).not.toBeInTheDocument();
 		expect(
 			screen.getByPlaceholderText(ENTER_ALERT_RULE_NAME_PLACEHOLDER),
 		).toHaveValue('TEST_ALERT');
@@ -441,7 +445,7 @@ describe('CreateAlertHeader', () => {
 	it('should navigate to classic experience when button is clicked', () => {
 		renderCreateAlertHeader();
 		const switchToClassicExperienceButton = screen.getByText(
-			'Switch to Classic Experience',
+			'v2_switch_to_classic',
 		);
 		expect(switchToClassicExperienceButton).toBeInTheDocument();
 		fireEvent.click(switchToClassicExperienceButton);
@@ -467,7 +471,7 @@ describe('CreateAlertHeader', () => {
 			</CreateAlertProvider>,
 		);
 		expect(
-			screen.queryByText('Switch to Classic Experience'),
+			screen.queryByText('v2_switch_to_classic'),
 		).not.toBeInTheDocument();
 	});
 });

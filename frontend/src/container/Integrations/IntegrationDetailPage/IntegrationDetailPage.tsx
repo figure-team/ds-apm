@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useHistory, useParams } from 'react-router-dom';
 import { Color } from '@signozhq/design-tokens';
 import { Button } from '@signozhq/ui';
@@ -26,6 +27,7 @@ import './IntegrationDetailPage.styles.scss';
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 function IntegrationDetailPage(): JSX.Element {
+	const { t } = useTranslation('integrations');
 	const history = useHistory();
 	const { integrationId } = useParams<{ integrationId?: string }>();
 	const [activeDetailTab, setActiveDetailTab] = useState<string | null>(
@@ -71,7 +73,7 @@ function IntegrationDetailPage(): JSX.Element {
 						history.push(ROUTES.INTEGRATIONS);
 					}}
 				>
-					All Integrations
+					{t('common.all_integrations')}
 				</Button>
 			</Flex>
 
@@ -80,7 +82,7 @@ function IntegrationDetailPage(): JSX.Element {
 					<div className="error-content">
 						<img src={awwSnapUrl} alt="error-emoji" className="error-state-svg" />
 						<Typography.Text>
-							Something went wrong :/ Please retry or contact support.
+							{t('common.something_went_wrong')}
 						</Typography.Text>
 						<div className="error-btns">
 							<Button
@@ -89,13 +91,13 @@ function IntegrationDetailPage(): JSX.Element {
 								onClick={(): Promise<any> => refetch()}
 								prefix={<RotateCw size={14} />}
 							>
-								Retry
+								{t('common.retry')}
 							</Button>
 							<div
 								className="contact-support"
 								onClick={(): void => handleContactSupport(isCloudUserVal)}
 							>
-								<Typography.Link className="text">Contact Support </Typography.Link>
+								<Typography.Link className="text">{t('common.contact_support')} </Typography.Link>
 
 								<MoveUpRight size={14} color={Color.BG_ROBIN_400} />
 							</div>

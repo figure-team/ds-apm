@@ -7,6 +7,7 @@ import getAxes from 'lib/uPlotLib/utils/getAxes';
 import { getUplotChartDataForAnomalyDetection } from 'lib/uPlotLib/utils/getUplotChartData';
 import { getYAxisScaleForAnomalyDetection } from 'lib/uPlotLib/utils/getYAxisScale';
 import { LineChart } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useTimezone } from 'providers/Timezone';
 import uPlot from 'uplot';
 
@@ -57,6 +58,7 @@ function AnomalyAlertEvaluationView({
 	data: any;
 	yAxisUnit: string;
 }): JSX.Element {
+	const { t } = useTranslation('alerts');
 	const { spline } = uPlot.paths;
 	const _spline = spline ? spline() : undefined;
 	const chartRef = useRef<HTMLDivElement>(null);
@@ -299,7 +301,7 @@ function AnomalyAlertEvaluationView({
 					<div className="anomaly-alert-evaluation-view-no-data-container">
 						<LineChart size={48} strokeWidth={0.5} />
 
-						<Typography>No Data</Typography>
+						<Typography>{t('anomaly_no_data')}</Typography>
 					</div>
 				)}
 			</div>
@@ -310,7 +312,7 @@ function AnomalyAlertEvaluationView({
 						<div className="anomaly-alert-evaluation-view-series-list">
 							<Search
 								className="anomaly-alert-evaluation-view-series-list-search"
-								placeholder="Search a series"
+								placeholder={t('anomaly_search_series')}
 								allowClear
 								onChange={handleSearchValueChange}
 							/>
@@ -325,7 +327,7 @@ function AnomalyAlertEvaluationView({
 										checked={selectedSeries === null}
 										onChange={(): void => handleSeriesChange(null)}
 									>
-										Show All
+										{t('anomaly_show_all')}
 									</Checkbox>
 								)}
 
@@ -351,7 +353,7 @@ function AnomalyAlertEvaluationView({
 								))}
 
 								{filteredSeriesKeys.length === 0 && (
-									<Typography>No series found</Typography>
+									<Typography>{t('anomaly_no_series_found')}</Typography>
 								)}
 							</div>
 						</div>

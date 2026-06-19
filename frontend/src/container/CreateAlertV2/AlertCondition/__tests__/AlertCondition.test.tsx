@@ -3,6 +3,14 @@ import { MemoryRouter } from 'react-router-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { AlertTypes } from 'types/api/alerts/alertTypes';
 
+jest.mock('react-i18next', () => ({
+	useTranslation: (): { t: (key: string) => string } => ({
+		t: (key: string): string => key,
+	}),
+	Trans: ({ children }: { children: React.ReactNode }): React.ReactNode =>
+		children,
+}));
+
 import { CreateAlertProvider } from '../../context';
 import AlertCondition from '../AlertCondition';
 
@@ -24,7 +32,7 @@ const ANOMALY_THRESHOLD_TEST_ID = 'anomaly-threshold';
 const THRESHOLD_VIEW_TEST_ID = 'threshold-view';
 const ANOMALY_VIEW_TEST_ID = 'anomaly-view';
 const ANOMALY_TAB_TEXT = 'Anomaly';
-const THRESHOLD_TAB_TEXT = 'Threshold';
+const THRESHOLD_TAB_TEXT = 'v2_tab_threshold';
 const ACTIVE_TAB_CLASS = '.active-tab';
 
 // Mock the Stepper component
@@ -116,7 +124,7 @@ describe('AlertCondition', () => {
 	it('renders the stepper with correct step number and label', () => {
 		renderAlertCondition();
 		expect(screen.getByTestId(STEPPER_TEST_ID)).toHaveTextContent(
-			'Step 2: Set alert conditions',
+			'Step 2: v2_step_set_conditions',
 		);
 	});
 

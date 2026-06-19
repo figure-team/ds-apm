@@ -1,0 +1,23 @@
+{
+	"header_title": "DS-APM MCP Server",
+	"header_subtitle": "Connect AI assistants like Claude, Cursor, VS Code, and Codex to your DS-APM data via the Model Context Protocol. Authenticate from your MCP client with a service-account API key.",
+	"step1_title": "Configure your client",
+	"step1_description": "Add DS-APM to your MCP client. Use a one-click install where available, or copy the config for manual setup. On first connect, the client will open a DS-APM authorization page - use the instance URL and API key from step 2.",
+	"auth_title": "Authenticate from your client",
+	"auth_description": "On first connect, your client opens a DS-APM authorization page asking for two values:",
+	"instance_url_label": "DS-APM Instance URL",
+	"copy_instance_url_aria": "Copy DS-APM instance URL",
+	"api_key_label": "API Key",
+	"create_service_account": "Create service account",
+	"helper_admin": "Create a service account, then add a new key inside it - paste that key into the API Key field.",
+	"helper_non_admin": "Only admins can create API keys. Ask your workspace admin for a key with read access, then paste it into the API Key field.",
+	"use_cases_title": "What you can do with it",
+	"use_case_1": "Ask your AI assistant to investigate a spiking error rate.",
+	"use_case_2": "Debug a slow service by walking through recent traces.",
+	"use_case_3": "Summarize an alert and suggest likely root causes.",
+	"use_case_4": "Generate dashboards or queries from a natural-language description.",
+	"copy_endpoint_aria": "Copy MCP endpoint",
+	"manual_setup_hint": "Or copy the config below for manual setup.",
+	"fallback_title": "MCP Server is available on DS-APM",
+	"fallback_body": "Users can follow the docs to setup the MCP server against their DS-APM instance."
+}

@@ -1,4 +1,4 @@
-import {
+﻿import {
 	ChangeEvent,
 	Key,
 	useCallback,
@@ -619,7 +619,7 @@ function DashboardsList(): JSX.Element {
 			<Typography.Text className="numbers">
 				{range[0]} &#8212; {range[1]}
 			</Typography.Text>
-			<Typography.Text className="total">of {total}</Typography.Text>
+			<Typography.Text className="total">{t('pagination_of')} {total}</Typography.Text>
 		</>
 	);
 

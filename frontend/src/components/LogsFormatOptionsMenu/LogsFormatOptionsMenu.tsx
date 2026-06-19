@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Input, InputNumber, Popover, Tooltip, Typography } from 'antd';
 import type { DefaultOptionType } from 'antd/es/select';
 import cx from 'classnames';
@@ -28,6 +29,7 @@ function OptionsMenu({
 	selectedOptionFormat,
 	config,
 }: LogsFormatOptionsMenuProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const { maxLines, format, addColumn, fontSize } = config;
 	const [selectedItem, setSelectedItem] = useState(selectedOptionFormat);
 	const maxLinesNumber = (maxLines?.value as number) || 1;
@@ -225,7 +227,7 @@ function OptionsMenu({
 						type="text"
 					>
 						<ChevronLeft size={14} className="icon" />
-						<Typography.Text className="text">Select font size</Typography.Text>
+						<Typography.Text className="text">{t('logs:select_font_size')}</Typography.Text>
 					</Button>
 					<div className="horizontal-line" />
 					<div className="content">
@@ -280,7 +282,7 @@ function OptionsMenu({
 									onClick={handleToggleAddNewColumn}
 								/>
 							</div>
-							Add New Column
+							{t('logs:add_new_column')}
 						</div>
 
 						<Input
@@ -289,13 +291,13 @@ function OptionsMenu({
 							autoFocus
 							onFocus={addColumn?.onFocus}
 							onChange={handleSearchValueChange}
-							placeholder="Search..."
+							placeholder={t('logs:search_placeholder')}
 						/>
 					</div>
 
 					<div className="add-new-column-content">
 						{addColumn?.isFetching && (
-							<div className="loading-container"> Loading ... </div>
+							<div className="loading-container"> {t('logs:loading')} </div>
 						)}
 
 						<div className="column-format-new-options" ref={listRef}>
@@ -334,7 +336,7 @@ function OptionsMenu({
 			{!isFontSizeOptionsOpen && !showAddNewColumnContainer && (
 				<div>
 					<div className="font-size-container">
-						<div className="title">Font Size</div>
+						<div className="title">{t('logs:font_size_label')}</div>
 						<Button
 							className="value"
 							type="text"
@@ -348,7 +350,7 @@ function OptionsMenu({
 					</div>
 					<div className="horizontal-line" />
 					<div className="menu-container">
-						<div className="title">FORMAT</div>
+						<div className="title">{t('logs:format_label')}</div>
 
 						<div className="menu-items">
 							{items.map(
@@ -374,7 +376,7 @@ function OptionsMenu({
 							<>
 								<div className="horizontal-line" />
 								<div className="max-lines-per-row">
-									<div className="title"> max lines per row </div>
+									<div className="title"> {t('logs:max_lines_per_row_label')} </div>
 									<div className="raw-format max-lines-per-row-input">
 										<button
 											type="button"
@@ -408,7 +410,7 @@ function OptionsMenu({
 								<div className="item-content">
 									{!showAddNewColumnContainer && (
 										<div className="title">
-											columns
+											{t('logs:columns_label')}
 											<Plus size={14} onClick={handleToggleAddNewColumn} />{' '}
 										</div>
 									)}
@@ -432,7 +434,7 @@ function OptionsMenu({
 										))}
 										{addColumn && addColumn?.value?.length === 0 && (
 											<div className="column-name no-columns-selected">
-												No columns selected
+												{t('logs:no_columns_selected')}
 											</div>
 										)}
 									</div>
@@ -451,6 +453,7 @@ function LogsFormatOptionsMenu({
 	selectedOptionFormat,
 	config,
 }: LogsFormatOptionsMenuProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 	return (
 		<Popover
@@ -469,7 +472,7 @@ function LogsFormatOptionsMenu({
 			rootClassName="format-options-popover"
 			destroyTooltipOnHide
 		>
-			<Tooltip title="Options">
+			<Tooltip title={t('logs:options')}>
 				<Button
 					className="periscope-btn ghost"
 					icon={<Sliders size={14} />}

@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction } from 'react';
 import { Select, Typography } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { PrecisionOption } from 'components/Graph/types';
 import { PanelDisplay } from 'constants/queryBuilder';
 import { SlidersHorizontal } from 'lucide-react';
@@ -38,9 +39,10 @@ export default function FormattingUnitsSection({
 	allowPanelColumnPreference,
 	decimapPrecisionOptions,
 }: FormattingUnitsSectionProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	return (
 		<SettingsSection
-			title="Formatting & Units"
+			title={t('section_formatting_units')}
 			icon={<SlidersHorizontal size={14} />}
 		>
 			{allowYAxisUnit && (
@@ -60,7 +62,7 @@ export default function FormattingUnitsSection({
 			{allowDecimalPrecision && (
 				<section className="decimal-precision-selector control-container">
 					<Typography.Text className="section-heading">
-						Decimal Precision
+						{t('decimal_precision')}
 					</Typography.Text>
 					<Select
 						options={decimapPrecisionOptions}

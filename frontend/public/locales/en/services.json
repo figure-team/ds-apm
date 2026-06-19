@@ -44,5 +44,13 @@
 	"continue_without_instrumentation": "Continue without instrumentation",
 	"no_instrumentation_data": "No instrumentation data.",
 	"instrument_your_application": "Please instrument your application as mentioned",
-	"here": "here"
+	"here": "here",
+	"email": "email",
+	"breadcrumb_services": "services",
+	"top_level_operation": "Top Level Operation",
+	"top_level_operations_title": "Top Level Operations",
+	"docs": "docs",
+	"top_level_ops_desc_1": "DS-APM calculates the RED metrics for a service using the entry-point spans. For more details, you can check out our ",
+	"top_level_ops_desc_2": ". We expect the number of unique entry-point operations to be no more than 2500. The high number of top level operations might be due to an instrumentation issue in your service. Below table shows the sample top level operations. Please refer to official docs for span name guidelines ",
+	"top_level_ops_desc_3": " and update the instrumentation to to follow the guidelines. If there are any dynamic IDs in the span name, make sure to use the span attributes instead. If you have more questions, please reach out to us via support."
 }

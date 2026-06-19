@@ -1,4 +1,5 @@
-/* eslint-disable sonarjs/cognitive-complexity */
+﻿﻿/* eslint-disable sonarjs/cognitive-complexity */
+import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import {
 	DragDropContext,
@@ -49,6 +50,7 @@ function ExplorerColumnsRenderer({
 	selectedTracesFields,
 	setSelectedTracesFields,
 }: LogColumnsRendererProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const { currentQuery } = useQueryBuilder();
 	const [searchText, setSearchText] = useState<string>('');
 	const [querySearchText, setQuerySearchText] = useState<string>('');
@@ -172,7 +174,7 @@ function ExplorerColumnsRenderer({
 			label: (
 				<Input
 					type="text"
-					placeholder="Search"
+					placeholder={t('search_columns_placeholder')}
 					className="explorer-columns-search"
 					value={searchText}
 					onChange={handleSearchChange}
@@ -257,7 +259,7 @@ function ExplorerColumnsRenderer({
 	return (
 		<div className="explorer-columns-renderer">
 			<div className="title">
-				<Typography.Text>Columns</Typography.Text>
+				<Typography.Text>{t('columns_label')}</Typography.Text>
 				{isError && (
 					<Tooltip title={SOMETHING_WENT_WRONG}>
 						<AlertCircle size={16} data-testid="alert-circle-icon" />

@@ -1,4 +1,5 @@
-import { PlusOutlined } from '@ant-design/icons';
+﻿import { PlusOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { useQueryBuilder } from 'hooks/queryBuilder/useQueryBuilder';
 import { IPromQLQuery } from 'types/api/queryBuilder/queryBuilderData';
 import { EQueryType } from 'types/common/dashboard';
@@ -7,6 +8,7 @@ import { QueryButton } from '../../styles';
 import PromQLQueryBuilder from './query';
 
 function PromQLQueryContainer(): JSX.Element | null {
+	const { t } = useTranslation('dashboard');
 	const { addNewQueryItem, currentQuery } = useQueryBuilder();
 
 	const addQueryHandler = (): void => {
@@ -30,7 +32,7 @@ function PromQLQueryContainer(): JSX.Element | null {
 				icon={<PlusOutlined />}
 				style={{ margin: '0.4rem 1rem' }}
 			>
-				Query
+				{t('query_add')}
 			</QueryButton>
 		</>
 	);

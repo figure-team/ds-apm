@@ -26,7 +26,7 @@ export function RequestIntegrationBtn({
 	const [requestedIntegrationName, setRequestedIntegrationName] = useState('');
 
 	const { notifications } = useNotifications();
-	const { t } = useTranslation(['common']);
+	const { t } = useTranslation(['integrations', 'common']);
 
 	const handleRequestIntegrationSubmit = async (): Promise<void> => {
 		try {
@@ -80,7 +80,7 @@ export function RequestIntegrationBtn({
 			<div className="form-section">
 				<Space.Compact style={{ width: '100%' }}>
 					<Input
-						placeholder="Enter integration name..."
+						placeholder={t('header.integration_name_placeholder')}
 						style={{ width: 300, marginBottom: 0 }}
 						value={requestedIntegrationName}
 						onChange={(e): void => setRequestedIntegrationName(e.target.value)}
@@ -102,7 +102,7 @@ export function RequestIntegrationBtn({
 							requestedIntegrationName?.trim().length === 0
 						}
 					>
-						Submit
+						{t('common.submit')}
 					</Button>
 				</Space.Compact>
 			</div>

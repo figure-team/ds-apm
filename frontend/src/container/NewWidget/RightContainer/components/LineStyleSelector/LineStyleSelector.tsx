@@ -1,6 +1,7 @@
 import { ToggleGroup, ToggleGroupItem } from '@signozhq/ui';
 import { Typography } from 'antd';
 import { LineStyle } from 'lib/uPlotV2/config/types';
+import { useTranslation } from 'react-i18next';
 
 import './LineStyleSelector.styles.scss';
 
@@ -13,9 +14,10 @@ export default function LineStyleSelector({
 	value,
 	onChange,
 }: LineStyleSelectorProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	return (
 		<section className="line-style-selector control-container">
-			<Typography.Text className="section-heading">Line style</Typography.Text>
+			<Typography.Text className="section-heading">{t('line_style')}</Typography.Text>
 			<ToggleGroup
 				type="single"
 				value={value}
@@ -26,7 +28,7 @@ export default function LineStyleSelector({
 					}
 				}}
 			>
-				<ToggleGroupItem value={LineStyle.Solid} aria-label="Solid">
+				<ToggleGroupItem value={LineStyle.Solid} aria-label={t('line_style_solid')}>
 					<svg
 						className="line-style-icon"
 						viewBox="0 0 48 48"
@@ -38,9 +40,9 @@ export default function LineStyleSelector({
 					>
 						<path d="M8 24 L40 24" />
 					</svg>
-					<Typography.Text className="section-heading-small">Solid</Typography.Text>
+					<Typography.Text className="section-heading-small">{t('line_style_solid')}</Typography.Text>
 				</ToggleGroupItem>
-				<ToggleGroupItem value={LineStyle.Dashed} aria-label="Dashed">
+				<ToggleGroupItem value={LineStyle.Dashed} aria-label={t('line_style_dashed')}>
 					<svg
 						className="line-style-icon"
 						viewBox="0 0 48 48"
@@ -53,7 +55,7 @@ export default function LineStyleSelector({
 					>
 						<path d="M8 24 L40 24" />
 					</svg>
-					<Typography.Text className="section-heading-small">Dashed</Typography.Text>
+					<Typography.Text className="section-heading-small">{t('line_style_dashed')}</Typography.Text>
 				</ToggleGroupItem>
 			</ToggleGroup>
 		</section>

@@ -3,6 +3,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Button } from 'antd';
 import { useQueryBuilder } from 'hooks/queryBuilder/useQueryBuilder';
+import { useTranslation } from 'react-i18next';
 import { useGetQueryLabels } from 'hooks/useGetQueryLabels';
 import { Plus } from 'lucide-react';
 import { v4 as uuid } from 'uuid';
@@ -19,6 +20,7 @@ function ThresholdSelector({
 	selectedGraph,
 	columnUnits,
 }: ThresholdSelectorProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const { currentQuery } = useQueryBuilder();
 
 	const aggregationQueries = useGetQueryLabels(currentQuery);
@@ -75,7 +77,7 @@ function ThresholdSelector({
 						data-testid="add-threshold-cta"
 						onClick={addThresholdHandler}
 					>
-						Add Threshold
+						{t('add_threshold')}
 					</Button>
 				</div>
 				{thresholds.map((threshold, idx) => (

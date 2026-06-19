@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Select, Typography } from 'antd';
 import { useQueryBuilder } from 'hooks/queryBuilder/useQueryBuilder';
 import { useAppContext } from 'providers/App/App';
@@ -29,6 +30,7 @@ function AnomalyThreshold({
 	isErrorChannels,
 	refreshChannels,
 }: AnomalyAndThresholdProps): JSX.Element {
+	const { t } = useTranslation(['alerts']);
 	const { user } = useAppContext();
 	const {
 		thresholdState,
@@ -68,7 +70,7 @@ function AnomalyThreshold({
 				{/* Sentence 1 */}
 				<div className="alert-condition-sentence">
 					<Typography.Text data-testid="notification-text" className="sentence-text">
-						Send notification when the observed value for
+						{t('v2_anomaly_send_notification')}
 					</Typography.Text>
 					<Select
 						value={thresholdState.selectedQuery}
@@ -85,7 +87,7 @@ function AnomalyThreshold({
 						data-testid="evaluation-window-text"
 						className="sentence-text"
 					>
-						during the last
+						{t('v2_anomaly_during_last')}
 					</Typography.Text>
 					<Select
 						value={thresholdState.evaluationWindow}
@@ -102,7 +104,7 @@ function AnomalyThreshold({
 				<div className="alert-condition-sentence">
 					{/* Sentence 2 */}
 					<Typography.Text data-testid="threshold-text" className="sentence-text">
-						is
+						{t('v2_anomaly_is')}
 					</Typography.Text>
 					<Select
 						value={thresholdState.thresholds[0].thresholdValue}
@@ -117,7 +119,7 @@ function AnomalyThreshold({
 						options={deviationOptions}
 					/>
 					<Typography.Text data-testid="deviations-text" className="sentence-text">
-						deviations
+						{t('v2_anomaly_deviations')}
 					</Typography.Text>
 					<Select
 						value={
@@ -137,7 +139,7 @@ function AnomalyThreshold({
 						data-testid="predicted-data-text"
 						className="sentence-text"
 					>
-						the predicted data
+						{t('v2_anomaly_predicted_data')}
 					</Typography.Text>
 					<Select
 						value={
@@ -157,7 +159,7 @@ function AnomalyThreshold({
 				{/* Sentence 3 */}
 				<div className="alert-condition-sentence">
 					<Typography.Text data-testid="using-the-text" className="sentence-text">
-						using the
+						{t('v2_anomaly_using_the')}
 					</Typography.Text>
 					<Select
 						value={thresholdState.algorithm}
@@ -174,7 +176,7 @@ function AnomalyThreshold({
 						data-testid="algorithm-with-text"
 						className="sentence-text"
 					>
-						algorithm with
+						{t('v2_anomaly_algorithm_with')}
 					</Typography.Text>
 					<Select
 						value={thresholdState.seasonality}
@@ -193,7 +195,7 @@ function AnomalyThreshold({
 								data-testid="seasonality-text"
 								className="sentence-text"
 							>
-								seasonality to
+								{t('v2_anomaly_seasonality_to')}
 							</Typography.Text>
 							<Select
 								value={thresholdState.thresholds[0].channels}
@@ -206,7 +208,7 @@ function AnomalyThreshold({
 									label: channel.name,
 								}))}
 								mode="multiple"
-								placeholder="Select notification channels"
+								placeholder={t('v2_notification_channels_placeholder')}
 								showSearch
 								maxTagCount={2}
 								maxTagPlaceholder={(omittedValues): string =>
@@ -228,7 +230,7 @@ function AnomalyThreshold({
 						</>
 					) : (
 						<Typography.Text data-testid="seasonality-text" className="sentence-text">
-							seasonality
+							{t('v2_anomaly_seasonality')}
 						</Typography.Text>
 					)}
 				</div>

@@ -1,4 +1,5 @@
-import React from 'react';
+﻿import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { CustomMultiSelect } from 'components/NewSelect';
 import { PANEL_GROUP_TYPES } from 'constants/queryBuilder';
 import { generateGridTitle } from 'container/GridPanelSwitch/utils';
@@ -12,6 +13,7 @@ export function WidgetSelector({
 	selectedWidgets: string[];
 	setSelectedWidgets: (widgets: string[]) => void;
 }): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const { dashboardData } = useDashboardStore();
 
 	// Get layout IDs for cross-referencing
@@ -51,7 +53,7 @@ export function WidgetSelector({
 
 	return (
 		<CustomMultiSelect
-			placeholder="Select Panels"
+			placeholder={t('select_panels_placeholder')}
 			options={widgets.map((widget: WidgetRow | Widgets) => ({
 				label: generateGridTitle(widget.title),
 				value: widget.id,

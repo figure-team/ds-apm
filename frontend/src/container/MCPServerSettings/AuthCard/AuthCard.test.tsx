@@ -27,10 +27,10 @@ describe('AuthCard', () => {
 	it('shows Create Service Account button for admin', () => {
 		render(<AuthCard {...defaultProps} isAdmin />);
 
-		expect(screen.getByText('Create service account')).toBeInTheDocument();
+		expect(screen.getByText('create_service_account')).toBeInTheDocument();
 		expect(
 			screen.queryByText(
-				'Only admins can create API keys. Ask your workspace admin for a key with read access, then paste it into the API Key field.',
+				'helper_non_admin',
 			),
 		).not.toBeInTheDocument();
 	});
@@ -40,10 +40,10 @@ describe('AuthCard', () => {
 
 		expect(
 			screen.getByText(
-				'Only admins can create API keys. Ask your workspace admin for a key with read access, then paste it into the API Key field.',
+				'helper_non_admin',
 			),
 		).toBeInTheDocument();
-		expect(screen.queryByText('Create service account')).not.toBeInTheDocument();
+		expect(screen.queryByText('create_service_account')).not.toBeInTheDocument();
 	});
 
 	it('calls onCopyInstanceUrl when copy button is clicked', async () => {
@@ -52,7 +52,7 @@ describe('AuthCard', () => {
 		render(<AuthCard {...defaultProps} isAdmin />);
 
 		await user.click(
-			screen.getByRole('button', { name: 'Copy SigNoz instance URL' }),
+			screen.getByRole('button', { name: 'copy_instance_url_aria' }),
 		);
 
 		expect(mockOnCopyInstanceUrl).toHaveBeenCalledTimes(1);
@@ -63,7 +63,7 @@ describe('AuthCard', () => {
 
 		render(<AuthCard {...defaultProps} isAdmin />);
 
-		await user.click(screen.getByText('Create service account'));
+		await user.click(screen.getByText('create_service_account'));
 
 		expect(mockOnCreateServiceAccount).toHaveBeenCalledTimes(1);
 	});

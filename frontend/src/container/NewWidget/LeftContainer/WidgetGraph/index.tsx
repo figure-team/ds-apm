@@ -1,4 +1,5 @@
-import { memo } from 'react';
+﻿import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import QueryCancelledPlaceholder from 'components/QueryCancelledPlaceholder';
 import WarningPopover from 'components/WarningPopover/WarningPopover';
@@ -25,15 +26,14 @@ function WidgetGraph({
 	enableDrillDown = false,
 	isCancelled = false,
 }: WidgetGraphContainerProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const { currentQuery } = useQueryBuilder();
 
 	const isDarkMode = useIsDarkMode();
 
 	if (selectedWidget === undefined) {
 		return (
-			<Card $panelType={selectedGraph} isDarkMode={isDarkMode}>
-				Invalid widget
-			</Card>
+			<Card $panelType={selectedGraph} isDarkMode={isDarkMode}>{t('invalid_widget')}</Card>
 		);
 	}
 

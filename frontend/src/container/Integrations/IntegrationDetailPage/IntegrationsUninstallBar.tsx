@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation } from 'react-query';
 import { Button, Modal, Typography } from 'antd';
 import logEvent from 'api/common/logEvent';
@@ -11,6 +12,8 @@ import { INTEGRATION_TELEMETRY_EVENTS } from '../constants';
 import { ConnectionStates } from './TestConnection';
 
 import './IntegrationDetailPage.styles.scss';
+
+const DEFAULT_REMOVE_INTEGRATION_TITLE = 'Remove from SigNoz';
 
 interface IntergrationsUninstallBarProps {
 	integrationTitle: string;
@@ -27,10 +30,16 @@ function IntergrationsUninstallBar(
 		integrationId,
 		onUnInstallSuccess,
 		connectionStatus,
-		removeIntegrationTitle = 'Remove from SigNoz',
+		removeIntegrationTitle = DEFAULT_REMOVE_INTEGRATION_TITLE,
 	} = props;
 	const { notifications } = useNotifications();
+	const { t } = useTranslation('integrations');
 	const [isModalOpen, setIsModalOpen] = useState(false);
+
+	const removeIntegrationLabel =
+		removeIntegrationTitle === DEFAULT_REMOVE_INTEGRATION_TITLE
+			? t('uninstall.remove_from_signoz')
+			: removeIntegrationTitle;
 
 	const { mutate: uninstallIntegration, isLoading: isUninstallLoading } =
 		useMutation(unInstallIntegration, {
@@ -68,10 +77,11 @@ function IntergrationsUninstallBar(
 	return (
 		<div className="uninstall-integration-bar">
 			<div className="unintall-integration-bar-text">
-				<Typography.Text className="heading">Remove Integration</Typography.Text>
+				<Typography.Text className="heading">
+					{t('uninstall.remove_integration')}
+				</Typography.Text>
 				<Typography.Text className="subtitle">
-					Removing the {integrationTitle} integration would make your workspace stop
-					listening for data from {integrationTitle} instances.
+					{t('uninstall.subtitle', { title: integrationTitle })}
 				</Typography.Text>
 			</div>
 			<Button
@@ -79,24 +89,22 @@ function IntergrationsUninstallBar(
 				icon={<X size={14} />}
 				onClick={(): void => showModal()}
 			>
-				{removeIntegrationTitle}
+				{removeIntegrationLabel}
 			</Button>
 			<Modal
 				className="remove-integration-modal"
 				open={isModalOpen}
-				title="Remove integration"
+				title={t('uninstall.modal_title')}
 				onOk={handleOk}
 				onCancel={handleCancel}
-				okText="Remove Integration"
+				okText={t('uninstall.remove_integration_btn')}
 				okButtonProps={{
 					danger: true,
 					disabled: isUninstallLoading,
 				}}
 			>
 				<Typography.Text className="remove-integration-text">
-					Removing this integration makes SigNoz stop listening for data from{' '}
-					{integrationTitle} instances. You would still have to manually remove the
-					configuration in your code to stop sending data.
+					{t('uninstall.remove_text', { title: integrationTitle })}
 				</Typography.Text>
 			</Modal>
 		</div>
@@ -104,7 +112,7 @@ function IntergrationsUninstallBar(
 }
 
 IntergrationsUninstallBar.defaultProps = {
-	removeIntegrationTitle: 'Remove from SigNoz',
+	removeIntegrationTitle: DEFAULT_REMOVE_INTEGRATION_TITLE,
 };
 
 export default IntergrationsUninstallBar;

@@ -1,3 +1,4 @@
+﻿import { useTranslation } from 'react-i18next';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation } from 'react-query';
 import { useCopyToClipboard } from 'react-use';
@@ -54,6 +55,7 @@ const showErrorNotification = (error: APIError): void => {
 };
 
 function PublicDashboardSetting(): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const [publicDashboardData, setPublicDashboardData] = useState<
 		PublicDashboardMetaProps | undefined
 	>(undefined);
@@ -251,18 +253,18 @@ function PublicDashboardSetting(): JSX.Element {
 						value={timeRangeEnabled}
 						onChange={handleTimeRangeEnabled}
 					>
-						Enable time range
+						{t('enable_time_range')}
 					</Checkbox>
 				</div>
 
 				<div className="default-time-range-select">
 					<div className="default-time-range-select-label">
 						<Typography.Text className="default-time-range-select-label-text">
-							Default time range
+							{t('default_time_range_label')}
 						</Typography.Text>
 					</div>
 					<Select
-						placeholder="Select default time range"
+						placeholder={t('default_time_range_placeholder')}
 						options={TIME_RANGE_PRESETS_OPTIONS}
 						value={defaultTimeRange}
 						onChange={handleDefaultTimeRange}
@@ -275,7 +277,7 @@ function PublicDashboardSetting(): JSX.Element {
 					<div className="public-dashboard-url">
 						<div className="url-label-container">
 							<Typography.Text className="url-label">
-								Public Dashboard URL
+								{t('public_dashboard_url')}
 							</Typography.Text>
 						</div>
 
@@ -307,7 +309,7 @@ function PublicDashboardSetting(): JSX.Element {
 				<div className="public-dashboard-setting-callout">
 					<Typography.Text className="public-dashboard-setting-callout-text">
 						<Info size={12} className="public-dashboard-setting-callout-icon" />{' '}
-						Dashboard variables won&apos;t work in public dashboards
+						{t('dashboard_variables_no_public')}
 					</Typography.Text>
 				</div>
 
@@ -333,7 +335,7 @@ function PublicDashboardSetting(): JSX.Element {
 								)
 							}
 						>
-							Publish dashboard
+							{t('publish_dashboard')}
 						</Button>
 					) : (
 						<>
@@ -345,7 +347,7 @@ function PublicDashboardSetting(): JSX.Element {
 								loading={isLoadingRevokePublicDashboardAccess}
 								icon={<Trash size={14} />}
 							>
-								Unpublish dashboard
+								{t('unpublish_dashboard')}
 							</Button>
 
 							<Button
@@ -356,7 +358,7 @@ function PublicDashboardSetting(): JSX.Element {
 								loading={isLoadingUpdatePublicDashboard}
 								icon={<Globe size={14} />}
 							>
-								Update published dashboard
+								{t('update_published_dashboard')}
 							</Button>
 						</>
 					)}

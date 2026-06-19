@@ -18,7 +18,7 @@ jest.mock('hooks/useDebounce', () => ({
 
 describe('DynamicVariable Component', () => {
 	const mockSetDynamicVariablesSelectedValue = jest.fn();
-	const ATTRIBUTE_PLACEHOLDER = 'Select a field';
+	const ATTRIBUTE_PLACEHOLDER = 'select_a_field';
 	const LOADING_TEXT = 'Refreshing values...';
 	const DEFAULT_PROPS = {
 		setDynamicVariablesSelectedValue: mockSetDynamicVariablesSelectedValue,

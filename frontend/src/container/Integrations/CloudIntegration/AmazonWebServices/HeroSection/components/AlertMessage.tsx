@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import { Alert, Spin } from 'antd';
 import { LoaderCircle, TriangleAlert } from 'lucide-react';
@@ -9,6 +10,7 @@ function AlertMessage({
 }: {
 	modalState: ModalStateEnum;
 }): JSX.Element | null {
+	const { t } = useTranslation('integrations');
 	switch (modalState) {
 		case ModalStateEnum.WAITING:
 			return (
@@ -24,8 +26,8 @@ function AlertMessage({
 									/>
 								}
 							/>
-							Waiting for connection, retrying in{' '}
-							<span className="retry-time">10</span> secs...
+							{t('alert.waiting_connection')}{' '}
+							<span className="retry-time">10</span> {t('alert.secs')}
 						</div>
 					}
 					className="cloud-account-setup-form__alert"
@@ -38,7 +40,7 @@ function AlertMessage({
 					message={
 						<div className="cloud-account-setup-form__alert-message">
 							<TriangleAlert type="solid" size={15} color={Color.BG_SAKURA_400} />
-							{`We couldn't establish a connection to your AWS account. Please try again`}
+							{t('alert.connection_failed')}
 						</div>
 					}
 					type="error"

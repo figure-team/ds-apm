@@ -12,6 +12,8 @@
 	"field_allow_unbound": "Allow Without Anomaly Signal (not recommended)",
 	"allow_unbound_warning": "Analysis will trigger on SOP-unlinked alerts without an anomaly detection signal. This may increase costs.",
 	"save": "Save",
+	"edit": "Edit",
+	"delete": "Delete",
 	"saved": "Saved successfully",
 	"save_failed": "Failed to save",
 	"repos_title": "Analysis Target Repositories",

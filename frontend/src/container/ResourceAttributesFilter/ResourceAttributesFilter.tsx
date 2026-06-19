@@ -138,13 +138,10 @@ function ResourceAttributesFilter({
 						notFoundContent={
 							loading ? (
 								<span>
-									<Spin size="small" /> Loading...
+									<Spin size="small" /> {t('loading')}
 								</span>
 							) : (
-								<span>
-									No resource attributes available to filter. Please refer docs to send
-									attributes.
-								</span>
+								<span>{t('resource_attributes_empty')}</span>
 							)
 						}
 					/>

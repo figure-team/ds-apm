@@ -3,5 +3,6 @@
 	"loading": "Loading...",
 	"filter_tooltip": "Currently, service map supports filtering of {{keys}} only, in resource attributes",
 	"select_environment": "Select Environment/s",
-	"resource_attributes_filter_placeholder": "Search and Filter based on resource attributes."
+	"resource_attributes_filter_placeholder": "Search and Filter based on resource attributes.",
+	"resource_attributes_empty": "No resource attributes available to filter. Please refer docs to send attributes."
 }

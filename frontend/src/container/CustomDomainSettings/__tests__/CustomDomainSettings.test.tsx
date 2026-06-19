@@ -75,11 +75,11 @@ describe('CustomDomainSettings', () => {
 		await screen.findByText(/custom-host\.test\.cloud/i);
 
 		await user.click(
-			screen.getByRole('button', { name: /edit workspace link/i }),
+			screen.getByRole('button', { name: /edit_workspace_link/i }),
 		);
 
 		expect(
-			screen.getByRole('dialog', { name: /edit workspace link/i }),
+			screen.getByRole('dialog', { name: /edit_modal_title/i }),
 		).toBeInTheDocument();
 		// DNS suffix is the part of the default host URL after the name prefix
 		expect(screen.getByText('test.cloud')).toBeInTheDocument();
@@ -103,14 +103,14 @@ describe('CustomDomainSettings', () => {
 
 		await screen.findByText(/custom-host\.test\.cloud/i);
 		await user.click(
-			screen.getByRole('button', { name: /edit workspace link/i }),
+			screen.getByRole('button', { name: /edit_workspace_link/i }),
 		);
 
 		// The input is inside the modal — find it by its role
 		const input = screen.getByRole('textbox');
 		await user.clear(input);
 		await user.type(input, 'myteam');
-		await user.click(screen.getByRole('button', { name: /apply changes/i }));
+		await user.click(screen.getByRole('button', { name: /apply_changes/i }));
 
 		await waitFor(() => {
 			expect(capturedBody).toEqual({ name: 'myteam' });
@@ -135,13 +135,13 @@ describe('CustomDomainSettings', () => {
 
 		await screen.findByText(/custom-host\.test\.cloud/i);
 		await user.click(
-			screen.getByRole('button', { name: /edit workspace link/i }),
+			screen.getByRole('button', { name: /edit_workspace_link/i }),
 		);
 
 		const input = screen.getByRole('textbox');
 		await user.clear(input);
 		await user.type(input, 'myteam');
-		await user.click(screen.getByRole('button', { name: /apply changes/i }));
+		await user.click(screen.getByRole('button', { name: /apply_changes/i }));
 
 		expect(
 			await screen.findByRole('button', { name: /contact support/i }),
@@ -160,13 +160,13 @@ describe('CustomDomainSettings', () => {
 
 		await screen.findByText(/custom-host\.test\.cloud/i);
 		await user.click(
-			screen.getByRole('button', { name: /edit workspace link/i }),
+			screen.getByRole('button', { name: /edit_workspace_link/i }),
 		);
 
 		const input = screen.getByRole('textbox');
 		await user.clear(input);
 		await user.type(input, 'ab');
-		await user.click(screen.getByRole('button', { name: /apply changes/i }));
+		await user.click(screen.getByRole('button', { name: /apply_changes/i }));
 
 		expect(
 			screen.getByText(/minimum 3 characters required/i),
@@ -220,13 +220,13 @@ describe('CustomDomainSettings', () => {
 
 		await screen.findByText(/custom-host\.test\.cloud/i);
 		await user.click(
-			screen.getByRole('button', { name: /edit workspace link/i }),
+			screen.getByRole('button', { name: /edit_workspace_link/i }),
 		);
 
 		const input = screen.getByRole('textbox');
 		await user.clear(input);
 		await user.type(input, 'myteam');
-		await user.click(screen.getByRole('button', { name: /apply changes/i }));
+		await user.click(screen.getByRole('button', { name: /apply_changes/i }));
 
 		// Verify toast.custom was called
 		await waitFor(() => {
@@ -316,7 +316,7 @@ describe('CustomDomainSettings', () => {
 				appContextOverrides: { org: [] },
 			});
 
-			await screen.findByRole('button', { name: /edit workspace link/i });
+			await screen.findByRole('button', { name: /edit_workspace_link/i });
 
 			expect(
 				container.querySelector('.custom-domain-card-name-row'),

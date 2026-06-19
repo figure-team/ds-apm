@@ -6,6 +6,7 @@ import ROUTES from 'constants/routes';
 import useComponentPermission from 'hooks/useComponentPermission';
 import { useSafeNavigate } from 'hooks/useSafeNavigate';
 import { useAppContext } from 'providers/App/App';
+import { useTranslation } from 'react-i18next';
 import { DataSource } from 'types/common/queryBuilder';
 import { isModifierKeyPressed } from 'utils/app';
 
@@ -31,6 +32,7 @@ const alertLogEvents = (
 };
 
 export function AlertsEmptyState(): JSX.Element {
+	const { t } = useTranslation('alerts');
 	const { user } = useAppContext();
 	const { safeNavigate } = useSafeNavigate();
 	const [addNewAlert] = useComponentPermission(
@@ -52,9 +54,9 @@ export function AlertsEmptyState(): JSX.Element {
 		<div className="alert-list-container">
 			<div className="alert-list-view-content">
 				<div className="alert-list-title-container">
-					<Typography.Title className="title">Alert Rules</Typography.Title>
+					<Typography.Title className="title">{t('list_alert_rules_title')}</Typography.Title>
 					<Typography.Text className="subtitle">
-						Create and manage alert rules for your resources.
+						{t('list_alert_rules_subtitle')}
 					</Typography.Text>
 				</div>
 				<section className="empty-alert-info-container">
@@ -67,10 +69,10 @@ export function AlertsEmptyState(): JSX.Element {
 							/>
 							<div>
 								<Typography.Text className="empty-info">
-									No Alert rules yet.{' '}
+									{t('list_no_alert_rules')}{' '}
 								</Typography.Text>
 								<Typography.Text className="empty-alert-action">
-									Create an Alert Rule to get started
+									{t('list_create_alert_rule')}
 								</Typography.Text>
 							</div>
 						</section>
@@ -84,7 +86,7 @@ export function AlertsEmptyState(): JSX.Element {
 								type="primary"
 								data-testid="add-alert"
 							>
-								New Alert Rule
+								{t('list_new_alert_rule')}
 							</Button>
 							<InfoLinkText
 								infoText="Watch a tutorial on creating a sample alert"
@@ -123,7 +125,7 @@ export function AlertsEmptyState(): JSX.Element {
 				<div className="get-started-text">
 					<Divider>
 						<Typography.Text className="get-started-text">
-							Or get started with these sample alerts
+							{t('list_sample_alerts')}
 						</Typography.Text>
 					</Divider>
 				</div>

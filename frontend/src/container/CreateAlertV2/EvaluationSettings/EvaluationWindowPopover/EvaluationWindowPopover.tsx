@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button, Typography } from 'antd';
 import classNames from 'classnames';
 import { Check } from 'lucide-react';
@@ -20,6 +21,7 @@ function EvaluationWindowPopover({
 	evaluationWindow,
 	setEvaluationWindow,
 }: IEvaluationWindowPopoverProps): JSX.Element {
+	const { t } = useTranslation(['alerts']);
 	const { containerRef, firstItemRef } =
 		useKeyboardNavigationForEvaluationWindowPopover({
 			onSelect: (value: string, sectionId: string): void => {
@@ -97,7 +99,7 @@ function EvaluationWindowPopover({
 					<Typography.Text>
 						{getRollingWindowDescription(evaluationWindow.timeframe)}
 					</Typography.Text>
-					<Button type="link">Read the docs</Button>
+					<Button type="link">{t('v2_read_the_docs')}</Button>
 				</div>
 			);
 		}
@@ -111,7 +113,7 @@ function EvaluationWindowPopover({
 					<Typography.Text>
 						{getCumulativeWindowDescription(evaluationWindow.timeframe)}
 					</Typography.Text>
-					<Button type="link">Read the docs</Button>
+					<Button type="link">{t('v2_read_the_docs')}</Button>
 				</div>
 			);
 		}
@@ -129,7 +131,7 @@ function EvaluationWindowPopover({
 			className="evaluation-window-popover"
 			ref={containerRef}
 			role="menu"
-			aria-label="Evaluation window options"
+			aria-label={t('v2_how_often_check_title')}
 		>
 			<div className="evaluation-window-content">
 				{renderEvaluationWindowContent(

@@ -1,6 +1,7 @@
 import { ToggleGroup, ToggleGroupItem } from '@signozhq/ui';
 import { Typography } from 'antd';
 import { LineInterpolation } from 'lib/uPlotV2/config/types';
+import { useTranslation } from 'react-i18next';
 
 import './LineInterpolationSelector.styles.scss';
 
@@ -13,10 +14,11 @@ export default function LineInterpolationSelector({
 	value,
 	onChange,
 }: LineInterpolationSelectorProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	return (
 		<section className="line-interpolation-selector control-container">
 			<Typography.Text className="section-heading">
-				Line interpolation
+				{t('line_interpolation')}
 			</Typography.Text>
 			<ToggleGroup
 				type="single"
@@ -28,7 +30,7 @@ export default function LineInterpolationSelector({
 					}
 				}}
 			>
-				<ToggleGroupItem value={LineInterpolation.Linear} aria-label="Linear">
+				<ToggleGroupItem value={LineInterpolation.Linear} aria-label={t('line_interpolation_linear')}>
 					<svg
 						className="line-interpolation-icon"
 						viewBox="0 0 48 48"
@@ -44,7 +46,7 @@ export default function LineInterpolationSelector({
 						<path d="M8 32 L24 16 L40 32" stroke="#888" />
 					</svg>
 				</ToggleGroupItem>
-				<ToggleGroupItem value={LineInterpolation.Spline} aria-label="Spline">
+				<ToggleGroupItem value={LineInterpolation.Spline} aria-label={t('line_interpolation_spline')}>
 					<svg
 						className="line-interpolation-icon"
 						viewBox="0 0 48 48"
@@ -62,7 +64,7 @@ export default function LineInterpolationSelector({
 				</ToggleGroupItem>
 				<ToggleGroupItem
 					value={LineInterpolation.StepAfter}
-					aria-label="Step After"
+					aria-label={t('line_interpolation_step_after')}
 				>
 					<svg
 						className="line-interpolation-icon"
@@ -82,7 +84,7 @@ export default function LineInterpolationSelector({
 
 				<ToggleGroupItem
 					value={LineInterpolation.StepBefore}
-					aria-label="Step Before"
+					aria-label={t('line_interpolation_step_before')}
 				>
 					<svg
 						className="line-interpolation-icon"

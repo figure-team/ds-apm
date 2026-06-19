@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from 'react';
 import type { UseQueryResult } from 'react-query';
 import { Select, Typography } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { Layers } from 'lucide-react';
 import { SuccessResponse } from 'types/api';
 import { LegendPosition } from 'types/api/dashboard/getAll';
@@ -33,11 +34,12 @@ export default function LegendSection({
 	setCustomLegendColors,
 	queryResponse,
 }: LegendSectionProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	return (
-		<SettingsSection title="Legend" icon={<Layers size={14} />}>
+		<SettingsSection title={t('section_legend')} icon={<Layers size={14} />}>
 			{allowLegendPosition && (
 				<section className="legend-position control-container">
-					<Typography.Text className="section-heading">Position</Typography.Text>
+					<Typography.Text className="section-heading">{t('legend_position')}</Typography.Text>
 					<Select
 						onChange={(value: LegendPosition): void => setLegendPosition(value)}
 						value={legendPosition}
@@ -46,12 +48,12 @@ export default function LegendSection({
 					>
 						<Option value={LegendPosition.BOTTOM}>
 							<div className="select-option">
-								<Typography.Text className="display">Bottom</Typography.Text>
+								<Typography.Text className="display">{t('legend_position_bottom')}</Typography.Text>
 							</div>
 						</Option>
 						<Option value={LegendPosition.RIGHT}>
 							<div className="select-option">
-								<Typography.Text className="display">Right</Typography.Text>
+								<Typography.Text className="display">{t('legend_position_right')}</Typography.Text>
 							</div>
 						</Option>
 					</Select>

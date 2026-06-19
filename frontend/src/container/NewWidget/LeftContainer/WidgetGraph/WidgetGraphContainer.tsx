@@ -1,3 +1,4 @@
+﻿import { useTranslation } from 'react-i18next';
 import { Card, Typography } from 'antd';
 import ErrorInPlace from 'components/ErrorInPlace/ErrorInPlace';
 import Spinner from 'components/Spinner';
@@ -18,6 +19,7 @@ function WidgetGraphContainer({
 	isLoadingPanelData,
 	enableDrillDown = false,
 }: WidgetGraphContainerProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	if (queryResponse.data && selectedGraph === PANEL_TYPES.BAR) {
 		const sortedSeriesData = getSortedSeriesData(
 			queryResponse.data?.payload.data.result,
@@ -31,7 +33,7 @@ function WidgetGraphContainer({
 	}
 
 	if (selectedWidget === undefined) {
-		return <Card>Invalid widget</Card>;
+		return <Card>{t('invalid_widget')}</Card>;
 	}
 
 	if (queryResponse?.error) {
@@ -52,7 +54,7 @@ function WidgetGraphContainer({
 	if (queryResponse.isIdle) {
 		return (
 			<NotFoundContainer>
-				<Typography>No Data</Typography>
+				<Typography>{t('no_data_widget')}</Typography>
 			</NotFoundContainer>
 		);
 	}

@@ -1,4 +1,4 @@
-import { memo, ReactNode, useCallback, useEffect, useMemo } from 'react';
+﻿﻿import { memo, ReactNode, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExclamationCircleFilled } from '@ant-design/icons';
 import { Space, Tooltip } from 'antd';
@@ -53,7 +53,7 @@ function GridTableComponent({
 	hiddenColumns = [],
 	...props
 }: GridTableComponentProps): JSX.Element {
-	const { t } = useTranslation(['valueGraph']);
+	const { t } = useTranslation(['valueGraph', 'dashboard']);
 
 	// create columns and dataSource in the ui friendly structure
 	// use the query from the widget here to extract the legend information
@@ -229,7 +229,7 @@ function GridTableComponent({
 							<ButtonWrapper className="hover-button">
 								<button type="button" className="open-traces-button">
 									<Compass size={12} />
-									Open Trace
+									{t('open_trace')}
 								</button>
 							</ButtonWrapper>
 						</RelativeWrapper>

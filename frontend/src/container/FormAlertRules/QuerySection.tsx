@@ -85,16 +85,16 @@ function QuerySection({
 
 	const anomalyDisabledTooltip = (url: string): JSX.Element => (
 		<span>
-			Coming soon for anomaly detection.{' '}
+			{t('rule_coming_soon_anomaly')}{' '}
 			<Typography.Link
 				href={url}
 				target="_blank"
 				rel="noopener noreferrer"
 				style={{ color: 'inherit', textDecoration: 'underline' }}
 			>
-				Leave a thumbs-up
+				{t('rule_leave_thumbs_up')}
 			</Typography.Link>{' '}
-			to help us prioritize!
+			{t('rule_help_prioritize')}
 		</span>
 	);
 

@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import { Form, Select } from 'antd';
 import { ChevronDown } from 'lucide-react';
@@ -17,13 +18,14 @@ function RegionDeploymentSection({
 	handleRegionChange: (value: string) => void;
 	isFormDisabled: boolean;
 }): JSX.Element {
+	const { t } = useTranslation('integrations');
 	return (
 		<div className="cloud-account-setup-form__form-group">
 			<div className="cloud-account-setup-form__title">
-				Where should we deploy the SigNoz Cloud stack?
+				{t('setup.deploy_stack_title')}
 			</div>
 			<div className="cloud-account-setup-form__description">
-				Choose the AWS region for CloudFormation stack deployment
+				{t('setup.deploy_stack_description')}
 			</div>
 			<Form.Item
 				name="region"
@@ -31,7 +33,7 @@ function RegionDeploymentSection({
 				className="cloud-account-setup-form__form-item"
 			>
 				<Select
-					placeholder="e.g. US East (N. Virginia)"
+					placeholder={t('setup.region_placeholder')}
 					suffixIcon={<ChevronDown size={16} color={Color.BG_VANILLA_400} />}
 					className="cloud-account-setup-form__select integrations-select"
 					onChange={handleRegionChange}
@@ -60,14 +62,14 @@ function MonitoringRegionsSection({
 	setSelectedRegions: Dispatch<SetStateAction<string[]>>;
 	setIncludeAllRegions: Dispatch<SetStateAction<boolean>>;
 }): JSX.Element {
+	const { t } = useTranslation('integrations');
 	return (
 		<div className="cloud-account-setup-form__form-group">
 			<div className="cloud-account-setup-form__title">
-				Which regions do you want to monitor?
+				{t('regions.which_regions')}
 			</div>
 			<div className="cloud-account-setup-form__description">
-				Choose only the regions you want SigNoz to monitor. You can enable all at
-				once, or pick specific ones:
+				{t('regions.choose_regions_long')}
 			</div>
 
 			<RegionSelector
@@ -80,12 +82,11 @@ function MonitoringRegionsSection({
 }
 
 function ComplianceNote(): JSX.Element {
+	const { t } = useTranslation('integrations');
 	return (
 		<div className="cloud-account-setup-form__form-group">
 			<div className="cloud-account-setup-form__note">
-				Note: Some organizations may require the CloudFormation stack to be deployed
-				in the same region as their primary infrastructure for compliance or latency
-				reasons.
+				{t('setup.compliance_note')}
 			</div>
 		</div>
 	);

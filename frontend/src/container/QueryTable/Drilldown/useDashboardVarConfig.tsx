@@ -1,3 +1,4 @@
+﻿import { useTranslation } from 'react-i18next';
 import { useCallback, useMemo } from 'react';
 import OverlayScrollbar from 'components/OverlayScrollbar/OverlayScrollbar';
 import { useDashboardVariablesByType } from 'hooks/dashboard/useDashboardVariablesByType';
@@ -33,6 +34,7 @@ const useDashboardVarConfig = ({
 	};
 	// contextItems: React.ReactNode;
 } => {
+	const { t } = useTranslation('dashboard');
 	const dashboardDynamicVariables = useDashboardVariablesByType('DYNAMIC');
 	const { onValueUpdate, createVariable } = useDashboardVariableUpdate();
 
@@ -136,7 +138,7 @@ const useDashboardVarConfig = ({
 										handleUnsetVariable(fieldName, [dashboardVarKey, dashboardVarData])
 									}
 								>
-									Unset <strong>${fieldName}</strong>
+									{t('drilldown_unset')} <strong>${fieldName}</strong>
 								</ContextMenu.Item>
 							);
 						}
@@ -152,7 +154,7 @@ const useDashboardVarConfig = ({
 									)
 								}
 							>
-								Set <strong>${fieldName}</strong> to <strong>{fieldValue}</strong>
+								{t('drilldown_set')} <strong>${fieldName}</strong> {t('drilldown_to')} <strong>{fieldValue}</strong>
 							</ContextMenu.Item>
 						);
 					}
@@ -162,7 +164,7 @@ const useDashboardVarConfig = ({
 							icon={<Plus size={16} />}
 							onClick={(): void => handleCreateVariable(fieldName, value)}
 						>
-							Create var <strong>${fieldName}</strong>:<strong>{value}</strong>
+							{t('drilldown_create_var')} <strong>${fieldName}</strong>:<strong>{value}</strong>
 						</ContextMenu.Item>
 					);
 				})}
@@ -174,6 +176,7 @@ const useDashboardVarConfig = ({
 			handleSetVariable,
 			handleUnsetVariable,
 			handleCreateVariable,
+			t,
 		],
 	);
 
@@ -192,7 +195,7 @@ const useDashboardVarConfig = ({
 								style={{ cursor: 'pointer' }}
 								onClick={handleBackClick}
 							/>
-							<span>Dashboard Variables</span>
+							<span>{t('drilldown_dashboard_variables')}</span>
 						</div>
 					</ContextMenu.Header>
 					<div>
@@ -210,7 +213,7 @@ const useDashboardVarConfig = ({
 				</>
 			),
 		}),
-		[contextItems, handleBackClick],
+		[contextItems, handleBackClick, t],
 	);
 
 	return { dashbaordVariablesConfig };

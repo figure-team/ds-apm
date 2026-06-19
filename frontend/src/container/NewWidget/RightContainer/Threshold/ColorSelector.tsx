@@ -3,6 +3,7 @@ import { DownOutlined } from '@ant-design/icons';
 import { Button, ColorPicker, Dropdown, MenuProps, Space } from 'antd';
 import type { Color } from 'antd/es/color-picker';
 import useDebounce from 'hooks/useDebounce';
+import { useTranslation } from 'react-i18next';
 
 import CustomColor from './CustomColor';
 
@@ -12,6 +13,7 @@ function ColorSelector({
 	thresholdColor = 'Red',
 	setColor,
 }: ColorSelectorProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const [colorFromPicker, setColorFromPicker] = useState<string>('');
 
 	const debounceColor = useDebounce(colorFromPicker);
@@ -55,7 +57,7 @@ function ColorSelector({
 					onChange={handleColorChange}
 					placement="bottomLeft"
 				>
-					Custom Color
+					{t('custom_color')}
 				</ColorPicker>
 			),
 		},

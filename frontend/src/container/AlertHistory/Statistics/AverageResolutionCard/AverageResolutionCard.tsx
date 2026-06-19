@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { AlertRuleStats } from 'types/api/alerts/def';
 import { formatTime } from 'utils/timeUtils';
 
@@ -14,12 +15,13 @@ function AverageResolutionCard({
 	pastAvgResolutionTime,
 	timeSeries,
 }: TotalTriggeredCardProps): JSX.Element {
+	const { t } = useTranslation('alerts');
 	return (
 		<StatsCard
 			displayValue={formatTime(+currentAvgResolutionTime)}
 			totalCurrentCount={+currentAvgResolutionTime}
 			totalPastCount={+pastAvgResolutionTime}
-			title="Avg. Resolution Time"
+			title={t('hist_avg_resolution_time')}
 			timeSeries={timeSeries}
 		/>
 	);

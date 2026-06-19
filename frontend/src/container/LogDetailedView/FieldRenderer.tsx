@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Divider, Tooltip, Typography } from 'antd';
 
 import { TagContainer, TagLabel, TagValue } from './FieldRenderer.styles';
@@ -7,6 +8,7 @@ import { getFieldAttributes } from './utils';
 import './FieldRenderer.styles.scss';
 
 function FieldRenderer({ field }: FieldRendererProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const { dataType, newField, logType } = getFieldAttributes(field);
 
 	return (
@@ -22,14 +24,14 @@ function FieldRenderer({ field }: FieldRendererProps): JSX.Element {
 					<div className="tags">
 						<TagContainer>
 							<TagLabel>
-								type
+								{t('logs:field_type')}
 								<Divider type="vertical" />{' '}
 							</TagLabel>
 							<TagValue>{logType}</TagValue>
 						</TagContainer>
 						<TagContainer>
 							<TagLabel>
-								data type <Divider type="vertical" />{' '}
+								{t('logs:field_data_type')} <Divider type="vertical" />{' '}
 							</TagLabel>
 							<TagValue>{dataType}</TagValue>
 						</TagContainer>

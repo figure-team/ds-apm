@@ -198,9 +198,9 @@ describe('LogsExplorerList - empty states', () => {
 		);
 
 		// Check for custom empty state message
-		expect(screen.getByText(/This query had no results./i)).toBeInTheDocument();
+		expect(screen.getByText(/query_no_results/i)).toBeInTheDocument();
 		expect(
-			screen.getByText(/Edit your query and try again!/i),
+			screen.getByText(/edit_query_retry/i),
 		).toBeInTheDocument();
 	});
 });

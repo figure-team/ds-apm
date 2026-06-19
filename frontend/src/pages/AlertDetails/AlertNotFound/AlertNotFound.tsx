@@ -5,6 +5,7 @@ import { handleContactSupport } from 'container/Integrations/utils';
 import { useGetTenantLicense } from 'hooks/useGetTenantLicense';
 import { useSafeNavigate } from 'hooks/useSafeNavigate';
 import { LifeBuoy, List } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { isModifierKeyPressed } from 'utils/app';
 
 import broomUrl from '@/assets/Icons/broom.svg';
@@ -18,6 +19,7 @@ interface AlertNotFoundProps {
 }
 
 function AlertNotFound({ isTestAlert }: AlertNotFoundProps): JSX.Element {
+	const { t } = useTranslation('alerts');
 	const { isCloudUser: isCloudUserVal } = useGetTenantLicense();
 	const { safeNavigate } = useSafeNavigate();
 
@@ -34,7 +36,7 @@ function AlertNotFound({ isTestAlert }: AlertNotFoundProps): JSX.Element {
 			<section className="description">
 				<img src={noDataUrl} alt="no-data" className="not-found-img" />
 				<Typography.Text className="not-found-text">
-					Uh-oh! We couldn&apos;t find the given alert rule.
+					{t('not_found_message')}
 				</Typography.Text>
 				<Typography.Text className="not-found-text">
 					{isTestAlert
@@ -48,13 +50,13 @@ function AlertNotFound({ isTestAlert }: AlertNotFoundProps): JSX.Element {
 						<div className="reason">
 							<img src={constructionUrl} alt="no-data" className="construction-img" />
 							<Typography.Text className="text">
-								The alert rule link is incorrect, please verify it once.
+								{t('not_found_link_incorrect')}
 							</Typography.Text>
 						</div>
 						<div className="reason">
 							<img src={broomUrl} alt="no-data" className="broom-img" />
 							<Typography.Text className="text">
-								The alert rule you&apos;re trying to check has been deleted.
+								{t('not_found_deleted')}
 							</Typography.Text>
 						</div>
 					</>
@@ -63,16 +65,14 @@ function AlertNotFound({ isTestAlert }: AlertNotFoundProps): JSX.Element {
 					<div className="reason">
 						<img src={broomUrl} alt="no-data" className="broom-img" />
 						<Typography.Text className="text">
-							You clicked on the Alert notification link received when testing a new
-							Alert rule. Once the alert rule is saved, future notifications will link
-							to actual alerts.
+							{t('not_found_test_alert')}
 						</Typography.Text>
 					</div>
 				)}
 			</section>
 			<section className="none-of-above">
 				<Typography.Text className="text">
-					If you feel the issue is none of the above, please contact support.
+					{t('not_found_contact_support_msg')}
 				</Typography.Text>
 				<div className="action-btns">
 					<Button
@@ -80,14 +80,14 @@ function AlertNotFound({ isTestAlert }: AlertNotFoundProps): JSX.Element {
 						icon={<List size={14} />}
 						onClick={checkAllRulesHandler}
 					>
-						Check all rules
+						{t('not_found_check_rules')}
 					</Button>
 					<Button
 						className="action-btn"
 						icon={<LifeBuoy size={14} />}
 						onClick={contactSupportHandler}
 					>
-						Contact Support
+						{t('not_found_contact_support')}
 					</Button>
 				</div>
 			</section>

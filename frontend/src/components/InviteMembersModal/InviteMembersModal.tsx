@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Style } from '@signozhq/design-tokens';
 import { ChevronDown, CircleAlert, Plus, Trash2, X } from '@signozhq/icons';
 import {
@@ -46,6 +47,7 @@ function InviteMembersModal({
 	onComplete,
 }: InviteMembersModalProps): JSX.Element {
 	const { showErrorModal, isErrorModalVisible } = useErrorModal();
+	const { t } = useTranslation('organizationsettings');
 
 	const [rows, setRows] = useState<InviteRow[]>(() => [
 		EMPTY_ROW(),
@@ -219,7 +221,7 @@ function InviteMembersModal({
 
 	return (
 		<DialogWrapper
-			title="Invite Team Members"
+			title={t('invite_modal_title')}
 			open={open}
 			onOpenChange={(isOpen): void => {
 				if (!isOpen) {
@@ -234,8 +236,10 @@ function InviteMembersModal({
 			<div className="invite-members-modal__content">
 				<div className="invite-members-modal__table">
 					<div className="invite-members-modal__table-header">
-						<div className="table-header-cell email-header">Email address</div>
-						<div className="table-header-cell role-header">Roles</div>
+						<div className="table-header-cell email-header">
+							{t('email_address')}
+						</div>
+						<div className="table-header-cell role-header">{t('roles_col')}</div>
 						<div className="table-header-cell action-header" />
 					</div>
 					<div className="invite-members-modal__container">
@@ -253,7 +257,7 @@ function InviteMembersModal({
 											autoComplete="email"
 										/>
 										{emailValidity[row.id] === false && row.email.trim() !== '' && (
-											<span className="email-error-message">Invalid email address</span>
+											<span className="email-error-message">{t('invalid_email')}</span>
 										)}
 									</div>
 									<div className="team-member-cell role-cell">
@@ -261,7 +265,7 @@ function InviteMembersModal({
 											value={row.role || undefined}
 											onChange={(role): void => updateRole(row.id, role as ROLES)}
 											className="team-member-role-select"
-											placeholder="Select roles"
+											placeholder={t('select_roles')}
 											suffixIcon={<ChevronDown size={14} />}
 											getPopupContainer={popupContainer}
 										>
@@ -276,7 +280,7 @@ function InviteMembersModal({
 												variant="ghost"
 												color="destructive"
 												onClick={(): void => removeRow(row.id)}
-												aria-label="Remove row"
+												aria-label={t('remove_row')}
 											>
 												<Trash2 size={12} />
 											</Button>
@@ -310,7 +314,7 @@ function InviteMembersModal({
 					prefix={<Plus size={12} color={Style.L1_FOREGROUND} />}
 					onClick={addRow}
 				>
-					Add another
+					{t('add_another')}
 				</Button>
 
 				<div className="invite-members-modal__footer-right">
@@ -321,7 +325,7 @@ function InviteMembersModal({
 						onClick={resetAndClose}
 					>
 						<X size={12} />
-						Cancel
+						{t('cancel')}
 					</Button>
 
 					<Button
@@ -331,7 +335,7 @@ function InviteMembersModal({
 						disabled={isSubmitDisabled}
 						loading={isSubmitting}
 					>
-						{isSubmitting ? 'Inviting...' : 'Invite Team Members'}
+						{isSubmitting ? t('inviting') : t('invite_modal_title')}
 					</Button>
 				</div>
 			</DialogFooter>

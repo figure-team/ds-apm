@@ -1,3 +1,4 @@
+﻿import { useTranslation } from 'react-i18next';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Input } from 'antd';
 import { PrecisionOption, PrecisionOptionsEnum } from 'components/Graph/types';
@@ -43,6 +44,7 @@ export default function ChartManager({
 	decimalPrecision = PrecisionOptionsEnum.TWO,
 	onCancel,
 }: ChartManagerProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const { notifications } = useNotifications();
 	const { legendItemsMap } = useLegendsSync({
 		config,
@@ -136,7 +138,7 @@ export default function ChartManager({
 	const handleSave = useCallback((): void => {
 		syncSeriesVisibilityToLocalStorage();
 		notifications.success({
-			message: 'The updated graphs & legends are saved',
+			message: t('graphs_legends_saved'),
 		});
 		onCancel?.();
 	}, [syncSeriesVisibilityToLocalStorage, notifications, onCancel]);
@@ -145,17 +147,17 @@ export default function ChartManager({
 		<div className="chart-manager-container">
 			<div className="chart-manager-header">
 				<Input
-					placeholder="Filter Series"
+					placeholder={t('filter_series')}
 					value={filterValue}
 					onChange={handleFilterChange}
 					data-testid="filter-input"
 				/>
 				<div className="chart-manager-actions-container">
 					<Button type="default" onClick={onCancel}>
-						Cancel
+						{t('cancel', { ns: 'common' })}
 					</Button>
 					<Button type="primary" onClick={handleSave}>
-						Save
+						{t('save', { ns: 'common' })}
 					</Button>
 				</div>
 			</div>

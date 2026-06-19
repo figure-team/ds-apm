@@ -70,9 +70,9 @@ describe('MembersSettings (integration)', () => {
 		expect(screen.getByText('Bob Jones')).toBeInTheDocument();
 		expect(screen.getByText('charlie@signoz.io')).toBeInTheDocument();
 		expect(screen.getByText('Dave Deleted')).toBeInTheDocument();
-		expect(screen.getAllByText('ACTIVE')).toHaveLength(2);
-		expect(screen.getByText('INVITED')).toBeInTheDocument();
-		expect(screen.getByText('DELETED')).toBeInTheDocument();
+		expect(screen.getAllByText('status_active')).toHaveLength(2);
+		expect(screen.getByText('status_invited')).toBeInTheDocument();
+		expect(screen.getByText('status_deleted')).toBeInTheDocument();
 	});
 
 	it('filters to pending invites via the filter dropdown', async () => {

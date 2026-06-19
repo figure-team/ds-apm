@@ -204,7 +204,7 @@ describe('MetricNameSelector', () => {
 		fireEvent.focus(input);
 		fireEvent.change(input, { target: { value: 'test' } });
 
-		expect(screen.getByText('Failed to load metrics')).toBeInTheDocument();
+		expect(screen.getByText('failed_to_load_metrics')).toBeInTheDocument();
 	});
 
 	it('shows loading spinner while fetching metrics', () => {

@@ -1,4 +1,5 @@
 import { ChangeEvent, KeyboardEvent, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { Button, DialogWrapper, Input, toast } from '@signozhq/ui';
 import { Flex, Typography } from 'antd';
@@ -16,6 +17,7 @@ interface IntegrationsHeaderProps {
 }
 
 function IntegrationsHeader(props: IntegrationsHeaderProps): JSX.Element {
+	const { t } = useTranslation('integrations');
 	const history = useHistory();
 	const { user } = useAppContext();
 
@@ -68,20 +70,20 @@ function IntegrationsHeader(props: IntegrationsHeaderProps): JSX.Element {
 
 	return (
 		<div className="integrations-header">
-			<Typography.Title className="title">Integrations</Typography.Title>
+			<Typography.Title className="title">{t('common.integrations')}</Typography.Title>
 			<Flex
 				justify="space-between"
 				align="center"
 				className="integrations-header__subrow"
 			>
 				<Typography.Text className="subtitle">
-					Manage integrations for this workspace.
+					{t('header.subtitle')}
 				</Typography.Text>
 			</Flex>
 
 			<div className="integrations-search-request-container">
 				<Input
-					placeholder="Search for an integration..."
+					placeholder={t('header.search_placeholder')}
 					value={searchQuery}
 					onChange={(e: ChangeEvent<HTMLInputElement>): void =>
 						onSearchChange(e.target.value)
@@ -94,21 +96,21 @@ function IntegrationsHeader(props: IntegrationsHeaderProps): JSX.Element {
 					prefix={<Cable size={14} />}
 					onClick={(): void => setIsRequestIntegrationDialogOpen(true)}
 				>
-					Request Integration
+					{t('header.request_integration')}
 				</Button>
 
 				<DialogWrapper
 					className="request-integration-dialog"
-					title="Request New Integration"
+					title={t('header.request_new_integration')}
 					open={isRequestIntegrationDialogOpen}
 					onOpenChange={setIsRequestIntegrationDialogOpen}
 				>
 					<div className="request-integration-form">
 						<div className="request-integration-form-title">
-							Which integration are you looking for?
+							{t('header.which_integration')}
 						</div>
 						<Input
-							placeholder="Enter integration name..."
+							placeholder={t('header.integration_name_placeholder')}
 							value={requestedIntegrationName}
 							onChange={(e: ChangeEvent<HTMLInputElement>): void => {
 								setRequestedIntegrationName(e.target.value);
@@ -135,7 +137,7 @@ function IntegrationsHeader(props: IntegrationsHeaderProps): JSX.Element {
 								requestedIntegrationName?.trim().length === 0
 							}
 						>
-							Submit
+							{t('common.submit')}
 						</Button>
 					</div>
 				</DialogWrapper>
@@ -146,7 +148,7 @@ function IntegrationsHeader(props: IntegrationsHeaderProps): JSX.Element {
 						color="primary"
 						onClick={(): void => history.push(ROUTES.GET_STARTED_WITH_CLOUD)}
 					>
-						<span>View 150+ Data Sources</span>
+						<span>{t('header.view_data_sources')}</span>
 						<ArrowRight size={14} />
 					</Button>
 				)}

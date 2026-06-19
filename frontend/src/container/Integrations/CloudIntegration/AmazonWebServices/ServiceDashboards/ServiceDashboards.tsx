@@ -1,4 +1,5 @@
 /* eslint-disable sonarjs/cognitive-complexity */
+import { useTranslation } from 'react-i18next';
 import {
 	CloudintegrationtypesDashboardDTO,
 	CloudintegrationtypesServiceDTO,
@@ -15,6 +16,7 @@ function ServiceDashboards({
 	service: Pick<CloudintegrationtypesServiceDTO, 'assets'>;
 	isInteractive?: boolean;
 }): JSX.Element {
+	const { t } = useTranslation('integrations');
 	const dashboards = service?.assets?.dashboards || [];
 	const { safeNavigate } = useSafeNavigate();
 	if (!dashboards.length) {
@@ -23,7 +25,7 @@ function ServiceDashboards({
 
 	return (
 		<div className="aws-service-dashboards">
-			<div className="aws-service-dashboards-title">Dashboards</div>
+			<div className="aws-service-dashboards-title">{t('service_dashboards.dashboards')}</div>
 			<div className="aws-service-dashboards-items">
 				{dashboards.map((dashboard: CloudintegrationtypesDashboardDTO) => {
 					if (!dashboard.id) {

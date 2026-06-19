@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { AutoComplete, Spin, Typography } from 'antd';
 import { useListMetrics } from 'api/generated/services/metrics';
 import { MetricsexplorertypesListMetricDTO } from 'api/generated/services/sigNoz.schemas';
@@ -84,6 +85,7 @@ export const MetricNameSelector = memo(function MetricNameSelector({
 	signalSource,
 	'data-testid': dataTestId,
 }: MetricNameSelectorProps): JSX.Element {
+	const { t } = useTranslation('common');
 	const currentMetricName =
 		(query.aggregations?.[0] as MetricAggregation)?.metricName ||
 		query.aggregateAttribute?.key ||
@@ -282,7 +284,7 @@ export const MetricNameSelector = memo(function MetricNameSelector({
 					<Spin size="small" />
 				) : isError ? (
 					<Typography.Text type="danger" style={{ fontSize: 12 }}>
-						Failed to load metrics
+						{t('failed_to_load_metrics')}
 					</Typography.Text>
 				) : null
 			}

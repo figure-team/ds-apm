@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import { useHistory } from 'react-router-dom';
 import { PlayCircleFilled } from '@ant-design/icons';
@@ -22,6 +23,7 @@ import { MetricRangePayloadProps } from 'types/api/metrics/getQueryRange';
 import { LiveButtonStyled } from './styles';
 
 function LogsTopNav(): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const history = useHistory();
 	const queryClient = useQueryClient();
 
@@ -78,7 +80,7 @@ function LogsTopNav(): JSX.Element {
 				type="primary"
 				size="small"
 			>
-				Go Live
+				{t('logs:go_live')}
 			</LiveButtonStyled>
 		),
 		[handleGoLive],

@@ -54,13 +54,11 @@ describe('MultiIngestionSettings Page', () => {
 			initialRoute: INGESTION_SETTINGS_ROUTE,
 		});
 
-		expect(screen.getByText('Ingestion Keys')).toBeInTheDocument();
+		expect(screen.getByText('title')).toBeInTheDocument();
 
-		expect(
-			screen.getByText('Create and manage ingestion keys for the SigNoz Cloud'),
-		).toBeInTheDocument();
+		expect(screen.getByText('subtitle')).toBeInTheDocument();
 
-		const aboutKeyslink = screen.getByRole('link', { name: /Learn more/i });
+		const aboutKeyslink = screen.getByRole('link', { name: /learn_more/i });
 		expect(aboutKeyslink).toHaveAttribute(
 			'href',
 			'https://signoz.io/docs/ingestion/signoz-cloud/keys/',
@@ -116,7 +114,7 @@ describe('MultiIngestionSettings Page', () => {
 		await user.click(expandButton);
 
 		// Wait for limits section to render and click metrics alert button by test id
-		await screen.findByText('LIMITS');
+		await screen.findByText('limits_upper');
 		const metricsAlertBtn = (await screen.findByTestId(
 			'set-alert-btn-metrics',
 		)) as HTMLButtonElement;
@@ -204,7 +202,7 @@ describe('MultiIngestionSettings Page', () => {
 		await user.click(expandButton);
 
 		// Wait for limits section to render and click logs alert button by test id
-		await screen.findByText('LIMITS');
+		await screen.findByText('limits_upper');
 		const logsAlertBtn = (await screen.findByTestId(
 			'set-alert-btn-logs',
 		)) as HTMLButtonElement;
@@ -320,9 +318,7 @@ describe('MultiIngestionSettings Page', () => {
 		getHandler.mockClear();
 
 		// Type in search box
-		const searchInput = screen.getByPlaceholderText(
-			'Search for ingestion key...',
-		);
+		const searchInput = screen.getByPlaceholderText('search_placeholder');
 		await user.type(searchInput, 'test');
 
 		await screen.findByText('Key Search Result');

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from 'antd';
 import { ILog } from 'types/api/logs/log';
 import { PipelineData } from 'types/api/pipeline/def';
@@ -9,6 +10,7 @@ function LogsProcessingSimulator({
 	inputLogs,
 	pipeline,
 }: LogsProcessingSimulatorProps): JSX.Element {
+	const { t } = useTranslation(['pipeline']);
 	const [simulationInput, setSimulationInput] = useState<ILog[] | null>(null);
 
 	const simulate = (): void => setSimulationInput(inputLogs);
@@ -20,7 +22,7 @@ function LogsProcessingSimulator({
 					type="primary"
 					onClick={simulate}
 				>
-					Simulate Processing
+					{t('pipeline:simulate_processing')}
 				</Button>
 			</div>
 		);

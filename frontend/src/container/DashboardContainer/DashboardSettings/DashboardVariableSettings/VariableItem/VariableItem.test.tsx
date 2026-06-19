@@ -38,20 +38,20 @@ const VARIABLE_MODE = 'ADD';
 
 // Common text constants
 const TEXT = {
-	INCLUDE_ALL_VALUES: 'Include an option for ALL values',
-	ENABLE_MULTI_VALUES: 'Enable multiple values to be checked',
+	INCLUDE_ALL_VALUES: 'include_all_option',
+	ENABLE_MULTI_VALUES: 'enable_multiple_values',
 	VARIABLE_EXISTS: 'Variable name already exists',
 	VARIABLE_WHITESPACE: 'Variable name cannot contain whitespaces',
 	ATTRIBUTE_KEY_EXISTS: 'A variable with this attribute key already exists',
-	SORT_VALUES: 'Sort Values',
-	DEFAULT_VALUE: 'Default Value',
-	ALL_VARIABLES: 'All variables',
-	DISCARD: 'Discard',
+	SORT_VALUES: 'sort_values_label',
+	DEFAULT_VALUE: 'default_value_label',
+	ALL_VARIABLES: 'all_variables',
+	DISCARD: 'discard',
 	OPTIONS: 'Options',
-	QUERY: 'Query',
-	TEXTBOX: 'Textbox',
-	CUSTOM: 'Custom',
-	DYNAMIC: 'Dynamic',
+	QUERY: 'variable_type_query',
+	TEXTBOX: 'variable_type_textbox',
+	CUSTOM: 'variable_type_custom',
+	DYNAMIC: 'variable_type_dynamic',
 };
 
 // Common test constants
@@ -81,8 +81,8 @@ const TEST_VAR_DESCRIPTIONS = {
 };
 
 // Common UI elements
-const SAVE_BUTTON_TEXT = 'Save Variable';
-const UNIQUE_NAME_PLACEHOLDER = 'Unique name of the variable';
+const SAVE_BUTTON_TEXT = 'save_variable';
+const UNIQUE_NAME_PLACEHOLDER = 'variable_name_placeholder';
 
 // Basic variable data for testing
 const basicVariableData: IDashboardVariable = {
@@ -159,9 +159,9 @@ describe('VariableItem Component', () => {
 		renderVariableItem();
 
 		expect(screen.getByText(TEXT.ALL_VARIABLES)).toBeInTheDocument();
-		expect(screen.getByText('Name')).toBeInTheDocument();
-		expect(screen.getByText('Description')).toBeInTheDocument();
-		expect(screen.getByText('Variable Type')).toBeInTheDocument();
+		expect(screen.getByText('variable_name_label')).toBeInTheDocument();
+		expect(screen.getByText('variable_description_label')).toBeInTheDocument();
+		expect(screen.getByText('variable_type_label')).toBeInTheDocument();
 	});
 
 	describe('Variable Name Validation', () => {
@@ -208,7 +208,7 @@ describe('VariableItem Component', () => {
 			expect(screen.getByText(TEXT.VARIABLE_WHITESPACE)).toBeInTheDocument();
 
 			// Save button should be disabled
-			const saveButton = screen.getByRole('button', { name: /save variable/i });
+			const saveButton = screen.getByRole('button', { name: /save_variable/i });
 			expect(saveButton).toBeDisabled();
 		});
 
@@ -273,7 +273,7 @@ describe('VariableItem Component', () => {
 			});
 
 			// Save button should be disabled
-			const saveButton = screen.getByRole('button', { name: /save variable/i });
+			const saveButton = screen.getByRole('button', { name: /save_variable/i });
 			expect(saveButton).toBeDisabled();
 		});
 
@@ -311,7 +311,7 @@ describe('VariableItem Component', () => {
 			});
 
 			// Save button should not be disabled due to attribute key error
-			const saveButton = screen.getByRole('button', { name: /save variable/i });
+			const saveButton = screen.getByRole('button', { name: /save_variable/i });
 			expect(saveButton).not.toBeDisabled();
 		});
 
@@ -418,7 +418,7 @@ describe('VariableItem Component', () => {
 			// Default Value input should appear
 			expect(screen.getByText(TEXT.DEFAULT_VALUE)).toBeInTheDocument();
 			expect(
-				screen.getByPlaceholderText('Enter a default value (if any)...'),
+				screen.getByPlaceholderText('default_value_placeholder'),
 			).toBeInTheDocument();
 		});
 	});
@@ -723,7 +723,7 @@ describe('VariableItem Component', () => {
 
 			// Change the textbox value
 			const textboxInput = screen.getByPlaceholderText(
-				'Enter a default value (if any)...',
+				'default_value_placeholder',
 			);
 			await user.clear(textboxInput);
 			await user.type(textboxInput, 'updated-value');
@@ -804,7 +804,7 @@ describe('VariableItem Component', () => {
 
 			// Enter a default value in the textbox input
 			const textboxInput = screen.getByPlaceholderText(
-				'Enter a default value (if any)...',
+				'default_value_placeholder',
 			);
 			await user.type(textboxInput, 'new-textbox-default');
 

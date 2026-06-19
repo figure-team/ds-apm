@@ -1,5 +1,7 @@
 {
 	"something_went_wrong": "문제가 발생했습니다",
+	"source": "소스",
+	"failed_to_load_metrics": "메트릭을 불러오지 못했습니다",
 	"already_logged_in": "이미 로그인됨",
 	"success": "성공",
 	"cancel": "취소",

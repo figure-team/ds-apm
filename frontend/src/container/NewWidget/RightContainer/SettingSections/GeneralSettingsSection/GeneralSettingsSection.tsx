@@ -8,6 +8,7 @@ import {
 } from 'react';
 import type { InputRef } from 'antd';
 import { AutoComplete, Input, Typography } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { popupContainer } from 'utils/selectPopupContainer';
 
 import SettingsSection from '../../components/SettingsSection/SettingsSection';
@@ -36,6 +37,7 @@ export default function GeneralSettingsSection({
 	setDescription,
 	dashboardVariables,
 }: GeneralSettingsSectionProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const [inputValue, setInputValue] = useState(title);
 	const [autoCompleteOpen, setAutoCompleteOpen] = useState(false);
 	const [cursorPos, setCursorPos] = useState(0);
@@ -118,9 +120,9 @@ export default function GeneralSettingsSection({
 	}, [inputValue, updateCursorAndDropdown]);
 
 	return (
-		<SettingsSection title="General" defaultOpen icon={null}>
+		<SettingsSection title={t('section_general')} defaultOpen icon={null}>
 			<section className="general-settings__name-description control-container">
-				<Typography.Text className="section-heading">Name</Typography.Text>
+				<Typography.Text className="section-heading">{t('panel_name')}</Typography.Text>
 				<AutoComplete
 					options={dashboardVariableOptions}
 					value={inputValue}
@@ -128,7 +130,7 @@ export default function GeneralSettingsSection({
 					onSelect={onSelect}
 					filterOption={filterOption}
 					getPopupContainer={popupContainer}
-					placeholder="Enter the panel name here..."
+					placeholder={t('panel_name_placeholder')}
 					open={autoCompleteOpen}
 				>
 					<Input
@@ -140,9 +142,9 @@ export default function GeneralSettingsSection({
 						onBlur={(): void => setAutoCompleteOpen(false)}
 					/>
 				</AutoComplete>
-				<Typography.Text className="section-heading">Description</Typography.Text>
+				<Typography.Text className="section-heading">{t('panel_description')}</Typography.Text>
 				<TextArea
-					placeholder="Enter the panel description here..."
+					placeholder={t('panel_description_placeholder')}
 					bordered
 					allowClear
 					value={description}

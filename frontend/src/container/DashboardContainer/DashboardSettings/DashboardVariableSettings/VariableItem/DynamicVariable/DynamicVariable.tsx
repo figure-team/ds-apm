@@ -1,3 +1,4 @@
+﻿import { useTranslation } from 'react-i18next';
 import {
 	Dispatch,
 	SetStateAction,
@@ -49,6 +50,8 @@ function DynamicVariable({
 		| undefined;
 	errorAttributeKeyMessage?: string;
 }): JSX.Element {
+	const { t } = useTranslation('dashboard');
+
 	const sources = [
 		AttributeSource.ALL_TELEMETRY,
 		AttributeSource.LOGS,
@@ -165,7 +168,7 @@ function DynamicVariable({
 		<div className="dynamic-variable-container">
 			<div className="dynamic-variable-config-container">
 				<CustomSelect
-					placeholder="Select a field"
+					placeholder={t('select_a_field')}
 					options={Object.keys(filteredAttributes).map((key) => ({
 						label: key,
 						value: key,
@@ -187,7 +190,7 @@ function DynamicVariable({
 					}}
 					showRetryButton={isRetryableError}
 				/>
-				<Typography className="dynamic-variable-from-text">from</Typography>
+				<Typography className="dynamic-variable-from-text">{t('from')}</Typography>
 				<span style={{ display: 'inline-flex', alignItems: 'center' }}>
 					<TextToolTip
 						text="By default, this searches across logs, traces, and metrics, which can be slow. Selecting a single source improves performance. Many fields share the same values across different signals (for example, `k8s.pod.name` is identical in logs, traces and metrics) making one source enough. Only use `All telemetry` when you need fields that have different values in different signal types."
@@ -204,7 +207,7 @@ function DynamicVariable({
 					/>
 				</span>
 				<Select
-					placeholder="Source"
+					placeholder={t('source_placeholder')}
 					defaultValue={AttributeSource.ALL_TELEMETRY}
 					options={sources.map((source) => ({ label: source, value: source }))}
 					onChange={(value): void => setAttributeSource(value as AttributeSource)}

@@ -112,7 +112,7 @@ function NotificationMessage(): JSX.Element {
 				<Typography.Text>
 					{t('v2_pm_sisam_hint')}{' '}
 					<code>$incident.impact_summary</code>, <code>$incident.next_action</code>,
-					<code>$incident.service_name</code>, and <code>$incident.sop_id</code>.
+					<code>$incident.service_name</code>, {t('v2_and_conjunction')} <code>$incident.sop_id</code>.
 				</Typography.Text>
 			</div>
 			{unknownIncidentVariables.length > 0 && (

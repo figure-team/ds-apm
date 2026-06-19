@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Form, Input, Space, Switch, Tooltip } from 'antd';
 import { ProcessorData } from 'types/api/pipeline/def';
@@ -17,6 +18,7 @@ function JsonFlattening({
 	selectedProcessorData,
 	isAdd,
 }: JsonFlatteningProps): JSX.Element | null {
+	const { t } = useTranslation(['pipeline']);
 	const form = Form.useFormInstance();
 	const mappingValue = selectedProcessorData?.mapping || {};
 	const enableFlattening = Form.useWatch('enable_flattening', form);
@@ -63,17 +65,17 @@ function JsonFlattening({
 						checked={enablePaths}
 						onChange={handleEnablePathsChange}
 					/>
-					Enable Paths
+					{t('pipeline:enable_paths')}
 				</Space>
 			</Form.Item>
 
 			{enablePaths && (
 				<Form.Item
 					name="path_prefix"
-					label="Path Prefix"
+					label={t('pipeline:path_prefix_label')}
 					initialValue={selectedProcessorData?.path_prefix}
 				>
-					<Input placeholder="Path Prefix" />
+					<Input placeholder={t('pipeline:path_prefix_placeholder')} />
 				</Form.Item>
 			)}
 
@@ -84,8 +86,8 @@ function JsonFlattening({
 						checked={enableMapping}
 						onChange={handleEnableMappingChange}
 					/>
-					Enable Mapping
-					<Tooltip title="The order of filled keys will determine the priority of keys i.e. earlier keys have higher precedence">
+					{t('pipeline:enable_mapping')}
+					<Tooltip title={t('pipeline:mapping_priority_tooltip')}>
 						<InfoCircleOutlined />
 					</Tooltip>
 				</Space>

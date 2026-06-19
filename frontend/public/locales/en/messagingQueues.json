@@ -1,4 +1,7 @@
 {
+	"fix": "Fix",
+	"success": "Success",
+	"kafka_service_attributes": "Kafka Service Attributes",
 	"tab_overview": "Overview",
 	"breadcrumb_kafka_views": "Kafka / views /",
 	"view_consumer_lag": "Consumer Lag view",

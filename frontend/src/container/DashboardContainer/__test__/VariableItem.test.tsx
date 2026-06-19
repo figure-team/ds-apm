@@ -66,11 +66,10 @@ describe('VariableItem Component - Creation Flow', () => {
 	const mockValidateName = jest.fn();
 	const mockValidateAttributeKey = jest.fn();
 	// Constants to avoid string duplication
-	const VARIABLE_NAME_PLACEHOLDER = 'Unique name of the variable';
-	const VARIABLE_DESCRIPTION_PLACEHOLDER =
-		'Enter a description for the variable';
-	const SAVE_BUTTON_TEXT = 'Save Variable';
-	const DISCARD_BUTTON_TEXT = 'Discard';
+	const VARIABLE_NAME_PLACEHOLDER = 'variable_name_placeholder';
+	const VARIABLE_DESCRIPTION_PLACEHOLDER = 'variable_description_placeholder';
+	const SAVE_BUTTON_TEXT = 'save_variable';
+	const DISCARD_BUTTON_TEXT = 'discard';
 
 	const defaultProps = {
 		variableData: {} as IDashboardVariable,
@@ -96,16 +95,16 @@ describe('VariableItem Component - Creation Flow', () => {
 			);
 
 			// Test switching to different variable types
-			const textboxButton = screen.getByText('Textbox');
+			const textboxButton = screen.getByText('variable_type_textbox');
 			fireEvent.click(textboxButton);
 			// Check if the button has the selected class or is in selected state
 			expect(textboxButton.closest('button')).toHaveClass('selected');
 
-			const customButton = screen.getByText('Custom');
+			const customButton = screen.getByText('variable_type_custom');
 			fireEvent.click(customButton);
 			expect(customButton.closest('button')).toHaveClass('selected');
 
-			const queryButton = screen.getByText('Query');
+			const queryButton = screen.getByText('variable_type_query');
 			fireEvent.click(queryButton);
 			expect(queryButton.closest('button')).toHaveClass('selected');
 
@@ -168,7 +167,7 @@ describe('VariableItem Component - Creation Flow', () => {
 			fireEvent.change(nameInput, { target: { value: 'var3' } });
 
 			// Switch to QUERY type
-			const queryButton = screen.getByText('Query');
+			const queryButton = screen.getByText('variable_type_query');
 			fireEvent.click(queryButton);
 
 			// Add query that creates dependency
@@ -227,11 +226,11 @@ describe('VariableItem Component - Creation Flow', () => {
 			});
 
 			// Switch to TEXTBOX type
-			const textboxButton = screen.getByText('Textbox');
+			const textboxButton = screen.getByText('variable_type_textbox');
 			fireEvent.click(textboxButton);
 
 			// Switch back to DYNAMIC
-			const dynamicButton = screen.getByText('Dynamic');
+			const dynamicButton = screen.getByText('variable_type_dynamic');
 			fireEvent.click(dynamicButton);
 
 			// Name and description should be preserved

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, Typography } from 'antd';
 import { Calendar, Info } from 'lucide-react';
 
@@ -14,13 +15,14 @@ export function ScheduleList({
 	schedule,
 	currentTimezone,
 }: IScheduleListProps): JSX.Element {
+	const { t } = useTranslation(['alerts']);
 	if (schedule && schedule.length > 0) {
 		return (
 			<div className="schedule-preview" data-testid="schedule-preview">
 				<div className="schedule-preview-header">
 					<Calendar size={16} />
 					<Typography.Text className="schedule-preview-title">
-						Schedule Preview
+						{t('v2_schedule_preview_title')}
 					</Typography.Text>
 				</div>
 				<div className="schedule-preview-list">
@@ -63,7 +65,7 @@ export function ScheduleList({
 		<div className="no-schedule" data-testid="no-schedule">
 			<Info size={32} />
 			<Typography.Text>
-				Please fill the relevant information to generate a schedule
+				{t('v2_schedule_fill_info')}
 			</Typography.Text>
 		</div>
 	);

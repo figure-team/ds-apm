@@ -64,24 +64,24 @@ describe('NotificationMessage', () => {
 
 	it('renders textarea with message and placeholder', () => {
 		render(<NotificationMessage />);
-		expect(screen.getByText('Notification Message')).toBeInTheDocument();
+		expect(screen.getByText('v2_notification_message_title')).toBeInTheDocument();
 		expect(screen.getByText('$incident.impact_summary')).toBeInTheDocument();
 		expect(screen.getByText('$incident.next_action')).toBeInTheDocument();
 		expect(screen.getByText('$incident.service_name')).toBeInTheDocument();
 		expect(screen.getByText('$incident.sop_id')).toBeInTheDocument();
-		const textarea = screen.getByPlaceholderText('Enter notification message...');
+		const textarea = screen.getByPlaceholderText('v2_notification_message_placeholder');
 		expect(textarea).toBeInTheDocument();
-		expect(screen.getByRole('button', { name: 'Preview' })).toBeDisabled();
+		expect(screen.getByRole('button', { name: /v2_preview_btn/i })).toBeDisabled();
 	});
 
 	it('shows incident template variables in the variables popover', async () => {
 		const user = userEvent.setup();
 		render(<NotificationMessage />);
 
-		await user.click(screen.getByText('Variables'));
+		await user.click(screen.getByText('v2_variables_btn'));
 
 		await expect(
-			screen.findByText('Incident template variables'),
+			screen.findByText('v2_incident_template_vars_title'),
 		).resolves.toBeInTheDocument();
 		expect(screen.getByText('$incident.vendor_request')).toBeInTheDocument();
 		expect(screen.getByText('$incident.sop_url')).toBeInTheDocument();
@@ -115,7 +115,7 @@ describe('NotificationMessage', () => {
 		render(<NotificationMessage />);
 
 		expect(screen.getByRole('alert')).toHaveTextContent(
-			'Unknown incident template variable: $incident.bad_field',
+			'v2_unknown_incident_var',
 		);
 	});
 
@@ -147,7 +147,7 @@ describe('NotificationMessage', () => {
 
 		render(<NotificationMessage />);
 
-		await user.click(screen.getByRole('button', { name: 'Preview' }));
+		await user.click(screen.getByRole('button', { name: /v2_preview_btn/i }));
 
 		expect(mockPreviewNotificationTemplate).toHaveBeenCalledWith({
 			template:
@@ -171,7 +171,7 @@ describe('NotificationMessage', () => {
 	it('updates notification settings when textarea value changes', async () => {
 		const user = userEvent.setup();
 		render(<NotificationMessage />);
-		const textarea = screen.getByPlaceholderText('Enter notification message...');
+		const textarea = screen.getByPlaceholderText('v2_notification_message_placeholder');
 		await user.type(textarea, 'x');
 		expect(mockSetNotificationSettings).toHaveBeenLastCalledWith({
 			type: 'SET_DESCRIPTION',

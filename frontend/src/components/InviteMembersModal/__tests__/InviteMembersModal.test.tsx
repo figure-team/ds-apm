@@ -59,7 +59,7 @@ describe('InviteMembersModal', () => {
 		expect(emailInputs).toHaveLength(3);
 
 		expect(
-			screen.getByRole('button', { name: /invite team members/i }),
+			screen.getByRole('button', { name: /invite_modal_title/i }),
 		).toBeDisabled();
 	});
 
@@ -68,10 +68,10 @@ describe('InviteMembersModal', () => {
 
 		render(<InviteMembersModal {...defaultProps} />);
 
-		await user.click(screen.getByRole('button', { name: /add another/i }));
+		await user.click(screen.getByRole('button', { name: /add_another/i }));
 		expect(screen.getAllByPlaceholderText('john@signoz.io')).toHaveLength(4);
 
-		const removeButtons = screen.getAllByRole('button', { name: /remove row/i });
+		const removeButtons = screen.getAllByRole('button', { name: /remove_row/i });
 		await user.click(removeButtons[0]);
 		expect(screen.getAllByPlaceholderText('john@signoz.io')).toHaveLength(3);
 	});
@@ -87,7 +87,7 @@ describe('InviteMembersModal', () => {
 				'not-an-email',
 			);
 			await user.click(
-				screen.getByRole('button', { name: /invite team members/i }),
+				screen.getByRole('button', { name: /invite_modal_title/i }),
 			);
 
 			expect(
@@ -105,11 +105,11 @@ describe('InviteMembersModal', () => {
 			const emailInputs = screen.getAllByPlaceholderText('john@signoz.io');
 			await user.type(emailInputs[0], 'not-an-email');
 
-			await user.click(screen.getAllByText('Select roles')[0]);
+			await user.click(screen.getAllByText('select_roles')[0]);
 			await user.click(await screen.findByText('Viewer'));
 
 			await user.click(
-				screen.getByRole('button', { name: /invite team members/i }),
+				screen.getByRole('button', { name: /invite_modal_title/i }),
 			);
 
 			expect(
@@ -127,7 +127,7 @@ describe('InviteMembersModal', () => {
 				'valid@signoz.io',
 			);
 			await user.click(
-				screen.getByRole('button', { name: /invite team members/i }),
+				screen.getByRole('button', { name: /invite_modal_title/i }),
 			);
 
 			expect(
@@ -145,12 +145,12 @@ describe('InviteMembersModal', () => {
 		const emailInputs = screen.getAllByPlaceholderText('john@signoz.io');
 		await user.type(emailInputs[0], 'single@signoz.io');
 
-		const roleSelects = screen.getAllByText('Select roles');
+		const roleSelects = screen.getAllByText('select_roles');
 		await user.click(roleSelects[0]);
 		await user.click(await screen.findByText('Viewer'));
 
 		await user.click(
-			screen.getByRole('button', { name: /invite team members/i }),
+			screen.getByRole('button', { name: /invite_modal_title/i }),
 		);
 
 		await waitFor(() => {
@@ -176,10 +176,10 @@ describe('InviteMembersModal', () => {
 				screen.getAllByPlaceholderText('john@signoz.io')[0],
 				'single@signoz.io',
 			);
-			await user.click(screen.getAllByText('Select roles')[0]);
+			await user.click(screen.getAllByText('select_roles')[0]);
 			await user.click(await screen.findByText('Viewer'));
 			await user.click(
-				screen.getByRole('button', { name: /invite team members/i }),
+				screen.getByRole('button', { name: /invite_modal_title/i }),
 			);
 
 			await waitFor(() => {
@@ -198,16 +198,16 @@ describe('InviteMembersModal', () => {
 
 			const emailInputs = screen.getAllByPlaceholderText('john@signoz.io');
 			await user.type(emailInputs[0], 'alice@signoz.io');
-			await user.click(screen.getAllByText('Select roles')[0]);
+			await user.click(screen.getAllByText('select_roles')[0]);
 			await user.click(await screen.findByText('Viewer'));
 
 			await user.type(emailInputs[1], 'bob@signoz.io');
-			await user.click(screen.getAllByText('Select roles')[0]);
+			await user.click(screen.getAllByText('select_roles')[0]);
 			const editorOptions = await screen.findAllByText('Editor');
 			await user.click(editorOptions[editorOptions.length - 1]);
 
 			await user.click(
-				screen.getByRole('button', { name: /invite team members/i }),
+				screen.getByRole('button', { name: /invite_modal_title/i }),
 			);
 
 			await waitFor(() => {
@@ -229,10 +229,10 @@ describe('InviteMembersModal', () => {
 				screen.getAllByPlaceholderText('john@signoz.io')[0],
 				'single@signoz.io',
 			);
-			await user.click(screen.getAllByText('Select roles')[0]);
+			await user.click(screen.getAllByText('select_roles')[0]);
 			await user.click(await screen.findByText('Viewer'));
 			await user.click(
-				screen.getByRole('button', { name: /invite team members/i }),
+				screen.getByRole('button', { name: /invite_modal_title/i }),
 			);
 
 			await waitFor(() => {
@@ -250,16 +250,16 @@ describe('InviteMembersModal', () => {
 		const emailInputs = screen.getAllByPlaceholderText('john@signoz.io');
 
 		await user.type(emailInputs[0], 'alice@signoz.io');
-		await user.click(screen.getAllByText('Select roles')[0]);
+		await user.click(screen.getAllByText('select_roles')[0]);
 		await user.click(await screen.findByText('Viewer'));
 
 		await user.type(emailInputs[1], 'bob@signoz.io');
-		await user.click(screen.getAllByText('Select roles')[0]);
+		await user.click(screen.getAllByText('select_roles')[0]);
 		const editorOptions = await screen.findAllByText('Editor');
 		await user.click(editorOptions[editorOptions.length - 1]);
 
 		await user.click(
-			screen.getByRole('button', { name: /invite team members/i }),
+			screen.getByRole('button', { name: /invite_modal_title/i }),
 		);
 
 		await waitFor(() => {

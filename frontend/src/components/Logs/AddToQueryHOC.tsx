@@ -1,4 +1,5 @@
 import { memo, MouseEvent, ReactNode, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Popover } from 'antd';
 import cx from 'classnames';
 import { OPERATORS } from 'constants/queryBuilder';
@@ -15,14 +16,16 @@ function AddToQueryHOC({
 	dataType = DataTypes.EMPTY,
 	children,
 }: AddToQueryHOCProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const handleQueryAdd = (event: MouseEvent<HTMLDivElement>): void => {
 		event.stopPropagation();
 		onAddToQuery(fieldKey, fieldValue, OPERATORS['='], dataType);
 	};
 
 	const popOverContent = useMemo(
-		() => <span>Add to query: {fieldKey}</span>,
-		[fieldKey],
+		() => <span>{t('logs:add_to_query')} {fieldKey}</span>,
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[fieldKey, t],
 	);
 
 	return (

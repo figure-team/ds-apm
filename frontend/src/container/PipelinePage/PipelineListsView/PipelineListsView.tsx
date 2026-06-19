@@ -79,7 +79,7 @@ function PipelinesListEmptyState(): JSX.Element {
 								target="_blank"
 								rel="noopener noreferrer"
 							>
-								here
+								{t('here')}
 							</a>
 						</Typography>
 					</div>

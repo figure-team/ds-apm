@@ -67,7 +67,7 @@ function ChannelSelect({
 				<Select.Option key="add-new-channel" value="add-new-channel">
 					<StyledCreateChannelOption>
 						<PlusOutlined />
-						Create a new channel
+						{t('rule_create_new_channel')}
 					</StyledCreateChannelOption>
 				</Select.Option>,
 			);

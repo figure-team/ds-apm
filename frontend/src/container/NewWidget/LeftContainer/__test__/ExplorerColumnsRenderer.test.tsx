@@ -120,7 +120,7 @@ describe('ExplorerColumnsRenderer', () => {
 			</Wrapper>,
 		);
 
-		expect(screen.getByText('Columns')).toBeInTheDocument();
+		expect(screen.getByText('columns_label')).toBeInTheDocument();
 		expect(screen.getByTestId('add-columns-button')).toBeInTheDocument();
 	});
 
@@ -160,7 +160,7 @@ describe('ExplorerColumnsRenderer', () => {
 		const addButton = screen.getByTestId('add-columns-button');
 		await userEvent.click(addButton);
 
-		expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+		expect(screen.getByPlaceholderText('search_columns_placeholder')).toBeInTheDocument();
 		expect(screen.getByText('attribute1')).toBeInTheDocument();
 
 		await userEvent.click(addButton);
@@ -183,7 +183,7 @@ describe('ExplorerColumnsRenderer', () => {
 
 		await userEvent.click(screen.getByTestId('add-columns-button'));
 
-		const searchInput = screen.getByPlaceholderText('Search');
+		const searchInput = screen.getByPlaceholderText('search_columns_placeholder');
 		await userEvent.type(searchInput, 'another');
 
 		await waitFor(() => {

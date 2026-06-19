@@ -37,38 +37,30 @@ describe('AlertNotFound', () => {
 	it('should render the correct error message for test alerts', () => {
 		render(<AlertNotFound isTestAlert />);
 		expect(
-			screen.getByText("Uh-oh! We couldn't find the given alert rule."),
+			screen.getByText('not_found_message'),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText('This can happen in the following scenario -'),
-		).toBeInTheDocument();
-		expect(
-			screen.getByText(
-				'You clicked on the Alert notification link received when testing a new Alert rule. Once the alert rule is saved, future notifications will link to actual alerts.',
-			),
+			screen.getByText('not_found_test_alert'),
 		).toBeInTheDocument();
 	});
 
 	it('should render the correct error message for non-existing alerts', () => {
 		render(<AlertNotFound isTestAlert={false} />);
 		expect(
-			screen.getByText("Uh-oh! We couldn't find the given alert rule."),
+			screen.getByText('not_found_message'),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText('This can happen in either of the following scenarios -'),
+			screen.getByText('not_found_link_incorrect'),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText('The alert rule link is incorrect, please verify it once.'),
-		).toBeInTheDocument();
-		expect(
-			screen.getByText("The alert rule you're trying to check has been deleted."),
+			screen.getByText('not_found_deleted'),
 		).toBeInTheDocument();
 	});
 
 	it('should navigate to the list all alerts page when the check all rules button is clicked', async () => {
 		const user = userEvent.setup();
 		render(<AlertNotFound isTestAlert={false} />);
-		await user.click(screen.getByText('Check all rules'));
+		await user.click(screen.getByText('not_found_check_rules'));
 		expect(mockSafeNavigate).toHaveBeenCalledWith(ROUTES.LIST_ALL_ALERT, {
 			newTab: false,
 		});
@@ -81,14 +73,14 @@ describe('AlertNotFound', () => {
 		} as ReturnType<typeof useGetTenantLicense.useGetTenantLicense>);
 
 		render(<AlertNotFound isTestAlert={false} />);
-		await user.click(screen.getByText('Contact Support'));
+		await user.click(screen.getByText('not_found_contact_support'));
 		expect(history.push).toHaveBeenCalledWith('/support');
 	});
 
 	it('should navigate to the support page for self-hosted users when the contact support button is clicked', async () => {
 		const user = userEvent.setup();
 		render(<AlertNotFound isTestAlert={false} />);
-		await user.click(screen.getByText('Contact Support'));
+		await user.click(screen.getByText('not_found_contact_support'));
 		expect(window.open).toHaveBeenCalledWith('https://signoz.io/slack', '_blank');
 	});
 });

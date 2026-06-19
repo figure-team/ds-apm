@@ -110,9 +110,9 @@ describe('ChartManager', () => {
 			/>,
 		);
 
-		expect(screen.getByPlaceholderText('Filter Series')).toBeInTheDocument();
-		expect(screen.getByRole('button', { name: /Cancel/ })).toBeInTheDocument();
-		expect(screen.getByRole('button', { name: /Save/ })).toBeInTheDocument();
+		expect(screen.getByPlaceholderText('filter_series')).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: /cancel/ })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: /save/ })).toBeInTheDocument();
 	});
 
 	it('renders ResizeTable with data', () => {
@@ -135,7 +135,7 @@ describe('ChartManager', () => {
 			/>,
 		);
 
-		await userEvent.click(screen.getByRole('button', { name: /Cancel/ }));
+		await userEvent.click(screen.getByRole('button', { name: /cancel/ }));
 
 		expect(mockOnCancel).toHaveBeenCalledTimes(1);
 	});
@@ -169,11 +169,11 @@ describe('ChartManager', () => {
 			/>,
 		);
 
-		await userEvent.click(screen.getByRole('button', { name: /Save/ }));
+		await userEvent.click(screen.getByRole('button', { name: /save/ }));
 
 		expect(mockSyncSeriesVisibilityToLocalStorage).toHaveBeenCalledTimes(1);
 		expect(mockNotificationsSuccess).toHaveBeenCalledWith({
-			message: 'The updated graphs & legends are saved',
+			message: 'graphs_legends_saved',
 		});
 		expect(mockOnCancel).toHaveBeenCalledTimes(1);
 	});

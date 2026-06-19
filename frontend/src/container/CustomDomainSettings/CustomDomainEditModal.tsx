@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import { CircleAlert, CircleCheck, LoaderCircle } from '@signozhq/icons';
 import { Button, DialogWrapper, Input } from '@signozhq/ui';
@@ -28,6 +29,7 @@ export default function CustomDomainEditModal({
 	onClearError,
 	onSubmit,
 }: CustomDomainEditModalProps): JSX.Element {
+	const { t } = useTranslation('customDomain');
 	const initialSubdomain = customDomainSubdomain ?? '';
 	const [value, setValue] = useState(initialSubdomain);
 	const [validationError, setValidationError] = useState<string | null>(null);
@@ -107,7 +109,7 @@ export default function CustomDomainEditModal({
 	return (
 		<DialogWrapper
 			className="edit-workspace-modal"
-			title="Edit Workspace Link"
+			title={t('edit_modal_title')}
 			open={isOpen}
 			onOpenChange={(open: boolean): void => {
 				if (!open) {
@@ -118,15 +120,14 @@ export default function CustomDomainEditModal({
 		>
 			<div className="edit-workspace-modal-content">
 				<p className="edit-modal-description">
-					Enter your preferred subdomain to create a unique URL for your team. Need
-					help?{' '}
+					{t('description')}{' '}
 					<a
 						href="https://signoz.io/support"
 						target="_blank"
 						rel="noreferrer"
 						className="edit-modal-link"
 					>
-						Contact support.
+						{t('contact_support')}
 					</a>
 				</p>
 
@@ -137,7 +138,7 @@ export default function CustomDomainEditModal({
 							hasError ? ' edit-modal-label--error' : ''
 						}`}
 					>
-						Workspace URL
+						{t('workspace_url_label')}
 					</label>
 
 					<div
@@ -174,10 +175,7 @@ export default function CustomDomainEditModal({
 
 				<div className="edit-modal-note">
 					<span className="edit-modal-note-emoji">🚧</span>
-					<span className="edit-modal-note-text">
-						Note that your previous URL still remains accessible. Your access
-						credentials for the new URL remain the same.
-					</span>
+					<span className="edit-modal-note-text">{t('note_text')}</span>
 				</div>
 
 				<div className="edit-modal-footer">
@@ -185,7 +183,7 @@ export default function CustomDomainEditModal({
 						<LaunchChatSupport
 							attributes={{ screen: 'Custom Domain Settings' }}
 							eventName="Custom Domain Settings: Facing Issues Updating Custom Domain"
-							message="Hi Team, I need help with updating custom domain"
+							message={t('help_message')}
 							buttonText="Contact Support"
 						/>
 					) : (
@@ -198,7 +196,7 @@ export default function CustomDomainEditModal({
 							disabled={isLoading || value === initialSubdomain}
 							loading={isLoading}
 						>
-							Apply Changes
+							{t('apply_changes')}
 						</Button>
 					)}
 				</div>

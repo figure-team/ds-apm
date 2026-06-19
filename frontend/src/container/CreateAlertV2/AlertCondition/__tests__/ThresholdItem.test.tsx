@@ -1,5 +1,13 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { DefaultOptionType } from 'antd/es/select';
+
+jest.mock('react-i18next', () => ({
+	useTranslation: (): { t: (key: string) => string } => ({
+		t: (key: string): string => key,
+	}),
+	Trans: ({ children }: { children: React.ReactNode }): React.ReactNode =>
+		children,
+}));
 import { createMockAlertContextState } from 'container/CreateAlertV2/EvaluationSettings/__tests__/testUtils';
 import { getAppContextMockState } from 'container/RoutingPolicies/__tests__/testUtils';
 import * as appHooks from 'providers/App/App';
@@ -42,8 +50,8 @@ const TEST_CONSTANTS = {
 	CHANNEL_3: 'channel-3',
 	EMAIL_CHANNEL_NAME: 'Email Channel',
 	EMAIL_CHANNEL_TRUNCATED: 'Email Chan...',
-	ENTER_THRESHOLD_NAME: 'Enter threshold name',
-	ENTER_THRESHOLD_VALUE: 'Enter threshold value',
+	ENTER_THRESHOLD_NAME: 'v2_threshold_name_placeholder',
+	ENTER_THRESHOLD_VALUE: 'v2_threshold_value_placeholder',
 	ENTER_RECOVERY_THRESHOLD_VALUE: 'Enter recovery threshold value',
 } as const;
 
@@ -107,14 +115,12 @@ const verifySelectorWidth = (
 // };
 
 const verifyComponentRendersWithLoading = (): void => {
-	expect(
-		screen.getByPlaceholderText(TEST_CONSTANTS.ENTER_THRESHOLD_NAME),
-	).toBeInTheDocument();
+	expect(screen.getByTestId('threshold-name-select')).toBeInTheDocument();
 };
 
 const verifyUnitSelectorDisabled = (): void => {
 	const unitSelectors = screen.getAllByRole('combobox');
-	const unitSelector = unitSelectors[0]; // First combobox is the unit selector
+	const unitSelector = unitSelectors[1]; // Second combobox is the unit selector (first is severity)
 	expect(unitSelector).toBeDisabled();
 };
 
@@ -134,10 +140,11 @@ describe('ThresholdItem', () => {
 	it('renders threshold label input with correct value', () => {
 		renderThresholdItem();
 
-		const labelInput = screen.getByPlaceholderText(
-			TEST_CONSTANTS.ENTER_THRESHOLD_NAME,
-		);
-		expect(labelInput).toHaveValue(TEST_CONSTANTS.CRITICAL_LABEL);
+		// Label is now a Select (severity dropdown), not a free-text Input
+		const labelSelect = screen.getByTestId('threshold-name-select');
+		expect(labelSelect).toBeInTheDocument();
+		// Selected value is rendered as title by AntD Select
+		expect(screen.getByTitle(TEST_CONSTANTS.CRITICAL_LABEL)).toBeInTheDocument();
 	});
 
 	it('renders threshold value input with correct value', () => {
@@ -160,17 +167,19 @@ describe('ThresholdItem', () => {
 		const updateThreshold = jest.fn();
 		renderThresholdItem({ updateThreshold });
 
-		const labelInput = screen.getByPlaceholderText(
-			TEST_CONSTANTS.ENTER_THRESHOLD_NAME,
-		);
-		fireEvent.change(labelInput, {
-			target: { value: TEST_CONSTANTS.WARNING_LABEL },
-		});
+		// Label is now a Select; open and choose an option
+		const labelSelect = screen.getByTestId('threshold-name-select');
+		const selector = labelSelect.querySelector('.ant-select-selector') || labelSelect;
+		fireEvent.mouseDown(selector);
+
+		// 'warning' is the lowercase option in the severity dropdown
+		const warningOption = screen.getByTitle('warning');
+		fireEvent.click(warningOption);
 
 		expect(updateThreshold).toHaveBeenCalledWith(
 			TEST_CONSTANTS.THRESHOLD_ID,
 			'label',
-			TEST_CONSTANTS.WARNING_LABEL,
+			'warning',
 		);
 	});
 
@@ -196,7 +205,7 @@ describe('ThresholdItem', () => {
 
 		// Find the unit selector by its role and simulate change
 		const unitSelectors = screen.getAllByRole('combobox');
-		const unitSelector = unitSelectors[0]; // First combobox is the unit selector
+		const unitSelector = unitSelectors[1]; // Second combobox is the unit selector (severity is first)
 
 		// Simulate clicking to open the dropdown and selecting a value
 		fireEvent.click(unitSelector);
@@ -212,7 +221,7 @@ describe('ThresholdItem', () => {
 
 		// Find the channels selector by its role and simulate change
 		const channelSelectors = screen.getAllByRole('combobox');
-		const channelSelector = channelSelectors[1]; // Second combobox is the channels selector
+		const channelSelector = channelSelectors[2]; // Third combobox is the channels selector (severity, unit, channels)
 
 		// Simulate clicking to open the dropdown
 		fireEvent.click(channelSelector);
@@ -312,32 +321,32 @@ describe('ThresholdItem', () => {
 
 		renderThresholdItem({ threshold: emptyThreshold });
 
-		expect(screen.getByPlaceholderText('Enter threshold name')).toHaveValue('');
-		expect(screen.getByPlaceholderText('Enter threshold value')).toHaveValue(0);
+		// Label is now a Select; placeholder text appears as inner text when no value is selected
+		expect(screen.getByText('v2_threshold_name_placeholder')).toBeInTheDocument();
+		expect(screen.getByPlaceholderText('v2_threshold_value_placeholder')).toHaveValue(0);
 	});
 
 	it('renders with correct input widths', () => {
 		renderThresholdItem();
 
-		const labelInput = screen.getByPlaceholderText(
-			TEST_CONSTANTS.ENTER_THRESHOLD_NAME,
-		);
+		// Label is now a Select; width is on the Select wrapper element
+		const labelSelect = screen.getByTestId('threshold-name-select');
 		const valueInput = screen.getByPlaceholderText(
 			TEST_CONSTANTS.ENTER_THRESHOLD_VALUE,
 		);
 
-		expect(labelInput).toHaveStyle('width: 200px');
+		expect(labelSelect).toHaveStyle('width: 200px');
 		expect(valueInput).toHaveStyle('width: 100px');
 	});
 
 	it('renders channels selector with correct width', () => {
 		renderThresholdItem();
-		verifySelectorWidth(1, '350px');
+		verifySelectorWidth(2, '350px'); // severity[0], unit[1], channels[2]
 	});
 
 	it('renders unit selector with correct width', () => {
 		renderThresholdItem();
-		verifySelectorWidth(0, '150px');
+		verifySelectorWidth(1, '150px'); // severity[0], unit[1]
 	});
 
 	it('handles loading channels state', () => {
@@ -363,8 +372,8 @@ describe('ThresholdItem', () => {
 
 		renderThresholdItem({ threshold: thresholdWithoutChannels });
 
-		// Should render channels selector without selected values
+		// Should render all three selectors: severity, unit, channels
 		const channelSelectors = screen.getAllByRole('combobox');
-		expect(channelSelectors).toHaveLength(2); // Should have both unit and channel selectors
+		expect(channelSelectors).toHaveLength(3); // severity[0], unit[1], channels[2]
 	});
 });

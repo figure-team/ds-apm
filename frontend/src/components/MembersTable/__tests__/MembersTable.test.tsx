@@ -48,7 +48,7 @@ describe('MembersTable', () => {
 
 		expect(screen.getByText('Alice Smith')).toBeInTheDocument();
 		expect(screen.getByText('alice@signoz.io')).toBeInTheDocument();
-		expect(screen.getAllByText('ACTIVE')).toHaveLength(2);
+		expect(screen.getAllByText('status_active')).toHaveLength(2);
 	});
 
 	it('renders INVITED badge for pending invite members', () => {
@@ -60,7 +60,7 @@ describe('MembersTable', () => {
 			/>,
 		);
 
-		expect(screen.getByText('INVITED')).toBeInTheDocument();
+		expect(screen.getByText('status_invited')).toBeInTheDocument();
 		expect(screen.getByText('charlie@signoz.io')).toBeInTheDocument();
 	});
 
@@ -106,7 +106,7 @@ describe('MembersTable', () => {
 			/>,
 		);
 
-		expect(screen.getByText('DELETED')).toBeInTheDocument();
+		expect(screen.getByText('status_deleted')).toBeInTheDocument();
 		await user.click(screen.getByText('Dave Deleted'));
 		expect(onRowClick).toHaveBeenCalledWith(
 			expect.objectContaining({ id: 'user-del' }),
@@ -116,7 +116,7 @@ describe('MembersTable', () => {
 	it('shows "No members found" empty state when no data and no search query', () => {
 		render(<MembersTable {...defaultProps} data={[]} total={0} searchQuery="" />);
 
-		expect(screen.getByText('No members found')).toBeInTheDocument();
+		expect(screen.getByText('no_members_found')).toBeInTheDocument();
 	});
 
 	it('shows "No results for X" when no data and a search query is set', () => {
@@ -124,7 +124,7 @@ describe('MembersTable', () => {
 			<MembersTable {...defaultProps} data={[]} total={0} searchQuery="unknown" />,
 		);
 
-		expect(screen.getByText(/No results for/i)).toBeInTheDocument();
+		expect(screen.getByText(/no_results_for/i)).toBeInTheDocument();
 		expect(screen.getByText('unknown')).toBeInTheDocument();
 	});
 

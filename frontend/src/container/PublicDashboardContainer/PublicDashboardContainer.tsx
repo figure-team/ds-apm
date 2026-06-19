@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+﻿import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import RGL, { WidthProvider } from 'react-grid-layout';
 import { Typography } from 'antd';
 import cx from 'classnames';
@@ -78,6 +79,7 @@ function PublicDashboardContainer({
 	publicDashboardId: string;
 	publicDashboardData: SuccessResponseV2<PublicDashboardDataProps>;
 }): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const isDarkMode = useIsDarkMode();
 	const { dashboard, publicDashboard } = publicDashboardData?.data || {};
 	const { widgets } = dashboard?.data || {};
@@ -134,9 +136,9 @@ function PublicDashboardContainer({
 			<div className="public-dashboard-header">
 				<div className="public-dashboard-header-left">
 					<div className="brand-logo">
-						<img src={signozBrandLogoUrl} alt="SigNoz" className="brand-logo-img" />
+						<img src={signozBrandLogoUrl} alt={t('public_dashboard_brand')} className="brand-logo-img" />
 
-						<Typography className="brand-logo-name">SigNoz</Typography>
+						<Typography className="brand-logo-name">{t('public_dashboard_brand')}</Typography>
 					</div>
 
 					<div className="public-dashboard-header-title">

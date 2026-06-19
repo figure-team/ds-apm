@@ -1,4 +1,4 @@
-/* eslint-disable sonarjs/cognitive-complexity */
+﻿/* eslint-disable sonarjs/cognitive-complexity */
 import React, {
 	useCallback,
 	useEffect,
@@ -309,7 +309,7 @@ function FullView({
 									<div className="drildown-options-container">
 										{showResetQuery && (
 											<Button type="link" onClick={handleResetQuery}>
-												Reset Query
+												{t('reset_query')}
 											</Button>
 										)}
 										{editWidget && (
@@ -324,7 +324,7 @@ function FullView({
 													}
 												}}
 											>
-												Switch to Edit Mode
+												{t('switch_to_edit_mode')}
 											</Button>
 										)}
 										<PanelTypeSelector

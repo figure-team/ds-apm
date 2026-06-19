@@ -187,7 +187,7 @@ function BasicInfo({
 
 				<FormItemMedium
 					name="alert_all_configured_channels"
-					label="Alert all the configured channels"
+					label={t('rule_alert_all_channels')}
 				>
 					<Tooltip
 						title={
@@ -216,7 +216,7 @@ function BasicInfo({
 						placement="right"
 					>
 						<FormItemMedium
-							label="Notification Channels"
+							label={t('rule_notification_channels')}
 							name="notification_channels"
 							required
 							rules={[
@@ -258,7 +258,7 @@ function BasicInfo({
 							className="create-notification-btn"
 							disabled={!addNewChannelPermission}
 						>
-							Create a notification channel
+							{t('rule_create_notification_channel')}
 						</Button>
 					</Tooltip>
 				)}

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
 	Button,
 	Col,
@@ -39,6 +40,7 @@ function UpdateContextLinks({
 	onCancel,
 	selectedWidget,
 }: UpdateContextLinksProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const [form] = Form.useForm();
 	// const label = Form.useWatch(CONTEXT_LINK_FIELDS.LABEL, form);
 	const url = Form.useWatch(CONTEXT_LINK_FIELDS.URL, form);
@@ -209,16 +211,16 @@ function UpdateContextLinks({
 					// onFinish={() => {}}
 				>
 					{/* //label */}
-					<Typography.Text className="form-label">Label</Typography.Text>
+					<Typography.Text className="form-label">{t('context_link_label')}</Typography.Text>
 					<Form.Item
 						name={CONTEXT_LINK_FIELDS.LABEL}
 						rules={[{ required: false, message: 'Please input the label' }]}
 					>
-						<Input placeholder="View Traces details: {{_traceId}}" />
+						<Input placeholder={t('context_link_placeholder')} />
 					</Form.Item>
 					{/* //url */}
 					<Typography.Text className="form-label">
-						URL <span className="required-asterisk">*</span>
+						{t('context_link_url')} <span className="required-asterisk">*</span>
 					</Typography.Text>
 					<Form.Item
 						name={CONTEXT_LINK_FIELDS.URL}
@@ -270,8 +272,8 @@ function UpdateContextLinks({
 					{params.length > 0 && (
 						<div className="url-parameters-section">
 							<Row gutter={[8, 8]} className="parameter-header">
-								<Col span={6}>Key</Col>
-								<Col span={16}>Value</Col>
+								<Col span={6}>{t('context_link_key')}</Col>
+								<Col span={16}>{t('context_link_value')}</Col>
 								<Col span={2}>{/* Empty column for spacing */}</Col>
 							</Row>
 
@@ -281,7 +283,7 @@ function UpdateContextLinks({
 									<Col span={6}>
 										<Input
 											id={`param-key-${index}`}
-											placeholder="Key"
+											placeholder={t('context_link_key')}
 											value={param.key}
 											onChange={(e): void =>
 												handleParamChange(index, 'key', e.target.value)
@@ -298,7 +300,7 @@ function UpdateContextLinks({
 											{({ setIsOpen, setCursorPosition }): JSX.Element => (
 												<TextArea
 													rows={1}
-													placeholder="Value"
+													placeholder={t('context_link_value')}
 													value={param.value}
 													onChange={(event): void => {
 														setCursorPosition(event.target.selectionStart || 0);
@@ -341,15 +343,15 @@ function UpdateContextLinks({
 					icon={<Plus size={12} />}
 					onClick={handleAddUrlParameter}
 				>
-					Add URL parameter
+					{t('add_url_parameter')}
 				</Button>
 			</div>
 
 			{/* Footer with Cancel and Save buttons */}
 			<div className="context-link-footer">
-				<Button onClick={onCancel}>Cancel</Button>
+				<Button onClick={onCancel}>{t('cancel')}</Button>
 				<Button type="primary" onClick={handleSave}>
-					Save
+					{t('save')}
 				</Button>
 			</div>
 		</div>

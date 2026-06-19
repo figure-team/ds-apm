@@ -3,6 +3,14 @@ import {
 	AlertThresholdMatchType,
 	AlertThresholdOperator,
 } from 'container/CreateAlertV2/context/types';
+
+jest.mock('react-i18next', () => ({
+	useTranslation: (): { t: (key: string) => string } => ({
+		t: (key: string): string => key,
+	}),
+	Trans: ({ children }: { children: React.ReactNode }): React.ReactNode =>
+		children,
+}));
 import { createMockAlertContextState } from 'container/CreateAlertV2/EvaluationSettings/__tests__/testUtils';
 
 import * as createAlertState from '../../context';
@@ -40,7 +48,7 @@ const mockAlertContextState = createMockAlertContextState({
 	discardAlertRule: mockDiscardAlertRule,
 	alertState: {
 		name: 'Test Alert',
-		labels: {},
+		labels: { sop_id: 'test-sop' },
 		annotations: {},
 		yAxisUnit: undefined,
 	},
@@ -69,9 +77,9 @@ jest
 	.spyOn(createAlertState, 'useCreateAlertState')
 	.mockReturnValue(mockAlertContextState);
 
-const SAVE_ALERT_RULE_TEXT = 'Save Alert Rule';
-const TEST_NOTIFICATION_TEXT = 'Test Notification';
-const DISCARD_TEXT = 'Discard';
+const SAVE_ALERT_RULE_TEXT = 'v2_save_alert_rule';
+const TEST_NOTIFICATION_TEXT = 'v2_test_notification';
+const DISCARD_TEXT = 'v2_discard';
 
 const LOADER_ICON_SELECTOR = 'svg.lucide-loader';
 const CHECK_ICON_SELECTOR = 'svg.lucide-check';
@@ -82,7 +90,7 @@ describe('Footer', () => {
 		useQueryBuilder.mockReturnValue({
 			currentQuery: {
 				builder: {
-					queryData: [],
+					queryData: [{ aggregateAttribute: { key: 'test_metric', dataType: '', type: '', isColumn: true, isJSON: false } }],
 					queryFormulas: [],
 				},
 				promql: [],
@@ -139,12 +147,12 @@ describe('Footer', () => {
 		render(<Footer />);
 
 		expect(
-			screen.getByRole('button', { name: /save alert rule/i }),
+			screen.getByRole('button', { name: /v2_save_alert_rule/i }),
 		).toBeDisabled();
 		expect(
-			screen.getByRole('button', { name: /test notification/i }),
+			screen.getByRole('button', { name: /v2_test_notification/i }),
 		).toBeDisabled();
-		expect(screen.getByRole('button', { name: /discard/i })).toBeDisabled();
+		expect(screen.getByRole('button', { name: /v2_discard/i })).toBeDisabled();
 	});
 
 	it('all buttons are disabled when updating alert rule', () => {
@@ -156,12 +164,12 @@ describe('Footer', () => {
 
 		// Target the button elements directly instead of the text spans inside them
 		expect(
-			screen.getByRole('button', { name: /save alert rule/i }),
+			screen.getByRole('button', { name: /v2_save_alert_rule/i }),
 		).toBeDisabled();
 		expect(
-			screen.getByRole('button', { name: /test notification/i }),
+			screen.getByRole('button', { name: /v2_test_notification/i }),
 		).toBeDisabled();
-		expect(screen.getByRole('button', { name: /discard/i })).toBeDisabled();
+		expect(screen.getByRole('button', { name: /v2_discard/i })).toBeDisabled();
 	});
 
 	it('all buttons are disabled when testing alert rule', () => {
@@ -173,12 +181,12 @@ describe('Footer', () => {
 
 		// Target the button elements directly instead of the text spans inside them
 		expect(
-			screen.getByRole('button', { name: /save alert rule/i }),
+			screen.getByRole('button', { name: /v2_save_alert_rule/i }),
 		).toBeDisabled();
 		expect(
-			screen.getByRole('button', { name: /test notification/i }),
+			screen.getByRole('button', { name: /v2_test_notification/i }),
 		).toBeDisabled();
-		expect(screen.getByRole('button', { name: /discard/i })).toBeDisabled();
+		expect(screen.getByRole('button', { name: /v2_discard/i })).toBeDisabled();
 	});
 
 	it('create and test buttons are disabled when alert name is missing', () => {
@@ -192,10 +200,10 @@ describe('Footer', () => {
 		render(<Footer />);
 
 		expect(
-			screen.getByRole('button', { name: /save alert rule/i }),
+			screen.getByRole('button', { name: /v2_save_alert_rule/i }),
 		).toBeDisabled();
 		expect(
-			screen.getByRole('button', { name: /test notification/i }),
+			screen.getByRole('button', { name: /v2_test_notification/i }),
 		).toBeDisabled();
 	});
 
@@ -220,10 +228,10 @@ describe('Footer', () => {
 		render(<Footer />);
 
 		expect(
-			screen.getByRole('button', { name: /save alert rule/i }),
+			screen.getByRole('button', { name: /v2_save_alert_rule/i }),
 		).toBeDisabled();
 		expect(
-			screen.getByRole('button', { name: /test notification/i }),
+			screen.getByRole('button', { name: /v2_test_notification/i }),
 		).toBeDisabled();
 	});
 
@@ -248,12 +256,12 @@ describe('Footer', () => {
 		render(<Footer />);
 
 		expect(
-			screen.getByRole('button', { name: /save alert rule/i }),
+			screen.getByRole('button', { name: /v2_save_alert_rule/i }),
 		).toBeEnabled();
 		expect(
-			screen.getByRole('button', { name: /test notification/i }),
+			screen.getByRole('button', { name: /v2_test_notification/i }),
 		).toBeEnabled();
-		expect(screen.getByRole('button', { name: /discard/i })).toBeEnabled();
+		expect(screen.getByRole('button', { name: /v2_discard/i })).toBeEnabled();
 	});
 
 	it('should show loader icon on test notification button when testing alert rule', () => {

@@ -1,0 +1,122 @@
+{
+	"common": {
+		"integrations": "통합",
+		"get_help": "도움말",
+		"all_integrations": "전체 통합",
+		"something_went_wrong": "문제가 발생했습니다 :/ 다시 시도하거나 지원팀에 문의해 주세요.",
+		"retry": "다시 시도",
+		"contact_support": "지원팀 문의",
+		"no_integrations_found_for": "통합을 찾을 수 없습니다:",
+		"submit": "제출",
+		"save": "저장",
+		"discard": "취소",
+		"logs": "로그",
+		"metrics": "메트릭"
+	},
+	"header": {
+		"subtitle": "이 워크스페이스의 통합을 관리합니다.",
+		"search_placeholder": "통합 검색...",
+		"request_integration": "통합 요청",
+		"request_new_integration": "새 통합 요청",
+		"which_integration": "어떤 통합을 찾고 계신가요?",
+		"integration_name_placeholder": "통합 이름 입력...",
+		"view_data_sources": "150개 이상의 데이터 소스 보기"
+	},
+	"hero": {
+		"aws": "AWS",
+		"aws_description": "AWS는 애플리케이션을 구축하고 실행하기 위한 다양한 서비스를 제공하는 클라우드 컴퓨팅 플랫폼입니다."
+	},
+	"account": {
+		"account_label": "계정:",
+		"select_aws_account": "AWS 계정 선택",
+		"edit_account": "계정 편집",
+		"add_new_account": "새 계정 추가",
+		"integrate_now": "지금 연동",
+		"connected_account_details": "연결된 계정 세부 정보",
+		"aws_account_label": "AWS 계정:",
+		"update_changes": "변경 사항 업데이트",
+		"account_settings": "계정 설정"
+	},
+	"regions": {
+		"which_regions": "어떤 리전을 모니터링하시겠습니까?",
+		"choose_regions_short": "DS-APM이 모니터링할 리전만 선택하세요.",
+		"choose_regions_long": "DS-APM이 모니터링할 리전만 선택하세요. 한 번에 모두 활성화하거나 특정 리전을 선택할 수 있습니다:",
+		"select_all_regions": "모든 리전 선택"
+	},
+	"setup": {
+		"deploy_stack_title": "DS-APM Cloud 스택을 어디에 배포할까요?",
+		"deploy_stack_description": "CloudFormation 스택 배포를 위한 AWS 리전을 선택하세요",
+		"region_placeholder": "예: US East (N. Virginia)",
+		"compliance_note": "참고: 일부 조직은 규정 준수 또는 지연 시간 문제로 CloudFormation 스택을 기본 인프라와 동일한 리전에 배포해야 할 수 있습니다.",
+		"launch_cf_template": "CloudFormation 템플릿 실행"
+	},
+	"connection_params": {
+		"ingestion_url_label": "수집 URL",
+		"ingestion_url_placeholder": "수집 URL 입력",
+		"ingestion_key_label": "수집 키",
+		"ingestion_key_placeholder": "수집 키 입력",
+		"api_url_label": "DS-APM API URL",
+		"api_url_placeholder": "DS-APM API URL 입력",
+		"api_key_label": "DS-APM API 키",
+		"api_key_placeholder": "DS-APM API 키 입력"
+	},
+	"remove_account": {
+		"disconnect": "연결 해제",
+		"remove_integration_title": "통합 제거",
+		"remove_account": "계정 제거",
+		"desc1": "이 계정을 제거하면 향후 약 15분 이내에 AWS 계정에서 DS-APM으로 텔레메트리를 전송하기 위해 생성된 모든 구성 요소가 제거됩니다(활성화된 리전의 signoz-integration-telemetry-collection 이름의 cloudformation 스택).",
+		"desc2": "그 후 이 계정을 연결할 때 수동으로 생성된 cloudformation 스택을 삭제할 수 있습니다."
+	},
+	"s3": {
+		"select_buckets": "리전별 S3 버킷 선택",
+		"region_disabled": "계정 설정에서 비활성화된 리전입니다. 여기의 S3 버킷은 동기화되지 않습니다."
+	},
+	"service_details": {
+		"log_collection": "로그 수집",
+		"metric_collection": "메트릭 수집"
+	},
+	"services_list": {
+		"no_services_found": "서비스를 찾을 수 없습니다",
+		"enabled": "활성화됨",
+		"no_enabled_services": "활성화된 서비스가 없습니다",
+		"not_enabled": "활성화되지 않음"
+	},
+	"service_dashboards": {
+		"dashboards": "대시보드"
+	},
+	"detail": {
+		"overview": "개요",
+		"configure": "구성",
+		"data_collected": "수집된 데이터",
+		"category": "카테고리",
+		"assets": "자산",
+		"last_received_from": "마지막 수신 출처",
+		"last_received_at": "마지막 수신 시각",
+		"testing_no_data": "아직 {{title}} 인스턴스에서 데이터를 수신하지 못했습니다. {{title}} 인스턴스가 DS-APM으로 데이터를 전송하도록 수동으로 구성해야 합니다.",
+		"not_installed_no_data": "{{title}} 인스턴스가 DS-APM으로 데이터를 전송하도록 수동으로 구성해야 합니다.",
+		"no_data_help": "데이터를 전송하도록 이미 리소스를 구성했다면 잠시 기다리면 데이터가 들어옵니다. 그렇지 않다면 리소스가 데이터를 전송하도록 구성하는 단계를 참고하세요."
+	},
+	"uninstall": {
+		"remove_integration": "통합 제거",
+		"subtitle": "{{title}} 통합을 제거하면 워크스페이스가 {{title}} 인스턴스의 데이터 수신을 중단합니다.",
+		"modal_title": "통합 제거",
+		"remove_integration_btn": "통합 제거",
+		"remove_text": "이 통합을 제거하면 DS-APM이 {{title}} 인스턴스의 데이터 수신을 중단합니다. 데이터 전송을 멈추려면 코드의 구성도 수동으로 제거해야 합니다.",
+		"remove_from_signoz": "DS-APM에서 제거"
+	},
+	"list": {
+		"name": "이름",
+		"published_by": "게시자",
+		"status": "상태",
+		"signoz": "DS-APM"
+	},
+	"one_click": {
+		"title": "원클릭 통합",
+		"new": "신규"
+	},
+	"alert": {
+		"waiting_connection": "연결 대기 중,",
+		"secs": "초 후 다시 시도...",
+		"connection_failed": "AWS 계정에 연결할 수 없습니다. 다시 시도해 주세요"
+	}
+}

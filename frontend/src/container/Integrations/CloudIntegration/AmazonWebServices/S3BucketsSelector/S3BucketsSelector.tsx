@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Select, Skeleton } from 'antd';
 import { useListAccounts } from 'api/generated/services/cloudintegration';
 import { INTEGRATION_TYPES } from 'container/Integrations/constants';
@@ -24,6 +25,7 @@ function S3BucketsSelector({
 	initialBucketsByRegion = {},
 	disabled: isSelectorDisabled = false,
 }: S3BucketsSelectorProps): JSX.Element {
+	const { t } = useTranslation('integrations');
 	const cloudAccountId = useUrlQuery().get('cloudAccountId');
 	const { data: listAccountsResponse, isLoading } = useListAccounts({
 		cloudProvider: INTEGRATION_TYPES.AWS,
@@ -102,7 +104,7 @@ function S3BucketsSelector({
 
 	return (
 		<div className="s3-buckets-selector">
-			<div className="s3-buckets-selector-title">Select S3 Buckets by Region</div>
+			<div className="s3-buckets-selector-title">{t('s3.select_buckets')}</div>
 			<div className="s3-buckets-selector-content">
 				{allRegions.map((region) => {
 					const isRegionUnavailable = isRegionDisabled(region);
@@ -113,8 +115,7 @@ function S3BucketsSelector({
 								<div className="s3-buckets-selector-region-label">{region}</div>
 								{isRegionUnavailable && (
 									<div className="s3-buckets-selector-region-help">
-										Region disabled in account settings; S3 buckets here will not be
-										synced.
+										{t('s3.region_disabled')}
 									</div>
 								)}
 							</div>

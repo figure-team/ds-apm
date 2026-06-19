@@ -24,7 +24,9 @@ const renderServiceDetails = (
 const assertGenericModalElements = async (): Promise<void> => {
 	await waitFor(() => {
 		expect(screen.getByRole('switch')).toBeInTheDocument();
-		expect(screen.getByText(/log collection/i)).toBeInTheDocument();
+		expect(
+			screen.getByText('service_details.log_collection'),
+		).toBeInTheDocument();
 	});
 };
 
@@ -38,7 +40,7 @@ const assertS3SyncSpecificElements = async (
 	const regions = accountsResponse.data.accounts[0]?.config?.aws?.regions || [];
 
 	await waitFor(() => {
-		expect(screen.getByText(/select s3 buckets by region/i)).toBeInTheDocument();
+		expect(screen.getByText('s3.select_buckets')).toBeInTheDocument();
 
 		regions.forEach((region) => {
 			expect(screen.getByText(region)).toBeInTheDocument();

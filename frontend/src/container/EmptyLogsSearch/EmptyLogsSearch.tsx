@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Typography } from 'antd';
 import logEvent from 'api/common/logEvent';
 import cx from 'classnames';
@@ -22,6 +23,7 @@ export default function EmptyLogsSearch({
 	panelType,
 	customMessage,
 }: EmptyLogsSearchProps): JSX.Element {
+	const { t } = useTranslation(['logs']);
 	const logEventCalledRef = useRef(false);
 	useEffect(() => {
 		if (!logEventCalledRef.current) {
@@ -85,7 +87,7 @@ export default function EmptyLogsSearch({
 									{customMessage.clearFiltersButtonText}
 									<span className="empty-logs-search__clear-filters-btn-icon">
 										<Delete size={14} />
-										Clear filters
+										{t('logs:clear_filters')}
 									</span>
 								</button>
 							)}
@@ -93,15 +95,15 @@ export default function EmptyLogsSearch({
 					) : (
 						<Typography.Text>
 							<span className="empty-logs-search__sub-text">
-								This query had no results.{' '}
+								{t('logs:query_no_results')}{' '}
 							</span>
-							Edit your query and try again!
+							{t('logs:edit_query_retry')}
 						</Typography.Text>
 					)}
 				</div>
 				{customMessage?.documentationLinks && (
 					<div className="empty-logs-search__resources-card">
-						<div className="empty-logs-search__resources-title">RESOURCES</div>
+						<div className="empty-logs-search__resources-title">{t('logs:resources')}</div>
 						<div className="empty-logs-search__resources-links">
 							{customMessage.documentationLinks.map((link) => (
 								<LearnMore key={link.text} text={link.text} url={link.url} />

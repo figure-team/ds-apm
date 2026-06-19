@@ -209,7 +209,7 @@ function RuleOptions({
 			value={alertDef.condition.algorithm}
 			onChange={onChangeAlgorithm}
 		>
-			<Select.Option value="standard">Standard</Select.Option>
+			<Select.Option value="standard">{t('rule_standard')}</Select.Option>
 		</InlineSelect>
 	);
 
@@ -243,9 +243,9 @@ function RuleOptions({
 			value={alertDef.condition.seasonality}
 			onChange={onChangeSeasonality}
 		>
-			<Select.Option value="hourly">Hourly</Select.Option>
-			<Select.Option value="daily">Daily</Select.Option>
-			<Select.Option value="weekly">Weekly</Select.Option>
+			<Select.Option value="hourly">{t('rule_hourly')}</Select.Option>
+			<Select.Option value="daily">{t('rule_daily')}</Select.Option>
+			<Select.Option value="weekly">{t('rule_weekly')}</Select.Option>
 		</InlineSelect>
 	);
 
@@ -262,7 +262,7 @@ function RuleOptions({
 					value={alertDef.condition.selectedQueryName}
 					onChange={onChangeSelectedQueryName}
 				/>
-				<Typography.Text>is</Typography.Text>
+				<Typography.Text>{t('rule_is_text')}</Typography.Text>
 				{renderCompareOps()} {t('text_condition2')} {renderMatchOpts()}{' '}
 				{t('text_condition3')} {renderEvalWindows()}
 			</Typography.Text>
@@ -282,7 +282,7 @@ function RuleOptions({
 					value={alertDef.condition.selectedQueryName}
 					onChange={onChangeSelectedQueryName}
 				/>
-				<Typography.Text>is</Typography.Text>
+				<Typography.Text>{t('rule_is_text')}</Typography.Text>
 				{renderCompareOps()} {t('text_condition2')} {renderMatchOpts()}
 				{t('text_condition3')} {renderPromEvalWindows()}
 			</Typography.Text>
@@ -333,14 +333,14 @@ function RuleOptions({
 					onChange={onChangeSelectedQueryName}
 				/>
 				{t('text_condition3')} {renderEvalWindows()}
-				<Typography.Text>is</Typography.Text>
+				<Typography.Text>{t('rule_is_text')}</Typography.Text>
 				{renderDeviationOpts()}
-				<Typography.Text>deviations</Typography.Text>
+				<Typography.Text>{t('rule_deviations')}</Typography.Text>
 				{renderCompareOps()}
-				<Typography.Text>the predicted data</Typography.Text>
+				<Typography.Text>{t('rule_predicted_data')}</Typography.Text>
 				{renderMatchOpts()}
-				using the {renderAlgorithms()} algorithm with {renderSeasonality()}{' '}
-				seasonality
+				{t('rule_using_the')} {renderAlgorithms()} {t('rule_algorithm_with')} {renderSeasonality()}{' '}
+				{t('rule_seasonality')}
 			</Typography.Text>
 		</Form.Item>
 	);

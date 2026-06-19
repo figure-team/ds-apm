@@ -177,7 +177,7 @@ describe('Dashboard landing page actions header tests', () => {
 			),
 		);
 
-		const dashboardButton = getByText('Dashboard /');
+		const dashboardButton = getByText('dashboard_breadcrumb');
 		await user.click(dashboardButton);
 
 		expect(mockSafeNavigate).toHaveBeenCalledWith('/dashboard');
@@ -224,7 +224,7 @@ describe('Dashboard landing page actions header tests', () => {
 			),
 		);
 
-		const dashboardButton = getByText('Dashboard /');
+		const dashboardButton = getByText('dashboard_breadcrumb');
 		await user.click(dashboardButton);
 
 		expect(mockSafeNavigate).toHaveBeenCalledWith({

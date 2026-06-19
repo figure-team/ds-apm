@@ -349,7 +349,7 @@ export default function BillingContainer(): JSX.Element {
 				<>
 					<BillingUsageGraph data={apiResponse} billAmount={billAmount} />
 					<div className="billing-update-note">
-						Note: Billing metrics are updated once every 24 hours.
+						{t('billing_metrics_note')}
 					</div>
 				</>
 			) : (
@@ -430,7 +430,7 @@ export default function BillingContainer(): JSX.Element {
 					<Flex vertical>
 						<Typography.Title level={5} style={{ marginTop: 2, fontWeight: 500 }}>
 							{isCloudUserVal ? t('teams_cloud') : t('teams')}{' '}
-							{isFreeTrial ? <Tag color="success"> Free Trial </Tag> : ''}
+							{isFreeTrial ? <Tag color="success">{t('free_trial')}</Tag> : ''}
 						</Typography.Title>
 
 						{!isLoading && !isFetchingBillingData && !showGracePeriodMessage ? (
@@ -449,7 +449,7 @@ export default function BillingContainer(): JSX.Element {
 							icon={<CloudDownloadOutlined />}
 							className="periscope-btn"
 						>
-							Download CSV
+							{t('download_csv')}
 						</Button>
 						<Button
 							data-testid="header-billing-button"

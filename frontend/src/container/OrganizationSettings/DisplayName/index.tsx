@@ -85,7 +85,7 @@ function DisplayName({ index, id: orgId }: DisplayNameProps): JSX.Element {
 			autoComplete="off"
 		>
 			<div className="form-field">
-				<label htmlFor="displayName">Display name</label>
+				<label htmlFor="displayName">{t('display_name')}</label>
 				<Controller
 					name="displayName"
 					control={control}
@@ -113,7 +113,7 @@ function DisplayName({ index, id: orgId }: DisplayNameProps): JSX.Element {
 					type="primary"
 					htmlType="submit"
 				>
-					Submit
+					{t('submit')}
 				</Button>
 			</div>
 		</form>

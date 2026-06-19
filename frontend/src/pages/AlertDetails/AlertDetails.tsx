@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Breadcrumb, Button, Divider } from 'antd';
+import { useTranslation } from 'react-i18next';
 import logEvent from 'api/common/logEvent';
 import classNames from 'classnames';
 import { Filters } from 'components/AlertDetailsFilters/Filters';
@@ -57,6 +58,7 @@ BreadCrumbItem.defaultProps = {
 };
 
 function AlertDetails(): JSX.Element {
+	const { t } = useTranslation('alerts');
 	const { pathname } = useLocation();
 	const { routes } = useRouteTabUtils();
 	const params = useUrlQuery();
@@ -131,7 +133,7 @@ function AlertDetails(): JSX.Element {
 					items={[
 						{
 							title: (
-								<BreadCrumbItem title="Alert Rules" route={ROUTES.LIST_ALL_ALERT} />
+								<BreadCrumbItem title={t('alert_details_breadcrumb')} route={ROUTES.LIST_ALL_ALERT} />
 							),
 						},
 						{

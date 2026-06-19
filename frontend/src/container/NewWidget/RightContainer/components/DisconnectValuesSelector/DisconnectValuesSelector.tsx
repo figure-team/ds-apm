@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Typography } from 'antd';
 import { DisconnectedValuesMode } from 'lib/uPlotV2/config/types';
+import { useTranslation } from 'react-i18next';
 
 import DisconnectValuesModeToggle from './DisconnectValuesModeToggle';
 import DisconnectValuesThresholdInput from './DisconnectValuesThresholdInput';
@@ -20,6 +21,7 @@ export default function DisconnectValuesSelector({
 	minValue,
 	onChange,
 }: DisconnectValuesSelectorProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const [mode, setMode] = useState<DisconnectedValuesMode>(() => {
 		if (typeof value === 'number') {
 			return DisconnectedValuesMode.Threshold;
@@ -69,14 +71,14 @@ export default function DisconnectValuesSelector({
 	return (
 		<section className="disconnect-values-selector control-container">
 			<Typography.Text className="section-heading">
-				Disconnect values
+				{t('disconnect_values')}
 			</Typography.Text>
 			<div className="disconnect-values-input-wrapper">
 				<DisconnectValuesModeToggle value={mode} onChange={handleModeChange} />
 				{mode === DisconnectedValuesMode.Threshold && (
 					<section className="control-container">
 						<Typography.Text className="section-heading">
-							Threshold Value
+							{t('disconnect_threshold_value')}
 						</Typography.Text>
 						<DisconnectValuesThresholdInput
 							value={thresholdSeconds}

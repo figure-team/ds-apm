@@ -189,7 +189,7 @@ describe('RightContainer - Alerts Section', () => {
 	it('renders alerts section for TIME_SERIES panel type', () => {
 		render(<RightContainer {...defaultProps} />);
 
-		const alertsSection = screen.getByText('Alerts').closest('section');
+		const alertsSection = screen.getByText('section_alerts').closest('section');
 		expect(alertsSection).toBeInTheDocument();
 		expect(alertsSection).toHaveClass('alerts-section');
 	});
@@ -200,7 +200,7 @@ describe('RightContainer - Alerts Section', () => {
 		expect(
 			screen.getByTestId('lucide-square-arrow-out-up-right'),
 		).toBeInTheDocument();
-		expect(screen.getByText('Alerts')).toBeInTheDocument();
+		expect(screen.getByText('section_alerts')).toBeInTheDocument();
 	});
 
 	it('calls onCreateAlertsHandler when alerts section is clicked', async () => {
@@ -212,7 +212,7 @@ describe('RightContainer - Alerts Section', () => {
 
 		render(<RightContainer {...defaultProps} />);
 
-		const alertsSection = screen.getByText('Alerts').closest('section');
+		const alertsSection = screen.getByText('section_alerts').closest('section');
 		expect(alertsSection).toBeInTheDocument();
 
 		await userEvent.click(alertsSection as HTMLElement);
@@ -239,7 +239,7 @@ describe('RightContainer - Alerts Section', () => {
 			/>,
 		);
 
-		expect(screen.getByText('Alerts')).toBeInTheDocument();
+		expect(screen.getByText('section_alerts')).toBeInTheDocument();
 	});
 
 	it('renders alerts section for BAR panel type', () => {
@@ -251,7 +251,7 @@ describe('RightContainer - Alerts Section', () => {
 			/>,
 		);
 
-		expect(screen.getByText('Alerts')).toBeInTheDocument();
+		expect(screen.getByText('section_alerts')).toBeInTheDocument();
 	});
 
 	it('does not render alerts section for TABLE panel type', () => {
@@ -263,7 +263,7 @@ describe('RightContainer - Alerts Section', () => {
 			/>,
 		);
 
-		expect(screen.queryByText('Alerts')).not.toBeInTheDocument();
+		expect(screen.queryByText('section_alerts')).not.toBeInTheDocument();
 	});
 
 	it('does not render alerts section for LIST panel type', () => {
@@ -275,7 +275,7 @@ describe('RightContainer - Alerts Section', () => {
 			/>,
 		);
 
-		expect(screen.queryByText('Alerts')).not.toBeInTheDocument();
+		expect(screen.queryByText('section_alerts')).not.toBeInTheDocument();
 	});
 
 	it('does not render alerts section for PIE panel type', () => {
@@ -287,7 +287,7 @@ describe('RightContainer - Alerts Section', () => {
 			/>,
 		);
 
-		expect(screen.queryByText('Alerts')).not.toBeInTheDocument();
+		expect(screen.queryByText('section_alerts')).not.toBeInTheDocument();
 	});
 
 	it('does not render alerts section for HISTOGRAM panel type', () => {
@@ -299,6 +299,6 @@ describe('RightContainer - Alerts Section', () => {
 			/>,
 		);
 
-		expect(screen.queryByText('Alerts')).not.toBeInTheDocument();
+		expect(screen.queryByText('section_alerts')).not.toBeInTheDocument();
 	});
 });

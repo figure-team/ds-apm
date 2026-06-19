@@ -1,0 +1,15 @@
+{
+	"url_updating_prefix": "Your workspace URL is being updated to",
+	"url_updating_suffix": ". This may take a few minutes.",
+	"visit_new_url": "Visit new URL",
+	"dismiss": "Dismiss",
+	"all_workspace_urls": "All Workspace URLs",
+	"edit_workspace_link": "Edit workspace link",
+	"edit_modal_title": "Edit Workspace Link",
+	"description": "Enter your preferred subdomain to create a unique URL for your team. Need help?",
+	"contact_support": "Contact support.",
+	"workspace_url_label": "Workspace URL",
+	"note_text": "Note that your previous URL still remains accessible. Your access credentials for the new URL remain the same.",
+	"help_message": "Hi Team, I need help with updating custom domain",
+	"apply_changes": "Apply Changes"
+}

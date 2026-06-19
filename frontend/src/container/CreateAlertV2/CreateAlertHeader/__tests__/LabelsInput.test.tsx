@@ -17,9 +17,9 @@ const defaultProps: LabelsInputProps = {
 	validateLabelsKey: mockValidateLabelsKey,
 };
 
-const ADD_LABELS_TEXT = '+ Add labels';
-const ENTER_KEY_PLACEHOLDER = 'Enter key';
-const ENTER_VALUE_PLACEHOLDER = 'Enter value';
+const ADD_LABELS_TEXT = 'v2_add_labels_btn';
+const ENTER_KEY_PLACEHOLDER = 'v2_label_key_placeholder';
+const ENTER_VALUE_PLACEHOLDER = 'v2_label_value_placeholder';
 
 const CLOSE_ICON_TEST_ID = 'close-icon';
 const SEVERITY_HIGH_TEXT = 'severity: high';

@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { Select, Switch, Typography } from 'antd';
+import { useTranslation } from 'react-i18next';
 import TimePreference from 'components/TimePreferenceDropDown';
 import { PANEL_TYPES } from 'constants/queryBuilder';
 import {
@@ -42,6 +43,7 @@ export default function VisualizationSettingsSection({
 	allowStackingBarChart,
 	allowFillSpans,
 }: VisualizationSettingsSectionProps): JSX.Element {
+	const { t } = useTranslation('dashboard');
 	const { currentQuery } = useQueryBuilder();
 	const [graphTypes, setGraphTypes] = useState<ItemsProps[]>(PanelTypesWithData);
 
@@ -61,12 +63,12 @@ export default function VisualizationSettingsSection({
 
 	return (
 		<SettingsSection
-			title="Visualization"
+			title={t('section_visualization')}
 			defaultOpen
 			icon={<LayoutDashboard size={14} />}
 		>
 			<section className="panel-type control-container">
-				<Typography.Text className="section-heading">Panel Type</Typography.Text>
+				<Typography.Text className="section-heading">{t('panel_type')}</Typography.Text>
 				<Select
 					onChange={setGraphHandler}
 					value={selectedGraph}
@@ -88,7 +90,7 @@ export default function VisualizationSettingsSection({
 			{allowPanelTimePreference && (
 				<section className="panel-time-preference control-container">
 					<Typography.Text className="section-heading">
-						Panel Time Preference
+						{t('panel_time_preference')}
 					</Typography.Text>
 					<TimePreference
 						{...{
@@ -101,7 +103,7 @@ export default function VisualizationSettingsSection({
 
 			{allowStackingBarChart && (
 				<section className="stack-chart control-container">
-					<Typography.Text className="section-heading">Stack series</Typography.Text>
+					<Typography.Text className="section-heading">{t('stack_series')}</Typography.Text>
 					<Switch
 						checked={stackedBarChart}
 						size="small"
@@ -113,9 +115,9 @@ export default function VisualizationSettingsSection({
 			{allowFillSpans && (
 				<section className="fill-gaps toggle-card">
 					<div className="toggle-card-text-container">
-						<Typography className="section-heading">Fill gaps</Typography>
+						<Typography className="section-heading">{t('fill_gaps')}</Typography>
 						<Typography.Text className="toggle-card-description">
-							Fill gaps in data with 0 for continuity
+							{t('fill_gaps_description')}
 						</Typography.Text>
 					</div>
 					<Switch

@@ -58,7 +58,7 @@ describe('ContextLinks Component', () => {
 
 			// Check that the add button is present
 			expect(
-				screen.getByRole('button', { name: /context link/i }),
+				screen.getByRole('button', { name: /add_context_link/i }),
 			).toBeInTheDocument();
 
 			// Check that all context link items are displayed
@@ -85,9 +85,9 @@ describe('ContextLinks Component', () => {
 			);
 
 			// Check that the add button is present and has correct text
-			const addButton = screen.getByRole('button', { name: /context link/i });
+			const addButton = screen.getByRole('button', { name: /add_context_link/i });
 			expect(addButton).toBeInTheDocument();
-			expect(addButton).toHaveTextContent('Context Link');
+			expect(addButton).toHaveTextContent('add_context_link');
 			expect(addButton).toHaveClass('add-context-link-button');
 		});
 	});
@@ -104,7 +104,7 @@ describe('ContextLinks Component', () => {
 			);
 
 			// Click the add button to open modal
-			const addButton = screen.getByRole('button', { name: /context link/i });
+			const addButton = screen.getByRole('button', { name: /add_context_link/i });
 			fireEvent.click(addButton);
 
 			// Check that modal content is displayed
@@ -126,12 +126,12 @@ describe('ContextLinks Component', () => {
 			);
 
 			// Click the add button to open modal
-			const addButton = screen.getByRole('button', { name: /context link/i });
+			const addButton = screen.getByRole('button', { name: /add_context_link/i });
 			fireEvent.click(addButton);
 
 			// Fill in the form fields using placeholder text
 			const labelInput = screen.getByPlaceholderText(
-				'View Traces details: {{_traceId}}',
+				'context_link_placeholder',
 			);
 			fireEvent.change(labelInput, { target: { value: 'New Link' } });
 			const urlInput = screen.getByPlaceholderText(
@@ -179,7 +179,7 @@ describe('ContextLinks Component', () => {
 			);
 
 			// Click the add button to open modal
-			const addButton = screen.getByRole('button', { name: /context link/i });
+			const addButton = screen.getByRole('button', { name: /add_context_link/i });
 			fireEvent.click(addButton);
 
 			// Modal should be visible
@@ -206,7 +206,7 @@ describe('ContextLinks Component', () => {
 			);
 
 			// Click the add button to open modal
-			const addButton = screen.getByRole('button', { name: /context link/i });
+			const addButton = screen.getByRole('button', { name: /add_context_link/i });
 			fireEvent.click(addButton);
 
 			// Click cancel button
@@ -233,16 +233,16 @@ describe('ContextLinks Component', () => {
 			);
 
 			// Click the add button to open modal
-			const addButton = screen.getByRole('button', { name: /context link/i });
+			const addButton = screen.getByRole('button', { name: /add_context_link/i });
 			fireEvent.click(addButton);
 
 			// Check that form field labels are present
-			expect(screen.getByText('Label')).toBeInTheDocument();
-			expect(screen.getByText('URL')).toBeInTheDocument();
+			expect(screen.getByText('context_link_label')).toBeInTheDocument();
+			expect(screen.getByText(/context_link_url/)).toBeInTheDocument();
 
 			// Check that form field inputs are present using placeholder text
 			const labelInput = screen.getByPlaceholderText(
-				'View Traces details: {{_traceId}}',
+				'context_link_placeholder',
 			);
 			const urlInput = screen.getByPlaceholderText(
 				'http://localhost/trace/{{_traceId}}',
@@ -262,7 +262,7 @@ describe('ContextLinks Component', () => {
 			);
 
 			// Click the add button to open modal
-			const addButton = screen.getByRole('button', { name: /context link/i });
+			const addButton = screen.getByRole('button', { name: /add_context_link/i });
 			fireEvent.click(addButton);
 
 			// Try to save without filling required fields
@@ -298,7 +298,7 @@ describe('ContextLinks Component', () => {
 
 			// Form should be pre-populated with existing data from the first context link
 			const labelInput = screen.getByPlaceholderText(
-				'View Traces details: {{_traceId}}',
+				'context_link_placeholder',
 			);
 			const urlInput = screen.getByPlaceholderText(
 				'http://localhost/trace/{{_traceId}}',
@@ -326,7 +326,7 @@ describe('ContextLinks Component', () => {
 			);
 
 			// Open modal to add new context link
-			const addButton = screen.getByRole('button', { name: /context link/i });
+			const addButton = screen.getByRole('button', { name: /add_context_link/i });
 			fireEvent.click(addButton);
 
 			// Type a URL with query parameters
@@ -339,8 +339,8 @@ describe('ContextLinks Component', () => {
 
 			// Wait for parameter parsing and display
 			await waitFor(() => {
-				expect(screen.getByText('Key')).toBeInTheDocument();
-				expect(screen.getByText('Value')).toBeInTheDocument();
+				expect(screen.getByText('context_link_key')).toBeInTheDocument();
+				expect(screen.getByText('context_link_value')).toBeInTheDocument();
 			});
 
 			// Verify all parameters are displayed
@@ -363,27 +363,27 @@ describe('ContextLinks Component', () => {
 			);
 
 			// Open modal
-			const addButton = screen.getByRole('button', { name: /context link/i });
+			const addButton = screen.getByRole('button', { name: /add_context_link/i });
 			fireEvent.click(addButton);
 
 			// Initially no parameters should be visible
-			expect(screen.queryByText('Key')).not.toBeInTheDocument();
+			expect(screen.queryByText('context_link_key')).not.toBeInTheDocument();
 
 			// Click "Add URL parameter" button
 			const addParamButton = screen.getByRole('button', {
-				name: /add url parameter/i,
+				name: /add_url_parameter/i,
 			});
 			fireEvent.click(addParamButton);
 
 			// Parameter table should now be visible
 			await waitFor(() => {
-				expect(screen.getByText('Key')).toBeInTheDocument();
-				expect(screen.getByText('Value')).toBeInTheDocument();
+				expect(screen.getByText('context_link_key')).toBeInTheDocument();
+				expect(screen.getByText('context_link_value')).toBeInTheDocument();
 			});
 
 			// Should have one empty parameter row
-			const keyInputs = screen.getAllByPlaceholderText('Key');
-			const valueInputs = screen.getAllByPlaceholderText('Value');
+			const keyInputs = screen.getAllByPlaceholderText('context_link_key');
+			const valueInputs = screen.getAllByPlaceholderText('context_link_value');
 			expect(keyInputs).toHaveLength(1);
 			expect(valueInputs).toHaveLength(1);
 		});
@@ -399,18 +399,18 @@ describe('ContextLinks Component', () => {
 			);
 
 			// Open modal
-			const addButton = screen.getByRole('button', { name: /context link/i });
+			const addButton = screen.getByRole('button', { name: /add_context_link/i });
 			fireEvent.click(addButton);
 
 			// Add a parameter
 			const addParamButton = screen.getByRole('button', {
-				name: /add url parameter/i,
+				name: /add_url_parameter/i,
 			});
 			fireEvent.click(addParamButton);
 
 			// Fill in parameter key and value
-			const keyInput = screen.getByPlaceholderText('Key');
-			const valueInput = screen.getAllByPlaceholderText('Value')[0];
+			const keyInput = screen.getByPlaceholderText('context_link_key');
+			const valueInput = screen.getAllByPlaceholderText('context_link_value')[0];
 
 			fireEvent.change(keyInput, { target: { value: 'search' } });
 			fireEvent.change(valueInput, { target: { value: 'query' } });
@@ -433,18 +433,18 @@ describe('ContextLinks Component', () => {
 			);
 
 			// Open modal
-			const addButton = screen.getByRole('button', { name: /context link/i });
+			const addButton = screen.getByRole('button', { name: /add_context_link/i });
 			fireEvent.click(addButton);
 
 			// Add a parameter
 			const addParamButton = screen.getByRole('button', {
-				name: /add url parameter/i,
+				name: /add_url_parameter/i,
 			});
 			fireEvent.click(addParamButton);
 
 			// Fill in parameter
-			const keyInput = screen.getByPlaceholderText('Key');
-			const valueInput = screen.getAllByPlaceholderText('Value')[0];
+			const keyInput = screen.getByPlaceholderText('context_link_key');
+			const valueInput = screen.getAllByPlaceholderText('context_link_value')[0];
 			fireEvent.change(keyInput, { target: { value: 'test' } });
 			fireEvent.change(valueInput, { target: { value: 'value' } });
 
@@ -482,18 +482,18 @@ describe('ContextLinks Component', () => {
 			);
 
 			// Open modal
-			const addButton = screen.getByRole('button', { name: /context link/i });
+			const addButton = screen.getByRole('button', { name: /add_context_link/i });
 			fireEvent.click(addButton);
 
 			// Add first parameter
 			const addParamButton = screen.getByRole('button', {
-				name: /add url parameter/i,
+				name: /add_url_parameter/i,
 			});
 			fireEvent.click(addParamButton);
 
 			// Fill first parameter
-			let keyInputs = screen.getAllByPlaceholderText('Key');
-			let valueInputs = screen.getAllByPlaceholderText('Value');
+			let keyInputs = screen.getAllByPlaceholderText('context_link_key');
+			let valueInputs = screen.getAllByPlaceholderText('context_link_value');
 			fireEvent.change(keyInputs[0], { target: { value: 'page' } });
 			fireEvent.change(valueInputs[0], { target: { value: '1' } });
 
@@ -501,8 +501,8 @@ describe('ContextLinks Component', () => {
 			fireEvent.click(addParamButton);
 
 			// Get updated inputs after adding second parameter
-			keyInputs = screen.getAllByPlaceholderText('Key');
-			valueInputs = screen.getAllByPlaceholderText('Value');
+			keyInputs = screen.getAllByPlaceholderText('context_link_key');
+			valueInputs = screen.getAllByPlaceholderText('context_link_value');
 
 			// Fill second parameter
 			fireEvent.change(keyInputs[1], { target: { value: 'size' } });
@@ -532,7 +532,7 @@ describe('ContextLinks Component', () => {
 			);
 
 			// Open modal
-			const addButton = screen.getByRole('button', { name: /context link/i });
+			const addButton = screen.getByRole('button', { name: /add_context_link/i });
 			fireEvent.click(addButton);
 
 			// Try to save with invalid URL
@@ -567,18 +567,18 @@ describe('ContextLinks Component', () => {
 			);
 
 			// Open modal
-			const addButton = screen.getByRole('button', { name: /context link/i });
+			const addButton = screen.getByRole('button', { name: /add_context_link/i });
 			fireEvent.click(addButton);
 
 			// Add parameter with special characters
 			const addParamButton = screen.getByRole('button', {
-				name: /add url parameter/i,
+				name: /add_url_parameter/i,
 			});
 			fireEvent.click(addParamButton);
 
 			// Fill parameter with special characters
-			const keyInput = screen.getByPlaceholderText('Key');
-			const valueInput = screen.getAllByPlaceholderText('Value')[0];
+			const keyInput = screen.getByPlaceholderText('context_link_key');
+			const valueInput = screen.getAllByPlaceholderText('context_link_value')[0];
 
 			fireEvent.change(keyInput, { target: { value: 'user@domain' } });
 			fireEvent.change(valueInput, { target: { value: 'John Doe & Co.' } });
@@ -601,7 +601,7 @@ describe('ContextLinks Component', () => {
 			);
 
 			// Open modal
-			const addButton = screen.getByRole('button', { name: /context link/i });
+			const addButton = screen.getByRole('button', { name: /add_context_link/i });
 			fireEvent.click(addButton);
 
 			// Type URL with template variable
@@ -614,7 +614,7 @@ describe('ContextLinks Component', () => {
 
 			// Wait for parameter parsing
 			await waitFor(() => {
-				expect(screen.getByText('Key')).toBeInTheDocument();
+				expect(screen.getByText('context_link_key')).toBeInTheDocument();
 			});
 
 			// Should parse template variable as parameter

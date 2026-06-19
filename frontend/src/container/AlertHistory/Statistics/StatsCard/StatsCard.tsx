@@ -3,6 +3,7 @@ import { Tooltip } from 'antd';
 import { QueryParams } from 'constants/query';
 import useUrlQuery from 'hooks/useUrlQuery';
 import { ArrowDownLeft, ArrowUpRight, Calendar } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { AlertRuleStats } from 'types/api/alerts/def';
 import { calculateChange } from 'utils/calculateChange';
 
@@ -24,6 +25,7 @@ function ChangePercentage({
 	direction,
 	duration,
 }: ChangePercentageProps): JSX.Element {
+	const { t } = useTranslation('alerts');
 	if (direction > 0) {
 		return (
 			<div className="change-percentage change-percentage--success">
@@ -31,7 +33,7 @@ function ChangePercentage({
 					<ArrowDownLeft size={14} color={Color.BG_FOREST_500} />
 				</div>
 				<div className="change-percentage__label">
-					{percentage}% vs Last {duration}
+					{percentage}{t('hist_pct_vs_last')} {duration}
 				</div>
 			</div>
 		);
@@ -43,7 +45,7 @@ function ChangePercentage({
 					<ArrowUpRight size={14} color={Color.BG_CHERRY_500} />
 				</div>
 				<div className="change-percentage__label">
-					{percentage}% vs Last {duration}
+					{percentage}{t('hist_pct_vs_last')} {duration}
 				</div>
 			</div>
 		);
@@ -51,7 +53,7 @@ function ChangePercentage({
 
 	return (
 		<div className="change-percentage change-percentage--no-previous-data">
-			<div className="change-percentage__label">no previous data</div>
+			<div className="change-percentage__label">{t('hist_no_previous_data')}</div>
 		</div>
 	);
 }

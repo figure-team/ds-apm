@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation } from 'react-query';
 import { Button, Modal, Skeleton, Tooltip, Typography } from 'antd';
 import logEvent from 'api/common/logEvent';
@@ -46,6 +47,7 @@ function IntegrationDetailHeader(
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	const { notifications } = useNotifications();
+	const { t } = useTranslation('integrations');
 
 	const showModal = (): void => {
 		setIsModalOpen(true);
@@ -242,7 +244,7 @@ function IntegrationDetailHeader(
 						<>
 							<div className="data-info">
 								<Typography.Text className="last-data">
-									Last recieved from
+									{t('detail.last_received_from')}
 								</Typography.Text>
 								<div className="connection-line" />
 								<Tooltip
@@ -257,7 +259,7 @@ function IntegrationDetailHeader(
 							</div>
 							<div className="data-info">
 								<Typography.Text className="last-data">
-									Last recieved at
+									{t('detail.last_received_at')}
 								</Typography.Text>
 								<div className="connection-line" />
 								<Tooltip
@@ -290,27 +292,16 @@ function IntegrationDetailHeader(
 					) : connectionState === ConnectionStates.TestingConnection ? (
 						<div className="data-test-connection">
 							<div className="last-data">
-								We have not received data from your {title} Instance yet. You need to
-								manually configure your {title} instance to start sending data to
-								SigNoz.
+								{t('detail.testing_no_data', { title })}
 							</div>
-							<div className="last-data">
-								If you have already configured your resources to send data, sit tight
-								and wait for the data to flow in, Or else, see the steps to configure
-								your resources to start sending data.
-							</div>
+							<div className="last-data">{t('detail.no_data_help')}</div>
 						</div>
 					) : isConnectionStateNotInstalled ? (
 						<div className="data-test-connection">
 							<div className="last-data">
-								You would need to manually configure your {title} instance to start
-								sending data to SigNoz.
+								{t('detail.not_installed_no_data', { title })}
 							</div>
-							<div className="last-data">
-								If you have already configured your resources to send data, sit tight
-								and wait for the data to flow in, Or else, see the steps to configure
-								your resources to start sending data.
-							</div>
+							<div className="last-data">{t('detail.no_data_help')}</div>
 						</div>
 					) : null}
 				</div>

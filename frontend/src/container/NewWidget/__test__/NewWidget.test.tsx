@@ -45,7 +45,7 @@ const checkStackSeriesState = (
 	container: HTMLElement,
 	expectedChecked: boolean,
 ): HTMLElement => {
-	expect(getByTextUtil(container, 'Stack series')).toBeInTheDocument();
+	expect(getByTextUtil(container, 'stack_series')).toBeInTheDocument();
 
 	const stackSeriesSection = container.querySelector(
 		'.stack-chart',
@@ -335,7 +335,7 @@ describe('Stacking bar in new panel', () => {
 		);
 
 		// Verify label is present
-		expect(getByText('Stack series')).toBeInTheDocument();
+		expect(getByText('stack_series')).toBeInTheDocument();
 
 		// Verify section exists
 		const section = container.querySelector('.stack-chart');
@@ -407,7 +407,7 @@ describe('when switching to BAR panel type', () => {
 		);
 
 		// Since we are on timeseries panel, stack series should be false
-		expect(screen.queryByText('Stack series')).not.toBeInTheDocument();
+		expect(screen.queryByText('stack_series')).not.toBeInTheDocument();
 
 		// switch back to Bar panel
 		const panelTypeDropdown2 = getByTestId('panel-change-select') as HTMLElement;

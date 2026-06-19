@@ -111,7 +111,7 @@ jest.mock('container/CreateAlertV2/utils', () => ({
 }));
 
 const TEST_STRINGS = {
-	ADD_THRESHOLD: 'Add Threshold',
+	ADD_THRESHOLD: 'v2_add_threshold',
 	AT_LEAST_ONCE: 'AT LEAST ONCE',
 	IS_ABOVE: 'ABOVE',
 } as const;
@@ -153,9 +153,9 @@ describe('AlertThreshold', () => {
 
 	it('renders the main condition sentence', () => {
 		renderAlertThreshold();
-		expect(screen.getByText('Send a notification when')).toBeInTheDocument();
-		expect(screen.getByText('the threshold(s)')).toBeInTheDocument();
-		expect(screen.getByText('during the')).toBeInTheDocument();
+		expect(screen.getByText('v2_send_notification_when')).toBeInTheDocument();
+		expect(screen.getByText('v2_the_thresholds')).toBeInTheDocument();
+		expect(screen.getByText('v2_during_the')).toBeInTheDocument();
 		expect(
 			screen.getByTestId('condensed-evaluation-settings-container'),
 		).toBeInTheDocument();
@@ -277,7 +277,7 @@ describe('AlertThreshold', () => {
 		renderAlertThreshold();
 
 		// Component should render even while channels are loading
-		expect(screen.getByText('Send a notification when')).toBeInTheDocument();
+		expect(screen.getByText('v2_send_notification_when')).toBeInTheDocument();
 	});
 
 	it('renders with correct initial state', () => {

@@ -83,5 +83,7 @@
 	"channel_name_required": "Channel name is mandatory",
 	"label_advanced_settings": "Advanced Settings",
 	"help_channel_title": "Customize the alert title using Go templates. e.g. {{ .CommonLabels.alertname }}, {{ .Status }}",
-	"help_channel_description": "Customize the message body using Go templates. Use {{ range .Alerts -}} to iterate over each alert."
+	"help_channel_description": "Customize the message body using Go templates. Use {{ range .Alerts -}} to iterate over each alert.",
+	"label_filter_notify_when": "Notify When (Optional)",
+	"label_filter_placeholder": "enter a text here"
 }

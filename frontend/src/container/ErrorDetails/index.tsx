@@ -152,7 +152,9 @@ function ErrorDetails(props: ErrorDetailsProps): JSX.Element {
 
 			<EventContainer>
 				<div>
-					<Typography>Event {errorDetail.errorId}</Typography>
+					<Typography>
+						{t('event')} {errorDetail.errorId}
+					</Typography>
 					<Typography>
 						{formatTimezoneAdjustedTimestamp(
 							errorDetail.timestamp,
