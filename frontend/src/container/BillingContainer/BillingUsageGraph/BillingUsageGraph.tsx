@@ -1,4 +1,5 @@
 import { useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import { Card, Flex, Typography } from 'antd';
 import Uplot from 'components/Uplot';
@@ -58,6 +59,7 @@ const calculateStartEndTime = (
 
 export function BillingUsageGraph(props: BillingUsageGraphProps): JSX.Element {
 	const { data, billAmount } = props;
+	const { t } = useTranslation(['billings']);
 	// Added this to fix the issue where breakdown with one day data are causing the bars to spread across multiple days
 	data?.details?.breakdown?.forEach((breakdown: any) => {
 		if (breakdown?.dayWiseBreakdown?.breakdown?.length === 1) {
@@ -206,7 +208,7 @@ export function BillingUsageGraph(props: BillingUsageGraphProps): JSX.Element {
 			<Flex justify="space-between">
 				<Flex vertical gap={6}>
 					<Typography.Text className="total-spent-title">
-						TOTAL SPENT
+						{t('total_spent')}
 					</Typography.Text>
 					<Typography.Text color={Color.BG_VANILLA_100} className="total-spent">
 						${numberFormatter.format(billAmount)}

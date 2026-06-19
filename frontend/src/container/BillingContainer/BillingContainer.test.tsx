@@ -73,7 +73,7 @@ describe('BillingContainer', () => {
 			// If the component schedules any setTimeout on mount, flush them:
 			jest.runOnlyPendingTimers();
 
-			expect(await screen.findByText('Free Trial')).toBeInTheDocument();
+			expect(await screen.findByText('free_trial')).toBeInTheDocument();
 			expect(await screen.findByText('billing')).toBeInTheDocument();
 			expect(await screen.findByText(/\$0/i)).toBeInTheDocument();
 
