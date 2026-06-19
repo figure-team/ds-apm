@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
 	Check,
 	ChevronDown,
@@ -32,12 +33,13 @@ function DomainUpdateToast({
 	url: string;
 }): JSX.Element {
 	const displayUrl = url?.split('://')[1] ?? url;
+	const { t } = useTranslation('customDomain');
 
 	return (
 		<div className="custom-domain-toast">
 			<span className="custom-domain-toast-message">
-				Your workspace URL is being updated to <strong>{displayUrl}</strong>. This
-				may take a few minutes.
+				{t('url_updating_prefix')} <strong>{displayUrl}</strong>
+				{t('url_updating_suffix')}
 			</span>
 			<div className="custom-domain-toast-actions">
 				<Button
@@ -50,7 +52,7 @@ function DomainUpdateToast({
 						window.open(url, '_blank', 'noopener,noreferrer');
 					}}
 				>
-					Visit new URL
+					{t('visit_new_url')}
 				</Button>
 				<Button
 					variant="ghost"
@@ -59,7 +61,7 @@ function DomainUpdateToast({
 					onClick={(): void => {
 						toast.dismiss(toastId);
 					}}
-					aria-label="Dismiss"
+					aria-label={t('dismiss')}
 					prefix={<X size={14} />}
 				/>
 			</div>
@@ -70,6 +72,7 @@ function DomainUpdateToast({
 export default function CustomDomainSettings(): JSX.Element {
 	const { org } = useAppContext();
 	const { timezone } = useTimezone();
+	const { t } = useTranslation('customDomain');
 
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 	const [isPollingEnabled, setIsPollingEnabled] = useState(false);
@@ -207,7 +210,7 @@ export default function CustomDomainSettings(): JSX.Element {
 							dropdownRender={(): JSX.Element => (
 								<div className="workspace-url-dropdown">
 									<span className="workspace-url-dropdown-header">
-										All Workspace URLs
+										{t('all_workspace_urls')}
 									</span>
 									<div className="workspace-url-dropdown-divider" />
 									{sortedHosts.map((host) => {
@@ -264,7 +267,7 @@ export default function CustomDomainSettings(): JSX.Element {
 					disabled={isFetchingHosts || isPollingEnabled}
 					onClick={(): void => setIsEditModalOpen(true)}
 				>
-					Edit workspace link
+					{t('edit_workspace_link')}
 				</Button>
 			</div>
 
