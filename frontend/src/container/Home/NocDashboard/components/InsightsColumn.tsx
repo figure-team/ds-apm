@@ -1,7 +1,11 @@
+import ROUTES from 'constants/routes';
+import { useSafeNavigate } from 'hooks/useSafeNavigate';
 import { ScrollText, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { NocLogLine, NocRca } from '../types';
+
+const CODE_RCA_RUNS_ROUTE = `${ROUTES.CODE_RCA_SETTINGS}?tab=runs`;
 import NocPanel from './NocPanel';
 
 const LEVEL_CLASS: Record<NocLogLine['level'], string> = {
@@ -29,6 +33,7 @@ export default function InsightsColumn({
 	logsError,
 }: InsightsColumnProps): JSX.Element {
 	const { t } = useTranslation('home');
+	const { safeNavigate } = useSafeNavigate();
 
 	const renderRca = (): JSX.Element => {
 		if (rcaLoading) {
@@ -61,12 +66,16 @@ export default function InsightsColumn({
 				{rca.actions.length > 0 ? (
 					<div className="noc-rca-actions">
 						{rca.actions.map((action, i) => (
-							<span
-								className={`noc-chip${i === 0 ? ' noc-chip-brand' : ''}`}
+							<button
+								type="button"
+								className={`noc-chip noc-chip-btn${
+									i === 0 ? ' noc-chip-brand' : ''
+								}`}
 								key={action}
+								onClick={(): void => safeNavigate(CODE_RCA_RUNS_ROUTE)}
 							>
 								{action}
-							</span>
+							</button>
 						))}
 					</div>
 				) : null}
@@ -109,6 +118,7 @@ export default function InsightsColumn({
 				icon={<ScrollText size={13} />}
 				title={t('noc_panel_logs')}
 				action={<span>{t('noc_action_explorer')}</span>}
+				onActionClick={(): void => safeNavigate(ROUTES.LOGS_EXPLORER)}
 			>
 				{renderLogs()}
 			</NocPanel>

@@ -1,3 +1,5 @@
+import ROUTES from 'constants/routes';
+import { useSafeNavigate } from 'hooks/useSafeNavigate';
 import { Activity } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -29,6 +31,7 @@ export default function ServiceHealthList({
 	isError,
 }: ServiceHealthListProps): JSX.Element {
 	const { t } = useTranslation('home');
+	const { safeNavigate } = useSafeNavigate();
 
 	const renderBody = (): JSX.Element => {
 		if (isLoading) {
@@ -75,6 +78,7 @@ export default function ServiceHealthList({
 			icon={<Activity size={13} />}
 			title={t('noc_panel_health')}
 			action={<span>{t('noc_action_services')}</span>}
+			onActionClick={(): void => safeNavigate(ROUTES.APPLICATION)}
 			className="noc-health-panel"
 		>
 			{renderBody()}

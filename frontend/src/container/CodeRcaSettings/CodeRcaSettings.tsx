@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Tabs } from 'antd';
 import { useAppContext } from 'providers/App/App';
+import { useHistory, useLocation } from 'react-router-dom';
 import { USER_ROLES } from 'types/roles';
 
 import ConfigTab from './ConfigTab';
@@ -8,10 +9,21 @@ import RunsTab from './RunsTab';
 
 import './CodeRcaSettings.styles.scss';
 
+const VALID_TABS = ['config', 'runs'];
+
 function CodeRcaSettings(): JSX.Element {
 	const { t } = useTranslation(['codeRca']);
 	const { user } = useAppContext();
 	const isAdmin = user.role === USER_ROLES.ADMIN;
+
+	const history = useHistory();
+	const { search } = useLocation();
+	const tabParam = new URLSearchParams(search).get('tab');
+	const activeTab = tabParam && VALID_TABS.includes(tabParam) ? tabParam : 'config';
+
+	const handleTabChange = (key: string): void => {
+		history.push({ search: `?tab=${key}` });
+	};
 
 	return (
 		<div className="code-rca-settings" data-testid="code-rca-settings">
@@ -20,7 +32,8 @@ function CodeRcaSettings(): JSX.Element {
 				<p className="code-rca-settings__header-subtitle">{t('header_subtitle')}</p>
 			</header>
 			<Tabs
-				defaultActiveKey="config"
+				activeKey={activeTab}
+				onChange={handleTabChange}
 				items={[
 					{
 						key: 'config',

@@ -1,3 +1,5 @@
+import ROUTES from 'constants/routes';
+import { useSafeNavigate } from 'hooks/useSafeNavigate';
 import { BarChart3, Siren, Zap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -35,6 +37,7 @@ export default function LeftRail({
 	alertsError,
 }: LeftRailProps): JSX.Element {
 	const { t } = useTranslation('home');
+	const { safeNavigate } = useSafeNavigate();
 
 	const renderAlerts = (): JSX.Element => {
 		if (alertsLoading) {
@@ -123,6 +126,7 @@ export default function LeftRail({
 				icon={<Siren size={13} />}
 				title={t('noc_panel_alerts')}
 				action={<span>{t('noc_action_view_all')}</span>}
+				onActionClick={(): void => safeNavigate(ROUTES.LIST_ALL_ALERT)}
 			>
 				{renderAlerts()}
 			</NocPanel>

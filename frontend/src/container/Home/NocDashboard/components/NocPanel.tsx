@@ -4,15 +4,35 @@ export default function NocPanel({
 	icon,
 	title,
 	action,
+	onActionClick,
 	children,
 	className,
 }: {
 	icon: ReactNode;
 	title: string;
 	action?: ReactNode;
+	onActionClick?: () => void;
 	children: ReactNode;
 	className?: string;
 }): JSX.Element {
+	const renderAction = (): ReactNode => {
+		if (!action) {
+			return null;
+		}
+		if (onActionClick) {
+			return (
+				<button
+					type="button"
+					className="noc-panel-action"
+					onClick={onActionClick}
+				>
+					{action}
+				</button>
+			);
+		}
+		return <div className="noc-panel-action">{action}</div>;
+	};
+
 	return (
 		<div className={`noc-panel${className ? ` ${className}` : ''}`}>
 			<div className="noc-panel-head">
@@ -20,7 +40,7 @@ export default function NocPanel({
 					<span className="noc-panel-icon">{icon}</span>
 					{title}
 				</div>
-				{action ? <div className="noc-panel-action">{action}</div> : null}
+				{renderAction()}
 			</div>
 			{children}
 		</div>

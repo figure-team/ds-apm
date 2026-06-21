@@ -191,6 +191,10 @@
 		color: var(--noc-txt2);
 	}
 	.noc-panel-action {
+		background: none;
+		border: none;
+		padding: 0;
+		font-family: inherit;
 		font-size: 11px;
 		color: var(--noc-txt3);
 		font-weight: 600;
@@ -379,6 +383,17 @@
 		&.noc-chip-brand {
 			border-color: var(--noc-brand-line);
 			color: var(--noc-brand);
+		}
+
+		&.noc-chip-btn {
+			font-family: inherit;
+			cursor: pointer;
+			transition: border-color 0.15s ease, color 0.15s ease;
+
+			&:hover {
+				border-color: var(--noc-brand-line);
+				color: var(--noc-brand);
+			}
 		}
 	}
 

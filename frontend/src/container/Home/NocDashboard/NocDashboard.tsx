@@ -26,7 +26,6 @@ export default function NocDashboard(): JSX.Element {
 					<button type="button" className="active">
 						PROD
 					</button>
-					<button type="button">STAGING</button>
 					<button type="button">DEV</button>
 				</div>
 				<div className="noc-toolbar-spacer" />
