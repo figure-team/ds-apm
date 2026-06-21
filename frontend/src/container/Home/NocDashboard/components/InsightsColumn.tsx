@@ -96,13 +96,18 @@ export default function InsightsColumn({
 		return (
 			<div className="noc-logs">
 				{logs.map((line, i) => (
-					<div className="noc-logline" key={`${line.ts}-${line.service}-${i}`}>
+					<button
+						type="button"
+						className="noc-logline noc-logline-btn"
+						key={`${line.ts}-${line.service}-${i}`}
+						onClick={(): void => safeNavigate(ROUTES.LOGS_EXPLORER)}
+					>
 						<span className={`noc-lv ${LEVEL_CLASS[line.level]}`}>{line.level}</span>
 						{line.service ? (
 							<span className="noc-log-svc">{line.service}</span>
 						) : null}
 						<span className="noc-log-tx">{line.message}</span>
-					</div>
+					</button>
 				))}
 			</div>
 		);

@@ -304,6 +304,22 @@
 			border-bottom: none;
 		}
 	}
+	.noc-alert-btn {
+		width: 100%;
+		text-align: left;
+		font-family: inherit;
+		color: inherit;
+		background: none;
+		border: 0;
+		border-bottom: 1px solid var(--noc-line);
+		border-radius: 6px;
+		cursor: pointer;
+		transition: background 0.15s ease;
+
+		&:hover {
+			background: var(--noc-panel2);
+		}
+	}
 	.noc-alert-bar {
 		width: 3px;
 		border-radius: 3px;
@@ -428,6 +444,20 @@
 	.noc-health-row.crit {
 		background: var(--noc-crit-soft);
 	}
+	.noc-health-row-btn {
+		width: 100%;
+		font-family: inherit;
+		color: inherit;
+		background: none;
+		border: 0;
+		border-bottom: 1px solid var(--noc-line);
+		cursor: pointer;
+		transition: background 0.15s ease;
+
+		&:hover {
+			background: var(--noc-panel2);
+		}
+	}
 	.noc-health-name {
 		flex: 1;
 		min-width: 0;
@@ -518,6 +548,23 @@
 		display: flex;
 		gap: 9px;
 		white-space: nowrap;
+	}
+	.noc-logline-btn {
+		width: 100%;
+		text-align: left;
+		font-family: inherit;
+		font-size: inherit;
+		color: inherit;
+		background: none;
+		border: 0;
+		padding: 1px 2px;
+		border-radius: 5px;
+		cursor: pointer;
+		transition: background 0.15s ease;
+
+		&:hover {
+			background: var(--noc-panel2);
+		}
 	}
 	.noc-lv {
 		font-weight: 800;

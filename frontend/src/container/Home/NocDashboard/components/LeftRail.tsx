@@ -52,7 +52,14 @@ export default function LeftRail({
 		return (
 			<>
 				{alerts.map((alert) => (
-					<div className="noc-alert" key={alert.id}>
+					<button
+						type="button"
+						className="noc-alert noc-alert-btn"
+						key={alert.id}
+						onClick={(): void =>
+							safeNavigate(`${ROUTES.ALERT_OVERVIEW}?ruleId=${alert.id}`)
+						}
+					>
 						<div className={`noc-alert-bar ${SEVERITY_CLASS[alert.severity]}`} />
 						<div className="noc-alert-body">
 							<div className="noc-alert-top">
@@ -64,7 +71,7 @@ export default function LeftRail({
 							{alert.meta ? <div className="noc-alert-meta">{alert.meta}</div> : null}
 						</div>
 						{alert.age ? <div className="noc-alert-time">{alert.age}</div> : null}
-					</div>
+					</button>
 				))}
 			</>
 		);

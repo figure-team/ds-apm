@@ -52,9 +52,15 @@ export default function ServiceHealthList({
 					<span className="noc-health-m">RPS</span>
 				</div>
 				{rows.map((row) => (
-					<div
-						className={`noc-health-row ${HEALTH_CLASS[row.health]}`}
+					<button
+						type="button"
+						className={`noc-health-row noc-health-row-btn ${
+							HEALTH_CLASS[row.health]
+						}`}
 						key={row.name}
+						onClick={(): void =>
+							safeNavigate(`${ROUTES.APPLICATION}/${encodeURIComponent(row.name)}`)
+						}
 					>
 						<span className="noc-health-name">
 							<span className={`noc-dot noc-${HEALTH_CLASS[row.health]}`} />
@@ -67,7 +73,7 @@ export default function ServiceHealthList({
 							{row.errPct.toFixed(2)}%
 						</span>
 						<span className="noc-health-m">{formatRps(row.rps)}</span>
-					</div>
+					</button>
 				))}
 			</div>
 		);
