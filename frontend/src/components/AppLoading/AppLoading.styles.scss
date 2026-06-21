@@ -46,7 +46,7 @@
 			width: 150px;
 			height: 12px;
 			border-radius: 2px;
-			color: var(--primary-background); // Primary blue color
+			color: var(--bg-robin-500); // KT 브랜드 레드 (부팅 시점엔 data-theme 미적용이라 --primary-background가 비어 폴백색이 나옴)
 			border: 2px solid;
 			position: relative;
 		}

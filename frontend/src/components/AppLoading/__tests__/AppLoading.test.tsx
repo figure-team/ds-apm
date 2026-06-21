@@ -8,13 +8,20 @@ jest.mock('../../../api/browser/localstorage/get', () => ({
 	default: jest.fn(),
 }));
 
+// Mirror the global react-i18next mock: t() returns the key so the tagline
+// is testable by its translation key without loading locale resources.
+jest.mock('react-i18next', () => ({
+	useTranslation: (): { t: (str: string) => string } => ({
+		t: (str: string): string => str,
+	}),
+}));
+
 // Access the mocked function
 const mockGet = getLocal as unknown as jest.Mock;
 
 describe('AppLoading', () => {
-	const SIGNOZ_TEXT = 'SigNoz';
-	const TAGLINE_TEXT =
-		'OpenTelemetry-Native Logs, Metrics and Traces in a single pane';
+	const SIGNOZ_TEXT = 'DS-APM';
+	const TAGLINE_TEXT = 'app_loading_tagline';
 	const CONTAINER_SELECTOR = '.app-loading-container';
 
 	beforeEach(() => {
