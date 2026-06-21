@@ -21,8 +21,6 @@ import { Tags } from 'types/reducer/trace';
 
 import { NocGoldenSignal, NocHealth, NocKpi, NocServiceRow } from '../types';
 
-const HOME_INTERVAL = 30 * 60 * 1000;
-
 // error rate thresholds (percent)
 const HEALTHY_ERR_PCT = 1;
 const CRITICAL_ERR_PCT = 5;
@@ -99,10 +97,11 @@ export interface UseNocOverviewResult {
 
 export default function useNocOverview(firingCount: number): UseNocOverviewResult {
 	const { t } = useTranslation('home');
-	const { selectedTime: globalSelectedInterval } = useSelector<
-		AppState,
-		GlobalReducer
-	>((state) => state.globalTime);
+	const {
+		maxTime,
+		minTime,
+		selectedTime: globalSelectedInterval,
+	} = useSelector<AppState, GlobalReducer>((state) => state.globalTime);
 
 	const { featureFlags } = useAppContext();
 	const dotMetricsEnabled =
@@ -115,19 +114,9 @@ export default function useNocOverview(firingCount: number): UseNocOverviewResul
 		[queries],
 	);
 
-	const timeRange = useMemo(() => {
-		const now = Date.now();
-		return { startTime: now - HOME_INTERVAL, endTime: now };
-	}, []);
-
 	const topLevelQueryKey: QueryKey = useMemo(
-		() => [
-			timeRange.startTime,
-			timeRange.endTime,
-			selectedTags,
-			globalSelectedInterval,
-		],
-		[timeRange.startTime, timeRange.endTime, selectedTags, globalSelectedInterval],
+		() => [minTime, maxTime, selectedTags, globalSelectedInterval],
+		[minTime, maxTime, selectedTags, globalSelectedInterval],
 	);
 
 	const {
@@ -135,8 +124,8 @@ export default function useNocOverview(firingCount: number): UseNocOverviewResul
 		isLoading: isTopLevelLoading,
 		isError: isTopLevelError,
 	} = useGetTopLevelOperations(topLevelQueryKey, {
-		start: timeRange.startTime * 1e6,
-		end: timeRange.endTime * 1e6,
+		start: minTime,
+		end: maxTime,
 	});
 
 	const topLevelOperations = useMemo(
@@ -158,11 +147,11 @@ export default function useNocOverview(firingCount: number): UseNocOverviewResul
 		queryKey: useMemo(
 			() => [
 				`noc-overview-${globalSelectedInterval}`,
-				timeRange.endTime,
-				timeRange.startTime,
+				maxTime,
+				minTime,
 				globalSelectedInterval,
 			],
-			[globalSelectedInterval, timeRange.endTime, timeRange.startTime],
+			[globalSelectedInterval, maxTime, minTime],
 		),
 		keepPreviousData: true,
 		enabled: topLevelOperations.length > 0,

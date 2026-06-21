@@ -131,16 +131,19 @@
 			animation: noc-pulse 1.8s infinite;
 		}
 	}
-	.noc-toolbar-pill {
+	/* embedded global time picker (DateTimeSelectionV2) */
+	.noc-time-select {
 		display: flex;
 		align-items: center;
-		gap: 7px;
-		background: var(--noc-panel2);
-		border: 1px solid var(--noc-line);
-		padding: 6px 12px;
-		border-radius: 8px;
-		font-size: 12px;
-		color: var(--noc-txt2);
+
+		.ant-form-inline {
+			flex-wrap: nowrap;
+		}
+
+		.refresh-actions {
+			display: flex;
+			align-items: center;
+		}
 	}
 
 	/* ---- layout ---- */

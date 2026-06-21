@@ -1,3 +1,4 @@
+import DateTimeSelectionV2 from 'container/TopNav/DateTimeSelectionV2';
 import { useIsDarkMode } from 'hooks/useDarkMode';
 import { useTranslation } from 'react-i18next';
 
@@ -33,7 +34,14 @@ export default function NocDashboard(): JSX.Element {
 					<span className="noc-live-pulse" />
 					{t('noc_live_ingesting')}
 				</div>
-				<div className="noc-toolbar-pill">⏱ {t('noc_time_range')}</div>
+				<div className="noc-time-select">
+					<DateTimeSelectionV2
+						showAutoRefresh
+						showRefreshText={false}
+						hideShareModal
+						defaultRelativeTime="30m"
+					/>
+				</div>
 			</div>
 
 			<div className="noc-console">
