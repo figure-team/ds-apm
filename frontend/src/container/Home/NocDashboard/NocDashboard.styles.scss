@@ -508,6 +508,9 @@
 		font-weight: 700;
 		color: var(--noc-txt);
 		margin-bottom: 7px;
+		min-width: 0;
+		overflow-wrap: anywhere;
+		word-break: break-word;
 	}
 	.noc-rca-ai {
 		font-size: 9px;
@@ -516,11 +519,14 @@
 		color: #fff;
 		padding: 2px 6px;
 		border-radius: 4px;
+		flex-shrink: 0;
 	}
 	.noc-rca-desc {
 		font-size: 11.5px;
 		color: var(--noc-txt2);
 		line-height: 1.6;
+		overflow-wrap: anywhere;
+		word-break: break-word;
 	}
 	.noc-rca-chips {
 		display: flex;
