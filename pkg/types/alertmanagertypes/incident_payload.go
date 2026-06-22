@@ -82,6 +82,7 @@ func SanitizeIncidentInfo(info IncidentInfo) IncidentInfo {
 		NextAction:       SanitizeIncidentValue(info.NextAction),
 		VendorRequest:    SanitizeIncidentValue(info.VendorRequest),
 		CustomerUpdate:   SanitizeIncidentValue(info.CustomerUpdate),
+		NotificationBody: SanitizeIncidentValue(info.NotificationBody),
 		SopID:            SanitizeIncidentValue(info.SopID),
 		SopURL:           SanitizeIncidentValue(info.SopURL),
 		SopSource:        SanitizeIncidentValue(info.SopSource),

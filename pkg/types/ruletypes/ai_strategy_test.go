@@ -1,6 +1,7 @@
 package ruletypes
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/SigNoz/signoz/pkg/types/alertmanagertypes"
@@ -275,6 +276,21 @@ func TestAIStrategyIncidentAnnotationsMapsFallbackWithoutFabricatedActions(t *te
 	require.NotContains(t, got, alertmanagertypes.IncidentAnnotationAIEvidenceRefs)
 }
 
+func TestAIStrategyIncidentAnnotationsEmitsNotificationBody(t *testing.T) {
+	s := AIStrategy{NotificationBody: "현황: 5xx 급증\n조치: SOP 1단계 확인"}
+	ann := AIStrategyIncidentAnnotations(s)
+	if got := ann[alertmanagertypes.IncidentAnnotationNotificationBody]; got != s.NotificationBody {
+		t.Fatalf("want %q, got %q", s.NotificationBody, got)
+	}
+}
+
+func TestAIStrategyIncidentAnnotationsOmitsEmptyNotificationBody(t *testing.T) {
+	ann := AIStrategyIncidentAnnotations(AIStrategy{})
+	if _, ok := ann[alertmanagertypes.IncidentAnnotationNotificationBody]; ok {
+		t.Fatalf("empty NotificationBody must not emit the annotation")
+	}
+}
+
 func validAIStrategyRequest() AIStrategyRequest {
 	source := validPilotManagedMarkdownSource()
 	doc := NewSOPDocumentFromManagedMarkdown(source, source.Documents[0], "payments", SOPApprovalStatusApproved)
@@ -312,4 +328,49 @@ func validAIStrategyRequest() AIStrategyRequest {
 
 func boolPointer(value bool) *bool {
 	return &value
+}
+
+func TestGenerateLocalAIStrategyFillsNotificationBody(t *testing.T) {
+	// Use validAIStrategyRequest which has a fully valid SOPDocument and matching
+	// tenant labels, so it reaches the NotificationBody assignment path.
+	req := validAIStrategyRequest()
+	s, _ := GenerateLocalAIStrategy(req)
+	if strings.TrimSpace(s.NotificationBody) == "" {
+		t.Fatalf("NotificationBody must be non-empty for SOP-bound local strategy")
+	}
+	if !strings.Contains(s.NotificationBody, req.SOPDocument.Title) {
+		t.Fatalf("NotificationBody should reference the SOP title, got: %q", s.NotificationBody)
+	}
+}
+
+func TestGenerateLocalAIStrategyBlankBodyWhenProviderDisabled(t *testing.T) {
+	disabled := false
+	req := AIStrategyRequest{
+		IncidentID:  "INC-2",
+		Labels:      map[string]string{"service.name": "shipping"},
+		SOPDocument: SOPDocument{SOPID: "SOP-1", Title: "t", Version: "v", BodyMarkdown: "- x"},
+		Controls:    AIStrategyControls{ProviderEnabled: &disabled},
+	}
+	s, _ := GenerateLocalAIStrategy(req)
+	if strings.TrimSpace(s.NotificationBody) != "" {
+		t.Fatalf("blocked strategy must have empty NotificationBody, got %q", s.NotificationBody)
+	}
+}
+
+func TestGenerateLocalAIStrategyBlankBodyWhenTenantScopeDenied(t *testing.T) {
+	// Mirror TestGenerateLocalAIStrategyBlocksCrossTenantSOP but assert NotificationBody is empty.
+	// The SOP's TenantScope is "payments/customer-a/prod" (from validAIStrategyRequest),
+	// but we change the labels to a different project/env so PilotTenantScopeAllows returns false.
+	req := validAIStrategyRequest()
+	req.Labels["project_id"] = "customer-b"
+	req.Labels["environment"] = "stage"
+
+	s, err := GenerateLocalAIStrategy(req)
+
+	require.NoError(t, err)
+	require.Equal(t, AIStrategyStatusBlockedByPolicy, s.Status)
+	require.Contains(t, s.Limitations, SOPTenantPolicyDeniedWarning)
+	if strings.TrimSpace(s.NotificationBody) != "" {
+		t.Fatalf("tenant-scope-denied strategy must have empty NotificationBody, got %q", s.NotificationBody)
+	}
 }

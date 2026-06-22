@@ -28,6 +28,8 @@ const (
 	IncidentAnnotationAIConfidence     = "ai_confidence"
 	IncidentAnnotationAILimitations    = "ai_limitations"
 	IncidentAnnotationAIEvidenceRefs   = "ai_evidence_refs"
+
+	IncidentAnnotationNotificationBody = "notification_body"
 )
 
 // IncidentInfo is the PM-friendly DS-APM/SI-SM incident context extracted
@@ -44,6 +46,7 @@ type IncidentInfo struct {
 	NextAction       string `json:"nextAction,omitempty" mapstructure:"next_action"`
 	VendorRequest    string `json:"vendorRequest,omitempty" mapstructure:"vendor_request"`
 	CustomerUpdate   string `json:"customerUpdate,omitempty" mapstructure:"customer_update"`
+	NotificationBody string `json:"notificationBody,omitempty" mapstructure:"notification_body"`
 	SopID            string `json:"sopId,omitempty" mapstructure:"sop_id"`
 	SopURL           string `json:"sopUrl,omitempty" mapstructure:"sop_url"`
 	SopSource        string `json:"sopSource,omitempty" mapstructure:"sop_source"`
@@ -73,6 +76,7 @@ func BuildIncidentInfo(labels, annotations template.KV) IncidentInfo {
 		NextAction:       annotations[IncidentAnnotationNextAction],
 		VendorRequest:    annotations[IncidentAnnotationVendorRequest],
 		CustomerUpdate:   annotations[IncidentAnnotationCustomerUpdate],
+		NotificationBody: annotations[IncidentAnnotationNotificationBody],
 		SopID:            labels[IncidentLabelSopID],
 		SopURL:           annotations[IncidentAnnotationSopURL],
 		SopSource:        annotations[IncidentAnnotationSopSource],
@@ -102,6 +106,7 @@ func (i IncidentInfo) IsZero() bool {
 		i.NextAction == "" &&
 		i.VendorRequest == "" &&
 		i.CustomerUpdate == "" &&
+		i.NotificationBody == "" &&
 		i.SopID == "" &&
 		i.SopURL == "" &&
 		i.SopSource == "" &&

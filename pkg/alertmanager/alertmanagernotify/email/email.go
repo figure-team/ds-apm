@@ -9,6 +9,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	htmlpkg "html"
 	"log/slog"
 	"math/rand"
 	"mime"
@@ -217,6 +218,7 @@ func (n *Email) Notify(ctx context.Context, as ...*types.Alert) (bool, error) {
 		data    = notify.GetTemplateData(ctx, n.tmpl, as, n.logger)
 		tmpl    = notify.TmplText(n.tmpl, data, &tmplErr)
 	)
+	aiNotif, aiOK := alertmanagertypes.ResolveSOPBoundNotification(data.CommonAnnotations)
 	from := tmpl(n.conf.From)
 	if tmplErr != nil {
 		return false, errors.WrapInternalf(tmplErr, errors.CodeInternal, "execute 'from' template")
@@ -266,6 +268,9 @@ func (n *Email) Notify(ctx context.Context, as ...*types.Alert) (bool, error) {
 		value, err := n.tmpl.ExecuteTextString(t, data)
 		if err != nil {
 			return false, errors.WrapInternalf(err, errors.CodeInternal, "execute %q header template", header)
+		}
+		if header == "Subject" && aiOK && aiNotif.Title != "" {
+			value = aiNotif.Title
 		}
 		fmt.Fprintf(buffer, "%s: %s\r\n", header, mime.QEncoding.Encode("utf-8", value))
 	}
@@ -336,6 +341,12 @@ func (n *Email) Notify(ctx context.Context, as ...*types.Alert) (bool, error) {
 		if err != nil {
 			return false, errors.WrapInternalf(err, errors.CodeInternal, "execute text template")
 		}
+		if aiOK {
+			body = aiNotif.Body
+			if aiNotif.CustomerNotice != "" {
+				body = body + "\n\n" + alertmanagertypes.CollapsibleNoticeLabel + "\n" + aiNotif.CustomerNotice
+			}
+		}
 		qw := quotedprintable.NewWriter(w)
 		_, err = qw.Write([]byte(body))
 		if err != nil {
@@ -361,6 +372,9 @@ func (n *Email) Notify(ctx context.Context, as ...*types.Alert) (bool, error) {
 		body, err := n.tmpl.ExecuteHTMLString(n.conf.HTML, data)
 		if err != nil {
 			return false, errors.WrapInternalf(err, errors.CodeInternal, "execute html template")
+		}
+		if aiOK {
+			body = emailAIHTMLBody(aiNotif)
 		}
 		qw := quotedprintable.NewWriter(w)
 		_, err = qw.Write([]byte(body))
@@ -439,6 +453,24 @@ func (n *Email) getAuthSecret() (string, error) {
 		return string(content), nil
 	}
 	return string(n.conf.AuthSecret), nil
+}
+
+// emailAIHTMLBody renders the AI main body as HTML and wraps the customer
+// notice in a <details><summary>자세히보기</summary>…</details> collapsible.
+func emailAIHTMLBody(n alertmanagertypes.SOPBoundNotification) string {
+	esc := func(s string) string {
+		return strings.ReplaceAll(htmlpkg.EscapeString(s), "\n", "<br>")
+	}
+	var sb strings.Builder
+	sb.WriteString("<div>")
+	sb.WriteString(esc(n.Body))
+	if n.CustomerNotice != "" {
+		sb.WriteString("<details><summary>자세히보기</summary><div>")
+		sb.WriteString(esc(n.CustomerNotice))
+		sb.WriteString("</div></details>")
+	}
+	sb.WriteString("</div>")
+	return sb.String()
 }
 
 func incidentHeaderName(key string) string {

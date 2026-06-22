@@ -693,6 +693,173 @@ func TestPagerDutyTimeout(t *testing.T) {
 	}
 }
 
+// TestPagerDutyUsesAIContentWhenBound verifies that when CommonAnnotations
+// contain a notification_body (SOP-bound), the outgoing v2 payload uses
+// sop_title as the summary and injects notification_body + customer_update
+// into custom_details.
+func TestPagerDutyUsesAIContentWhenBound(t *testing.T) {
+	type capturedEvent struct {
+		Payload struct {
+			Summary       string         `json:"summary"`
+			CustomDetails map[string]any `json:"custom_details"`
+		} `json:"payload"`
+	}
+
+	var captured capturedEvent
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.NoError(t, json.NewDecoder(r.Body).Decode(&captured))
+		w.WriteHeader(http.StatusAccepted)
+	}))
+	defer server.Close()
+
+	u, err := url.Parse(server.URL)
+	require.NoError(t, err)
+
+	notifier, err := New(
+		&config.PagerdutyConfig{
+			RoutingKey: config.Secret("01234567890123456789012345678901"),
+			URL:        &config.URL{URL: u},
+			HTTPConfig: &commoncfg.HTTPClientConfig{},
+		},
+		test.CreateTmpl(t),
+		promslog.NewNopLogger(),
+	)
+	require.NoError(t, err)
+
+	ctx := notify.WithGroupKey(context.Background(), "sop-bound-test")
+
+	alert := &types.Alert{
+		Alert: model.Alert{
+			Labels: model.LabelSet{
+				"alertname": "ShippingLatencyHigh",
+			},
+			Annotations: model.LabelSet{
+				model.LabelName(alertmanagertypes.IncidentAnnotationSopTitle):         "Shipping 5xx 대응",
+				model.LabelName(alertmanagertypes.IncidentAnnotationNotificationBody): "## 현황\n서비스 영향 중",
+				model.LabelName(alertmanagertypes.IncidentAnnotationCustomerUpdate):   "[안내] 점검 중",
+			},
+			StartsAt: time.Now(),
+			EndsAt:   time.Now().Add(time.Hour),
+		},
+	}
+
+	_, err = notifier.Notify(ctx, alert)
+	require.NoError(t, err)
+
+	require.Equal(t, "Shipping 5xx 대응", captured.Payload.Summary)
+	require.Equal(t, "## 현황\n서비스 영향 중", captured.Payload.CustomDetails["notification_body"])
+	require.Equal(t, "[안내] 점검 중", captured.Payload.CustomDetails["customer_update"])
+}
+
+// TestPagerDutyUsesAIContentWhenBoundV1 verifies the same logic for the v1
+// API path: SOP-bound description + details keys.
+func TestPagerDutyUsesAIContentWhenBoundV1(t *testing.T) {
+	type capturedEvent struct {
+		Description string         `json:"description"`
+		Details     map[string]any `json:"details"`
+	}
+
+	var captured capturedEvent
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.NoError(t, json.NewDecoder(r.Body).Decode(&captured))
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	notifier, err := New(
+		&config.PagerdutyConfig{
+			ServiceKey: config.Secret("01234567890123456789012345678901"),
+			HTTPConfig: &commoncfg.HTTPClientConfig{},
+		},
+		test.CreateTmpl(t),
+		promslog.NewNopLogger(),
+	)
+	require.NoError(t, err)
+	notifier.apiV1 = server.URL
+
+	ctx := notify.WithGroupKey(context.Background(), "sop-bound-v1-test")
+
+	alert := &types.Alert{
+		Alert: model.Alert{
+			Labels: model.LabelSet{
+				"alertname": "ShippingLatencyHighV1",
+			},
+			Annotations: model.LabelSet{
+				model.LabelName(alertmanagertypes.IncidentAnnotationSopTitle):         "Shipping 5xx 대응",
+				model.LabelName(alertmanagertypes.IncidentAnnotationNotificationBody): "## 현황\n서비스 영향 중",
+				model.LabelName(alertmanagertypes.IncidentAnnotationCustomerUpdate):   "[안내] 점검 중",
+			},
+			StartsAt: time.Now(),
+			EndsAt:   time.Now().Add(time.Hour),
+		},
+	}
+
+	_, err = notifier.Notify(ctx, alert)
+	require.NoError(t, err)
+
+	require.Equal(t, "Shipping 5xx 대응", captured.Description)
+	require.Equal(t, "## 현황\n서비스 영향 중", captured.Details["notification_body"])
+	require.Equal(t, "[안내] 점검 중", captured.Details["customer_update"])
+}
+
+// TestPagerDutyUsesTemplateWhenUnbound is a regression test: when no
+// notification_body annotation is present (unbound alert), the description
+// falls back to the configured template and no AI keys appear in details.
+func TestPagerDutyUsesTemplateWhenUnbound(t *testing.T) {
+	type capturedEvent struct {
+		Payload struct {
+			Summary       string         `json:"summary"`
+			CustomDetails map[string]any `json:"custom_details"`
+		} `json:"payload"`
+	}
+
+	var captured capturedEvent
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.NoError(t, json.NewDecoder(r.Body).Decode(&captured))
+		w.WriteHeader(http.StatusAccepted)
+	}))
+	defer server.Close()
+
+	u, err := url.Parse(server.URL)
+	require.NoError(t, err)
+
+	notifier, err := New(
+		&config.PagerdutyConfig{
+			RoutingKey: config.Secret("01234567890123456789012345678901"),
+			URL:        &config.URL{URL: u},
+			HTTPConfig: &commoncfg.HTTPClientConfig{},
+		},
+		test.CreateTmpl(t),
+		promslog.NewNopLogger(),
+	)
+	require.NoError(t, err)
+
+	ctx := notify.WithGroupKey(context.Background(), "unbound-test")
+
+	alert := &types.Alert{
+		Alert: model.Alert{
+			Labels: model.LabelSet{
+				"alertname": "PlainAlert",
+			},
+			Annotations: model.LabelSet{
+				// No notification_body → unbound; only a plain annotation present.
+				"summary": "plain alert summary",
+			},
+			StartsAt: time.Now(),
+			EndsAt:   time.Now().Add(time.Hour),
+		},
+	}
+
+	_, err = notifier.Notify(ctx, alert)
+	require.NoError(t, err)
+
+	// AI keys must not appear when unbound.
+	_, hasNotifBody := captured.Payload.CustomDetails["notification_body"]
+	_, hasCustomerUpdate := captured.Payload.CustomDetails["customer_update"]
+	require.False(t, hasNotifBody, "notification_body should not be present for unbound alert")
+	require.False(t, hasCustomerUpdate, "customer_update should not be present for unbound alert")
+}
+
 func TestRenderDetails(t *testing.T) {
 	type args struct {
 		details map[string]any

@@ -220,6 +220,97 @@ func TestWebhookURLTemplating(t *testing.T) {
 	}
 }
 
+// TestWebhookNotificationBodyInPayload is the regression guard for I1:
+// when an alert carries the notification_body annotation the serialized webhook
+// payload must include incident.notificationBody; when absent it must be omitted.
+func TestWebhookNotificationBodyInPayload(t *testing.T) {
+	type incidentBlock struct {
+		NotificationBody string `json:"notificationBody"`
+		CustomerUpdate   string `json:"customerUpdate"`
+	}
+	type webhookPayload struct {
+		Incident *incidentBlock `json:"incident"`
+	}
+
+	makeNotifier := func(t *testing.T, srvURL string) *Notifier {
+		t.Helper()
+		n, err := New(
+			&config.WebhookConfig{
+				URL:        config.SecretTemplateURL(srvURL),
+				HTTPConfig: &commoncfg.HTTPClientConfig{},
+			},
+			test.CreateTmpl(t),
+			promslog.NewNopLogger(),
+		)
+		require.NoError(t, err)
+		return n
+	}
+
+	baseLabels := model.LabelSet{
+		"alertname": "CheckoutLatencyHigh",
+		model.LabelName(alertmanagertypes.IncidentLabelProjectID):   "customer-a",
+		model.LabelName(alertmanagertypes.IncidentLabelEnvironment): "prod",
+	}
+
+	t.Run("notification_body present when annotation set", func(t *testing.T) {
+		var got webhookPayload
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			require.NoError(t, json.NewDecoder(r.Body).Decode(&got))
+			w.WriteHeader(http.StatusOK)
+		}))
+		defer srv.Close()
+
+		ctx := context.Background()
+		ctx = notify.WithGroupKey(ctx, "test-group")
+		ctx = notify.WithGroupLabels(ctx, model.LabelSet{"alertname": "CheckoutLatencyHigh"})
+
+		_, err := makeNotifier(t, srv.URL).Notify(ctx, &types.Alert{
+			Alert: model.Alert{
+				Labels: baseLabels,
+				Annotations: model.LabelSet{
+					model.LabelName(alertmanagertypes.IncidentAnnotationNotificationBody): "결제 서비스 지연 발생. SOP 기준으로 대응 중입니다.",
+					model.LabelName(alertmanagertypes.IncidentAnnotationCustomerUpdate):   "Payment latency is under investigation.",
+				},
+				StartsAt: time.Now(),
+				EndsAt:   time.Now().Add(time.Hour),
+			},
+		})
+		require.NoError(t, err)
+		require.NotNil(t, got.Incident)
+		require.Equal(t, "결제 서비스 지연 발생. SOP 기준으로 대응 중입니다.", got.Incident.NotificationBody,
+			"notification_body annotation must survive into incident.notificationBody in the webhook payload")
+		require.Equal(t, "Payment latency is under investigation.", got.Incident.CustomerUpdate)
+	})
+
+	t.Run("notification_body absent when annotation not set", func(t *testing.T) {
+		var got webhookPayload
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			require.NoError(t, json.NewDecoder(r.Body).Decode(&got))
+			w.WriteHeader(http.StatusOK)
+		}))
+		defer srv.Close()
+
+		ctx := context.Background()
+		ctx = notify.WithGroupKey(ctx, "test-group")
+		ctx = notify.WithGroupLabels(ctx, model.LabelSet{"alertname": "CheckoutLatencyHigh"})
+
+		_, err := makeNotifier(t, srv.URL).Notify(ctx, &types.Alert{
+			Alert: model.Alert{
+				Labels: baseLabels,
+				Annotations: model.LabelSet{
+					model.LabelName(alertmanagertypes.IncidentAnnotationCustomerUpdate): "Payment latency is under investigation.",
+				},
+				StartsAt: time.Now(),
+				EndsAt:   time.Now().Add(time.Hour),
+			},
+		})
+		require.NoError(t, err)
+		require.NotNil(t, got.Incident)
+		require.Empty(t, got.Incident.NotificationBody,
+			"incident.notificationBody must be absent when the annotation is not set")
+	})
+}
+
 func TestWebhookIncludesIncidentContext(t *testing.T) {
 	var payload struct {
 		Incident *alertmanagertypes.IncidentInfo `json:"incident"`

@@ -1187,3 +1187,164 @@ func TestEmailImplicitTLS(t *testing.T) {
 func ptrTo(b bool) *bool {
 	return &b
 }
+
+// capturingNotify sends a single alert via a capturing SMTP server and returns
+// the raw SMTP DATA payload as a string.
+func capturingNotify(t *testing.T, cfg *config.EmailConfig, as ...*types.Alert) string {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	t.Cleanup(cancel)
+
+	messages := make(chan string, 1)
+	srv, l, err := capturingSMTPServer(t, messages)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = srv.Shutdown(ctx) })
+
+	done := make(chan struct{})
+	go func() {
+		_ = srv.Serve(l)
+		close(done)
+	}()
+	require.Eventuallyf(t, func() bool {
+		c, err := smtp.Dial(srv.Addr)
+		if err != nil {
+			return false
+		}
+		_ = c.Close()
+		return true
+	}, 10*time.Second, 100*time.Millisecond, "mock SMTP server failed to start")
+
+	addr := l.Addr().(*net.TCPAddr)
+	cfg.Smarthost = config.HostPort{Host: addr.IP.String(), Port: strconv.Itoa(addr.Port)}
+	if cfg.RequireTLS == nil {
+		cfg.RequireTLS = new(bool)
+	}
+	if cfg.Headers == nil {
+		cfg.Headers = make(map[string]string)
+	}
+
+	tmpl, err := template.FromGlobs([]string{})
+	require.NoError(t, err)
+	tmpl.ExternalURL, _ = url.Parse("http://am")
+
+	e := New(cfg, tmpl, promslog.NewNopLogger())
+	retry, err := e.Notify(ctx, as...)
+	require.NoError(t, err)
+	require.False(t, retry)
+
+	var raw string
+	select {
+	case raw = <-messages:
+	case <-time.After(3 * time.Second):
+		t.Fatal("timed out waiting for SMTP message")
+	}
+	require.NoError(t, srv.Shutdown(ctx))
+	<-done
+	return raw
+}
+
+// boundAlert returns an alert carrying all annotation keys that
+// ResolveSOPBoundNotification needs to return ok=true.
+func boundAlert() *types.Alert {
+	return &types.Alert{
+		Alert: model.Alert{
+			Labels: model.LabelSet{"alertname": "5xxSpike"},
+			Annotations: model.LabelSet{
+				model.LabelName(alertmanagertypes.IncidentAnnotationSopTitle):        "Shipping 5xx 대응",
+				model.LabelName(alertmanagertypes.IncidentAnnotationNotificationBody): "## 현황\n5xx 에러율 급증",
+				model.LabelName(alertmanagertypes.IncidentAnnotationCustomerUpdate):  "[안내] 점검 중",
+			},
+			StartsAt: time.Now(),
+			EndsAt:   time.Now().Add(time.Hour),
+		},
+	}
+}
+
+// TestEmailAIHTMLBody tests the pure HTML-rendering helper directly.
+func TestEmailAIHTMLBody(t *testing.T) {
+	notif := alertmanagertypes.SOPBoundNotification{
+		Body:           "현황\n<script>xss</script>",
+		CustomerNotice: "[안내] 점검 중\n세부사항",
+	}
+	got := emailAIHTMLBody(notif)
+
+	require.Contains(t, got, "현황<br>&lt;script&gt;xss&lt;/script&gt;", "body escaped and newlines→<br>")
+	require.Contains(t, got, "<details>", "has details element")
+	require.Contains(t, got, "<summary>자세히보기</summary>", "has summary label")
+	require.Contains(t, got, "[안내] 점검 중<br>세부사항", "customer notice escaped and newlines→<br>")
+	require.Contains(t, got, "</details>", "closes details element")
+}
+
+// TestEmailAIHTMLBodyNoCustomerNotice verifies <details> is omitted when CustomerNotice is empty.
+func TestEmailAIHTMLBodyNoCustomerNotice(t *testing.T) {
+	notif := alertmanagertypes.SOPBoundNotification{
+		Body:           "본문",
+		CustomerNotice: "",
+	}
+	got := emailAIHTMLBody(notif)
+
+	require.Contains(t, got, "본문")
+	require.NotContains(t, got, "<details>")
+	require.NotContains(t, got, "<summary>")
+}
+
+// TestEmailUsesAIContentWhenBound verifies Subject/Text/HTML are overridden
+// from SOP-bound annotations.
+func TestEmailUsesAIContentWhenBound(t *testing.T) {
+	cfg := &config.EmailConfig{
+		From: "alertmanager@system",
+		To:   "sre@company",
+		Headers: map[string]string{
+			"Subject": "{{ len .Alerts }} {{ .Status }} alert(s)",
+		},
+		Text: "template text body",
+		HTML: "template html body",
+	}
+
+	raw := capturingNotify(t, cfg, boundAlert())
+
+	// Subject line must contain the AI title encoded in RFC 2047 Q-encoding.
+	// "Shipping 5xx 대응" → "Shipping_5xx_=EB=8C=80=EC=9D=91" inside =?utf-8?q?…?=
+	require.Contains(t, raw, "Subject:", "Subject header must be present")
+	require.Contains(t, raw, "Shipping_5xx_", "Subject should contain AI title (Q-encoded spaces→underscores)")
+
+	// Text body: AI body + collapsible label + customer notice (QP-encoded).
+	// "현황" in QP = =ED=98=84=ED=99=A9
+	require.Contains(t, raw, "=ED=98=84=ED=99=A9", "text body should contain AI body (QP-encoded 현황)")
+	// CollapsibleNoticeLabel "▼ 고객 공지 (자세히보기)" will be QP-encoded; check ▼ prefix
+	require.Contains(t, raw, "=E2=96=BC", "text body should contain QP-encoded ▼ (CollapsibleNoticeLabel)")
+
+	// HTML body: <details> collapsible present.
+	require.Contains(t, raw, "<details>")
+	require.Contains(t, raw, "<summary>")
+}
+
+// TestEmailUsesTemplateWhenUnbound confirms that, without notification_body,
+// Subject/Text/HTML stay as the template renders them (fail-open).
+func TestEmailUsesTemplateWhenUnbound(t *testing.T) {
+	unboundAlert := &types.Alert{
+		Alert: model.Alert{
+			Labels:   model.LabelSet{"alertname": "MemHigh"},
+			StartsAt: time.Now(),
+			EndsAt:   time.Now().Add(time.Hour),
+		},
+	}
+
+	cfg := &config.EmailConfig{
+		From: "alertmanager@system",
+		To:   "sre@company",
+		Headers: map[string]string{
+			"Subject": "TEMPLATE_SUBJECT",
+		},
+		Text: "TEMPLATE_TEXT",
+		HTML: "TEMPLATE_HTML",
+	}
+
+	raw := capturingNotify(t, cfg, unboundAlert)
+
+	require.Contains(t, raw, "TEMPLATE_SUBJECT", "subject should use template when unbound")
+	require.Contains(t, raw, "TEMPLATE_TEXT", "text body should use template when unbound")
+	require.Contains(t, raw, "TEMPLATE_HTML", "html body should use template when unbound")
+	require.NotContains(t, raw, "<details>", "no AI html when unbound")
+	require.NotContains(t, raw, alertmanagertypes.CollapsibleNoticeLabel, "no collapsible label when unbound")
+}

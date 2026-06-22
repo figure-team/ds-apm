@@ -167,6 +167,21 @@ func TestDraft_GroundedCitation(t *testing.T) {
 		"downgrade must explain the missing SOP grounding")
 }
 
+func TestParseMapsNotificationBody(t *testing.T) {
+	raw := `{"headline":"h","notificationBody":"## 현황\n- 5xx 급증","customerUpdateDraft":"[안내] ...","confidence":"low","status":"evidence_unavailable","limitations":["e"]}`
+	req := ruletypes.AIStrategyRequest{
+		IncidentID:  "INC-1",
+		SOPDocument: ruletypes.SOPDocument{SOPID: "SOP-1", Version: "v1"},
+	}
+	s, err := Parse(raw, req, "test-model")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if s.NotificationBody != "## 현황\n- 5xx 급증" {
+		t.Fatalf("notificationBody not mapped, got %q", s.NotificationBody)
+	}
+}
+
 func TestParse_AuditFieldsPopulated(t *testing.T) {
 	strategy, err := Parse(happyJSON, parseReq, "gpt-4o-mini")
 	require.NoError(t, err)

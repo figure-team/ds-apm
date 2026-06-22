@@ -40,6 +40,13 @@ const (
 
 type AIStrategyRequest struct {
 	StrategyID       string             `json:"strategyId,omitempty"`
+	// OrgID is the authoritative organization identifier (SigNoz org UUID).
+	// Callers that already know the org (e.g. the dispatch hook, which holds
+	// the per-org dispatcher's orgID) should set it so a store-aware generator
+	// can resolve the per-org AI config directly, rather than re-deriving the
+	// org from Labels. Empty is tolerated: store-aware generators fall back to
+	// label-based org resolution.
+	OrgID            string             `json:"orgId,omitempty"`
 	IncidentID       string             `json:"incidentId"`
 	AlertFingerprint string             `json:"alertFingerprint,omitempty"`
 	Language         string             `json:"language,omitempty"`
@@ -99,6 +106,7 @@ type AIStrategy struct {
 	Hypotheses          []AIHypothesis  `json:"hypotheses,omitempty"`
 	FirstActions        []AIFirstAction `json:"firstActions,omitempty"`
 	CustomerUpdateDraft string          `json:"customerUpdateDraft,omitempty"`
+	NotificationBody    string          `json:"notificationBody,omitempty"`
 	VendorRequestDraft  string          `json:"vendorRequestDraft,omitempty"`
 	Confidence          string          `json:"confidence"`
 	EvidenceRefs        []AIEvidenceRef `json:"evidenceRefs,omitempty"`
@@ -185,6 +193,7 @@ func GenerateLocalAIStrategy(req AIStrategyRequest) (AIStrategy, error) {
 		return strategy, ValidateAIStrategy(strategy)
 	}
 
+	strategy.NotificationBody = notificationBodyFromSOP(req.SOPDocument, req.Labels)
 	firstActionText := firstActionFromSOP(req.SOPDocument)
 	sopStepRef := req.SOPDocument.SOPID + "#1"
 	if len(req.EvidenceRefs) == 0 {
@@ -346,6 +355,7 @@ func markAIStrategyFallback(strategy *AIStrategy, status string, headline string
 	strategy.FirstActions = nil
 	strategy.EvidenceRefs = nil
 	strategy.CustomerUpdateDraft = ""
+	strategy.NotificationBody = ""
 	strategy.VendorRequestDraft = ""
 	strategy.Limitations = []string{limitation}
 }
@@ -366,6 +376,7 @@ func AIStrategyIncidentAnnotations(strategy AIStrategy) map[string]string {
 	set(alertmanagertypes.IncidentAnnotationAIHeadline, strategy.Headline)
 	set(alertmanagertypes.IncidentAnnotationAIConfidence, strategy.Confidence)
 	set(alertmanagertypes.IncidentAnnotationCustomerUpdate, strategy.CustomerUpdateDraft)
+	set(alertmanagertypes.IncidentAnnotationNotificationBody, strategy.NotificationBody)
 	set(alertmanagertypes.IncidentAnnotationVendorRequest, strategy.VendorRequestDraft)
 
 	if len(strategy.FirstActions) > 0 {
@@ -476,6 +487,7 @@ func appendAIStrategySecretAndSafetyErrors(errs *[]error, strategy AIStrategy) {
 	pilotAppendSecretLikeStringErrors(errs, "sopVersion", strategy.SOPVersion)
 	pilotAppendSecretLikeStringErrors(errs, "headline", strategy.Headline)
 	pilotAppendSecretLikeStringErrors(errs, "customerUpdateDraft", strategy.CustomerUpdateDraft)
+	pilotAppendSecretLikeStringErrors(errs, "notificationBody", strategy.NotificationBody)
 	pilotAppendSecretLikeStringErrors(errs, "vendorRequestDraft", strategy.VendorRequestDraft)
 	pilotAppendSecretLikeStringErrors(errs, "audit.promptVersion", strategy.Audit.PromptVersion)
 	pilotAppendSecretLikeStringErrors(errs, "audit.model", strategy.Audit.Model)
@@ -488,6 +500,7 @@ func appendAIStrategySecretAndSafetyErrors(errs *[]error, strategy AIStrategy) {
 	}{
 		{"headline", strategy.Headline},
 		{"customerUpdateDraft", strategy.CustomerUpdateDraft},
+		{"notificationBody", strategy.NotificationBody},
 		{"vendorRequestDraft", strategy.VendorRequestDraft},
 	} {
 		if aiContainsAutomaticOperationClaim(field.value) {
@@ -557,6 +570,21 @@ func aiFirstActionTexts(actions []AIFirstAction) []string {
 	}
 
 	return texts
+}
+
+// notificationBodyFromSOP는 SOP 제목·본문과 알림 라벨로 한국어 상황 요약 markdown을
+// 생성한다. LLM 미사용 경로의 메인 본문 폴백으로, evidence 유무와 무관하게 채운다.
+func notificationBodyFromSOP(doc SOPDocument, labels map[string]string) string {
+	service := firstNonEmpty(labels[alertmanagertypes.IncidentLabelServiceName], "대상 서비스")
+	severity := firstNonEmpty(labels[alertmanagertypes.IncidentLabelSeverity], "unknown")
+	firstStep := firstActionFromSOP(doc)
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "## %s\n\n", firstNonEmpty(doc.Title, "장애 대응 안내"))
+	fmt.Fprintf(&sb, "- 서비스: %s\n", service)
+	fmt.Fprintf(&sb, "- 심각도: %s\n", severity)
+	fmt.Fprintf(&sb, "- SOP: %s (%s)\n\n", firstNonEmpty(doc.SOPID, "미지정"), doc.Version)
+	fmt.Fprintf(&sb, "### 첫 조치\n%s 1단계에 따라 %s\n", firstNonEmpty(doc.SOPID, "SOP"), firstStep)
+	return sb.String()
 }
 
 func firstActionFromSOP(doc SOPDocument) string {

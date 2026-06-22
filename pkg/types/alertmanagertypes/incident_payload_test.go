@@ -174,6 +174,23 @@ func TestSanitizeTemplateData(t *testing.T) {
 	require.Equal(t, "reach chulsoo@example.co.kr", in.Alerts[0].Labels["customer"])
 }
 
+// TestSanitizeIncidentInfoCopiesNotificationBody is the regression guard for I1:
+// SanitizeIncidentInfo must copy NotificationBody through to the sanitized
+// struct, just as it does for the adjacent CustomerUpdate field.
+func TestSanitizeIncidentInfoCopiesNotificationBody(t *testing.T) {
+	in := IncidentInfo{
+		CustomerUpdate:   "Payment latency is under investigation.",
+		NotificationBody: "결제 서비스 지연 발생. SOP 기준으로 대응 중입니다.",
+	}
+	out := SanitizeIncidentInfo(in)
+	require.Equal(t, in.CustomerUpdate, out.CustomerUpdate, "CustomerUpdate must survive sanitization")
+	require.Equal(t, in.NotificationBody, out.NotificationBody, "NotificationBody must survive sanitization")
+
+	// An absent NotificationBody must remain empty (not become RedactedIncidentValue).
+	outEmpty := SanitizeIncidentInfo(IncidentInfo{CustomerUpdate: "some update"})
+	require.Empty(t, outEmpty.NotificationBody, "absent NotificationBody must not be fabricated")
+}
+
 func TestIncidentInfoFieldsOmitEmptyValues(t *testing.T) {
 	fields := IncidentInfoFields(IncidentInfo{
 		SopID:            "SOP-PAY-001",

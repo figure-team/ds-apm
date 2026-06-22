@@ -402,6 +402,115 @@ func slackFieldValues(fields []any) map[string]string {
 	return values
 }
 
+func TestSlackUsesAIContentWhenBound(t *testing.T) {
+	var capturedBody map[string]any
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.NoError(t, json.NewDecoder(r.Body).Decode(&capturedBody))
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"ok": true}`))
+	}))
+	defer server.Close()
+
+	u, _ := url.Parse(server.URL)
+	notifier, err := New(
+		&config.SlackConfig{
+			APIURL:     &config.SecretURL{URL: u},
+			Channel:    "#test-channel",
+			HTTPConfig: &commoncfg.HTTPClientConfig{},
+		},
+		test.CreateTmpl(t),
+		promslog.NewNopLogger(),
+	)
+	require.NoError(t, err)
+
+	ctx := notify.WithGroupKey(context.Background(), "test-group-key")
+	alert := &types.Alert{
+		Alert: model.Alert{
+			Labels: model.LabelSet{
+				"alertname": "ShippingHighError",
+			},
+			Annotations: model.LabelSet{
+				model.LabelName(alertmanagertypes.IncidentAnnotationNotificationBody): "## 현황\n서비스 5xx 급증",
+				model.LabelName(alertmanagertypes.IncidentAnnotationSopTitle):         "Shipping 5xx 대응",
+				model.LabelName(alertmanagertypes.IncidentAnnotationCustomerUpdate):   "[안내] 점검 중",
+			},
+			StartsAt: time.Now(),
+			EndsAt:   time.Now().Add(time.Hour),
+		},
+	}
+
+	_, err = notifier.Notify(ctx, alert)
+	require.NoError(t, err)
+
+	attachments, ok := capturedBody["attachments"].([]any)
+	require.True(t, ok)
+	require.Len(t, attachments, 1)
+
+	att := attachments[0].(map[string]any)
+	require.Equal(t, "Shipping 5xx 대응", att["title"], "attachment title should be AI sop_title")
+
+	text, _ := att["text"].(string)
+	require.Contains(t, text, "## 현황", "text should contain notification_body content")
+	require.Contains(t, text, alertmanagertypes.CollapsibleNoticeLabel, "text should contain collapsible label")
+	require.Contains(t, text, "[안내] 점검 중", "text should contain customer notice")
+}
+
+func TestSlackUsesTemplateWhenUnbound(t *testing.T) {
+	var capturedBody map[string]any
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.NoError(t, json.NewDecoder(r.Body).Decode(&capturedBody))
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"ok": true}`))
+	}))
+	defer server.Close()
+
+	u, _ := url.Parse(server.URL)
+	confTitle := "Alert: TestAlert"
+	confText := "Something went wrong"
+	notifier, err := New(
+		&config.SlackConfig{
+			APIURL:     &config.SecretURL{URL: u},
+			Channel:    "#test-channel",
+			Title:      confTitle,
+			Text:       confText,
+			HTTPConfig: &commoncfg.HTTPClientConfig{},
+		},
+		test.CreateTmpl(t),
+		promslog.NewNopLogger(),
+	)
+	require.NoError(t, err)
+
+	ctx := notify.WithGroupKey(context.Background(), "test-group-key")
+	// Alert with NO notification_body annotation → should use conf template values
+	alert := &types.Alert{
+		Alert: model.Alert{
+			Labels: model.LabelSet{
+				"alertname": "TestAlert",
+			},
+			Annotations: model.LabelSet{
+				// only non-AI annotations; no notification_body
+				model.LabelName(alertmanagertypes.IncidentAnnotationSopTitle): "some sop title",
+			},
+			StartsAt: time.Now(),
+			EndsAt:   time.Now().Add(time.Hour),
+		},
+	}
+
+	_, err = notifier.Notify(ctx, alert)
+	require.NoError(t, err)
+
+	attachments, ok := capturedBody["attachments"].([]any)
+	require.True(t, ok)
+	require.Len(t, attachments, 1)
+
+	att := attachments[0].(map[string]any)
+	require.Equal(t, confTitle, att["title"], "title should use conf template when unbound")
+	require.Equal(t, confText, att["text"], "text should use conf template when unbound")
+	require.NotContains(t, att["text"], alertmanagertypes.CollapsibleNoticeLabel, "collapsible label must not appear when unbound")
+}
+
 func alertWithDSAPMIncidentFields() *types.Alert {
 	return &types.Alert{
 		Alert: model.Alert{

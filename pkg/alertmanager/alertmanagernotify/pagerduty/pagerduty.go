@@ -153,6 +153,16 @@ func (n *Notifier) notifyV1(
 		n.logger.WarnContext(ctx, "Truncated description", slog.Any("key", key), slog.Int("max_runes", maxV1DescriptionLenRunes))
 	}
 
+	if notif, ok := alertmanagertypes.ResolveSOPBoundNotification(data.CommonAnnotations); ok {
+		if notif.Title != "" {
+			description, _ = notify.TruncateInRunes(notif.Title, maxV1DescriptionLenRunes)
+		}
+		details["notification_body"] = notif.Body
+		if notif.CustomerNotice != "" {
+			details["customer_update"] = notif.CustomerNotice
+		}
+	}
+
 	serviceKey := string(n.conf.ServiceKey)
 	if serviceKey == "" {
 		content, fileErr := os.ReadFile(n.conf.ServiceKeyFile)
@@ -215,6 +225,16 @@ func (n *Notifier) notifyV2(
 	summary, truncated := notify.TruncateInRunes(tmpl(n.conf.Description), maxV2SummaryLenRunes)
 	if truncated {
 		n.logger.WarnContext(ctx, "Truncated summary", slog.Any("key", key), slog.Int("max_runes", maxV2SummaryLenRunes))
+	}
+
+	if notif, ok := alertmanagertypes.ResolveSOPBoundNotification(data.CommonAnnotations); ok {
+		if notif.Title != "" {
+			summary, _ = notify.TruncateInRunes(notif.Title, maxV2SummaryLenRunes)
+		}
+		details["notification_body"] = notif.Body
+		if notif.CustomerNotice != "" {
+			details["customer_update"] = notif.CustomerNotice
+		}
 	}
 
 	routingKey := string(n.conf.RoutingKey)

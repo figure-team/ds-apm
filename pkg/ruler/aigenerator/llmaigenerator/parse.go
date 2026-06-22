@@ -19,6 +19,7 @@ type partialResponse struct {
 	Hypotheses          []ruletypes.AIHypothesis  `json:"hypotheses"`
 	FirstActions        []ruletypes.AIFirstAction `json:"firstActions"`
 	CustomerUpdateDraft string                    `json:"customerUpdateDraft"`
+	NotificationBody    string                    `json:"notificationBody"`
 	VendorRequestDraft  string                    `json:"vendorRequestDraft"`
 	Confidence          string                    `json:"confidence"`
 	Limitations         []string                  `json:"limitations"`
@@ -67,6 +68,7 @@ func Parse(raw string, req ruletypes.AIStrategyRequest, model string) (ruletypes
 		Hypotheses:          partial.Hypotheses,
 		FirstActions:        partial.FirstActions,
 		CustomerUpdateDraft: partial.CustomerUpdateDraft,
+		NotificationBody:    partial.NotificationBody,
 		VendorRequestDraft:  partial.VendorRequestDraft,
 		EvidenceRefs:        req.EvidenceRefs,
 		Limitations:         partial.Limitations,

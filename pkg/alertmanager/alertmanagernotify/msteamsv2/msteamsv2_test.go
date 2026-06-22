@@ -277,6 +277,143 @@ func TestMSTeamsV2RedactedURL(t *testing.T) {
 	test.AssertNotifyLeaksNoSecret(ctx, t, notifier, secret)
 }
 
+// TestMSTeamsUsesAIContentWhenBound verifies that when a single alert carries
+// SOP-bound AI annotations (notification_body present), the card:
+//  1. uses the sop_title as the first TextBlock Text (title override)
+//  2. includes a TextBlock containing the notification_body
+//  3. includes a customer-notice section (CollapsibleNoticeLabel + notice text)
+//  4. does NOT include a Labels or Annotations FactSet
+func TestMSTeamsUsesAIContentWhenBound(t *testing.T) {
+	var capturedPayload teamsMessage
+
+	notifier, err := New(
+		&config.MSTeamsV2Config{
+			Title:      `{{ template "msteams.default.title" . }}`,
+			WebhookURL: &config.SecretURL{URL: testWebhookURL},
+			HTTPConfig: &commoncfg.HTTPClientConfig{},
+		},
+		test.CreateTmpl(t),
+		`{{ template "msteamsv2.default.titleLink" . }}`,
+		promslog.NewNopLogger(),
+	)
+	require.NoError(t, err)
+
+	notifier.postJSONFunc = func(ctx context.Context, client *http.Client, url string, body io.Reader) (*http.Response, error) {
+		require.NoError(t, json.NewDecoder(body).Decode(&capturedPayload))
+		resp := httptest.NewRecorder()
+		resp.WriteHeader(http.StatusOK)
+		_, _ = resp.WriteString("1")
+		return resp.Result(), nil
+	}
+
+	ctx := notify.WithGroupKey(context.Background(), "ai-bound-test")
+
+	alert := &types.Alert{
+		Alert: model.Alert{
+			Labels: model.LabelSet{
+				"alertname": "ShippingLatencyHigh",
+				model.LabelName(alertmanagertypes.IncidentLabelSopID): "SOP-SHIP-001",
+			},
+			Annotations: model.LabelSet{
+				model.LabelName(alertmanagertypes.IncidentAnnotationSopTitle):        "Shipping 5xx 대응",
+				model.LabelName(alertmanagertypes.IncidentAnnotationNotificationBody): "## 현황\n결제 서비스 지연 감지.",
+				model.LabelName(alertmanagertypes.IncidentAnnotationCustomerUpdate):   "[안내] 점검 중입니다.",
+			},
+			StartsAt: time.Now(),
+			EndsAt:   time.Now().Add(time.Hour),
+		},
+	}
+
+	_, err = notifier.Notify(ctx, alert)
+	require.NoError(t, err)
+
+	bodies := capturedPayload.Attachments[0].Content.Body
+
+	// 1. First TextBlock (title) must equal the sop_title
+	require.NotEmpty(t, bodies, "card body must not be empty")
+	require.Equal(t, "TextBlock", bodies[0].Type)
+	require.Equal(t, "Shipping 5xx 대응", bodies[0].Text, "title TextBlock must use sop_title")
+
+	// 2. Some TextBlock must contain the notification_body text
+	bodyTexts := make([]string, 0, len(bodies))
+	for _, b := range bodies {
+		bodyTexts = append(bodyTexts, b.Text)
+	}
+	require.Contains(t, bodyTexts, "## 현황\n결제 서비스 지연 감지.", "body must contain notification_body TextBlock")
+
+	// 3. Customer notice label and text must appear as separate TextBlocks
+	require.Contains(t, bodyTexts, alertmanagertypes.CollapsibleNoticeLabel, "body must contain CollapsibleNoticeLabel TextBlock")
+	require.Contains(t, bodyTexts, "[안내] 점검 중입니다.", "body must contain customer notice TextBlock")
+
+	// 4. No FactSet bodies — AI path must NOT emit Labels/Annotations FactSets
+	for _, b := range bodies {
+		require.NotEqual(t, "FactSet", b.Type, "AI-bound path must not emit any FactSet blocks")
+	}
+}
+
+// TestMSTeamsUsesFactsWhenUnbound verifies that when no notification_body annotation
+// is present the existing per-alert Labels/Annotations FactSet path is preserved intact.
+func TestMSTeamsUsesFactsWhenUnbound(t *testing.T) {
+	var capturedPayload teamsMessage
+
+	notifier, err := New(
+		&config.MSTeamsV2Config{
+			WebhookURL: &config.SecretURL{URL: testWebhookURL},
+			HTTPConfig: &commoncfg.HTTPClientConfig{},
+		},
+		test.CreateTmpl(t),
+		`{{ template "msteamsv2.default.titleLink" . }}`,
+		promslog.NewNopLogger(),
+	)
+	require.NoError(t, err)
+
+	notifier.postJSONFunc = func(ctx context.Context, client *http.Client, url string, body io.Reader) (*http.Response, error) {
+		require.NoError(t, json.NewDecoder(body).Decode(&capturedPayload))
+		resp := httptest.NewRecorder()
+		resp.WriteHeader(http.StatusOK)
+		_, _ = resp.WriteString("1")
+		return resp.Result(), nil
+	}
+
+	ctx := notify.WithGroupKey(context.Background(), "unbound-test")
+
+	alert := &types.Alert{
+		Alert: model.Alert{
+			Labels: model.LabelSet{
+				"alertname": "MemoryHigh",
+				"env":       "prod",
+			},
+			Annotations: model.LabelSet{
+				"summary": "Memory usage above 90%",
+			},
+			StartsAt: time.Now(),
+			EndsAt:   time.Now().Add(time.Hour),
+		},
+	}
+
+	_, err = notifier.Notify(ctx, alert)
+	require.NoError(t, err)
+
+	bodies := capturedPayload.Attachments[0].Content.Body
+
+	// Must contain at least one FactSet (Labels or Annotations)
+	hasFactSet := false
+	for _, b := range bodies {
+		if b.Type == "FactSet" {
+			hasFactSet = true
+			break
+		}
+	}
+	require.True(t, hasFactSet, "unbound path must emit Labels/Annotations FactSet blocks")
+
+	// Must NOT contain CollapsibleNoticeLabel (AI path must not activate)
+	bodyTexts := make([]string, 0, len(bodies))
+	for _, b := range bodies {
+		bodyTexts = append(bodyTexts, b.Text)
+	}
+	require.NotContains(t, bodyTexts, alertmanagertypes.CollapsibleNoticeLabel, "unbound path must not emit customer notice label")
+}
+
 func TestMSTeamsV2ReadingURLFromFile(t *testing.T) {
 	ctx, u, fn := test.GetContextWithCancelingURL()
 	defer fn()

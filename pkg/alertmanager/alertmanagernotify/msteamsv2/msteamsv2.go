@@ -134,6 +134,18 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 		return false, err
 	}
 
+	// Override title with AI-generated SOP title when available.
+	// We peek at CommonAnnotations here; full aiOK check happens below after card init.
+	if sopTitle := strings.TrimSpace(data.CommonAnnotations[alertmanagertypes.IncidentAnnotationSopTitle]); sopTitle != "" {
+		if strings.TrimSpace(data.CommonAnnotations[alertmanagertypes.IncidentAnnotationNotificationBody]) != "" {
+			title = sopTitle
+		}
+	} else if aiHeadline := strings.TrimSpace(data.CommonAnnotations[alertmanagertypes.IncidentAnnotationAIHeadline]); aiHeadline != "" {
+		if strings.TrimSpace(data.CommonAnnotations[alertmanagertypes.IncidentAnnotationNotificationBody]) != "" {
+			title = aiHeadline
+		}
+	}
+
 	titleLink := tmpl(n.titleLink)
 	if err != nil {
 		return false, err
@@ -196,18 +208,33 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 		},
 	}
 
-	// add labels and annotations to the body of all alerts
-	for _, alert := range as {
+	// If CommonAnnotations carry an AI-generated notification body, use it
+	// to replace the per-alert Labels/Annotations FactSet blocks (fail-open).
+	notif, aiOK := alertmanagertypes.ResolveSOPBoundNotification(data.CommonAnnotations)
+	if aiOK {
+		// AI main body block
 		t.Attachments[0].Content.Body = append(t.Attachments[0].Content.Body, Body{
-			Type:   "TextBlock",
-			Text:   "Alerts",
-			Weight: "Bolder",
-			Size:   "Medium",
-			Wrap:   true,
-			Color:  color,
+			Type: "TextBlock",
+			Text: notif.Body,
+			Wrap: true,
 		})
+		if notif.CustomerNotice != "" {
+			t.Attachments[0].Content.Body = append(t.Attachments[0].Content.Body, collapsibleNoticeBlocks(notif.CustomerNotice)...)
+		}
+	} else {
+		// add labels and annotations to the body of all alerts
+		for _, alert := range as {
+			t.Attachments[0].Content.Body = append(t.Attachments[0].Content.Body, Body{
+				Type:   "TextBlock",
+				Text:   "Alerts",
+				Weight: "Bolder",
+				Size:   "Medium",
+				Wrap:   true,
+				Color:  color,
+			})
 
-		t.Attachments[0].Content.Body = append(t.Attachments[0].Content.Body, n.createLabelsAndAnnotationsBody(alert)...)
+			t.Attachments[0].Content.Body = append(t.Attachments[0].Content.Body, n.createLabelsAndAnnotationsBody(alert)...)
+		}
 	}
 
 	var payload bytes.Buffer
@@ -310,4 +337,14 @@ func labelSetToTemplateKV(labels model.LabelSet) template.KV {
 	}
 
 	return kv
+}
+
+// collapsibleNoticeBlocks returns TextBlocks representing a labeled customer-notice section.
+// The Body/Action structs do not support ToggleVisibility (no ID/IsVisible/TargetElements fields),
+// so we use two TextBlocks: a bold label and the notice text (acceptance bar: "appears as own section").
+func collapsibleNoticeBlocks(notice string) []Body {
+	return []Body{
+		{Type: "TextBlock", Text: alertmanagertypes.CollapsibleNoticeLabel, Weight: "Bolder", Wrap: true},
+		{Type: "TextBlock", Text: notice, Wrap: true},
+	}
 }

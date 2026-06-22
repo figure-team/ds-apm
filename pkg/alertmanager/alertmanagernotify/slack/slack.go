@@ -113,11 +113,24 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 	if truncated {
 		logger.WarnContext(ctx, "Truncated title", slog.Int("max_runes", maxTitleLenRunes))
 	}
+	text := tmplText(n.conf.Text)
+
+	// DS-APM: SOP 바운드 알림이면 채널 템플릿 대신 AI 제목·본문·고객공지로 대체.
+	if notif, ok := alertmanagertypes.ResolveSOPBoundNotification(data.CommonAnnotations); ok {
+		if notif.Title != "" {
+			title, _ = notify.TruncateInRunes(notif.Title, maxTitleLenRunes)
+		}
+		text = notif.Body
+		if notif.CustomerNotice != "" {
+			text = text + "\n\n" + alertmanagertypes.CollapsibleNoticeLabel + "\n" + notif.CustomerNotice
+		}
+	}
+
 	att := &attachment{
 		Title:      title,
 		TitleLink:  tmplText(n.conf.TitleLink),
 		Pretext:    tmplText(n.conf.Pretext),
-		Text:       tmplText(n.conf.Text),
+		Text:       text,
 		Fallback:   tmplText(n.conf.Fallback),
 		CallbackID: tmplText(n.conf.CallbackID),
 		ImageURL:   tmplText(n.conf.ImageURL),
