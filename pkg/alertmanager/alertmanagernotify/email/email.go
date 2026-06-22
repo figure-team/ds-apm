@@ -274,9 +274,13 @@ func (n *Email) Notify(ctx context.Context, as ...*types.Alert) (bool, error) {
 		}
 		fmt.Fprintf(buffer, "%s: %s\r\n", header, mime.QEncoding.Encode("utf-8", value))
 	}
-	for _, field := range alertmanagertypes.IncidentInfoFields(
-		alertmanagertypes.BuildSafeIncidentInfo(data.CommonLabels, data.CommonAnnotations),
-	) {
+	incidentInfo := alertmanagertypes.BuildSafeIncidentInfo(data.CommonLabels, data.CommonAnnotations)
+	infoFields := alertmanagertypes.IncidentInfoFields(incidentInfo)
+	if aiOK {
+		// AI body already carries the situation summary; trim to routing + SOP link.
+		infoFields = alertmanagertypes.IncidentInfoFieldsCompact(incidentInfo)
+	}
+	for _, field := range infoFields {
 		header := incidentHeaderName(field.Key)
 		if _, exists := n.conf.Headers[header]; exists {
 			continue

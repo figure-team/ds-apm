@@ -317,7 +317,12 @@ func (*Notifier) createLabelsAndAnnotationsBody(alert *types.Alert) []Body {
 func incidentInfoFactsForAlert(alert *types.Alert) []Fact {
 	labels := labelSetToTemplateKV(alert.Labels)
 	annotations := labelSetToTemplateKV(alert.Annotations)
-	fields := alertmanagertypes.IncidentInfoFields(alertmanagertypes.BuildSafeIncidentInfo(labels, annotations))
+	info := alertmanagertypes.BuildSafeIncidentInfo(labels, annotations)
+	fields := alertmanagertypes.IncidentInfoFields(info)
+	if _, sopBound := alertmanagertypes.ResolveSOPBoundNotification(annotations); sopBound {
+		// AI body already carries the situation summary; trim to routing + SOP link.
+		fields = alertmanagertypes.IncidentInfoFieldsCompact(info)
+	}
 	if len(fields) == 0 {
 		return nil
 	}

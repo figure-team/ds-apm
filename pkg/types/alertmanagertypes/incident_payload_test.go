@@ -202,3 +202,53 @@ func TestIncidentInfoFieldsOmitEmptyValues(t *testing.T) {
 		{Key: "ai_strategy_status", Title: "AI status", Value: "quota_exhausted", Short: true},
 	}, fields)
 }
+
+func TestIncidentInfoFieldsCompactKeepsOnlyRoutingAndSOPLink(t *testing.T) {
+	// SOP-bound notifications carry the AI body as their text; the field block is
+	// trimmed to routing context + a link to the SOP. Verbose AI/comms/debug
+	// fields are dropped even when populated.
+	info := IncidentInfo{
+		ProjectID:        "customer-a",
+		Environment:      "prod",
+		ServiceName:      "frontend",
+		OwnerTeam:        "frontend",
+		Severity:         "critical",
+		ImpactSummary:    "loading failures up",
+		NextAction:       "check CDN",
+		VendorRequest:    "ask vendor",
+		CustomerUpdate:   "under investigation",
+		SopID:            "SOP-FE-001",
+		SopTitle:         "Frontend 5xx 대응",
+		SopVersion:       "2026-06-17.1",
+		SopSource:        "src-managed-markdown-default",
+		SopURL:           "https://kb.example/sop/SOP-FE-001",
+		SopBindingID:     "explicit_label",
+		AIStrategyID:     "llm-abc123",
+		AIStrategyStatus: "low_confidence",
+		AIConfidence:     "low",
+		AIHeadline:       "frontend 5xx 알람",
+		AILimitations:    "no evidence",
+	}
+
+	require.Equal(t, []IncidentField{
+		{Key: "project_id", Title: "Project", Value: "customer-a", Short: true},
+		{Key: "environment", Title: "Environment", Value: "prod", Short: true},
+		{Key: "service_name", Title: "Service", Value: "frontend", Short: true},
+		{Key: "owner_team", Title: "Owner team", Value: "frontend", Short: true},
+		{Key: "severity", Title: "Severity", Value: "critical", Short: true},
+		{Key: "sop_title", Title: "SOP title", Value: "Frontend 5xx 대응"},
+		{Key: "sop_url", Title: "SOP URL", Value: "https://kb.example/sop/SOP-FE-001"},
+	}, IncidentInfoFieldsCompact(info))
+}
+
+func TestIncidentInfoFieldsCompactOmitsEmptyValues(t *testing.T) {
+	fields := IncidentInfoFieldsCompact(IncidentInfo{
+		ProjectID: "customer-a",
+		Severity:  "critical",
+	})
+
+	require.Equal(t, []IncidentField{
+		{Key: "project_id", Title: "Project", Value: "customer-a", Short: true},
+		{Key: "severity", Title: "Severity", Value: "critical", Short: true},
+	}, fields)
+}

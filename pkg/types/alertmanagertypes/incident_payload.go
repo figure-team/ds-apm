@@ -217,6 +217,33 @@ func IncidentInfoFields(info IncidentInfo) []IncidentField {
 		{Key: "ai_evidence_refs", Title: "AI evidence refs", Value: info.AIEvidenceRefs},
 	}
 
+	return nonEmptyIncidentFields(fields)
+}
+
+// IncidentInfoFieldsCompact returns the trimmed field set used by SOP-bound
+// human notifications (slack/email/teams), whose message text is already the AI
+// situation summary. It keeps only routing context plus a link to the SOP and
+// drops the verbose AI/comms/debug fields (headline duplicates the title,
+// customer update is already appended to the body, status/confidence/limitations
+// /strategyId/source/binding are internal detail). Machine payloads keep the
+// full set via IncidentInfoFields / IncidentInfoDetails.
+func IncidentInfoFieldsCompact(info IncidentInfo) []IncidentField {
+	info = SanitizeIncidentInfo(info)
+	fields := []IncidentField{
+		{Key: "project_id", Title: "Project", Value: info.ProjectID, Short: true},
+		{Key: "environment", Title: "Environment", Value: info.Environment, Short: true},
+		{Key: "service_name", Title: "Service", Value: info.ServiceName, Short: true},
+		{Key: "owner_team", Title: "Owner team", Value: info.OwnerTeam, Short: true},
+		{Key: "severity", Title: "Severity", Value: info.Severity, Short: true},
+		{Key: "sop_title", Title: "SOP title", Value: info.SopTitle},
+		{Key: "sop_url", Title: "SOP URL", Value: info.SopURL},
+	}
+
+	return nonEmptyIncidentFields(fields)
+}
+
+// nonEmptyIncidentFields drops fields whose value is blank, preserving order.
+func nonEmptyIncidentFields(fields []IncidentField) []IncidentField {
 	result := make([]IncidentField, 0, len(fields))
 	for _, field := range fields {
 		if strings.TrimSpace(field.Value) == "" {
