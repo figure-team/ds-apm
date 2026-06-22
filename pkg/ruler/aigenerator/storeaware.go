@@ -51,7 +51,16 @@ func NewStoreAware(store ruletypes.AIConfigStore, cipher *secretbox.Cipher, envF
 // from req.Labels, looks up the per-org config, builds (or reuses) a
 // generator, and delegates. Falls back to envFallback on any error.
 func (s *StoreAware) Generate(ctx context.Context, req ruletypes.AIStrategyRequest) (ruletypes.AIStrategy, error) {
-	orgID := orgIDFromRequest(req)
+	// Prefer the authoritative OrgID the caller supplied; only fall back to
+	// label-derived resolution when it is absent. The dispatch hook holds the
+	// per-org dispatcher's orgID and sets req.OrgID, so SOP-bound notifications
+	// resolve the same per-org AI config the rest of the product uses (the
+	// label-derived path could not see the org UUID and silently used the env
+	// fallback generator).
+	orgID := req.OrgID
+	if orgID == "" {
+		orgID = orgIDFromRequest(req)
+	}
 	if orgID == "" {
 		return s.envFallback.Generate(ctx, req)
 	}
