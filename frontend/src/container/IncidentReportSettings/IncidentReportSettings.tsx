@@ -88,13 +88,15 @@ function IncidentReportSettings(): JSX.Element {
 	};
 
 	return (
-		<div className="incident-report-settings">
-			<Typography.Title level={4}>장애보고서</Typography.Title>
-			<Typography.Paragraph type="secondary">
-				CF-2 대응 전략과 CF-11 코드 RCA 결과를 집약해 한국 SI 양식의 장애보고서를
-				생성합니다. 조직별 양식(Go text/template)을 관리하고, 인시던트별로 보고서를
-				뽑을 수 있습니다.
-			</Typography.Paragraph>
+		<div className="incident-report-settings settings-shell settings-shell--narrow">
+			<header className="incident-report-settings__header">
+				<h1 className="incident-report-settings__header-title">장애보고서</h1>
+				<p className="incident-report-settings__header-subtitle">
+					CF-2 대응 전략과 CF-11 코드 RCA 결과를 집약해 한국 SI 양식의 장애보고서를
+					생성합니다. 조직별 양식(Go text/template)을 관리하고, 인시던트별로 보고서를
+					뽑을 수 있습니다.
+				</p>
+			</header>
 
 			<section className="incident-report-settings__block">
 				<Typography.Title level={5}>
