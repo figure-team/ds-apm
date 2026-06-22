@@ -31,7 +31,7 @@
 			width: 100%;
 			height: calc(100vh - 48px);
 			background: var(--l1-background);
-			padding: 10px 8px;
+			padding: 0 var(--padding-2);
 			overflow-y: auto;
 
 			&::-webkit-scrollbar {
@@ -51,5 +51,18 @@
 				background: var(--l3-background);
 			}
 		}
+	}
+}
+
+// 설정 페이지 공통 레이아웃 양식 (모든 설정 메뉴의 단일 진입점)
+// 폭: 표·목록형 1200px / 폼·상세형 880px(--narrow)
+// 여백: 상단 32 · 좌우 24 · 하단 24 (대칭)
+.settings-shell {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: var(--padding-8) var(--padding-6) var(--padding-6);
+
+	&--narrow {
+		max-width: 880px;
 	}
 }

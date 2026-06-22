@@ -411,7 +411,7 @@ export default function BillingContainer(): JSX.Element {
 		trialInfo?.gracePeriodEnd;
 
 	return (
-		<div className="billing-container">
+		<div className="billing-container settings-shell">
 			<Flex vertical style={{ marginBottom: 16 }}>
 				<Typography.Text style={{ fontWeight: 500, fontSize: 18 }}>
 					{t('billing')}

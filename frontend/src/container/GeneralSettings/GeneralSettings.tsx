@@ -655,7 +655,7 @@ function GeneralSettings({
 	});
 
 	return (
-		<div className="general-settings-page">
+		<div className="general-settings-page settings-shell settings-shell--narrow">
 			<div className="general-settings-header">
 				<span className="general-settings-title">{t('workspace_title')}</span>
 				<span className="general-settings-subtitle">{t('workspace_subtitle')}</span>

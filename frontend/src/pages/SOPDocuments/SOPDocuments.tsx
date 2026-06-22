@@ -205,7 +205,7 @@ function SOPDocuments(): JSX.Element {
 	);
 
 	return (
-		<div className="sop-documents-page">
+		<div className="sop-documents-page settings-shell settings-shell--narrow">
 			<header className="sop-documents-page__header">
 				<div className="sop-documents-page__header-row">
 					<div>

@@ -99,7 +99,10 @@ function MCPServerSettings(): JSX.Element {
 	}
 
 	return (
-		<div className="mcp-settings" data-testid="mcp-settings">
+		<div
+			className="mcp-settings settings-shell settings-shell--narrow"
+			data-testid="mcp-settings"
+		>
 			<header className="mcp-settings__header">
 				<h1 className="mcp-settings__header-title">{t('header_title')}</h1>
 				<p className="mcp-settings__header-subtitle">{t('header_subtitle')}</p>

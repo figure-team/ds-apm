@@ -319,7 +319,10 @@ function AIModuleSettings(): JSX.Element {
 	);
 
 	return (
-		<div className="ai-module-settings" data-testid="ai-module-settings">
+		<div
+			className="ai-module-settings settings-shell settings-shell--narrow"
+			data-testid="ai-module-settings"
+		>
 			<header className="ai-module-settings__header">
 				<h1 className="ai-module-settings__header-title">{t('header_title')}</h1>
 				<p className="ai-module-settings__header-subtitle">

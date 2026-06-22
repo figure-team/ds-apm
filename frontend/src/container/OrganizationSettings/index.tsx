@@ -14,7 +14,7 @@ function OrganizationSettings(): JSX.Element {
 	}
 
 	return (
-		<div className="organization-settings-container">
+		<div className="organization-settings-container settings-shell settings-shell--narrow">
 			<Space direction="vertical">
 				{org.map((e, index) => (
 					<DisplayName key={e.id} id={e.id} index={index} />

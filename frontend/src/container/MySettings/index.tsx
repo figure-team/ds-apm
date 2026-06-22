@@ -182,7 +182,7 @@ function MySettings(): JSX.Element {
 	};
 
 	return (
-		<div className="my-settings-container">
+		<div className="my-settings-container settings-shell settings-shell--narrow">
 			<div className="user-info-section">
 				<div className="user-info-section-header">
 					<div className="user-info-section-title">{t('settings:account_title')}</div>

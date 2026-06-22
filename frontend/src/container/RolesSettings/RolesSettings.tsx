@@ -15,7 +15,7 @@ function RolesSettings(): JSX.Element {
 	const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
 	return (
-		<div className="roles-settings" data-testid="roles-settings">
+		<div className="roles-settings settings-shell" data-testid="roles-settings">
 			<div className="roles-settings-header">
 				<h3 className="roles-settings-header-title">{t('roles_title')}</h3>
 				<p className="roles-settings-header-description">{t('roles_subtitle')}</p>

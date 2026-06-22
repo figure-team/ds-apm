@@ -71,7 +71,7 @@ export default function IngestionSettings(): JSX.Element {
 	];
 
 	return (
-		<div className="ingestion-settings-container">
+		<div className="ingestion-settings-container settings-shell">
 			<Typography
 				style={{
 					margin: '16px 0px',
