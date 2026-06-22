@@ -321,6 +321,63 @@ func TestMatch_FallbackCandidates(t *testing.T) {
 	require.Equal(t, "SOP-INF-001", resp.Candidates[1].SOPID)
 }
 
+// sopDocWithStatus clones the valid managed-markdown SOP fixture and overrides
+// the identifying/version/approval fields so approval-status binding policy can
+// be exercised deterministically.
+func sopDocWithStatus(sopID, version, status string) SOPDocument {
+	d := validSOPDocument()
+	d.SOPID = sopID
+	d.Version = version
+	d.ApprovalStatus = status
+	return d
+}
+
+func TestPreviewSOPDocumentBinding_ExplicitBindsLatestApprovedNotLatestVersion(t *testing.T) {
+	// A newer DEPRECATED version coexists with an older APPROVED one. Explicit
+	// sop_id binding must pick the approved version, not merely the latest.
+	approvedOld := sopDocWithStatus("SOP-PAY-001", "2026-05-01.1", SOPApprovalStatusApproved)
+	deprecatedNew := sopDocWithStatus("SOP-PAY-001", "2026-06-01.2", SOPApprovalStatusDeprecated)
+
+	resp, err := PreviewSOPDocumentBinding([]SOPDocument{deprecatedNew, approvedOld}, SOPBindingPreviewRequest{
+		Labels: map[string]string{"environment": "prod", "project_id": "customer-a", "sop_id": "SOP-PAY-001"},
+	})
+	require.NoError(t, err)
+	require.Equal(t, SOPBindingStatusBound, resp.Status)
+	require.Equal(t, "2026-05-01.1", resp.Version, "must bind the approved version, not the newer deprecated one")
+}
+
+func TestPreviewSOPDocumentBinding_ExplicitDraftNotApproved(t *testing.T) {
+	draft := sopDocWithStatus("SOP-PAY-001", "2026-06-01.1", SOPApprovalStatusDraft)
+	resp, err := PreviewSOPDocumentBinding([]SOPDocument{draft}, SOPBindingPreviewRequest{
+		Labels: map[string]string{"environment": "prod", "project_id": "customer-a", "sop_id": "SOP-PAY-001"},
+	})
+	require.NoError(t, err)
+	require.Equal(t, SOPBindingStatusMissing, resp.Status, "a draft SOP must not bind")
+	require.Contains(t, resp.Warnings, SOPBindingNotApprovedWarning)
+}
+
+func TestPreviewSOPDocumentBinding_ExplicitDeprecatedNotApproved(t *testing.T) {
+	dep := sopDocWithStatus("SOP-PAY-001", "2026-06-01.1", SOPApprovalStatusDeprecated)
+	resp, err := PreviewSOPDocumentBinding([]SOPDocument{dep}, SOPBindingPreviewRequest{
+		Labels: map[string]string{"environment": "prod", "project_id": "customer-a", "sop_id": "SOP-PAY-001"},
+	})
+	require.NoError(t, err)
+	require.Equal(t, SOPBindingStatusMissing, resp.Status, "a deprecated SOP must not bind")
+	require.Contains(t, resp.Warnings, SOPBindingNotApprovedWarning)
+}
+
+func TestMatch_NonApprovedExcludedFromLabelMatch(t *testing.T) {
+	// A draft doc matches every label dimension but must not bind: only approved
+	// SOPs are eligible for label-combo grounding.
+	draft := sopMatchDoc("SOP-PAY-001", "payments", []string{"payment-api", "critical"}, "2026-05-01.1", sopFresh)
+	draft.ApprovalStatus = SOPApprovalStatusDraft
+
+	resp, err := previewSOPDocumentBindingAt([]SOPDocument{draft}, SOPBindingPreviewRequest{Labels: sopMatchLabels()}, sopMatchNow)
+	require.NoError(t, err)
+	require.Equal(t, SOPBindingStatusMissing, resp.Status)
+	require.Empty(t, resp.Candidates, "non-approved SOP must not surface as a candidate")
+}
+
 func TestMatch_StalenessExcluded(t *testing.T) {
 	// The stale doc matches all dimensions and carries a higher version, but a
 	// SOP not updated within 90 days is excluded so the fresh one binds.

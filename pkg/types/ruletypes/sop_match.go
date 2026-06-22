@@ -37,6 +37,11 @@ const (
 	// matching excludes stale documents outright; the explicit path keeps the
 	// user-intended binding but flags it.
 	SOPBindingStaleWarning = "sop document was not updated within 90 days"
+	// SOPBindingNotApprovedWarning is surfaced on an explicit sop_id binding
+	// whose only versions are non-approved (draft/deprecated). Only approved
+	// SOPs are eligible to ground AI strategies, so such a reference resolves to
+	// "missing" rather than binding an unapproved document.
+	SOPBindingNotApprovedWarning = "sop document is not approved"
 )
 
 // sopMatchDimensions lists the alert label keys used for label-combo grounding,
@@ -103,15 +108,22 @@ func previewSOPDocumentBindingAt(docs []SOPDocument, req SOPBindingPreviewReques
 func previewExplicitSOPBinding(docs []SOPDocument, req SOPBindingPreviewRequest, now time.Time) (SOPBindingPreviewResponse, error) {
 	sopID := strings.TrimSpace(req.Labels[alertmanagertypes.IncidentLabelSopID])
 
-	doc, ok := latestSOPDocumentByID(docs, sopID)
-	if !ok {
-		return SOPBindingPreviewResponse{
-			ContractVersion: SOPBindingContractVersion,
-			Status:          SOPBindingStatusMissing,
-			Resolution:      SOPBindingResolutionExplicitLabel,
-			SOPID:           sopID,
-			Warnings:        []string{"sop document was not found"},
-		}, nil
+	// Only approved SOPs may bind. Prefer the latest approved version; when none
+	// exists, fall back to the latest document of any status purely to emit an
+	// informative, non-binding response (not-found / not-approved / disabled).
+	doc, approved := latestApprovedSOPDocumentByID(docs, sopID)
+	if !approved {
+		anyDoc, exists := latestSOPDocumentByID(docs, sopID)
+		if !exists {
+			return SOPBindingPreviewResponse{
+				ContractVersion: SOPBindingContractVersion,
+				Status:          SOPBindingStatusMissing,
+				Resolution:      SOPBindingResolutionExplicitLabel,
+				SOPID:           sopID,
+				Warnings:        []string{"sop document was not found"},
+			}, nil
+		}
+		doc = anyDoc
 	}
 
 	tenant := PilotTenantFromLabels(req.Labels)
@@ -134,19 +146,37 @@ func previewExplicitSOPBinding(docs []SOPDocument, req SOPBindingPreviewRequest,
 		}, nil
 	}
 
-	status := SOPBindingStatusBound
-	warnings := []string{}
-	if doc.ApprovalStatus == SOPApprovalStatusDisabled {
-		status = SOPBindingStatusDisabled
-		warnings = append(warnings, "sop document is disabled")
+	if !approved {
+		// A disabled document keeps its distinct, non-binding signal; every other
+		// non-approved status (draft/deprecated) resolves to missing/not-approved
+		// so unapproved guidance never grounds an AI strategy.
+		status := SOPBindingStatusMissing
+		warning := SOPBindingNotApprovedWarning
+		if doc.ApprovalStatus == SOPApprovalStatusDisabled {
+			status = SOPBindingStatusDisabled
+			warning = "sop document is disabled"
+		}
+		resp := SOPBindingPreviewResponse{
+			ContractVersion: SOPBindingContractVersion,
+			Status:          status,
+			Resolution:      SOPBindingResolutionExplicitLabel,
+			SOPID:           doc.SOPID,
+			Version:         doc.Version,
+			Title:           doc.Title,
+			SourceID:        doc.Source.SourceID,
+			Warnings:        []string{warning},
+		}
+		return resp, ValidateSOPBindingPreviewResponse(resp)
 	}
+
+	warnings := []string{}
 	if sopIsStale(doc, now) {
 		warnings = append(warnings, SOPBindingStaleWarning)
 	}
 
 	resp := SOPBindingPreviewResponse{
 		ContractVersion: SOPBindingContractVersion,
-		Status:          status,
+		Status:          SOPBindingStatusBound,
 		Resolution:      SOPBindingResolutionExplicitLabel,
 		SOPID:           doc.SOPID,
 		Version:         doc.Version,
@@ -197,21 +227,17 @@ func previewLabelComboBinding(docs []SOPDocument, req SOPBindingPreviewRequest, 
 	candidates := sopCandidatesFromEntries(entries)
 
 	if top, ok := firstExactMatch(entries, len(present)); ok {
-		status := SOPBindingStatusBound
-		warnings := []string{}
-		if top.doc.ApprovalStatus == SOPApprovalStatusDisabled {
-			status = SOPBindingStatusDisabled
-			warnings = append(warnings, "sop document is disabled")
-		}
+		// collectSOPMatches yields approved documents only, so an exact label
+		// match always binds (no disabled/draft state reaches here).
 		resp := SOPBindingPreviewResponse{
 			ContractVersion: SOPBindingContractVersion,
-			Status:          status,
+			Status:          SOPBindingStatusBound,
 			Resolution:      SOPBindingResolutionLabelMatch,
 			SOPID:           top.doc.SOPID,
 			Version:         top.doc.Version,
 			Title:           top.doc.Title,
 			SourceID:        top.doc.Source.SourceID,
-			Warnings:        warnings,
+			Warnings:        []string{},
 			Candidates:      candidates,
 		}
 		return resp, ValidateSOPBindingPreviewResponse(resp)
@@ -235,6 +261,9 @@ func collectSOPMatches(docs []SOPDocument, labels map[string]string, tenant Pilo
 		sopID := strings.TrimSpace(doc.SOPID)
 		if sopID == "" {
 			continue
+		}
+		if !isSOPApproved(doc) {
+			continue // only approved SOPs are eligible for label-combo grounding
 		}
 		if !PilotTenantScopeAllows(doc.TenantScope, tenant) {
 			continue

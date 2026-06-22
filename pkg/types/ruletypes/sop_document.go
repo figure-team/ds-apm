@@ -317,6 +317,35 @@ func latestSOPDocumentByID(docs []SOPDocument, sopID string) (SOPDocument, bool)
 	return latest, found
 }
 
+// isSOPApproved reports whether a document is in the approved state — the only
+// approval status eligible to ground AI strategies or bind to an alert.
+func isSOPApproved(doc SOPDocument) bool {
+	return strings.TrimSpace(doc.ApprovalStatus) == SOPApprovalStatusApproved
+}
+
+// latestApprovedSOPDocumentByID returns the highest-version APPROVED document
+// for sopID. A newer draft/deprecated/disabled version never shadows an older
+// approved one — binding policy recognises approved SOPs only.
+func latestApprovedSOPDocumentByID(docs []SOPDocument, sopID string) (SOPDocument, bool) {
+	sopID = strings.TrimSpace(sopID)
+	var latest SOPDocument
+	found := false
+	for _, doc := range docs {
+		if strings.TrimSpace(doc.SOPID) != sopID {
+			continue
+		}
+		if !isSOPApproved(doc) {
+			continue
+		}
+		if !found || strings.TrimSpace(doc.Version) > strings.TrimSpace(latest.Version) {
+			latest = doc
+			found = true
+		}
+	}
+
+	return latest, found
+}
+
 const (
 	SOPBatchResultContractVersion = "ds.sop_batch_result.v1"
 	SOPBatchResultStatusOk        = "ok"
