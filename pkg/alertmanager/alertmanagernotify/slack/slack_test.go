@@ -445,15 +445,98 @@ func TestSlackUsesAIContentWhenBound(t *testing.T) {
 
 	attachments, ok := capturedBody["attachments"].([]any)
 	require.True(t, ok)
-	require.Len(t, attachments, 1)
+	require.GreaterOrEqual(t, len(attachments), 2, "SOP-bound message splits body and secondary info into two attachments")
 
 	att := attachments[0].(map[string]any)
 	require.Equal(t, "Shipping 5xx 대응", att["title"], "attachment title should be AI sop_title")
 
 	text, _ := att["text"].(string)
-	require.Contains(t, text, "## 현황", "text should contain notification_body content")
-	require.Contains(t, text, alertmanagertypes.CollapsibleNoticeLabel, "text should contain collapsible label")
-	require.Contains(t, text, "[안내] 점검 중", "text should contain customer notice")
+	require.Contains(t, text, "## 현황", "primary attachment text is the AI body")
+	require.NotContains(t, text, alertmanagertypes.CollapsibleNoticeLabel, "customer notice must not sit in the primary body attachment")
+	require.NotContains(t, text, "[안내] 점검 중", "customer notice must not sit in the primary body attachment")
+
+	secondary := attachments[1].(map[string]any)
+	secText, _ := secondary["text"].(string)
+	require.Contains(t, secText, alertmanagertypes.CollapsibleNoticeLabel, "secondary attachment carries the collapsible label")
+	require.Contains(t, secText, "[안내] 점검 중", "secondary attachment carries the customer notice")
+}
+
+func slackFieldTitles(att map[string]any) []string {
+	var titles []string
+	if fs, ok := att["fields"].([]any); ok {
+		for _, f := range fs {
+			if m, ok := f.(map[string]any); ok {
+				if t, ok := m["title"].(string); ok {
+					titles = append(titles, t)
+				}
+			}
+		}
+	}
+	return titles
+}
+
+func TestSlackUsesCompactFieldsWhenBound(t *testing.T) {
+	var capturedBody map[string]any
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.NoError(t, json.NewDecoder(r.Body).Decode(&capturedBody))
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"ok": true}`))
+	}))
+	defer server.Close()
+
+	u, _ := url.Parse(server.URL)
+	notifier, err := New(
+		&config.SlackConfig{
+			APIURL:     &config.SecretURL{URL: u},
+			Channel:    "#test-channel",
+			HTTPConfig: &commoncfg.HTTPClientConfig{},
+		},
+		test.CreateTmpl(t),
+		promslog.NewNopLogger(),
+	)
+	require.NoError(t, err)
+
+	ctx := notify.WithGroupKey(context.Background(), "test-group-key")
+	alert := &types.Alert{
+		Alert: model.Alert{
+			Labels: model.LabelSet{
+				"alertname": "ShippingHighError",
+				model.LabelName(alertmanagertypes.IncidentLabelProjectID): "customer-a",
+				model.LabelName(alertmanagertypes.IncidentLabelSeverity):  "critical",
+			},
+			Annotations: model.LabelSet{
+				model.LabelName(alertmanagertypes.IncidentAnnotationNotificationBody): "## 현황\n서비스 5xx 급증",
+				model.LabelName(alertmanagertypes.IncidentAnnotationSopTitle):         "Shipping 5xx 대응",
+				model.LabelName(alertmanagertypes.IncidentAnnotationSopURL):           "https://kb.example/sop/SOP-SHIP-001",
+				model.LabelName(alertmanagertypes.IncidentAnnotationSopVersion):       "2026-06-17.1",
+				model.LabelName(alertmanagertypes.IncidentAnnotationAIStrategyStatus): "low_confidence",
+				model.LabelName(alertmanagertypes.IncidentAnnotationCustomerUpdate):   "[안내] 점검 중",
+			},
+			StartsAt: time.Now(),
+			EndsAt:   time.Now().Add(time.Hour),
+		},
+	}
+
+	_, err = notifier.Notify(ctx, alert)
+	require.NoError(t, err)
+
+	atts := capturedBody["attachments"].([]any)
+	require.GreaterOrEqual(t, len(atts), 2)
+
+	// Primary (body) attachment carries no incident fields.
+	require.Empty(t, slackFieldTitles(atts[0].(map[string]any)), "body attachment must not carry incident fields")
+
+	// Secondary attachment carries the compact field set: routing + SOP link only.
+	titles := slackFieldTitles(atts[1].(map[string]any))
+	require.Contains(t, titles, "Project")
+	require.Contains(t, titles, "Severity")
+	require.Contains(t, titles, "SOP title")
+	require.Contains(t, titles, "SOP URL")
+	// Verbose/debug/redundant fields are dropped when SOP-bound.
+	require.NotContains(t, titles, "SOP version")
+	require.NotContains(t, titles, "AI status")
+	require.NotContains(t, titles, "Customer update", "customer update is already in the body")
 }
 
 func TestSlackUsesTemplateWhenUnbound(t *testing.T) {

@@ -116,14 +116,15 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 	text := tmplText(n.conf.Text)
 
 	// DS-APM: SOP 바운드 알림이면 채널 템플릿 대신 AI 제목·본문·고객공지로 대체.
-	if notif, ok := alertmanagertypes.ResolveSOPBoundNotification(data.CommonAnnotations); ok {
+	notif, sopBound := alertmanagertypes.ResolveSOPBoundNotification(data.CommonAnnotations)
+	if sopBound {
 		if notif.Title != "" {
 			title, _ = notify.TruncateInRunes(notif.Title, maxTitleLenRunes)
 		}
+		// Body only: the customer notice + incident fields move to a second
+		// attachment (below) so Slack's "show more" collapses those rather than
+		// truncating the SOP body that operators must read first.
 		text = notif.Body
-		if notif.CustomerNotice != "" {
-			text = text + "\n\n" + alertmanagertypes.CollapsibleNoticeLabel + "\n" + notif.CustomerNotice
-		}
 	}
 
 	att := &attachment{
@@ -161,15 +162,36 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 		}
 		att.Fields = fields
 	}
-	for _, field := range alertmanagertypes.IncidentInfoFields(
-		alertmanagertypes.BuildSafeIncidentInfo(data.CommonLabels, data.CommonAnnotations),
-	) {
-		short := field.Short
-		att.Fields = append(att.Fields, config.SlackField{
-			Title: field.Title,
-			Value: field.Value,
-			Short: &short,
-		})
+	incidentInfo := alertmanagertypes.BuildSafeIncidentInfo(data.CommonLabels, data.CommonAnnotations)
+	var secondaryAtt *attachment
+	if sopBound {
+		// Secondary attachment: customer notice + compact incident fields. Kept
+		// out of the primary body attachment so the SOP body stays fully visible
+		// and Slack collapses this lower-priority block instead.
+		sec := &attachment{Fallback: title, MrkdwnIn: markdownIn}
+		if notif.CustomerNotice != "" {
+			sec.Text = alertmanagertypes.CollapsibleNoticeLabel + "\n" + notif.CustomerNotice
+		}
+		for _, field := range alertmanagertypes.IncidentInfoFieldsCompact(incidentInfo) {
+			short := field.Short
+			sec.Fields = append(sec.Fields, config.SlackField{
+				Title: field.Title,
+				Value: field.Value,
+				Short: &short,
+			})
+		}
+		if sec.Text != "" || len(sec.Fields) > 0 {
+			secondaryAtt = sec
+		}
+	} else {
+		for _, field := range alertmanagertypes.IncidentInfoFields(incidentInfo) {
+			short := field.Short
+			att.Fields = append(att.Fields, config.SlackField{
+				Title: field.Title,
+				Value: field.Value,
+				Short: &short,
+			})
+		}
 	}
 
 	numActions := len(n.conf.Actions)
@@ -199,6 +221,11 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 		att.Actions = actions
 	}
 
+	attachments := []attachment{*att}
+	if secondaryAtt != nil {
+		attachments = append(attachments, *secondaryAtt)
+	}
+
 	req := &request{
 		Channel:     tmplText(n.conf.Channel),
 		Username:    tmplText(n.conf.Username),
@@ -206,7 +233,7 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 		IconURL:     tmplText(n.conf.IconURL),
 		LinkNames:   n.conf.LinkNames,
 		Text:        tmplText(n.conf.MessageText),
-		Attachments: []attachment{*att},
+		Attachments: attachments,
 	}
 	if err != nil {
 		return false, err
