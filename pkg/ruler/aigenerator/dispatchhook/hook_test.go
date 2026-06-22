@@ -648,6 +648,62 @@ func TestApplyReusesCachedCustomerNoticeWithoutRegenerating(t *testing.T) {
 		"cached customer notice must be merged into returned annotations")
 }
 
+// TestApplyDoesNotReuseDeterministicLocalDraft guards the cost-guardrail
+// exception: a cached draft stamped with the deterministic-local audit model is
+// the cheap non-LLM fallback format, so the second dispatch of the SAME incident
+// must REGENERATE (giving a now-available LLM a chance) rather than re-send the
+// boilerplate. Identical to the reuse test except for audit.Model.
+func TestApplyDoesNotReuseDeterministicLocalDraft(t *testing.T) {
+	const orgID = "customer-a"
+
+	inner := &stubGen{strategy: ruletypes.AIStrategy{
+		ContractVersion:     ruletypes.AIStrategyContractVersion,
+		StrategyID:          "strategy-local-noreuse-001",
+		IncidentID:          "INC-20260512-0001", // matches seed.Alert.IncidentID
+		AlertFingerprint:    "fp-payment-api-5xx-demo",
+		Status:              ruletypes.AIStrategyStatusReady,
+		Language:            "ko-KR",
+		SOPID:               "SOP-PAY-001",
+		SOPVersion:          "2026-05-12.1", // matches seed SOP version / binding.Version
+		Headline:            "로컬 양식 재사용 금지 테스트 headline",
+		CustomerUpdateDraft: "현재 결제 API 장애 확인 중입니다. 15분 내 업데이트 드리겠습니다.",
+		Hypotheses: []ruletypes.AIHypothesis{
+			{Rank: 1, Text: "PG timeout", Confidence: ruletypes.AIConfidenceMedium, SOPStepRefs: []string{"step-1"}},
+		},
+		FirstActions: []ruletypes.AIFirstAction{
+			{Text: "결제 성공률 확인", SOPStepRef: "step-1", RequiresHumanApproval: true},
+		},
+		EvidenceRefs: []ruletypes.AIEvidenceRef{
+			{RefID: "metric:error_rate:payment-api", Type: "metric", Observation: "5xx rate 상승", Confidence: ruletypes.AIConfidenceMedium},
+		},
+		Confidence: ruletypes.AIConfidenceMedium,
+		Audit: ruletypes.AIStrategyAudit{
+			PromptVersion: "ds-ir-ko-v1",
+			// The marker under test: deterministic-local format must NOT be reused.
+			Model:            ruletypes.AIStrategyModelDeterministicLocal,
+			GeneratedAt:      "2026-05-12T00:00:00Z",
+			RedactionApplied: true,
+		},
+	}}
+
+	seed := loadSeed(t)
+	countingGen := &countingGenerator{inner: inner}
+	hook, _, _, _ := seedHookFixture(t, orgID, countingGen)
+
+	// 1st dispatch: generates and upserts a deterministic-local history record.
+	_ = hook.Apply(context.Background(), orgID,
+		seed.Alert.IncidentID, seed.Alert.Fingerprint,
+		seed.Alert.Labels, seed.Alert.Annotations)
+	require.Equal(t, 1, countingGen.calls, "first dispatch must call the generator once")
+
+	// 2nd dispatch of the SAME incident: the cached draft is deterministic-local,
+	// so it must be IGNORED and the generator called again.
+	_ = hook.Apply(context.Background(), orgID,
+		seed.Alert.IncidentID, seed.Alert.Fingerprint,
+		seed.Alert.Labels, seed.Alert.Annotations)
+	require.Equal(t, 2, countingGen.calls, "deterministic-local cached draft must be regenerated, not reused")
+}
+
 // TestApplyFallbackOmitsCustomerNotice is a regression guard for the fallback
 // path: when the generator returns a non-ready strategy (status=unavailable,
 // empty CustomerUpdateDraft), Apply must NOT set the customer_update annotation

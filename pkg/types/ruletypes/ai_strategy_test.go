@@ -330,6 +330,21 @@ func boolPointer(value bool) *bool {
 	return &value
 }
 
+func TestAIStrategyIsDeterministicLocal(t *testing.T) {
+	local := AIStrategy{Audit: AIStrategyAudit{Model: AIStrategyModelDeterministicLocal}}
+	if !local.IsDeterministicLocal() {
+		t.Fatalf("deterministic-local model must report IsDeterministicLocal()==true")
+	}
+	llm := AIStrategy{Audit: AIStrategyAudit{Model: "claude-opus-4-8"}}
+	if llm.IsDeterministicLocal() {
+		t.Fatalf("LLM model must report IsDeterministicLocal()==false")
+	}
+	padded := AIStrategy{Audit: AIStrategyAudit{Model: "  " + AIStrategyModelDeterministicLocal + "  "}}
+	if !padded.IsDeterministicLocal() {
+		t.Fatalf("padded deterministic-local model must report true")
+	}
+}
+
 func TestGenerateLocalAIStrategyFillsNotificationBody(t *testing.T) {
 	// Use validAIStrategyRequest which has a fully valid SOPDocument and matching
 	// tenant labels, so it reaches the NotificationBody assignment path.

@@ -149,6 +149,20 @@ type AIStrategyAudit struct {
 	ExecutionElapsedMillis *int64 `json:"executionElapsedMillis,omitempty"`
 }
 
+// AIStrategyModelDeterministicLocal is the audit.model value stamped on
+// strategies produced by the deterministic local generator — the default,
+// non-LLM fallback format. The dispatch hook uses it to tell a cheap fallback
+// draft apart from a real LLM draft.
+const AIStrategyModelDeterministicLocal = defaultAIStrategyModel
+
+// IsDeterministicLocal reports whether the strategy was produced by the
+// deterministic local generator (the default non-LLM fallback format) rather
+// than a real LLM. The dispatch hook avoids reusing such a cached draft so a
+// now-available LLM can produce a richer one instead of re-sending boilerplate.
+func (s AIStrategy) IsDeterministicLocal() bool {
+	return strings.TrimSpace(s.Audit.Model) == AIStrategyModelDeterministicLocal
+}
+
 func GenerateLocalAIStrategy(req AIStrategyRequest) (AIStrategy, error) {
 	strategy := baseAIStrategy(req)
 	if strings.TrimSpace(req.IncidentID) == "" {

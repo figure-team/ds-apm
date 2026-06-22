@@ -158,13 +158,19 @@ func (h *Hook) Apply(
 	// this incident instead of paying for another LLM call. Storms and
 	// re-notifications of the SAME incident (same fingerprint) hit this path.
 	// Reuse only when the stored strategy still matches the bound SOP version.
+	//
+	// Exception: never reuse a deterministic-local draft. That format is the
+	// cheap non-LLM fallback (no LLM cost is saved by reusing it), and reusing
+	// it would keep re-sending boilerplate even after a real LLM becomes
+	// available. Regenerate so the LLM gets a chance to replace it.
 	if h.aiHistoryStore != nil {
 		if rec, ok, err := h.aiHistoryStore.GetLatest(ctx, orgID, ruletypes.AIStrategyHistoryLookupRequest{
 			IncidentID:       incidentID,
 			AlertFingerprint: alertFingerprint,
 		}); err == nil && ok &&
 			strings.TrimSpace(rec.Strategy.CustomerUpdateDraft) != "" &&
-			strings.TrimSpace(rec.Strategy.SOPVersion) == strings.TrimSpace(binding.Version) {
+			strings.TrimSpace(rec.Strategy.SOPVersion) == strings.TrimSpace(binding.Version) &&
+			!rec.Strategy.IsDeterministicLocal() {
 			return h.mergeStrategyWithSOP(annotations, rec.Strategy, doc, binding)
 		}
 	}
@@ -173,6 +179,7 @@ func (h *Hook) Apply(
 	defer cancel()
 
 	strategy, err := h.generator.Generate(genCtx, ruletypes.AIStrategyRequest{
+		OrgID:            orgID,
 		IncidentID:       incidentID,
 		AlertFingerprint: alertFingerprint,
 		Labels:           labels,
