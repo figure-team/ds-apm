@@ -12,7 +12,9 @@ const (
 	// PromptVersion identifies the prompt template used by this package.
 	// v2 adds customer/vendor communication drafts and explicit SOP-step /
 	// evidence grounding refs to the requested output schema.
-	PromptVersion = "ds-ir-ko-llm-v2"
+	// v3 switches notificationBody to a hybrid format: a one-line situation
+	// summary on top, then the SOP body's own section headings preserved.
+	PromptVersion = "ds-ir-ko-llm-v3"
 
 	// DefaultTimeout is applied when New is called with timeout <= 0.
 	DefaultTimeout = 15 * time.Second
