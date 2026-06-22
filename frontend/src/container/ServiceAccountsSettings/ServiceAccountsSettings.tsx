@@ -194,7 +194,7 @@ function ServiceAccountsSettings(): JSX.Element {
 
 	return (
 		<>
-			<div className="sa-settings">
+			<div className="sa-settings settings-shell">
 				<div className="sa-settings__header">
 					<h1 className="sa-settings__title">{t('page_title')}</h1>
 					<p className="sa-settings__subtitle">
@@ -251,22 +251,22 @@ function ServiceAccountsSettings(): JSX.Element {
 						{t('new_service_account')}
 					</Button>
 				</div>
-			</div>
 
-			{isError ? (
-				<ErrorInPlace
-					error={toAPIError(
-						error,
-						'An unexpected error occurred while fetching service accounts.',
-					)}
-				/>
-			) : (
-				<ServiceAccountsTable
-					data={filteredAccounts}
-					loading={isLoading}
-					onRowClick={handleRowClick}
-				/>
-			)}
+				{isError ? (
+					<ErrorInPlace
+						error={toAPIError(
+							error,
+							'An unexpected error occurred while fetching service accounts.',
+						)}
+					/>
+				) : (
+					<ServiceAccountsTable
+						data={filteredAccounts}
+						loading={isLoading}
+						onRowClick={handleRowClick}
+					/>
+				)}
+			</div>
 
 			<CreateServiceAccountModal />
 

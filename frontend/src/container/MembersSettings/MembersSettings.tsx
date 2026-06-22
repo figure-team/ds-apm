@@ -164,7 +164,7 @@ function MembersSettings(): JSX.Element {
 
 	return (
 		<>
-			<div className="members-settings">
+			<div className="members-settings settings-shell">
 				<div className="members-settings__header">
 					<h1 className="members-settings__title">{t('members_title')}</h1>
 					<p className="members-settings__subtitle">{t('members_subtitle')}</p>
@@ -209,17 +209,18 @@ function MembersSettings(): JSX.Element {
 						{t('invite_member')}
 					</Button>
 				</div>
+
+				<MembersTable
+					data={filteredMembers}
+					loading={isLoading}
+					total={filteredMembers.length}
+					currentPage={currentPage}
+					pageSize={PAGE_SIZE}
+					searchQuery={searchQuery}
+					onPageChange={setPage}
+					onRowClick={handleRowClick}
+				/>
 			</div>
-			<MembersTable
-				data={filteredMembers}
-				loading={isLoading}
-				total={filteredMembers.length}
-				currentPage={currentPage}
-				pageSize={PAGE_SIZE}
-				searchQuery={searchQuery}
-				onPageChange={setPage}
-				onRowClick={handleRowClick}
-			/>
 
 			<InviteMembersModal
 				open={isInviteModalOpen}
