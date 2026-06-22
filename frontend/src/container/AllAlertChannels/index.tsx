@@ -109,7 +109,7 @@ const TAB_ITEMS = [
 
 function AlertChannels(): JSX.Element {
 	return (
-		<div style={{ padding: '16px 24px' }}>
+		<div className="settings-shell">
 			<Tabs items={TAB_ITEMS} defaultActiveKey="channels" />
 		</div>
 	);

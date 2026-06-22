@@ -26,7 +26,10 @@ function CodeRcaSettings(): JSX.Element {
 	};
 
 	return (
-		<div className="code-rca-settings" data-testid="code-rca-settings">
+		<div
+			className="code-rca-settings settings-shell settings-shell--narrow"
+			data-testid="code-rca-settings"
+		>
 			<header className="code-rca-settings__header">
 				<h1 className="code-rca-settings__header-title">{t('header_title')}</h1>
 				<p className="code-rca-settings__header-subtitle">{t('header_subtitle')}</p>
