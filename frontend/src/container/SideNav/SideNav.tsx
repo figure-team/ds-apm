@@ -17,6 +17,7 @@ import { FeatureKeys } from 'constants/features';
 import ROUTES from 'constants/routes';
 import { GlobalShortcuts } from 'constants/shortcuts/globalShortcuts';
 import { useKeyboardHotkeys } from 'hooks/hotkeys/useKeyboardHotkeys';
+import { useIsDarkMode } from 'hooks/useDarkMode';
 import { useGetTenantLicense } from 'hooks/useGetTenantLicense';
 import history from 'lib/history';
 import {
@@ -39,7 +40,8 @@ import { checkVersionState } from 'utils/app';
 import { isModifierKeyPressed } from 'utils/app';
 import { openInNewTab } from 'utils/navigation';
 
-import signozBrandLogoUrl from '@/assets/Logos/signoz-brand-logo.svg';
+import ktdsLogoNegativeUrl from '@/assets/Logos/ktds-logo-negative.png';
+import ktdsLogoPositiveUrl from '@/assets/Logos/ktds-logo-positive.png';
 
 import { useCmdK } from '../../providers/cmdKProvider';
 import { routeConfig } from './config';
@@ -82,6 +84,7 @@ const sideNavItemKeyMap: Record<string, string> = {
 // eslint-disable-next-line sonarjs/cognitive-complexity
 function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 	const { t } = useTranslation(['routes', 'settings', 'helpSupport']);
+	const isDarkMode = useIsDarkMode();
 	const { openCmdK } = useCmdK();
 	const { pathname, search } = useLocation();
 	const { currentVersion, latestVersion, isCurrentVersionError } = useSelector<
@@ -664,7 +667,11 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 									onClickHandler(ROUTES.HOME, event);
 								}}
 							>
-								<img src={signozBrandLogoUrl} alt="SigNoz" />
+								<img
+									src={isDarkMode ? ktdsLogoNegativeUrl : ktdsLogoPositiveUrl}
+									alt="kt ds"
+								/>
+								<span className="brand-logo-name">DS-APM</span>
 							</div>
 
 							{licenseTag && (
