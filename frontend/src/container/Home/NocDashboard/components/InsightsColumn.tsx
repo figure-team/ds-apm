@@ -124,6 +124,7 @@ export default function InsightsColumn({
 				title={t('noc_panel_logs')}
 				action={<span>{t('noc_action_explorer')}</span>}
 				onActionClick={(): void => safeNavigate(ROUTES.LOGS_EXPLORER)}
+				className="noc-logs-panel"
 			>
 				{renderLogs()}
 			</NocPanel>

@@ -47,7 +47,6 @@ export default function NocDashboard(): JSX.Element {
 			<div className="noc-console">
 				<LeftRail
 					kpis={overview.kpis}
-					goldenSignals={overview.golden}
 					alerts={alerts}
 					alertsLoading={isLoading}
 					alertsError={isError}

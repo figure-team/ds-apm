@@ -6,7 +6,12 @@
 	--noc-r: 12px;
 
 	width: 100%;
-	padding: 14px 20px 26px;
+	height: 100%;
+	padding: 14px 20px 18px;
+
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
 
 	font-family: 'Segoe UI', 'Inter', Pretendard, Roboto, -apple-system, sans-serif;
 	letter-spacing: -0.01em;
@@ -89,6 +94,7 @@
 		align-items: center;
 		gap: 14px;
 		margin-bottom: 13px;
+		flex-shrink: 0;
 	}
 	.noc-env-tabs {
 		display: flex;
@@ -151,13 +157,16 @@
 		display: grid;
 		grid-template-columns: 300px 1fr 320px;
 		gap: 13px;
-		align-items: start;
+		align-items: stretch;
+		flex: 1;
+		min-height: 0;
 	}
 	.noc-rail,
 	.noc-col {
 		display: flex;
 		flex-direction: column;
 		gap: 13px;
+		min-height: 0;
 	}
 
 	/* ---- panel ---- */
@@ -264,33 +273,21 @@
 		opacity: 0.7;
 	}
 
-	/* ---- golden signals ---- */
-	.noc-golden {
-		display: flex;
-		border: 1px solid var(--noc-line);
-		border-radius: 9px;
-		overflow: hidden;
-	}
-	.noc-golden-item {
+	/* ---- panels that fill remaining height and scroll internally ---- */
+	.noc-alerts-panel,
+	.noc-logs-panel,
+	.noc-health-panel {
 		flex: 1;
-		padding: 9px 11px;
-		border-right: 1px solid var(--noc-line);
-
-		&:last-child {
-			border-right: none;
-		}
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
 	}
-	.noc-golden-lbl {
-		font-size: 9.5px;
-		color: var(--noc-txt2);
-		font-weight: 600;
-		text-transform: uppercase;
-	}
-	.noc-golden-val {
-		font-size: 15px;
-		font-weight: 800;
-		margin-top: 3px;
-		color: var(--noc-txt);
+	.noc-alerts-panel .noc-alert-list,
+	.noc-logs-panel .noc-logs,
+	.noc-health-panel .noc-health-list {
+		flex: 1;
+		min-height: 0;
+		overflow-y: auto;
 	}
 
 	/* ---- alerts ---- */
@@ -419,9 +416,6 @@
 	}
 
 	/* ---- service health list ---- */
-	.noc-health-panel {
-		min-height: 0;
-	}
 	.noc-health-head {
 		display: flex;
 		align-items: center;
@@ -432,6 +426,10 @@
 		letter-spacing: 0.04em;
 		color: var(--noc-txt3);
 		border-bottom: 1px solid var(--noc-line);
+		position: sticky;
+		top: 0;
+		background: var(--noc-panel);
+		z-index: 1;
 	}
 	.noc-health-row {
 		display: flex;
@@ -549,8 +547,6 @@
 		line-height: 1.85;
 		font-family: 'JetBrains Mono', 'Consolas', monospace;
 		font-variant-numeric: tabular-nums;
-		max-height: 206px;
-		overflow: hidden;
 	}
 	.noc-logline {
 		display: flex;

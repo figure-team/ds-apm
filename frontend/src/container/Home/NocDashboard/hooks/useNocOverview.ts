@@ -19,7 +19,7 @@ import { ServicesList } from 'types/api/metrics/getService';
 import { GlobalReducer } from 'types/reducer/globalTime';
 import { Tags } from 'types/reducer/trace';
 
-import { NocGoldenSignal, NocHealth, NocKpi, NocServiceRow } from '../types';
+import { NocHealth, NocKpi, NocServiceRow } from '../types';
 
 // error rate thresholds (percent)
 const HEALTHY_ERR_PCT = 1;
@@ -89,7 +89,6 @@ function aggregate(services: ServicesList[]): Aggregate {
 
 export interface UseNocOverviewResult {
 	kpis: NocKpi[];
-	golden: NocGoldenSignal[];
 	services: NocServiceRow[];
 	isLoading: boolean;
 	isError: boolean;
@@ -247,20 +246,5 @@ export default function useNocOverview(firingCount: number): UseNocOverviewResul
 		];
 	}, [agg, firingCount, t]);
 
-	const golden = useMemo<NocGoldenSignal[]>(
-		() => [
-			{ key: 'latency', label: '지연', value: `${Math.round(agg.maxP99Ms)}ms` },
-			{ key: 'traffic', label: '트래픽', value: formatRps(agg.totalRps) },
-			{
-				key: 'errors',
-				label: '에러',
-				value: `${agg.weightedErrPct.toFixed(2)}%`,
-				accent: agg.weightedErrPct >= HEALTHY_ERR_PCT ? 'error' : undefined,
-			},
-			{ key: 'firing', label: '발화', value: String(firingCount) },
-		],
-		[agg, firingCount],
-	);
-
-	return { kpis, golden, services: serviceRows, isLoading, isError };
+	return { kpis, services: serviceRows, isLoading, isError };
 }

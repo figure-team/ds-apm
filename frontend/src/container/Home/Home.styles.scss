@@ -77,6 +77,15 @@
 	flex-direction: row;
 	gap: 1rem;
 
+	/* NOC/control-center home fills the viewport below the sticky header so the
+	   whole console is visible at once; long lists scroll inside their panels. */
+	&.home-content--noc {
+		flex: 1;
+		min-height: 0;
+		padding: 0;
+		overflow: hidden;
+	}
+
 	.home-left-content {
 		width: 50%;
 		display: flex;

@@ -1,9 +1,9 @@
 import ROUTES from 'constants/routes';
 import { useSafeNavigate } from 'hooks/useSafeNavigate';
-import { BarChart3, Siren, Zap } from 'lucide-react';
+import { BarChart3, Siren } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { NocAccent, NocAlert, NocGoldenSignal, NocKpi, NocSeverity } from '../types';
+import { NocAccent, NocAlert, NocKpi, NocSeverity } from '../types';
 import NocPanel from './NocPanel';
 import Sparkline from './Sparkline';
 
@@ -23,7 +23,6 @@ const SEVERITY_CLASS: Record<NocSeverity, string> = {
 
 export interface LeftRailProps {
 	kpis: NocKpi[];
-	goldenSignals: NocGoldenSignal[];
 	alerts: NocAlert[];
 	alertsLoading: boolean;
 	alertsError: boolean;
@@ -31,7 +30,6 @@ export interface LeftRailProps {
 
 export default function LeftRail({
 	kpis,
-	goldenSignals,
 	alerts,
 	alertsLoading,
 	alertsError,
@@ -50,7 +48,7 @@ export default function LeftRail({
 			return <div className="noc-empty">{t('noc_alerts_empty')}</div>;
 		}
 		return (
-			<>
+			<div className="noc-alert-list">
 				{alerts.map((alert) => (
 					<button
 						type="button"
@@ -73,7 +71,7 @@ export default function LeftRail({
 						{alert.age ? <div className="noc-alert-time">{alert.age}</div> : null}
 					</button>
 				))}
-			</>
+			</div>
 		);
 	};
 
@@ -111,29 +109,12 @@ export default function LeftRail({
 				</div>
 			</NocPanel>
 
-			<NocPanel icon={<Zap size={13} />} title={t('noc_panel_golden')}>
-				<div className="noc-golden">
-					{goldenSignals.map((sig) => (
-						<div className="noc-golden-item" key={sig.key}>
-							<div className="noc-golden-lbl">{t(`noc_golden_${sig.key}`, sig.label)}</div>
-							<div
-								className="noc-golden-val"
-								style={
-									sig.accent === 'error' ? { color: 'var(--noc-err)' } : undefined
-								}
-							>
-								{sig.value}
-							</div>
-						</div>
-					))}
-				</div>
-			</NocPanel>
-
 			<NocPanel
 				icon={<Siren size={13} />}
 				title={t('noc_panel_alerts')}
 				action={<span>{t('noc_action_view_all')}</span>}
 				onActionClick={(): void => safeNavigate(ROUTES.LIST_ALL_ALERT)}
+				className="noc-alerts-panel"
 			>
 				{renderAlerts()}
 			</NocPanel>

@@ -347,7 +347,7 @@ export default function Home(): JSX.Element {
 				/>
 			</div>
 
-			<div className="home-content">
+			<div className={`home-content${showNocDashboard ? ' home-content--noc' : ''}`}>
 				{showNocDashboard ? (
 					<NocDashboard />
 				) : (

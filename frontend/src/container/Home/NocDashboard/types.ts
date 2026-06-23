@@ -17,13 +17,6 @@ export interface NocKpi {
 	sparkColor?: string;
 }
 
-export interface NocGoldenSignal {
-	key: string;
-	label: string;
-	value: string;
-	accent?: NocAccent;
-}
-
 export interface NocAlert {
 	id: string;
 	severity: NocSeverity;
