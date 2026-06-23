@@ -167,6 +167,55 @@ func TestDraft_GroundedCitation(t *testing.T) {
 		"downgrade must explain the missing SOP grounding")
 }
 
+// TestParse_DowngradesWhenNoEvidence pins the dispatch-path behaviour: the
+// dispatch hook supplies no evidence refs (v0.1 has no evidence collector), so a
+// SOP-grounded "ready" LLM draft would otherwise be hard-rejected by
+// ValidateAIStrategy ("ready strategy must include at least one evidence ref").
+// Instead it must be downgraded to low_confidence so the SOP-grounded
+// notification body still flows to the channel.
+func TestParse_DowngradesWhenNoEvidence(t *testing.T) {
+	// Same request the dispatch path builds: bound SOP, but EvidenceRefs empty.
+	noEvidenceReq := ruletypes.AIStrategyRequest{
+		IncidentID:       "INC-PARSE-002",
+		AlertFingerprint: "fp-parse-noevi",
+		SOPDocument: ruletypes.SOPDocument{
+			SOPID:   "SOP-PAY-TOSS-001",
+			Version: "2026-06-23.1",
+		},
+		// EvidenceRefs intentionally empty (dispatch path supplies none).
+	}
+
+	// A confident, SOP-grounded draft — what a compliant LLM returns for the
+	// SOP-bound customer-notice use case.
+	const raw = `{
+	  "headline": "토스페이 간편결제 장애 — 주문서 비활성화 검토 필요",
+	  "hypotheses": [
+	    {"rank":1,"text":"외부 PG 타임아웃으로 결제 호출 적체","confidence":"medium","sopStepRefs":["SOP-PAY-TOSS-001#1"]}
+	  ],
+	  "firstActions": [
+	    {"text":"백오피스에서 토스페이 주문서 비활성화 검토","sopStepRef":"SOP-PAY-TOSS-001#1","requiresHumanApproval":true}
+	  ],
+	  "notificationBody": "**현황:** 토스페이 결제 호출이 PG 타임아웃까지 대기하며 리소스 사용량이 상승 중입니다.",
+	  "customerUpdateDraft": "[간편결제(토스페이) 이용 안내] 토스페이 결제가 일시 지연되어 잠시 중단했습니다.",
+	  "confidence": "medium",
+	  "status": "ready"
+	}`
+
+	strategy, err := Parse(raw, noEvidenceReq, "test-model")
+	require.NoError(t, err, "no-evidence draft must be downgraded, not rejected")
+	require.Equal(t, ruletypes.AIStrategyStatusLowConfidence, strategy.Status,
+		"ready draft with no evidence must downgrade to low_confidence")
+	require.Equal(t, ruletypes.AIConfidenceLow, strategy.Confidence)
+	require.NotEmpty(t, strategy.Limitations,
+		"downgrade must explain the missing evidence")
+	// The whole point: the SOP-grounded body survives so the channel renders it.
+	require.Equal(t,
+		"**현황:** 토스페이 결제 호출이 PG 타임아웃까지 대기하며 리소스 사용량이 상승 중입니다.",
+		strategy.NotificationBody,
+		"notification body must survive the downgrade")
+	require.NoError(t, ruletypes.ValidateAIStrategy(strategy))
+}
+
 func TestParseMapsNotificationBody(t *testing.T) {
 	raw := `{"headline":"h","notificationBody":"## 현황\n- 5xx 급증","customerUpdateDraft":"[안내] ...","confidence":"low","status":"evidence_unavailable","limitations":["e"]}`
 	req := ruletypes.AIStrategyRequest{

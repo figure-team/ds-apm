@@ -93,6 +93,19 @@ func Parse(raw string, req ruletypes.AIStrategyRequest, model string) (ruletypes
 		strategy.Limitations = append(strategy.Limitations, groundingMissingLimitation)
 	}
 
+	// Evidence-absent downgrade: the dispatch path supplies no evidence refs
+	// (v0.1 has no evidence collector), but a ready strategy requires at least
+	// one (ValidateAIStrategy). A confident, SOP-grounded LLM draft would then be
+	// hard-rejected and the channel would fall back to its default body — even
+	// though the SOP-grounded NotificationBody/customer notice are perfectly
+	// usable. Mirror GenerateLocalAIStrategy's no-evidence handling: downgrade to
+	// low confidence rather than reject, so the draft still flows.
+	if strategy.Status == ruletypes.AIStrategyStatusReady && len(strategy.EvidenceRefs) == 0 {
+		strategy.Status = ruletypes.AIStrategyStatusLowConfidence
+		strategy.Confidence = ruletypes.AIConfidenceLow
+		strategy.Limitations = append(strategy.Limitations, evidenceMissingLimitation)
+	}
+
 	if err := ruletypes.ValidateAIStrategy(strategy); err != nil {
 		return ruletypes.AIStrategy{}, err
 	}
@@ -103,6 +116,11 @@ func Parse(raw string, req ruletypes.AIStrategyRequest, model string) (ruletypes
 // groundingMissingLimitation explains a draft that was downgraded because it
 // did not cite the bound SOP.
 const groundingMissingLimitation = "AI draft was not grounded in the bound SOP (no SOP step citation); confidence downgraded."
+
+// evidenceMissingLimitation explains a draft that was downgraded because no
+// evidence refs were available (the dispatch path has no evidence collector in
+// v0.1). The SOP-grounded notification body remains usable at low confidence.
+const evidenceMissingLimitation = "no evidence refs were available; confidence downgraded."
 
 // isSOPGrounded reports whether the strategy cites the SOP at least once via a
 // hypothesis sopStepRefs entry or a first-action sopStepRef.
