@@ -11,6 +11,8 @@ import {
 	CodeRcaRunStatus,
 	CodeRcaRunSummary,
 } from 'api/codeRca/types';
+import { MarkdownRenderer } from 'components/MarkdownRenderer/MarkdownRenderer';
+import { Bug, Info, ShieldAlert, Wrench } from 'lucide-react';
 
 const STATUS_OPTIONS = [
 	{ value: '', label: 'All' },
@@ -218,12 +220,27 @@ function RunsTab(): JSX.Element {
 			<Drawer
 				open={drawerOpen}
 				onClose={(): void => setDrawerOpen(false)}
-				width={600}
-				title={detail?.service ?? ''}
+				width={680}
+				rootClassName="code-rca-drawer"
+				title={
+					<div className="code-rca-drawer__title">
+						<span className="code-rca-drawer__title-svc">{detail?.service ?? ''}</span>
+						{detail && (
+							<Tag color={statusColor(detail.status)}>{detail.status}</Tag>
+						)}
+					</div>
+				}
 			>
 				<Spin spinning={loadingDetail}>
 					{detail && (
-						<div>
+						<div className="code-rca-report">
+							{detail.status === 'done' && (
+								<div className="code-rca-report__hitl">
+									<ShieldAlert size={15} />
+									<span>{t('run_hitl_notice')}</span>
+								</div>
+							)}
+
 							{detail.failureReason && (
 								<Alert
 									type="error"
@@ -240,38 +257,73 @@ function RunsTab(): JSX.Element {
 
 							{detail.status === 'done' && (
 								<>
-									<h3>{t('run_root_cause')}</h3>
-									<pre className="code-rca-settings__report">{detail.rootCause}</pre>
+									<section className="code-rca-card code-rca-card--cause">
+										<header className="code-rca-card__head">
+											<div className="code-rca-card__title">
+												<Bug size={15} />
+												<span>{t('run_root_cause')}</span>
+											</div>
+											{detail.confidence && (
+												<span
+													className={`code-rca-confidence code-rca-confidence--${detail.confidence}`}
+												>
+													<span className="code-rca-confidence__dot" />
+													{t('run_confidence')}:{' '}
+													{t(`run_confidence_${detail.confidence}`, detail.confidence)}
+												</span>
+											)}
+										</header>
+										<MarkdownRenderer
+											className="code-rca-md"
+											markdownContent={detail.rootCause}
+											variables={{}}
+										/>
+									</section>
 
-									<h3>{t('run_proposed_fix')}</h3>
-									<pre className="code-rca-settings__report">{detail.proposedFix}</pre>
-
-									<div style={{ marginTop: 12 }}>
-										<strong>{t('run_confidence')}: </strong>
-										<Tag>{detail.confidence}</Tag>
-									</div>
+									<section className="code-rca-card code-rca-card--fix">
+										<header className="code-rca-card__head">
+											<div className="code-rca-card__title">
+												<Wrench size={15} />
+												<span>{t('run_proposed_fix')}</span>
+											</div>
+											{detail.baselineCommit && (
+												<code className="code-rca-card__commit">
+													{detail.baselineCommit.slice(0, 8)}
+												</code>
+											)}
+										</header>
+										<MarkdownRenderer
+											className="code-rca-md"
+											markdownContent={detail.proposedFix}
+											variables={{}}
+										/>
+									</section>
 
 									{detail.limitations && (
-										<div style={{ marginTop: 12 }}>
-											<strong>{t('run_limitations')}: </strong>
-											<span>{detail.limitations}</span>
-										</div>
+										<section className="code-rca-card code-rca-card--limits">
+											<header className="code-rca-card__head">
+												<div className="code-rca-card__title">
+													<Info size={15} />
+													<span>{t('run_limitations')}</span>
+												</div>
+											</header>
+											<MarkdownRenderer
+												className="code-rca-md"
+												markdownContent={detail.limitations}
+												variables={{}}
+											/>
+										</section>
 									)}
 								</>
 							)}
 
-							<div style={{ marginTop: 12 }}>
-								<strong>{t('run_baseline')}: </strong>
-								<code>{detail.baselineCommit}</code>
-							</div>
-
-							{detail.status === 'done' && (
-								<Alert
-									type="warning"
-									showIcon
-									message={t('run_hitl_notice')}
-									style={{ marginTop: 16 }}
-								/>
+							{detail.status !== 'done' && detail.baselineCommit && (
+								<div className="code-rca-report__meta">
+									<span className="code-rca-report__meta-label">
+										{t('run_baseline')}
+									</span>
+									<code>{detail.baselineCommit}</code>
+								</div>
 							)}
 						</div>
 					)}
