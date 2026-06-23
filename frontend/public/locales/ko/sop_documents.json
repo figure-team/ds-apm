@@ -27,6 +27,7 @@
 	"btn_preview_binding": "바인딩 미리보기",
 	"documents_section_title": "등록된 문서",
 	"documents_section_description": "SOP 바인딩 미리보기에서 사용 가능한 최신 등록 문서 목록입니다.",
+	"filter_all_statuses": "전체 상태",
 	"col_sop_id": "SOP ID",
 	"col_title": "제목",
 	"col_version": "버전",

@@ -17,6 +17,22 @@
 		gap: var(--spacing-8);
 	}
 
+	&__section-header--row {
+		flex-direction: row;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--spacing-8);
+	}
+
+	&__status-filter {
+		min-width: 160px;
+		flex-shrink: 0;
+	}
+
+	.ant-pagination {
+		justify-content: center;
+	}
+
 	&__header-actions {
 		display: flex;
 		gap: var(--spacing-4);

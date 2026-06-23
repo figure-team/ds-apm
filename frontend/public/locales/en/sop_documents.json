@@ -27,6 +27,7 @@
 	"btn_preview_binding": "Preview binding",
 	"documents_section_title": "Registered documents",
 	"documents_section_description": "Latest registered documents available to SOP binding preview.",
+	"filter_all_statuses": "All statuses",
 	"col_sop_id": "SOP ID",
 	"col_title": "Title",
 	"col_version": "Version",

@@ -5,7 +5,7 @@ import {
 	PlusOutlined,
 	UploadOutlined,
 } from '@ant-design/icons';
-import { Alert, Button, Input, Table, Tag } from 'antd';
+import { Alert, Button, Input, Select, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
 	listSopDocuments,
@@ -44,10 +44,23 @@ function getErrorMessage(error: unknown): string {
 	return error instanceof Error ? error.message : 'Request failed.';
 }
 
+const PAGE_SIZE = 10;
+
+const STATUS_OPTIONS: SopApprovalStatus[] = [
+	'draft',
+	'approved',
+	'deprecated',
+	'disabled',
+];
+
+type StatusFilter = SopApprovalStatus | 'all';
+
 function SOPDocuments(): JSX.Element {
 	const { t } = useTranslation(['sop_documents']);
 
 	const [documents, setDocuments] = useState<SopDocumentSummary[]>([]);
+	const [statusFilter, setStatusFilter] = useState<StatusFilter>('approved');
+	const [currentPage, setCurrentPage] = useState(1);
 	const [bindingSopId, setBindingSopId] = useState('');
 	const [bindingProjectId, setBindingProjectId] = useState('customer-a');
 	const [bindingEnvironment, setBindingEnvironment] = useState('prod');
@@ -108,6 +121,22 @@ function SOPDocuments(): JSX.Element {
 		},
 		[loadDocuments],
 	);
+
+	const filteredDocuments = useMemo<SopDocumentSummary[]>(() => {
+		const filtered =
+			statusFilter === 'all'
+				? documents
+				: documents.filter(
+						(document) => document.approvalStatus === statusFilter,
+				  );
+		// Most recently registered/updated first (updatedAt is ISO 8601 → lexical sort).
+		return [...filtered].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+	}, [documents, statusFilter]);
+
+	const handleStatusFilterChange = useCallback((value: StatusFilter): void => {
+		setStatusFilter(value);
+		setCurrentPage(1);
+	}, []);
 
 	const handleParsed = useCallback((result: ParseSopExcelResult): void => {
 		setParseResult(result);
@@ -170,7 +199,9 @@ function SOPDocuments(): JSX.Element {
 				key: 'approvalStatus',
 				width: 140,
 				render: (status: SopApprovalStatus): JSX.Element => (
-					<Tag color={status === 'approved' ? 'green' : 'default'}>{status}</Tag>
+					<Tag color={status === 'approved' ? 'green' : 'default'}>
+						{t(`status_${status}`)}
+					</Tag>
 				),
 			},
 			{
@@ -238,13 +269,28 @@ function SOPDocuments(): JSX.Element {
 			{error && <Alert message={error} showIcon type="error" />}
 
 			<section className="sop-documents-page__section">
-				<div className="sop-documents-page__section-header">
-					<h2>{t('documents_section_title')}</h2>
-					<p>{t('documents_section_description')}</p>
+				<div className="sop-documents-page__section-header sop-documents-page__section-header--row">
+					<div>
+						<h2>{t('documents_section_title')}</h2>
+						<p>{t('documents_section_description')}</p>
+					</div>
+					<Select<StatusFilter>
+						className="sop-documents-page__status-filter"
+						data-testid="sop-status-filter"
+						onChange={handleStatusFilterChange}
+						options={[
+							{ value: 'all', label: t('filter_all_statuses') },
+							...STATUS_OPTIONS.map((status) => ({
+								value: status,
+								label: t(`status_${status}`),
+							})),
+						]}
+						value={statusFilter}
+					/>
 				</div>
 				<Table
 					columns={columns}
-					dataSource={documents}
+					dataSource={filteredDocuments}
 					expandable={{
 						expandedRowRender: (record: SopDocumentSummary): JSX.Element => (
 							<RunbooksSection sopId={record.sopId} version={record.version} />
@@ -253,7 +299,13 @@ function SOPDocuments(): JSX.Element {
 							Boolean(record.sopId && record.version),
 					}}
 					loading={isLoading}
-					pagination={false}
+					pagination={{
+						current: currentPage,
+						hideOnSinglePage: true,
+						onChange: setCurrentPage,
+						pageSize: PAGE_SIZE,
+						showSizeChanger: false,
+					}}
 					rowKey={(document): string => `${document.sopId}:${document.version}`}
 					size="small"
 				/>
