@@ -120,6 +120,16 @@ services:
       # Lives on the sqlite volume so it survives restarts (.dlq-meta/ sidecar
       # files are created alongside).
       - SIGNOZ_DLQ_PATH=/var/lib/signoz/alert-dlq.jsonl
+      # LLM CLI invocation audit log (pkg/ruler/cliaudit). One JSON line is
+      # appended every time the server actually shells out to the claude/codex
+      # CLI — for incident notifications (claudecli/codexcli) and Code RCA
+      # (coderca-cli). Each line carries via/binary/model/outcome(ok|timeout|
+      # failed)/duration_ms, so you can confirm the LLM CLI really ran. If this
+      # file stays empty during an incident, the CLI path was NOT taken (mock/
+      # local fallback, or the request was gated/suppressed before exec). Lives
+      # on the sqlite volume so it survives restarts; inspect with:
+      #   docker exec signoz tail -f /var/lib/signoz/llm-cli.jsonl
+      - DS_APM_LLM_CLI_LOG=/var/lib/signoz/llm-cli.jsonl
     healthcheck:
       test:
         - CMD

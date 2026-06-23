@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
+	"github.com/SigNoz/signoz/pkg/ruler/cliaudit"
 	"github.com/SigNoz/signoz/pkg/ruler/coderca"
 )
 
@@ -61,7 +63,6 @@ func NewRunner(opts ...RunnerOption) *Runner {
 // subprocess tree is contained per §6.5: own process group + parent-death
 // signal, group-killed on ctx/timeout. Raw stdout is always retained on the
 // result for audit.
-//
 func (r *Runner) Run(ctx context.Context, s Spec) (coderca.RCAResult, coderca.RunStatus, error) {
 	args, err := BuildArgs(s)
 	if err != nil {
@@ -96,8 +97,27 @@ func (r *Runner) Run(ctx context.Context, s Spec) (coderca.RCAResult, coderca.Ru
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
+	start := time.Now()
 	runErr := cmd.Run()
 	raw := stdout.String()
+
+	rec := cliaudit.Record{
+		Via:         "coderca-cli",
+		Binary:      binary,
+		Model:       s.Model,
+		DurationMS:  time.Since(start).Milliseconds(),
+		OutputBytes: len(raw),
+		Outcome:     "ok",
+	}
+	switch {
+	case runCtx.Err() == context.DeadlineExceeded:
+		rec.Outcome = "timeout"
+		rec.Err = fmt.Sprintf("exceeded %s", r.timeout)
+	case runErr != nil:
+		rec.Outcome = "failed"
+		rec.Err = truncate(strings.TrimSpace(stderr.String()), 256)
+	}
+	cliaudit.Default().Log(rec)
 
 	if runCtx.Err() == context.DeadlineExceeded {
 		return coderca.RCAResult{Raw: raw}, coderca.RunStatusTimeout,

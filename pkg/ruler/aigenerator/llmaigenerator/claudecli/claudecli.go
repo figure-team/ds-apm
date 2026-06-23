@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/SigNoz/signoz/pkg/ruler/aigenerator/llmaigenerator"
+	"github.com/SigNoz/signoz/pkg/ruler/cliaudit"
 )
 
 const DefaultBinary = "claude"
@@ -112,8 +113,28 @@ func (p *Provider) Complete(ctx context.Context, system, user string) (string, e
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-	if err := cmd.Run(); err != nil {
-		return "", fmt.Errorf("claudecli: run %s: %w (stderr: %s)", p.binary, err, truncate(stderr.String(), 512))
+
+	start := time.Now()
+	runErr := cmd.Run()
+	rec := cliaudit.Record{
+		Via:         "claudecli",
+		Binary:      p.binary,
+		Model:       p.model,
+		DurationMS:  time.Since(start).Milliseconds(),
+		OutputBytes: stdout.Len(),
+		Outcome:     "ok",
+	}
+	if runErr != nil {
+		rec.Outcome = "failed"
+		if ctx.Err() == context.DeadlineExceeded {
+			rec.Outcome = "timeout"
+		}
+		rec.Err = truncate(strings.TrimSpace(stderr.String()), 256)
+	}
+	cliaudit.Default().Log(rec)
+
+	if runErr != nil {
+		return "", fmt.Errorf("claudecli: run %s: %w (stderr: %s)", p.binary, runErr, truncate(stderr.String(), 512))
 	}
 	return stdout.String(), nil
 }
