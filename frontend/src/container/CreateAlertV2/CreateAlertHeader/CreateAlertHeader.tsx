@@ -36,6 +36,7 @@ import {
 import {
 	getSopBindingStatus,
 	hasSopBinding,
+	resolveSopBindingDocument,
 	SOP_ANNOTATION_FIELDS,
 	SOP_ID_LABEL,
 	validateSopAnnotations,
@@ -157,7 +158,7 @@ function CreateAlertHeader(): JSX.Element {
 	const handleSopIdChange = useCallback(
 		(value: string): void => {
 			const trimmed = value.trim();
-			const match = sopDocuments.find((doc) => doc.sopId === trimmed);
+			const match = resolveSopBindingDocument(sopDocuments, trimmed);
 
 			const nextLabels = { ...alertState.labels };
 			if (trimmed) {

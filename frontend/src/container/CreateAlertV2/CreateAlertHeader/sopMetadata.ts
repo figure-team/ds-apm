@@ -1,6 +1,35 @@
+import type { SopDocumentSummary } from 'api/v2/rules/sopDocuments';
 import type { Labels } from 'types/api/alerts/def';
 
 export const SOP_ID_LABEL = 'sop_id';
+
+// resolveSopBindingDocument picks the document used to auto-fill the alert form
+// when a SOP_ID is entered. Only approved SOPs may ground an alert binding, so
+// non-approved versions (draft/deprecated/disabled) are ignored even if they
+// match the id. When several approved versions share the id, the latest version
+// wins, mirroring the backend's latestApprovedSOPDocumentByID resolution.
+export function resolveSopBindingDocument(
+	documents: SopDocumentSummary[],
+	sopId: string,
+): SopDocumentSummary | undefined {
+	const trimmed = sopId.trim();
+
+	if (!trimmed) {
+		return undefined;
+	}
+
+	return documents
+		.filter(
+			(doc) => doc.sopId === trimmed && doc.approvalStatus === 'approved',
+		)
+		.reduce<SopDocumentSummary | undefined>((latest, doc) => {
+			if (!latest) {
+				return doc;
+			}
+
+			return doc.version.trim() > latest.version.trim() ? doc : latest;
+		}, undefined);
+}
 
 export type SopAnnotationFieldKey =
 	| 'sop_binding_id'
