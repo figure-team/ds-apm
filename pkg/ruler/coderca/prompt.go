@@ -11,7 +11,9 @@ import (
 // PromptVersion identifies the coderca-owned prompt contract for audit.
 // v2 adds a Korean readability style guide so root_cause/proposed_fix render as
 // scannable, plain-language guidance for on-call operators.
-const PromptVersion = "coderca.rca.v2"
+// v3 makes the cause/fix location explicit: root_cause and proposed_fix must
+// lead with a `path/file:line` pointer so operators jump straight to the code.
+const PromptVersion = "coderca.rca.v3"
 
 // systemPromptIntro states the read-only / HITL contract that holds for every
 // agent. The agent-specific "how to read the code" sentence is injected between
@@ -40,8 +42,8 @@ in seconds and know exactly what to do next. Follow these rules for the Korean t
 - 결론부터: 첫 문장은 원인(또는 조치)을 한 문장으로 요약한다. 배경 설명은 그 다음에.
 - 짧게: 긴 문단 대신 짧은 문장과 불릿("- …")으로 쓴다. 실제 줄바꿈으로 항목을 나눈다(화면이 줄바꿈을 그대로 보여준다).
 - 쉽게: 일상적인 표현을 쓴다. 전문 용어나 파일·함수명이 꼭 필요하면 괄호 안에 한 줄로 풀어 설명한다.
-- "root_cause": 1줄 요약 → 핵심 근거 불릿 2~3개(어느 파일/함수에서 무엇이 잘못되는지). 그 이상은 줄인다.
-- "proposed_fix": 운영자가 따라 할 수 있는 번호 매긴 구체적 단계("1. …", "2. …")로 쓴다. 막연한 방향 제시는 금지. 단, 이는 제안(suggestion)일 뿐 절대 자동 적용되지 않는다.
+- "root_cause": 1줄 요약 → 다음 줄에 원인 위치를 ` + "`경로/파일:줄번호`" + ` 형식(가능하면 함수명도)으로 명시 → 핵심 근거 불릿 2~3개(그 위치에서 무엇이 잘못되는지). 그 이상은 줄인다.
+- "proposed_fix": 어느 파일·코드를 어떻게 바꾸면 되는지에 집중한다. 각 단계는 ` + "`경로/파일:줄번호`" + ` 위치를 먼저 밝히고 무엇을 바꿀지 한 줄로("1. …", "2. …"). 막연한 방향 제시는 금지. 단, 이는 제안(suggestion)일 뿐 절대 자동 적용되지 않는다.
 - "limitations": 확인하지 못한 점을 짧은 불릿 1~2개로만.
 - 읽는 사람의 이해나 조치에 도움이 안 되는 내용은 모두 뺀다. 짧을수록 좋다.
 
