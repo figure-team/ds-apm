@@ -91,7 +91,11 @@ export default defineConfig(({ mode }): UserConfig => {
 		);
 	}
 
-	if (mode === 'production') {
+	// Image optimization + gzip pre-compression are pure output post-processing
+	// passes that re-run over every asset on each build (no incremental cache),
+	// adding time + log noise. They only matter for real release artifacts, so
+	// gate them behind OPTIMIZE_ASSETS — local/dev Docker builds skip them.
+	if (mode === 'production' && env.OPTIMIZE_ASSETS === 'true') {
 		plugins.push(
 			ViteImageOptimizer({
 				jpeg: { quality: 80 },

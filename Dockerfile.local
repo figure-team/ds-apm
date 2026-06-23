@@ -6,7 +6,12 @@ WORKDIR /src
 COPY go.mod go.sum ./
 RUN --mount=type=cache,target=/go/pkg/mod \
     go mod download
-COPY . .
+# Copy only the Go source trees (all *.go live under cmd/ and pkg/, and every
+# //go:embed target is inside pkg/). Copying the whole repo here pulled in
+# frontend/ too, so any frontend edit busted this layer and forced a full Go
+# rebuild that then fought the frontend build for CPU.
+COPY cmd ./cmd
+COPY pkg ./pkg
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
@@ -18,13 +23,24 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 # Stage 2: Frontend
 FROM node:22-alpine AS js-builder
 WORKDIR /frontend
+# yarn 1.x writes its package cache to ~/.cache/yarn by default, so the build
+# cache mount below (target=/root/.yarn) caught nothing and every install layer
+# rebuild re-downloaded all deps. Redirect the cache dir into the mounted path
+# so it actually persists across builds.
+ENV YARN_CACHE_FOLDER=/root/.yarn
+# Copy only the manifest + the two files postinstall actually touches
+# (i18-generate-hash.cjs and scripts/update-registry.cjs). Copying the whole
+# scripts/ dir keyed this layer on every i18n-tooling edit, busting the install
+# cache for changes the dependency install never needs.
 COPY frontend/package.json frontend/yarn.lock frontend/i18-generate-hash.cjs ./
-COPY frontend/scripts ./scripts/
+COPY frontend/scripts/update-registry.cjs ./scripts/update-registry.cjs
 RUN --mount=type=cache,target=/root/.yarn \
-    CI=1 yarn install --silent
+    CI=1 yarn install --frozen-lockfile --prefer-offline --silent
 COPY frontend/ .
+# Regenerate the i18n hash now that public/locales is present (at install time
+# it ran against an empty tree and wrote {}), then build.
 RUN --mount=type=cache,target=/root/.yarn \
-    CI=1 yarn build
+    CI=1 yarn i18n:generate-hash && CI=1 yarn build
 
 # Stage 3: Final image
 FROM alpine:3.20.3

@@ -2,6 +2,10 @@
 .github
 .vscode
 .devenv
+# Agent worktrees / OMC state: full repo clones that otherwise get pulled into
+# the build context, bloating `COPY . .` (each holds its own frontend/, pkg/...).
+.claude
+.omc
 README.md
 deploy
 sample-apps
