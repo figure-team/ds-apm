@@ -8,20 +8,12 @@ jest.mock('../../../api/browser/localstorage/get', () => ({
 	default: jest.fn(),
 }));
 
-// Mirror the global react-i18next mock: t() returns the key so the tagline
-// is testable by its translation key without loading locale resources.
-jest.mock('react-i18next', () => ({
-	useTranslation: (): { t: (str: string) => string } => ({
-		t: (str: string): string => str,
-	}),
-}));
-
 // Access the mocked function
 const mockGet = getLocal as unknown as jest.Mock;
 
 describe('AppLoading', () => {
 	const SIGNOZ_TEXT = 'DS-APM';
-	const TAGLINE_TEXT = 'app_loading_tagline';
+	const LOGO_ALT = 'kt ds';
 	const CONTAINER_SELECTOR = '.app-loading-container';
 
 	beforeEach(() => {
@@ -35,9 +27,8 @@ describe('AppLoading', () => {
 		render(<AppLoading />);
 
 		// Check if main elements are rendered
-		expect(screen.getByAltText(SIGNOZ_TEXT)).toBeInTheDocument();
+		expect(screen.getByAltText(LOGO_ALT)).toBeInTheDocument();
 		expect(screen.getByText(SIGNOZ_TEXT)).toBeInTheDocument();
-		expect(screen.getByText(TAGLINE_TEXT)).toBeInTheDocument();
 
 		// Check if dark theme class is applied
 		const container = screen.getByText(SIGNOZ_TEXT).closest(CONTAINER_SELECTOR);
@@ -52,17 +43,13 @@ describe('AppLoading', () => {
 		render(<AppLoading />);
 
 		// Check for brand logo
-		const logo = screen.getByAltText(SIGNOZ_TEXT);
+		const logo = screen.getByAltText(LOGO_ALT);
 		expect(logo).toBeInTheDocument();
 		expect(logo).toHaveAttribute('src', 'test-file-stub');
 
 		// Check for brand title
 		const title = screen.getByText(SIGNOZ_TEXT);
 		expect(title).toBeInTheDocument();
-
-		// Check for tagline
-		const tagline = screen.getByText(TAGLINE_TEXT);
-		expect(tagline).toBeInTheDocument();
 
 		// Check for loader
 		const loader = document.querySelector('.loader');

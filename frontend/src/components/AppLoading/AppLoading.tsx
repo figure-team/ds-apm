@@ -2,15 +2,13 @@ import { Typography } from 'antd';
 import get from 'api/browser/localstorage/get';
 import { LOCALSTORAGE } from 'constants/localStorage';
 import { THEME_MODE } from 'hooks/useDarkMode/constant';
-import { useTranslation } from 'react-i18next';
 
-import signozBrandLogoUrl from '@/assets/Logos/signoz-brand-logo.svg';
+import ktdsLogoNegativeUrl from '@/assets/Logos/ktds-logo-negative.png';
+import ktdsLogoPositiveUrl from '@/assets/Logos/ktds-logo-positive.png';
 
 import './AppLoading.styles.scss';
 
 function AppLoading(): JSX.Element {
-	const { t } = useTranslation();
-
 	// Get theme from localStorage directly to avoid context dependency
 	const getThemeFromStorage = (): boolean => {
 		try {
@@ -29,15 +27,15 @@ function AppLoading(): JSX.Element {
 			<div className="perilin-bg" />
 			<div className="app-loading-content">
 				<div className="brand">
-					<img src={signozBrandLogoUrl} alt="DS-APM" className="brand-logo" />
+					<img
+						src={isDarkMode ? ktdsLogoNegativeUrl : ktdsLogoPositiveUrl}
+						alt="kt ds"
+						className="brand-logo"
+					/>
 
 					<Typography.Title level={2} className="brand-title">
 						DS-APM
 					</Typography.Title>
-				</div>
-
-				<div className="brand-tagline">
-					<Typography.Text>{t('app_loading_tagline')}</Typography.Text>
 				</div>
 
 				<div className="loader" />
