@@ -36,6 +36,35 @@ import {
 } from './sopMetadata';
 import './styles.scss';
 
+// A line that begins a Markdown block (heading, list item, blockquote, fence,
+// rule, or table row). A single newline before such a line must stay a real
+// newline so the block parses correctly.
+const MARKDOWN_BLOCK_START = /^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>\s|`{3}|~{3}|-{3,}|\|)/;
+
+// SOP templates author each field on its own line separated by single newlines
+// (e.g. "■ 발생 현황: …\n■ 영향 범위: …"). Standard Markdown collapses single
+// newlines into one paragraph, turning the customer/vendor notices into a wall
+// of text. Convert each intra-paragraph newline into a hard break (two trailing
+// spaces) while leaving blank lines and Markdown block starts untouched, so real
+// lists and headings still render correctly.
+const withSoftLineBreaks = (markdown: string): string => {
+	const lines = markdown.split('\n');
+	return lines
+		.map((line, index) => {
+			const next = lines[index + 1];
+			if (
+				line.trim() === '' ||
+				next === undefined ||
+				next.trim() === '' ||
+				MARKDOWN_BLOCK_START.test(next)
+			) {
+				return line;
+			}
+			return `${line}  `;
+		})
+		.join('\n');
+};
+
 function CreateAlertHeader(): JSX.Element {
 	const { t } = useTranslation(['alerts']);
 	const { alertState, setAlertState, isEditMode } = useCreateAlertState();
@@ -563,7 +592,7 @@ function CreateAlertHeader(): JSX.Element {
 											{content?.trim() ? (
 												<div className="sop-metadata__doc-body">
 													<MarkdownRenderer
-														markdownContent={content}
+														markdownContent={withSoftLineBreaks(content)}
 														variables={{}}
 													/>
 												</div>
