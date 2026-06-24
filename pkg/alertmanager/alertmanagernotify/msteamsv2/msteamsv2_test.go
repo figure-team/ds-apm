@@ -182,7 +182,10 @@ func TestMSTeamsV2Templating(t *testing.T) {
 	}
 }
 
-func TestMSTeamsV2PayloadIncludesSanitizedIncidentFields(t *testing.T) {
+// Non-SOP alerts render a minimal Korean incident block (severity, service,
+// time), not the full label/annotation dump. SOP/AI fields and secrets present
+// on the alert must neither be rendered nor leak into the card.
+func TestMSTeamsV2NonSOPRendersMinimalKorean(t *testing.T) {
 	var payload teamsMessage
 	notifier, err := New(
 		&config.MSTeamsV2Config{
@@ -208,10 +211,14 @@ func TestMSTeamsV2PayloadIncludesSanitizedIncidentFields(t *testing.T) {
 
 	require.NoError(t, err)
 	facts := teamsFactValues(payload)
-	require.Equal(t, "SOP-PAY-001", facts["SOP ID"])
-	require.Equal(t, "quota_exhausted", facts["AI status"])
-	require.Equal(t, alertmanagertypes.RedactedIncidentValue, facts["AI headline"])
-	require.Equal(t, "https://runbooks.example.com/payment-latency?view=public", facts["SOP URL"])
+	require.Equal(t, "CRITICAL", facts["심각도"])
+	require.Equal(t, "checkout-api", facts["서비스"])
+	require.Contains(t, facts, "발생시간")
+	// The verbose incident / label / annotation fields are no longer rendered.
+	require.NotContains(t, facts, "SOP ID")
+	require.NotContains(t, facts, "AI status")
+	require.NotContains(t, facts, "AI headline")
+	require.NotContains(t, facts, "SOP URL")
 
 	encodedPayload, err := json.Marshal(payload)
 	require.NoError(t, err)

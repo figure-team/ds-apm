@@ -201,3 +201,89 @@ func TestFromGlobs(t *testing.T) {
 		})
 	}
 }
+
+func TestToKST(t *testing.T) {
+	fn := AdditionalFuncMap()["toKST"].(func(time.Time) string)
+
+	// 06:05 UTC + 9h = 15:05 KST.
+	require.Equal(t, "2026-06-24 15:05 KST", fn(time.Date(2026, 6, 24, 6, 5, 0, 0, time.UTC)))
+	// Crossing midnight: 18:30 UTC + 9h = 03:30 KST next day.
+	require.Equal(t, "2026-06-25 03:30 KST", fn(time.Date(2026, 6, 24, 18, 30, 0, 0, time.UTC)))
+	// Zero time renders empty so an absent timestamp does not print a bogus date.
+	require.Equal(t, "", fn(time.Time{}))
+}
+
+// slackDefaultText mirrors SlackInitialConfig.text in
+// frontend/src/container/CreateAlertChannels/defaults.ts. Kept in sync so this
+// test fails if the rendered shape of the practitioner-facing default drifts
+// from the Go template engine's capabilities (toKST, index on "service.name").
+const slackDefaultText = `{{ range .Alerts }}심각도: {{ if .Labels.severity }}{{ .Labels.severity | toUpper }}{{ else }}-{{ end }}
+서비스: {{ if index .Labels "service.name" }}{{ index .Labels "service.name" }}{{ else }}-{{ end }}
+발생시간: {{ .StartsAt | toKST }}
+
+📋 오류 내용
+{{ .Annotations.description }}{{ if .Annotations.next_action }}
+
+✅ 조치 사항
+{{ .Annotations.next_action }}{{ end }}
+{{ end }}`
+
+func TestSlackDefaultTemplateRendersKoreanIncident(t *testing.T) {
+	tmpl, err := FromGlobs([]string{})
+	require.NoError(t, err)
+	tmpl.ExternalURL = &url.URL{Scheme: "http", Host: "localhost:8080"}
+
+	startsAt := time.Date(2026, 6, 24, 6, 5, 0, 0, time.UTC)
+
+	t.Run("WithNextAction", func(t *testing.T) {
+		alerts := []*types.Alert{{
+			Alert: model.Alert{
+				Labels: model.LabelSet{
+					"alertname":    "PaymentLatencyHigh",
+					"severity":     "critical",
+					"service.name": "payment-api",
+				},
+				Annotations: model.LabelSet{
+					"description": "p99 지연이 2s 임계치를 초과했습니다.",
+					"next_action": "런북 확인 후 결제 인스턴스 롤백",
+				},
+				StartsAt: startsAt,
+			},
+		}}
+		data := tmpl.Data("__receiver", model.LabelSet{}, alerts...)
+
+		out, err := tmpl.ExecuteTextString(slackDefaultText, data)
+		require.NoError(t, err)
+
+		require.Contains(t, out, "심각도: CRITICAL")
+		require.Contains(t, out, "서비스: payment-api")
+		require.Contains(t, out, "발생시간: 2026-06-24 15:05 KST")
+		require.Contains(t, out, "p99 지연이 2s 임계치를 초과했습니다.")
+		require.Contains(t, out, "✅ 조치 사항")
+		require.Contains(t, out, "런북 확인 후 결제 인스턴스 롤백")
+	})
+
+	t.Run("WithoutNextActionOrService", func(t *testing.T) {
+		alerts := []*types.Alert{{
+			Alert: model.Alert{
+				Labels: model.LabelSet{
+					"alertname": "DiskUsageHigh",
+				},
+				Annotations: model.LabelSet{
+					"description": "디스크 사용량이 임계치를 초과했습니다.",
+				},
+				StartsAt: startsAt,
+			},
+		}}
+		data := tmpl.Data("__receiver", model.LabelSet{}, alerts...)
+
+		out, err := tmpl.ExecuteTextString(slackDefaultText, data)
+		require.NoError(t, err)
+
+		require.Contains(t, out, "심각도: -")
+		require.Contains(t, out, "서비스: -")
+		require.Contains(t, out, "디스크 사용량이 임계치를 초과했습니다.")
+		// next_action absent → the optional action block is omitted entirely.
+		require.NotContains(t, out, "✅ 조치 사항")
+	})
+}

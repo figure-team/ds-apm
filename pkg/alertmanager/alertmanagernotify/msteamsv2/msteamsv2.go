@@ -12,7 +12,6 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"slices"
 	"strings"
 
 	"github.com/SigNoz/signoz/pkg/errors"
@@ -222,18 +221,11 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 			t.Attachments[0].Content.Body = append(t.Attachments[0].Content.Body, collapsibleNoticeBlocks(notif.CustomerNotice)...)
 		}
 	} else {
-		// add labels and annotations to the body of all alerts
+		// Non-SOP alerts render a minimal Korean incident block (severity,
+		// service, time, error, action) instead of dumping every label and
+		// annotation, keeping the card readable for on-call operators.
 		for _, alert := range as {
-			t.Attachments[0].Content.Body = append(t.Attachments[0].Content.Body, Body{
-				Type:   "TextBlock",
-				Text:   "Alerts",
-				Weight: "Bolder",
-				Size:   "Medium",
-				Wrap:   true,
-				Color:  color,
-			})
-
-			t.Attachments[0].Content.Body = append(t.Attachments[0].Content.Body, n.createLabelsAndAnnotationsBody(alert)...)
+			t.Attachments[0].Content.Body = append(t.Attachments[0].Content.Body, koreanIncidentBody(alert)...)
 		}
 	}
 
@@ -256,92 +248,43 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 	return shouldRetry, err
 }
 
-func (*Notifier) createLabelsAndAnnotationsBody(alert *types.Alert) []Body {
-	bodies := []Body{}
-	incidentFacts := incidentInfoFactsForAlert(alert)
-	if len(incidentFacts) > 0 {
-		bodies = append(bodies, Body{
-			Type:   "TextBlock",
-			Text:   "DS-APM response",
-			Weight: "Bolder",
-			Size:   "Medium",
-		})
-		bodies = append(bodies, Body{
-			Type:  "FactSet",
-			Facts: incidentFacts,
-		})
+// koreanIncidentBody renders the practitioner-facing minimal incident block for
+// a non-SOP alert: severity, service, and time as a FactSet, followed by the
+// error description and (when present) the recommended action. It deliberately
+// omits the raw label/annotation dump so the Teams card stays readable.
+func koreanIncidentBody(alert *types.Alert) []Body {
+	severity := strings.ToUpper(strings.TrimSpace(string(alert.Labels[alertmanagertypes.IncidentLabelSeverity])))
+	if severity == "" {
+		severity = "-"
+	}
+	service := strings.TrimSpace(string(alert.Labels[alertmanagertypes.IncidentLabelServiceName]))
+	if service == "" {
+		service = "-"
 	}
 
-	bodies = append(bodies, Body{
-		Type:   "TextBlock",
-		Text:   "Labels",
-		Weight: "Bolder",
-		Size:   "Medium",
-	})
+	bodies := []Body{{
+		Type: "FactSet",
+		Facts: []Fact{
+			{Title: "심각도", Value: severity},
+			{Title: "서비스", Value: service},
+			{Title: "발생시간", Value: alertmanagertypes.FormatKST(alert.StartsAt)},
+		},
+	}}
 
-	facts := []Fact{}
-	for k, v := range alert.Labels {
-		if slices.Contains([]string{"alertname", "severity", "ruleId", "ruleSource"}, string(k)) {
-			continue
-		}
-		facts = append(facts, Fact{Title: string(k), Value: alertmanagertypes.SanitizeIncidentValue(string(v))})
+	if desc := alertmanagertypes.SanitizeIncidentValue(string(alert.Annotations["description"])); desc != "" {
+		bodies = append(bodies,
+			Body{Type: "TextBlock", Text: "📋 오류 내용", Weight: "Bolder", Wrap: true},
+			Body{Type: "TextBlock", Text: desc, Wrap: true},
+		)
 	}
-	bodies = append(bodies, Body{
-		Type:  "FactSet",
-		Facts: facts,
-	})
-
-	bodies = append(bodies, Body{
-		Type:   "TextBlock",
-		Text:   "Annotations",
-		Weight: "Bolder",
-		Size:   "Medium",
-	})
-
-	annotationsFacts := []Fact{}
-	for k, v := range alert.Annotations {
-		if slices.Contains([]string{"summary", "related_logs", "related_traces"}, string(k)) {
-			continue
-		}
-		annotationsFacts = append(annotationsFacts, Fact{Title: string(k), Value: alertmanagertypes.SanitizeIncidentValue(string(v))})
+	if action := alertmanagertypes.SanitizeIncidentValue(string(alert.Annotations[alertmanagertypes.IncidentAnnotationNextAction])); action != "" {
+		bodies = append(bodies,
+			Body{Type: "TextBlock", Text: "✅ 조치 사항", Weight: "Bolder", Wrap: true},
+			Body{Type: "TextBlock", Text: action, Wrap: true},
+		)
 	}
-
-	bodies = append(bodies, Body{
-		Type:  "FactSet",
-		Facts: annotationsFacts,
-	})
 
 	return bodies
-}
-
-func incidentInfoFactsForAlert(alert *types.Alert) []Fact {
-	labels := labelSetToTemplateKV(alert.Labels)
-	annotations := labelSetToTemplateKV(alert.Annotations)
-	info := alertmanagertypes.BuildSafeIncidentInfo(labels, annotations)
-	fields := alertmanagertypes.IncidentInfoFields(info)
-	if _, sopBound := alertmanagertypes.ResolveSOPBoundNotification(annotations); sopBound {
-		// AI body already carries the situation summary; trim to routing + SOP link.
-		fields = alertmanagertypes.IncidentInfoFieldsCompact(info)
-	}
-	if len(fields) == 0 {
-		return nil
-	}
-
-	facts := make([]Fact, 0, len(fields))
-	for _, field := range fields {
-		facts = append(facts, Fact{Title: field.Title, Value: field.Value})
-	}
-
-	return facts
-}
-
-func labelSetToTemplateKV(labels model.LabelSet) template.KV {
-	kv := make(template.KV, len(labels))
-	for key, value := range labels {
-		kv[string(key)] = string(value)
-	}
-
-	return kv
 }
 
 // collapsibleNoticeBlocks returns TextBlocks representing a labeled customer-notice section.

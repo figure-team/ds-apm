@@ -343,7 +343,11 @@ func TestSlackMessageField(t *testing.T) {
 	}
 }
 
-func TestSlackPayloadIncludesSanitizedIncidentFields(t *testing.T) {
+// Non-SOP alerts render the minimal practitioner message (the channel text
+// template), not the verbose English incident-field block. Even though the
+// alert annotations carry SOP/AI fields and secrets, none of them must be
+// rendered or leak into the payload.
+func TestSlackNonSOPRendersMinimalWithoutLeakingSecrets(t *testing.T) {
 	var body map[string]any
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		require.NoError(t, json.NewDecoder(r.Body).Decode(&body))
@@ -373,18 +377,19 @@ func TestSlackPayloadIncludesSanitizedIncidentFields(t *testing.T) {
 	require.NoError(t, err)
 	attachments, ok := body["attachments"].([]any)
 	require.True(t, ok)
+	// Only the primary attachment; no secondary block and no verbose incident fields.
 	require.Len(t, attachments, 1)
-	fields, ok := attachments[0].(map[string]any)["fields"].([]any)
-	require.True(t, ok)
-
-	fieldValues := slackFieldValues(fields)
-	require.Equal(t, "SOP-PAY-001", fieldValues["SOP ID"])
-	require.Equal(t, "quota_exhausted", fieldValues["AI status"])
-	require.Equal(t, alertmanagertypes.RedactedIncidentValue, fieldValues["AI headline"])
-	require.Equal(t, "https://runbooks.example.com/payment-latency?view=public", fieldValues["SOP URL"])
+	if fields, ok := attachments[0].(map[string]any)["fields"].([]any); ok {
+		fieldValues := slackFieldValues(fields)
+		require.NotContains(t, fieldValues, "SOP ID")
+		require.NotContains(t, fieldValues, "AI status")
+		require.NotContains(t, fieldValues, "AI headline")
+		require.NotContains(t, fieldValues, "SOP URL")
+	}
 	encodedBody, err := json.Marshal(body)
 	require.NoError(t, err)
 	require.NotContains(t, string(encodedBody), "token=hidden")
+	require.NotContains(t, string(encodedBody), "bearer abcdefghijklmnopqrstuvwxyz")
 }
 
 func slackFieldValues(fields []any) map[string]string {

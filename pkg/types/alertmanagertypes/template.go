@@ -3,6 +3,7 @@ package alertmanagertypes
 import (
 	"bytes"
 	"net/url"
+	"time"
 
 	tmplhtml "html/template"
 	tmpltext "text/template"
@@ -10,6 +11,23 @@ import (
 	"github.com/SigNoz/signoz/pkg/errors"
 	alertmanagertemplate "github.com/prometheus/alertmanager/template"
 )
+
+// kstZone is a fixed UTC+9 (Korea Standard Time) offset. A fixed zone is used
+// instead of time.LoadLocation("Asia/Seoul") so the helper does not depend on
+// the tzdata database being present in the (often minimal) runtime container.
+var kstZone = time.FixedZone("KST", 9*60*60)
+
+// FormatKST renders an alert timestamp in Korean Standard Time as
+// "2006-01-02 15:04 KST". A zero time renders empty so an absent timestamp does
+// not print a bogus date. Shared by the template "toKST" func and the notifiers
+// that build incident bodies in Go (e.g. MS Teams), so KST formatting has a
+// single source of truth.
+func FormatKST(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	return t.In(kstZone).Format("2006-01-02 15:04 KST")
+}
 
 func AdditionalFuncMap() tmpltext.FuncMap {
 	return tmpltext.FuncMap{
@@ -19,6 +37,10 @@ func AdditionalFuncMap() tmpltext.FuncMap {
 		"urlescape": func(value string) tmplhtml.HTML {
 			return tmplhtml.HTML(url.QueryEscape(value))
 		},
+		// toKST renders an alert timestamp (e.g. {{ .StartsAt | toKST }}) in
+		// Korean Standard Time as "2006-01-02 15:04 KST" so operators read the
+		// incident time in local time instead of UTC. A zero time renders empty.
+		"toKST": FormatKST,
 	}
 }
 

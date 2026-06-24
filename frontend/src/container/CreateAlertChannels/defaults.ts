@@ -454,8 +454,16 @@ export const EmailInitialConfig: Partial<EmailChannel> = {
 };
 
 export const SlackInitialConfig: Partial<SlackChannel> = {
-	title: `[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}`,
-	text: `{{ range .Alerts }}{{ .Annotations.description }}
+	title: `{{ if eq .Status "firing" }}🚨 발생{{ else }}✅ 해소{{ end }} · {{ .CommonLabels.alertname }}`,
+	text: `{{ range .Alerts }}심각도: {{ if .Labels.severity }}{{ .Labels.severity | toUpper }}{{ else }}-{{ end }}
+서비스: {{ if index .Labels "service.name" }}{{ index .Labels "service.name" }}{{ else }}-{{ end }}
+발생시간: {{ .StartsAt | toKST }}
+
+📋 오류 내용
+{{ .Annotations.description }}{{ if .Annotations.next_action }}
+
+✅ 조치 사항
+{{ .Annotations.next_action }}{{ end }}
 {{ end }}`,
 };
 

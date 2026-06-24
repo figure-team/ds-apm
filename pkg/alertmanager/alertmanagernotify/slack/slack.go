@@ -183,16 +183,11 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 		if sec.Text != "" || len(sec.Fields) > 0 {
 			secondaryAtt = sec
 		}
-	} else {
-		for _, field := range alertmanagertypes.IncidentInfoFields(incidentInfo) {
-			short := field.Short
-			att.Fields = append(att.Fields, config.SlackField{
-				Title: field.Title,
-				Value: field.Value,
-				Short: &short,
-			})
-		}
 	}
+	// Non-SOP alerts intentionally append no incident fields: the channel text
+	// template already carries the practitioner-facing summary (severity,
+	// service, time, error, action), so the verbose English IncidentInfoFields
+	// block is omitted to keep the message minimal.
 
 	numActions := len(n.conf.Actions)
 	if numActions > 0 {
