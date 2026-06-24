@@ -541,5 +541,20 @@
 	"not_found_check_rules": "Check all rules",
 	"not_found_contact_support": "Contact Support",
 	"tab_overview": "Overview",
-	"tab_history": "History"
+	"tab_history": "History",
+	"remediation_card_title": "Auto-remediation script",
+	"remediation_status_proposed": "Awaiting approval",
+	"remediation_status_approved": "Approved",
+	"remediation_status_executing": "Executing",
+	"remediation_status_succeeded": "Execution succeeded",
+	"remediation_status_verified": "Likely resolved",
+	"remediation_status_unresolved": "Not resolved",
+	"remediation_status_failed": "Execution failed",
+	"remediation_status_rejected": "Rejected",
+	"remediation_status_expired": "Expired",
+	"remediation_approve": "Approve & run",
+	"remediation_reject": "Reject",
+	"remediation_confirm": "Run this script?",
+	"remediation_exit_code": "Exit code",
+	"remediation_source_sop": "Source SOP"
 }

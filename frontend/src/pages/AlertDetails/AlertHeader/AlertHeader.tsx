@@ -15,6 +15,7 @@ import AlertState from './AlertState/AlertState';
 import AlertResponseContext, {
 	type AlertAIStrategyHistory,
 } from './ResponseContext/AlertResponseContext';
+import RemediationCard from './ResponseContext/RemediationCard';
 
 import './AlertHeader.styles.scss';
 
@@ -73,6 +74,9 @@ function AlertHeader({ alertDetails }: AlertHeaderProps): JSX.Element {
 					labels={labels}
 					strategyHistory={aiStrategyHistory}
 				/>
+				{annotations?.remediation_id && (
+					<RemediationCard remediationId={annotations.remediation_id} />
+				)}
 			</div>
 			<div className="alert-info__action-buttons">
 				<AlertActionButtons

@@ -541,5 +541,20 @@
 	"not_found_check_rules": "모든 규칙 확인",
 	"not_found_contact_support": "지원팀 문의",
 	"tab_overview": "개요",
-	"tab_history": "이력"
+	"tab_history": "이력",
+	"remediation_card_title": "자동 대응 스크립트",
+	"remediation_status_proposed": "승인 대기",
+	"remediation_status_approved": "승인됨",
+	"remediation_status_executing": "실행 중",
+	"remediation_status_succeeded": "실행 성공",
+	"remediation_status_verified": "해결 추정",
+	"remediation_status_unresolved": "미해제",
+	"remediation_status_failed": "실행 실패",
+	"remediation_status_rejected": "거절됨",
+	"remediation_status_expired": "만료됨",
+	"remediation_approve": "승인하고 실행",
+	"remediation_reject": "거절",
+	"remediation_confirm": "이 스크립트를 실행하시겠습니까?",
+	"remediation_exit_code": "종료 코드",
+	"remediation_source_sop": "출처 SOP"
 }
