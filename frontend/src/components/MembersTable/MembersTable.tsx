@@ -134,7 +134,7 @@ function MembersTable({
 
 	const columns: ColumnsType<MemberRow> = [
 		{
-			title: 'Name / Email',
+			title: t('members_col_name_email'),
 			dataIndex: 'name',
 			key: 'name',
 			sorter: (a, b): number => a.email.localeCompare(b.email),
@@ -143,7 +143,7 @@ function MembersTable({
 			),
 		},
 		{
-			title: 'Status',
+			title: t('member_status_label'),
 			dataIndex: 'status',
 			key: 'status',
 			width: 100,
@@ -155,7 +155,7 @@ function MembersTable({
 			),
 		},
 		{
-			title: 'Joined On',
+			title: t('member_joined_on'),
 			dataIndex: 'joinedOn',
 			key: 'joinedOn',
 			width: 250,

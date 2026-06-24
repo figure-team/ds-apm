@@ -1,9 +1,11 @@
+import { useTranslation } from 'react-i18next';
 import { CircleAlert, RefreshCw } from '@signozhq/icons';
 import { Checkbox, Select } from 'antd';
 import { convertToApiError } from 'api/ErrorResponseHandlerForGeneratedAPIs';
 import { useListRoles } from 'api/generated/services/role';
 import type { AuthtypesRoleDTO } from 'api/generated/services/sigNoz.schemas';
 import cx from 'classnames';
+import type { TFunction } from 'i18next';
 import APIError from 'types/api/error';
 import { popupContainer } from 'utils/selectPopupContainer';
 
@@ -12,6 +14,26 @@ import './RolesSelect.styles.scss';
 export interface RoleOption {
 	label: string;
 	value: string;
+}
+
+// Built-in managed roles are stored as `signoz-*` identifiers but shown to
+// users with friendly, localized labels. Custom roles keep their raw name.
+const MANAGED_ROLE_LABEL_KEYS: Record<string, string> = {
+	'signoz-admin': 'role_admin',
+	'signoz-editor': 'role_editor',
+	'signoz-viewer': 'role_viewer',
+	'signoz-anonymous': 'role_anonymous',
+};
+
+export function getRoleDisplayName(
+	name: string | undefined,
+	t: TFunction,
+): string {
+	if (!name) {
+		return '';
+	}
+	const labelKey = MANAGED_ROLE_LABEL_KEYS[name];
+	return labelKey ? t(labelKey, { ns: 'common' }) : name;
 }
 
 export function useRoles(): {
@@ -98,6 +120,7 @@ interface MultipleProps extends BaseProps {
 export type RolesSelectProps = SingleProps | MultipleProps;
 
 function RolesSelect(props: RolesSelectProps): JSX.Element {
+	const { t } = useTranslation('common');
 	const externalRoles = props.roles;
 
 	const {
@@ -111,7 +134,10 @@ function RolesSelect(props: RolesSelectProps): JSX.Element {
 	});
 
 	const roles = externalRoles ?? data?.data ?? [];
-	const options = getRoleOptions(roles);
+	const options = roles.map((role) => ({
+		label: getRoleDisplayName(role.name, t),
+		value: role.id ?? '',
+	}));
 
 	const {
 		mode,

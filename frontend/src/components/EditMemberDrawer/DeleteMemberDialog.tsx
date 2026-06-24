@@ -1,3 +1,4 @@
+import { Trans, useTranslation } from 'react-i18next';
 import { Trash2, X } from '@signozhq/icons';
 import { Button, DialogWrapper } from '@signozhq/ui';
 import { MemberRow } from 'components/MembersTable/MembersTable';
@@ -19,27 +20,30 @@ function DeleteMemberDialog({
 	onClose,
 	onConfirm,
 }: DeleteMemberDialogProps): JSX.Element {
-	const title = isInvited ? 'Revoke Invite' : 'Delete Member';
+	const { t } = useTranslation(['organizationsettings']);
+	const title = isInvited ? t('member_revoke_invite') : t('member_delete');
 
 	const body = isInvited ? (
-		<>
-			Are you sure you want to revoke the invite for{' '}
-			<strong>{member?.email}</strong>? They will no longer be able to join the
-			workspace using this invite.
-		</>
+		<Trans
+			t={t}
+			i18nKey="member_revoke_invite_confirm"
+			values={{ email: member?.email }}
+			components={[<strong key="0" />]}
+		/>
 	) : (
-		<>
-			Are you sure you want to delete{' '}
-			<strong>{member?.name || member?.email}</strong>? This will remove their
-			access to the workspace.
-		</>
+		<Trans
+			t={t}
+			i18nKey="member_delete_confirm"
+			values={{ name: member?.name || member?.email }}
+			components={[<strong key="0" />]}
+		/>
 	);
 
 	const footer = (
 		<>
 			<Button variant="solid" color="secondary" onClick={onClose}>
 				<X size={12} />
-				Cancel
+				{t('cancel')}
 			</Button>
 			<Button
 				variant="solid"
@@ -48,7 +52,7 @@ function DeleteMemberDialog({
 				onClick={onConfirm}
 			>
 				<Trash2 size={12} />
-				{isDeleting ? 'Processing...' : title}
+				{isDeleting ? t('member_processing') : title}
 			</Button>
 		</>
 	);

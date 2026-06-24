@@ -166,7 +166,7 @@ describe('ServiceAccountDrawer', () => {
 		await screen.findByDisplayValue('CI Bot');
 
 		await user.click(screen.getByLabelText('roles'));
-		await user.click(await screen.findByTitle('signoz-viewer'));
+		await user.click(await screen.findByTitle('role_viewer'));
 
 		const saveBtn = screen.getByRole('button', { name: 'save_changes' });
 		await waitFor(() => expect(saveBtn).not.toBeDisabled());
@@ -379,7 +379,7 @@ describe('ServiceAccountDrawer – save-error UX', () => {
 
 		// Add the signoz-viewer role (which is not currently assigned)
 		await user.click(screen.getByLabelText('roles'));
-		await user.click(await screen.findByTitle('signoz-viewer'));
+		await user.click(await screen.findByTitle('role_viewer'));
 
 		const saveBtn = screen.getByRole('button', { name: 'save_changes' });
 		await waitFor(() => expect(saveBtn).not.toBeDisabled());
@@ -416,7 +416,7 @@ describe('ServiceAccountDrawer – save-error UX', () => {
 		await screen.findByDisplayValue('CI Bot');
 
 		await user.click(screen.getByLabelText('roles'));
-		await user.click(await screen.findByTitle('signoz-viewer'));
+		await user.click(await screen.findByTitle('role_viewer'));
 
 		const saveBtn = screen.getByRole('button', { name: 'save_changes' });
 		await waitFor(() => expect(saveBtn).not.toBeDisabled());

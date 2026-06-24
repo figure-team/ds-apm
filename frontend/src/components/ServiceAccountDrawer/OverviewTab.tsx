@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { LockKeyhole } from '@signozhq/icons';
 import { Badge, Input } from '@signozhq/ui';
 import type { AuthtypesRoleDTO } from 'api/generated/services/sigNoz.schemas';
-import RolesSelect from 'components/RolesSelect';
+import RolesSelect, { getRoleDisplayName } from 'components/RolesSelect';
 import { DATE_TIME_FORMATS } from 'constants/dateTimeFormats';
 import { ServiceAccountRow } from 'container/ServiceAccountsSettings/utils';
 import { useTimezone } from 'providers/Timezone';
@@ -99,7 +99,10 @@ function OverviewTab({
 						<div className="sa-drawer__disabled-roles">
 							{localRole ? (
 								<Badge color="vanilla">
-									{availableRoles.find((r) => r.id === localRole)?.name ?? localRole}
+									{getRoleDisplayName(
+										availableRoles.find((r) => r.id === localRole)?.name ?? localRole,
+										t,
+									)}
 								</Badge>
 							) : (
 								<span className="sa-drawer__input-text">—</span>

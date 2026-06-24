@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Check, Copy } from '@signozhq/icons';
 import { Button, DialogWrapper } from '@signozhq/ui';
 
@@ -20,6 +21,8 @@ function ResetLinkDialog({
 	onClose,
 	onCopy,
 }: ResetLinkDialogProps): JSX.Element {
+	const { t } = useTranslation(['organizationsettings']);
+
 	return (
 		<DialogWrapper
 			open={open}
@@ -28,7 +31,11 @@ function ResetLinkDialog({
 					onClose();
 				}
 			}}
-			title={linkType === 'invite' ? 'Invite Link' : 'Password Reset Link'}
+			title={
+				linkType === 'invite'
+					? t('reset_dialog_invite_title')
+					: t('reset_dialog_reset_title')
+			}
 			showCloseButton
 			width="base"
 			className="reset-link-dialog"
@@ -36,8 +43,8 @@ function ResetLinkDialog({
 			<div className="reset-link-dialog__content">
 				<p className="reset-link-dialog__description">
 					{linkType === 'invite'
-						? 'Share this one-time link with the team member to complete their account setup.'
-						: 'This creates a one-time link the team member can use to set a new password for their SigNoz account.'}
+						? t('reset_dialog_invite_desc')
+						: t('reset_dialog_reset_desc')}
 				</p>
 				<div className="reset-link-dialog__link-row">
 					<div className="reset-link-dialog__link-text-wrap">
@@ -51,12 +58,12 @@ function ResetLinkDialog({
 						prefix={hasCopied ? <Check size={12} /> : <Copy size={12} />}
 						className="reset-link-dialog__copy-btn"
 					>
-						{hasCopied ? 'Copied!' : 'Copy'}
+						{hasCopied ? t('reset_dialog_copied') : t('reset_dialog_copy')}
 					</Button>
 				</div>
 				{expiresAt && (
 					<p className="reset-link-dialog__description">
-						This link expires on {expiresAt}.
+						{t('reset_dialog_expires_on', { date: expiresAt })}
 					</p>
 				)}
 			</div>

@@ -117,7 +117,7 @@ describe('MembersSettings (integration)', () => {
 
 		await user.click(await screen.findByText('Alice Smith'));
 
-		await screen.findByText('Member Details');
+		await screen.findByText('member_details_title');
 	});
 
 	it('opens EditMemberDrawer when a deleted member row is clicked', async () => {
@@ -127,7 +127,7 @@ describe('MembersSettings (integration)', () => {
 
 		await user.click(await screen.findByText('Dave Deleted'));
 
-		expect(screen.queryByText('Member Details')).toBeInTheDocument();
+		expect(screen.queryByText('member_details_title')).toBeInTheDocument();
 	});
 
 	it('opens InviteMembersModal when "Invite member" button is clicked', async () => {

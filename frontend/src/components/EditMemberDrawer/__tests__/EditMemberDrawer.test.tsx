@@ -230,9 +230,9 @@ describe('EditMemberDrawer', () => {
 
 		expect(screen.getByDisplayValue('Alice Smith')).toBeInTheDocument();
 		expect(screen.getByText('alice@signoz.io')).toBeInTheDocument();
-		expect(screen.getByText('ACTIVE')).toBeInTheDocument();
+		expect(screen.getByText('status_active')).toBeInTheDocument();
 		expect(
-			screen.getByRole('button', { name: /save member details/i }),
+			screen.getByRole('button', { name: /member_save/i }),
 		).toBeDisabled();
 	});
 
@@ -252,7 +252,7 @@ describe('EditMemberDrawer', () => {
 		await user.clear(nameInput);
 		await user.type(nameInput, 'Alice Updated');
 
-		const saveBtn = screen.getByRole('button', { name: /save member details/i });
+		const saveBtn = screen.getByRole('button', { name: /member_save/i });
 		await waitFor(() => expect(saveBtn).not.toBeDisabled());
 
 		await user.click(saveBtn);
@@ -276,13 +276,13 @@ describe('EditMemberDrawer', () => {
 		await user.clear(nameInput);
 		await user.type(nameInput, 'Alice Updated');
 
-		const saveBtn = screen.getByRole('button', { name: /save member details/i });
+		const saveBtn = screen.getByRole('button', { name: /member_save/i });
 		await waitFor(() => expect(saveBtn).not.toBeDisabled());
 		await user.click(saveBtn);
 
 		await waitFor(() => {
 			expect(
-				screen.getByRole('button', { name: /save member details/i }),
+				screen.getByRole('button', { name: /member_save/i }),
 			).toBeInTheDocument();
 		});
 		expect(onClose).not.toHaveBeenCalled();
@@ -300,11 +300,11 @@ describe('EditMemberDrawer', () => {
 
 		renderDrawer({ onComplete });
 
-		// Open the roles dropdown and select signoz-editor
-		await user.click(screen.getByLabelText('Roles'));
-		await user.click(await screen.findByTitle('signoz-editor'));
+		// Open the roles dropdown and select signoz-editor (shown as localized "role_editor")
+		await user.click(screen.getByLabelText('member_roles_label'));
+		await user.click(await screen.findByTitle('role_editor'));
 
-		const saveBtn = screen.getByRole('button', { name: /save member details/i });
+		const saveBtn = screen.getByRole('button', { name: /member_save/i });
 		await waitFor(() => expect(saveBtn).not.toBeDisabled());
 		await user.click(saveBtn);
 
@@ -329,11 +329,11 @@ describe('EditMemberDrawer', () => {
 
 		renderDrawer({ onComplete });
 
-		// Switch from signoz-admin to signoz-viewer using single-select
-		await user.click(screen.getByLabelText('Roles'));
-		await user.click(await screen.findByTitle('signoz-viewer'));
+		// Switch from signoz-admin to signoz-viewer using single-select (shown as localized "role_viewer")
+		await user.click(screen.getByLabelText('member_roles_label'));
+		await user.click(await screen.findByTitle('role_viewer'));
 
-		const saveBtn = screen.getByRole('button', { name: /save member details/i });
+		const saveBtn = screen.getByRole('button', { name: /member_save/i });
 		await waitFor(() => expect(saveBtn).not.toBeDisabled());
 		await user.click(saveBtn);
 
@@ -359,13 +359,13 @@ describe('EditMemberDrawer', () => {
 
 		renderDrawer({ onComplete });
 
-		await user.click(screen.getByRole('button', { name: /delete member/i }));
+		await user.click(screen.getByRole('button', { name: /member_delete/i }));
 
 		expect(
-			await screen.findByText(/are you sure you want to delete/i),
+			await screen.findByText(/member_delete_confirm/i),
 		).toBeInTheDocument();
 
-		const confirmBtns = screen.getAllByRole('button', { name: /delete member/i });
+		const confirmBtns = screen.getAllByRole('button', { name: /member_delete/i });
 		await user.click(confirmBtns[confirmBtns.length - 1]);
 
 		await waitFor(() => {
@@ -380,16 +380,16 @@ describe('EditMemberDrawer', () => {
 		renderDrawer({ member: invitedMember });
 
 		expect(
-			screen.getByRole('button', { name: /revoke invite/i }),
+			screen.getByRole('button', { name: /member_revoke_invite/i }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole('button', { name: /copy invite link/i }),
+			screen.getByRole('button', { name: /member_copy_invite_link/i }),
 		).toBeInTheDocument();
 		expect(
-			screen.queryByRole('button', { name: /generate password reset link/i }),
+			screen.queryByRole('button', { name: /member_generate_reset_link/i }),
 		).not.toBeInTheDocument();
-		expect(screen.getByText('Invited On')).toBeInTheDocument();
-		expect(screen.queryByText('Last Modified')).not.toBeInTheDocument();
+		expect(screen.getByText('member_invited_on')).toBeInTheDocument();
+		expect(screen.queryByText('member_last_modified')).not.toBeInTheDocument();
 	});
 
 	it('shows "Regenerate Invite Link" when token is expired', () => {
@@ -408,7 +408,7 @@ describe('EditMemberDrawer', () => {
 		renderDrawer({ member: invitedMember });
 
 		expect(
-			screen.getByRole('button', { name: /regenerate invite link/i }),
+			screen.getByRole('button', { name: /member_regenerate_invite_link/i }),
 		).toBeInTheDocument();
 	});
 
@@ -422,7 +422,7 @@ describe('EditMemberDrawer', () => {
 		renderDrawer({ member: invitedMember });
 
 		expect(
-			screen.getByRole('button', { name: /generate invite link/i }),
+			screen.getByRole('button', { name: /member_generate_invite_link/i }),
 		).toBeInTheDocument();
 	});
 
@@ -439,13 +439,13 @@ describe('EditMemberDrawer', () => {
 
 		renderDrawer({ member: invitedMember, onComplete });
 
-		await user.click(screen.getByRole('button', { name: /revoke invite/i }));
+		await user.click(screen.getByRole('button', { name: /member_revoke_invite/i }));
 
 		expect(
-			await screen.findByText(/Are you sure you want to revoke the invite/i),
+			await screen.findByText(/member_revoke_invite_confirm/i),
 		).toBeInTheDocument();
 
-		const confirmBtns = screen.getAllByRole('button', { name: /revoke invite/i });
+		const confirmBtns = screen.getAllByRole('button', { name: /member_revoke_invite/i });
 		await user.click(confirmBtns[confirmBtns.length - 1]);
 
 		await waitFor(() => {
@@ -490,7 +490,7 @@ describe('EditMemberDrawer', () => {
 		await user.clear(nameInput);
 		await user.type(nameInput, 'Bob Updated');
 
-		const saveBtn = screen.getByRole('button', { name: /save member details/i });
+		const saveBtn = screen.getByRole('button', { name: /member_save/i });
 		await waitFor(() => expect(saveBtn).not.toBeDisabled());
 		await user.click(saveBtn);
 
@@ -526,7 +526,7 @@ describe('EditMemberDrawer', () => {
 			await user.clear(nameInput);
 			await user.type(nameInput, 'Alice Updated');
 
-			const saveBtn = screen.getByRole('button', { name: /save member details/i });
+			const saveBtn = screen.getByRole('button', { name: /member_save/i });
 			await waitFor(() => expect(saveBtn).not.toBeDisabled());
 			await user.click(saveBtn);
 
@@ -549,9 +549,9 @@ describe('EditMemberDrawer', () => {
 
 			renderDrawer();
 
-			await user.click(screen.getByRole('button', { name: /delete member/i }));
+			await user.click(screen.getByRole('button', { name: /member_delete/i }));
 			const confirmBtns = screen.getAllByRole('button', {
-				name: /delete member/i,
+				name: /member_delete/i,
 			});
 			await user.click(confirmBtns[confirmBtns.length - 1]);
 
@@ -580,9 +580,9 @@ describe('EditMemberDrawer', () => {
 
 			renderDrawer({ member: invitedMember });
 
-			await user.click(screen.getByRole('button', { name: /revoke invite/i }));
+			await user.click(screen.getByRole('button', { name: /member_revoke_invite/i }));
 			const confirmBtns = screen.getAllByRole('button', {
-				name: /revoke invite/i,
+				name: /member_revoke_invite/i,
 			});
 			await user.click(confirmBtns[confirmBtns.length - 1]);
 
@@ -604,7 +604,7 @@ describe('EditMemberDrawer', () => {
 		it('disables Delete button when viewing own profile', () => {
 			renderDrawer({ member: selfMember });
 			expect(
-				screen.getByRole('button', { name: /delete member/i }),
+				screen.getByRole('button', { name: /member_delete/i }),
 			).toBeDisabled();
 		});
 
@@ -612,10 +612,10 @@ describe('EditMemberDrawer', () => {
 			const user = userEvent.setup({ pointerEventsCheck: 0 });
 			renderDrawer({ member: selfMember });
 
-			await user.click(screen.getByRole('button', { name: /delete member/i }));
+			await user.click(screen.getByRole('button', { name: /member_delete/i }));
 
 			expect(
-				screen.queryByText(/are you sure you want to delete/i),
+				screen.queryByText(/member_delete_confirm/i),
 			).not.toBeInTheDocument();
 		});
 
@@ -627,7 +627,7 @@ describe('EditMemberDrawer', () => {
 		it('keeps Reset Link button enabled when viewing own profile', () => {
 			renderDrawer({ member: selfMember });
 			expect(
-				screen.getByRole('button', { name: /generate password reset link/i }),
+				screen.getByRole('button', { name: /member_generate_reset_link/i }),
 			).not.toBeDisabled();
 		});
 	});
@@ -649,21 +649,21 @@ describe('EditMemberDrawer', () => {
 		it('disables Delete button for root user', () => {
 			renderDrawer();
 			expect(
-				screen.getByRole('button', { name: /delete member/i }),
+				screen.getByRole('button', { name: /member_delete/i }),
 			).toBeDisabled();
 		});
 
 		it('disables Reset Link button for root user', () => {
 			renderDrawer();
 			expect(
-				screen.getByRole('button', { name: /generate password reset link/i }),
+				screen.getByRole('button', { name: /member_generate_reset_link/i }),
 			).toBeDisabled();
 		});
 
 		it('disables Save button for root user', () => {
 			renderDrawer();
 			expect(
-				screen.getByRole('button', { name: /save member details/i }),
+				screen.getByRole('button', { name: /member_save/i }),
 			).toBeDisabled();
 		});
 
@@ -671,10 +671,10 @@ describe('EditMemberDrawer', () => {
 			const user = userEvent.setup({ pointerEventsCheck: 0 });
 			renderDrawer();
 
-			await user.click(screen.getByRole('button', { name: /delete member/i }));
+			await user.click(screen.getByRole('button', { name: /member_delete/i }));
 
 			expect(
-				screen.queryByText(/are you sure you want to delete/i),
+				screen.queryByText(/member_delete_confirm/i),
 			).not.toBeInTheDocument();
 		});
 
@@ -683,7 +683,7 @@ describe('EditMemberDrawer', () => {
 			renderDrawer();
 
 			await user.click(
-				screen.getByRole('button', { name: /generate password reset link/i }),
+				screen.getByRole('button', { name: /member_generate_reset_link/i }),
 			);
 
 			expect(mockCreateTokenMutateAsync).not.toHaveBeenCalled();
@@ -701,18 +701,18 @@ describe('EditMemberDrawer', () => {
 			renderDrawer();
 
 			await user.click(
-				screen.getByRole('button', { name: /generate password reset link/i }),
+				screen.getByRole('button', { name: /member_generate_reset_link/i }),
 			);
 
 			const dialog = await screen.findByRole('dialog', {
-				name: /password reset link/i,
+				name: /reset_dialog_reset_title/i,
 			});
 			expect(mockCreateTokenMutateAsync).toHaveBeenCalledWith({
 				pathParams: { id: 'user-1' },
 			});
 			expect(dialog).toBeInTheDocument();
 			expect(dialog).toHaveTextContent('reset-tok-abc');
-			expect(dialog).toHaveTextContent(/this link expires on/i);
+			expect(dialog).toHaveTextContent(/reset_dialog_expires_on/i);
 		});
 
 		it('copies the link to clipboard and shows "Copied!" on the button', async () => {
@@ -722,25 +722,27 @@ describe('EditMemberDrawer', () => {
 			renderDrawer();
 
 			await user.click(
-				screen.getByRole('button', { name: /generate password reset link/i }),
+				screen.getByRole('button', { name: /member_generate_reset_link/i }),
 			);
 
 			const dialog = await screen.findByRole('dialog', {
-				name: /password reset link/i,
+				name: /reset_dialog_reset_title/i,
 			});
 			expect(dialog).toHaveTextContent('reset-tok-abc');
 
-			await user.click(screen.getByRole('button', { name: /^copy$/i }));
+			await user.click(
+				screen.getByRole('button', { name: /^reset_dialog_copy$/i }),
+			);
 
 			await waitFor(() => {
 				expect(mockCopyToClipboard).toHaveBeenCalledWith(
 					expect.stringContaining('reset-tok-abc'),
 				);
 				expect(
-					screen.getByRole('button', { name: /copied!/i }),
+					screen.getByRole('button', { name: /reset_dialog_copied/i }),
 				).toBeInTheDocument();
 				expect(mockToast.success).toHaveBeenCalledWith(
-					'Reset link copied to clipboard',
+					'member_reset_link_copied',
 				);
 			});
 		});

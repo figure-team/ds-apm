@@ -1,11 +1,12 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Table } from 'antd';
 import { SA_QUERY_PARAMS } from 'container/ServiceAccountsSettings/constants';
 import { ServiceAccountRow } from 'container/ServiceAccountsSettings/utils';
 import { parseAsInteger, parseAsString, useQueryState } from 'nuqs';
 
 import {
-	columns,
+	getColumns,
 	ServiceAccountsEmptyState,
 	showPaginationTotal,
 } from './utils';
@@ -25,6 +26,8 @@ function ServiceAccountsTable({
 	loading,
 	onRowClick,
 }: ServiceAccountsTableProps): JSX.Element {
+	const { t } = useTranslation('serviceAccounts');
+	const columns = getColumns(t);
 	const [currentPage, setPage] = useQueryState(
 		SA_QUERY_PARAMS.PAGE,
 		parseAsInteger.withDefault(1),
