@@ -1,7 +1,6 @@
 import type { SopDocumentSummary } from 'api/v2/rules/sopDocuments';
 
 import {
-	getSopBindingStatus,
 	hasSopBinding,
 	resolveSopBindingDocument,
 	validateSopAnnotations,
@@ -30,15 +29,6 @@ describe('sopMetadata', () => {
 		expect(
 			hasSopBinding({}, { sop_url: 'https://kb.example/sop/SOP-PAY-001' }),
 		).toBe(true);
-	});
-
-	it('returns operator-facing SOP binding status text', () => {
-		expect(getSopBindingStatus({}, {})).toBe(
-			'SOP missing: add sop_id or sop_url before production use',
-		);
-		expect(getSopBindingStatus({ sop_id: 'SOP-PAY-001' }, {})).toBe(
-			'SOP binding metadata is present',
-		);
 	});
 
 	it('does not warn for empty or normal SOP metadata values', () => {

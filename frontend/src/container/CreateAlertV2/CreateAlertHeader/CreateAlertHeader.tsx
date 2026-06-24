@@ -3,12 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { Collapse } from 'antd';
 import { Button, Input } from '@signozhq/ui';
 import logEvent from 'api/common/logEvent';
-import { previewSop, type PreviewSopResult } from 'api/v2/rules/previewSop';
 import {
+	getSopDocument,
 	listSopDocuments,
+	type SopDocument,
 	type SopDocumentSummary,
 } from 'api/v2/rules/sopDocuments';
 import classNames from 'classnames';
+import { MarkdownRenderer } from 'components/MarkdownRenderer/MarkdownRenderer';
 import { QueryParams } from 'constants/query';
 import ROUTES from 'constants/routes';
 import { useQueryBuilder } from 'hooks/queryBuilder/useQueryBuilder';
@@ -34,7 +36,6 @@ import {
 	validatePmBriefingMetadata,
 } from './pmBriefingMetadata';
 import {
-	getSopBindingStatus,
 	hasSopBinding,
 	resolveSopBindingDocument,
 	SOP_ANNOTATION_FIELDS,
@@ -47,9 +48,10 @@ import './styles.scss';
 function CreateAlertHeader(): JSX.Element {
 	const { t } = useTranslation(['alerts']);
 	const { alertState, setAlertState, isEditMode } = useCreateAlertState();
-	const [sopPreview, setSopPreview] = useState<PreviewSopResult>();
-	const [sopPreviewError, setSopPreviewError] = useState('');
-	const [isSopPreviewLoading, setIsSopPreviewLoading] = useState(false);
+	const [isSopPreviewOpen, setIsSopPreviewOpen] = useState(false);
+	const [sopDoc, setSopDoc] = useState<SopDocument>();
+	const [sopDocError, setSopDocError] = useState('');
+	const [isSopDocLoading, setIsSopDocLoading] = useState(false);
 	const [sopDocuments, setSopDocuments] = useState<SopDocumentSummary[]>([]);
 
 	useEffect(() => {
@@ -123,8 +125,6 @@ function CreateAlertHeader(): JSX.Element {
 				delete nextAnnotations[key];
 			}
 
-			setSopPreview(undefined);
-			setSopPreviewError('');
 			setAlertState({
 				type: 'SET_ALERT_ANNOTATIONS',
 				payload: nextAnnotations,
@@ -145,8 +145,6 @@ function CreateAlertHeader(): JSX.Element {
 				delete nextLabels[key];
 			}
 
-			setSopPreview(undefined);
-			setSopPreviewError('');
 			setAlertState({
 				type: 'SET_ALERT_LABELS',
 				payload: nextLabels,
@@ -177,8 +175,6 @@ function CreateAlertHeader(): JSX.Element {
 				}
 			}
 
-			setSopPreview(undefined);
-			setSopPreviewError('');
 			setAlertState({
 				type: 'SET_ALERT_LABELS',
 				payload: nextLabels,
@@ -199,25 +195,6 @@ function CreateAlertHeader(): JSX.Element {
 		},
 		[sopDocuments, alertState.labels, alertState.annotations, setAlertState],
 	);
-
-	const handlePreviewSop = useCallback(async (): Promise<void> => {
-		setSopPreviewError('');
-		setIsSopPreviewLoading(true);
-
-		try {
-			const response = await previewSop({
-				labels: alertState.labels,
-				annotations: alertState.annotations,
-			});
-
-			setSopPreview(response.data);
-		} catch {
-			setSopPreview(undefined);
-			setSopPreviewError(t('v2_sop_preview_error'));
-		} finally {
-			setIsSopPreviewLoading(false);
-		}
-	}, [alertState.annotations, alertState.labels]);
 
 	const pmBriefingWarnings = useMemo(
 		() => validatePmBriefingMetadata(alertState.annotations),
@@ -243,6 +220,57 @@ function CreateAlertHeader(): JSX.Element {
 		() => getMissingOperationalLabels(alertState.labels),
 		[alertState.labels],
 	);
+
+	const boundSopDocument = useMemo(
+		() =>
+			resolveSopBindingDocument(
+				sopDocuments,
+				alertState.labels[SOP_ID_LABEL] || '',
+			),
+		[sopDocuments, alertState.labels],
+	);
+
+	const handleToggleSopPreview = useCallback((): void => {
+		setIsSopPreviewOpen((open) => !open);
+	}, []);
+
+	useEffect(() => {
+		if (!isSopPreviewOpen || !boundSopDocument) {
+			return undefined;
+		}
+
+		if (
+			sopDoc?.sopId === boundSopDocument.sopId &&
+			sopDoc?.version === boundSopDocument.version
+		) {
+			return undefined;
+		}
+
+		let cancelled = false;
+		setIsSopDocLoading(true);
+		setSopDocError('');
+		getSopDocument(boundSopDocument.sopId, boundSopDocument.version)
+			.then((res) => {
+				if (!cancelled) {
+					setSopDoc(res.data);
+				}
+			})
+			.catch(() => {
+				if (!cancelled) {
+					setSopDoc(undefined);
+					setSopDocError(t('v2_sop_doc_error'));
+				}
+			})
+			.finally(() => {
+				if (!cancelled) {
+					setIsSopDocLoading(false);
+				}
+			});
+
+		return (): void => {
+			cancelled = true;
+		};
+	}, [isSopPreviewOpen, boundSopDocument, sopDoc, t]);
 
 	return (
 		<div
@@ -345,7 +373,9 @@ function CreateAlertHeader(): JSX.Element {
 						})}
 						role="status"
 					>
-						{getSopBindingStatus(alertState.labels, alertState.annotations)}
+						{hasSopBinding(alertState.labels, alertState.annotations)
+							? t('v2_sop_binding_present')
+							: t('v2_sop_binding_missing')}
 					</div>
 					{!hasSopBinding(alertState.labels, alertState.annotations) && (
 						<div className="sop-metadata__missing-banner" role="alert">
@@ -493,146 +523,76 @@ function CreateAlertHeader(): JSX.Element {
 					</div>
 					<div className="sop-metadata__preview">
 						<div className="sop-metadata__preview-header">
-							<div>
-								<div className="sop-metadata__preview-title">
-									{t('v2_sop_preview_title')}
-								</div>
-								<div className="sop-metadata__preview-description">
-									{t('v2_sop_preview_desc')}
-								</div>
+							<div className="sop-metadata__preview-title">
+								{t('v2_sop_doc_preview_toggle')}
 							</div>
 							<Button
 								color="secondary"
-								disabled={isSopPreviewLoading}
-								onClick={handlePreviewSop}
+								onClick={handleToggleSopPreview}
 								size="sm"
 								variant="solid"
 							>
-								{isSopPreviewLoading ? t('v2_previewing_btn') : t('v2_preview_sop_source_btn')}
+								{isSopPreviewOpen
+									? t('v2_sop_preview_collapse')
+									: t('v2_sop_preview_expand')}
 							</Button>
 						</div>
-						{sopPreviewError && (
-							<div className="sop-metadata__warning" role="alert">
-								{sopPreviewError}
-							</div>
-						)}
-						{sopPreview && (
+						{isSopPreviewOpen && (
 							<div
-								className="sop-metadata__preview-grid"
-								data-testid="sop-source-preview"
+								className="sop-metadata__doc-preview"
+								data-testid="sop-doc-preview"
 							>
-								<div className="sop-metadata__preview-summary">
-									<span className="sop-metadata__preview-summary-title">
-										{t('v2_review_summary')}
-									</span>
-									<span className="sop-metadata__preview-summary-copy">
-										{sopPreview.status === 'bound'
-											? t('v2_sop_ready_for_review')
-											: t('v2_sop_add_metadata')}
-									</span>
-									<div className="sop-metadata__preview-badges">
-										<span className="sop-metadata__preview-badge">
-											{sopPreview.access.browserCredentialsAllowed
-												? t('v2_browser_creds_allowed')
-												: t('v2_browser_creds_blocked')}
-										</span>
-										{sopPreview.access.requiresServerSideFetch && (
-											<span className="sop-metadata__preview-badge">
-												{t('v2_server_side_connector_required')}
-											</span>
-										)}
-										{sopPreview.access.auditEventRequired && (
-											<span className="sop-metadata__preview-badge">
-												{t('v2_audit_required')}
-											</span>
-										)}
+								{!boundSopDocument && (
+									<div className="sop-metadata__doc-note">
+										{t('v2_sop_doc_not_found')}
 									</div>
-								</div>
-								<div>
-									<span className="sop-metadata__preview-label">{t('v2_preview_contract')}</span>
-									<span className="sop-metadata__preview-value">
-										{sopPreview.contractVersion}
-									</span>
-								</div>
-								<div>
-									<span className="sop-metadata__preview-label">{t('v2_preview_status')}</span>
-									<span
-										className={classNames('sop-metadata__preview-value', {
-											'sop-metadata__preview-value--complete':
-												sopPreview.status === 'bound',
-											'sop-metadata__preview-value--warning':
-												sopPreview.status !== 'bound',
-										})}
-									>
-										{sopPreview.status}
-									</span>
-								</div>
-								<div>
-									<span className="sop-metadata__preview-label">{t('v2_preview_source')}</span>
-									<span className="sop-metadata__preview-value">
-										{sopPreview.source.name}
-									</span>
-								</div>
-								<div>
-									<span className="sop-metadata__preview-label">{t('v2_preview_search')}</span>
-									<span className="sop-metadata__preview-value">
-										{sopPreview.search.query || t('v2_no_search_terms')}
-									</span>
-								</div>
-								<div>
-									<span className="sop-metadata__preview-label">{t('v2_preview_label')}</span>
-									{sopPreview.preview.available && sopPreview.preview.url ? (
-										<a
-											className="sop-metadata__preview-link"
-											href={sopPreview.preview.url}
-											target="_blank"
-											rel="noopener noreferrer"
-										>
-											{sopPreview.preview.displayUrl || sopPreview.preview.title}
-										</a>
-									) : (
-										<span className="sop-metadata__preview-value">
-											{sopPreview.preview.title || t('v2_preview_unavailable')}
-										</span>
-									)}
-								</div>
-								<div>
-									<span className="sop-metadata__preview-label">{t('v2_preview_auth_boundary')}</span>
-									<span className="sop-metadata__preview-value">
-										{sopPreview.access.mode} · {sopPreview.access.credentialScope}
-									</span>
-								</div>
-								<div>
-									<span className="sop-metadata__preview-label">{t('v2_preview_service_account')}</span>
-									<span className="sop-metadata__preview-value">
-										{sopPreview.access.recommendedServiceAccountProfile || t('v2_not_required')}
-									</span>
-								</div>
-								<div className="sop-metadata__preview-note">
-									<span className="sop-metadata__preview-label">
-										{t('v2_preview_browser_creds')}
-									</span>
-									<span className="sop-metadata__preview-value">
-										{sopPreview.access.browserCredentialsAllowed
-											? t('v2_creds_allowed')
-											: t('v2_creds_never_accepted')}
-									</span>
-								</div>
-								<div className="sop-metadata__preview-note">
-									<span className="sop-metadata__preview-label">{t('v2_preview_boundary_note')}</span>
-									<span className="sop-metadata__preview-value">
-										{sopPreview.access.message}
-									</span>
-								</div>
-								{sopPreview.warnings?.map((warning) => (
-									<div
-										className="sop-metadata__preview-warning"
-										key={warning}
-										role="alert"
-									>
-										{warning}
+								)}
+								{boundSopDocument && isSopDocLoading && (
+									<div className="sop-metadata__doc-note">
+										{t('v2_sop_doc_loading')}
 									</div>
-								))}
+								)}
+								{boundSopDocument && !isSopDocLoading && sopDocError && (
+									<div className="sop-metadata__warning" role="alert">
+										{sopDocError}
+									</div>
+								)}
+								{boundSopDocument &&
+									!isSopDocLoading &&
+									!sopDocError &&
+									sopDoc &&
+									[
+										{
+											title: t('v2_sop_doc_section'),
+											content: sopDoc.bodyMarkdown,
+										},
+										{
+											title: t('v2_sop_customer_template_section'),
+											content: sopDoc.customerUpdateTemplate,
+										},
+										{
+											title: t('v2_sop_vendor_template_section'),
+											content: sopDoc.vendorRequestTemplate,
+										},
+									].map(({ title, content }) => (
+										<div className="sop-metadata__doc-section" key={title}>
+											<div className="sop-metadata__doc-section-title">
+												{title}
+											</div>
+											{content?.trim() ? (
+												<div className="sop-metadata__doc-body">
+													<MarkdownRenderer
+														markdownContent={content}
+														variables={{}}
+													/>
+												</div>
+											) : (
+												<div className="sop-metadata__doc-empty">
+													{t('v2_sop_doc_empty')}
+												</div>
+											)}
+										</div>
+									))}
 							</div>
 						)}
 					</div>

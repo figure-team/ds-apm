@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { previewSop } from 'api/v2/rules/previewSop';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { getSopDocument, listSopDocuments } from 'api/v2/rules/sopDocuments';
 import { QueryParams } from 'constants/query';
 import ROUTES from 'constants/routes';
 import { defaultPostableAlertRuleV2 } from 'container/CreateAlertV2/constants';
@@ -11,8 +11,18 @@ import * as rulesHook from '../../../../api/generated/services/rules';
 import { CreateAlertProvider } from '../../context';
 import CreateAlertHeader from '../CreateAlertHeader';
 
-jest.mock('api/v2/rules/previewSop', () => ({
-	previewSop: jest.fn(),
+jest.mock('api/v2/rules/sopDocuments', () => ({
+	...jest.requireActual('api/v2/rules/sopDocuments'),
+	listSopDocuments: jest.fn(),
+	getSopDocument: jest.fn(),
+}));
+
+jest.mock('components/MarkdownRenderer/MarkdownRenderer', () => ({
+	MarkdownRenderer: ({
+		markdownContent,
+	}: {
+		markdownContent: string;
+	}): JSX.Element => <div data-testid="markdown">{markdownContent}</div>,
 }));
 
 const mockSafeNavigate = jest.fn();
@@ -55,7 +65,26 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const ENTER_ALERT_RULE_NAME_PLACEHOLDER = 'v2_alert_name_placeholder';
-const mockPreviewSop = previewSop as jest.MockedFunction<typeof previewSop>;
+const mockListSopDocuments = listSopDocuments as jest.MockedFunction<
+	typeof listSopDocuments
+>;
+const mockGetSopDocument = getSopDocument as jest.MockedFunction<
+	typeof getSopDocument
+>;
+
+const SOP_DOC_SUMMARY = {
+	contractVersion: 'ds.sop_document.v1',
+	sopId: 'SOP-PAY-001',
+	title: 'Payment API 5xx response',
+	version: '2026-04-20.3',
+	checksum: 'sha256:abc',
+	source: { type: 'managed_markdown', sourceId: 'confluence' },
+	displayUrl: 'kb.example/sop/SOP-PAY-001',
+	ownerTeam: 'payments-team',
+	approvalStatus: 'approved',
+	tenantScope: { projectIds: [], environments: [] },
+	updatedAt: '2026-04-20T00:00:00Z',
+};
 
 const renderCreateAlertHeader = (): ReturnType<typeof render> =>
 	render(
@@ -67,48 +96,28 @@ const renderCreateAlertHeader = (): ReturnType<typeof render> =>
 describe('CreateAlertHeader', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		mockPreviewSop.mockResolvedValue({
+		mockListSopDocuments.mockResolvedValue({
 			status: 'success',
 			data: {
-				access: {
-					auditEventRequired: true,
-					browserCredentialsAllowed: false,
-					credentialScope: 'source_connector_secret',
-					message:
-						'Live SOP content must be fetched server-side with source connector credentials; browser credentials are never accepted.',
-					mode: 'server_side_connector',
-					recommendedServiceAccountProfile: 'ds-sop-reader',
-					requiresServerSideFetch: true,
-				},
-				binding: {
-					bindingId: 'payment-api-prod-critical',
-					sopId: 'SOP-PAY-001',
-					title: 'Payment API 5xx response',
-					version: '2026-04-20.3',
-				},
-				contractVersion: 'ds-apm.sop-preview.v1',
-				preview: {
-					available: true,
-					displayUrl: 'kb.example/sop/SOP-PAY-001',
-					title: 'Payment API 5xx response',
-					url: 'https://kb.example/sop/SOP-PAY-001?view=summary',
-				},
-				search: {
-					query: 'SOP-PAY-001 payment-api-prod-critical Payment API 5xx response',
-					terms: [
-						'SOP-PAY-001',
-						'payment-api-prod-critical',
-						'Payment API 5xx response',
-					],
-				},
-				source: {
-					kind: 'configured_source',
-					name: 'confluence',
-				},
-				status: 'bound',
-				warnings: [],
+				contractVersion: 'ds.sop_document_list.v1',
+				documents: [SOP_DOC_SUMMARY],
 			},
-		});
+		} as never);
+		mockGetSopDocument.mockResolvedValue({
+			status: 'success',
+			data: {
+				...SOP_DOC_SUMMARY,
+				bodyMarkdown: '## Payment API 5xx 대응\n1. 대시보드 확인',
+				customerUpdateTemplate: '현재 결제 일부에서 지연이 발생하고 있습니다.',
+				vendorRequestTemplate: '',
+				securityContext: {
+					serviceAccountProfile: 'ds-sop-reader',
+					secretRefVisible: false,
+					browserCredentialsUsed: false,
+					redactionApplied: false,
+				},
+			},
+		} as never);
 	});
 
 	it('renders the header with title', () => {
@@ -167,9 +176,7 @@ describe('CreateAlertHeader', () => {
 		renderCreateAlertHeader();
 
 		expect(screen.getByText('v2_sop_binding_title')).toBeInTheDocument();
-		expect(
-			screen.getByText('SOP missing: add sop_id or sop_url before production use'),
-		).toBeInTheDocument();
+		expect(screen.getByText('v2_sop_binding_missing')).toBeInTheDocument();
 
 		const sopIdInput = screen.getByTestId('sop-metadata-sop_id');
 		const sopUrlInput = screen.getByTestId('sop-metadata-sop_url');
@@ -183,84 +190,51 @@ describe('CreateAlertHeader', () => {
 
 		expect(sopIdInput).toHaveValue('SOP-PAY-001');
 		expect(sopUrlInput).toHaveValue('https://kb.example/sop/SOP-PAY-001');
-		expect(
-			screen.getByText('SOP binding metadata is present'),
-		).toBeInTheDocument();
+		expect(screen.getByText('v2_sop_binding_present')).toBeInTheDocument();
 	});
 
-	it('previews SOP source, search, and document metadata', async () => {
+	it('toggles the SOP document/template preview and renders sections', async () => {
 		renderCreateAlertHeader();
 
-		const sopIdInput = screen.getByTestId('sop-metadata-sop_id');
-		const sopUrlInput = screen.getByTestId('sop-metadata-sop_url');
-		const sopSourceInput = screen.getByTestId('sop-metadata-sop_source');
-		const sopTitleInput = screen.getByTestId('sop-metadata-sop_title');
+		// Wait for SOP documents to load so the bound document can resolve.
+		await waitFor(() => expect(mockListSopDocuments).toHaveBeenCalled());
 
-		fireEvent.change(sopIdInput, {
+		fireEvent.change(screen.getByTestId('sop-metadata-sop_id'), {
 			target: { value: 'SOP-PAY-001' },
 		});
-		fireEvent.change(sopUrlInput, {
-			target: { value: 'https://kb.example/sop/SOP-PAY-001?view=summary' },
-		});
-		fireEvent.change(sopSourceInput, {
-			target: { value: 'confluence' },
-		});
-		fireEvent.change(sopTitleInput, {
-			target: { value: 'Payment API 5xx response' },
-		});
 
-		fireEvent.click(screen.getByRole('button', { name: 'v2_preview_sop_source_btn' }));
-
-		expect(mockPreviewSop).toHaveBeenCalledWith({
-			labels: {
-				sop_id: 'SOP-PAY-001',
-			},
-			annotations: {
-				sop_source: 'confluence',
-				sop_title: 'Payment API 5xx response',
-				sop_url: 'https://kb.example/sop/SOP-PAY-001?view=summary',
-			},
-		});
-		await expect(
-			screen.findByTestId('sop-source-preview'),
-		).resolves.toBeInTheDocument();
-		expect(screen.getByText('v2_review_summary')).toBeInTheDocument();
-		expect(
-			screen.getByText('v2_sop_ready_for_review'),
-		).toBeInTheDocument();
-		expect(screen.getByText('v2_browser_creds_blocked')).toBeInTheDocument();
-		expect(
-			screen.getByText('v2_server_side_connector_required'),
-		).toBeInTheDocument();
-		expect(
-			screen.getByText('v2_audit_required'),
-		).toBeInTheDocument();
-		expect(screen.getByText('ds-apm.sop-preview.v1')).toBeInTheDocument();
-		expect(screen.getByText('bound')).toBeInTheDocument();
-		expect(screen.getByText('confluence')).toBeInTheDocument();
-		expect(
-			screen.getByText(
-				'SOP-PAY-001 payment-api-prod-critical Payment API 5xx response',
-			),
-		).toBeInTheDocument();
-		const previewLink = screen.getByRole('link', {
-			name: 'kb.example/sop/SOP-PAY-001',
-		});
-		expect(previewLink).toHaveAttribute(
-			'href',
-			'https://kb.example/sop/SOP-PAY-001?view=summary',
+		fireEvent.click(
+			screen.getByRole('button', { name: 'v2_sop_preview_expand' }),
 		);
-		expect(screen.queryByText(/view=summary/)).not.toBeInTheDocument();
-		expect(
-			screen.getByText('server_side_connector · source_connector_secret'),
-		).toBeInTheDocument();
-		expect(screen.getByText('ds-sop-reader')).toBeInTheDocument();
-		expect(screen.getByText('v2_creds_never_accepted')).toBeInTheDocument();
-		expect(
-			screen.getByText(
-				'Live SOP content must be fetched server-side with source connector credentials; browser credentials are never accepted.',
+
+		await screen.findByTestId('sop-doc-preview');
+
+		await waitFor(() =>
+			expect(mockGetSopDocument).toHaveBeenCalledWith(
+				'SOP-PAY-001',
+				'2026-04-20.3',
 			),
+		);
+
+		// Body markdown and the customer template render; the empty vendor
+		// template falls back to the muted placeholder.
+		expect(await screen.findByText(/Payment API 5xx/)).toBeInTheDocument();
+		expect(
+			screen.getByText('현재 결제 일부에서 지연이 발생하고 있습니다.'),
 		).toBeInTheDocument();
+		expect(
+			screen.getByText('v2_sop_customer_template_section'),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText('v2_sop_vendor_template_section'),
+		).toBeInTheDocument();
+		expect(screen.getByText('v2_sop_doc_empty')).toBeInTheDocument();
+
+		// Collapsing hides the preview body again.
+		fireEvent.click(
+			screen.getByRole('button', { name: 'v2_sop_preview_collapse' }),
+		);
+		expect(screen.queryByTestId('sop-doc-preview')).not.toBeInTheDocument();
 	});
 
 	it('warns when SOP metadata uses unsafe values', () => {

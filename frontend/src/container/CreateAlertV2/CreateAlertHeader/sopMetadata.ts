@@ -121,15 +121,6 @@ export function hasSopBinding(labels: Labels, annotations: Labels): boolean {
 	return Boolean(labels[SOP_ID_LABEL]?.trim() || annotations.sop_url?.trim());
 }
 
-export function getSopBindingStatus(
-	labels: Labels,
-	annotations: Labels,
-): string {
-	return hasSopBinding(labels, annotations)
-		? 'SOP binding metadata is present'
-		: 'SOP missing: add sop_id or sop_url before production use';
-}
-
 export function validateSopLabelValue(value: string | undefined): string[] {
 	const trimmedValue = value?.trim();
 
