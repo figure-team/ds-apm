@@ -1,0 +1,147 @@
+package ruletypes
+
+import (
+	"errors"
+	"fmt"
+	"strings"
+)
+
+// Remediation lifecycle status enum. Terminal: verified, unresolved, failed,
+// rejected, expired. Non-terminal: proposed, approved, executing, succeeded.
+const (
+	RemediationStatusProposed   = "proposed"
+	RemediationStatusApproved   = "approved"
+	RemediationStatusExecuting  = "executing"
+	RemediationStatusSucceeded  = "succeeded"
+	RemediationStatusFailed     = "failed"
+	RemediationStatusVerified   = "verified"
+	RemediationStatusUnresolved = "unresolved"
+	RemediationStatusRejected   = "rejected"
+	RemediationStatusExpired    = "expired"
+)
+
+// RemediationMaxScriptLen mirrors RunbookMaxScriptLen — the snapshot is a copy
+// of a Runbook's ExecutableScript.
+const RemediationMaxScriptLen = RunbookMaxScriptLen
+
+// RemediationMaxOutputSnippet caps the stored stdout/stderr snippet (audit only,
+// not a full log). Secret masking is a future extension point.
+const RemediationMaxOutputSnippet = 8_192
+
+// RemediationExecution is one approve→execute→verify lifecycle for a single
+// incident, tied to exactly one pre-approved Runbook. ScriptSnapshot is the
+// frozen copy of the Runbook script taken at propose time, so SOP edits cannot
+// change what an operator approved (design §4.2).
+type RemediationExecution struct {
+	ID               string `json:"id"`
+	OrgID            string `json:"orgId"`
+	IncidentID       string `json:"incidentId"`
+	AlertFingerprint string `json:"alertFingerprint"`
+	SOPID            string `json:"sopId"`
+	SOPVersion       string `json:"sopVersion"`
+	RunbookID        string `json:"runbookId"`
+	ScriptSnapshot   string `json:"scriptSnapshot"`
+	Status           string `json:"status"`
+	ProposedAt       string `json:"proposedAt"`
+	ApprovedAt       string `json:"approvedAt,omitempty"`
+	ExecutedAt       string `json:"executedAt,omitempty"`
+	TerminalAt       string `json:"terminalAt,omitempty"`
+	ApprovedBy       string `json:"approvedBy,omitempty"`
+	ExitCode         *int   `json:"exitCode,omitempty"`
+	OutputSnippet    string `json:"outputSnippet,omitempty"`
+	VerifyResult     string `json:"verifyResult,omitempty"`
+	ExpiresAt        string `json:"expiresAt"`
+}
+
+var allowedRemediationStatuses = map[string]struct{}{
+	RemediationStatusProposed:   {},
+	RemediationStatusApproved:   {},
+	RemediationStatusExecuting:  {},
+	RemediationStatusSucceeded:  {},
+	RemediationStatusFailed:     {},
+	RemediationStatusVerified:   {},
+	RemediationStatusUnresolved: {},
+	RemediationStatusRejected:   {},
+	RemediationStatusExpired:    {},
+}
+
+var terminalRemediationStatuses = map[string]struct{}{
+	RemediationStatusVerified:   {},
+	RemediationStatusUnresolved: {},
+	RemediationStatusFailed:     {},
+	RemediationStatusRejected:   {},
+	RemediationStatusExpired:    {},
+}
+
+// allowedRemediationTransitions maps each from-status to its permitted
+// to-statuses. Absent keys (terminal states) permit no transition.
+var allowedRemediationTransitions = map[string]map[string]struct{}{
+	RemediationStatusProposed: {
+		RemediationStatusApproved: {}, RemediationStatusRejected: {}, RemediationStatusExpired: {},
+	},
+	RemediationStatusApproved: {
+		RemediationStatusExecuting: {},
+	},
+	RemediationStatusExecuting: {
+		RemediationStatusSucceeded: {}, RemediationStatusFailed: {},
+	},
+	RemediationStatusSucceeded: {
+		RemediationStatusVerified: {}, RemediationStatusUnresolved: {},
+	},
+}
+
+func (e RemediationExecution) IsTerminal() bool {
+	_, ok := terminalRemediationStatuses[e.Status]
+	return ok
+}
+
+// ValidateRemediationStatusTransition mirrors ValidateRunbookStatusTransition:
+// validity gate first, then no-op and illegal-direction rejection.
+func ValidateRemediationStatusTransition(from, to string) error {
+	if _, ok := allowedRemediationStatuses[from]; !ok {
+		return fmt.Errorf("status transition: from %q invalid", from)
+	}
+	if _, ok := allowedRemediationStatuses[to]; !ok {
+		return fmt.Errorf("status transition: to %q invalid", to)
+	}
+	if from == to {
+		return fmt.Errorf("status transition: %q → %q is a no-op", from, to)
+	}
+	allowed, ok := allowedRemediationTransitions[from]
+	if !ok {
+		return fmt.Errorf("status transition: %q is terminal", from)
+	}
+	if _, ok := allowed[to]; !ok {
+		return fmt.Errorf("status transition: %q → %q forbidden", from, to)
+	}
+	return nil
+}
+
+// ValidateRemediationExecution returns nil when e is well-formed, otherwise a
+// joined field-level error. Style mirrors ValidateRunbook. ScriptSnapshot is
+// NOT secret-like-checked (bash legitimately references $TOKEN env vars, same
+// policy as Runbook.ExecutableScript).
+func ValidateRemediationExecution(e RemediationExecution) error {
+	var errs []error
+
+	if !uuidV4Pattern.MatchString(strings.TrimSpace(e.ID)) {
+		errs = append(errs, fmt.Errorf("id: must be UUID v4 (got %q)", e.ID))
+	}
+	pilotRequireNonEmpty(&errs, "orgId", e.OrgID)
+	pilotRequireNonEmpty(&errs, "incidentId", e.IncidentID)
+	pilotRequireNonEmpty(&errs, "sopId", e.SOPID)
+	pilotRequireNonEmpty(&errs, "runbookId", e.RunbookID)
+	pilotRequireAllowed(&errs, "status", e.Status, allowedRemediationStatuses)
+	if len(e.ScriptSnapshot) > RemediationMaxScriptLen {
+		errs = append(errs, fmt.Errorf("scriptSnapshot: exceeds %d-byte limit (got %d)", RemediationMaxScriptLen, len(e.ScriptSnapshot)))
+	}
+	if strings.ContainsRune(e.ScriptSnapshot, 0) {
+		errs = append(errs, fmt.Errorf("scriptSnapshot: must not contain NUL byte"))
+	}
+	pilotRequireNonEmpty(&errs, "proposedAt", e.ProposedAt)
+	pilotRequireNonEmpty(&errs, "expiresAt", e.ExpiresAt)
+
+	pilotAppendSecretLikeStringErrors(&errs, "approvedBy", e.ApprovedBy)
+
+	return errors.Join(errs...)
+}
