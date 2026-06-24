@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/SigNoz/signoz/pkg/ruler/remediationstore"
 	"github.com/SigNoz/signoz/pkg/sqlstore"
@@ -220,7 +221,8 @@ func (s *SQLStore) Transition(ctx context.Context, orgID, id, toStatus string, p
 		Model((*remediationRow)(nil)).
 		Set("status = ?", toStatus).
 		Where("id = ?", id).
-		Where("org_id = ?", orgID)
+		Where("org_id = ?", orgID).
+		Where("status = ?", e.Status)
 
 	if patch.TerminalAt != "" {
 		q = q.Set("terminal_at = ?", patch.TerminalAt)
@@ -238,8 +240,18 @@ func (s *SQLStore) Transition(ctx context.Context, orgID, id, toStatus string, p
 		q = q.Set("executed_at = ?", patch.ExecutedAt)
 	}
 
-	_, err = q.Exec(ctx)
-	return err
+	res, err := q.Exec(ctx)
+	if err != nil {
+		return err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return fmt.Errorf("remediationstore: transition %s→%s: row changed concurrently (id=%s)", e.Status, toStatus, id)
+	}
+	return nil
 }
 
 // CountActiveByOrg returns the number of executions in 'approved' or 'executing'

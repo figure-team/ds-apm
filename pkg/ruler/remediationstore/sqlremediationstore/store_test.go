@@ -201,6 +201,43 @@ func TestCountActiveByOrg(t *testing.T) {
 	require.Equal(t, int64(1), count)
 }
 
+func TestTransition_FailsOnConcurrentChange(t *testing.T) {
+	s := newTestStore(t)
+	ctx := context.Background()
+
+	// Seed an execution that is already in 'succeeded' state by walking the
+	// valid transition chain: proposed → executing → succeeded.
+	e := sampleExecution("99999999-9999-9999-9999-999999999999")
+	require.NoError(t, s.Create(ctx, e))
+
+	won, err := s.TransitionToExecuting(ctx, "org-1", e.ID, "alice@x", "2026-06-24T00:05:00Z")
+	require.NoError(t, err)
+	require.True(t, won)
+
+	exitCode := 0
+	require.NoError(t, s.Transition(ctx, "org-1", e.ID, ruletypes.RemediationStatusSucceeded, remediationstore.TransitionPatch{
+		ExitCode:   &exitCode,
+		ExecutedAt: "2026-06-24T00:06:00Z",
+	}))
+
+	// First concurrent writer moves succeeded → verified (out-of-band mutation).
+	require.NoError(t, s.Transition(ctx, "org-1", e.ID, ruletypes.RemediationStatusVerified, remediationstore.TransitionPatch{
+		TerminalAt: "2026-06-24T00:07:00Z",
+	}))
+
+	// Second writer (stale read) still thinks the row is 'succeeded' and tries
+	// succeeded → unresolved. The guard must reject it because the row is now 'verified'.
+	err = s.Transition(ctx, "org-1", e.ID, ruletypes.RemediationStatusUnresolved, remediationstore.TransitionPatch{
+		TerminalAt: "2026-06-24T00:08:00Z",
+	})
+	require.Error(t, err, "Transition must return error when row status changed concurrently")
+
+	// Row must remain 'verified' — the clobber was prevented.
+	got, err := s.Get(ctx, "org-1", e.ID)
+	require.NoError(t, err)
+	require.Equal(t, ruletypes.RemediationStatusVerified, got.Status)
+}
+
 func TestExitCode_NullableRoundtrip(t *testing.T) {
 	s := newTestStore(t)
 	ctx := context.Background()
