@@ -634,6 +634,61 @@ func (provider *provider) addRulerRoutes(router *mux.Router) error {
 		return err
 	}
 
+	if err := router.Handle("/api/v2/ds/remediation/{id}", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.GetRemediation), handler.OpenAPIDef{
+		ID:                  "GetRemediation",
+		Tags:                []string{"remediation"},
+		Summary:             "Get remediation execution",
+		Description:         "Returns one remediation execution by ID.",
+		Response:            new(ruletypes.RemediationExecution),
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusUnauthorized, http.StatusNotFound},
+		SecuritySchemes:     newSecuritySchemes(types.RoleViewer),
+	})).Methods(http.MethodGet).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/remediation", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.ListRemediations), handler.OpenAPIDef{
+		ID:                  "ListRemediations",
+		Tags:                []string{"remediation"},
+		Summary:             "List remediation executions",
+		Description:         "Lists remediation executions, scoped to an incident via the incidentId query param (defaults to proposed executions).",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusUnauthorized},
+		SecuritySchemes:     newSecuritySchemes(types.RoleViewer),
+	})).Methods(http.MethodGet).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/remediation/{id}/approve", handler.New(provider.authZ.AdminAccess(provider.rulerHandler.ApproveRemediation), handler.OpenAPIDef{
+		ID:                  "ApproveRemediation",
+		Tags:                []string{"remediation"},
+		Summary:             "Approve and execute remediation",
+		Description:         "Approves a proposed remediation and starts async script execution; admin role required.",
+		Response:            new(ruletypes.RemediationExecution),
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusAccepted,
+		ErrorStatusCodes:    []int{http.StatusBadRequest, http.StatusForbidden, http.StatusUnauthorized, http.StatusConflict, http.StatusTooManyRequests},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
+	})).Methods(http.MethodPost).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/remediation/{id}/reject", handler.New(provider.authZ.AdminAccess(provider.rulerHandler.RejectRemediation), handler.OpenAPIDef{
+		ID:                  "RejectRemediation",
+		Tags:                []string{"remediation"},
+		Summary:             "Reject remediation",
+		Description:         "Rejects a proposed remediation without executing; admin role required.",
+		Response:            new(ruletypes.RemediationExecution),
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusBadRequest, http.StatusUnauthorized},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
+	})).Methods(http.MethodPost).GetError(); err != nil {
+		return err
+	}
+
 	if err := router.Handle("/api/v1/downtime_schedules", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.ListDowntimeSchedules), handler.OpenAPIDef{
 		ID:                  "ListDowntimeSchedules",
 		Tags:                []string{"downtimeschedules"},

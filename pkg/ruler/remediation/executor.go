@@ -62,6 +62,10 @@ func (e *Executor) Run(ctx context.Context, script string) ExecResult {
 
 	start := time.Now()
 	runErr := cmd.Run()
+	// OPERATOR CONTRACT: Approved runbook scripts must not print secrets to
+	// stdout/stderr — the captured snippet below is stored unredacted in
+	// ds_remediation_execution.output_snippet and is visible to Viewers via
+	// the GET /remediation API. Secret masking is a future extension point.
 	out := truncate(buf.String(), maxOutputCapture)
 
 	res := ExecResult{Output: out}

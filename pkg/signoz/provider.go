@@ -202,6 +202,7 @@ func NewSQLMigrationProviderFactories(
 		sqlmigration.NewAlterDSAIStrategyHistoryMultiFactory(sqlstore),
 		sqlmigration.NewAddDSCodebaseConfigFactory(sqlstore),
 		sqlmigration.NewUpdateDSCodebaseConfigFactory(sqlstore),
+		sqlmigration.NewAddDSRemediationFactory(sqlstore),
 		sqlmigration.NewAddDSIncidentReportTemplateFactory(sqlstore),
 		sqlmigration.NewAddCodercaFailureReasonFactory(sqlstore),
 		sqlmigration.NewRetireCodercaHighSeverityFactory(sqlstore),

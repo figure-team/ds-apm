@@ -52,11 +52,12 @@ func TestValidateRemediationExecution_RejectsNULInScript(t *testing.T) {
 }
 
 func TestRemediationStatusTransition(t *testing.T) {
+	// v1 live path: proposed→executing is the single atomic step (no approved
+	// intermediate). proposed→approved and approved→executing are retired.
 	ok := [][2]string{
-		{RemediationStatusProposed, RemediationStatusApproved},
+		{RemediationStatusProposed, RemediationStatusExecuting}, // v1 direct approve path
 		{RemediationStatusProposed, RemediationStatusRejected},
 		{RemediationStatusProposed, RemediationStatusExpired},
-		{RemediationStatusApproved, RemediationStatusExecuting},
 		{RemediationStatusExecuting, RemediationStatusSucceeded},
 		{RemediationStatusExecuting, RemediationStatusFailed},
 		{RemediationStatusSucceeded, RemediationStatusVerified},
@@ -68,7 +69,8 @@ func TestRemediationStatusTransition(t *testing.T) {
 		}
 	}
 	bad := [][2]string{
-		{RemediationStatusProposed, RemediationStatusExecuting}, // must approve first
+		{RemediationStatusProposed, RemediationStatusApproved},  // retired two-step path
+		{RemediationStatusApproved, RemediationStatusExecuting}, // retired two-step path
 		{RemediationStatusApproved, RemediationStatusApproved},  // no-op
 		{RemediationStatusRejected, RemediationStatusApproved},  // terminal
 		{RemediationStatusVerified, RemediationStatusExecuting}, // terminal

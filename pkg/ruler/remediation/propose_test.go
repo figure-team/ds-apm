@@ -35,7 +35,7 @@ func (f *fakeStore) ListByStatus(_ context.Context, _, _ string) ([]ruletypes.Re
 	return nil, nil
 }
 
-func (f *fakeStore) TransitionToExecuting(_ context.Context, _, _, _, _ string) (bool, error) {
+func (f *fakeStore) TransitionToExecuting(_ context.Context, _, _, _, _ string, _ int64) (bool, error) {
 	return false, nil
 }
 

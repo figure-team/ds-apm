@@ -96,12 +96,12 @@ func TestTransitionToExecuting_SingleWinner(t *testing.T) {
 	e := sampleExecution("22222222-2222-2222-2222-222222222222")
 	_ = s.Create(ctx, e)
 
-	won, err := s.TransitionToExecuting(ctx, "org-1", e.ID, "alice@x", "2026-06-24T00:05:00Z")
+	won, err := s.TransitionToExecuting(ctx, "org-1", e.ID, "alice@x", "2026-06-24T00:05:00Z", 5)
 	if err != nil || !won {
 		t.Fatalf("first approve must win: won=%v err=%v", won, err)
 	}
 	// Second concurrent approve must lose (row no longer proposed).
-	won2, err := s.TransitionToExecuting(ctx, "org-1", e.ID, "bob@x", "2026-06-24T00:06:00Z")
+	won2, err := s.TransitionToExecuting(ctx, "org-1", e.ID, "bob@x", "2026-06-24T00:06:00Z", 5)
 	if err != nil || won2 {
 		t.Fatalf("second approve must lose: won=%v err=%v", won2, err)
 	}
@@ -109,6 +109,33 @@ func TestTransitionToExecuting_SingleWinner(t *testing.T) {
 	if got.Status != ruletypes.RemediationStatusExecuting || got.ApprovedBy != "alice@x" {
 		t.Fatalf("unexpected post-state: %+v", got)
 	}
+}
+
+// TestTransitionToExecuting_CapEnforced verifies that when cap=1 and one row is
+// already executing, a second proposed row cannot be approved atomically.
+func TestTransitionToExecuting_CapEnforced(t *testing.T) {
+	s := newTestStore(t)
+	ctx := context.Background()
+
+	e1 := sampleExecution("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+	e2 := sampleExecution("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
+	require.NoError(t, s.Create(ctx, e1))
+	require.NoError(t, s.Create(ctx, e2))
+
+	// First approval wins (0 executing < cap 1).
+	won1, err := s.TransitionToExecuting(ctx, "org-1", e1.ID, "alice@x", "2026-06-24T00:05:00Z", 1)
+	require.NoError(t, err)
+	require.True(t, won1, "first approve should win when cap=1 and 0 executing")
+
+	// Second approval must lose: e1 is now executing, count=1 is not < cap 1.
+	won2, err := s.TransitionToExecuting(ctx, "org-1", e2.ID, "bob@x", "2026-06-24T00:06:00Z", 1)
+	require.NoError(t, err)
+	require.False(t, won2, "second approve must lose when cap=1 and 1 already executing")
+
+	// e2 must remain proposed.
+	got, err := s.Get(ctx, "org-1", e2.ID)
+	require.NoError(t, err)
+	require.Equal(t, ruletypes.RemediationStatusProposed, got.Status)
 }
 
 func TestGetConfig_DefaultsWhenUnset(t *testing.T) {
@@ -193,9 +220,12 @@ func TestCountActiveByOrg(t *testing.T) {
 	require.NoError(t, s.Create(ctx, e1))
 	require.NoError(t, s.Create(ctx, e2))
 
-	// Transition e1 to approved
-	require.NoError(t, s.Transition(ctx, "org-1", e1.ID, ruletypes.RemediationStatusApproved, remediationstore.TransitionPatch{}))
+	// Move e1 to executing via the atomic guard (cap=10 so it always fires).
+	won, err := s.TransitionToExecuting(ctx, "org-1", e1.ID, "alice@x", "2026-06-24T00:05:00Z", 10)
+	require.NoError(t, err)
+	require.True(t, won)
 
+	// Only e1 is executing; e2 is still proposed — count must be 1.
 	count, err := s.CountActiveByOrg(ctx, "org-1")
 	require.NoError(t, err)
 	require.Equal(t, int64(1), count)
@@ -210,7 +240,7 @@ func TestTransition_FailsOnConcurrentChange(t *testing.T) {
 	e := sampleExecution("99999999-9999-9999-9999-999999999999")
 	require.NoError(t, s.Create(ctx, e))
 
-	won, err := s.TransitionToExecuting(ctx, "org-1", e.ID, "alice@x", "2026-06-24T00:05:00Z")
+	won, err := s.TransitionToExecuting(ctx, "org-1", e.ID, "alice@x", "2026-06-24T00:05:00Z", 5)
 	require.NoError(t, err)
 	require.True(t, won)
 
@@ -246,7 +276,7 @@ func TestExitCode_NullableRoundtrip(t *testing.T) {
 	require.NoError(t, s.Create(ctx, e))
 
 	// proposed → executing via TransitionToExecuting (single-step guard)
-	won, err := s.TransitionToExecuting(ctx, "org-1", e.ID, "alice@x", "2026-06-24T00:05:00Z")
+	won, err := s.TransitionToExecuting(ctx, "org-1", e.ID, "alice@x", "2026-06-24T00:05:00Z", 5)
 	require.NoError(t, err)
 	require.True(t, won)
 

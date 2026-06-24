@@ -62,9 +62,9 @@ func (s *stubGen) Generate(ctx context.Context, _ ruletypes.AIStrategyRequest) (
 // dispatchSeed is a trimmed view of the v0.1 demo seed used to build a
 // realistic SOP document + alert payload for the hook tests.
 type dispatchSeed struct {
-	SOPDocument  ruletypes.SOPDocument       `json:"sopDocument"`
-	Alert        dispatchSeedAlert           `json:"alert"`
-	EvidenceRefs []ruletypes.AIEvidenceRef   `json:"evidenceRefs"`
+	SOPDocument  ruletypes.SOPDocument     `json:"sopDocument"`
+	Alert        dispatchSeedAlert         `json:"alert"`
+	EvidenceRefs []ruletypes.AIEvidenceRef `json:"evidenceRefs"`
 }
 
 type dispatchSeedAlert struct {
@@ -458,10 +458,10 @@ func cannedStrategy(incidentID, fingerprint string) ruletypes.AIStrategy {
 // fakeTrigger records (orgID, labels, annotations) passed to Maybe so
 // tests can assert call count and captured values.
 type fakeTrigger struct {
-	calls       int
-	lastOrgID   string
-	lastLabels  map[string]string
-	lastAnnots  map[string]string
+	calls      int
+	lastOrgID  string
+	lastLabels map[string]string
+	lastAnnots map[string]string
 }
 
 func (f *fakeTrigger) Maybe(_ context.Context, orgID string, labels, annotations map[string]string) {
@@ -766,3 +766,57 @@ func cloneMap(in map[string]string) map[string]string {
 	return out
 }
 
+// newBoundSOPHook returns a Hook pre-loaded with the demo SOP (same as the
+// existing bound-SOP tests) using a minimal canned generator.
+func newBoundSOPHook(t *testing.T) *Hook {
+	t.Helper()
+	const orgID = "customer-a"
+	gen := &stubGen{strategy: cannedStrategy("INC-20260512-0001", "fp-payment-api-5xx-demo")}
+	hook, _, _, _ := seedHookFixture(t, orgID, gen)
+	return hook
+}
+
+// boundLabels returns the seed alert labels that resolve to a Bound SOP.
+func boundLabels(t *testing.T) map[string]string {
+	t.Helper()
+	seed := loadSeed(t)
+	return seed.Alert.Labels
+}
+
+// fakeRemediationProposer records calls and returns canned annotations.
+type fakeRemediationProposer struct {
+	called bool
+	ann    map[string]string
+	ok     bool
+}
+
+func (f *fakeRemediationProposer) MaybePropose(_ context.Context, orgID, incidentID, fp string, doc ruletypes.SOPDocument) (map[string]string, bool) {
+	f.called = true
+	return f.ann, f.ok
+}
+
+func TestApply_BoundSOP_MergesRemediationAnnotations(t *testing.T) {
+	h := newBoundSOPHook(t)
+	fp := &fakeRemediationProposer{ann: map[string]string{"remediation_id": "rem-1"}, ok: true}
+	h.SetRemediationProposer(fp)
+
+	seed := loadSeed(t)
+	out := h.Apply(context.Background(), "customer-a", seed.Alert.IncidentID, seed.Alert.Fingerprint, boundLabels(t), map[string]string{})
+
+	if !fp.called {
+		t.Fatal("proposer must be called on bound path")
+	}
+	if out["remediation_id"] != "rem-1" {
+		t.Fatalf("remediation annotation not merged: %v", out)
+	}
+}
+
+func TestApply_ProposerNil_Unaffected(t *testing.T) {
+	h := newBoundSOPHook(t)
+	// no proposer set
+	seed := loadSeed(t)
+	out := h.Apply(context.Background(), "customer-a", seed.Alert.IncidentID, seed.Alert.Fingerprint, boundLabels(t), map[string]string{})
+	if _, has := out["remediation_id"]; has {
+		t.Fatal("no proposer → no remediation annotation")
+	}
+}

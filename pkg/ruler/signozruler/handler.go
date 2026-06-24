@@ -16,6 +16,7 @@ import (
 	"github.com/SigNoz/signoz/pkg/ruler/aiconfigstore/secretbox"
 	codercarunstore "github.com/SigNoz/signoz/pkg/ruler/coderca/runstore"
 	sqltemplatestore "github.com/SigNoz/signoz/pkg/ruler/incidentreport/sqltemplatestore"
+	"github.com/SigNoz/signoz/pkg/ruler/remediationstore"
 	"github.com/SigNoz/signoz/pkg/types/authtypes"
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
 	"github.com/SigNoz/signoz/pkg/valuer"
@@ -43,6 +44,22 @@ type handler struct {
 	aiCipherInsecure  bool
 	// Incident report 양식 template store (incident_report_handler.go).
 	reportTemplateStore *sqltemplatestore.Store
+	// Remediation execution (remediation_handler.go). remediationStore persists
+	// the approve→execute→verify lifecycle; newRemediationExecutor is a factory
+	// that builds a per-run executor bound to the org's configured timeout (the
+	// factory seam keeps the executor fake-able in tests). Both are wired via
+	// SetRemediationDeps; nil until then.
+	remediationStore       remediationstore.Store
+	newRemediationExecutor func(timeout time.Duration) RemediationRunner
+}
+
+// SetRemediationDeps wires the remediation store + executor factory into the
+// handler. Kept as a post-construction setter (rather than a NewHandler arg) to
+// avoid churning the long NewHandler signature; the apiserver provider calls
+// this when the remediation feature is enabled.
+func (h *handler) SetRemediationDeps(store remediationstore.Store, newExec func(time.Duration) RemediationRunner) {
+	h.remediationStore = store
+	h.newRemediationExecutor = newExec
 }
 
 // NewHandler constructs a ruler HTTP handler. aiGenerator is the
@@ -65,22 +82,26 @@ func NewHandler(
 	codercaRunStore *codercarunstore.Store,
 	aiCipherInsecure bool,
 	reportTemplateStore *sqltemplatestore.Store,
+	remediationStore remediationstore.Store,
+	newRemediationExecutor func(time.Duration) RemediationRunner,
 ) ruler.Handler {
 	return &handler{
-		ruler:               ruler,
-		sopStore:            sopStore,
-		aiHistoryStore:      aiHistoryStore,
-		aiGenerator:         aiGenerator,
-		aiConfigStore:       aiConfigStore,
-		aiCipher:            aiCipher,
-		aiRebuilder:         aiRebuilder,
-		runbookDrafter:      runbookDrafter,
-		codebaseRepoStore:   codebaseRepoStore,
-		codebaseMapStore:    codebaseMapStore,
-		codercaCfgStore:     codercaCfgStore,
-		codercaRunStore:     codercaRunStore,
-		aiCipherInsecure:    aiCipherInsecure,
-		reportTemplateStore: reportTemplateStore,
+		ruler:                  ruler,
+		sopStore:               sopStore,
+		aiHistoryStore:         aiHistoryStore,
+		aiGenerator:            aiGenerator,
+		aiConfigStore:          aiConfigStore,
+		aiCipher:               aiCipher,
+		aiRebuilder:            aiRebuilder,
+		runbookDrafter:         runbookDrafter,
+		codebaseRepoStore:      codebaseRepoStore,
+		codebaseMapStore:       codebaseMapStore,
+		codercaCfgStore:        codercaCfgStore,
+		codercaRunStore:        codercaRunStore,
+		aiCipherInsecure:       aiCipherInsecure,
+		reportTemplateStore:    reportTemplateStore,
+		remediationStore:       remediationStore,
+		newRemediationExecutor: newRemediationExecutor,
 	}
 }
 

@@ -50,6 +50,11 @@ type Handler interface {
 	DeleteRunbook(http.ResponseWriter, *http.Request)
 	DraftRunbook(http.ResponseWriter, *http.Request)
 
+	GetRemediation(http.ResponseWriter, *http.Request)
+	ListRemediations(http.ResponseWriter, *http.Request)
+	ApproveRemediation(http.ResponseWriter, *http.Request)
+	RejectRemediation(http.ResponseWriter, *http.Request)
+
 	ListDowntimeSchedules(http.ResponseWriter, *http.Request)
 	GetDowntimeScheduleByID(http.ResponseWriter, *http.Request)
 	CreateDowntimeSchedule(http.ResponseWriter, *http.Request)

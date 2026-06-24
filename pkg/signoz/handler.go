@@ -1,6 +1,8 @@
 package signoz
 
 import (
+	"time"
+
 	"github.com/SigNoz/signoz/pkg/alertmanager"
 	"github.com/SigNoz/signoz/pkg/alertmanager/signozalertmanager"
 	"github.com/SigNoz/signoz/pkg/analytics"
@@ -50,6 +52,7 @@ import (
 	"github.com/SigNoz/signoz/pkg/ruler/aihistorystore/sqlaihistorystore"
 	codercarunstore "github.com/SigNoz/signoz/pkg/ruler/coderca/runstore"
 	sqlincidentreporttemplatestore "github.com/SigNoz/signoz/pkg/ruler/incidentreport/sqltemplatestore"
+	"github.com/SigNoz/signoz/pkg/ruler/remediationstore"
 	"github.com/SigNoz/signoz/pkg/ruler/signozruler"
 	"github.com/SigNoz/signoz/pkg/ruler/sopstore/sqlsopstore"
 	"github.com/SigNoz/signoz/pkg/sqlstore"
@@ -111,6 +114,8 @@ func NewHandlers(
 	codercaCfgStore ruletypes.CodebaseRCAConfigStore,
 	codercaRunStore *codercarunstore.Store,
 	aiCipherInsecure bool,
+	remStore remediationstore.Store,
+	newExec func(time.Duration) signozruler.RemediationRunner,
 ) Handlers {
 	return Handlers{
 		SavedView:               implsavedview.NewHandler(modules.SavedView),
@@ -151,6 +156,8 @@ func NewHandlers(
 			codercaRunStore,
 			aiCipherInsecure,
 			sqlincidentreporttemplatestore.New(sqlStore),
+			remStore,
+			newExec,
 		),
 	}
 }

@@ -78,6 +78,9 @@ import (
 	codercasourcestate "github.com/SigNoz/signoz/pkg/ruler/coderca/sourcestate"
 	codercatrigger "github.com/SigNoz/signoz/pkg/ruler/coderca/trigger"
 	codercaworker "github.com/SigNoz/signoz/pkg/ruler/coderca/worker"
+	"github.com/SigNoz/signoz/pkg/ruler/remediation"
+	"github.com/SigNoz/signoz/pkg/ruler/remediationstore/sqlremediationstore"
+	"github.com/SigNoz/signoz/pkg/ruler/signozruler"
 	"path/filepath"
 )
 
@@ -491,12 +494,25 @@ func New(
 	codercaCfgStore := sqlcodebasercaconfigstore.New(sqlstore)
 	codercaRunStore := codercarunstore.New(sqlstore)
 
+	// Build remediation store (used by proposer, handler, and verifier).
+	remStore := sqlremediationstore.New(sqlstore)
+
 	// Trigger: injected into the dispatch hook (fail-open, fire-and-forget).
 	if aiDispatchHook != nil {
 		aiDispatchHook.SetCodeRCATrigger(codercatrigger.New(
 			codercaCfgStore, codercaMapStore, codercaRunStore,
 			providerSettings.Logger, nil,
 		))
+
+		// Dispatch-hook proposer: wraps the Proposer in a MaybePropose adapter.
+		// baseURL is intentionally empty — the approve URL is best-effort and the
+		// Proposer trims trailing slashes before building the link. TODO: wire in
+		// a SiteURL config field when one is added to the signoz Config struct.
+		proposer := remediation.NewProposer(remStore, "", time.Now)
+		aiDispatchHook.SetRemediationProposer(remediationHookAdapter{
+			proposer: proposer,
+			store:    remStore,
+		})
 	}
 
 	// Engine: deployment-level agent/model/auth from env (per-org thresholds
@@ -683,9 +699,20 @@ func New(
 		return nil, err
 	}
 
+	// Start the remediation verifier as a background goroutine. It polls active
+	// orgs every 30 s, expiring stale proposals and promoting succeeded→verified
+	// (or unresolved) based on alert state. alertStateLookup uses GetAlerts from
+	// the alertmanager service (active-only filter). orgLister uses the shared
+	// orgGetter that already drives the alertmanager sync loop.
+	verifier := remediation.NewVerifier(remStore, alertStateLookup{am: alertmanager}, time.Now)
+	go verifier.Run(ctx, 30*time.Second, orgLister(orgGetter, providerSettings.Logger))
+
 	// Initialize all handlers for the modules
 	registryHandler := factory.NewHandler(registry)
-	handlers := NewHandlers(modules, providerSettings, analytics, querierHandler, licensing, global, flagger, gateway, telemetryMetadataStore, authz, zeus, registryHandler, alertmanager, rulerInstance, sqlstore, storeAware, aiConfigStore, aiCipher, storeAware, runbookDrafter, codercaRepoStore, codercaMapStore, codercaCfgStore, codercaRunStore, insecure)
+	newExec := func(d time.Duration) signozruler.RemediationRunner {
+		return remediation.NewExecutor(d)
+	}
+	handlers := NewHandlers(modules, providerSettings, analytics, querierHandler, licensing, global, flagger, gateway, telemetryMetadataStore, authz, zeus, registryHandler, alertmanager, rulerInstance, sqlstore, storeAware, aiConfigStore, aiCipher, storeAware, runbookDrafter, codercaRepoStore, codercaMapStore, codercaCfgStore, codercaRunStore, insecure, remStore, newExec)
 
 	// Initialize the API server (after registry so it can access service health)
 	apiserverInstance, err := factory.NewProviderFromNamedMap(

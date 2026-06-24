@@ -15,12 +15,15 @@ type Store interface {
 	// TransitionToExecuting atomically moves a proposed row to executing,
 	// stamping approver+time. Returns true iff this call won the race (affected
 	// rows == 1). Guards against double-execution (design §4.1).
-	TransitionToExecuting(ctx context.Context, orgID, id, approvedBy, approvedAt string) (bool, error)
+	// maxConcurrent is the org-level cap: the UPDATE only fires when the number
+	// of currently-executing rows is strictly below this value, making the cap
+	// enforcement atomic with the status flip (no TOCTOU window).
+	TransitionToExecuting(ctx context.Context, orgID, id, approvedBy, approvedAt string, maxConcurrent int64) (bool, error)
 	// Transition applies a validated status change, stamping result fields.
 	// Used by reject/executor-result/verifier. patch carries only the fields
 	// relevant to the target status (exit code, output, verify result, terminal time).
 	Transition(ctx context.Context, orgID, id, toStatus string, patch TransitionPatch) error
-	CountActiveByOrg(ctx context.Context, orgID string) (int64, error) // approved+executing
+	CountActiveByOrg(ctx context.Context, orgID string) (int64, error) // executing only (approved is retired in v1)
 	GetConfig(ctx context.Context, orgID string) (ruletypes.RemediationConfig, error)
 }
 

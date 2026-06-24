@@ -30,6 +30,14 @@ type CodeRCATrigger interface {
 	Maybe(ctx context.Context, orgID string, labels, annotations map[string]string)
 }
 
+// RemediationProposer is the fail-open seam for human-gated auto-remediation.
+// Implemented by remediation.Proposer (wrapped to also resolve per-org config).
+// Apply calls it only on the Bound branch; a nil proposer or a (nil,false)
+// return leaves annotations unchanged.
+type RemediationProposer interface {
+	MaybePropose(ctx context.Context, orgID, incidentID, alertFingerprint string, doc ruletypes.SOPDocument) (map[string]string, bool)
+}
+
 // DefaultGenerateTimeout is the upper bound the hook imposes on the AI
 // generator. The dispatcher must never block on a slow provider, so this
 // is intentionally aggressive.
@@ -50,11 +58,16 @@ type Hook struct {
 	logger         *slog.Logger
 	timeout        time.Duration
 	codeRCA        CodeRCATrigger
+	remediation    RemediationProposer
 }
 
 // SetCodeRCATrigger injects the CF-11 trigger after construction (the trigger
 // depends on stores built later in server wiring). nil-safe; optional.
 func (h *Hook) SetCodeRCATrigger(t CodeRCATrigger) { h.codeRCA = t }
+
+// SetRemediationProposer injects the proposer after construction (optional,
+// nil-safe). Mirrors SetCodeRCATrigger.
+func (h *Hook) SetRemediationProposer(p RemediationProposer) { h.remediation = p }
 
 // New constructs a Hook. logger may be nil — the hook falls back to
 // slog.Default() in that case. timeout ≤ 0 falls back to
@@ -171,7 +184,17 @@ func (h *Hook) Apply(
 			strings.TrimSpace(rec.Strategy.CustomerUpdateDraft) != "" &&
 			strings.TrimSpace(rec.Strategy.SOPVersion) == strings.TrimSpace(binding.Version) &&
 			!rec.Strategy.IsDeterministicLocal() {
-			return h.mergeStrategyWithSOP(annotations, rec.Strategy, doc, binding)
+			merged := h.mergeStrategyWithSOP(annotations, rec.Strategy, doc, binding)
+			// Human-gated auto-remediation (design §8): if a proposer is wired and
+			// the bound SOP has an approved Runbook + org has execution enabled,
+			// create a proposed execution and merge its annotations. Fail-open:
+			// never blocks the alert.
+			if h.remediation != nil {
+				if remAnn, ok := h.remediation.MaybePropose(ctx, orgID, incidentID, alertFingerprint, doc); ok && len(remAnn) > 0 {
+					merged = mergeAnnotations(merged, remAnn)
+				}
+			}
+			return merged
 		}
 	}
 
@@ -211,6 +234,16 @@ func (h *Hook) Apply(
 				slog.String("orgId", orgID), slog.String("incidentId", incidentID),
 				slog.String("strategyId", strategy.StrategyID),
 				slog.Any("err", upsertErr))
+		}
+	}
+
+	// Human-gated auto-remediation (design §8): if a proposer is wired and
+	// the bound SOP has an approved Runbook + org has execution enabled,
+	// create a proposed execution and merge its annotations. Fail-open:
+	// never blocks the alert.
+	if h.remediation != nil {
+		if remAnn, ok := h.remediation.MaybePropose(ctx, orgID, incidentID, alertFingerprint, doc); ok && len(remAnn) > 0 {
+			merged = mergeAnnotations(merged, remAnn)
 		}
 	}
 

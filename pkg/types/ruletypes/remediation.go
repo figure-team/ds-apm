@@ -75,12 +75,15 @@ var terminalRemediationStatuses = map[string]struct{}{
 
 // allowedRemediationTransitions maps each from-status to its permitted
 // to-statuses. Absent keys (terminal states) permit no transition.
+//
+// v1 live path: proposed → executing (atomic via TransitionToExecuting SQL guard).
+// The two-step proposed→approved→executing path is retired in v1; the
+// RemediationStatusApproved constant is kept for forward-compatibility but the
+// approved→executing and proposed→approved edges are intentionally absent here.
+// approved as a from-status has no permitted targets (it is effectively dormant).
 var allowedRemediationTransitions = map[string]map[string]struct{}{
 	RemediationStatusProposed: {
-		RemediationStatusApproved: {}, RemediationStatusRejected: {}, RemediationStatusExpired: {},
-	},
-	RemediationStatusApproved: {
-		RemediationStatusExecuting: {},
+		RemediationStatusExecuting: {}, RemediationStatusRejected: {}, RemediationStatusExpired: {},
 	},
 	RemediationStatusExecuting: {
 		RemediationStatusSucceeded: {}, RemediationStatusFailed: {},

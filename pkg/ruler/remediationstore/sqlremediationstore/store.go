@@ -180,21 +180,34 @@ func (s *SQLStore) ListByStatus(ctx context.Context, orgID, status string) ([]ru
 }
 
 // TransitionToExecuting is the single-execution guard. It atomically moves a
-// row from 'proposed' to 'executing' with a conditional UPDATE.
-// Returns true iff exactly 1 row was affected (this caller won the race).
-// A second concurrent call on the same row returns false, nil (row already
-// moved out of 'proposed' by the first winner).
-func (s *SQLStore) TransitionToExecuting(ctx context.Context, orgID, id, approvedBy, approvedAt string) (bool, error) {
-	res, err := s.sqlstore.BunDB().NewUpdate().
-		Model((*remediationRow)(nil)).
-		Set("status = ?", ruletypes.RemediationStatusExecuting).
-		Set("approved_by = ?", approvedBy).
-		Set("approved_at = ?", approvedAt).
-		Set("executed_at = ?", approvedAt).
-		Where("id = ?", id).
-		Where("org_id = ?", orgID).
-		Where("status = ?", ruletypes.RemediationStatusProposed).
-		Exec(ctx)
+// row from 'proposed' to 'executing' with a conditional UPDATE that also
+// enforces the org-level concurrency cap in a single SQL statement, eliminating
+// the TOCTOU window between CountActiveByOrg and the status flip.
+//
+// The WHERE clause checks both:
+//   - the row is still 'proposed' (double-execution guard, design §4.1), and
+//   - the count of currently-executing rows for this org is strictly below
+//     maxConcurrent (atomic cap enforcement, no race with concurrent approvals).
+//
+// Returns true iff exactly 1 row was affected (this caller won).
+// Returns false, nil when 0 rows were affected — either the row left 'proposed'
+// (concurrent approve or reject/expire) or the cap is already full.
+func (s *SQLStore) TransitionToExecuting(ctx context.Context, orgID, id, approvedBy, approvedAt string, maxConcurrent int64) (bool, error) {
+	res, err := s.sqlstore.BunDB().NewRaw(`
+UPDATE ds_remediation_execution
+SET    status      = ?,
+       approved_by = ?,
+       approved_at = ?,
+       executed_at = ?
+WHERE  id      = ?
+  AND  org_id  = ?
+  AND  status  = ?
+  AND  (SELECT COUNT(*) FROM ds_remediation_execution
+        WHERE  org_id = ? AND status = ?) < ?`,
+		ruletypes.RemediationStatusExecuting, approvedBy, approvedAt, approvedAt,
+		id, orgID, ruletypes.RemediationStatusProposed,
+		orgID, ruletypes.RemediationStatusExecuting, maxConcurrent,
+	).Exec(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -254,15 +267,16 @@ func (s *SQLStore) Transition(ctx context.Context, orgID, id, toStatus string, p
 	return nil
 }
 
-// CountActiveByOrg returns the number of executions in 'approved' or 'executing'
-// status for the given org.
+// CountActiveByOrg returns the number of executions in 'executing' status for
+// the given org. The 'approved' status is retired in v1 (proposed→executing is
+// now a single atomic step), so only 'executing' counts toward the cap.
 func (s *SQLStore) CountActiveByOrg(ctx context.Context, orgID string) (int64, error) {
 	var count int64
 	err := s.sqlstore.BunDB().NewSelect().
 		Model((*remediationRow)(nil)).
 		ColumnExpr("COUNT(*) AS count").
 		Where("org_id = ?", orgID).
-		Where("status IN (?, ?)", ruletypes.RemediationStatusApproved, ruletypes.RemediationStatusExecuting).
+		Where("status = ?", ruletypes.RemediationStatusExecuting).
 		Scan(ctx, &count)
 	if err != nil {
 		return 0, err
