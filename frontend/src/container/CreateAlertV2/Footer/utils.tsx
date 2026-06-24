@@ -306,7 +306,6 @@ export function buildCreateThresholdAlertRulePayload(
 		annotations: {
 			...basicAlertState.annotations,
 			description: notificationSettings.description,
-			summary: notificationSettings.description,
 		},
 		notificationSettings: notificationSettingsProps,
 		version: 'v5',
@@ -361,7 +360,6 @@ export function buildCreateAnomalyAlertRulePayload(
 		annotations: {
 			...basicAlertState.annotations,
 			description: notificationSettings.description,
-			summary: notificationSettings.description,
 		},
 		notificationSettings: notificationSettingsProps,
 		evaluation: evaluationProps,

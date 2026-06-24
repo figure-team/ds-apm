@@ -438,8 +438,6 @@ describe('Footer utils', () => {
 				annotations: {
 					description:
 						'This alert is fired when the defined metric (current value: {{$value}}) crosses the threshold ({{$threshold}})',
-					summary:
-						'This alert is fired when the defined metric (current value: {{$value}}) crosses the threshold ({{$threshold}})',
 				},
 				condition: {
 					alertOnAbsent: false,
@@ -558,8 +556,6 @@ describe('Footer utils', () => {
 					'This alert is fired when the defined metric (current value: {{$value}}) crosses the threshold ({{$threshold}})',
 				impact_summary: 'Checkout failures may affect customers.',
 				next_action: 'Ask vendor to inspect payment-api traces.',
-				summary:
-					'This alert is fired when the defined metric (current value: {{$value}}) crosses the threshold ({{$threshold}})',
 				vendor_request: 'Share suspected cause, mitigation, and ETA.',
 			});
 		});
