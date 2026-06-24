@@ -257,8 +257,6 @@
 	}
 }
 
-.evidence-metadata,
-.pm-briefing-metadata,
 .sop-metadata {
 	border: 1px solid var(--l1-border);
 	border-radius: 4px;
@@ -323,27 +321,6 @@
 		color: var(--l2-foreground);
 		font-size: 12px;
 		line-height: 18px;
-	}
-
-	&__textarea {
-		background-color: transparent;
-		border: 1px solid var(--l1-border);
-		border-radius: 4px;
-		color: var(--l1-foreground);
-		font-size: 13px;
-		line-height: 18px;
-		min-height: 54px;
-		outline: none;
-		padding: 6px 8px;
-		resize: vertical;
-
-		&::placeholder {
-			color: var(--l2-foreground);
-		}
-
-		&:focus {
-			border-color: var(--bg-robin-400);
-		}
 	}
 
 	&__input {
@@ -441,31 +418,6 @@
 	}
 }
 
-.optional-sections-collapse {
-	&.ant-collapse {
-		border: 1px solid var(--l1-border);
-		border-radius: 4px;
-	}
-
-	.ant-collapse-item {
-		border-bottom: 1px solid var(--l1-border);
-
-		&:last-child {
-			border-bottom: none;
-		}
-	}
-
-	.ant-collapse-header {
-		color: var(--l2-foreground) !important;
-		font-size: 12px;
-		padding: 8px 10px !important;
-	}
-
-	.ant-collapse-content-box {
-		padding: 0 10px 10px !important;
-	}
-}
-
 body.lightMode {
 	.alert-header__required-badge {
 		background-color: var(--bg-cherry-50);
@@ -493,8 +445,6 @@ body.lightMode {
 		}
 	}
 
-	.evidence-metadata,
-	.pm-briefing-metadata,
 	.sop-metadata {
 		&__status {
 			color: #f59e0b;

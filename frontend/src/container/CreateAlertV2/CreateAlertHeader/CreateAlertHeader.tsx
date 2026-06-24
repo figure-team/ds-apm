@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Collapse } from 'antd';
 import { Button, Input } from '@signozhq/ui';
 import logEvent from 'api/common/logEvent';
 import {
@@ -21,20 +20,12 @@ import type { Labels } from 'types/api/alerts/def';
 
 import { useCreateAlertState } from '../context';
 import { syncLabelsToExpression } from '../syncedLabels';
-import {
-	EVIDENCE_METADATA_FIELDS,
-	validateEvidenceMetadata,
-} from './evidenceMetadata';
 import LabelsInput from './LabelsInput';
 import {
 	getMissingOperationalLabels,
 	hasOperationalLabel,
 	RECOMMENDED_OPERATIONAL_LABELS,
 } from './operationalMetadata';
-import {
-	PM_BRIEFING_FIELDS,
-	validatePmBriefingMetadata,
-} from './pmBriefingMetadata';
 import {
 	hasSopBinding,
 	resolveSopBindingDocument,
@@ -194,16 +185,6 @@ function CreateAlertHeader(): JSX.Element {
 			});
 		},
 		[sopDocuments, alertState.labels, alertState.annotations, setAlertState],
-	);
-
-	const pmBriefingWarnings = useMemo(
-		() => validatePmBriefingMetadata(alertState.annotations),
-		[alertState.annotations],
-	);
-
-	const evidenceMetadataWarnings = useMemo(
-		() => validateEvidenceMetadata(alertState.annotations),
-		[alertState.annotations],
 	);
 
 	const sopLabelWarnings = useMemo(
@@ -597,101 +578,6 @@ function CreateAlertHeader(): JSX.Element {
 						)}
 					</div>
 				</div>
-				<Collapse ghost className="optional-sections-collapse">
-				<Collapse.Panel header={t('v2_pm_briefing_collapse')} key="pm-briefing">
-				<div
-					className="pm-briefing-metadata"
-					aria-label={t('v2_pm_briefing_collapse')}
-				>
-					<div className="pm-briefing-metadata__header">
-						<div className="pm-briefing-metadata__description">
-							{t('v2_pm_briefing_desc')}
-						</div>
-					</div>
-					<div className="pm-briefing-metadata__grid">
-						{PM_BRIEFING_FIELDS.map(({ key, label, placeholder }) => {
-							const warnings = pmBriefingWarnings[key] || [];
-							const warningId = warnings.length
-								? `pm-briefing-${key}-warning`
-								: undefined;
-
-							return (
-								<label className="pm-briefing-metadata__field" key={key}>
-									<span className="pm-briefing-metadata__label">{label}</span>
-									<textarea
-										aria-describedby={warningId}
-										aria-invalid={warnings.length > 0}
-										className="pm-briefing-metadata__textarea"
-										value={alertState.annotations[key] || ''}
-										onChange={(event): void =>
-											handleAnnotationChange(key, event.target.value)
-										}
-										placeholder={placeholder}
-										data-testid={`pm-briefing-${key}`}
-										rows={2}
-									/>
-									{warnings.map((warning, index) => (
-										<span
-											className="pm-briefing-metadata__warning"
-											id={index === 0 ? warningId : undefined}
-											key={warning}
-											role="alert"
-										>
-											{warning}
-										</span>
-									))}
-								</label>
-							);
-						})}
-					</div>
-				</div>
-				</Collapse.Panel>
-				<Collapse.Panel header={t('v2_ai_evidence_collapse')} key="ai-evidence">
-				<div className="evidence-metadata" aria-label={t('v2_ai_evidence_collapse')}>
-					<div className="evidence-metadata__header">
-						<div className="evidence-metadata__description">
-							{t('v2_ai_evidence_desc')}
-						</div>
-					</div>
-					<div className="evidence-metadata__grid">
-						{EVIDENCE_METADATA_FIELDS.map(({ key, label, placeholder }) => {
-							const warnings = evidenceMetadataWarnings[key] || [];
-							const warningId = warnings.length
-								? `evidence-metadata-${key}-warning`
-								: undefined;
-
-							return (
-								<label className="evidence-metadata__field" key={key}>
-									<span className="evidence-metadata__label">{label}</span>
-									<Input
-										aria-describedby={warningId}
-										aria-invalid={warnings.length > 0}
-										className="evidence-metadata__input"
-										data-testid={`evidence-metadata-${key}`}
-										onChange={(event): void =>
-											handleAnnotationChange(key, event.target.value)
-										}
-										placeholder={placeholder}
-										type="text"
-										value={alertState.annotations[key] || ''}
-									/>
-									{warnings.map((warning, index) => (
-										<span
-											className="evidence-metadata__warning"
-											id={index === 0 ? warningId : undefined}
-											key={warning}
-											role="alert"
-										>
-											{warning}
-										</span>
-									))}
-								</label>
-							);
-						})}
-					</div>
-				</div>
-				</Collapse.Panel>
-				</Collapse>
 			</div>
 		</div>
 	);
