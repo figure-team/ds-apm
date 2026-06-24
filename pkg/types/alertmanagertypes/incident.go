@@ -30,6 +30,12 @@ const (
 	IncidentAnnotationAIEvidenceRefs   = "ai_evidence_refs"
 
 	IncidentAnnotationNotificationBody = "notification_body"
+
+	// Remediation (human-gated auto-remediation, design §8). These point the
+	// operator at the web approval card; the full script is NOT in the body.
+	IncidentAnnotationRemediationID            = "remediation_id"
+	IncidentAnnotationRemediationScriptSummary = "remediation_script_summary"
+	IncidentAnnotationRemediationApproveURL    = "remediation_approve_url"
 )
 
 // IncidentInfo is the PM-friendly DS-APM/SI-SM incident context extracted
