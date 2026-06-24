@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import { useCopyToClipboard } from 'react-use';
 import { DialogWrapper, toast } from '@signozhq/ui';
@@ -22,11 +23,12 @@ import APIError from 'types/api/error';
 import KeyCreatedPhase from './KeyCreatedPhase';
 import KeyFormPhase from './KeyFormPhase';
 import type { FormValues } from './types';
-import { DEFAULT_FORM_VALUES, ExpiryMode, Phase, PHASE_TITLES } from './types';
+import { DEFAULT_FORM_VALUES, ExpiryMode, Phase } from './types';
 
 import './AddKeyModal.styles.scss';
 
 function AddKeyModal(): JSX.Element {
+	const { t } = useTranslation(['serviceAccounts', 'common']);
 	const queryClient = useQueryClient();
 	const { showErrorModal, isErrorModalVisible } = useErrorModal();
 	const [accountId] = useQueryState(SA_QUERY_PARAMS.ACCOUNT);
@@ -113,14 +115,14 @@ function AddKeyModal(): JSX.Element {
 		copyToClipboard(createdKey.key);
 		setHasCopied(true);
 		setTimeout(() => setHasCopied(false), 2000);
-		toast.success('Key copied to clipboard');
-	}, [copyToClipboard, createdKey?.key]);
+		toast.success(t('key_copied'));
+	}, [copyToClipboard, createdKey?.key, t]);
 
 	useEffect(() => {
 		if (copyState.error) {
-			toast.error('Failed to copy key');
+			toast.error(t('key_copy_failed'));
 		}
-	}, [copyState.error]);
+	}, [copyState.error, t]);
 
 	const handleClose = useCallback((): void => {
 		setIsAddKeyOpen(null);
@@ -128,12 +130,12 @@ function AddKeyModal(): JSX.Element {
 
 	function getExpiryLabel(): string {
 		if (expiryMode === ExpiryMode.NONE || !expiryDate) {
-			return 'Never';
+			return t('never');
 		}
 		try {
 			return expiryDate.format(DATE_TIME_FORMATS.MONTH_DATE);
 		} catch {
-			return 'Never';
+			return t('never');
 		}
 	}
 
@@ -145,7 +147,9 @@ function AddKeyModal(): JSX.Element {
 					handleClose();
 				}
 			}}
-			title={PHASE_TITLES[phase]}
+			title={
+				phase === Phase.FORM ? t('add_new_key_title') : t('key_created_title')
+			}
 			width="base"
 			className="add-key-modal"
 			showCloseButton

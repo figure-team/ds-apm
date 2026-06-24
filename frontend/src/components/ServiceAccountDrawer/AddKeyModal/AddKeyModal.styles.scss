@@ -37,7 +37,7 @@
 	}
 
 	&__expiry-toggle {
-		width: 60%;
+		width: 100%;
 		display: flex;
 		border: 1px solid var(--l1-border);
 		border-radius: 2px;
@@ -58,6 +58,7 @@
 			font-weight: var(--label-small-400-font-weight);
 			line-height: var(--label-small-400-line-height);
 			justify-content: center;
+			white-space: nowrap;
 			background: transparent;
 			border: none;
 			border-right: 1px solid var(--l1-border);

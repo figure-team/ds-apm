@@ -50,7 +50,7 @@ function buildColumns({
 }: BuildColumnsParams): ColumnsType<ServiceaccounttypesGettableFactorAPIKeyDTO> {
 	return [
 		{
-			title: 'Name',
+			title: t('name'),
 			dataIndex: 'name',
 			key: 'name',
 			className: 'keys-tab__name-column',
@@ -60,7 +60,7 @@ function buildColumns({
 			),
 		},
 		{
-			title: 'Expiry',
+			title: t('expiration'),
 			dataIndex: 'expiresAt',
 			key: 'expiry',
 			width: 160,
@@ -73,7 +73,7 @@ function buildColumns({
 			render: (expiresAt: number): JSX.Element => formatExpiry(expiresAt, t),
 		},
 		{
-			title: 'Last Observed At',
+			title: t('last_observed_at'),
 			dataIndex: 'lastObservedAt',
 			key: 'lastObservedAt',
 			width: 220,
@@ -96,7 +96,9 @@ function buildColumns({
 			width: 48,
 			align: 'right' as const,
 			render: (_, record): JSX.Element => (
-				<Tooltip title={isDisabled ? 'Service account disabled' : 'Revoke Key'}>
+				<Tooltip
+					title={isDisabled ? t('service_account_disabled') : t('revoke_key')}
+				>
 					<Button
 						variant="ghost"
 						size="sm"
@@ -238,7 +240,9 @@ function KeysTab({
 					},
 					role: 'button',
 					tabIndex: 0,
-					'aria-label': `Edit key ${record.name || 'options'}`,
+					'aria-label': t('edit_key_aria', {
+						name: record.name || t('options_fallback'),
+					}),
 				})}
 			/>
 

@@ -95,7 +95,7 @@ describe('AddKeyModal', () => {
 
 		await screen.findByText('snz_abc123xyz456secret');
 		expect(screen.getByText('store_key_securely')).toBeInTheDocument();
-		await screen.findByRole('dialog', { name: /Key Created Successfully/i });
+		await screen.findByRole('dialog', { name: /key_created_title/i });
 	});
 
 	it('copy button writes key to clipboard and shows toast.success', async () => {
@@ -123,7 +123,7 @@ describe('AddKeyModal', () => {
 
 		await waitFor(() => {
 			expect(mockCopyToClipboard).toHaveBeenCalledWith('snz_abc123xyz456secret');
-			expect(mockToast.success).toHaveBeenCalledWith('Key copied to clipboard');
+			expect(mockToast.success).toHaveBeenCalledWith('key_copied');
 		});
 	});
 
@@ -131,7 +131,9 @@ describe('AddKeyModal', () => {
 		const user = userEvent.setup({ pointerEventsCheck: 0 });
 		renderModal();
 
-		const dialog = await screen.findByRole('dialog', { name: /Add a New Key/i });
+		const dialog = await screen.findByRole('dialog', {
+			name: /add_new_key_title/i,
+		});
 		await user.click(screen.getByRole('button', { name: 'common:cancel' }));
 
 		await waitForElementToBeRemoved(dialog);
