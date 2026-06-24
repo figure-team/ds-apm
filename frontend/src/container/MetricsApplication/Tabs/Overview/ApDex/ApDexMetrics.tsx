@@ -3,11 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { Space, Typography } from 'antd';
 import TextToolTip from 'components/TextToolTip';
-import {
-	apDexToolTipText,
-	apDexToolTipUrl,
-	apDexToolTipUrlText,
-} from 'constants/apDex';
+import { apDexToolTipUrl } from 'constants/apDex';
 import { ENTITY_VERSION_V4 } from 'constants/app';
 import { PANEL_TYPES } from 'constants/queryBuilder';
 import Graph from 'container/GridCardLayout/GridCard';
@@ -61,10 +57,10 @@ function ApDexMetrics({
 					<Space>
 						<Typography>{t('services:graph_apdex')}</Typography>
 						<TextToolTip
-							text={apDexToolTipText}
+							text={t('services:apdex_tooltip')}
 							url={apDexToolTipUrl}
 							useFilledIcon={false}
-							urlText={apDexToolTipUrlText}
+							urlText={t('services:apdex_learn_more')}
 						/>
 					</Space>
 				),

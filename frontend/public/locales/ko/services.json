@@ -16,6 +16,8 @@
 	"settings": "설정",
 	"application_settings": "애플리케이션 설정",
 	"apdex_threshold_in_seconds": "Apdex 임계값(초)",
+	"apdex_tooltip": "Apdex는 웹 서비스의 응답 시간에 대한 사용자 만족도를 측정하는 방법입니다. 0~1 사이의 점수로 표시됩니다.",
+	"apdex_learn_more": "Apdex에 대해 자세히 알아보기.",
 	"graph_latency": "지연시간",
 	"graph_rate_ops": "처리율(ops/s)",
 	"graph_error_percentage": "오류 비율",

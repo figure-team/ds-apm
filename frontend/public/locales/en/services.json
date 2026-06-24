@@ -16,6 +16,8 @@
 	"settings": "Settings",
 	"application_settings": "Application Settings",
 	"apdex_threshold_in_seconds": "Apdex threshold (in seconds)",
+	"apdex_tooltip": "Apdex is a way to measure your users' satisfaction with the response time of your web service. It's represented as a score from 0-1.",
+	"apdex_learn_more": "Learn more about Apdex.",
 	"graph_latency": "Latency",
 	"graph_rate_ops": "Rate (ops/s)",
 	"graph_error_percentage": "Error Percentage",
