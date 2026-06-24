@@ -14,6 +14,7 @@ import {
 	usePatchObjects,
 } from 'api/generated/services/role';
 import ErrorInPlace from 'components/ErrorInPlace/ErrorInPlace';
+import { getRoleDisplayName } from 'components/RolesSelect';
 import ROUTES from 'constants/routes';
 import { capitalize } from 'lodash-es';
 import { useErrorModal } from 'providers/ErrorModalProvider';
@@ -187,7 +188,7 @@ function RoleDetailsPage(): JSX.Element {
 		<div className="role-details-page">
 			<div className="role-details-header">
 				<h2 className="role-details-title">
-					{t('role_prefix')} {role.name}
+					{t('role_prefix')} {getRoleDisplayName(role.name, t)}
 				</h2>
 			</div>
 

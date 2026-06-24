@@ -5,6 +5,7 @@ import { Pagination, Skeleton } from 'antd';
 import { useListRoles } from 'api/generated/services/role';
 import { AuthtypesRoleDTO } from 'api/generated/services/sigNoz.schemas';
 import ErrorInPlace from 'components/ErrorInPlace/ErrorInPlace';
+import { getRoleDisplayName } from 'components/RolesSelect';
 import { DATE_TIME_FORMATS } from 'constants/dateTimeFormats';
 import ROUTES from 'constants/routes';
 import useUrlQuery from 'hooks/useUrlQuery';
@@ -211,7 +212,7 @@ function RolesListingTable({
 			}}
 		>
 			<div className="roles-table-cell roles-table-cell--name">
-				{role.name ?? '—'}
+				{getRoleDisplayName(role.name, t) || '—'}
 			</div>
 			<div className="roles-table-cell roles-table-cell--description">
 				<LineClampedText
