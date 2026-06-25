@@ -1,8 +1,10 @@
 {
 	"section_title": "Runbook",
 	"btn_new": "새 Runbook",
+	"btn_template": "양식",
 	"menu_manual": "직접 작성",
 	"menu_ai_draft": "오류 기반 AI 초안",
+	"menu_bulk_upload": "Excel 양식으로 업로드",
 	"tab_active": "활성 ({{count}})",
 	"tab_approved": "승인됨 ({{count}})",
 	"tab_drafts": "초안 ({{count}})",

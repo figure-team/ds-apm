@@ -1,8 +1,10 @@
 {
 	"section_title": "Runbooks",
 	"btn_new": "New runbook",
+	"btn_template": "Template",
 	"menu_manual": "Manual",
 	"menu_ai_draft": "AI draft from error",
+	"menu_bulk_upload": "Upload via Excel template",
 	"tab_active": "Active ({{count}})",
 	"tab_approved": "Approved ({{count}})",
 	"tab_drafts": "Drafts ({{count}})",

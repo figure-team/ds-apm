@@ -87,7 +87,17 @@
 		}
 	}
 
+	&__header-actions {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
 	&__list {
 		margin-top: 16px;
 	}
+}
+
+.runbook-preview-row--error td {
+	background: rgba(255, 77, 79, 0.06) !important;
 }

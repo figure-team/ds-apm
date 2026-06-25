@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Dropdown, Tabs, Empty, Spin, Modal } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { DownloadOutlined, PlusOutlined } from '@ant-design/icons';
 import { toast } from '@signozhq/ui';
 import { useAppContext } from 'providers/App/App';
 import { USER_ROLES } from 'types/roles';
@@ -13,6 +13,12 @@ import { Runbook, RunbookStatus } from './types';
 import RunbookCard from './RunbookCard';
 import RunbookForm from './RunbookForm';
 import RunbookDraftFromError from './RunbookDraftFromError';
+import RunbookBulkUploadModal from './RunbookBulkUploadModal';
+import RunbookBulkPreviewDrawer from './RunbookBulkPreviewDrawer';
+import {
+	downloadRunbookExcelTemplate,
+	type ParseRunbookExcelResult,
+} from './parseRunbookExcel';
 import './Runbooks.styles.scss';
 
 interface Props {
@@ -32,6 +38,10 @@ export default function RunbooksSection({ sopId, version }: Props): JSX.Element 
 	const [creatingNew, setCreatingNew] = useState(false);
 	const [saving, setSaving] = useState(false);
 	const [aiDraftOpen, setAiDraftOpen] = useState(false);
+	const [bulkUploadOpen, setBulkUploadOpen] = useState(false);
+	const [bulkPreviewOpen, setBulkPreviewOpen] = useState(false);
+	const [bulkParseResult, setBulkParseResult] =
+		useState<ParseRunbookExcelResult | null>(null);
 
 	const canEdit =
 		user.role === USER_ROLES.ADMIN || user.role === USER_ROLES.EDITOR;
@@ -98,6 +108,16 @@ export default function RunbooksSection({ sopId, version }: Props): JSX.Element 
 	const handleNewRunbook = useCallback(() => {
 		setCreatingNew(true);
 	}, []);
+
+	const handleBulkParsed = useCallback((result: ParseRunbookExcelResult) => {
+		setBulkParseResult(result);
+		setBulkUploadOpen(false);
+		setBulkPreviewOpen(true);
+	}, []);
+
+	const handleBulkRegistered = useCallback(() => {
+		void fetchRunbooks(statusFilter);
+	}, [fetchRunbooks, statusFilter]);
 
 	const handleFormCancel = useCallback(() => {
 		setEditing(null);
@@ -166,22 +186,36 @@ export default function RunbooksSection({ sopId, version }: Props): JSX.Element 
 			<div className="runbooks-section__header">
 				<h2>{t('section_title')}</h2>
 				{canEdit && (
-					<Dropdown
-						menu={{
-							items: [
-								{ key: 'manual', label: t('menu_manual'), onClick: handleNewRunbook },
-								{
-									key: 'ai',
-									label: t('menu_ai_draft'),
-									onClick: (): void => setAiDraftOpen(true),
-								},
-							],
-						}}
-					>
-						<Button type="primary" icon={<PlusOutlined />}>
-							{t('btn_new')}
+					<div className="runbooks-section__header-actions">
+						<Button
+							icon={<DownloadOutlined />}
+							onClick={downloadRunbookExcelTemplate}
+						>
+							{t('btn_template')}
 						</Button>
-					</Dropdown>
+						<Dropdown
+							menu={{
+								items: [
+									{ key: 'manual', label: t('menu_manual'), onClick: handleNewRunbook },
+									{
+										key: 'ai',
+										label: t('menu_ai_draft'),
+										onClick: (): void => setAiDraftOpen(true),
+									},
+									{ type: 'divider' },
+									{
+										key: 'bulk',
+										label: t('menu_bulk_upload'),
+										onClick: (): void => setBulkUploadOpen(true),
+									},
+								],
+							}}
+						>
+							<Button type="primary" icon={<PlusOutlined />}>
+								{t('btn_new')}
+							</Button>
+						</Dropdown>
+					</div>
 				)}
 			</div>
 
@@ -239,6 +273,21 @@ export default function RunbooksSection({ sopId, version }: Props): JSX.Element 
 					void fetchRunbooks(statusFilter);
 				}}
 				onCancel={(): void => setAiDraftOpen(false)}
+			/>
+
+			<RunbookBulkUploadModal
+				open={bulkUploadOpen}
+				onClose={(): void => setBulkUploadOpen(false)}
+				onParsed={handleBulkParsed}
+			/>
+
+			<RunbookBulkPreviewDrawer
+				open={bulkPreviewOpen}
+				parseResult={bulkParseResult}
+				sopId={sopId}
+				version={version}
+				onClose={(): void => setBulkPreviewOpen(false)}
+				onRegistered={handleBulkRegistered}
 			/>
 		</div>
 	);
