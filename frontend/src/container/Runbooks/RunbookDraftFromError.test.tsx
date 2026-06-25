@@ -41,10 +41,10 @@ it('calls draftRunbook with pasted error and prefills form on success', async ()
 			onCancel={jest.fn()}
 		/>,
 	);
-	fireEvent.change(screen.getByLabelText(/error example 1/i), {
+	fireEvent.change(screen.getByLabelText(/draft_error_example 1/), {
 		target: { value: 'timeout' },
 	});
-	fireEvent.click(screen.getByRole('button', { name: /^draft$/i }));
+	fireEvent.click(screen.getByRole('button', { name: 'btn_draft' }));
 	await waitFor(() => expect(mockDraft).toHaveBeenCalled());
 	await waitFor(() => expect(screen.getByDisplayValue('Restart')).toBeInTheDocument());
 });
@@ -62,11 +62,11 @@ it('shows auth banner when API returns errorKind=auth', async () => {
 			onCancel={jest.fn()}
 		/>,
 	);
-	fireEvent.change(screen.getByLabelText(/error example 1/i), {
+	fireEvent.change(screen.getByLabelText(/draft_error_example 1/), {
 		target: { value: 'something' },
 	});
-	fireEvent.click(screen.getByRole('button', { name: /^draft$/i }));
+	fireEvent.click(screen.getByRole('button', { name: 'btn_draft' }));
 	await waitFor(() =>
-		expect(screen.getByText(/authentication issue/i)).toBeInTheDocument(),
+		expect(screen.getByText('draft_auth_title')).toBeInTheDocument(),
 	);
 });

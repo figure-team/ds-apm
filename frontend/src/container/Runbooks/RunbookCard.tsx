@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useIsDarkMode } from 'hooks/useDarkMode';
 import { Button, Tag } from 'antd';
 import { CopyOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -23,6 +24,7 @@ export default function RunbookCard({
 	onStatusChange,
 	onDelete,
 }: Props): JSX.Element {
+	const { t } = useTranslation(['runbooks']);
 	const isDarkMode = useIsDarkMode();
 	const STATUS_COLORS: Record<RunbookStatus, string> = {
 		draft: isDarkMode ? 'gold' : '#D97706',
@@ -34,11 +36,11 @@ export default function RunbookCard({
 		try {
 			await navigator.clipboard.writeText(runbook.executableScript);
 			const lines = runbook.executableScript.split('\n').length;
-			toast.success(`Script copied (${lines} lines)`);
+			toast.success(t('toast_script_copied', { lines }));
 		} catch (error) {
-			toast.error('Failed to copy script');
+			toast.error(t('toast_copy_error'));
 		}
-	}, [runbook.executableScript]);
+	}, [runbook.executableScript, t]);
 
 	const handleStatusToggle = useCallback(() => {
 		const nextStatus: RunbookStatus =
@@ -47,14 +49,10 @@ export default function RunbookCard({
 	}, [runbook, onStatusChange]);
 
 	const handleDelete = useCallback(() => {
-		if (
-			window.confirm(
-				`Delete runbook "${runbook.title}"? This is permanent and cannot be undone.`
-			)
-		) {
+		if (window.confirm(t('confirm_delete', { title: runbook.title }))) {
 			onDelete(runbook);
 		}
-	}, [runbook, onDelete]);
+	}, [runbook, onDelete, t]);
 
 	const truncatedDescription =
 		runbook.description.length > 280
@@ -65,13 +63,17 @@ export default function RunbookCard({
 		<div className="runbook-card">
 			<div className="runbook-card__header">
 				<h3>{runbook.title}</h3>
-				<Tag color={STATUS_COLORS[runbook.status]}>{runbook.status}</Tag>
+				<Tag color={STATUS_COLORS[runbook.status]}>
+					{t(`status_${runbook.status}`)}
+				</Tag>
 			</div>
 
 			{runbook.aiDraftedBy && (
 				<div className="runbook-card__meta">
-					AI-drafted by <code>{runbook.aiDraftedBy}</code> · confidence{' '}
-					{(runbook.confidence * 100).toFixed(0)}%
+					{t('card_ai_drafted_by')} <code>{runbook.aiDraftedBy}</code> ·{' '}
+					{t('card_confidence', {
+						pct: (runbook.confidence * 100).toFixed(0),
+					})}
 				</div>
 			)}
 
@@ -89,16 +91,16 @@ export default function RunbookCard({
 					icon={<CopyOutlined />}
 					onClick={handleCopyScript}
 				>
-					Copy
+					{t('btn_copy')}
 				</Button>
 
 				{canEdit && (
 					<>
 						<Button icon={<EditOutlined />} onClick={() => onEdit(runbook)}>
-							Edit
+							{t('btn_edit')}
 						</Button>
 						<Button onClick={handleStatusToggle}>
-							{runbook.status === 'approved' ? 'Deprecate' : 'Approve'}
+							{runbook.status === 'approved' ? t('btn_deprecate') : t('btn_approve')}
 						</Button>
 					</>
 				)}
@@ -110,7 +112,7 @@ export default function RunbookCard({
 						icon={<DeleteOutlined />}
 						onClick={handleDelete}
 					>
-						Delete
+						{t('btn_delete')}
 					</Button>
 				)}
 			</div>

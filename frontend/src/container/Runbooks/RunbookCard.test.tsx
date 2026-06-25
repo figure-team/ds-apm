@@ -47,7 +47,8 @@ describe('RunbookCard', () => {
 		);
 
 		expect(screen.getByText('Restart Service')).toBeInTheDocument();
-		expect(screen.getByText('approved')).toBeInTheDocument();
+		// i18n mock returns the key: status Tag renders status_<status>.
+		expect(screen.getByText('status_approved')).toBeInTheDocument();
 		expect(screen.getByText(/Restarting service/)).toBeInTheDocument();
 	});
 
@@ -106,9 +107,10 @@ describe('RunbookCard', () => {
 			/>
 		);
 
-		expect(screen.getByText(/AI-drafted by/)).toBeInTheDocument();
+		// i18n mock returns keys (interpolation ignored), so assert on keys/value.
+		expect(screen.getByText(/card_ai_drafted_by/)).toBeInTheDocument();
 		expect(screen.getByText(/claude-ai/)).toBeInTheDocument();
-		expect(screen.getByText(/95%/)).toBeInTheDocument();
+		expect(screen.getByText(/card_confidence/)).toBeInTheDocument();
 	});
 
 	it('does not render AI draft metadata when aiDraftedBy is empty', () => {
@@ -124,7 +126,7 @@ describe('RunbookCard', () => {
 			/>
 		);
 
-		expect(screen.queryByText(/AI-drafted by/)).not.toBeInTheDocument();
+		expect(screen.queryByText(/card_ai_drafted_by/)).not.toBeInTheDocument();
 	});
 
 	it('shows Edit button only when canEdit is true', () => {

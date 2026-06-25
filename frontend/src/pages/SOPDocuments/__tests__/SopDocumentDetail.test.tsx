@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from 'tests/test-utils';
+import { render, screen } from 'tests/test-utils';
 import type { SopDocumentSummary } from 'api/v2/rules/sopDocuments';
 
 import SopDocumentDetail from '../SopDocumentDetail';
@@ -24,25 +24,19 @@ const record: SopDocumentSummary = {
 };
 
 describe('SopDocumentDetail', () => {
-	it('renders SOP meta, the runbooks body, and fires callbacks', () => {
-		const onBack = jest.fn();
-		const onEditDocument = jest.fn();
-		render(
-			<SopDocumentDetail
-				record={record}
-				onBack={onBack}
-				onEditDocument={onEditDocument}
-			/>,
-		);
+	it('renders the SOP title and the runbooks body in an open drawer', () => {
+		render(<SopDocumentDetail open record={record} onClose={jest.fn()} />);
 
+		// 제목은 드로어 타이틀로만 노출되고, 메타/안내 문구는 더 이상 렌더하지 않는다.
 		expect(screen.getByText('Payment API 5xx response')).toBeInTheDocument();
-		expect(screen.getByText('SOP-PAY-001')).toBeInTheDocument();
+		expect(screen.queryByText('SOP-PAY-001')).not.toBeInTheDocument();
 		expect(screen.getByText('RunbooksSectionStub')).toBeInTheDocument();
+	});
 
-		fireEvent.click(screen.getByTestId('sop-detail-back'));
-		expect(onBack).toHaveBeenCalledTimes(1);
+	it('does not render runbooks content when closed', () => {
+		render(<SopDocumentDetail open={false} record={record} onClose={jest.fn()} />);
 
-		fireEvent.click(screen.getByTestId('sop-detail-edit-document'));
-		expect(onEditDocument).toHaveBeenCalledWith(record);
+		// destroyOnClose: 드로어가 닫혀 있으면 Runbook 본문이 마운트되지 않는다.
+		expect(screen.queryByText('RunbooksSectionStub')).not.toBeInTheDocument();
 	});
 });

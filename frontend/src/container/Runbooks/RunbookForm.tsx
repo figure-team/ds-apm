@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Input, Radio } from 'antd';
 
 import { Runbook, RunbookStatus } from './types';
@@ -11,6 +12,7 @@ interface Props {
 }
 
 function RunbookForm({ initial, onSubmit, onCancel, saving }: Props): JSX.Element {
+	const { t } = useTranslation(['runbooks']);
 	const [title, setTitle] = useState(initial?.title ?? '');
 	const [description, setDescription] = useState(initial?.description ?? '');
 	const [script, setScript] = useState(initial?.executableScript ?? '');
@@ -30,11 +32,11 @@ function RunbookForm({ initial, onSubmit, onCancel, saving }: Props): JSX.Elemen
 	return (
 		<div className="runbook-form">
 			<label>
-				Title
+				{t('field_title')}
 				<Input value={title} onChange={(e): void => setTitle(e.target.value)} />
 			</label>
 			<label>
-				Description (markdown)
+				{t('field_description')}
 				<Input.TextArea
 					value={description}
 					onChange={(e): void => setDescription(e.target.value)}
@@ -42,7 +44,7 @@ function RunbookForm({ initial, onSubmit, onCancel, saving }: Props): JSX.Elemen
 				/>
 			</label>
 			<label>
-				Script (bash)
+				{t('field_script')}
 				<Input.TextArea
 					value={script}
 					onChange={(e): void => setScript(e.target.value)}
@@ -51,13 +53,13 @@ function RunbookForm({ initial, onSubmit, onCancel, saving }: Props): JSX.Elemen
 				/>
 			</label>
 			<Radio.Group value={status} onChange={(e): void => setStatus(e.target.value)}>
-				<Radio value="draft">Draft</Radio>
-				<Radio value="approved">Approved</Radio>
+				<Radio value="draft">{t('status_draft')}</Radio>
+				<Radio value="approved">{t('status_approved')}</Radio>
 			</Radio.Group>
 			<div className="runbook-form__actions">
-				<Button onClick={onCancel}>Cancel</Button>
+				<Button onClick={onCancel}>{t('btn_cancel')}</Button>
 				<Button type="primary" onClick={handleSave} loading={saving}>
-					Save
+					{t('btn_save')}
 				</Button>
 			</div>
 		</div>

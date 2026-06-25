@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Dropdown, Tabs, Empty, Spin, Modal } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { toast } from '@signozhq/ui';
@@ -22,6 +23,7 @@ interface Props {
 type StatusFilter = 'approved,draft' | 'approved' | 'draft' | 'deprecated';
 
 export default function RunbooksSection({ sopId, version }: Props): JSX.Element {
+	const { t } = useTranslation(['runbooks']);
 	const { user } = useAppContext();
 	const [runbooks, setRunbooks] = useState<Runbook[]>([]);
 	const [statusFilter, setStatusFilter] = useState<StatusFilter>('approved,draft');
@@ -41,12 +43,12 @@ export default function RunbooksSection({ sopId, version }: Props): JSX.Element 
 			const response = await listRunbooks(sopId, version, filter);
 			setRunbooks(response.data.runbooks);
 		} catch (error) {
-			toast.error('Failed to load runbooks');
+			toast.error(t('toast_load_error'));
 			console.error(error);
 		} finally {
 			setLoading(false);
 		}
-	}, [sopId, version]);
+	}, [sopId, version, t]);
 
 	useEffect(() => {
 		fetchRunbooks(statusFilter);
@@ -62,14 +64,16 @@ export default function RunbooksSection({ sopId, version }: Props): JSX.Element 
 				});
 				await fetchRunbooks(statusFilter);
 				toast.success(
-					`Runbook ${nextStatus === 'deprecated' ? 'deprecated' : 'approved'} successfully`
+					nextStatus === 'deprecated'
+						? t('toast_status_deprecated')
+						: t('toast_status_approved')
 				);
 			} catch (error) {
-				toast.error('Failed to update runbook status');
+				toast.error(t('toast_status_error'));
 				console.error(error);
 			}
 		},
-		[loading, sopId, version, statusFilter, fetchRunbooks]
+		[loading, sopId, version, statusFilter, fetchRunbooks, t]
 	);
 
 	const handleDelete = useCallback(
@@ -78,13 +82,13 @@ export default function RunbooksSection({ sopId, version }: Props): JSX.Element 
 			try {
 				await deleteRunbook(sopId, version, runbook.id);
 				await fetchRunbooks(statusFilter);
-				toast.success('Runbook deleted successfully');
+				toast.success(t('toast_deleted'));
 			} catch (error) {
-				toast.error('Failed to delete runbook');
+				toast.error(t('toast_delete_error'));
 				console.error(error);
 			}
 		},
-		[loading, sopId, version, statusFilter, fetchRunbooks]
+		[loading, sopId, version, statusFilter, fetchRunbooks, t]
 	);
 
 	const handleEdit = useCallback((runbook: Runbook) => {
@@ -106,22 +110,22 @@ export default function RunbooksSection({ sopId, version }: Props): JSX.Element 
 			try {
 				if (editing) {
 					await updateRunbook(sopId, version, { ...editing, ...values });
-					toast.success('Runbook updated');
+					toast.success(t('toast_updated'));
 				} else {
 					await createRunbook(sopId, version, values);
-					toast.success('Runbook created');
+					toast.success(t('toast_created'));
 				}
 				setEditing(null);
 				setCreatingNew(false);
 				await fetchRunbooks(statusFilter);
 			} catch (error) {
-				toast.error('Failed to save runbook');
+				toast.error(t('toast_save_error'));
 				console.error(error);
 			} finally {
 				setSaving(false);
 			}
 		},
-		[editing, sopId, version, statusFilter, fetchRunbooks]
+		[editing, sopId, version, statusFilter, fetchRunbooks, t]
 	);
 
 	const showForm = editing !== null || creatingNew;
@@ -141,37 +145,41 @@ export default function RunbooksSection({ sopId, version }: Props): JSX.Element 
 	const tabItems = [
 		{
 			key: 'approved,draft',
-			label: `Active (${stats.active})`,
+			label: t('tab_active', { count: stats.active }),
 		},
 		{
 			key: 'approved',
-			label: `Approved (${stats.approved})`,
+			label: t('tab_approved', { count: stats.approved }),
 		},
 		{
 			key: 'draft',
-			label: `Drafts (${stats.draft})`,
+			label: t('tab_drafts', { count: stats.draft }),
 		},
 		{
 			key: 'deprecated',
-			label: `Deprecated (${stats.deprecated})`,
+			label: t('tab_deprecated', { count: stats.deprecated }),
 		},
 	];
 
 	return (
 		<div className="runbooks-section">
 			<div className="runbooks-section__header">
-				<h2>Runbooks</h2>
+				<h2>{t('section_title')}</h2>
 				{canEdit && (
 					<Dropdown
 						menu={{
 							items: [
-								{ key: 'manual', label: 'Manual', onClick: handleNewRunbook },
-								{ key: 'ai', label: 'AI draft from error', onClick: (): void => setAiDraftOpen(true) },
+								{ key: 'manual', label: t('menu_manual'), onClick: handleNewRunbook },
+								{
+									key: 'ai',
+									label: t('menu_ai_draft'),
+									onClick: (): void => setAiDraftOpen(true),
+								},
 							],
 						}}
 					>
 						<Button type="primary" icon={<PlusOutlined />}>
-							New runbook
+							{t('btn_new')}
 						</Button>
 					</Dropdown>
 				)}
@@ -185,7 +193,7 @@ export default function RunbooksSection({ sopId, version }: Props): JSX.Element 
 
 			<Spin spinning={loading}>
 				{!loading && runbooks.length === 0 && (
-					<Empty description="No runbooks yet." />
+					<Empty description={t('empty')} />
 				)}
 				{runbooks.length > 0 && (
 					<div className="runbooks-section__list">
@@ -206,7 +214,7 @@ export default function RunbooksSection({ sopId, version }: Props): JSX.Element 
 
 			<Modal
 				open={showForm}
-				title={editing ? 'Edit runbook' : 'New runbook'}
+				title={editing ? t('modal_edit_title') : t('modal_new_title')}
 				onCancel={handleFormCancel}
 				footer={null}
 				width={720}

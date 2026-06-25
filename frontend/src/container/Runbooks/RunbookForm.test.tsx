@@ -7,9 +7,10 @@ beforeEach(() => jest.clearAllMocks());
 it('submits the form values on save', async () => {
 	const onSubmit = jest.fn();
 	render(<RunbookForm onSubmit={onSubmit} onCancel={jest.fn()} />);
-	fireEvent.change(screen.getByLabelText(/title/i), { target: { value: 'My runbook' } });
-	fireEvent.change(screen.getByLabelText(/script \(bash\)/i), { target: { value: '#!/bin/bash\nhi\n' } });
-	fireEvent.click(screen.getByRole('button', { name: /save/i }));
+	// i18n mock returns the key, so labels/buttons assert on their translation keys.
+	fireEvent.change(screen.getByLabelText('field_title'), { target: { value: 'My runbook' } });
+	fireEvent.change(screen.getByLabelText('field_script'), { target: { value: '#!/bin/bash\nhi\n' } });
+	fireEvent.click(screen.getByRole('button', { name: 'btn_save' }));
 	await waitFor(() => expect(onSubmit).toHaveBeenCalled());
 	const submitted = onSubmit.mock.calls[0][0];
 	expect(submitted.title).toBe('My runbook');

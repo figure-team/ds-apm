@@ -184,20 +184,24 @@ describe('SOPDocuments', () => {
 		expect(screen.getByText('bound')).toBeInTheDocument();
 	});
 
-	it('drills into a SOP document and returns to the list', async () => {
+	it('opens the runbook drawer over the list and closes it', async () => {
 		render(<SOPDocuments />);
 
 		fireEvent.click(await screen.findByText('Payment API 5xx response'));
 
-		await expect(screen.findByTestId('sop-detail-back')).resolves.toBeInTheDocument();
+		// Runbook 관리가 우측 드로어로 열린다.
+		await expect(
+			screen.findByTestId('sop-document-detail-drawer'),
+		).resolves.toBeInTheDocument();
 		expect(screen.getByText('RunbooksSectionStub')).toBeInTheDocument();
-		// 목록 섹션은 더 이상 보이지 않는다.
-		expect(screen.queryByText('documents_section_title')).not.toBeInTheDocument();
+		// 목록 섹션은 드로어 뒤에 그대로 남아 있다.
+		expect(screen.getByText('documents_section_title')).toBeInTheDocument();
 
-		fireEvent.click(screen.getByTestId('sop-detail-back'));
+		// 드로어 닫기 버튼으로 닫는다.
+		fireEvent.click(screen.getByLabelText('Close'));
 
 		await waitFor(() =>
-			expect(screen.queryByTestId('sop-detail-back')).not.toBeInTheDocument(),
+			expect(screen.queryByText('RunbooksSectionStub')).not.toBeInTheDocument(),
 		);
 		expect(screen.getByText('documents_section_title')).toBeInTheDocument();
 	});

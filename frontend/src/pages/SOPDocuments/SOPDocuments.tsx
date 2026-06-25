@@ -290,15 +290,7 @@ function SOPDocuments(): JSX.Element {
 
 	return (
 		<div className="sop-documents-page settings-shell settings-shell--narrow">
-			{selectedRecord ? (
-				<SopDocumentDetail
-					onBack={handleBackToList}
-					onEditDocument={openEditDrawer}
-					record={selectedRecord}
-				/>
-			) : (
-				<>
-					<header className="sop-documents-page__header">
+			<header className="sop-documents-page__header">
 						<div className="sop-documents-page__header-row">
 							<div>
 								<h1>{t('page_title')}</h1>
@@ -423,8 +415,12 @@ function SOPDocuments(): JSX.Element {
 					</div>
 				)}
 			</section>
-				</>
-			)}
+
+			<SopDocumentDetail
+				onClose={handleBackToList}
+				open={Boolean(selectedRecord)}
+				record={selectedRecord}
+			/>
 
 			<SopDocumentFormDrawer
 				editTarget={editTarget}

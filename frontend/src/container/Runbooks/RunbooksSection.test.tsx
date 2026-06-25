@@ -61,7 +61,8 @@ describe('RunbooksSection', () => {
 		render(<RunbooksSection sopId="sop-1" version="1.0" />);
 
 		await waitFor(() => {
-			expect(screen.getByText(/no runbooks yet/i)).toBeInTheDocument();
+			// i18n mock returns the key for the empty-state copy.
+			expect(screen.getByText('empty')).toBeInTheDocument();
 		});
 	});
 
