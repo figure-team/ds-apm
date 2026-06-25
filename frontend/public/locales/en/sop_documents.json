@@ -43,5 +43,9 @@
 	"btn_save_new_version": "Save as new version",
 	"edit_version_hint": "Enter a new version. Saving automatically deprecates the previous version.",
 	"edit_version_same_error": "Enter a version different from the previous one.",
-	"msg_save_success_prefix": "Saved:"
+	"msg_save_success_prefix": "Saved:",
+	"btn_back_to_list": "← SOP documents",
+	"btn_edit_document": "Edit document",
+	"menu_edit_document": "Edit document",
+	"detail_runbooks_hint": "Manage the runbooks (automated responses) bound to this SOP."
 }

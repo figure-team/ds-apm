@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from 'tests/test-utils';
 import {
 	createSopDocument,
+	getSopDocument,
 	listSopDocuments,
 	previewSopDocumentBinding,
 } from 'api/v2/rules/sopDocuments';
@@ -15,6 +16,11 @@ jest.mock('api/v2/rules/sopDocuments', () => ({
 	SOP_DOCUMENT_CONTRACT_VERSION: 'ds.sop_document.v1',
 }));
 
+jest.mock('container/Runbooks/RunbooksSection', () => ({
+	__esModule: true,
+	default: (): JSX.Element => <div>RunbooksSectionStub</div>,
+}));
+
 const mockCreateSopDocument = createSopDocument as jest.MockedFunction<
 	typeof createSopDocument
 >;
@@ -25,6 +31,9 @@ const mockPreviewSopDocumentBinding =
 	previewSopDocumentBinding as jest.MockedFunction<
 		typeof previewSopDocumentBinding
 	>;
+const mockGetSopDocument = getSopDocument as jest.MockedFunction<
+	typeof getSopDocument
+>;
 
 describe('SOPDocuments', () => {
 	beforeEach(() => {
@@ -69,6 +78,33 @@ describe('SOPDocuments', () => {
 				sopId: 'SOP-PAY-001',
 				status: 'bound',
 				title: 'Payment API 5xx response',
+				version: '2026-05-12.1',
+			},
+		});
+		mockGetSopDocument.mockResolvedValue({
+			status: 'success',
+			data: {
+				approvalStatus: 'approved',
+				bodyMarkdown: '# Payment API 5xx response',
+				checksum: 'sha256:existing',
+				contractVersion: 'ds.sop_document.v1',
+				displayUrl: 'https://kb.example/sop/SOP-PAY-001',
+				ownerTeam: 'payments',
+				securityContext: {
+					browserCredentialsUsed: false,
+					redactionApplied: true,
+					secretRefVisible: false,
+					serviceAccountProfile: 'managed-markdown-local',
+				},
+				sopId: 'SOP-PAY-001',
+				source: {
+					sourceId: 'src-managed-markdown-default',
+					type: 'managed_markdown',
+				},
+				tags: ['payment-api'],
+				tenantScope: { environments: ['prod'], projectIds: ['customer-a'] },
+				title: 'Payment API 5xx response',
+				updatedAt: '2026-05-12T00:00:00Z',
 				version: '2026-05-12.1',
 			},
 		});
@@ -146,5 +182,36 @@ describe('SOPDocuments', () => {
 			screen.findByText('explicit_label'),
 		).resolves.toBeInTheDocument();
 		expect(screen.getByText('bound')).toBeInTheDocument();
+	});
+
+	it('drills into a SOP document and returns to the list', async () => {
+		render(<SOPDocuments />);
+
+		fireEvent.click(await screen.findByText('Payment API 5xx response'));
+
+		await expect(screen.findByTestId('sop-detail-back')).resolves.toBeInTheDocument();
+		expect(screen.getByText('RunbooksSectionStub')).toBeInTheDocument();
+		// 목록 섹션은 더 이상 보이지 않는다.
+		expect(screen.queryByText('documents_section_title')).not.toBeInTheDocument();
+
+		fireEvent.click(screen.getByTestId('sop-detail-back'));
+
+		await waitFor(() =>
+			expect(screen.queryByTestId('sop-detail-back')).not.toBeInTheDocument(),
+		);
+		expect(screen.getByText('documents_section_title')).toBeInTheDocument();
+	});
+
+	it('opens document edit from the row overflow menu without drilling in', async () => {
+		render(<SOPDocuments />);
+		await screen.findByText('Payment API 5xx response');
+
+		fireEvent.click(screen.getByTestId('sop-row-actions'));
+		fireEvent.click(await screen.findByText('menu_edit_document'));
+
+		// 편집 드로어가 edit 모드로 열려 문서를 조회한다.
+		await waitFor(() => expect(mockGetSopDocument).toHaveBeenCalled());
+		// ⋯ 메뉴 클릭은 상세로 드릴인하지 않는다(stopPropagation).
+		expect(screen.queryByTestId('sop-detail-back')).not.toBeInTheDocument();
 	});
 });

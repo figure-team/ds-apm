@@ -136,6 +136,34 @@
 	&__warning {
 		color: var(--bg-vanilla-400);
 	}
+
+	&__detail {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-12);
+	}
+
+	&__detail-back {
+		align-self: flex-start;
+		padding-left: 0;
+	}
+
+	&__detail-header {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--spacing-8);
+	}
+
+	&__detail-meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--spacing-6);
+		margin-top: var(--spacing-2);
+		color: var(--foreground);
+		font-size: var(--font-size-xs);
+	}
 }
 
 @media screen and (max-width: 900px) {

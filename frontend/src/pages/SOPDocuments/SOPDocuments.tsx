@@ -2,10 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
 	DownloadOutlined,
+	MoreOutlined,
 	PlusOutlined,
 	UploadOutlined,
 } from '@ant-design/icons';
-import { Alert, Button, Input, Select, Table, Tag } from 'antd';
+import { Alert, Button, Dropdown, Input, Select, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
 	listSopDocuments,
@@ -14,7 +15,9 @@ import {
 	type SopBindingPreviewResult,
 	type SopDocumentSummary,
 } from 'api/v2/rules/sopDocuments';
-import RunbooksSection from 'container/Runbooks/RunbooksSection';
+import { useHistory } from 'react-router-dom';
+import useUrlQuery from 'hooks/useUrlQuery';
+import SopDocumentDetail from './SopDocumentDetail';
 
 import './SOPDocuments.styles.scss';
 import {
@@ -57,6 +60,29 @@ type StatusFilter = SopApprovalStatus | 'all';
 
 function SOPDocuments(): JSX.Element {
 	const { t } = useTranslation(['sop_documents']);
+
+	const history = useHistory();
+	const query = useUrlQuery();
+
+	const selectedSop = useMemo<{ sopId: string; version: string } | null>(() => {
+		const sopId = query.get('sopId');
+		const version = query.get('version');
+		return sopId && version ? { sopId, version } : null;
+	}, [query]);
+
+	const openDetail = useCallback(
+		(record: SopDocumentSummary): void => {
+			const params = new URLSearchParams();
+			params.set('sopId', record.sopId);
+			params.set('version', record.version);
+			history.push({ search: params.toString() });
+		},
+		[history],
+	);
+
+	const handleBackToList = useCallback((): void => {
+		history.push({ search: '' });
+	}, [history]);
 
 	const [documents, setDocuments] = useState<SopDocumentSummary[]>([]);
 	const [statusFilter, setStatusFilter] = useState<StatusFilter>('approved');
@@ -132,6 +158,15 @@ function SOPDocuments(): JSX.Element {
 		// Most recently registered/updated first (updatedAt is ISO 8601 → lexical sort).
 		return [...filtered].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 	}, [documents, statusFilter]);
+
+	const selectedRecord = useMemo<SopDocumentSummary | undefined>(() => {
+		if (!selectedSop) {return undefined;}
+		return documents.find(
+			(document) =>
+				document.sopId === selectedSop.sopId &&
+				document.version === selectedSop.version,
+		);
+	}, [documents, selectedSop]);
 
 	const handleStatusFilterChange = useCallback((value: StatusFilter): void => {
 		setStatusFilter(value);
@@ -219,16 +254,34 @@ function SOPDocuments(): JSX.Element {
 			{
 				title: t('col_actions'),
 				key: 'actions',
-				width: 96,
+				width: 64,
 				render: (_, record: SopDocumentSummary): JSX.Element => (
-					<Button
-						data-testid="edit-sop-document"
-						onClick={(): void => openEditDrawer(record)}
-						size="small"
-						type="link"
+					// stopPropagation: ⋯ 메뉴 클릭이 행 클릭(상세 드릴인)을 트리거하지 않게 한다.
+					<span
+						onClick={(event): void => event.stopPropagation()}
+						onKeyDown={(event): void => event.stopPropagation()}
+						role="presentation"
 					>
-						{t('btn_edit')}
-					</Button>
+						<Dropdown
+							menu={{
+								items: [
+									{
+										key: 'edit',
+										label: t('menu_edit_document'),
+										onClick: (): void => openEditDrawer(record),
+									},
+								],
+							}}
+							trigger={['click']}
+						>
+							<Button
+								data-testid="sop-row-actions"
+								icon={<MoreOutlined />}
+								size="small"
+								type="text"
+							/>
+						</Dropdown>
+					</span>
 				),
 			},
 		],
@@ -237,79 +290,84 @@ function SOPDocuments(): JSX.Element {
 
 	return (
 		<div className="sop-documents-page settings-shell settings-shell--narrow">
-			<header className="sop-documents-page__header">
-				<div className="sop-documents-page__header-row">
-					<div>
-						<h1>{t('page_title')}</h1>
-						<p>{t('page_description')}</p>
-					</div>
-					<div className="sop-documents-page__header-actions">
-						<Button icon={<DownloadOutlined />} onClick={downloadSopExcelTemplate}>
-							{t('btn_template_download')}
-						</Button>
-						<Button
-							icon={<UploadOutlined />}
-							onClick={(): void => setUploadModalOpen(true)}
-						>
-							{t('btn_file_upload')}
-						</Button>
-						<Button
-							data-testid="open-register-drawer"
-							icon={<PlusOutlined />}
-							onClick={openCreateDrawer}
-							type="primary"
-						>
-							{t('btn_add_document')}
-						</Button>
-					</div>
-				</div>
-			</header>
-
-			{message && <Alert message={message} showIcon type="success" />}
-			{error && <Alert message={error} showIcon type="error" />}
-
-			<section className="sop-documents-page__section">
-				<div className="sop-documents-page__section-header sop-documents-page__section-header--row">
-					<div>
-						<h2>{t('documents_section_title')}</h2>
-						<p>{t('documents_section_description')}</p>
-					</div>
-					<Select<StatusFilter>
-						className="sop-documents-page__status-filter"
-						data-testid="sop-status-filter"
-						onChange={handleStatusFilterChange}
-						options={[
-							{ value: 'all', label: t('filter_all_statuses') },
-							...STATUS_OPTIONS.map((status) => ({
-								value: status,
-								label: t(`status_${status}`),
-							})),
-						]}
-						value={statusFilter}
-					/>
-				</div>
-				<Table
-					columns={columns}
-					dataSource={filteredDocuments}
-					expandable={{
-						expandedRowRender: (record: SopDocumentSummary): JSX.Element => (
-							<RunbooksSection sopId={record.sopId} version={record.version} />
-						),
-						rowExpandable: (record: SopDocumentSummary): boolean =>
-							Boolean(record.sopId && record.version),
-					}}
-					loading={isLoading}
-					pagination={{
-						current: currentPage,
-						hideOnSinglePage: true,
-						onChange: setCurrentPage,
-						pageSize: PAGE_SIZE,
-						showSizeChanger: false,
-					}}
-					rowKey={(document): string => `${document.sopId}:${document.version}`}
-					size="small"
+			{selectedRecord ? (
+				<SopDocumentDetail
+					onBack={handleBackToList}
+					onEditDocument={openEditDrawer}
+					record={selectedRecord}
 				/>
-			</section>
+			) : (
+				<>
+					<header className="sop-documents-page__header">
+						<div className="sop-documents-page__header-row">
+							<div>
+								<h1>{t('page_title')}</h1>
+								<p>{t('page_description')}</p>
+							</div>
+							<div className="sop-documents-page__header-actions">
+								<Button icon={<DownloadOutlined />} onClick={downloadSopExcelTemplate}>
+									{t('btn_template_download')}
+								</Button>
+								<Button
+									icon={<UploadOutlined />}
+									onClick={(): void => setUploadModalOpen(true)}
+								>
+									{t('btn_file_upload')}
+								</Button>
+								<Button
+									data-testid="open-register-drawer"
+									icon={<PlusOutlined />}
+									onClick={openCreateDrawer}
+									type="primary"
+								>
+									{t('btn_add_document')}
+								</Button>
+							</div>
+						</div>
+					</header>
+
+					{message && <Alert message={message} showIcon type="success" />}
+					{error && <Alert message={error} showIcon type="error" />}
+
+					<section className="sop-documents-page__section">
+						<div className="sop-documents-page__section-header sop-documents-page__section-header--row">
+							<div>
+								<h2>{t('documents_section_title')}</h2>
+								<p>{t('documents_section_description')}</p>
+							</div>
+							<Select<StatusFilter>
+								className="sop-documents-page__status-filter"
+								data-testid="sop-status-filter"
+								onChange={handleStatusFilterChange}
+								options={[
+									{ value: 'all', label: t('filter_all_statuses') },
+									...STATUS_OPTIONS.map((status) => ({
+										value: status,
+										label: t(`status_${status}`),
+									})),
+								]}
+								value={statusFilter}
+							/>
+						</div>
+						<Table
+							columns={columns}
+							dataSource={filteredDocuments}
+							loading={isLoading}
+							onRow={(record: SopDocumentSummary) => ({
+								onClick: (): void => openDetail(record),
+								style: { cursor: 'pointer' },
+							})}
+							pagination={{
+								current: currentPage,
+								hideOnSinglePage: true,
+								onChange: setCurrentPage,
+								pageSize: PAGE_SIZE,
+								showSizeChanger: false,
+							}}
+							rowKey={(document): string => `${document.sopId}:${document.version}`}
+							size="small"
+						/>
+					</section>
 
 			<section className="sop-documents-page__section">
 				<div className="sop-documents-page__section-header">
@@ -365,6 +423,8 @@ function SOPDocuments(): JSX.Element {
 					</div>
 				)}
 			</section>
+				</>
+			)}
 
 			<SopDocumentFormDrawer
 				editTarget={editTarget}

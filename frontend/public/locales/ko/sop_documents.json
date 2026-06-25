@@ -43,5 +43,9 @@
 	"btn_save_new_version": "새 버전으로 저장",
 	"edit_version_hint": "수정 시 새 버전을 입력하세요. 저장하면 이전 버전은 자동으로 사용 중단(deprecated) 처리됩니다.",
 	"edit_version_same_error": "이전 버전과 다른 새 버전을 입력하세요.",
-	"msg_save_success_prefix": "저장됨:"
+	"msg_save_success_prefix": "저장됨:",
+	"btn_back_to_list": "← SOP 문서 목록",
+	"btn_edit_document": "문서 수정",
+	"menu_edit_document": "문서 수정",
+	"detail_runbooks_hint": "이 SOP에 연결된 Runbook(자동 대응 작업)을 관리합니다."
 }
