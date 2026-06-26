@@ -66,6 +66,12 @@ type IncidentInfo struct {
 	AIConfidence     string `json:"aiConfidence,omitempty" mapstructure:"ai_confidence"`
 	AILimitations    string `json:"aiLimitations,omitempty" mapstructure:"ai_limitations"`
 	AIEvidenceRefs   string `json:"aiEvidenceRefs,omitempty" mapstructure:"ai_evidence_refs"`
+	// Human-gated auto-remediation (design §8). RemediationSummary is a short
+	// one-liner (runbook title + "approve in web UI"); RemediationApproveURL deep
+	// links to the alert detail page where the operator reviews+approves. The full
+	// script is intentionally never in the notification.
+	RemediationSummary    string `json:"remediationSummary,omitempty" mapstructure:"remediation_script_summary"`
+	RemediationApproveURL string `json:"remediationApproveUrl,omitempty" mapstructure:"remediation_approve_url"`
 }
 
 // BuildIncidentInfo maps the recommended DS-APM operational labels and PM
@@ -96,6 +102,8 @@ func BuildIncidentInfo(labels, annotations template.KV) IncidentInfo {
 		AIConfidence:     annotations[IncidentAnnotationAIConfidence],
 		AILimitations:    annotations[IncidentAnnotationAILimitations],
 		AIEvidenceRefs:   annotations[IncidentAnnotationAIEvidenceRefs],
+		RemediationSummary:    annotations[IncidentAnnotationRemediationScriptSummary],
+		RemediationApproveURL: annotations[IncidentAnnotationRemediationApproveURL],
 	}
 }
 
@@ -125,5 +133,7 @@ func (i IncidentInfo) IsZero() bool {
 		i.AIFirstActions == "" &&
 		i.AIConfidence == "" &&
 		i.AILimitations == "" &&
-		i.AIEvidenceRefs == ""
+		i.AIEvidenceRefs == "" &&
+		i.RemediationSummary == "" &&
+		i.RemediationApproveURL == ""
 }

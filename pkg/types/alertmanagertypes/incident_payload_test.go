@@ -241,6 +241,36 @@ func TestIncidentInfoFieldsCompactKeepsOnlyRoutingAndSOPLink(t *testing.T) {
 	}, IncidentInfoFieldsCompact(info))
 }
 
+func TestIncidentInfoFieldsCompactIncludesRemediationWhenPresent(t *testing.T) {
+	// Human-gated auto-remediation surfaces a summary + an approval deep link in
+	// the compact (SOP-bound human) field set used by Slack/Email.
+	info := IncidentInfo{
+		ServiceName:           "payment",
+		RemediationSummary:    "Restart payment (승인 시 웹 UI에서 실행)",
+		RemediationApproveURL: "https://apm.example.com/alerts/overview?remediation=rem-1&ruleId=r1",
+	}
+	fields := IncidentInfoFieldsCompact(info)
+
+	byKey := map[string]string{}
+	for _, f := range fields {
+		byKey[f.Key] = f.Value
+	}
+	require.Equal(t, "Restart payment (승인 시 웹 UI에서 실행)", byKey["remediation_summary"])
+	require.Equal(t,
+		"https://apm.example.com/alerts/overview?remediation=rem-1&ruleId=r1",
+		byKey["remediation_approve_url"])
+}
+
+func TestBuildIncidentInfoMapsRemediationAnnotations(t *testing.T) {
+	info := BuildIncidentInfo(nil, template.KV{
+		IncidentAnnotationRemediationScriptSummary: "Restart payment (승인 시 웹 UI에서 실행)",
+		IncidentAnnotationRemediationApproveURL:    "https://apm.example.com/alerts/overview?remediation=rem-1",
+	})
+	require.Equal(t, "Restart payment (승인 시 웹 UI에서 실행)", info.RemediationSummary)
+	require.Equal(t, "https://apm.example.com/alerts/overview?remediation=rem-1", info.RemediationApproveURL)
+	require.False(t, info.IsZero(), "remediation-only info must not be zero")
+}
+
 func TestIncidentInfoFieldsCompactOmitsEmptyValues(t *testing.T) {
 	fields := IncidentInfoFieldsCompact(IncidentInfo{
 		ProjectID: "customer-a",

@@ -1266,13 +1266,16 @@ func TestEmailAIHTMLBody(t *testing.T) {
 		Body:           "현황\n<script>xss</script>",
 		CustomerNotice: "[안내] 점검 중\n세부사항",
 	}
-	got := emailAIHTMLBody(notif)
+	got := emailAIHTMLBody(notif, "Restart payment (승인 시 웹 UI에서 실행)", "https://apm.example.com/alerts/overview?remediation=rem-1")
 
 	require.Contains(t, got, "현황<br>&lt;script&gt;xss&lt;/script&gt;", "body escaped and newlines→<br>")
 	require.Contains(t, got, "<details>", "has details element")
 	require.Contains(t, got, "<summary>자세히보기</summary>", "has summary label")
 	require.Contains(t, got, "[안내] 점검 중<br>세부사항", "customer notice escaped and newlines→<br>")
 	require.Contains(t, got, "</details>", "closes details element")
+	require.Contains(t, got, "🔧 자동 대응:", "renders remediation summary label")
+	require.Contains(t, got, `href="https://apm.example.com/alerts/overview?remediation=rem-1"`, "renders clickable approval link")
+	require.Contains(t, got, "승인하기", "renders approval link text")
 }
 
 // TestEmailAIHTMLBodyNoCustomerNotice verifies <details> is omitted when CustomerNotice is empty.
@@ -1281,11 +1284,12 @@ func TestEmailAIHTMLBodyNoCustomerNotice(t *testing.T) {
 		Body:           "본문",
 		CustomerNotice: "",
 	}
-	got := emailAIHTMLBody(notif)
+	got := emailAIHTMLBody(notif, "", "")
 
 	require.Contains(t, got, "본문")
 	require.NotContains(t, got, "<details>")
 	require.NotContains(t, got, "<summary>")
+	require.NotContains(t, got, "자동 대응", "no remediation block when approve url empty")
 }
 
 // TestEmailUsesAIContentWhenBound verifies Subject/Text/HTML are overridden

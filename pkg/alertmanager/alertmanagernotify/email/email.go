@@ -350,6 +350,11 @@ func (n *Email) Notify(ctx context.Context, as ...*types.Alert) (bool, error) {
 			if aiNotif.CustomerNotice != "" {
 				body = body + "\n\n" + alertmanagertypes.CollapsibleNoticeLabel + "\n" + aiNotif.CustomerNotice
 			}
+			// Human-gated auto-remediation: append summary + approval link.
+			if incidentInfo.RemediationApproveURL != "" {
+				body = body + "\n\n🔧 자동 대응: " + incidentInfo.RemediationSummary +
+					"\n승인: " + incidentInfo.RemediationApproveURL
+			}
 		}
 		qw := quotedprintable.NewWriter(w)
 		_, err = qw.Write([]byte(body))
@@ -378,7 +383,7 @@ func (n *Email) Notify(ctx context.Context, as ...*types.Alert) (bool, error) {
 			return false, errors.WrapInternalf(err, errors.CodeInternal, "execute html template")
 		}
 		if aiOK {
-			body = emailAIHTMLBody(aiNotif)
+			body = emailAIHTMLBody(aiNotif, incidentInfo.RemediationSummary, incidentInfo.RemediationApproveURL)
 		}
 		qw := quotedprintable.NewWriter(w)
 		_, err = qw.Write([]byte(body))
@@ -461,7 +466,7 @@ func (n *Email) getAuthSecret() (string, error) {
 
 // emailAIHTMLBody renders the AI main body as HTML and wraps the customer
 // notice in a <details><summary>자세히보기</summary>…</details> collapsible.
-func emailAIHTMLBody(n alertmanagertypes.SOPBoundNotification) string {
+func emailAIHTMLBody(n alertmanagertypes.SOPBoundNotification, remSummary, remApproveURL string) string {
 	esc := func(s string) string {
 		return strings.ReplaceAll(htmlpkg.EscapeString(s), "\n", "<br>")
 	}
@@ -472,6 +477,15 @@ func emailAIHTMLBody(n alertmanagertypes.SOPBoundNotification) string {
 		sb.WriteString("<details><summary>자세히보기</summary><div>")
 		sb.WriteString(esc(n.CustomerNotice))
 		sb.WriteString("</div></details>")
+	}
+	// Human-gated auto-remediation: summary + clickable approval link. The full
+	// script is never included; the operator reviews it on the approval card.
+	if remApproveURL != "" {
+		sb.WriteString(`<div style="margin-top:12px"><strong>🔧 자동 대응:</strong> `)
+		sb.WriteString(esc(remSummary))
+		sb.WriteString(` <a href="`)
+		sb.WriteString(htmlpkg.EscapeString(remApproveURL))
+		sb.WriteString(`">승인하기</a></div>`)
 	}
 	sb.WriteString("</div>")
 	return sb.String()

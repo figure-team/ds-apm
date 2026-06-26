@@ -24,6 +24,7 @@ type remediationHookAdapter struct {
 func (a remediationHookAdapter) MaybePropose(
 	ctx context.Context,
 	orgID, incidentID, fp string,
+	labels map[string]string,
 	doc ruletypes.SOPDocument,
 ) (map[string]string, bool) {
 	cfg, err := a.store.GetConfig(ctx, orgID)
@@ -31,7 +32,7 @@ func (a remediationHookAdapter) MaybePropose(
 		// fail-open: don't block alert delivery on a config-load error
 		return nil, false
 	}
-	return a.proposer.Propose(ctx, orgID, incidentID, fp, doc, cfg)
+	return a.proposer.Propose(ctx, orgID, incidentID, fp, labels, doc, cfg)
 }
 
 // alertStateLookup implements remediation.AlertStateLookup over the alertmanager

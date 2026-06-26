@@ -2,6 +2,7 @@ package remediation
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -72,7 +73,8 @@ func TestPropose_CreatesExecutionAndAnnotations(t *testing.T) {
 	p := NewProposer(fs, "https://apm.example.com", fixedNow)
 	cfg := ruletypes.RemediationConfig{ExecutionEnabled: true, ProposalTTLSeconds: 1800}.WithDefaults()
 
-	ann, ok := p.Propose(context.Background(), "org-1", "inc-1", "fp-1", docWithApprovedRunbook(), cfg)
+	labels := map[string]string{"ruleId": "rule-123"}
+	ann, ok := p.Propose(context.Background(), "org-1", "inc-1", "fp-1", labels, docWithApprovedRunbook(), cfg)
 	if !ok {
 		t.Fatal("expected proposal")
 	}
@@ -92,8 +94,17 @@ func TestPropose_CreatesExecutionAndAnnotations(t *testing.T) {
 	if ann[alertmanagertypes.IncidentAnnotationRemediationID] != e.ID {
 		t.Fatalf("annotation id mismatch")
 	}
-	if ann[alertmanagertypes.IncidentAnnotationRemediationApproveURL] == "" {
+	approveURL := ann[alertmanagertypes.IncidentAnnotationRemediationApproveURL]
+	if approveURL == "" {
 		t.Fatalf("approve url missing")
+	}
+	// Deep links to the alert detail page with ruleId (from labels) + remediation id.
+	if !strings.HasPrefix(approveURL, "https://apm.example.com/alerts/overview?") {
+		t.Fatalf("approve url must target alert overview, got %q", approveURL)
+	}
+	if !strings.Contains(approveURL, "ruleId=rule-123") ||
+		!strings.Contains(approveURL, "remediation="+e.ID) {
+		t.Fatalf("approve url missing ruleId/remediation params: %q", approveURL)
 	}
 }
 
@@ -101,7 +112,7 @@ func TestPropose_FlagOff_NoOp(t *testing.T) {
 	fs := &fakeStore{}
 	p := NewProposer(fs, "https://x", fixedNow)
 	cfg := ruletypes.RemediationConfig{ExecutionEnabled: false}.WithDefaults()
-	if _, ok := p.Propose(context.Background(), "org-1", "inc-1", "fp-1", docWithApprovedRunbook(), cfg); ok {
+	if _, ok := p.Propose(context.Background(), "org-1", "inc-1", "fp-1", nil, docWithApprovedRunbook(), cfg); ok {
 		t.Fatal("flag off must not propose")
 	}
 	if len(fs.created) != 0 {
@@ -115,7 +126,7 @@ func TestPropose_NoApprovedRunbook_NoOp(t *testing.T) {
 	cfg := ruletypes.RemediationConfig{ExecutionEnabled: true}.WithDefaults()
 	doc := ruletypes.SOPDocument{SOPID: "SOP-1", Version: "v1",
 		Runbooks: []ruletypes.Runbook{{ID: "d", Status: ruletypes.RunbookStatusDraft, ExecutableScript: "x"}}}
-	if _, ok := p.Propose(context.Background(), "org-1", "inc-1", "fp-1", doc, cfg); ok {
+	if _, ok := p.Propose(context.Background(), "org-1", "inc-1", "fp-1", nil, doc, cfg); ok {
 		t.Fatal("no approved runbook must not propose")
 	}
 }
@@ -124,7 +135,7 @@ func TestPropose_CreateError_FailOpen(t *testing.T) {
 	fs := &fakeStore{createErr: context.DeadlineExceeded}
 	p := NewProposer(fs, "https://x", fixedNow)
 	cfg := ruletypes.RemediationConfig{ExecutionEnabled: true}.WithDefaults()
-	if _, ok := p.Propose(context.Background(), "org-1", "inc-1", "fp-1", docWithApprovedRunbook(), cfg); ok {
+	if _, ok := p.Propose(context.Background(), "org-1", "inc-1", "fp-1", nil, docWithApprovedRunbook(), cfg); ok {
 		t.Fatal("store error must yield no proposal (fail-open)")
 	}
 }

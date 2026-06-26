@@ -3,6 +3,7 @@ package remediation
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -44,6 +45,7 @@ func NewProposer(store remediationstore.Store, baseURL string, now func() time.T
 func (p *Proposer) Propose(
 	ctx context.Context,
 	orgID, incidentID, alertFingerprint string,
+	labels map[string]string,
 	doc ruletypes.SOPDocument,
 	cfg ruletypes.RemediationConfig,
 ) (map[string]string, bool) {
@@ -76,7 +78,7 @@ func (p *Proposer) Propose(
 	ann := map[string]string{
 		alertmanagertypes.IncidentAnnotationRemediationID:            e.ID,
 		alertmanagertypes.IncidentAnnotationRemediationScriptSummary: scriptSummary(rb),
-		alertmanagertypes.IncidentAnnotationRemediationApproveURL:    p.approveURL(incidentID, e.ID),
+		alertmanagertypes.IncidentAnnotationRemediationApproveURL:    p.approveURL(labels["ruleId"], e.ID),
 	}
 	return ann, true
 }
@@ -103,8 +105,17 @@ func scriptSummary(rb ruletypes.Runbook) string {
 	return fmt.Sprintf("%s (승인 시 웹 UI에서 실행)", title)
 }
 
-// approveURL constructs the web URL where an operator can review and approve
-// the proposed remediation execution.
-func (p *Proposer) approveURL(incidentID, remediationID string) string {
-	return fmt.Sprintf("%s/incidents/%s?remediation=%s", p.baseURL, incidentID, remediationID)
+// approveURL constructs the web URL where an operator reviews and approves the
+// proposed remediation. It deep links to the alert detail page (ALERT_OVERVIEW,
+// loaded by ruleId) with the remediation id in the query so the RemediationCard
+// renders for this specific proposal. ruleID comes from the alert's "ruleId"
+// label (alertmanager DefaultGroupBy); when absent the card still loads from the
+// remediation query param, the page just lacks rule context.
+func (p *Proposer) approveURL(ruleID, remediationID string) string {
+	q := url.Values{}
+	if ruleID != "" {
+		q.Set("ruleId", ruleID)
+	}
+	q.Set("remediation", remediationID)
+	return fmt.Sprintf("%s/alerts/overview?%s", p.baseURL, q.Encode())
 }

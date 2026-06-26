@@ -96,6 +96,8 @@ func SanitizeIncidentInfo(info IncidentInfo) IncidentInfo {
 		AIConfidence:     SanitizeIncidentValue(info.AIConfidence),
 		AILimitations:    SanitizeIncidentValue(info.AILimitations),
 		AIEvidenceRefs:   SanitizeIncidentValue(info.AIEvidenceRefs),
+		RemediationSummary:    SanitizeIncidentValue(info.RemediationSummary),
+		RemediationApproveURL: SanitizeIncidentValue(info.RemediationApproveURL),
 	}
 }
 
@@ -215,6 +217,8 @@ func IncidentInfoFields(info IncidentInfo) []IncidentField {
 		{Key: "ai_first_actions", Title: "AI first actions", Value: info.AIFirstActions},
 		{Key: "ai_limitations", Title: "AI limitations", Value: info.AILimitations},
 		{Key: "ai_evidence_refs", Title: "AI evidence refs", Value: info.AIEvidenceRefs},
+		{Key: "remediation_summary", Title: "Auto-remediation", Value: info.RemediationSummary},
+		{Key: "remediation_approve_url", Title: "Approve", Value: info.RemediationApproveURL},
 	}
 
 	return nonEmptyIncidentFields(fields)
@@ -237,6 +241,8 @@ func IncidentInfoFieldsCompact(info IncidentInfo) []IncidentField {
 		{Key: "severity", Title: "Severity", Value: info.Severity, Short: true},
 		{Key: "sop_title", Title: "SOP title", Value: info.SopTitle},
 		{Key: "sop_url", Title: "SOP URL", Value: info.SopURL},
+		{Key: "remediation_summary", Title: "Auto-remediation", Value: info.RemediationSummary},
+		{Key: "remediation_approve_url", Title: "Approve", Value: info.RemediationApproveURL},
 	}
 
 	return nonEmptyIncidentFields(fields)

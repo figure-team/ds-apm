@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { RuletypesRuleDTO } from 'api/generated/services/sigNoz.schemas';
 import CreateAlertV2Header from 'container/CreateAlertV2/CreateAlertHeader';
+import useUrlQuery from 'hooks/useUrlQuery';
 import LineClampedText from 'periscope/components/LineClampedText/LineClampedText';
 import { useAlertRule } from 'providers/Alert';
 import {
@@ -26,6 +27,13 @@ function AlertHeader({ alertDetails }: AlertHeaderProps): JSX.Element {
 	const { state, alert: alertName, labels, annotations } = alertDetails;
 	const { alertRuleState } = useAlertRule();
 	const [updatedName, setUpdatedName] = useState(alertName);
+
+	// Auto-remediation: the per-incident remediation id arrives via the notification
+	// deep link (?remediation=...), not the rule's static annotations. Prefer the
+	// query param, falling back to an annotation if present.
+	const urlQuery = useUrlQuery();
+	const remediationId =
+		urlQuery.get('remediation') || annotations?.remediation_id;
 
 	const labelsWithoutSeverity = useMemo(() => {
 		if (labels) {
@@ -74,9 +82,7 @@ function AlertHeader({ alertDetails }: AlertHeaderProps): JSX.Element {
 					labels={labels}
 					strategyHistory={aiStrategyHistory}
 				/>
-				{annotations?.remediation_id && (
-					<RemediationCard remediationId={annotations.remediation_id} />
-				)}
+				{remediationId && <RemediationCard remediationId={remediationId} />}
 			</div>
 			<div className="alert-info__action-buttons">
 				<AlertActionButtons

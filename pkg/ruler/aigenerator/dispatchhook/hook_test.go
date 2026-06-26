@@ -785,13 +785,15 @@ func boundLabels(t *testing.T) map[string]string {
 
 // fakeRemediationProposer records calls and returns canned annotations.
 type fakeRemediationProposer struct {
-	called bool
-	ann    map[string]string
-	ok     bool
+	called     bool
+	gotLabels  map[string]string
+	ann        map[string]string
+	ok         bool
 }
 
-func (f *fakeRemediationProposer) MaybePropose(_ context.Context, orgID, incidentID, fp string, doc ruletypes.SOPDocument) (map[string]string, bool) {
+func (f *fakeRemediationProposer) MaybePropose(_ context.Context, orgID, incidentID, fp string, labels map[string]string, doc ruletypes.SOPDocument) (map[string]string, bool) {
 	f.called = true
+	f.gotLabels = labels
 	return f.ann, f.ok
 }
 

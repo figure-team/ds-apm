@@ -35,7 +35,7 @@ type CodeRCATrigger interface {
 // Apply calls it only on the Bound branch; a nil proposer or a (nil,false)
 // return leaves annotations unchanged.
 type RemediationProposer interface {
-	MaybePropose(ctx context.Context, orgID, incidentID, alertFingerprint string, doc ruletypes.SOPDocument) (map[string]string, bool)
+	MaybePropose(ctx context.Context, orgID, incidentID, alertFingerprint string, labels map[string]string, doc ruletypes.SOPDocument) (map[string]string, bool)
 }
 
 // DefaultGenerateTimeout is the upper bound the hook imposes on the AI
@@ -190,7 +190,7 @@ func (h *Hook) Apply(
 			// create a proposed execution and merge its annotations. Fail-open:
 			// never blocks the alert.
 			if h.remediation != nil {
-				if remAnn, ok := h.remediation.MaybePropose(ctx, orgID, incidentID, alertFingerprint, doc); ok && len(remAnn) > 0 {
+				if remAnn, ok := h.remediation.MaybePropose(ctx, orgID, incidentID, alertFingerprint, labels, doc); ok && len(remAnn) > 0 {
 					merged = mergeAnnotations(merged, remAnn)
 				}
 			}
@@ -242,7 +242,7 @@ func (h *Hook) Apply(
 	// create a proposed execution and merge its annotations. Fail-open:
 	// never blocks the alert.
 	if h.remediation != nil {
-		if remAnn, ok := h.remediation.MaybePropose(ctx, orgID, incidentID, alertFingerprint, doc); ok && len(remAnn) > 0 {
+		if remAnn, ok := h.remediation.MaybePropose(ctx, orgID, incidentID, alertFingerprint, labels, doc); ok && len(remAnn) > 0 {
 			merged = mergeAnnotations(merged, remAnn)
 		}
 	}
