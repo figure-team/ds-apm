@@ -21,6 +21,11 @@ jest.mock('container/Runbooks/RunbooksSection', () => ({
 	default: (): JSX.Element => <div>RunbooksSectionStub</div>,
 }));
 
+jest.mock('../RemediationConfigToggle', () => ({
+	__esModule: true,
+	default: (): JSX.Element => <div>RemediationConfigToggleStub</div>,
+}));
+
 const mockCreateSopDocument = createSopDocument as jest.MockedFunction<
 	typeof createSopDocument
 >;

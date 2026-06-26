@@ -33,3 +33,29 @@ export const rejectRemediation = (id: string): Promise<RemediationExecution> =>
 		url: `/api/v2/ds/remediation/${encodeURIComponent(id)}/reject`,
 		method: 'POST',
 	}).then((r) => r.data);
+
+// RemediationConfig is the org-wide auto-remediation master switch + timing
+// knobs. Admin-only on both read and write (the backend routes enforce
+// AdminAccess). executionEnabled is the toggle surfaced on the SOP page.
+export interface RemediationConfig {
+	executionEnabled: boolean;
+	proposalTtlSeconds: number;
+	execTimeoutSeconds: number;
+	verifyWindowSeconds: number;
+	maxConcurrent: number;
+}
+
+export const getRemediationConfig = (): Promise<RemediationConfig> =>
+	GeneratedAPIInstance<ApiResponse<RemediationConfig>>({
+		url: `/api/v2/ds/remediation/config`,
+		method: 'GET',
+	}).then((r) => r.data);
+
+export const updateRemediationConfig = (
+	config: RemediationConfig,
+): Promise<RemediationConfig> =>
+	GeneratedAPIInstance<ApiResponse<RemediationConfig>>({
+		url: `/api/v2/ds/remediation/config`,
+		method: 'PUT',
+		data: config,
+	}).then((r) => r.data);

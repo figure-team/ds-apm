@@ -47,5 +47,13 @@
 	"btn_back_to_list": "← SOP 문서 목록",
 	"btn_edit_document": "문서 수정",
 	"menu_edit_document": "문서 수정",
-	"detail_runbooks_hint": "이 SOP에 연결된 Runbook(자동 대응 작업)을 관리합니다."
+	"detail_runbooks_hint": "이 SOP에 연결된 Runbook(자동 대응 작업)을 관리합니다.",
+	"remediation_toggle_title": "조직 자동 대응 실행",
+	"remediation_toggle_description": "이 조직 전체에서 승인된 Runbook의 자동 대응 스크립트 실행을 허용합니다. 비상 시 전체를 즉시 중단하는 마스터 스위치입니다. (관리자 전용)",
+	"remediation_toggle_status_enabled": "활성화됨",
+	"remediation_toggle_status_disabled": "비활성화됨",
+	"remediation_toggle_confirm_on": "이 조직 전체에서 자동 대응 실행을 활성화하시겠습니까? 승인된 Runbook의 스크립트가 운영자 승인 후 실제로 실행됩니다.",
+	"remediation_toggle_confirm_off": "자동 대응 실행을 비활성화하시겠습니까? 진행 중이 아닌 신규 자동 대응 제안이 더 이상 생성되지 않습니다.",
+	"remediation_toggle_load_error": "자동 대응 설정을 불러오지 못했습니다.",
+	"remediation_toggle_save_error": "자동 대응 설정 저장에 실패했습니다."
 }

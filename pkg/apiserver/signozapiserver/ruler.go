@@ -634,6 +634,38 @@ func (provider *provider) addRulerRoutes(router *mux.Router) error {
 		return err
 	}
 
+	// NOTE: the /config routes MUST be registered before /{id} below — gorilla/mux
+	// matches in registration order, so otherwise GET /remediation/config would be
+	// captured by the /{id} route with id="config".
+	if err := router.Handle("/api/v2/ds/remediation/config", handler.New(provider.authZ.AdminAccess(provider.rulerHandler.GetRemediationConfig), handler.OpenAPIDef{
+		ID:                  "GetRemediationConfig",
+		Tags:                []string{"remediation"},
+		Summary:             "Get org auto-remediation config",
+		Description:         "Returns the org-wide auto-remediation master switch (executionEnabled) and timing knobs; admin role required.",
+		Response:            new(ruletypes.RemediationConfig),
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusForbidden, http.StatusUnauthorized},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
+	})).Methods(http.MethodGet).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/remediation/config", handler.New(provider.authZ.AdminAccess(provider.rulerHandler.UpdateRemediationConfig), handler.OpenAPIDef{
+		ID:                  "UpdateRemediationConfig",
+		Tags:                []string{"remediation"},
+		Summary:             "Update org auto-remediation config",
+		Description:         "Upserts the org-wide auto-remediation master switch (executionEnabled) and timing knobs; admin role required.",
+		Request:             new(ruletypes.RemediationConfig),
+		Response:            new(ruletypes.RemediationConfig),
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusBadRequest, http.StatusForbidden, http.StatusUnauthorized},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
+	})).Methods(http.MethodPut).GetError(); err != nil {
+		return err
+	}
+
 	if err := router.Handle("/api/v2/ds/remediation/{id}", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.GetRemediation), handler.OpenAPIDef{
 		ID:                  "GetRemediation",
 		Tags:                []string{"remediation"},

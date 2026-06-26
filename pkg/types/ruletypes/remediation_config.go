@@ -1,5 +1,10 @@
 package ruletypes
 
+import (
+	"errors"
+	"fmt"
+)
+
 // RemediationConfig is the per-org master switch + timing knobs for the
 // remediation execution feature (design §6). ExecutionEnabled defaults OFF so
 // the feature is inert until an org explicitly opts in.
@@ -39,4 +44,25 @@ func (c RemediationConfig) WithDefaults() RemediationConfig {
 		c.MaxConcurrent = d.MaxConcurrent
 	}
 	return c
+}
+
+// ValidateRemediationConfig rejects out-of-range knobs before persistence.
+// Zero is tolerated for the numeric knobs (WithDefaults backfills them); only
+// negative values and a non-positive concurrency cap are errors. ExecutionEnabled
+// needs no validation — any bool is valid.
+func ValidateRemediationConfig(c RemediationConfig) error {
+	var errs []error
+	if c.ProposalTTLSeconds < 0 {
+		errs = append(errs, fmt.Errorf("proposalTtlSeconds: must be >= 0 (got %d)", c.ProposalTTLSeconds))
+	}
+	if c.ExecTimeoutSeconds < 0 {
+		errs = append(errs, fmt.Errorf("execTimeoutSeconds: must be >= 0 (got %d)", c.ExecTimeoutSeconds))
+	}
+	if c.VerifyWindowSeconds < 0 {
+		errs = append(errs, fmt.Errorf("verifyWindowSeconds: must be >= 0 (got %d)", c.VerifyWindowSeconds))
+	}
+	if c.MaxConcurrent < 0 {
+		errs = append(errs, fmt.Errorf("maxConcurrent: must be >= 0 (got %d)", c.MaxConcurrent))
+	}
+	return errors.Join(errs...)
 }

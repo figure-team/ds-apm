@@ -25,6 +25,10 @@ type Store interface {
 	Transition(ctx context.Context, orgID, id, toStatus string, patch TransitionPatch) error
 	CountActiveByOrg(ctx context.Context, orgID string) (int64, error) // executing only (approved is retired in v1)
 	GetConfig(ctx context.Context, orgID string) (ruletypes.RemediationConfig, error)
+	// UpsertConfig inserts or updates the per-org remediation config. Used by the
+	// admin-only config endpoint to flip ExecutionEnabled (org-wide master switch)
+	// and the timing knobs. Callers should validate before calling.
+	UpsertConfig(ctx context.Context, orgID string, cfg ruletypes.RemediationConfig) error
 }
 
 // TransitionPatch carries optional result fields for a status transition. Empty

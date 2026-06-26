@@ -149,6 +149,50 @@ func TestGetConfig_DefaultsWhenUnset(t *testing.T) {
 	}
 }
 
+func TestUpsertConfig_InsertThenReadBack(t *testing.T) {
+	s := newTestStore(t)
+	ctx := context.Background()
+
+	cfg := ruletypes.RemediationConfig{ExecutionEnabled: true, MaxConcurrent: 3}
+	if err := s.UpsertConfig(ctx, "org-1", cfg); err != nil {
+		t.Fatal(err)
+	}
+	got, err := s.GetConfig(ctx, "org-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !got.ExecutionEnabled {
+		t.Fatalf("executionEnabled must persist: %+v", got)
+	}
+	if got.MaxConcurrent != 3 {
+		t.Fatalf("maxConcurrent must persist: %+v", got)
+	}
+	// Zeroed timing knobs must be backfilled with defaults, not stored as 0.
+	if got.ProposalTTLSeconds != 1800 || got.ExecTimeoutSeconds != 300 {
+		t.Fatalf("timing knobs must backfill to defaults: %+v", got)
+	}
+}
+
+func TestUpsertConfig_OverwritesExisting(t *testing.T) {
+	s := newTestStore(t)
+	ctx := context.Background()
+
+	if err := s.UpsertConfig(ctx, "org-1", ruletypes.RemediationConfig{ExecutionEnabled: true}); err != nil {
+		t.Fatal(err)
+	}
+	// Second write flips the switch off — exercises the ON CONFLICT update path.
+	if err := s.UpsertConfig(ctx, "org-1", ruletypes.RemediationConfig{ExecutionEnabled: false}); err != nil {
+		t.Fatal(err)
+	}
+	got, err := s.GetConfig(ctx, "org-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.ExecutionEnabled {
+		t.Fatalf("second upsert must turn executionEnabled off: %+v", got)
+	}
+}
+
 func TestListByIncident(t *testing.T) {
 	s := newTestStore(t)
 	ctx := context.Background()

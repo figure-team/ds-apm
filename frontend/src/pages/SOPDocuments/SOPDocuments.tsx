@@ -29,6 +29,7 @@ import SopBulkPreviewDrawer from './SopBulkPreviewDrawer';
 import SopDocumentFormDrawer, {
 	type SopDocumentEditTarget,
 } from './SopDocumentFormDrawer';
+import RemediationConfigToggle from './RemediationConfigToggle';
 
 function getErrorMessage(error: unknown): string {
 	if (typeof error === 'object' && error !== null && 'response' in error) {
@@ -414,6 +415,7 @@ function SOPDocuments(): JSX.Element {
 						))}
 					</div>
 				)}
+				<RemediationConfigToggle />
 			</section>
 
 			<SopDocumentDetail

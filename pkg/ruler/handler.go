@@ -54,6 +54,8 @@ type Handler interface {
 	ListRemediations(http.ResponseWriter, *http.Request)
 	ApproveRemediation(http.ResponseWriter, *http.Request)
 	RejectRemediation(http.ResponseWriter, *http.Request)
+	GetRemediationConfig(http.ResponseWriter, *http.Request)
+	UpdateRemediationConfig(http.ResponseWriter, *http.Request)
 
 	ListDowntimeSchedules(http.ResponseWriter, *http.Request)
 	GetDowntimeScheduleByID(http.ResponseWriter, *http.Request)

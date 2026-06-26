@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/SigNoz/signoz/pkg/errors"
+	"github.com/SigNoz/signoz/pkg/http/binding"
 	"github.com/SigNoz/signoz/pkg/http/render"
 	"github.com/SigNoz/signoz/pkg/ruler/remediation"
 	"github.com/SigNoz/signoz/pkg/ruler/remediationstore"
@@ -183,6 +184,53 @@ func truncateRemediationSnippet(s string) string {
 		return s[:n] + "..."
 	}
 	return s
+}
+
+// GetRemediationConfig handles GET /api/v2/ds/remediation/config. Admin-only
+// (enforced by the route's AdminAccess guard): returns the org's auto-remediation
+// master switch (ExecutionEnabled) + timing knobs, backfilled with defaults when
+// no row exists. The SOP page shows this state and lets admins flip the toggle.
+func (h *handler) GetRemediationConfig(rw http.ResponseWriter, req *http.Request) {
+	orgID, err := requireOrg(req)
+	if err != nil {
+		render.Error(rw, err)
+		return
+	}
+	cfg, err := h.remediationStore.GetConfig(req.Context(), orgID)
+	if err != nil {
+		render.Error(rw, errors.WrapInternalf(err, errors.CodeInternal, "load remediation config"))
+		return
+	}
+	render.Success(rw, http.StatusOK, cfg)
+}
+
+// UpdateRemediationConfig handles PUT /api/v2/ds/remediation/config. Admin-only:
+// upserts the org's auto-remediation config. The ExecutionEnabled master switch
+// is the primary knob the SOP-page toggle flips; numeric knobs are validated and
+// backfilled with defaults so a toggle-only payload never zeroes the timing values.
+func (h *handler) UpdateRemediationConfig(rw http.ResponseWriter, req *http.Request) {
+	orgID, err := requireOrg(req)
+	if err != nil {
+		render.Error(rw, err)
+		return
+	}
+	var incoming ruletypes.RemediationConfig
+	if err := binding.JSON.BindBody(req.Body, &incoming); err != nil {
+		render.Error(rw, err)
+		return
+	}
+	defer req.Body.Close() //nolint:errcheck
+
+	incoming = incoming.WithDefaults()
+	if err := ruletypes.ValidateRemediationConfig(incoming); err != nil {
+		render.Error(rw, errors.WrapInvalidInputf(err, errors.CodeInvalidInput, "remediation config validation failed"))
+		return
+	}
+	if err := h.remediationStore.UpsertConfig(req.Context(), orgID, incoming); err != nil {
+		render.Error(rw, errors.WrapInternalf(err, errors.CodeInternal, "save remediation config"))
+		return
+	}
+	render.Success(rw, http.StatusOK, incoming)
 }
 
 // RejectRemediation handles POST /api/v2/ds/remediation/{id}/reject. The store's

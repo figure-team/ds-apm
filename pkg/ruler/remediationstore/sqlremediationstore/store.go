@@ -307,3 +307,29 @@ func (s *SQLStore) GetConfig(ctx context.Context, orgID string) (ruletypes.Remed
 	}
 	return c.WithDefaults(), nil
 }
+
+// UpsertConfig inserts or updates the per-org remediation config row. Numeric
+// knobs are backfilled with defaults so a partial payload (e.g. only the
+// ExecutionEnabled toggle) never writes zeroed-out timing values. Mirrors the
+// ON CONFLICT idiom in sqlaiconfigstore.
+func (s *SQLStore) UpsertConfig(ctx context.Context, orgID string, cfg ruletypes.RemediationConfig) error {
+	cfg = cfg.WithDefaults()
+	row := configRow{
+		OrgID:               orgID,
+		ExecutionEnabled:    cfg.ExecutionEnabled,
+		ProposalTTLSeconds:  cfg.ProposalTTLSeconds,
+		ExecTimeoutSeconds:  cfg.ExecTimeoutSeconds,
+		VerifyWindowSeconds: cfg.VerifyWindowSeconds,
+		MaxConcurrent:       cfg.MaxConcurrent,
+	}
+	_, err := s.sqlstore.BunDB().NewInsert().
+		Model(&row).
+		On("CONFLICT (org_id) DO UPDATE").
+		Set("execution_enabled = EXCLUDED.execution_enabled").
+		Set("proposal_ttl_seconds = EXCLUDED.proposal_ttl_seconds").
+		Set("exec_timeout_seconds = EXCLUDED.exec_timeout_seconds").
+		Set("verify_window_seconds = EXCLUDED.verify_window_seconds").
+		Set("max_concurrent = EXCLUDED.max_concurrent").
+		Exec(ctx)
+	return err
+}

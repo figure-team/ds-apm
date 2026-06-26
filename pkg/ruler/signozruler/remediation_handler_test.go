@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -144,6 +145,13 @@ func (f *fakeRemediationStore) GetConfig(_ context.Context, _ string) (ruletypes
 	return f.cfg, nil
 }
 
+func (f *fakeRemediationStore) UpsertConfig(_ context.Context, _ string, cfg ruletypes.RemediationConfig) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.cfg = cfg.WithDefaults()
+	return nil
+}
+
 // fakeRunner records the script it was asked to run and signals completion so
 // tests can synchronise on the async execution goroutine.
 type fakeRunner struct {
@@ -199,6 +207,58 @@ func newAuthedReq(t *testing.T, method, target, _ string, vars map[string]string
 		req = muxSetVar(req, k, v)
 	}
 	return req
+}
+
+func TestGetRemediationConfig_ReturnsConfig(t *testing.T) {
+	h, _, _ := newRemediationHandler(t)
+
+	rw := httptest.NewRecorder()
+	req := newAuthedReq(t, http.MethodGet, "/api/v2/ds/remediation/config", testOrgID, nil)
+	h.GetRemediationConfig(rw, req)
+
+	if rw.Code != http.StatusOK {
+		t.Fatalf("want 200, got %d (body=%s)", rw.Code, rw.Body.String())
+	}
+	if !strings.Contains(rw.Body.String(), "executionEnabled") {
+		t.Fatalf("response missing executionEnabled: %s", rw.Body.String())
+	}
+}
+
+func TestUpdateRemediationConfig_PersistsToggle(t *testing.T) {
+	h, store, _ := newRemediationHandler(t)
+	// Fake seeds ExecutionEnabled:true; PUT flips it off.
+	req := httptest.NewRequest(http.MethodPut, "/api/v2/ds/remediation/config",
+		strings.NewReader(`{"executionEnabled": false}`))
+	req = withSOPTestClaims(req)
+
+	rw := httptest.NewRecorder()
+	h.UpdateRemediationConfig(rw, req)
+
+	if rw.Code != http.StatusOK {
+		t.Fatalf("want 200, got %d (body=%s)", rw.Code, rw.Body.String())
+	}
+	got, _ := store.GetConfig(context.Background(), testOrgID)
+	if got.ExecutionEnabled {
+		t.Fatalf("PUT must persist executionEnabled=false, got %+v", got)
+	}
+	// Toggle-only payload must not zero the timing knobs.
+	if got.ProposalTTLSeconds != 1800 {
+		t.Fatalf("timing knobs must backfill, got %+v", got)
+	}
+}
+
+func TestUpdateRemediationConfig_RejectsNegative(t *testing.T) {
+	h, _, _ := newRemediationHandler(t)
+	req := httptest.NewRequest(http.MethodPut, "/api/v2/ds/remediation/config",
+		strings.NewReader(`{"executionEnabled": true, "maxConcurrent": -3}`))
+	req = withSOPTestClaims(req)
+
+	rw := httptest.NewRecorder()
+	h.UpdateRemediationConfig(rw, req)
+
+	if rw.Code != http.StatusBadRequest {
+		t.Fatalf("want 400 on negative knob, got %d (body=%s)", rw.Code, rw.Body.String())
+	}
 }
 
 func TestApproveRemediation_Wins_StartsExecution(t *testing.T) {

@@ -51,6 +51,10 @@ func (f *fakeStore) GetConfig(_ context.Context, _ string) (ruletypes.Remediatio
 	return ruletypes.RemediationConfig{}, nil
 }
 
+func (f *fakeStore) UpsertConfig(_ context.Context, _ string, _ ruletypes.RemediationConfig) error {
+	return nil
+}
+
 func fixedNow() time.Time { return time.Date(2026, 6, 24, 0, 0, 0, 0, time.UTC) }
 
 func docWithApprovedRunbook() ruletypes.SOPDocument {

@@ -50,6 +50,9 @@ func (s *vFakeStore) CountActiveByOrg(_ context.Context, _ string) (int64, error
 func (s *vFakeStore) GetConfig(_ context.Context, _ string) (ruletypes.RemediationConfig, error) {
 	return ruletypes.RemediationConfig{}, nil
 }
+func (s *vFakeStore) UpsertConfig(_ context.Context, _ string, _ ruletypes.RemediationConfig) error {
+	return nil
+}
 
 // ---------------------------------------------------------------------------
 // Fake AlertStateLookup

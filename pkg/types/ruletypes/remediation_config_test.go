@@ -28,3 +28,20 @@ func TestRemediationConfigWithDefaults(t *testing.T) {
 		t.Fatalf("explicit value clobbered: %+v", c2)
 	}
 }
+
+func TestValidateRemediationConfig(t *testing.T) {
+	// Both toggle states with sane knobs are valid.
+	if err := ValidateRemediationConfig(RemediationConfig{ExecutionEnabled: true}.WithDefaults()); err != nil {
+		t.Fatalf("enabled default config must be valid: %v", err)
+	}
+	if err := ValidateRemediationConfig(DefaultRemediationConfig()); err != nil {
+		t.Fatalf("default config must be valid: %v", err)
+	}
+	// Negative knobs are rejected.
+	if err := ValidateRemediationConfig(RemediationConfig{ProposalTTLSeconds: -1}); err == nil {
+		t.Error("negative proposalTtlSeconds must be rejected")
+	}
+	if err := ValidateRemediationConfig(RemediationConfig{MaxConcurrent: -5}); err == nil {
+		t.Error("negative maxConcurrent must be rejected")
+	}
+}
