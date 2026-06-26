@@ -85,11 +85,21 @@ function RemediationCard({ remediationId }: RemediationCardProps): JSX.Element |
 	if (!rem) return null;
 
 	const isProposed = rem.status === 'proposed';
+	// Once the remediation has actually run it carries a result (exit code /
+	// output / verify outcome). For those we lead with the result and tuck the
+	// raw script behind a toggle — the executed code matters less than what it
+	// did. Before that (proposed/approved/executing) the script is the point.
+	const hasResult =
+		typeof rem.exitCode === 'number' ||
+		Boolean(rem.outputSnippet) ||
+		Boolean(rem.verifyResult);
 
 	return (
 		<div className="remediation-card">
 			<div className="remediation-card__header">
-				<h4 className="remediation-card__title">{t('remediation_card_title')}</h4>
+				<h4 className="remediation-card__title">
+					{t(hasResult ? 'remediation_result_card_title' : 'remediation_card_title')}
+				</h4>
 				<span
 					className={`remediation-card__badge remediation-card__badge--${rem.status}`}
 				>
@@ -99,17 +109,26 @@ function RemediationCard({ remediationId }: RemediationCardProps): JSX.Element |
 			<div className="remediation-card__meta">
 				{t('remediation_source_sop')}: {rem.sopId}
 			</div>
-			<pre className="remediation-card__script">{rem.scriptSnapshot}</pre>
-			{typeof rem.exitCode === 'number' && (
-				<div className="remediation-card__exit">
-					{t('remediation_exit_code')}: {rem.exitCode}
-				</div>
-			)}
-			{rem.outputSnippet && (
-				<pre className="remediation-card__output">{rem.outputSnippet}</pre>
-			)}
-			{rem.verifyResult && (
-				<div className="remediation-card__verify">{rem.verifyResult}</div>
+			{hasResult ? (
+				<>
+					{typeof rem.exitCode === 'number' && (
+						<div className="remediation-card__exit">
+							{t('remediation_exit_code')}: {rem.exitCode}
+						</div>
+					)}
+					<pre className="remediation-card__output">
+						{rem.outputSnippet || t('remediation_no_output')}
+					</pre>
+					{rem.verifyResult && (
+						<div className="remediation-card__verify">{rem.verifyResult}</div>
+					)}
+					<details className="remediation-card__script-toggle">
+						<summary>{t('remediation_show_script')}</summary>
+						<pre className="remediation-card__script">{rem.scriptSnapshot}</pre>
+					</details>
+				</>
+			) : (
+				<pre className="remediation-card__script">{rem.scriptSnapshot}</pre>
 			)}
 			{isProposed && (
 				<div className="remediation-card__actions">

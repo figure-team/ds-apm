@@ -556,5 +556,8 @@
 	"remediation_reject": "거절",
 	"remediation_confirm": "이 스크립트를 실행하시겠습니까?",
 	"remediation_exit_code": "종료 코드",
-	"remediation_source_sop": "출처 SOP"
+	"remediation_source_sop": "출처 SOP",
+	"remediation_result_card_title": "자동 대응 결과",
+	"remediation_show_script": "실행한 스크립트 보기",
+	"remediation_no_output": "출력 없음"
 }

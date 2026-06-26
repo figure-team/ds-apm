@@ -556,5 +556,8 @@
 	"remediation_reject": "Reject",
 	"remediation_confirm": "Run this script?",
 	"remediation_exit_code": "Exit code",
-	"remediation_source_sop": "Source SOP"
+	"remediation_source_sop": "Source SOP",
+	"remediation_result_card_title": "Auto-remediation result",
+	"remediation_show_script": "Show executed script",
+	"remediation_no_output": "No output"
 }

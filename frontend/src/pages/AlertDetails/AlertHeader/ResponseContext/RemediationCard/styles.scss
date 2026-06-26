@@ -45,6 +45,21 @@
 		margin-top: 8px;
 	}
 
+	&__script-toggle {
+		margin-top: 8px;
+
+		> summary {
+			cursor: pointer;
+			font-size: 12px;
+			color: var(--text-vanishing, #8d8d8d);
+			user-select: none;
+		}
+
+		.remediation-card__script {
+			margin-top: 8px;
+		}
+	}
+
 	&__verify {
 		font-size: 12px;
 		margin-top: 8px;

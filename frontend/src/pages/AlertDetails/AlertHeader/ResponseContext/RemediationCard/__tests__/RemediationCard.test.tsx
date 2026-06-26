@@ -47,6 +47,28 @@ describe('RemediationCard', () => {
 		);
 	});
 
+	it('leads with the execution result and tucks the script behind a toggle when run', async () => {
+		const api = require('api/remediation');
+		api.getRemediation.mockResolvedValueOnce({
+			id: 'rem-1',
+			status: 'failed',
+			scriptSnapshot: 'echo ran',
+			sopId: 'SOP-1',
+			runbookId: 'rb-1',
+			exitCode: 1,
+			outputSnippet: 'boom',
+		});
+
+		render(<RemediationCard remediationId="rem-1" />);
+
+		// Result is shown; card title switches to the result variant.
+		expect(await screen.findByText('boom')).toBeInTheDocument();
+		expect(screen.getByText('remediation_result_card_title')).toBeInTheDocument();
+		// Script is available behind the toggle (not the primary content).
+		expect(screen.getByText('remediation_show_script')).toBeInTheDocument();
+		expect(screen.getByText(/echo ran/)).toBeInTheDocument();
+	});
+
 	it('does not show action buttons for terminal status', async () => {
 		const api = require('api/remediation');
 		api.getRemediation.mockResolvedValueOnce({
