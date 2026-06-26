@@ -1,19 +1,12 @@
-import { ENTITY_VERSION_V4 } from 'constants/app';
-import { FeatureKeys } from 'constants/features';
-import {
-	getQueryRangeRequestData,
-	getServiceListFromQuery,
-} from 'container/ServiceApplication/utils';
-import { useGetQueriesRange } from 'hooks/queryBuilder/useGetQueriesRange';
-import useGetTopLevelOperations from 'hooks/useGetTopLevelOperations';
+import getService from 'api/metrics/getService';
 import useResourceAttribute from 'hooks/useResourceAttribute';
 import { convertRawQueriesToTraceSelectedTags } from 'hooks/useResourceAttribute/utils';
+import GetMinMax from 'lib/getMinMax';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { QueryKey } from 'react-query';
+import { useQuery } from 'react-query';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
-import { useAppContext } from 'providers/App/App';
 import { AppState } from 'store/reducers';
 import { ServicesList } from 'types/api/metrics/getService';
 import { GlobalReducer } from 'types/reducer/globalTime';
@@ -102,79 +95,36 @@ export default function useNocOverview(firingCount: number): UseNocOverviewResul
 		selectedTime: globalSelectedInterval,
 	} = useSelector<AppState, GlobalReducer>((state) => state.globalTime);
 
-	const { featureFlags } = useAppContext();
-	const dotMetricsEnabled =
-		featureFlags?.find((flag) => flag.name === FeatureKeys.DOT_METRICS_ENABLED)
-			?.active || false;
-
 	const { queries } = useResourceAttribute();
 	const selectedTags = useMemo(
 		() => (convertRawQueriesToTraceSelectedTags(queries) as Tags[]) || [],
 		[queries],
 	);
 
-	const topLevelQueryKey: QueryKey = useMemo(
-		() => [minTime, maxTime, selectedTags, globalSelectedInterval],
-		[minTime, maxTime, selectedTags, globalSelectedInterval],
-	);
-
+	// Reuse the same /api/v2/services endpoint that powers the Services list page.
+	// The previous query_range path rendered all-zero because TABLE-panel responses
+	// are reshaped (no `series`), which getSeriesValue could not read.
 	const {
-		data: topLevelData,
-		isLoading: isTopLevelLoading,
-		isError: isTopLevelError,
-	} = useGetTopLevelOperations(topLevelQueryKey, {
-		start: minTime,
-		end: maxTime,
-	});
-
-	const topLevelOperations = useMemo(
-		() => Object.entries(topLevelData || {}),
-		[topLevelData],
+		data: servicesData,
+		isLoading,
+		isError,
+	} = useQuery<ServicesList[] | undefined>(
+		['noc-overview-services', minTime, maxTime, globalSelectedInterval, selectedTags],
+		() => {
+			const { minTime: start, maxTime: end } = GetMinMax(globalSelectedInterval, [
+				minTime / 1e6,
+				maxTime / 1e6,
+			]);
+			return getService({ start, end, selectedTags });
+		},
+		{
+			keepPreviousData: true,
+		},
 	);
 
-	const queryRangeRequestData = useMemo(
-		() =>
-			getQueryRangeRequestData({
-				topLevelOperations,
-				globalSelectedInterval,
-				dotMetricsEnabled,
-			}),
-		[topLevelOperations, globalSelectedInterval, dotMetricsEnabled],
-	);
-
-	const dataQueries = useGetQueriesRange(queryRangeRequestData, ENTITY_VERSION_V4, {
-		queryKey: useMemo(
-			() => [
-				`noc-overview-${globalSelectedInterval}`,
-				maxTime,
-				minTime,
-				globalSelectedInterval,
-			],
-			[globalSelectedInterval, maxTime, minTime],
-		),
-		keepPreviousData: true,
-		enabled: topLevelOperations.length > 0,
-		refetchOnMount: false,
-	});
-
-	const isQueriesLoading = useMemo(
-		() => dataQueries.some((query) => query.isLoading),
-		[dataQueries],
-	);
-	const isQueriesError = useMemo(
-		() => dataQueries.some((query) => query.isError),
-		[dataQueries],
-	);
-
-	const services: ServicesList[] = useMemo(
-		() =>
-			getServiceListFromQuery({
-				queries: dataQueries,
-				topLevelOperations,
-				isLoading: isQueriesLoading,
-			}),
-		[dataQueries, topLevelOperations, isQueriesLoading],
-	);
+	const services: ServicesList[] = useMemo(() => servicesData || [], [
+		servicesData,
+	]);
 
 	const agg = useMemo(() => aggregate(services), [services]);
 
@@ -192,9 +142,6 @@ export default function useNocOverview(firingCount: number): UseNocOverviewResul
 				.slice(0, MAX_SERVICE_ROWS),
 		[services],
 	);
-
-	const isLoading = isTopLevelLoading || isQueriesLoading;
-	const isError = isTopLevelError || isQueriesError;
 
 	const kpis = useMemo<NocKpi[]>(() => {
 		const uptimePct = agg.total > 0 ? (agg.healthy / agg.total) * 100 : 100;
