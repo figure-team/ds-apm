@@ -505,10 +505,14 @@ func New(
 		))
 
 		// Dispatch-hook proposer: wraps the Proposer in a MaybePropose adapter.
-		// baseURL is intentionally empty — the approve URL is best-effort and the
-		// Proposer trims trailing slashes before building the link. TODO: wire in
-		// a SiteURL config field when one is added to the signoz Config struct.
-		proposer := remediation.NewProposer(remStore, "", time.Now)
+		// baseURL is the SigNoz external URL (the host operators reach the UI on)
+		// so the approval deep link is absolute and renders as a clickable link in
+		// Slack/Teams/Email. Configurable via SIGNOZ_ALERTMANAGER_SIGNOZ_EXTERNAL__URL.
+		remediationBaseURL := ""
+		if config.Alertmanager.Signoz.ExternalURL != nil {
+			remediationBaseURL = config.Alertmanager.Signoz.ExternalURL.String()
+		}
+		proposer := remediation.NewProposer(remStore, remediationBaseURL, time.Now)
 		aiDispatchHook.SetRemediationProposer(remediationHookAdapter{
 			proposer: proposer,
 			store:    remStore,

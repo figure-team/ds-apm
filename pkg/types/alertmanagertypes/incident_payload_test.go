@@ -261,6 +261,29 @@ func TestIncidentInfoFieldsCompactIncludesRemediationWhenPresent(t *testing.T) {
 		byKey["remediation_approve_url"])
 }
 
+func TestSanitizeIncidentApproveURL(t *testing.T) {
+	// A real approval link carries a UUID remediation id; the generic secret
+	// redactor would mangle that 36-char token, so the URL-aware sanitizer must
+	// keep it intact.
+	uuidURL := "https://apm.example.com/alerts/overview?remediation=550e8400-e29b-41d4-a716-446655440000&ruleId=rule-123"
+	require.Equal(t, uuidURL, SanitizeIncidentApproveURL(uuidURL))
+	require.NotContains(t, SanitizeIncidentApproveURL(uuidURL), "[redacted")
+
+	// Generic sanitizer (for comparison) mangles the same URL — the reason a
+	// dedicated approve-URL sanitizer exists.
+	require.NotEqual(t, uuidURL, SanitizeIncidentValue(uuidURL))
+	require.Contains(t, SanitizeIncidentValue(uuidURL), "[redacted")
+
+	// Sensitive query keys are still stripped (defense in depth).
+	require.Equal(t,
+		"https://apm.example.com/alerts/overview?remediation=rem-1",
+		SanitizeIncidentApproveURL("https://apm.example.com/alerts/overview?remediation=rem-1&token=secret"))
+
+	// A relative URL cannot render as a clickable link — drop it.
+	require.Equal(t, "", SanitizeIncidentApproveURL("/alerts/overview?remediation=rem-1"))
+	require.Equal(t, "", SanitizeIncidentApproveURL(""))
+}
+
 func TestBuildIncidentInfoMapsRemediationAnnotations(t *testing.T) {
 	info := BuildIncidentInfo(nil, template.KV{
 		IncidentAnnotationRemediationScriptSummary: "Restart payment (승인 시 웹 UI에서 실행)",

@@ -236,7 +236,7 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 			Body{Type: "TextBlock", Text: "🔧 자동 대응", Weight: "Bolder", Wrap: true},
 			Body{Type: "TextBlock", Text: summary, Wrap: true},
 		)
-		if approveURL := alertmanagertypes.SanitizeIncidentValue(strings.TrimSpace(data.CommonAnnotations[alertmanagertypes.IncidentAnnotationRemediationApproveURL])); approveURL != "" {
+		if approveURL := alertmanagertypes.SanitizeIncidentApproveURL(data.CommonAnnotations[alertmanagertypes.IncidentAnnotationRemediationApproveURL]); approveURL != "" {
 			t.Attachments[0].Content.Actions = append(t.Attachments[0].Content.Actions, Action{
 				Type:  "Action.OpenUrl",
 				Title: "자동 대응 승인",

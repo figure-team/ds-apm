@@ -87,7 +87,14 @@ func (e *Executor) Run(ctx context.Context, script string) ExecResult {
 		if errors.As(runErr, &exitErr) {
 			res.ExitCode = exitErr.ExitCode()
 		} else {
+			// The process never started (e.g. bash not installed) or was killed
+			// before producing an exit status. There is no captured output to
+			// explain the bare -1, so surface the start error in the snippet the
+			// operator sees instead of leaving the result blank.
 			res.ExitCode = -1
+			if res.Output == "" {
+				res.Output = "실행 실패: " + strings.TrimSpace(runErr.Error())
+			}
 		}
 		rec.Outcome = "failed"
 		rec.Err = truncate(strings.TrimSpace(runErr.Error()), 256)

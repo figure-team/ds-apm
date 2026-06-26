@@ -408,12 +408,14 @@ func slackFieldValues(fields []any) map[string]string {
 }
 
 func TestSlackUsesAIContentWhenBound(t *testing.T) {
-	var capturedBody map[string]any
+	var bodies []map[string]any
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		require.NoError(t, json.NewDecoder(r.Body).Decode(&capturedBody))
+		var b map[string]any
+		require.NoError(t, json.NewDecoder(r.Body).Decode(&b))
+		bodies = append(bodies, b)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"ok": true}`))
+		_, _ = w.Write([]byte(`{"ok": true, "ts": "1700000000.000100"}`))
 	}))
 	defer server.Close()
 
@@ -448,22 +450,28 @@ func TestSlackUsesAIContentWhenBound(t *testing.T) {
 	_, err = notifier.Notify(ctx, alert)
 	require.NoError(t, err)
 
-	attachments, ok := capturedBody["attachments"].([]any)
-	require.True(t, ok)
-	require.GreaterOrEqual(t, len(attachments), 2, "SOP-bound message splits body and secondary info into two attachments")
+	// SOP-bound alert posts the SOP body, then a threaded reply for the notice.
+	require.Len(t, bodies, 2, "SOP-bound alert posts the body and a threaded reply")
 
-	att := attachments[0].(map[string]any)
+	// Parent message: SOP body only — the customer notice is NOT here, so Slack's
+	// length-based truncation cannot fold away the body.
+	parentAtts := bodies[0]["attachments"].([]any)
+	require.Len(t, parentAtts, 1, "parent message carries only the body attachment")
+	att := parentAtts[0].(map[string]any)
 	require.Equal(t, "Shipping 5xx 대응", att["title"], "attachment title should be AI sop_title")
-
 	text, _ := att["text"].(string)
 	require.Contains(t, text, "## 현황", "primary attachment text is the AI body")
-	require.NotContains(t, text, alertmanagertypes.CollapsibleNoticeLabel, "customer notice must not sit in the primary body attachment")
-	require.NotContains(t, text, "[안내] 점검 중", "customer notice must not sit in the primary body attachment")
+	require.NotContains(t, text, alertmanagertypes.CollapsibleNoticeLabel, "customer notice must not sit in the body message")
+	require.NotContains(t, text, "[안내] 점검 중", "customer notice must not sit in the body message")
+	require.Empty(t, bodies[0]["thread_ts"], "parent message is not itself threaded")
 
-	secondary := attachments[1].(map[string]any)
-	secText, _ := secondary["text"].(string)
-	require.Contains(t, secText, alertmanagertypes.CollapsibleNoticeLabel, "secondary attachment carries the collapsible label")
-	require.Contains(t, secText, "[안내] 점검 중", "secondary attachment carries the customer notice")
+	// Threaded reply: customer notice, threaded under the parent message ts.
+	require.Equal(t, "1700000000.000100", bodies[1]["thread_ts"], "reply threads under the parent message ts")
+	replyAtts := bodies[1]["attachments"].([]any)
+	require.Len(t, replyAtts, 1)
+	secText, _ := replyAtts[0].(map[string]any)["text"].(string)
+	require.Contains(t, secText, alertmanagertypes.CollapsibleNoticeLabel, "reply carries the collapsible label")
+	require.Contains(t, secText, "[안내] 점검 중", "reply carries the customer notice")
 }
 
 func slackFieldTitles(att map[string]any) []string {
@@ -480,13 +488,100 @@ func slackFieldTitles(att map[string]any) []string {
 	return titles
 }
 
-func TestSlackUsesCompactFieldsWhenBound(t *testing.T) {
-	var capturedBody map[string]any
+func TestSlackAppendsRemediationToBodyAndDropsMetadataFields(t *testing.T) {
+	var bodies []map[string]any
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		require.NoError(t, json.NewDecoder(r.Body).Decode(&capturedBody))
+		var b map[string]any
+		require.NoError(t, json.NewDecoder(r.Body).Decode(&b))
+		bodies = append(bodies, b)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"ok": true}`))
+		_, _ = w.Write([]byte(`{"ok": true, "ts": "1700000000.000100"}`))
+	}))
+	defer server.Close()
+
+	u, _ := url.Parse(server.URL)
+	notifier, err := New(
+		&config.SlackConfig{
+			APIURL:     &config.SecretURL{URL: u},
+			Channel:    "#test-channel",
+			HTTPConfig: &commoncfg.HTTPClientConfig{},
+		},
+		test.CreateTmpl(t),
+		promslog.NewNopLogger(),
+	)
+	require.NoError(t, err)
+
+	// Realistic absolute URL with a UUID remediation id: the URL-aware sanitizer
+	// must keep it intact (the generic secret redactor would mangle the 36-char
+	// UUID into [redacted-secret] and break the link).
+	const approveURL = "https://apm.example.com/alerts/overview?remediation=550e8400-e29b-41d4-a716-446655440000&ruleId=rule-123"
+	ctx := notify.WithGroupKey(context.Background(), "test-group-key")
+	alert := &types.Alert{
+		Alert: model.Alert{
+			Labels: model.LabelSet{
+				"alertname": "ShippingHighError",
+				model.LabelName(alertmanagertypes.IncidentLabelProjectID): "customer-a",
+				model.LabelName(alertmanagertypes.IncidentLabelSeverity):  "critical",
+			},
+			Annotations: model.LabelSet{
+				model.LabelName(alertmanagertypes.IncidentAnnotationNotificationBody):         "## 현황\n서비스 5xx 급증",
+				model.LabelName(alertmanagertypes.IncidentAnnotationSopTitle):                 "Shipping 5xx 대응",
+				model.LabelName(alertmanagertypes.IncidentAnnotationSopURL):                   "https://kb.example/sop/SOP-SHIP-001",
+				model.LabelName(alertmanagertypes.IncidentAnnotationSopVersion):               "2026-06-17.1",
+				model.LabelName(alertmanagertypes.IncidentAnnotationAIStrategyStatus):         "low_confidence",
+				model.LabelName(alertmanagertypes.IncidentAnnotationCustomerUpdate):           "[안내] 점검 중",
+				model.LabelName(alertmanagertypes.IncidentAnnotationRemediationScriptSummary): "결제 서비스 재시작",
+				model.LabelName(alertmanagertypes.IncidentAnnotationRemediationApproveURL):    approveURL,
+			},
+			StartsAt: time.Now(),
+			EndsAt:   time.Now().Add(time.Hour),
+		},
+	}
+
+	_, err = notifier.Notify(ctx, alert)
+	require.NoError(t, err)
+
+	require.Len(t, bodies, 2, "SOP-bound alert posts the body and a threaded reply")
+
+	// Parent (body) message carries no incident fields, but the auto-remediation
+	// suggestion (summary + approval link) is appended at the bottom of the body.
+	parentAtts := bodies[0]["attachments"].([]any)
+	require.Len(t, parentAtts, 1)
+	parentAtt := parentAtts[0].(map[string]any)
+	require.Empty(t, slackFieldTitles(parentAtt), "body message must not carry incident fields")
+	bodyText, _ := parentAtt["text"].(string)
+	require.Contains(t, bodyText, "## 현황", "SOP body stays in the parent message")
+	require.Contains(t, bodyText, "자동 대응", "auto-remediation label appended to the body")
+	require.Contains(t, bodyText, "결제 서비스 재시작", "remediation summary appended to the body")
+	require.Contains(t, bodyText, "<"+approveURL+"|승인>", "approval link rendered as a blue '승인' mrkdwn hyperlink")
+	require.NotContains(t, bodyText, "[redacted-secret]", "the trusted approve URL must not be mangled by the secret redactor")
+
+	// Threaded reply carries only the customer notice — no SOP metadata fields.
+	replyAtts := bodies[1]["attachments"].([]any)
+	require.Len(t, replyAtts, 1)
+	replyAtt := replyAtts[0].(map[string]any)
+	require.Empty(t, slackFieldTitles(replyAtt), "reply must not carry any SOP metadata fields")
+	replyText, _ := replyAtt["text"].(string)
+	require.Contains(t, replyText, alertmanagertypes.CollapsibleNoticeLabel)
+	require.Contains(t, replyText, "[안내] 점검 중", "reply carries the customer notice")
+	require.NotContains(t, replyText, "SOP URL")
+	require.NotContains(t, replyText, "결제 서비스 재시작", "remediation is in the body, not the reply")
+}
+
+// TestSlackThreadReplyFallsBackForWebhook verifies that an incoming webhook
+// (plaintext "ok" response, no message ts) still receives the notice/metadata as
+// a second, standalone post — keeping it out of the body's truncation window
+// even though true threading is unavailable.
+func TestSlackThreadReplyFallsBackForWebhook(t *testing.T) {
+	var bodies []map[string]any
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var b map[string]any
+		require.NoError(t, json.NewDecoder(r.Body).Decode(&b))
+		bodies = append(bodies, b)
+		// Incoming-webhook style: plaintext "ok", no JSON, no ts.
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("ok"))
 	}))
 	defer server.Close()
 
@@ -505,17 +600,10 @@ func TestSlackUsesCompactFieldsWhenBound(t *testing.T) {
 	ctx := notify.WithGroupKey(context.Background(), "test-group-key")
 	alert := &types.Alert{
 		Alert: model.Alert{
-			Labels: model.LabelSet{
-				"alertname": "ShippingHighError",
-				model.LabelName(alertmanagertypes.IncidentLabelProjectID): "customer-a",
-				model.LabelName(alertmanagertypes.IncidentLabelSeverity):  "critical",
-			},
+			Labels: model.LabelSet{"alertname": "ShippingHighError"},
 			Annotations: model.LabelSet{
 				model.LabelName(alertmanagertypes.IncidentAnnotationNotificationBody): "## 현황\n서비스 5xx 급증",
 				model.LabelName(alertmanagertypes.IncidentAnnotationSopTitle):         "Shipping 5xx 대응",
-				model.LabelName(alertmanagertypes.IncidentAnnotationSopURL):           "https://kb.example/sop/SOP-SHIP-001",
-				model.LabelName(alertmanagertypes.IncidentAnnotationSopVersion):       "2026-06-17.1",
-				model.LabelName(alertmanagertypes.IncidentAnnotationAIStrategyStatus): "low_confidence",
 				model.LabelName(alertmanagertypes.IncidentAnnotationCustomerUpdate):   "[안내] 점검 중",
 			},
 			StartsAt: time.Now(),
@@ -526,22 +614,12 @@ func TestSlackUsesCompactFieldsWhenBound(t *testing.T) {
 	_, err = notifier.Notify(ctx, alert)
 	require.NoError(t, err)
 
-	atts := capturedBody["attachments"].([]any)
-	require.GreaterOrEqual(t, len(atts), 2)
-
-	// Primary (body) attachment carries no incident fields.
-	require.Empty(t, slackFieldTitles(atts[0].(map[string]any)), "body attachment must not carry incident fields")
-
-	// Secondary attachment carries the compact field set: routing + SOP link only.
-	titles := slackFieldTitles(atts[1].(map[string]any))
-	require.Contains(t, titles, "Project")
-	require.Contains(t, titles, "Severity")
-	require.Contains(t, titles, "SOP title")
-	require.Contains(t, titles, "SOP URL")
-	// Verbose/debug/redundant fields are dropped when SOP-bound.
-	require.NotContains(t, titles, "SOP version")
-	require.NotContains(t, titles, "AI status")
-	require.NotContains(t, titles, "Customer update", "customer update is already in the body")
+	require.Len(t, bodies, 2, "webhook still gets body + standalone notice follow-up")
+	require.Empty(t, bodies[1]["thread_ts"], "webhook reply cannot thread (no parent ts)")
+	replyAtts := bodies[1]["attachments"].([]any)
+	secText, _ := replyAtts[0].(map[string]any)["text"].(string)
+	require.Contains(t, secText, alertmanagertypes.CollapsibleNoticeLabel)
+	require.Contains(t, secText, "[안내] 점검 중")
 }
 
 func TestSlackUsesTemplateWhenUnbound(t *testing.T) {

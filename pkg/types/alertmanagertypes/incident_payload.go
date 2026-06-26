@@ -73,32 +73,51 @@ func BuildSafeIncidentInfo(labels, annotations template.KV) IncidentInfo {
 
 func SanitizeIncidentInfo(info IncidentInfo) IncidentInfo {
 	return IncidentInfo{
-		ProjectID:        SanitizeIncidentValue(info.ProjectID),
-		Environment:      SanitizeIncidentValue(info.Environment),
-		ServiceName:      SanitizeIncidentValue(info.ServiceName),
-		OwnerTeam:        SanitizeIncidentValue(info.OwnerTeam),
-		Severity:         SanitizeIncidentValue(info.Severity),
-		ImpactSummary:    SanitizeIncidentValue(info.ImpactSummary),
-		NextAction:       SanitizeIncidentValue(info.NextAction),
-		VendorRequest:    SanitizeIncidentValue(info.VendorRequest),
-		CustomerUpdate:   SanitizeIncidentValue(info.CustomerUpdate),
-		NotificationBody: SanitizeIncidentValue(info.NotificationBody),
-		SopID:            SanitizeIncidentValue(info.SopID),
-		SopURL:           SanitizeIncidentValue(info.SopURL),
-		SopSource:        SanitizeIncidentValue(info.SopSource),
-		SopTitle:         SanitizeIncidentValue(info.SopTitle),
-		SopVersion:       SanitizeIncidentValue(info.SopVersion),
-		SopBindingID:     SanitizeIncidentValue(info.SopBindingID),
-		AIStrategyID:     SanitizeIncidentValue(info.AIStrategyID),
-		AIStrategyStatus: SanitizeIncidentValue(info.AIStrategyStatus),
-		AIHeadline:       SanitizeIncidentValue(info.AIHeadline),
-		AIFirstActions:   SanitizeIncidentValue(info.AIFirstActions),
-		AIConfidence:     SanitizeIncidentValue(info.AIConfidence),
-		AILimitations:    SanitizeIncidentValue(info.AILimitations),
-		AIEvidenceRefs:   SanitizeIncidentValue(info.AIEvidenceRefs),
+		ProjectID:             SanitizeIncidentValue(info.ProjectID),
+		Environment:           SanitizeIncidentValue(info.Environment),
+		ServiceName:           SanitizeIncidentValue(info.ServiceName),
+		OwnerTeam:             SanitizeIncidentValue(info.OwnerTeam),
+		Severity:              SanitizeIncidentValue(info.Severity),
+		ImpactSummary:         SanitizeIncidentValue(info.ImpactSummary),
+		NextAction:            SanitizeIncidentValue(info.NextAction),
+		VendorRequest:         SanitizeIncidentValue(info.VendorRequest),
+		CustomerUpdate:        SanitizeIncidentValue(info.CustomerUpdate),
+		NotificationBody:      SanitizeIncidentValue(info.NotificationBody),
+		SopID:                 SanitizeIncidentValue(info.SopID),
+		SopURL:                SanitizeIncidentValue(info.SopURL),
+		SopSource:             SanitizeIncidentValue(info.SopSource),
+		SopTitle:              SanitizeIncidentValue(info.SopTitle),
+		SopVersion:            SanitizeIncidentValue(info.SopVersion),
+		SopBindingID:          SanitizeIncidentValue(info.SopBindingID),
+		AIStrategyID:          SanitizeIncidentValue(info.AIStrategyID),
+		AIStrategyStatus:      SanitizeIncidentValue(info.AIStrategyStatus),
+		AIHeadline:            SanitizeIncidentValue(info.AIHeadline),
+		AIFirstActions:        SanitizeIncidentValue(info.AIFirstActions),
+		AIConfidence:          SanitizeIncidentValue(info.AIConfidence),
+		AILimitations:         SanitizeIncidentValue(info.AILimitations),
+		AIEvidenceRefs:        SanitizeIncidentValue(info.AIEvidenceRefs),
 		RemediationSummary:    SanitizeIncidentValue(info.RemediationSummary),
-		RemediationApproveURL: SanitizeIncidentValue(info.RemediationApproveURL),
+		RemediationApproveURL: SanitizeIncidentApproveURL(info.RemediationApproveURL),
 	}
+}
+
+// SanitizeIncidentApproveURL sanitizes the internally-generated remediation
+// approval deep link. Unlike SanitizeIncidentValue it does NOT apply the
+// long-token / PII redactors, which would mangle the legitimate UUID and rule
+// identifiers in the query string into [redacted-secret] and break the link. It
+// still strips sensitive query keys (defense in depth) and drops the value when
+// it is not an absolute http(s) URL, since a relative URL cannot render as a
+// clickable link anyway.
+func SanitizeIncidentApproveURL(value string) string {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return ""
+	}
+	sanitized, ok := sanitizeIncidentURL(value)
+	if !ok {
+		return ""
+	}
+	return sanitized
 }
 
 func SanitizeIncidentValue(value string) string {

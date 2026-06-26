@@ -26,10 +26,15 @@
 	&__script,
 	&__output {
 		background: var(--bg-ink-400, #0b0c0e);
+		// The background is forced dark in both themes, so pin a light text color
+		// rather than inheriting the page color (which is dark in light mode and
+		// made the script unreadable — dark-on-dark).
+		color: var(--bg-vanilla-100, #f4f6f8);
 		padding: 12px;
 		border-radius: 4px;
 		overflow-x: auto;
 		font-size: 12px;
+		font-family: 'Geist Mono', 'Fira Code', monospace;
 		margin-top: 8px;
 		white-space: pre-wrap;
 		word-break: break-all;

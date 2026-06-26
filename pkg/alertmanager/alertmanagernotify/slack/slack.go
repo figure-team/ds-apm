@@ -68,6 +68,12 @@ type request struct {
 	LinkNames   bool         `json:"link_names,omitempty"`
 	Text        string       `json:"text,omitempty"`
 	Attachments []attachment `json:"attachments"`
+	// ThreadTS threads a follow-up message under a parent. Set on the customer
+	// notice reply so Slack hides it behind "N replies" while the SOP body in the
+	// parent message stays fully visible (not subject to that message's
+	// length-based "show more" truncation). Only honored by the web API
+	// (chat.postMessage); incoming webhooks ignore it and post a standalone reply.
+	ThreadTS string `json:"thread_ts,omitempty"`
 }
 
 // attachment is used to display a richly-formatted message block.
@@ -121,10 +127,15 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 		if notif.Title != "" {
 			title, _ = notify.TruncateInRunes(notif.Title, maxTitleLenRunes)
 		}
-		// Body only: the customer notice + incident fields move to a second
-		// attachment (below) so Slack's "show more" collapses those rather than
-		// truncating the SOP body that operators must read first.
+		// SOP body, with the human-gated auto-remediation suggestion (요약 + 승인
+		// 링크) appended at the bottom so operators see it inline with the SOP they
+		// must act on — not as a separate reply/field. The customer notice still
+		// moves to a second attachment (below) so Slack's "show more" collapses it
+		// rather than truncating the SOP body.
 		text = notif.Body
+		if remediation := buildSlackRemediationText(data.CommonAnnotations); remediation != "" {
+			text = strings.TrimRight(text, "\n") + "\n\n" + remediation
+		}
 	}
 
 	att := &attachment{
@@ -162,26 +173,17 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 		}
 		att.Fields = fields
 	}
-	incidentInfo := alertmanagertypes.BuildSafeIncidentInfo(data.CommonLabels, data.CommonAnnotations)
 	var secondaryAtt *attachment
-	if sopBound {
-		// Secondary attachment: customer notice + compact incident fields. Kept
-		// out of the primary body attachment so the SOP body stays fully visible
-		// and Slack collapses this lower-priority block instead.
-		sec := &attachment{Fallback: title, MrkdwnIn: markdownIn}
-		if notif.CustomerNotice != "" {
-			sec.Text = alertmanagertypes.CollapsibleNoticeLabel + "\n" + notif.CustomerNotice
-		}
-		for _, field := range alertmanagertypes.IncidentInfoFieldsCompact(incidentInfo) {
-			short := field.Short
-			sec.Fields = append(sec.Fields, config.SlackField{
-				Title: field.Title,
-				Value: field.Value,
-				Short: &short,
-			})
-		}
-		if sec.Text != "" || len(sec.Fields) > 0 {
-			secondaryAtt = sec
+	if sopBound && notif.CustomerNotice != "" {
+		// Secondary attachment: customer notice only. The SOP metadata fields
+		// (project/severity/SOP link 등) are intentionally omitted, and the
+		// auto-remediation now lives at the bottom of the SOP body. Kept out of the
+		// primary attachment so Slack's "show more" collapses the notice instead of
+		// truncating the SOP body operators must read first.
+		secondaryAtt = &attachment{
+			Fallback: title,
+			MrkdwnIn: markdownIn,
+			Text:     alertmanagertypes.CollapsibleNoticeLabel + "\n" + notif.CustomerNotice,
 		}
 	}
 	// Non-SOP alerts intentionally append no incident fields: the channel text
@@ -216,11 +218,11 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 		att.Actions = actions
 	}
 
-	attachments := []attachment{*att}
-	if secondaryAtt != nil {
-		attachments = append(attachments, *secondaryAtt)
-	}
-
+	// Primary message: title + SOP body (with the auto-remediation suggestion
+	// appended at the bottom). For SOP-bound alerts the customer notice is
+	// deliberately left off here and posted as a threaded reply below, so this
+	// message stays short enough that Slack's length-based "show more" truncation
+	// does not fold away the SOP body operators must read first.
 	req := &request{
 		Channel:     tmplText(n.conf.Channel),
 		Username:    tmplText(n.conf.Username),
@@ -228,26 +230,15 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 		IconURL:     tmplText(n.conf.IconURL),
 		LinkNames:   n.conf.LinkNames,
 		Text:        tmplText(n.conf.MessageText),
-		Attachments: attachments,
+		Attachments: []attachment{*att},
 	}
 	if err != nil {
 		return false, err
 	}
 
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(req); err != nil {
+	u, err := n.resolveURL()
+	if err != nil {
 		return false, err
-	}
-
-	var u string
-	if n.conf.APIURL != nil {
-		u = n.conf.APIURL.String()
-	} else {
-		content, err := os.ReadFile(n.conf.APIURLFile)
-		if err != nil {
-			return false, err
-		}
-		u = strings.TrimSpace(string(content))
 	}
 
 	if n.conf.Timeout > 0 {
@@ -256,12 +247,99 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 		ctx = postCtx
 	}
 
+	ts, retry, err := n.post(ctx, u, req)
+	if err != nil {
+		return retry, err
+	}
+
+	// TEMP DEBUG (remove after verifying threading): record the threading decision.
+	logger.InfoContext(ctx, "DSAPM slack threading decision",
+		slog.Bool("sopBound", sopBound),
+		slog.Bool("hasSecondary", secondaryAtt != nil),
+		slog.Int("bodyLen", len(text)),
+		slog.String("parentTS", ts))
+
+	// Threaded follow-up: customer notice only. Best-effort and fail-open — the
+	// operator-critical body is already delivered, so a reply failure is logged
+	// rather than failing (and re-sending) the whole alert.
+	// With the web API we thread under the parent message (ts); an incoming
+	// webhook returns no ts, so this lands as a standalone follow-up — either way
+	// it sits outside the parent body's truncation window.
+	if secondaryAtt != nil {
+		reply := &request{
+			Channel:     req.Channel,
+			Username:    req.Username,
+			IconEmoji:   req.IconEmoji,
+			IconURL:     req.IconURL,
+			LinkNames:   req.LinkNames,
+			Attachments: []attachment{*secondaryAtt},
+			ThreadTS:    ts,
+		}
+		if replyTS, _, replyErr := n.post(ctx, u, reply); replyErr != nil {
+			logger.WarnContext(ctx, "failed to post SOP customer notice reply", slog.Any("err", replyErr))
+		} else {
+			// TEMP DEBUG (remove after verifying threading).
+			logger.InfoContext(ctx, "DSAPM slack reply posted", slog.String("replyTS", replyTS), slog.String("threadedUnder", ts))
+		}
+	}
+
+	return retry, nil
+}
+
+// buildSlackRemediationText renders the human-gated auto-remediation suggestion
+// (one-line summary + approval deep link) as Slack mrkdwn, to be appended at the
+// bottom of the SOP body. It returns "" when no remediation is proposed. The full
+// script is never included — only the summary and a link to the approval card.
+func buildSlackRemediationText(annotations template.KV) string {
+	summary := alertmanagertypes.SanitizeIncidentValue(strings.TrimSpace(annotations[alertmanagertypes.IncidentAnnotationRemediationScriptSummary]))
+	if summary == "" {
+		return ""
+	}
+
+	var b strings.Builder
+	b.WriteString("🔧 *자동 대응*\n")
+	b.WriteString(summary)
+	// Render the approval link as Slack mrkdwn (<url|label>) so it shows as a blue
+	// "승인" hyperlink rather than a raw URL. The URL is our own generated deep
+	// link, so it goes through the URL-aware sanitizer (which keeps the UUID/rule
+	// ids intact) — Slack only renders absolute http(s) URLs as links.
+	if approveURL := alertmanagertypes.SanitizeIncidentApproveURL(annotations[alertmanagertypes.IncidentAnnotationRemediationApproveURL]); approveURL != "" {
+		b.WriteString("\n<")
+		b.WriteString(approveURL)
+		b.WriteString("|승인>")
+	}
+
+	return b.String()
+}
+
+// resolveURL returns the Slack endpoint from either the inline APIURL or the
+// APIURLFile.
+func (n *Notifier) resolveURL() (string, error) {
+	if n.conf.APIURL != nil {
+		return n.conf.APIURL.String(), nil
+	}
+	content, err := os.ReadFile(n.conf.APIURLFile)
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(content)), nil
+}
+
+// post sends one Slack request. On success it returns the parent message
+// timestamp (ts) when Slack's web API supplies one (empty for incoming
+// webhooks); the bool is the alertmanager retry signal.
+func (n *Notifier) post(ctx context.Context, u string, req *request) (string, bool, error) {
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(req); err != nil {
+		return "", false, err
+	}
+
 	resp, err := n.postJSONFunc(ctx, n.client, u, &buf) //nolint:bodyclose
 	if err != nil {
 		if ctx.Err() != nil {
 			err = errors.NewInternalf(errors.CodeInternal, "failed to post JSON to slack: %v", context.Cause(ctx))
 		}
-		return true, notify.RedactURL(err)
+		return "", true, notify.RedactURL(err)
 	}
 	defer notify.Drain(resp)
 
@@ -270,25 +348,26 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 	retry, err := n.retrier.Check(resp.StatusCode, resp.Body)
 	if err != nil {
 		err = errors.NewInternalf(errors.CodeInternal, "channel %q: %v", req.Channel, err)
-		return retry, notify.NewErrorWithReason(notify.GetFailureReasonFromStatusCode(resp.StatusCode), err)
+		return "", retry, notify.NewErrorWithReason(notify.GetFailureReasonFromStatusCode(resp.StatusCode), err)
 	}
 
 	// Slack web API might return errors with a 200 response code.
 	// https://docs.slack.dev/tools/node-slack-sdk/web-api/#handle-errors
-	retry, err = checkResponseError(resp)
+	ts, retry, err := checkResponseError(resp)
 	if err != nil {
 		err = errors.NewInternalf(errors.CodeInternal, "channel %q: %v", req.Channel, err)
-		return retry, notify.NewErrorWithReason(notify.ClientErrorReason, err)
+		return "", retry, notify.NewErrorWithReason(notify.ClientErrorReason, err)
 	}
 
-	return retry, nil
+	return ts, retry, nil
 }
 
-// checkResponseError parses out the error message from Slack API response.
-func checkResponseError(resp *http.Response) (bool, error) {
+// checkResponseError parses out the error message from a Slack API response and
+// returns the parent message timestamp (ts) when present (web API only).
+func checkResponseError(resp *http.Response) (string, bool, error) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return true, errors.WrapInternalf(err, errors.CodeInternal, "could not read response body")
+		return "", true, errors.WrapInternalf(err, errors.CodeInternal, "could not read response body")
 	}
 
 	if strings.HasPrefix(resp.Header.Get("Content-Type"), "application/json") {
@@ -300,28 +379,31 @@ func checkResponseError(resp *http.Response) (bool, error) {
 // checkTextResponseError classifies plaintext responses from Slack.
 // A plaintext (non-JSON) response is successful if it's a string "ok".
 // This is typically a response for an Incoming Webhook
-// (https://api.slack.com/messaging/webhooks#handling_errors)
-func checkTextResponseError(body []byte) (bool, error) {
+// (https://api.slack.com/messaging/webhooks#handling_errors). Webhooks carry no
+// message timestamp, so the returned ts is always empty.
+func checkTextResponseError(body []byte) (string, bool, error) {
 	if !bytes.Equal(body, []byte("ok")) {
-		return false, errors.NewInternalf(errors.CodeInternal, "received an error response from Slack: %s", string(body))
+		return "", false, errors.NewInternalf(errors.CodeInternal, "received an error response from Slack: %s", string(body))
 	}
-	return false, nil
+	return "", false, nil
 }
 
-// checkJSONResponseError classifies JSON responses from Slack.
-func checkJSONResponseError(body []byte) (bool, error) {
-	// response is for parsing out errors from the JSON response.
+// checkJSONResponseError classifies JSON responses from Slack and extracts the
+// posted message timestamp (ts), used to thread the follow-up reply.
+func checkJSONResponseError(body []byte) (string, bool, error) {
+	// response is for parsing out errors and the message ts from the JSON response.
 	type response struct {
 		OK    bool   `json:"ok"`
 		Error string `json:"error"`
+		TS    string `json:"ts"`
 	}
 
 	var data response
 	if err := json.Unmarshal(body, &data); err != nil {
-		return true, errors.NewInternalf(errors.CodeInternal, "could not unmarshal JSON response %q: %v", string(body), err)
+		return "", true, errors.NewInternalf(errors.CodeInternal, "could not unmarshal JSON response %q: %v", string(body), err)
 	}
 	if !data.OK {
-		return false, errors.NewInternalf(errors.CodeInternal, "error response from Slack: %s", data.Error)
+		return "", false, errors.NewInternalf(errors.CodeInternal, "error response from Slack: %s", data.Error)
 	}
-	return false, nil
+	return data.TS, false, nil
 }

@@ -51,8 +51,11 @@ WORKDIR /root
 # nodejs+npm: runtime for the `claude` CLI (LLM cli transport).
 # ripgrep+git: claude-code shells out to these; the bundled musl-incompatible
 #   ripgrep is disabled via USE_BUILTIN_RIPGREP=0 so the system one is used.
+# bash: the auto-remediation executor runs approved Runbook scripts via `bash -c`
+#   (scripts use `#!/usr/bin/env bash` + `set -euo pipefail`); Alpine ships only
+#   busybox sh, so without bash every execution exits -1 (bash: not found).
 RUN apk update && \
-    apk add --no-cache ca-certificates nodejs npm ripgrep git && \
+    apk add --no-cache ca-certificates nodejs npm ripgrep git bash && \
     npm install -g @anthropic-ai/claude-code && \
     rm -rf /var/cache/apk/* /root/.npm
 ENV USE_BUILTIN_RIPGREP=0
