@@ -26,6 +26,8 @@ func newTestStore(t *testing.T) *SQLStore {
 			sop_id             TEXT    NOT NULL DEFAULT '',
 			sop_version        TEXT    NOT NULL DEFAULT '',
 			runbook_id         TEXT    NOT NULL DEFAULT '',
+			source             TEXT    NOT NULL DEFAULT 'runbook',
+			selection_rationale TEXT   NOT NULL DEFAULT '',
 			script_snapshot    TEXT    NOT NULL DEFAULT '',
 			status             TEXT    NOT NULL,
 			proposed_at        TEXT    NOT NULL DEFAULT '',
@@ -400,4 +402,45 @@ func TestExitCode_NullableRoundtrip(t *testing.T) {
 	require.NotNil(t, got.ExitCode)
 	require.Equal(t, 0, *got.ExitCode)
 	require.Equal(t, "ok", got.OutputSnippet)
+}
+
+func TestListActiveByFingerprint_ReturnsNonTerminal(t *testing.T) {
+	s := newTestStore(t)
+	ctx := context.Background()
+
+	// Insert a non-terminal (proposed) row with a specific fingerprint and Source.
+	e := sampleExecution("cccccccc-cccc-cccc-cccc-cccccccccccc")
+	e.AlertFingerprint = "fp-xyz"
+	e.Source = ruletypes.RemediationSourceRunbook
+	e.SelectionRationale = "best match for this alert"
+	if err := s.Create(ctx, e); err != nil {
+		t.Fatalf("create: %v", err)
+	}
+
+	// Insert a terminal (rejected) row for the same fingerprint — must be excluded.
+	eTerminal := sampleExecution("dddddddd-dddd-dddd-dddd-dddddddddddd")
+	eTerminal.AlertFingerprint = "fp-xyz"
+	eTerminal.Source = ruletypes.RemediationSourceRunbook
+	if err := s.Create(ctx, eTerminal); err != nil {
+		t.Fatalf("create terminal: %v", err)
+	}
+	if err := s.Transition(ctx, "org-1", eTerminal.ID, ruletypes.RemediationStatusRejected, remediationstore.TransitionPatch{
+		TerminalAt: "2026-06-24T00:10:00Z",
+	}); err != nil {
+		t.Fatalf("transition to rejected: %v", err)
+	}
+
+	got, err := s.ListActiveByFingerprint(ctx, "org-1", "fp-xyz")
+	if err != nil {
+		t.Fatalf("list: %v", err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("expected 1 active row, got %d: %+v", len(got), got)
+	}
+	if got[0].Source != ruletypes.RemediationSourceRunbook {
+		t.Fatalf("expected runbook source, got %q", got[0].Source)
+	}
+	if got[0].SelectionRationale != "best match for this alert" {
+		t.Fatalf("SelectionRationale not round-tripped: %q", got[0].SelectionRationale)
+	}
 }

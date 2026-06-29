@@ -58,6 +58,10 @@ func (s *vFakeStore) ListByOrg(_ context.Context, _ string, _ remediationstore.L
 	return nil, nil
 }
 
+func (s *vFakeStore) ListActiveByFingerprint(_ context.Context, _, _ string) ([]ruletypes.RemediationExecution, error) {
+	return nil, nil
+}
+
 // ---------------------------------------------------------------------------
 // Fake AlertStateLookup
 // ---------------------------------------------------------------------------

@@ -48,6 +48,11 @@ type Record struct {
 	OutputBytes int `json:"output_bytes,omitempty"`
 	// Err is a truncated error summary when Outcome != "ok".
 	Err string `json:"err,omitempty"`
+	// Source records the remediation script origin when Via is a remediation
+	// exec seam: "runbook" or "llm-generated". Empty for non-remediation records.
+	Source string `json:"source,omitempty"`
+	// Fingerprint is the alert fingerprint tied to this invocation, when known.
+	Fingerprint string `json:"fingerprint,omitempty"`
 }
 
 // Logger appends one JSON line per CLI invocation to a file. It is safe for

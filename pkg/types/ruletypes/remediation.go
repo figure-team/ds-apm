@@ -150,7 +150,14 @@ func ValidateRemediationExecution(e RemediationExecution) error {
 	pilotRequireNonEmpty(&errs, "orgId", e.OrgID)
 	pilotRequireNonEmpty(&errs, "incidentId", e.IncidentID)
 	pilotRequireNonEmpty(&errs, "sopId", e.SOPID)
-	pilotRequireNonEmpty(&errs, "runbookId", e.RunbookID)
+	if e.Source == RemediationSourceLLMGenerated {
+		// fallback scripts have no backing runbook (design §6.1)
+		if strings.TrimSpace(e.RunbookID) != "" {
+			errs = append(errs, fmt.Errorf("runbookId: must be empty for llm-generated source"))
+		}
+	} else {
+		pilotRequireNonEmpty(&errs, "runbookId", e.RunbookID)
+	}
 	pilotRequireAllowed(&errs, "status", e.Status, allowedRemediationStatuses)
 	if strings.TrimSpace(e.Source) != "" {
 		pilotRequireAllowed(&errs, "source", e.Source, allowedRemediationSources)

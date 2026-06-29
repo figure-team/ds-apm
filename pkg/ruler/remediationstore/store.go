@@ -32,6 +32,10 @@ type Store interface {
 	// admin-only config endpoint to flip ExecutionEnabled (org-wide master switch)
 	// and the timing knobs. Callers should validate before calling.
 	UpsertConfig(ctx context.Context, orgID string, cfg ruletypes.RemediationConfig) error
+	// ListActiveByFingerprint returns non-terminal executions for the given
+	// alert fingerprint. The Selector uses it to skip regenerating a proposal
+	// when one already exists for the same failure signature (cost guardrail).
+	ListActiveByFingerprint(ctx context.Context, orgID, fingerprint string) ([]ruletypes.RemediationExecution, error)
 }
 
 // ListFilter narrows a ListByOrg query. Empty string fields disable that

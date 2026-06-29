@@ -166,6 +166,21 @@ func (f *fakeRemediationStore) UpsertConfig(_ context.Context, _ string, cfg rul
 	return nil
 }
 
+func (f *fakeRemediationStore) ListActiveByFingerprint(_ context.Context, _, fingerprint string) ([]ruletypes.RemediationExecution, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	out := []ruletypes.RemediationExecution{}
+	for _, e := range f.rows {
+		if e.AlertFingerprint == fingerprint &&
+			e.Status != ruletypes.RemediationStatusSucceeded &&
+			e.Status != ruletypes.RemediationStatusFailed &&
+			e.Status != ruletypes.RemediationStatusRejected {
+			out = append(out, e)
+		}
+	}
+	return out, nil
+}
+
 // fakeRunner records the script it was asked to run and signals completion so
 // tests can synchronise on the async execution goroutine.
 type fakeRunner struct {
@@ -180,7 +195,7 @@ func newFakeRunner() *fakeRunner {
 	return &fakeRunner{done: make(chan struct{}, 1)}
 }
 
-func (r *fakeRunner) Run(_ context.Context, script string) remediation.ExecResult {
+func (r *fakeRunner) Run(_ context.Context, script string, _ remediation.RunMeta) remediation.ExecResult {
 	r.mu.Lock()
 	r.calls++
 	r.lastScript = script
