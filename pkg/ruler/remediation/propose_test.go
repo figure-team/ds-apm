@@ -98,13 +98,11 @@ func TestPropose_CreatesExecutionAndAnnotations(t *testing.T) {
 	if approveURL == "" {
 		t.Fatalf("approve url missing")
 	}
-	// Deep links to the alert detail page with ruleId (from labels) + remediation id.
-	if !strings.HasPrefix(approveURL, "https://apm.example.com/alerts/overview?") {
-		t.Fatalf("approve url must target alert overview, got %q", approveURL)
+	if !strings.HasPrefix(approveURL, "https://apm.example.com/remediation/approve/") {
+		t.Fatalf("approve url must target the standalone approval page, got %q", approveURL)
 	}
-	if !strings.Contains(approveURL, "ruleId=rule-123") ||
-		!strings.Contains(approveURL, "remediation="+e.ID) {
-		t.Fatalf("approve url missing ruleId/remediation params: %q", approveURL)
+	if !strings.HasSuffix(approveURL, "/remediation/approve/"+e.ID) {
+		t.Fatalf("approve url must end with the remediation id path, got %q", approveURL)
 	}
 }
 
