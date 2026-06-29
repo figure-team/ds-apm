@@ -55,4 +55,24 @@ describe('RemediationApprove', () => {
 		render(<RemediationApprove />);
 		expect(await screen.findByText('remediation_not_found')).toBeInTheDocument();
 	});
+
+	it('shows remediation_forbidden when approve returns 403', async () => {
+		api.getRemediation.mockResolvedValue({
+			id: 'rem-1', status: 'proposed', scriptSnapshot: 'echo hi', sopId: 'SOP-1', runbookId: 'rb-1',
+		});
+		api.approveRemediation.mockRejectedValue({ response: { status: 403 } });
+		render(<RemediationApprove />);
+		fireEvent.click(await screen.findByText('remediation_approve'));
+		expect(await screen.findByText('remediation_forbidden')).toBeInTheDocument();
+	});
+
+	it('shows remediation_too_many when approve returns 429', async () => {
+		api.getRemediation.mockResolvedValue({
+			id: 'rem-1', status: 'proposed', scriptSnapshot: 'echo hi', sopId: 'SOP-1', runbookId: 'rb-1',
+		});
+		api.approveRemediation.mockRejectedValue({ response: { status: 429 } });
+		render(<RemediationApprove />);
+		fireEvent.click(await screen.findByText('remediation_approve'));
+		expect(await screen.findByText('remediation_too_many')).toBeInTheDocument();
+	});
 });

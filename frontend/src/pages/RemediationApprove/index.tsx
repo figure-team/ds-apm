@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { Button } from 'antd';
@@ -29,14 +29,18 @@ function RemediationApprove(): JSX.Element {
 	const [busy, setBusy] = useState(false);
 	const [actionError, setActionError] = useState('');
 	const [justApproved, setJustApproved] = useState(false);
+	const hasLoaded = useRef(false);
 
 	const load = useCallback(async (): Promise<RemediationExecution | null> => {
 		try {
 			const r = await getRemediation(id);
 			setRem(r);
+			hasLoaded.current = true;
 			return r;
 		} catch {
-			setLoadError('not_found');
+			if (!hasLoaded.current) {
+				setLoadError('not_found');
+			}
 			return null;
 		}
 	}, [id]);
