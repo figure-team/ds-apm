@@ -54,6 +54,10 @@ func (s *vFakeStore) UpsertConfig(_ context.Context, _ string, _ ruletypes.Remed
 	return nil
 }
 
+func (s *vFakeStore) ListActiveByFingerprint(_ context.Context, _, _ string) ([]ruletypes.RemediationExecution, error) {
+	return nil, nil
+}
+
 // ---------------------------------------------------------------------------
 // Fake AlertStateLookup
 // ---------------------------------------------------------------------------

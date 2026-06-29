@@ -22,8 +22,10 @@ type remediationRow struct {
 	AlertFingerprint string        `bun:"alert_fingerprint"`
 	SOPID            string        `bun:"sop_id"`
 	SOPVersion       string        `bun:"sop_version"`
-	RunbookID        string        `bun:"runbook_id"`
-	ScriptSnapshot   string        `bun:"script_snapshot"`
+	RunbookID          string        `bun:"runbook_id"`
+	Source             string        `bun:"source"`
+	SelectionRationale string        `bun:"selection_rationale"`
+	ScriptSnapshot     string        `bun:"script_snapshot"`
 	Status           string        `bun:"status"`
 	ProposedAt       string        `bun:"proposed_at"`
 	ApprovedAt       string        `bun:"approved_at"`
@@ -44,8 +46,10 @@ func rowFromDomain(e ruletypes.RemediationExecution) remediationRow {
 		AlertFingerprint: e.AlertFingerprint,
 		SOPID:            e.SOPID,
 		SOPVersion:       e.SOPVersion,
-		RunbookID:        e.RunbookID,
-		ScriptSnapshot:   e.ScriptSnapshot,
+		RunbookID:          e.RunbookID,
+		Source:             e.Source,
+		SelectionRationale: e.SelectionRationale,
+		ScriptSnapshot:     e.ScriptSnapshot,
 		Status:           e.Status,
 		ProposedAt:       e.ProposedAt,
 		ApprovedAt:       e.ApprovedAt,
@@ -70,8 +74,10 @@ func (r remediationRow) toDomain() ruletypes.RemediationExecution {
 		AlertFingerprint: r.AlertFingerprint,
 		SOPID:            r.SOPID,
 		SOPVersion:       r.SOPVersion,
-		RunbookID:        r.RunbookID,
-		ScriptSnapshot:   r.ScriptSnapshot,
+		RunbookID:          r.RunbookID,
+		Source:             r.Source,
+		SelectionRationale: r.SelectionRationale,
+		ScriptSnapshot:     r.ScriptSnapshot,
 		Status:           r.Status,
 		ProposedAt:       r.ProposedAt,
 		ApprovedAt:       r.ApprovedAt,
@@ -306,6 +312,35 @@ func (s *SQLStore) GetConfig(ctx context.Context, orgID string) (ruletypes.Remed
 		MaxConcurrent:       row.MaxConcurrent,
 	}
 	return c.WithDefaults(), nil
+}
+
+// ListActiveByFingerprint returns non-terminal executions for org+fingerprint,
+// most recent first. Terminal rows (verified/unresolved/failed/rejected/expired)
+// are excluded so an old, closed proposal never suppresses a fresh one.
+func (s *SQLStore) ListActiveByFingerprint(ctx context.Context, orgID, fingerprint string) ([]ruletypes.RemediationExecution, error) {
+	terminal := []string{
+		ruletypes.RemediationStatusVerified,
+		ruletypes.RemediationStatusUnresolved,
+		ruletypes.RemediationStatusFailed,
+		ruletypes.RemediationStatusRejected,
+		ruletypes.RemediationStatusExpired,
+	}
+	var rows []remediationRow
+	err := s.sqlstore.BunDB().NewSelect().
+		Model(&rows).
+		Where("org_id = ?", orgID).
+		Where("alert_fingerprint = ?", fingerprint).
+		Where("status NOT IN (?)", bun.In(terminal)).
+		OrderExpr("proposed_at DESC").
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]ruletypes.RemediationExecution, len(rows))
+	for i, r := range rows {
+		out[i] = r.toDomain()
+	}
+	return out, nil
 }
 
 // UpsertConfig inserts or updates the per-org remediation config row. Numeric
