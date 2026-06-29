@@ -83,6 +83,31 @@ func TestRemediationStatusTransition(t *testing.T) {
 	}
 }
 
+func TestValidateRemediationExecution_AllowsKnownSource(t *testing.T) {
+	e := validRemediationExecution()
+	e.Source = RemediationSourceLLMGenerated
+	e.SelectionRationale = "적합한 Runbook이 없어 직접 제안한 스크립트"
+	if err := ValidateRemediationExecution(e); err != nil {
+		t.Fatalf("llm-generated source should validate: %v", err)
+	}
+}
+
+func TestValidateRemediationExecution_RejectsUnknownSource(t *testing.T) {
+	e := validRemediationExecution()
+	e.Source = "wat"
+	if err := ValidateRemediationExecution(e); err == nil {
+		t.Fatalf("expected unknown source to be rejected")
+	}
+}
+
+func TestValidateRemediationExecution_EmptySourceAllowed(t *testing.T) {
+	e := validRemediationExecution()
+	e.Source = ""
+	if err := ValidateRemediationExecution(e); err != nil {
+		t.Fatalf("empty source must stay valid for legacy rows: %v", err)
+	}
+}
+
 func TestRemediationIsTerminal(t *testing.T) {
 	for _, s := range []string{RemediationStatusVerified, RemediationStatusUnresolved, RemediationStatusFailed, RemediationStatusRejected, RemediationStatusExpired} {
 		if !(RemediationExecution{Status: s}).IsTerminal() {
