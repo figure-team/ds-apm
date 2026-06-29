@@ -60,7 +60,7 @@ export interface UseNocLogsResult {
 	isError: boolean;
 }
 
-export default function useNocLogs(limit = 7): UseNocLogsResult {
+export default function useNocLogs(limit = 50): UseNocLogsResult {
 	const requestData = useMemo(
 		() => cloneDeep(initialQueriesMap[DataSource.LOGS]),
 		[],

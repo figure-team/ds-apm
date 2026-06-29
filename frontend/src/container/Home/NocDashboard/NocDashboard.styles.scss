@@ -155,7 +155,7 @@
 	/* ---- layout ---- */
 	.noc-console {
 		display: grid;
-		grid-template-columns: 300px 1fr 320px;
+		grid-template-columns: 290px 380px 1fr;
 		gap: 13px;
 		align-items: stretch;
 		flex: 1;
@@ -544,14 +544,14 @@
 	/* ---- logs ---- */
 	.noc-logs {
 		font-size: 11.5px;
-		line-height: 1.85;
+		line-height: 1.6;
 		font-family: 'JetBrains Mono', 'Consolas', monospace;
 		font-variant-numeric: tabular-nums;
 	}
 	.noc-logline {
 		display: flex;
 		gap: 9px;
-		white-space: nowrap;
+		align-items: flex-start;
 	}
 	.noc-logline-btn {
 		width: 100%;
@@ -593,9 +593,12 @@
 		flex-shrink: 0;
 	}
 	.noc-log-tx {
+		flex: 1;
+		min-width: 0;
 		color: var(--noc-txt2);
-		overflow: hidden;
-		text-overflow: ellipsis;
+		white-space: pre-wrap;
+		word-break: break-word;
+		overflow-wrap: anywhere;
 	}
 }
 
