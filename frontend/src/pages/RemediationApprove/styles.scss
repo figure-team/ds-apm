@@ -1,0 +1,45 @@
+.remediation-approve {
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+
+	&__card {
+		width: 100%;
+		max-width: 520px;
+		border: 1px solid var(--bg-slate-400, #2c3140);
+		border-radius: 8px;
+		padding: 24px;
+		background: var(--bg-ink-400, #121317);
+	}
+
+	&__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 16px;
+	}
+
+	&__actions {
+		display: flex;
+		gap: 12px;
+		margin-top: 16px;
+	}
+
+	&__error {
+		color: var(--bg-cherry-500, #e5484d);
+		margin-top: 12px;
+	}
+
+	&__done h2,
+	&__msg h2,
+	&__executed h2 {
+		margin-bottom: 8px;
+	}
+}
+
+.lightMode .remediation-approve__card {
+	background: #fff;
+	border-color: #e0e0e0;
+}

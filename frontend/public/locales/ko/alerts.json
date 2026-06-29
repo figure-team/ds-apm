@@ -542,5 +542,19 @@
 	"remediation_source_sop": "출처 SOP",
 	"remediation_result_card_title": "자동 대응 결과",
 	"remediation_show_script": "실행한 스크립트 보기",
-	"remediation_no_output": "출력 없음"
+	"remediation_no_output": "출력 없음",
+	"remediation_approve_page_title": "자동대응 승인",
+	"remediation_approving": "승인 처리 중…",
+	"remediation_approved_done_title": "승인됨 · 실행을 시작했습니다",
+	"remediation_approved_done_desc": "스크립트가 백그라운드에서 실행됩니다. 이 창은 닫으셔도 됩니다.",
+	"remediation_close_window": "창 닫기",
+	"remediation_rejected_title": "거절됨",
+	"remediation_expired_title": "만료됨",
+	"remediation_expired_desc": "이 승인 링크는 만료되었습니다.",
+	"remediation_executing_title": "실행 중",
+	"remediation_executed_title": "실행됨",
+	"remediation_not_found": "유효하지 않거나 만료된 승인 링크입니다.",
+	"remediation_forbidden": "자동대응 실행이 비활성화되어 있거나 권한이 없습니다.",
+	"remediation_too_many": "현재 실행 한도를 초과했습니다. 잠시 후 다시 시도하세요.",
+	"remediation_view_history": "실행 내역에서 보기"
 }

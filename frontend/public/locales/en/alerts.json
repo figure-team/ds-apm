@@ -542,5 +542,19 @@
 	"remediation_source_sop": "Source SOP",
 	"remediation_result_card_title": "Auto-remediation result",
 	"remediation_show_script": "Show executed script",
-	"remediation_no_output": "No output"
+	"remediation_no_output": "No output",
+	"remediation_approve_page_title": "Auto-remediation Approval",
+	"remediation_approving": "Approving…",
+	"remediation_approved_done_title": "Approved · execution started",
+	"remediation_approved_done_desc": "The script runs in the background. You may close this window.",
+	"remediation_close_window": "Close window",
+	"remediation_rejected_title": "Rejected",
+	"remediation_expired_title": "Expired",
+	"remediation_expired_desc": "This approval link has expired.",
+	"remediation_executing_title": "Executing",
+	"remediation_executed_title": "Executed",
+	"remediation_not_found": "Invalid or expired approval link.",
+	"remediation_forbidden": "Auto-remediation is disabled or you lack permission.",
+	"remediation_too_many": "Execution limit reached. Please try again shortly.",
+	"remediation_view_history": "View in execution history"
 }
