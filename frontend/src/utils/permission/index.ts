@@ -137,4 +137,5 @@ export const routePermission: Record<keyof typeof ROUTES, ROLES[]> = {
 	AI_MODULE_SETTINGS: ['ADMIN'],
 	CODE_RCA_SETTINGS: ['ADMIN'],
 	INCIDENT_REPORT_SETTINGS: ['ADMIN'],
+	REMEDIATION_APPROVE: ['ADMIN', 'EDITOR', 'VIEWER'],
 };

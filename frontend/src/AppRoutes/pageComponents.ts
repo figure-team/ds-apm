@@ -257,6 +257,13 @@ export const IntegrationsDetailsPage = Loadable(
 		),
 );
 
+export const RemediationApprovePage = Loadable(
+	() =>
+		import(
+			/* webpackChunkName: "RemediationApprove" */ 'pages/RemediationApprove'
+		),
+);
+
 export const MessagingQueuesMainPage = Loadable(
 	() =>
 		import(/* webpackChunkName: "MessagingQueues" */ 'pages/MessagingQueues'),

@@ -58,6 +58,7 @@ import {
 	WorkspaceAccessRestricted,
 	WorkspaceBlocked,
 	WorkspaceSuspended,
+	RemediationApprovePage,
 } from './pageComponents';
 
 const routes: AppRoutes[] = [
@@ -495,6 +496,13 @@ const routes: AppRoutes[] = [
 		component: ApiMonitoring,
 		key: 'API_MONITORING',
 		isPrivate: true,
+	},
+	{
+		path: ROUTES.REMEDIATION_APPROVE,
+		exact: true,
+		component: RemediationApprovePage,
+		isPrivate: true,
+		key: 'REMEDIATION_APPROVE',
 	},
 ];
 
