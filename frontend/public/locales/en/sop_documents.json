@@ -65,5 +65,6 @@
 	"history_col_approver": "Approver",
 	"history_filter_status_all": "All statuses",
 	"history_filter_sop_placeholder": "Filter by SOP ID",
-	"history_empty": "No execution history."
+	"history_empty": "No execution history.",
+	"history_load_error": "Failed to load execution history."
 }

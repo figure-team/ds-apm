@@ -65,5 +65,6 @@
 	"history_col_approver": "승인자",
 	"history_filter_status_all": "모든 상태",
 	"history_filter_sop_placeholder": "SOP ID로 필터",
-	"history_empty": "실행 내역이 없습니다."
+	"history_empty": "실행 내역이 없습니다.",
+	"history_load_error": "실행 내역을 불러오지 못했습니다."
 }

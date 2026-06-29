@@ -26,4 +26,10 @@ describe('RemediationHistory', () => {
 		render(<RemediationHistory />);
 		expect(await screen.findByText('history_empty')).toBeInTheDocument();
 	});
+
+	it('shows error message when listRemediations rejects', async () => {
+		api.listRemediations.mockRejectedValue(new Error('network error'));
+		render(<RemediationHistory />);
+		expect(await screen.findByText('history_load_error')).toBeInTheDocument();
+	});
 });

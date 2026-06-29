@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Input, Select, Table } from 'antd';
+import { Input, Select, Table, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 
 import { listRemediations, RemediationExecution } from 'api/remediation';
@@ -17,26 +17,46 @@ function RemediationHistory(): JSX.Element {
 	const { t } = useTranslation('sop_documents');
 	const [rows, setRows] = useState<RemediationExecution[]>([]);
 	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 	const [statusFilter, setStatusFilter] = useState<string>('');
 	const [sopFilter, setSopFilter] = useState<string>('');
+	const [debouncedSop, setDebouncedSop] = useState<string>('');
 
-	const load = useCallback(async (): Promise<void> => {
-		setLoading(true);
-		try {
-			const data = await listRemediations({
-				status: statusFilter || undefined,
-				sopId: sopFilter || undefined,
-				limit: LIST_LIMIT,
-			});
-			setRows(data);
-		} finally {
-			setLoading(false);
-		}
-	}, [statusFilter, sopFilter]);
+	// Debounce sopFilter → debouncedSop (300 ms)
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setDebouncedSop(sopFilter);
+		}, 300);
+		return (): void => clearTimeout(timer);
+	}, [sopFilter]);
+
+	const load = useCallback(async (): Promise<RemediationExecution[]> => {
+		const data = await listRemediations({
+			status: statusFilter || undefined,
+			sopId: debouncedSop || undefined,
+			limit: LIST_LIMIT,
+		});
+		return data;
+	}, [statusFilter, debouncedSop]);
 
 	useEffect(() => {
-		void load();
-	}, [load]);
+		let active = true;
+		setLoading(true);
+		setError(null);
+		load()
+			.then((data) => {
+				if (active) setRows(data);
+			})
+			.catch(() => {
+				if (active) setError(t('history_load_error'));
+			})
+			.finally(() => {
+				if (active) setLoading(false);
+			});
+		return (): void => {
+			active = false;
+		};
+	}, [load, t]);
 
 	const columns = useMemo<ColumnsType<RemediationExecution>>(
 		() => [
@@ -81,6 +101,9 @@ function RemediationHistory(): JSX.Element {
 					allowClear
 				/>
 			</div>
+			{error && (
+				<Typography.Text type="danger">{error}</Typography.Text>
+			)}
 			<Table
 				columns={columns}
 				dataSource={rows}
