@@ -73,6 +73,35 @@ func (l alertStateLookup) IsFiring(ctx context.Context, orgID, fp string) (bool,
 	return false, nil
 }
 
+// remediationSelectorAdapter satisfies dispatchhook.RemediationSelector. It runs
+// the Selector in a detached goroutine with panic recovery so a slow LLM or a
+// bug can never block or crash the dispatch path (fire-and-forget, fail-open).
+type remediationSelectorAdapter struct {
+	selector *remediation.Selector
+	logger   *slog.Logger
+}
+
+func (a remediationSelectorAdapter) Maybe(
+	ctx context.Context,
+	orgID, incidentID, alertFingerprint string,
+	labels map[string]string,
+	doc ruletypes.SOPDocument,
+) {
+	if a.selector == nil {
+		return
+	}
+	// Detach: the dispatch context may be cancelled the moment the alert is
+	// delivered; the Selector has its own internal timeout.
+	go func() {
+		defer func() {
+			if r := recover(); r != nil && a.logger != nil {
+				a.logger.Error("remediation selector panic recovered", "recover", r, "orgId", orgID)
+			}
+		}()
+		_, _ = a.selector.Select(context.WithoutCancel(ctx), orgID, incidentID, alertFingerprint, labels, doc)
+	}()
+}
+
 // orgLister returns a func(context.Context) []string that lists all org IDs
 // owned by this instance. Used by the Verifier background worker.
 func orgLister(getter organization.Getter, logger *slog.Logger) func(context.Context) []string {

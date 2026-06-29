@@ -517,6 +517,17 @@ func New(
 			proposer: proposer,
 			store:    remStore,
 		})
+
+		// LLM-backed selector (design §3): supersedes the static first-approved
+		// proposer for SOPs with ≥1 approved Runbook when an org has an LLM
+		// configured. Fail-open + fire-and-forget; the proposer above stays wired
+		// as the fallback for selector-less orgs.
+		selectorResolver := aigenerator.NewStoreAwareSelectorProvider(aiConfigStore, aiCipher)
+		selector := remediation.NewSelector(remStore, selectorResolver, remediationBaseURL, 0, time.Now, providerSettings.Logger)
+		aiDispatchHook.SetRemediationSelector(remediationSelectorAdapter{
+			selector: selector,
+			logger:   providerSettings.Logger,
+		})
 	}
 
 	// Engine: deployment-level agent/model/auth from env (per-org thresholds
