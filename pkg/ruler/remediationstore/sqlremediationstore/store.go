@@ -179,6 +179,33 @@ func (s *SQLStore) ListByStatus(ctx context.Context, orgID, status string) ([]ru
 	return out, nil
 }
 
+// ListByOrg returns an org's executions with optional status/sopID filters,
+// ordered most-recent-first (proposed_at DESC), capped by filter.Limit.
+func (s *SQLStore) ListByOrg(ctx context.Context, orgID string, filter remediationstore.ListFilter) ([]ruletypes.RemediationExecution, error) {
+	var rows []remediationRow
+	q := s.sqlstore.BunDB().NewSelect().
+		Model(&rows).
+		Where("org_id = ?", orgID)
+	if filter.Status != "" {
+		q = q.Where("status = ?", filter.Status)
+	}
+	if filter.SOPID != "" {
+		q = q.Where("sop_id = ?", filter.SOPID)
+	}
+	q = q.OrderExpr("proposed_at DESC")
+	if filter.Limit > 0 {
+		q = q.Limit(filter.Limit)
+	}
+	if err := q.Scan(ctx); err != nil {
+		return nil, err
+	}
+	out := make([]ruletypes.RemediationExecution, len(rows))
+	for i, r := range rows {
+		out[i] = r.toDomain()
+	}
+	return out, nil
+}
+
 // TransitionToExecuting is the single-execution guard. It atomically moves a
 // row from 'proposed' to 'executing' with a conditional UPDATE that also
 // enforces the org-level concurrency cap in a single SQL statement, eliminating

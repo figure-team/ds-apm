@@ -23,12 +23,23 @@ type Store interface {
 	// Used by reject/executor-result/verifier. patch carries only the fields
 	// relevant to the target status (exit code, output, verify result, terminal time).
 	Transition(ctx context.Context, orgID, id, toStatus string, patch TransitionPatch) error
+	// ListByOrg returns executions for an org filtered by optional status/sopID,
+	// ordered most-recent-first, capped by filter.Limit (<=0 means no cap).
+	ListByOrg(ctx context.Context, orgID string, filter ListFilter) ([]ruletypes.RemediationExecution, error)
 	CountActiveByOrg(ctx context.Context, orgID string) (int64, error) // executing only (approved is retired in v1)
 	GetConfig(ctx context.Context, orgID string) (ruletypes.RemediationConfig, error)
 	// UpsertConfig inserts or updates the per-org remediation config. Used by the
 	// admin-only config endpoint to flip ExecutionEnabled (org-wide master switch)
 	// and the timing knobs. Callers should validate before calling.
 	UpsertConfig(ctx context.Context, orgID string, cfg ruletypes.RemediationConfig) error
+}
+
+// ListFilter narrows a ListByOrg query. Empty string fields disable that
+// filter; Limit <= 0 means no row cap.
+type ListFilter struct {
+	Status string
+	SOPID  string
+	Limit  int
 }
 
 // TransitionPatch carries optional result fields for a status transition. Empty

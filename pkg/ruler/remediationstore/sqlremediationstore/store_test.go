@@ -312,6 +312,68 @@ func TestTransition_FailsOnConcurrentChange(t *testing.T) {
 	require.Equal(t, ruletypes.RemediationStatusVerified, got.Status)
 }
 
+func TestListByOrg_FilterAndOrder(t *testing.T) {
+	s := newTestStore(t)
+	ctx := context.Background()
+
+	seed := []ruletypes.RemediationExecution{
+		{ID: "eeeeeeee-eeee-4eee-aeee-eeeeeeeeee01", OrgID: "o", SOPID: "SOP-A", RunbookID: "rb", IncidentID: "i1", Status: ruletypes.RemediationStatusProposed, ProposedAt: "2026-06-24T00:00:00Z", ExpiresAt: "2026-06-24T01:00:00Z"},
+		{ID: "eeeeeeee-eeee-4eee-aeee-eeeeeeeeee02", OrgID: "o", SOPID: "SOP-B", RunbookID: "rb", IncidentID: "i2", Status: ruletypes.RemediationStatusSucceeded, ProposedAt: "2026-06-24T02:00:00Z", ExpiresAt: "2026-06-24T03:00:00Z"},
+		{ID: "eeeeeeee-eeee-4eee-aeee-eeeeeeeeee03", OrgID: "o", SOPID: "SOP-A", RunbookID: "rb", IncidentID: "i3", Status: ruletypes.RemediationStatusProposed, ProposedAt: "2026-06-24T01:00:00Z", ExpiresAt: "2026-06-24T04:00:00Z"},
+	}
+	for _, e := range seed {
+		if err := s.Create(ctx, e); err != nil {
+			t.Fatalf("seed: %v", err)
+		}
+	}
+
+	// 전체: most-recent-first (proposed_at DESC)
+	all, err := s.ListByOrg(ctx, "o", remediationstore.ListFilter{})
+	if err != nil {
+		t.Fatalf("ListByOrg: %v", err)
+	}
+	if len(all) != 3 {
+		t.Fatalf("want 3 rows, got %d", len(all))
+	}
+	// Assert full DESC order across all 3 positions so a swap at indices 1–2 would also fail.
+	if all[0].ProposedAt != "2026-06-24T02:00:00Z" {
+		t.Fatalf("want all[0]=2026-06-24T02:00:00Z (newest), got %q", all[0].ProposedAt)
+	}
+	if all[1].ProposedAt != "2026-06-24T01:00:00Z" {
+		t.Fatalf("want all[1]=2026-06-24T01:00:00Z, got %q", all[1].ProposedAt)
+	}
+	if all[2].ProposedAt != "2026-06-24T00:00:00Z" {
+		t.Fatalf("want all[2]=2026-06-24T00:00:00Z (oldest), got %q", all[2].ProposedAt)
+	}
+
+	// status 필터
+	prop, err := s.ListByOrg(ctx, "o", remediationstore.ListFilter{Status: ruletypes.RemediationStatusProposed})
+	if err != nil {
+		t.Fatalf("ListByOrg status: %v", err)
+	}
+	if len(prop) != 2 {
+		t.Fatalf("want 2 proposed, got %d", len(prop))
+	}
+
+	// sopID 필터
+	sopA, err := s.ListByOrg(ctx, "o", remediationstore.ListFilter{SOPID: "SOP-A"})
+	if err != nil {
+		t.Fatalf("ListByOrg sop: %v", err)
+	}
+	if len(sopA) != 2 {
+		t.Fatalf("want 2 SOP-A, got %d", len(sopA))
+	}
+
+	// limit
+	one, err := s.ListByOrg(ctx, "o", remediationstore.ListFilter{Limit: 1})
+	if err != nil {
+		t.Fatalf("ListByOrg limit: %v", err)
+	}
+	if len(one) != 1 {
+		t.Fatalf("want 1 (limit), got %d", len(one))
+	}
+}
+
 func TestExitCode_NullableRoundtrip(t *testing.T) {
 	s := newTestStore(t)
 	ctx := context.Background()
