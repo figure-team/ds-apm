@@ -18,9 +18,12 @@ import (
 // TransitionToExecuting honours the proposed→executing single-flight guard so we
 // can exercise both the winning and losing approve paths.
 type fakeRemediationStore struct {
-	mu   sync.Mutex
-	rows map[string]ruletypes.RemediationExecution
-	cfg  ruletypes.RemediationConfig
+	mu              sync.Mutex
+	rows            map[string]ruletypes.RemediationExecution
+	cfg             ruletypes.RemediationConfig
+	byOrg           []ruletypes.RemediationExecution
+	listByOrgCalled bool
+	lastFilter      remediationstore.ListFilter
 }
 
 func newFakeRemediationStore() *fakeRemediationStore {
@@ -86,6 +89,17 @@ func (f *fakeRemediationStore) ListByStatus(_ context.Context, _, status string)
 		}
 	}
 	return out, nil
+}
+
+func (f *fakeRemediationStore) ListByOrg(_ context.Context, _ string, filter remediationstore.ListFilter) ([]ruletypes.RemediationExecution, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.listByOrgCalled = true
+	f.lastFilter = filter
+	if f.byOrg != nil {
+		return f.byOrg, nil
+	}
+	return []ruletypes.RemediationExecution{}, nil
 }
 
 func (f *fakeRemediationStore) TransitionToExecuting(_ context.Context, _, id, approvedBy, approvedAt string, _ int64) (bool, error) {
@@ -321,5 +335,26 @@ func TestRejectRemediation_OK(t *testing.T) {
 	}
 	if store.get("rem-3").Status != ruletypes.RemediationStatusRejected {
 		t.Fatal("status must be rejected")
+	}
+}
+
+func TestListRemediations_ScopeOrg(t *testing.T) {
+	h, store, _ := newRemediationHandler(t)
+	store.byOrg = []ruletypes.RemediationExecution{
+		{ID: "r1", OrgID: testOrgID, Status: ruletypes.RemediationStatusSucceeded},
+	}
+
+	rw := httptest.NewRecorder()
+	req := newAuthedReq(t, http.MethodGet, "/api/v2/ds/remediation?scope=org&status=succeeded&limit=50", testOrgID, nil)
+	h.ListRemediations(rw, req)
+
+	if rw.Code != http.StatusOK {
+		t.Fatalf("status: got %d (body=%s)", rw.Code, rw.Body.String())
+	}
+	if !store.listByOrgCalled {
+		t.Fatal("expected ListByOrg to be called for scope=org")
+	}
+	if store.lastFilter.Status != "succeeded" || store.lastFilter.Limit != 50 {
+		t.Fatalf("filter not propagated: %+v", store.lastFilter)
 	}
 }

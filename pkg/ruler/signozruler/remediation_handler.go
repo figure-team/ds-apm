@@ -3,6 +3,7 @@ package signozruler
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -65,21 +66,39 @@ func (h *handler) GetRemediation(rw http.ResponseWriter, req *http.Request) {
 	render.Success(rw, http.StatusOK, e)
 }
 
-// ListRemediations handles GET /api/v2/ds/remediation?incidentId=.
-// With incidentId it scopes to that incident; otherwise it returns proposed
-// executions (the actionable default for an approval UI).
+// ListRemediations handles GET /api/v2/ds/remediation.
+// Branches:
+//   - scope=org  → ListByOrg (history view; status/sopId/limit params accepted)
+//   - incidentId → ListByIncident (incident-scoped approval UI)
+//   - default    → ListByStatus(proposed) (actionable default for approval UI)
 func (h *handler) ListRemediations(rw http.ResponseWriter, req *http.Request) {
 	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
 		return
 	}
-	incidentID := strings.TrimSpace(req.URL.Query().Get("incidentId"))
+
+	q := req.URL.Query()
+	scope := strings.TrimSpace(q.Get("scope"))
+	incidentID := strings.TrimSpace(q.Get("incidentId"))
 
 	var list []ruletypes.RemediationExecution
-	if incidentID != "" {
+	switch {
+	case scope == "org":
+		limit := 0
+		if raw := strings.TrimSpace(q.Get("limit")); raw != "" {
+			if n, convErr := strconv.Atoi(raw); convErr == nil && n > 0 {
+				limit = n
+			}
+		}
+		list, err = h.remediationStore.ListByOrg(req.Context(), orgID, remediationstore.ListFilter{
+			Status: strings.TrimSpace(q.Get("status")),
+			SOPID:  strings.TrimSpace(q.Get("sopId")),
+			Limit:  limit,
+		})
+	case incidentID != "":
 		list, err = h.remediationStore.ListByIncident(req.Context(), orgID, incidentID)
-	} else {
+	default:
 		list, err = h.remediationStore.ListByStatus(req.Context(), orgID, ruletypes.RemediationStatusProposed)
 	}
 	if err != nil {
