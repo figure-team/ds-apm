@@ -18,6 +18,10 @@ const (
 	RemediationStatusUnresolved = "unresolved"
 	RemediationStatusRejected   = "rejected"
 	RemediationStatusExpired    = "expired"
+
+	// Source enum: where the proposed script came from.
+	RemediationSourceRunbook      = "runbook"
+	RemediationSourceLLMGenerated = "llm-generated"
 )
 
 // RemediationMaxScriptLen mirrors RunbookMaxScriptLen — the snapshot is a copy
@@ -40,7 +44,15 @@ type RemediationExecution struct {
 	SOPID            string `json:"sopId"`
 	SOPVersion       string `json:"sopVersion"`
 	RunbookID        string `json:"runbookId"`
-	ScriptSnapshot   string `json:"scriptSnapshot"`
+	// Source records the script origin: a pre-approved Runbook ("runbook", the
+	// default for legacy rows) or an LLM-proposed fallback ("llm-generated").
+	// Both execute under the same org gate + single approval; Source drives only
+	// the cliaudit Via tag so LLM-script runs are separable in post-hoc audit.
+	Source string `json:"source,omitempty"`
+	// SelectionRationale is the LLM's reason for choosing this Runbook (or for
+	// proposing a fallback). Shown on the approval card and stored for audit.
+	SelectionRationale string `json:"selectionRationale,omitempty"`
+	ScriptSnapshot     string `json:"scriptSnapshot"`
 	Status           string `json:"status"`
 	ProposedAt       string `json:"proposedAt"`
 	ApprovedAt       string `json:"approvedAt,omitempty"`
@@ -51,6 +63,11 @@ type RemediationExecution struct {
 	OutputSnippet    string `json:"outputSnippet,omitempty"`
 	VerifyResult     string `json:"verifyResult,omitempty"`
 	ExpiresAt        string `json:"expiresAt"`
+}
+
+var allowedRemediationSources = map[string]struct{}{
+	RemediationSourceRunbook:      {},
+	RemediationSourceLLMGenerated: {},
 }
 
 var allowedRemediationStatuses = map[string]struct{}{
@@ -135,6 +152,10 @@ func ValidateRemediationExecution(e RemediationExecution) error {
 	pilotRequireNonEmpty(&errs, "sopId", e.SOPID)
 	pilotRequireNonEmpty(&errs, "runbookId", e.RunbookID)
 	pilotRequireAllowed(&errs, "status", e.Status, allowedRemediationStatuses)
+	if strings.TrimSpace(e.Source) != "" {
+		pilotRequireAllowed(&errs, "source", e.Source, allowedRemediationSources)
+	}
+	pilotAppendSecretLikeStringErrors(&errs, "selectionRationale", e.SelectionRationale)
 	if len(e.ScriptSnapshot) > RemediationMaxScriptLen {
 		errs = append(errs, fmt.Errorf("scriptSnapshot: exceeds %d-byte limit (got %d)", RemediationMaxScriptLen, len(e.ScriptSnapshot)))
 	}
