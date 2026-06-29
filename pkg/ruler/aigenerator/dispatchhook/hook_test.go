@@ -758,6 +758,89 @@ func TestApplyFallbackOmitsCustomerNotice(t *testing.T) {
 		"fallback status must be recorded in annotation")
 }
 
+// recordingSelector records how many times Maybe was called (fire-and-forget seam).
+type recordingSelector struct {
+	called int
+	gotDoc ruletypes.SOPDocument
+}
+
+func (r *recordingSelector) Maybe(_ context.Context, _, _, _ string, _ map[string]string, doc ruletypes.SOPDocument) {
+	r.called++
+	r.gotDoc = doc
+}
+
+// recordingProposer records MaybePropose calls and returns a configurable annotation map.
+type recordingProposer struct {
+	called int
+	ret    map[string]string
+}
+
+func (r *recordingProposer) MaybePropose(_ context.Context, _, _, _ string, _ map[string]string, _ ruletypes.SOPDocument) (map[string]string, bool) {
+	r.called++
+	if len(r.ret) > 0 {
+		return r.ret, true
+	}
+	return nil, false
+}
+
+// newTestHookBoundToSOPWithRunbooks returns a Hook bound to the demo SOP with
+// the supplied runbooks embedded in the SOPDocument. Uses the same seed-based
+// setup as the existing bound-SOP tests so label resolution works identically.
+func newTestHookBoundToSOPWithRunbooks(t *testing.T, runbooks []ruletypes.Runbook) *Hook {
+	t.Helper()
+	const orgID = "customer-a"
+	seed := loadSeed(t)
+
+	doc := seed.SOPDocument
+	doc.Runbooks = runbooks
+
+	sops := sopstoretest.New()
+	require.NoError(t, sops.Upsert(context.Background(), orgID, doc))
+
+	hist := aihistorystoretest.New()
+
+	gen := &stubGen{strategy: cannedStrategy(seed.Alert.IncidentID, seed.Alert.Fingerprint)}
+	return New(sops, hist, gen, nil, time.Second)
+}
+
+func TestApply_BoundWithApprovedRunbook_TriggersSelectorNotProposer(t *testing.T) {
+	h := newTestHookBoundToSOPWithRunbooks(t, []ruletypes.Runbook{
+		{ID: "rb-1", Title: "t", ExecutableScript: "echo a", Status: ruletypes.RunbookStatusApproved, Confidence: 0.5},
+	})
+	sel := &recordingSelector{}
+	prop := &recordingProposer{}
+	h.SetRemediationSelector(sel)
+	h.SetRemediationProposer(prop)
+
+	seed := loadSeed(t)
+	_ = h.Apply(context.Background(), "customer-a", seed.Alert.IncidentID, seed.Alert.Fingerprint,
+		seed.Alert.Labels, map[string]string{})
+
+	if sel.called != 1 {
+		t.Fatalf("selector should be triggered exactly once, got %d", sel.called)
+	}
+	if prop.called != 0 {
+		t.Fatalf("proposer must NOT be called when selector is wired, got %d", prop.called)
+	}
+}
+
+func TestApply_SelectorNil_FallsBackToProposer(t *testing.T) {
+	h := newTestHookBoundToSOPWithRunbooks(t, []ruletypes.Runbook{
+		{ID: "rb-1", Title: "t", ExecutableScript: "echo a", Status: ruletypes.RunbookStatusApproved, Confidence: 0.5},
+	})
+	prop := &recordingProposer{ret: map[string]string{"x": "y"}}
+	h.SetRemediationProposer(prop)
+	// selector not set.
+
+	seed := loadSeed(t)
+	_ = h.Apply(context.Background(), "customer-a", seed.Alert.IncidentID, seed.Alert.Fingerprint,
+		seed.Alert.Labels, map[string]string{})
+
+	if prop.called != 1 {
+		t.Fatalf("proposer must run when no selector wired, got %d", prop.called)
+	}
+}
+
 func cloneMap(in map[string]string) map[string]string {
 	out := make(map[string]string, len(in))
 	for k, v := range in {

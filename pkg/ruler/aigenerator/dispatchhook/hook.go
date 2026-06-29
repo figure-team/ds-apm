@@ -38,6 +38,13 @@ type RemediationProposer interface {
 	MaybePropose(ctx context.Context, orgID, incidentID, alertFingerprint string, labels map[string]string, doc ruletypes.SOPDocument) (map[string]string, bool)
 }
 
+// RemediationSelector is the fire-and-forget seam for LLM-backed runbook
+// selection (design §3). Maybe runs off the dispatch path entirely (its own
+// goroutine + timeout inside the implementation) and must never panic or block.
+type RemediationSelector interface {
+	Maybe(ctx context.Context, orgID, incidentID, alertFingerprint string, labels map[string]string, doc ruletypes.SOPDocument)
+}
+
 // DefaultGenerateTimeout is the upper bound the hook imposes on the AI
 // generator. The dispatcher must never block on a slow provider, so this
 // is intentionally aggressive.
@@ -59,6 +66,7 @@ type Hook struct {
 	timeout        time.Duration
 	codeRCA        CodeRCATrigger
 	remediation    RemediationProposer
+	selector       RemediationSelector
 }
 
 // SetCodeRCATrigger injects the CF-11 trigger after construction (the trigger
@@ -68,6 +76,11 @@ func (h *Hook) SetCodeRCATrigger(t CodeRCATrigger) { h.codeRCA = t }
 // SetRemediationProposer injects the proposer after construction (optional,
 // nil-safe). Mirrors SetCodeRCATrigger.
 func (h *Hook) SetRemediationProposer(p RemediationProposer) { h.remediation = p }
+
+// SetRemediationSelector injects the LLM-backed selector (optional, nil-safe).
+// When set, it supersedes the static first-approved Proposer on the Bound
+// branch for SOPs that carry at least one approved Runbook.
+func (h *Hook) SetRemediationSelector(sel RemediationSelector) { h.selector = sel }
 
 // New constructs a Hook. logger may be nil — the hook falls back to
 // slog.Default() in that case. timeout ≤ 0 falls back to
@@ -185,15 +198,7 @@ func (h *Hook) Apply(
 			strings.TrimSpace(rec.Strategy.SOPVersion) == strings.TrimSpace(binding.Version) &&
 			!rec.Strategy.IsDeterministicLocal() {
 			merged := h.mergeStrategyWithSOP(annotations, rec.Strategy, doc, binding)
-			// Human-gated auto-remediation (design §8): if a proposer is wired and
-			// the bound SOP has an approved Runbook + org has execution enabled,
-			// create a proposed execution and merge its annotations. Fail-open:
-			// never blocks the alert.
-			if h.remediation != nil {
-				if remAnn, ok := h.remediation.MaybePropose(ctx, orgID, incidentID, alertFingerprint, labels, doc); ok && len(remAnn) > 0 {
-					merged = mergeAnnotations(merged, remAnn)
-				}
-			}
+			merged = h.applyRemediation(ctx, orgID, incidentID, alertFingerprint, labels, doc, merged)
 			return merged
 		}
 	}
@@ -237,15 +242,7 @@ func (h *Hook) Apply(
 		}
 	}
 
-	// Human-gated auto-remediation (design §8): if a proposer is wired and
-	// the bound SOP has an approved Runbook + org has execution enabled,
-	// create a proposed execution and merge its annotations. Fail-open:
-	// never blocks the alert.
-	if h.remediation != nil {
-		if remAnn, ok := h.remediation.MaybePropose(ctx, orgID, incidentID, alertFingerprint, labels, doc); ok && len(remAnn) > 0 {
-			merged = mergeAnnotations(merged, remAnn)
-		}
-	}
+	merged = h.applyRemediation(ctx, orgID, incidentID, alertFingerprint, labels, doc, merged)
 
 	return merged
 }
@@ -308,6 +305,33 @@ func (h *Hook) mergeStrategyWithSOP(base map[string]string, strategy ruletypes.A
 		merged[alertmanagertypes.IncidentAnnotationSopBindingID] = binding.Resolution
 	}
 	return merged
+}
+
+// applyRemediation routes to the LLM selector when wired (and the SOP has at
+// least one approved runbook), otherwise to the static first-approved proposer.
+// The selector is fire-and-forget (async), so it contributes no annotations to
+// THIS dispatch; its proposal attaches to the incident's approval card shortly
+// after, out of band. Returns merged unchanged in the selector case.
+func (h *Hook) applyRemediation(ctx context.Context, orgID, incidentID, alertFingerprint string, labels map[string]string, doc ruletypes.SOPDocument, merged map[string]string) map[string]string {
+	if h.selector != nil && hasApprovedRunbook(doc) {
+		h.selector.Maybe(ctx, orgID, incidentID, alertFingerprint, labels, doc)
+		return merged
+	}
+	if h.remediation != nil {
+		if remAnn, ok := h.remediation.MaybePropose(ctx, orgID, incidentID, alertFingerprint, labels, doc); ok && len(remAnn) > 0 {
+			return mergeAnnotations(merged, remAnn)
+		}
+	}
+	return merged
+}
+
+func hasApprovedRunbook(doc ruletypes.SOPDocument) bool {
+	for _, rb := range doc.Runbooks {
+		if rb.Status == ruletypes.RunbookStatusApproved && strings.TrimSpace(rb.ExecutableScript) != "" {
+			return true
+		}
+	}
+	return false
 }
 
 // mergeAnnotations returns a fresh map containing base overlaid with
