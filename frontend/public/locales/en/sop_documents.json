@@ -55,5 +55,15 @@
 	"remediation_toggle_confirm_on": "Enable auto-remediation execution for this entire org? Approved runbook scripts will actually run after operator approval.",
 	"remediation_toggle_confirm_off": "Disable auto-remediation execution? No new remediation proposals will be created (in-flight ones are unaffected).",
 	"remediation_toggle_load_error": "Failed to load auto-remediation config.",
-	"remediation_toggle_save_error": "Failed to save auto-remediation config."
+	"remediation_toggle_save_error": "Failed to save auto-remediation config.",
+	"history_tab": "Execution History",
+	"documents_tab": "SOP Documents",
+	"history_col_time": "Time",
+	"history_col_sop": "SOP",
+	"history_col_status": "Status",
+	"history_col_exit": "Exit code",
+	"history_col_approver": "Approver",
+	"history_filter_status_all": "All statuses",
+	"history_filter_sop_placeholder": "Filter by SOP ID",
+	"history_empty": "No execution history."
 }

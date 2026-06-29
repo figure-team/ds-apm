@@ -55,5 +55,15 @@
 	"remediation_toggle_confirm_on": "이 조직 전체에서 자동 대응 실행을 활성화하시겠습니까? 승인된 Runbook의 스크립트가 운영자 승인 후 실제로 실행됩니다.",
 	"remediation_toggle_confirm_off": "자동 대응 실행을 비활성화하시겠습니까? 진행 중이 아닌 신규 자동 대응 제안이 더 이상 생성되지 않습니다.",
 	"remediation_toggle_load_error": "자동 대응 설정을 불러오지 못했습니다.",
-	"remediation_toggle_save_error": "자동 대응 설정 저장에 실패했습니다."
+	"remediation_toggle_save_error": "자동 대응 설정 저장에 실패했습니다.",
+	"history_tab": "실행 내역",
+	"documents_tab": "SOP 문서",
+	"history_col_time": "시각",
+	"history_col_sop": "SOP",
+	"history_col_status": "상태",
+	"history_col_exit": "종료코드",
+	"history_col_approver": "승인자",
+	"history_filter_status_all": "모든 상태",
+	"history_filter_sop_placeholder": "SOP ID로 필터",
+	"history_empty": "실행 내역이 없습니다."
 }
