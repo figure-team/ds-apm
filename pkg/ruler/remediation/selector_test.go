@@ -30,6 +30,9 @@ func (m *memStore) Create(_ context.Context, e ruletypes.RemediationExecution) e
 	if m.createErr != nil {
 		return m.createErr
 	}
+	if err := ruletypes.ValidateRemediationExecution(e); err != nil {
+		return err
+	}
 	m.lastCreated = e
 	m.createCount++
 	return nil

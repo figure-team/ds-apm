@@ -59,6 +59,9 @@ func TestExecutor_Timeout(t *testing.T) {
 }
 
 func TestRun_TagsViaFromMeta(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("bash executor is linux/unix")
+	}
 	// cliaudit는 env가 비면 no-op이므로, 여기서는 Run이 meta.Via를 받아
 	// 정상 동작(빈 Via 기본값 포함)하는지 + 결과가 변하지 않는지 확인한다.
 	e := NewExecutor(2 * time.Second)

@@ -86,6 +86,7 @@ func TestRemediationStatusTransition(t *testing.T) {
 func TestValidateRemediationExecution_AllowsKnownSource(t *testing.T) {
 	e := validRemediationExecution()
 	e.Source = RemediationSourceLLMGenerated
+	e.RunbookID = "" // llm-generated has no backing runbook (design §6.1)
 	e.SelectionRationale = "적합한 Runbook이 없어 직접 제안한 스크립트"
 	if err := ValidateRemediationExecution(e); err != nil {
 		t.Fatalf("llm-generated source should validate: %v", err)
@@ -105,6 +106,49 @@ func TestValidateRemediationExecution_EmptySourceAllowed(t *testing.T) {
 	e.Source = ""
 	if err := ValidateRemediationExecution(e); err != nil {
 		t.Fatalf("empty source must stay valid for legacy rows: %v", err)
+	}
+}
+
+// TestValidateRemediationExecution_LLMSource_EmptyRunbookID verifies that
+// llm-generated executions with no backing runbook pass validation (design §6.1).
+func TestValidateRemediationExecution_LLMSource_EmptyRunbookID(t *testing.T) {
+	e := validRemediationExecution()
+	e.Source = RemediationSourceLLMGenerated
+	e.RunbookID = ""
+	if err := ValidateRemediationExecution(e); err != nil {
+		t.Fatalf("llm-generated + empty RunbookID must validate, got: %v", err)
+	}
+}
+
+// TestValidateRemediationExecution_LLMSource_NonEmptyRunbookID verifies that
+// llm-generated executions MUST NOT carry a RunbookID (would be inconsistent).
+func TestValidateRemediationExecution_LLMSource_NonEmptyRunbookID(t *testing.T) {
+	e := validRemediationExecution()
+	e.Source = RemediationSourceLLMGenerated
+	e.RunbookID = "22222222-2222-2222-2222-222222222222"
+	if err := ValidateRemediationExecution(e); err == nil {
+		t.Fatalf("llm-generated + non-empty RunbookID must error")
+	}
+}
+
+// TestValidateRemediationExecution_RunbookSource_EmptyRunbookID verifies that
+// the existing behavior is preserved: runbook-source (or empty source) still
+// requires a non-empty RunbookID.
+func TestValidateRemediationExecution_RunbookSource_EmptyRunbookID(t *testing.T) {
+	e := validRemediationExecution()
+	e.Source = RemediationSourceRunbook
+	e.RunbookID = ""
+	if err := ValidateRemediationExecution(e); err == nil {
+		t.Fatalf("runbook source + empty RunbookID must error")
+	}
+}
+
+func TestValidateRemediationExecution_EmptySource_EmptyRunbookID(t *testing.T) {
+	e := validRemediationExecution()
+	e.Source = ""
+	e.RunbookID = ""
+	if err := ValidateRemediationExecution(e); err == nil {
+		t.Fatalf("empty source + empty RunbookID must error (legacy row behavior)")
 	}
 }
 
