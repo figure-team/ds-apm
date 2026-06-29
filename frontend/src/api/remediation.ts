@@ -6,6 +6,13 @@ export interface RemediationExecution {
 	scriptSnapshot: string;
 	sopId: string;
 	runbookId: string;
+	incidentId?: string;
+	proposedAt?: string;
+	approvedAt?: string;
+	executedAt?: string;
+	terminalAt?: string;
+	approvedBy?: string;
+	expiresAt?: string;
 	exitCode?: number;
 	outputSnippet?: string;
 	verifyResult?: string;
@@ -33,6 +40,25 @@ export const rejectRemediation = (id: string): Promise<RemediationExecution> =>
 		url: `/api/v2/ds/remediation/${encodeURIComponent(id)}/reject`,
 		method: 'POST',
 	}).then((r) => r.data);
+
+export interface ListRemediationsParams {
+	status?: string;
+	sopId?: string;
+	limit?: number;
+}
+
+export const listRemediations = (
+	params: ListRemediationsParams = {},
+): Promise<RemediationExecution[]> => {
+	const search = new URLSearchParams({ scope: 'org' });
+	if (params.status) search.set('status', params.status);
+	if (params.sopId) search.set('sopId', params.sopId);
+	if (params.limit) search.set('limit', String(params.limit));
+	return GeneratedAPIInstance<ApiResponse<{ remediations: RemediationExecution[] }>>({
+		url: `/api/v2/ds/remediation?${search.toString()}`,
+		method: 'GET',
+	}).then((r) => r.data.remediations);
+};
 
 // RemediationConfig is the org-wide auto-remediation master switch + timing
 // knobs. Admin-only on both read and write (the backend routes enforce
