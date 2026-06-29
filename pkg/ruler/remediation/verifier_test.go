@@ -54,6 +54,10 @@ func (s *vFakeStore) UpsertConfig(_ context.Context, _ string, _ ruletypes.Remed
 	return nil
 }
 
+func (s *vFakeStore) ListByOrg(_ context.Context, _ string, _ remediationstore.ListFilter) ([]ruletypes.RemediationExecution, error) {
+	return nil, nil
+}
+
 // ---------------------------------------------------------------------------
 // Fake AlertStateLookup
 // ---------------------------------------------------------------------------
