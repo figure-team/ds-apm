@@ -26,6 +26,20 @@ jest.mock('../RemediationConfigToggle', () => ({
 	default: (): JSX.Element => <div>RemediationConfigToggleStub</div>,
 }));
 
+jest.mock('api/remediation', () => ({
+	listRemediations: jest.fn().mockResolvedValue([]),
+	getRemediation: jest.fn(),
+	approveRemediation: jest.fn(),
+	rejectRemediation: jest.fn(),
+	getRemediationConfig: jest.fn(),
+	updateRemediationConfig: jest.fn(),
+}));
+
+jest.mock('../RemediationHistory', () => ({
+	__esModule: true,
+	default: (): JSX.Element => <div>RemediationHistoryStub</div>,
+}));
+
 const mockCreateSopDocument = createSopDocument as jest.MockedFunction<
 	typeof createSopDocument
 >;
@@ -222,5 +236,11 @@ describe('SOPDocuments', () => {
 		await waitFor(() => expect(mockGetSopDocument).toHaveBeenCalled());
 		// ⋯ 메뉴 클릭은 상세로 드릴인하지 않는다(stopPropagation).
 		expect(screen.queryByTestId('sop-detail-back')).not.toBeInTheDocument();
+	});
+
+	it('renders document and history tabs', async () => {
+		render(<SOPDocuments />);
+		expect(await screen.findByText('documents_tab')).toBeInTheDocument();
+		expect(screen.getByText('history_tab')).toBeInTheDocument();
 	});
 });

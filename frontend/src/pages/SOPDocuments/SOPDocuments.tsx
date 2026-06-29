@@ -6,7 +6,7 @@ import {
 	PlusOutlined,
 	UploadOutlined,
 } from '@ant-design/icons';
-import { Alert, Button, Dropdown, Input, Select, Table, Tag } from 'antd';
+import { Alert, Button, Dropdown, Input, Select, Table, Tabs, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
 	listSopDocuments,
@@ -30,6 +30,7 @@ import SopDocumentFormDrawer, {
 	type SopDocumentEditTarget,
 } from './SopDocumentFormDrawer';
 import RemediationConfigToggle from './RemediationConfigToggle';
+import RemediationHistory from './RemediationHistory';
 
 function getErrorMessage(error: unknown): string {
 	if (typeof error === 'object' && error !== null && 'response' in error) {
@@ -289,78 +290,62 @@ function SOPDocuments(): JSX.Element {
 		[t, openEditDrawer],
 	);
 
-	return (
-		<div className="sop-documents-page settings-shell settings-shell--narrow">
-			<header className="sop-documents-page__header">
-						<div className="sop-documents-page__header-row">
-							<div>
-								<h1>{t('page_title')}</h1>
-								<p>{t('page_description')}</p>
-							</div>
-							<div className="sop-documents-page__header-actions">
-								<Button icon={<DownloadOutlined />} onClick={downloadSopExcelTemplate}>
-									{t('btn_template_download')}
-								</Button>
-								<Button
-									icon={<UploadOutlined />}
-									onClick={(): void => setUploadModalOpen(true)}
-								>
-									{t('btn_file_upload')}
-								</Button>
-								<Button
-									data-testid="open-register-drawer"
-									icon={<PlusOutlined />}
-									onClick={openCreateDrawer}
-									type="primary"
-								>
-									{t('btn_add_document')}
-								</Button>
-							</div>
-						</div>
-					</header>
+	const activeTab = query.get('tab') === 'history' ? 'history' : 'documents';
 
-					{message && <Alert message={message} showIcon type="success" />}
-					{error && <Alert message={error} showIcon type="error" />}
+	const onTabChange = useCallback(
+		(key: string): void => {
+			const params = new URLSearchParams(query.toString());
+			if (key === 'history') {
+				params.set('tab', 'history');
+			} else {
+				params.delete('tab');
+			}
+			history.push({ search: params.toString() });
+		},
+		[history, query],
+	);
 
-					<section className="sop-documents-page__section">
-						<div className="sop-documents-page__section-header sop-documents-page__section-header--row">
-							<div>
-								<h2>{t('documents_section_title')}</h2>
-								<p>{t('documents_section_description')}</p>
-							</div>
-							<Select<StatusFilter>
-								className="sop-documents-page__status-filter"
-								data-testid="sop-status-filter"
-								onChange={handleStatusFilterChange}
-								options={[
-									{ value: 'all', label: t('filter_all_statuses') },
-									...STATUS_OPTIONS.map((status) => ({
-										value: status,
-										label: t(`status_${status}`),
-									})),
-								]}
-								value={statusFilter}
-							/>
-						</div>
-						<Table
-							columns={columns}
-							dataSource={filteredDocuments}
-							loading={isLoading}
-							onRow={(record: SopDocumentSummary) => ({
-								onClick: (): void => openDetail(record),
-								style: { cursor: 'pointer' },
-							})}
-							pagination={{
-								current: currentPage,
-								hideOnSinglePage: true,
-								onChange: setCurrentPage,
-								pageSize: PAGE_SIZE,
-								showSizeChanger: false,
-							}}
-							rowKey={(document): string => `${document.sopId}:${document.version}`}
-							size="small"
-						/>
-					</section>
+	const documentsTab = (
+		<>
+			<section className="sop-documents-page__section">
+				<div className="sop-documents-page__section-header sop-documents-page__section-header--row">
+					<div>
+						<h2>{t('documents_section_title')}</h2>
+						<p>{t('documents_section_description')}</p>
+					</div>
+					<Select<StatusFilter>
+						className="sop-documents-page__status-filter"
+						data-testid="sop-status-filter"
+						onChange={handleStatusFilterChange}
+						options={[
+							{ value: 'all', label: t('filter_all_statuses') },
+							...STATUS_OPTIONS.map((status) => ({
+								value: status,
+								label: t(`status_${status}`),
+							})),
+						]}
+						value={statusFilter}
+					/>
+				</div>
+				<Table
+					columns={columns}
+					dataSource={filteredDocuments}
+					loading={isLoading}
+					onRow={(record: SopDocumentSummary) => ({
+						onClick: (): void => openDetail(record),
+						style: { cursor: 'pointer' },
+					})}
+					pagination={{
+						current: currentPage,
+						hideOnSinglePage: true,
+						onChange: setCurrentPage,
+						pageSize: PAGE_SIZE,
+						showSizeChanger: false,
+					}}
+					rowKey={(document): string => `${document.sopId}:${document.version}`}
+					size="small"
+				/>
+			</section>
 
 			<section className="sop-documents-page__section">
 				<div className="sop-documents-page__section-header">
@@ -441,6 +426,58 @@ function SOPDocuments(): JSX.Element {
 				onRegistered={handleRegistered}
 				open={previewDrawerOpen}
 				parseResult={parseResult}
+			/>
+		</>
+	);
+
+	return (
+		<div className="sop-documents-page settings-shell settings-shell--narrow">
+			<header className="sop-documents-page__header">
+				<div className="sop-documents-page__header-row">
+					<div>
+						<h1>{t('page_title')}</h1>
+						<p>{t('page_description')}</p>
+					</div>
+					<div className="sop-documents-page__header-actions">
+						<Button icon={<DownloadOutlined />} onClick={downloadSopExcelTemplate}>
+							{t('btn_template_download')}
+						</Button>
+						<Button
+							icon={<UploadOutlined />}
+							onClick={(): void => setUploadModalOpen(true)}
+						>
+							{t('btn_file_upload')}
+						</Button>
+						<Button
+							data-testid="open-register-drawer"
+							icon={<PlusOutlined />}
+							onClick={openCreateDrawer}
+							type="primary"
+						>
+							{t('btn_add_document')}
+						</Button>
+					</div>
+				</div>
+			</header>
+
+			{message && <Alert message={message} showIcon type="success" />}
+			{error && <Alert message={error} showIcon type="error" />}
+
+			<Tabs
+				activeKey={activeTab}
+				onChange={onTabChange}
+				items={[
+					{
+						key: 'documents',
+						label: t('documents_tab'),
+						children: documentsTab,
+					},
+					{
+						key: 'history',
+						label: t('history_tab'),
+						children: <RemediationHistory />,
+					},
+				]}
 			/>
 		</div>
 	);
