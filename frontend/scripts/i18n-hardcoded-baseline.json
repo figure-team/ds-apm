@@ -921,7 +921,6 @@
   "src/pages/AlertDetails/AlertHeader/AlertState/AlertState.tsx\tjsx-text\tMuted",
   "src/pages/AlertDetails/AlertHeader/AlertState/AlertState.tsx\tjsx-text\tNo Data",
   "src/pages/AlertDetails/AlertHeader/AlertState/AlertState.tsx\tjsx-text\tResolved",
-  "src/pages/AlertDetails/AlertHeader/ResponseContext/AlertResponseContext.tsx\tattr:aria-label\tIncident response context",
   "src/pages/AlertDetails/AlertNotFound/AlertNotFound.tsx\tjsx-text\tCheck all rules",
   "src/pages/AlertDetails/AlertNotFound/AlertNotFound.tsx\tjsx-text\tContact Support",
   "src/pages/AlertDetails/AlertNotFound/AlertNotFound.tsx\tjsx-text\tIf you feel the issue is none of the above, please contact support.",

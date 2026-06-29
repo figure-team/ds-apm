@@ -13,9 +13,6 @@ import AlertActionButtons from './ActionButtons/ActionButtons';
 import AlertLabels from './AlertLabels/AlertLabels';
 import AlertSeverity from './AlertSeverity/AlertSeverity';
 import AlertState from './AlertState/AlertState';
-import AlertResponseContext, {
-	type AlertAIStrategyHistory,
-} from './ResponseContext/AlertResponseContext';
 import RemediationCard from './ResponseContext/RemediationCard';
 
 import './AlertHeader.styles.scss';
@@ -45,9 +42,6 @@ function AlertHeader({ alertDetails }: AlertHeaderProps): JSX.Element {
 	}, [labels]);
 
 	const isV2Alert = alertDetails.schemaVersion === NEW_ALERT_SCHEMA_VERSION;
-	const aiStrategyHistory = (
-		alertDetails as { aiStrategyHistory?: AlertAIStrategyHistory }
-	).aiStrategyHistory;
 
 	const CreateAlertV1Header = (
 		<div className="alert-info__info-wrapper">
@@ -76,12 +70,6 @@ function AlertHeader({ alertDetails }: AlertHeaderProps): JSX.Element {
 		<div className="alert-info">
 			<div className="alert-info__content">
 				{isV2Alert ? <CreateAlertV2Header /> : CreateAlertV1Header}
-				<AlertResponseContext
-					alertName={updatedName || alertName}
-					annotations={annotations}
-					labels={labels}
-					strategyHistory={aiStrategyHistory}
-				/>
 				{remediationId && <RemediationCard remediationId={remediationId} />}
 			</div>
 			<div className="alert-info__action-buttons">
