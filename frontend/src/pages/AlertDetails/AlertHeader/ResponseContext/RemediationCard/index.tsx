@@ -7,6 +7,8 @@ import {
 	rejectRemediation,
 	RemediationExecution,
 } from 'api/remediation';
+import RemediationStatusBadge from 'components/Remediation/RemediationStatusBadge';
+import RemediationResult from 'components/Remediation/RemediationResult';
 
 import './styles.scss';
 
@@ -100,33 +102,13 @@ function RemediationCard({ remediationId }: RemediationCardProps): JSX.Element |
 				<h4 className="remediation-card__title">
 					{t(hasResult ? 'remediation_result_card_title' : 'remediation_card_title')}
 				</h4>
-				<span
-					className={`remediation-card__badge remediation-card__badge--${rem.status}`}
-				>
-					{t(`remediation_status_${rem.status}`)}
-				</span>
+				<RemediationStatusBadge status={rem.status} />
 			</div>
 			<div className="remediation-card__meta">
 				{t('remediation_source_sop')}: {rem.sopId}
 			</div>
 			{hasResult ? (
-				<>
-					{typeof rem.exitCode === 'number' && (
-						<div className="remediation-card__exit">
-							{t('remediation_exit_code')}: {rem.exitCode}
-						</div>
-					)}
-					<pre className="remediation-card__output">
-						{rem.outputSnippet || t('remediation_no_output')}
-					</pre>
-					{rem.verifyResult && (
-						<div className="remediation-card__verify">{rem.verifyResult}</div>
-					)}
-					<details className="remediation-card__script-toggle">
-						<summary>{t('remediation_show_script')}</summary>
-						<pre className="remediation-card__script">{rem.scriptSnapshot}</pre>
-					</details>
-				</>
+				<RemediationResult rem={rem} />
 			) : (
 				<pre className="remediation-card__script">{rem.scriptSnapshot}</pre>
 			)}
