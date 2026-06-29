@@ -20,7 +20,7 @@ import (
 // satisfies it (built via the newRemediationExecutor factory), and tests inject
 // a fake. Keeping it an interface decouples the handler from process spawning.
 type RemediationRunner interface {
-	Run(ctx context.Context, script string) remediation.ExecResult
+	Run(ctx context.Context, script string, meta remediation.RunMeta) remediation.ExecResult
 }
 
 // remediationListResponse is the GET /remediation wire shape.
@@ -160,7 +160,15 @@ func (h *handler) runRemediation(orgID string, e ruletypes.RemediationExecution,
 	ctx, cancel := context.WithTimeout(context.Background(), timeout+5*time.Second)
 	defer cancel()
 
-	res := runner.Run(ctx, e.ScriptSnapshot)
+	via := "remediation-exec"
+	if e.Source == ruletypes.RemediationSourceLLMGenerated {
+		via = "remediation-exec-llm"
+	}
+	res := runner.Run(ctx, e.ScriptSnapshot, remediation.RunMeta{
+		Via:         via,
+		Source:      e.Source,
+		Fingerprint: e.AlertFingerprint,
+	})
 
 	toStatus := ruletypes.RemediationStatusSucceeded
 	if res.TimedOut || res.ExitCode != 0 {

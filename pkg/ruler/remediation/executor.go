@@ -28,6 +28,13 @@ type ExecResult struct {
 	TimedOut bool
 }
 
+// RunMeta carries audit-tagging metadata for a single script run.
+type RunMeta struct {
+	Via         string // cliaudit seam; "" defaults to "remediation-exec"
+	Source      string // "runbook" | "llm-generated"
+	Fingerprint string
+}
+
 // Executor runs bash scripts under a hard timeout with process-group containment.
 type Executor struct {
 	timeout time.Duration
@@ -45,8 +52,8 @@ func NewExecutor(timeout time.Duration) *Executor {
 // Run executes script via `bash -c` under timeout + group containment. The whole
 // process tree is killed on timeout. Output (stdout+stderr combined) is captured
 // and truncated to maxOutputCapture bytes. Always logs a cliaudit.Record with
-// Via "remediation-exec".
-func (e *Executor) Run(ctx context.Context, script string) ExecResult {
+// Via from meta (defaults to "remediation-exec" when empty).
+func (e *Executor) Run(ctx context.Context, script string, meta RunMeta) ExecResult {
 	runCtx, cancel := context.WithTimeout(ctx, e.timeout)
 	defer cancel()
 
@@ -69,9 +76,15 @@ func (e *Executor) Run(ctx context.Context, script string) ExecResult {
 	out := truncate(buf.String(), maxOutputCapture)
 
 	res := ExecResult{Output: out}
+	via := meta.Via
+	if via == "" {
+		via = "remediation-exec"
+	}
 	rec := cliaudit.Record{
-		Via:         "remediation-exec",
+		Via:         via,
 		Binary:      "bash",
+		Source:      meta.Source,
+		Fingerprint: meta.Fingerprint,
 		DurationMS:  time.Since(start).Milliseconds(),
 		OutputBytes: len(out),
 		Outcome:     "ok",
