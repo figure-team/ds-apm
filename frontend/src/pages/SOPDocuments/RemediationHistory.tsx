@@ -2,6 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Input, Select, Table, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { DATE_TIME_FORMATS } from 'constants/dateTimeFormats';
+import dayjs from 'dayjs';
+import { useTimezone } from 'providers/Timezone';
 
 import { listRemediations, RemediationExecution } from 'api/remediation';
 import RemediationStatusBadge from 'components/Remediation/RemediationStatusBadge';
@@ -15,6 +18,7 @@ const LIST_LIMIT = 200;
 
 function RemediationHistory(): JSX.Element {
 	const { t } = useTranslation('sop_documents');
+	const { timezone } = useTimezone();
 	const [rows, setRows] = useState<RemediationExecution[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -63,7 +67,14 @@ function RemediationHistory(): JSX.Element {
 			{
 				title: t('history_col_time'),
 				key: 'time',
-				render: (_, r): string => r.terminalAt || r.proposedAt || '',
+				render: (_, r): string => {
+					const ts = r.terminalAt || r.proposedAt;
+					return ts
+						? dayjs(ts)
+								.tz(timezone.value)
+								.format(DATE_TIME_FORMATS.ISO_DATETIME_SECONDS)
+						: '';
+				},
 			},
 			{ title: t('history_col_sop'), dataIndex: 'sopId', key: 'sopId' },
 			{
@@ -79,7 +90,7 @@ function RemediationHistory(): JSX.Element {
 			},
 			{ title: t('history_col_approver'), dataIndex: 'approvedBy', key: 'approvedBy' },
 		],
-		[t],
+		[t, timezone.value],
 	);
 
 	return (
