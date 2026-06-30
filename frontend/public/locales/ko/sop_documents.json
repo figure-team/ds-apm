@@ -63,6 +63,8 @@
 	"history_col_status": "상태",
 	"history_col_exit": "종료코드",
 	"history_col_approver": "승인자",
+	"history_col_actions": "작업",
+	"history_action_approve": "승인 열기",
 	"history_filter_status_all": "모든 상태",
 	"history_filter_sop_placeholder": "SOP ID로 필터",
 	"history_empty": "실행 내역이 없습니다.",

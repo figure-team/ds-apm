@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from 'tests/test-utils';
+import { fireEvent, render, screen, waitFor } from 'tests/test-utils';
 
 import RemediationHistory from '../RemediationHistory';
 
@@ -31,5 +31,29 @@ describe('RemediationHistory', () => {
 		api.listRemediations.mockRejectedValue(new Error('network error'));
 		render(<RemediationHistory />);
 		expect(await screen.findByText('history_load_error')).toBeInTheDocument();
+	});
+
+	it('opens the approval popup for a proposed row', async () => {
+		api.listRemediations.mockResolvedValue([
+			{ id: 'r-prop', status: 'proposed', scriptSnapshot: 's', sopId: 'SOP-P', runbookId: 'rb', proposedAt: '2026-06-24T00:00:00Z' },
+		]);
+		const openSpy = jest.spyOn(window, 'open').mockReturnValue(null);
+		render(<RemediationHistory />);
+		fireEvent.click(await screen.findByText('history_action_approve'));
+		expect(openSpy).toHaveBeenCalledWith(
+			'/remediation/approve/r-prop',
+			'_blank',
+			expect.stringContaining('noopener'),
+		);
+		openSpy.mockRestore();
+	});
+
+	it('does not show the approve action for a terminal row', async () => {
+		api.listRemediations.mockResolvedValue([
+			{ id: 'r1', status: 'succeeded', scriptSnapshot: 's', sopId: 'SOP-A', runbookId: 'rb', proposedAt: '2026-06-24T00:00:00Z', approvedBy: 'alice', exitCode: 0 },
+		]);
+		render(<RemediationHistory />);
+		expect(await screen.findByText('SOP-A')).toBeInTheDocument();
+		expect(screen.queryByText('history_action_approve')).not.toBeInTheDocument();
 	});
 });

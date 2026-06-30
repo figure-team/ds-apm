@@ -63,6 +63,8 @@
 	"history_col_status": "Status",
 	"history_col_exit": "Exit code",
 	"history_col_approver": "Approver",
+	"history_col_actions": "Actions",
+	"history_action_approve": "Open approval",
 	"history_filter_status_all": "All statuses",
 	"history_filter_sop_placeholder": "Filter by SOP ID",
 	"history_empty": "No execution history.",
