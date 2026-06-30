@@ -544,6 +544,7 @@
 	"remediation_show_script": "Show executed script",
 	"remediation_no_output": "No output",
 	"remediation_approve_page_title": "Auto-remediation Approval",
+	"remediation_script_label": "Execution script",
 	"remediation_approving": "Approving…",
 	"remediation_approved_done_title": "Approved · execution started",
 	"remediation_approved_done_desc": "The script runs in the background. You may close this window.",

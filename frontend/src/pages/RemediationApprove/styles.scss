@@ -7,7 +7,7 @@
 
 	&__card {
 		width: 100%;
-		max-width: 520px;
+		max-width: 640px;
 		border: 1px solid var(--bg-slate-400, #2c3140);
 		border-radius: 8px;
 		padding: 24px;
@@ -19,6 +19,63 @@
 		align-items: center;
 		justify-content: space-between;
 		margin-bottom: 16px;
+	}
+
+	// ---- Script panel (the reviewed runbook bash) -------------------------
+	// Base = dark mode; the `.lightMode` block at the bottom overrides for light.
+	&__script-panel {
+		border: 1px solid var(--bg-slate-400, #2c3140);
+		border-radius: 8px;
+		overflow: hidden; // clip the <pre> to the rounded corners
+		background: #0d0e12;
+	}
+
+	&__script-label {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 8px 14px;
+		font-size: 11px;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--text-vanishing, #8d8d8d);
+		background: rgba(255, 255, 255, 0.03);
+		border-bottom: 1px solid var(--bg-slate-400, #2c3140);
+	}
+
+	&__script {
+		margin: 0;
+		padding: 14px 16px;
+		max-height: 360px;
+		overflow: auto;
+		white-space: pre;
+		tab-size: 2;
+		font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo,
+			'Courier New', monospace;
+		font-size: 12.5px;
+		line-height: 1.65;
+		color: #c9d1d9;
+		background: transparent;
+
+		// readable, unobtrusive scrollbars (webkit)
+		&::-webkit-scrollbar {
+			width: 10px;
+			height: 10px;
+		}
+		&::-webkit-scrollbar-thumb {
+			background: rgba(255, 255, 255, 0.18);
+			border-radius: 6px;
+			border: 2px solid transparent;
+			background-clip: padding-box;
+		}
+		&::-webkit-scrollbar-thumb:hover {
+			background: rgba(255, 255, 255, 0.3);
+			background-clip: padding-box;
+		}
+		&::-webkit-scrollbar-corner {
+			background: transparent;
+		}
 	}
 
 	&__actions {
@@ -39,7 +96,34 @@
 	}
 }
 
-.lightMode .remediation-approve__card {
-	background: #fff;
-	border-color: #e0e0e0;
+// ---- Light mode overrides -------------------------------------------------
+.lightMode {
+	.remediation-approve__card {
+		background: #fff;
+		border-color: #e0e0e0;
+	}
+
+	.remediation-approve__script-panel {
+		background: #f6f8fa;
+		border-color: #d0d7de;
+	}
+
+	.remediation-approve__script-label {
+		color: #57606a;
+		background: #eaeef2;
+		border-bottom-color: #d0d7de;
+	}
+
+	.remediation-approve__script {
+		color: #1f2328;
+
+		&::-webkit-scrollbar-thumb {
+			background: rgba(31, 35, 40, 0.22);
+			background-clip: padding-box;
+		}
+		&::-webkit-scrollbar-thumb:hover {
+			background: rgba(31, 35, 40, 0.38);
+			background-clip: padding-box;
+		}
+	}
 }

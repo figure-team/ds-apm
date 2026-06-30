@@ -128,7 +128,12 @@ function RemediationApprove(): JSX.Element {
 		if (rem.status === 'proposed') {
 			return (
 				<div className="remediation-approve__proposed">
-					<pre className="remediation-card__script">{rem.scriptSnapshot}</pre>
+					<div className="remediation-approve__script-panel">
+						<div className="remediation-approve__script-label">
+							{t('remediation_script_label')}
+						</div>
+						<pre className="remediation-approve__script">{rem.scriptSnapshot}</pre>
+					</div>
 					{actionError && <p className="remediation-approve__error">{actionError}</p>}
 					<div className="remediation-approve__actions">
 						<Button type="primary" disabled={busy} onClick={onApprove}>
