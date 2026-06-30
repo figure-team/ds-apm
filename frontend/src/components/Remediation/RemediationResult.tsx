@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { RemediationExecution } from 'api/remediation';
 
+import './RemediationResult.styles.scss';
+
 interface Props {
 	rem: RemediationExecution;
 }

@@ -1,0 +1,52 @@
+// Styles for RemediationResult, colocated with the component so it renders
+// consistently anywhere it is used — the alert RemediationCard, the SOP
+// execution-history expand row, and the approval popup — without depending on
+// another page's stylesheet (RemediationCard/styles.scss) being loaded first.
+// The class names stay `remediation-card__*` so existing markup is unchanged and
+// there is a single source of truth for these rules.
+.remediation-card {
+	&__script,
+	&__output {
+		background: var(--bg-ink-400, #0b0c0e);
+		// The background is forced dark in both themes, so pin a light text color
+		// rather than inheriting the page color (which is dark in light mode and
+		// made the script unreadable — dark-on-dark).
+		color: var(--bg-vanilla-100, #f4f6f8);
+		padding: 12px;
+		border-radius: 4px;
+		overflow-x: auto;
+		font-size: 12px;
+		font-family: 'Geist Mono', 'Fira Code', monospace;
+		margin-top: 8px;
+		white-space: pre-wrap;
+		word-break: break-all;
+	}
+
+	&__exit {
+		font-size: 12px;
+		margin-top: 8px;
+	}
+
+	&__script-toggle {
+		margin-top: 8px;
+
+		> summary {
+			cursor: pointer;
+			font-size: 12px;
+			color: var(--text-vanishing, #8d8d8d);
+			user-select: none;
+		}
+
+		.remediation-card__script {
+			margin-top: 8px;
+		}
+	}
+
+	&__verify {
+		font-size: 12px;
+		margin-top: 8px;
+		padding: 4px 8px;
+		border-radius: 4px;
+		background: var(--bg-slate-500, #1a202c);
+	}
+}
