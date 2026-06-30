@@ -1,5 +1,7 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { Modal } from 'antd';
 import type { NotificationInstance } from 'antd/es/notification/interface';
 import { convertToApiError } from 'api/ErrorResponseHandlerForGeneratedAPIs';
 import { deleteRuleByID } from 'api/generated/services/rules';
@@ -17,6 +19,7 @@ import { ColumnButton } from './styles';
 
 function DeleteAlert({
 	id,
+	alertName,
 	setData,
 	notifications,
 }: DeleteAlertProps): JSX.Element {
@@ -30,6 +33,7 @@ function DeleteAlert({
 		payload: undefined,
 	});
 
+	const [modal, contextHolder] = Modal.useModal();
 	const { t } = useTranslation('alerts');
 	const { showErrorModal } = useErrorModal();
 
@@ -60,27 +64,44 @@ function DeleteAlert({
 	};
 
 	const onClickHandler = (): void => {
-		setDeleteAlertState((state) => ({
-			...state,
-			loading: true,
-		}));
-		onDeleteHandler(id);
+		modal.confirm({
+			title: t('list_delete_title'),
+			content: t('list_delete_confirm', { name: alertName }),
+			icon: (
+				<ExclamationCircleOutlined style={{ color: 'var(--danger-background)' }} />
+			),
+			okText: t('list_delete'),
+			okButtonProps: { danger: true },
+			cancelText: t('list_delete_cancel'),
+			centered: true,
+			onOk: () => {
+				setDeleteAlertState((state) => ({
+					...state,
+					loading: true,
+				}));
+				return onDeleteHandler(id);
+			},
+		});
 	};
 
 	return (
-		<ColumnButton
-			disabled={deleteAlertState.loading || false}
-			loading={deleteAlertState.loading || false}
-			onClick={onClickHandler}
-			type="link"
-		>
-			{t('list_delete')}
-		</ColumnButton>
+		<>
+			<ColumnButton
+				disabled={deleteAlertState.loading || false}
+				loading={deleteAlertState.loading || false}
+				onClick={onClickHandler}
+				type="link"
+			>
+				{t('list_delete')}
+			</ColumnButton>
+			{contextHolder}
+		</>
 	);
 }
 
 interface DeleteAlertProps {
 	id: string;
+	alertName: string;
 	setData: Dispatch<SetStateAction<RuletypesRuleDTO[]>>;
 	notifications: NotificationInstance;
 }

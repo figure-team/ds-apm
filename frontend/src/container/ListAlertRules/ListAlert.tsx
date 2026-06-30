@@ -366,6 +366,7 @@ function ListAlert({ allAlertRules, refetch }: ListAlertProps): JSX.Element {
 								notifications={notificationsApi}
 								setData={setData}
 								id={id ?? ''}
+								alertName={record.alert ?? ''}
 							/>,
 						]}
 					/>
