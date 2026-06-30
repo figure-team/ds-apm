@@ -38,11 +38,14 @@ type RemediationProposer interface {
 	MaybePropose(ctx context.Context, orgID, incidentID, alertFingerprint string, labels map[string]string, doc ruletypes.SOPDocument) (map[string]string, bool)
 }
 
-// RemediationSelector is the fire-and-forget seam for LLM-backed runbook
-// selection (design §3). Maybe runs off the dispatch path entirely (its own
-// goroutine + timeout inside the implementation) and must never panic or block.
+// RemediationSelector is the synchronous seam for LLM-backed runbook selection
+// (design §3). Select runs inline on the dispatch path so its proposal — the
+// approve-URL annotations — can ride the SAME outgoing notification. The alert
+// is intentionally delayed (up to the selector's internal timeout) for SOPs that
+// carry approved runbooks. Implementations must never panic; a (nil,false)
+// return leaves annotations unchanged (fail-open).
 type RemediationSelector interface {
-	Maybe(ctx context.Context, orgID, incidentID, alertFingerprint string, labels map[string]string, doc ruletypes.SOPDocument)
+	Select(ctx context.Context, orgID, incidentID, alertFingerprint string, labels map[string]string, doc ruletypes.SOPDocument) (map[string]string, bool)
 }
 
 // DefaultGenerateTimeout is the upper bound the hook imposes on the AI
@@ -79,7 +82,9 @@ func (h *Hook) SetRemediationProposer(p RemediationProposer) { h.remediation = p
 
 // SetRemediationSelector injects the LLM-backed selector (optional, nil-safe).
 // When set, it supersedes the static first-approved Proposer on the Bound
-// branch for SOPs that carry at least one approved Runbook.
+// branch for SOPs that carry at least one approved Runbook. The selector runs
+// synchronously (see applyRemediation), so wiring it delays delivery of such
+// alerts until the LLM proposal is ready or its timeout fires.
 func (h *Hook) SetRemediationSelector(sel RemediationSelector) { h.selector = sel }
 
 // New constructs a Hook. logger may be nil — the hook falls back to
@@ -309,12 +314,15 @@ func (h *Hook) mergeStrategyWithSOP(base map[string]string, strategy ruletypes.A
 
 // applyRemediation routes to the LLM selector when wired (and the SOP has at
 // least one approved runbook), otherwise to the static first-approved proposer.
-// The selector is fire-and-forget (async), so it contributes no annotations to
-// THIS dispatch; its proposal attaches to the incident's approval card shortly
-// after, out of band. Returns merged unchanged in the selector case.
+// The selector runs synchronously: the dispatch waits for its proposal so the
+// approve-URL annotations ride THIS notification (the alert is delayed up to the
+// selector's internal timeout). A (nil,false) return — gate not met, LLM
+// timeout, or no actionable decision — leaves annotations unchanged (fail-open).
 func (h *Hook) applyRemediation(ctx context.Context, orgID, incidentID, alertFingerprint string, labels map[string]string, doc ruletypes.SOPDocument, merged map[string]string) map[string]string {
 	if h.selector != nil && hasApprovedRunbook(doc) {
-		h.selector.Maybe(ctx, orgID, incidentID, alertFingerprint, labels, doc)
+		if selAnn, ok := h.selector.Select(ctx, orgID, incidentID, alertFingerprint, labels, doc); ok && len(selAnn) > 0 {
+			return mergeAnnotations(merged, selAnn)
+		}
 		return merged
 	}
 	if h.remediation != nil {

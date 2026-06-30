@@ -523,7 +523,16 @@ func New(
 		// configured. Fail-open + fire-and-forget; the proposer above stays wired
 		// as the fallback for selector-less orgs.
 		selectorResolver := aigenerator.NewStoreAwareSelectorProvider(aiConfigStore, aiCipher)
-		selector := remediation.NewSelector(remStore, selectorResolver, remediationBaseURL, 0, time.Now, providerSettings.Logger)
+		// The selector now runs SYNCHRONOUSLY on the dispatch path so the approve
+		// URL rides the same notification — i.e. the alert is delayed until the LLM
+		// proposal is ready. This timeout bounds that delay (default 30s inside
+		// NewSelector when 0). claude-cli in a container can be slow, so make it
+		// tunable; raise it if proposals time out, lower it to cap delivery latency.
+		selectTimeout := time.Duration(0)
+		if secs := envInt("DS_APM_REMEDIATION_SELECT_TIMEOUT_SECONDS"); secs > 0 {
+			selectTimeout = time.Duration(secs) * time.Second
+		}
+		selector := remediation.NewSelector(remStore, selectorResolver, remediationBaseURL, selectTimeout, time.Now, providerSettings.Logger)
 		aiDispatchHook.SetRemediationSelector(remediationSelectorAdapter{
 			selector: selector,
 			logger:   providerSettings.Logger,

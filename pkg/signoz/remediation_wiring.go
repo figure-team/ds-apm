@@ -74,32 +74,39 @@ func (l alertStateLookup) IsFiring(ctx context.Context, orgID, fp string) (bool,
 }
 
 // remediationSelectorAdapter satisfies dispatchhook.RemediationSelector. It runs
-// the Selector in a detached goroutine with panic recovery so a slow LLM or a
-// bug can never block or crash the dispatch path (fire-and-forget, fail-open).
+// the Selector synchronously (with panic recovery) and returns its proposal
+// annotations so the dispatch hook can merge the approve URL into the SAME
+// notification. By design this BLOCKS the dispatch until the Selector's internal
+// timeout fires — only for alerts bound to a SOP with approved runbooks. A panic
+// or nil selector returns (nil,false) so delivery still proceeds (fail-open).
 type remediationSelectorAdapter struct {
 	selector *remediation.Selector
 	logger   *slog.Logger
 }
 
-func (a remediationSelectorAdapter) Maybe(
+func (a remediationSelectorAdapter) Select(
 	ctx context.Context,
 	orgID, incidentID, alertFingerprint string,
 	labels map[string]string,
 	doc ruletypes.SOPDocument,
-) {
+) (ann map[string]string, ok bool) {
 	if a.selector == nil {
-		return
+		return nil, false
 	}
-	// Detach: the dispatch context may be cancelled the moment the alert is
-	// delivered; the Selector has its own internal timeout.
-	go func() {
-		defer func() {
-			if r := recover(); r != nil && a.logger != nil {
+	// Recover so a Selector bug can never crash the dispatch goroutine. Use
+	// WithoutCancel: the dispatch context can be cancelled the instant the alert
+	// is delivered, but we still want the (bounded) LLM call to complete so the
+	// approve URL makes it into the notification. The Selector applies its own
+	// timeout on top.
+	defer func() {
+		if r := recover(); r != nil {
+			if a.logger != nil {
 				a.logger.Error("remediation selector panic recovered", "recover", r, "orgId", orgID)
 			}
-		}()
-		_, _ = a.selector.Select(context.WithoutCancel(ctx), orgID, incidentID, alertFingerprint, labels, doc)
+			ann, ok = nil, false
+		}
 	}()
+	return a.selector.Select(context.WithoutCancel(ctx), orgID, incidentID, alertFingerprint, labels, doc)
 }
 
 // orgLister returns a func(context.Context) []string that lists all org IDs

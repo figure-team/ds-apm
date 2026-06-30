@@ -758,15 +758,22 @@ func TestApplyFallbackOmitsCustomerNotice(t *testing.T) {
 		"fallback status must be recorded in annotation")
 }
 
-// recordingSelector records how many times Maybe was called (fire-and-forget seam).
+// recordingSelector records how many times Select was called and returns a
+// configurable annotation map (synchronous seam: the dispatch waits for the
+// proposal so the approve URL rides the same notification).
 type recordingSelector struct {
 	called int
 	gotDoc ruletypes.SOPDocument
+	ret    map[string]string
 }
 
-func (r *recordingSelector) Maybe(_ context.Context, _, _, _ string, _ map[string]string, doc ruletypes.SOPDocument) {
+func (r *recordingSelector) Select(_ context.Context, _, _, _ string, _ map[string]string, doc ruletypes.SOPDocument) (map[string]string, bool) {
 	r.called++
 	r.gotDoc = doc
+	if len(r.ret) > 0 {
+		return r.ret, true
+	}
+	return nil, false
 }
 
 // recordingProposer records MaybePropose calls and returns a configurable annotation map.
@@ -839,6 +846,33 @@ func TestApply_SelectorNil_FallsBackToProposer(t *testing.T) {
 	if prop.called != 1 {
 		t.Fatalf("proposer must run when no selector wired, got %d", prop.called)
 	}
+}
+
+// TestApply_SelectorAnnotationsMergedIntoNotification is the core of the
+// "delay the notification until the proposal is ready" fix: the selector now
+// runs synchronously and its approve-URL annotations MUST be merged into the
+// annotations Apply returns, so the same outgoing notification carries the
+// 승인 deep link.
+func TestApply_SelectorAnnotationsMergedIntoNotification(t *testing.T) {
+	h := newTestHookBoundToSOPWithRunbooks(t, []ruletypes.Runbook{
+		{ID: "rb-1", Title: "t", ExecutableScript: "echo a", Status: ruletypes.RunbookStatusApproved, Confidence: 0.5},
+	})
+	const approveURL = "https://signoz.example/remediation/approve/abc-123"
+	sel := &recordingSelector{ret: map[string]string{
+		alertmanagertypes.IncidentAnnotationRemediationID:            "abc-123",
+		alertmanagertypes.IncidentAnnotationRemediationApproveURL:    approveURL,
+		alertmanagertypes.IncidentAnnotationRemediationScriptSummary: "GetAds 점검",
+	}}
+	h.SetRemediationSelector(sel)
+
+	seed := loadSeed(t)
+	out := h.Apply(context.Background(), "customer-a", seed.Alert.IncidentID, seed.Alert.Fingerprint,
+		seed.Alert.Labels, map[string]string{})
+
+	require.Equal(t, 1, sel.called, "selector must run exactly once")
+	require.Equal(t, approveURL, out[alertmanagertypes.IncidentAnnotationRemediationApproveURL],
+		"approve URL from the synchronous selector must be merged into the outgoing annotations")
+	require.Equal(t, "abc-123", out[alertmanagertypes.IncidentAnnotationRemediationID])
 }
 
 func cloneMap(in map[string]string) map[string]string {
