@@ -54,8 +54,11 @@ WORKDIR /root
 # bash: the auto-remediation executor runs approved Runbook scripts via `bash -c`
 #   (scripts use `#!/usr/bin/env bash` + `set -euo pipefail`); Alpine ships only
 #   busybox sh, so without bash every execution exits -1 (bash: not found).
+# docker-cli: a restart-type Runbook script (e.g. SOP-AD-001) shells out to
+#   `docker restart <container>` against the host docker.sock mounted into this
+#   container (see docker-compose.local.yaml). musl-native, so no static binary.
 RUN apk update && \
-    apk add --no-cache ca-certificates nodejs npm ripgrep git bash && \
+    apk add --no-cache ca-certificates nodejs npm ripgrep git bash docker-cli && \
     npm install -g @anthropic-ai/claude-code && \
     rm -rf /var/cache/apk/* /root/.npm
 ENV USE_BUILTIN_RIPGREP=0
