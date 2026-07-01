@@ -80,6 +80,7 @@ import (
 	codercaworker "github.com/SigNoz/signoz/pkg/ruler/coderca/worker"
 	"github.com/SigNoz/signoz/pkg/ruler/remediation"
 	"github.com/SigNoz/signoz/pkg/ruler/remediationstore/sqlremediationstore"
+	"github.com/SigNoz/signoz/pkg/ruler/remediationtargetstore/sqlremediationtargetstore"
 	"github.com/SigNoz/signoz/pkg/ruler/signozruler"
 	"path/filepath"
 )
@@ -496,6 +497,7 @@ func New(
 
 	// Build remediation store (used by proposer, handler, and verifier).
 	remStore := sqlremediationstore.New(sqlstore)
+	remTargetStore := sqlremediationtargetstore.New(sqlstore)
 
 	// Trigger: injected into the dispatch hook (fail-open, fire-and-forget).
 	if aiDispatchHook != nil {
@@ -512,7 +514,7 @@ func New(
 		if config.Alertmanager.Signoz.ExternalURL != nil {
 			remediationBaseURL = config.Alertmanager.Signoz.ExternalURL.String()
 		}
-		proposer := remediation.NewProposer(remStore, remediationBaseURL, time.Now)
+		proposer := remediation.NewProposer(remStore, remTargetStore, remediationBaseURL, time.Now)
 		aiDispatchHook.SetRemediationProposer(remediationHookAdapter{
 			proposer: proposer,
 			store:    remStore,
@@ -532,7 +534,7 @@ func New(
 		if secs := envInt("DS_APM_REMEDIATION_SELECT_TIMEOUT_SECONDS"); secs > 0 {
 			selectTimeout = time.Duration(secs) * time.Second
 		}
-		selector := remediation.NewSelector(remStore, selectorResolver, remediationBaseURL, selectTimeout, time.Now, providerSettings.Logger)
+		selector := remediation.NewSelector(remStore, remTargetStore, selectorResolver, remediationBaseURL, selectTimeout, time.Now, providerSettings.Logger)
 		aiDispatchHook.SetRemediationSelector(remediationSelectorAdapter{
 			selector: selector,
 			logger:   providerSettings.Logger,
@@ -736,7 +738,7 @@ func New(
 	newExec := func(d time.Duration) signozruler.RemediationRunner {
 		return remediation.NewExecutor(d)
 	}
-	handlers := NewHandlers(modules, providerSettings, analytics, querierHandler, licensing, global, flagger, gateway, telemetryMetadataStore, authz, zeus, registryHandler, alertmanager, rulerInstance, sqlstore, storeAware, aiConfigStore, aiCipher, storeAware, runbookDrafter, codercaRepoStore, codercaMapStore, codercaCfgStore, codercaRunStore, insecure, remStore, newExec)
+	handlers := NewHandlers(modules, providerSettings, analytics, querierHandler, licensing, global, flagger, gateway, telemetryMetadataStore, authz, zeus, registryHandler, alertmanager, rulerInstance, sqlstore, storeAware, aiConfigStore, aiCipher, storeAware, runbookDrafter, codercaRepoStore, codercaMapStore, codercaCfgStore, codercaRunStore, insecure, remStore, remTargetStore, newExec)
 
 	// Initialize the API server (after registry so it can access service health)
 	apiserverInstance, err := factory.NewProviderFromNamedMap(

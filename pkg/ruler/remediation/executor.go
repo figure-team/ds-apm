@@ -4,14 +4,12 @@
 package remediation
 
 import (
-	"bytes"
 	"context"
-	"errors"
-	"os/exec"
 	"strings"
 	"time"
 
 	"github.com/SigNoz/signoz/pkg/ruler/cliaudit"
+	"github.com/SigNoz/signoz/pkg/types/ruletypes"
 )
 
 const (
@@ -49,73 +47,76 @@ func NewExecutor(timeout time.Duration) *Executor {
 	return &Executor{timeout: timeout}
 }
 
-// Run executes script via `bash -c` under timeout + group containment. The whole
-// process tree is killed on timeout. Output (stdout+stderr combined) is captured
-// and truncated to maxOutputCapture bytes. Always logs a cliaudit.Record with
-// Via from meta (defaults to "remediation-exec" when empty).
-func (e *Executor) Run(ctx context.Context, script string, meta RunMeta) ExecResult {
-	runCtx, cancel := context.WithTimeout(ctx, e.timeout)
-	defer cancel()
+// RemoteTarget bundles a frozen target with its execute-time unsealed private
+// key. A nil *RemoteTarget selects LocalTransport (design §3.4).
+type RemoteTarget struct {
+	Target        ruletypes.RemediationTarget
+	PrivateKeyPEM string
+}
 
-	cmd := exec.CommandContext(runCtx, "bash", "-c", script)
-	cmd.WaitDelay = defaultWaitDelay
-	configureSubprocess(cmd)
-	// Override CommandContext's lead-pid kill with a whole-group kill.
-	cmd.Cancel = func() error { return killProcessTree(cmd) }
-
-	var buf bytes.Buffer
-	cmd.Stdout = &buf
-	cmd.Stderr = &buf
+// Run executes script via the appropriate transport under the executor timeout,
+// logging a cliaudit.Record tagged with transport/target. target == nil → local.
+func (e *Executor) Run(ctx context.Context, script string, target *RemoteTarget, meta RunMeta) ExecResult {
+	var (
+		tr        Transport
+		transport = "local"
+		targetTag string
+		err       error
+	)
+	if target == nil {
+		tr = newLocalTransport(e.timeout)
+	} else {
+		transport = "ssh"
+		targetTag = target.Target.Host
+		tr, err = newSSHTransport(target.Target, target.PrivateKeyPEM, e.timeout, 5*time.Second)
+		if err != nil {
+			// Key parse failure = fail-closed for this run (never falls back to local).
+			e.logRecord(meta, transport, targetTag, 0, "failed", err)
+			return ExecResult{ExitCode: -1, Output: "원격 실행 준비 실패: " + strings.TrimSpace(err.Error())}
+		}
+	}
 
 	start := time.Now()
-	runErr := cmd.Run()
-	// OPERATOR CONTRACT: Approved runbook scripts must not print secrets to
-	// stdout/stderr — the captured snippet below is stored unredacted in
-	// ds_remediation_execution.output_snippet and is visible to Viewers via
-	// the GET /remediation API. Secret masking is a future extension point.
-	out := truncate(buf.String(), maxOutputCapture)
+	raw, exitCode, timedOut, execErr := tr.Exec(ctx, script)
+	out := truncate(raw, maxOutputCapture)
 
-	res := ExecResult{Output: out}
+	res := ExecResult{Output: out, ExitCode: exitCode, TimedOut: timedOut}
+	outcome := "ok"
+	switch {
+	case timedOut:
+		outcome = "timeout"
+		res.ExitCode = -1
+	case execErr != nil:
+		outcome = "failed"
+		if res.Output == "" {
+			res.Output = "실행 실패: " + strings.TrimSpace(execErr.Error())
+		}
+		res.ExitCode = -1
+	case exitCode != 0:
+		// non-zero exit is a script result, not an infra failure — record ok.
+	}
+	e.logRecordDur(meta, transport, targetTag, len(out), outcome, execErr, time.Since(start))
+	return res
+}
+
+func (e *Executor) logRecord(meta RunMeta, transport, target string, outBytes int, outcome string, err error) {
+	e.logRecordDur(meta, transport, target, outBytes, outcome, err, 0)
+}
+
+func (e *Executor) logRecordDur(meta RunMeta, transport, target string, outBytes int, outcome string, err error, dur time.Duration) {
 	via := meta.Via
 	if via == "" {
 		via = "remediation-exec"
 	}
 	rec := cliaudit.Record{
-		Via:         via,
-		Binary:      "bash",
-		Source:      meta.Source,
-		Fingerprint: meta.Fingerprint,
-		DurationMS:  time.Since(start).Milliseconds(),
-		OutputBytes: len(out),
-		Outcome:     "ok",
+		Via: via, Binary: "bash", Source: meta.Source, Fingerprint: meta.Fingerprint,
+		DurationMS: dur.Milliseconds(), OutputBytes: outBytes, Outcome: outcome,
+		Transport: transport, Target: target,
 	}
-
-	switch {
-	case runCtx.Err() == context.DeadlineExceeded:
-		res.TimedOut = true
-		res.ExitCode = -1
-		rec.Outcome = "timeout"
-	case runErr != nil:
-		var exitErr *exec.ExitError
-		if errors.As(runErr, &exitErr) {
-			res.ExitCode = exitErr.ExitCode()
-		} else {
-			// The process never started (e.g. bash not installed) or was killed
-			// before producing an exit status. There is no captured output to
-			// explain the bare -1, so surface the start error in the snippet the
-			// operator sees instead of leaving the result blank.
-			res.ExitCode = -1
-			if res.Output == "" {
-				res.Output = "실행 실패: " + strings.TrimSpace(runErr.Error())
-			}
-		}
-		rec.Outcome = "failed"
-		rec.Err = truncate(strings.TrimSpace(runErr.Error()), 256)
-	default:
-		res.ExitCode = 0
+	if err != nil {
+		rec.Err = truncate(strings.TrimSpace(err.Error()), 256)
 	}
 	cliaudit.Default().Log(rec)
-	return res
 }
 
 func truncate(s string, n int) string {

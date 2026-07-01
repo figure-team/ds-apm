@@ -53,6 +53,7 @@ import (
 	codercarunstore "github.com/SigNoz/signoz/pkg/ruler/coderca/runstore"
 	sqlincidentreporttemplatestore "github.com/SigNoz/signoz/pkg/ruler/incidentreport/sqltemplatestore"
 	"github.com/SigNoz/signoz/pkg/ruler/remediationstore"
+	"github.com/SigNoz/signoz/pkg/ruler/remediationtargetstore"
 	"github.com/SigNoz/signoz/pkg/ruler/signozruler"
 	"github.com/SigNoz/signoz/pkg/ruler/sopstore/sqlsopstore"
 	"github.com/SigNoz/signoz/pkg/sqlstore"
@@ -115,6 +116,7 @@ func NewHandlers(
 	codercaRunStore *codercarunstore.Store,
 	aiCipherInsecure bool,
 	remStore remediationstore.Store,
+	remTargetStore remediationtargetstore.Store,
 	newExec func(time.Duration) signozruler.RemediationRunner,
 ) Handlers {
 	return Handlers{
@@ -157,6 +159,7 @@ func NewHandlers(
 			aiCipherInsecure,
 			sqlincidentreporttemplatestore.New(sqlStore),
 			remStore,
+			remTargetStore,
 			newExec,
 		),
 	}

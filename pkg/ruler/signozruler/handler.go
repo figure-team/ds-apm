@@ -17,6 +17,7 @@ import (
 	codercarunstore "github.com/SigNoz/signoz/pkg/ruler/coderca/runstore"
 	sqltemplatestore "github.com/SigNoz/signoz/pkg/ruler/incidentreport/sqltemplatestore"
 	"github.com/SigNoz/signoz/pkg/ruler/remediationstore"
+	"github.com/SigNoz/signoz/pkg/ruler/remediationtargetstore"
 	"github.com/SigNoz/signoz/pkg/types/authtypes"
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
 	"github.com/SigNoz/signoz/pkg/valuer"
@@ -45,20 +46,25 @@ type handler struct {
 	// Incident report 양식 template store (incident_report_handler.go).
 	reportTemplateStore *sqltemplatestore.Store
 	// Remediation execution (remediation_handler.go). remediationStore persists
-	// the approve→execute→verify lifecycle; newRemediationExecutor is a factory
-	// that builds a per-run executor bound to the org's configured timeout (the
-	// factory seam keeps the executor fake-able in tests). Both are wired via
-	// SetRemediationDeps; nil until then.
+	// the approve→execute→verify lifecycle; remediationTargetStore resolves a
+	// frozen TargetID to its live SealedCredential at execute time (design §3.1,
+	// §3.2); newRemediationExecutor is a factory that builds a per-run executor
+	// bound to the org's configured timeout (the factory seam keeps the executor
+	// fake-able in tests). All three are wired via SetRemediationDeps; nil until
+	// then (remediationTargetStore stays nil in production until Task 13 wires it,
+	// which is fine — no remote execution is stamped without it, see runRemediation).
 	remediationStore       remediationstore.Store
+	remediationTargetStore remediationtargetstore.Store
 	newRemediationExecutor func(timeout time.Duration) RemediationRunner
 }
 
-// SetRemediationDeps wires the remediation store + executor factory into the
-// handler. Kept as a post-construction setter (rather than a NewHandler arg) to
-// avoid churning the long NewHandler signature; the apiserver provider calls
-// this when the remediation feature is enabled.
-func (h *handler) SetRemediationDeps(store remediationstore.Store, newExec func(time.Duration) RemediationRunner) {
+// SetRemediationDeps wires the remediation store, target store, and executor
+// factory into the handler. Kept as a post-construction setter (rather than a
+// NewHandler arg) to avoid churning the long NewHandler signature; the
+// apiserver provider calls this when the remediation feature is enabled.
+func (h *handler) SetRemediationDeps(store remediationstore.Store, targetStore remediationtargetstore.Store, newExec func(time.Duration) RemediationRunner) {
 	h.remediationStore = store
+	h.remediationTargetStore = targetStore
 	h.newRemediationExecutor = newExec
 }
 
@@ -83,6 +89,7 @@ func NewHandler(
 	aiCipherInsecure bool,
 	reportTemplateStore *sqltemplatestore.Store,
 	remediationStore remediationstore.Store,
+	remediationTargetStore remediationtargetstore.Store,
 	newRemediationExecutor func(time.Duration) RemediationRunner,
 ) ruler.Handler {
 	return &handler{
@@ -101,6 +108,7 @@ func NewHandler(
 		aiCipherInsecure:       aiCipherInsecure,
 		reportTemplateStore:    reportTemplateStore,
 		remediationStore:       remediationStore,
+		remediationTargetStore: remediationTargetStore,
 		newRemediationExecutor: newRemediationExecutor,
 	}
 }

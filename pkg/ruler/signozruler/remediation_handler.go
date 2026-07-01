@@ -21,7 +21,7 @@ import (
 // satisfies it (built via the newRemediationExecutor factory), and tests inject
 // a fake. Keeping it an interface decouples the handler from process spawning.
 type RemediationRunner interface {
-	Run(ctx context.Context, script string, meta remediation.RunMeta) remediation.ExecResult
+	Run(ctx context.Context, script string, target *remediation.RemoteTarget, meta remediation.RunMeta) remediation.ExecResult
 }
 
 // remediationListResponse is the GET /remediation wire shape.
@@ -179,11 +179,48 @@ func (h *handler) runRemediation(orgID string, e ruletypes.RemediationExecution,
 	ctx, cancel := context.WithTimeout(context.Background(), timeout+5*time.Second)
 	defer cancel()
 
+	var target *remediation.RemoteTarget
+	if e.TargetID != "" {
+		// 평문 폴백 거부 (Global Constraint C1 / design §3.1·§3.6): 마스터키 미설정 시
+		// aiCipher는 PlaintextCipher라 Decrypt가 실패하지 않고 값을 그대로 반환한다.
+		// 즉 아래 Decrypt 에러 검사만으로는 fail-closed가 성립하지 않으므로, 원격
+		// 실행은 암호화가 활성일 때만 허용한다(로컬 실행은 무관).
+		if h.aiCipherInsecure {
+			h.failRemediation(ctx, orgID, e.ID, "원격 실행 거부: 암호화 마스터키(DS_APM_AI_CONFIG_ENCRYPTION_KEY) 미구성")
+			return
+		}
+		// fail-closed (design §3.4 B2): 원격 타겟 로드/언실 실패 시 로컬 폴백 금지 → failed.
+		if h.remediationTargetStore == nil {
+			h.failRemediation(ctx, orgID, e.ID, "원격 실행 거부: 타겟 스토어 미배선")
+			return
+		}
+		tgt, err := h.remediationTargetStore.Get(ctx, orgID, e.TargetID)
+		if err != nil {
+			h.failRemediation(ctx, orgID, e.ID, "원격 타겟 로드 실패: "+strings.TrimSpace(err.Error()))
+			return
+		}
+		keyPEM, err := h.aiCipher.Decrypt(tgt.SealedCredential)
+		if err != nil || strings.TrimSpace(keyPEM) == "" {
+			h.failRemediation(ctx, orgID, e.ID, "원격 자격증명 복호 실패")
+			return
+		}
+		// 프리즈된 접속 파라미터 사용(design §3.2 New-1); 라이브 tgt에서는
+		// SealedCredential 한 필드만 쓴다 — Host/User 등은 propose 시점 스냅샷을 신뢰한다.
+		frozen := ruletypes.RemediationTarget{
+			Host:               e.TargetHost,
+			Port:               e.TargetPort,
+			User:               e.TargetUser,
+			HostKeyFingerprint: e.TargetHostKeyFP,
+			Name:               e.TargetName,
+		}
+		target = &remediation.RemoteTarget{Target: frozen, PrivateKeyPEM: keyPEM}
+	}
+
 	via := "remediation-exec"
 	if e.Source == ruletypes.RemediationSourceLLMGenerated {
 		via = "remediation-exec-llm"
 	}
-	res := runner.Run(ctx, e.ScriptSnapshot, remediation.RunMeta{
+	res := runner.Run(ctx, e.ScriptSnapshot, target, remediation.RunMeta{
 		Via:         via,
 		Source:      e.Source,
 		Fingerprint: e.AlertFingerprint,
@@ -201,6 +238,18 @@ func (h *handler) runRemediation(orgID string, e ruletypes.RemediationExecution,
 		TerminalAt:    time.Now().UTC().Format(time.RFC3339),
 		ExitCode:      &exit,
 		OutputSnippet: truncateRemediationSnippet(res.Output),
+	})
+}
+
+// failRemediation records a failed terminal state without executing anything.
+// Used by the fail-closed gates above: a remote-targeted run that cannot load
+// or decrypt its target must never silently fall back to local execution.
+func (h *handler) failRemediation(ctx context.Context, orgID, id, reason string) {
+	exit := -1
+	_ = h.remediationStore.Transition(ctx, orgID, id, ruletypes.RemediationStatusFailed, remediationstore.TransitionPatch{
+		TerminalAt:    time.Now().UTC().Format(time.RFC3339),
+		ExitCode:      &exit,
+		OutputSnippet: truncateRemediationSnippet(reason),
 	})
 }
 

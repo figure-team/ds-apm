@@ -12,7 +12,7 @@ func TestExecutor_Success(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("bash executor is linux/unix")
 	}
-	r := NewExecutor(5*time.Second).Run(context.Background(), "#!/bin/bash\necho hello-world\n", RunMeta{})
+	r := NewExecutor(5*time.Second).Run(context.Background(), "#!/bin/bash\necho hello-world\n", nil, RunMeta{})
 	if r.ExitCode != 0 || r.TimedOut {
 		t.Fatalf("want exit 0, got %+v", r)
 	}
@@ -25,7 +25,7 @@ func TestExecutor_NonZeroExit(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip()
 	}
-	r := NewExecutor(5*time.Second).Run(context.Background(), "exit 7", RunMeta{})
+	r := NewExecutor(5*time.Second).Run(context.Background(), "exit 7", nil, RunMeta{})
 	if r.ExitCode != 7 || r.TimedOut {
 		t.Fatalf("want exit 7, got %+v", r)
 	}
@@ -39,7 +39,7 @@ func TestExecutor_StartFailureSurfacedInOutput(t *testing.T) {
 		t.Skip()
 	}
 	t.Setenv("PATH", "") // make `bash` unresolvable so the process fails to start
-	r := NewExecutor(5*time.Second).Run(context.Background(), "echo nope", RunMeta{})
+	r := NewExecutor(5*time.Second).Run(context.Background(), "echo nope", nil, RunMeta{})
 	if r.ExitCode != -1 || r.TimedOut {
 		t.Fatalf("want exit -1 start failure, got %+v", r)
 	}
@@ -52,7 +52,7 @@ func TestExecutor_Timeout(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip()
 	}
-	r := NewExecutor(200*time.Millisecond).Run(context.Background(), "sleep 10", RunMeta{})
+	r := NewExecutor(200*time.Millisecond).Run(context.Background(), "sleep 10", nil, RunMeta{})
 	if !r.TimedOut {
 		t.Fatalf("want timeout, got %+v", r)
 	}
@@ -65,12 +65,23 @@ func TestRun_TagsViaFromMeta(t *testing.T) {
 	// cliaudit는 env가 비면 no-op이므로, 여기서는 Run이 meta.Via를 받아
 	// 정상 동작(빈 Via 기본값 포함)하는지 + 결과가 변하지 않는지 확인한다.
 	e := NewExecutor(2 * time.Second)
-	res := e.Run(context.Background(), "exit 0", RunMeta{Via: "remediation-exec-llm", Source: "llm-generated", Fingerprint: "fp-1"})
+	res := e.Run(context.Background(), "exit 0", nil, RunMeta{Via: "remediation-exec-llm", Source: "llm-generated", Fingerprint: "fp-1"})
 	if res.ExitCode != 0 {
 		t.Fatalf("expected exit 0, got %d", res.ExitCode)
 	}
-	res2 := e.Run(context.Background(), "exit 3", RunMeta{}) // 빈 meta → 기본 Via
+	res2 := e.Run(context.Background(), "exit 3", nil, RunMeta{}) // 빈 meta → 기본 Via
 	if res2.ExitCode != 3 {
 		t.Fatalf("expected exit 3, got %d", res2.ExitCode)
+	}
+}
+
+func TestExecutorRun_LocalWhenTargetNil(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("bash executor is linux/unix")
+	}
+	e := NewExecutor(5 * time.Second)
+	res := e.Run(context.Background(), "echo hi", nil, RunMeta{})
+	if res.ExitCode != 0 || !contains(res.Output, "hi") {
+		t.Fatalf("local run failed: %+v", res)
 	}
 }

@@ -151,6 +151,24 @@ func TestValidateRemediationExecution_EmptySource_EmptyRunbookID(t *testing.T) {
 		t.Fatalf("empty source + empty RunbookID must error (legacy row behavior)")
 	}
 }
+func TestValidateRemediationExecution_RemoteRequiresFrozenParams(t *testing.T) {
+	e := validRemediationExecution() // 기존 헬퍼 (없으면 인접 테스트의 생성 코드 재사용)
+	e.TargetID = "3f2504e0-4f89-41d3-9a0c-0305e82c3301"
+	e.TargetHost = ""       // 프리즈 무결성 위반
+	e.TargetHostKeyFP = ""
+	if err := ValidateRemediationExecution(e); err == nil {
+		t.Fatal("remote execution must require frozen TargetHost + TargetHostKeyFP")
+	}
+}
+
+func TestValidateRemediationExecution_LocalIgnoresTargetFields(t *testing.T) {
+	e := validRemediationExecution()
+	e.TargetID = "" // 로컬 = 스냅샷 필드 불필요
+	if err := ValidateRemediationExecution(e); err != nil {
+		t.Fatalf("local execution must not require target fields: %v", err)
+	}
+}
+
 func TestRemediationIsTerminal(t *testing.T) {
 	for _, s := range []string{RemediationStatusVerified, RemediationStatusUnresolved, RemediationStatusFailed, RemediationStatusRejected, RemediationStatusExpired} {
 		if !(RemediationExecution{Status: s}).IsTerminal() {

@@ -2,6 +2,7 @@ package remediation
 
 import (
 	"context"
+	"database/sql"
 	"strings"
 	"testing"
 	"time"
@@ -78,7 +79,7 @@ func docWithApprovedRunbook() ruletypes.SOPDocument {
 
 func TestPropose_CreatesExecutionAndAnnotations(t *testing.T) {
 	fs := &fakeStore{}
-	p := NewProposer(fs, "https://apm.example.com", fixedNow)
+	p := NewProposer(fs, nil, "https://apm.example.com", fixedNow)
 	cfg := ruletypes.RemediationConfig{ExecutionEnabled: true, ProposalTTLSeconds: 1800}.WithDefaults()
 
 	labels := map[string]string{"ruleId": "rule-123"}
@@ -116,7 +117,7 @@ func TestPropose_CreatesExecutionAndAnnotations(t *testing.T) {
 
 func TestPropose_FlagOff_NoOp(t *testing.T) {
 	fs := &fakeStore{}
-	p := NewProposer(fs, "https://x", fixedNow)
+	p := NewProposer(fs, nil, "https://x", fixedNow)
 	cfg := ruletypes.RemediationConfig{ExecutionEnabled: false}.WithDefaults()
 	if _, ok := p.Propose(context.Background(), "org-1", "inc-1", "fp-1", nil, docWithApprovedRunbook(), cfg); ok {
 		t.Fatal("flag off must not propose")
@@ -128,7 +129,7 @@ func TestPropose_FlagOff_NoOp(t *testing.T) {
 
 func TestPropose_NoApprovedRunbook_NoOp(t *testing.T) {
 	fs := &fakeStore{}
-	p := NewProposer(fs, "https://x", fixedNow)
+	p := NewProposer(fs, nil, "https://x", fixedNow)
 	cfg := ruletypes.RemediationConfig{ExecutionEnabled: true}.WithDefaults()
 	doc := ruletypes.SOPDocument{SOPID: "SOP-1", Version: "v1",
 		Runbooks: []ruletypes.Runbook{{ID: "d", Status: ruletypes.RunbookStatusDraft, ExecutableScript: "x"}}}
@@ -139,9 +140,63 @@ func TestPropose_NoApprovedRunbook_NoOp(t *testing.T) {
 
 func TestPropose_CreateError_FailOpen(t *testing.T) {
 	fs := &fakeStore{createErr: context.DeadlineExceeded}
-	p := NewProposer(fs, "https://x", fixedNow)
+	p := NewProposer(fs, nil, "https://x", fixedNow)
 	cfg := ruletypes.RemediationConfig{ExecutionEnabled: true}.WithDefaults()
 	if _, ok := p.Propose(context.Background(), "org-1", "inc-1", "fp-1", nil, docWithApprovedRunbook(), cfg); ok {
 		t.Fatal("store error must yield no proposal (fail-open)")
+	}
+}
+
+type fakeTargetStore struct {
+	t     ruletypes.RemediationTarget
+	found bool
+}
+
+func (f fakeTargetStore) Create(context.Context, string, ruletypes.RemediationTarget) error { return nil }
+func (f fakeTargetStore) Update(context.Context, string, ruletypes.RemediationTarget) error { return nil }
+func (f fakeTargetStore) Delete(context.Context, string, string) error                      { return nil }
+func (f fakeTargetStore) Get(context.Context, string, string) (ruletypes.RemediationTarget, error) {
+	return f.t, nil
+}
+func (f fakeTargetStore) List(context.Context, string) ([]ruletypes.RemediationTarget, error) {
+	return []ruletypes.RemediationTarget{f.t}, nil
+}
+func (f fakeTargetStore) Resolve(context.Context, string, map[string]string) (ruletypes.RemediationTarget, error) {
+	if !f.found {
+		return ruletypes.RemediationTarget{}, sql.ErrNoRows
+	}
+	return f.t, nil
+}
+
+func TestPropose_FreezesTargetSnapshotWhenResolved(t *testing.T) {
+	tgt := ruletypes.RemediationTarget{
+		ID: "3f2504e0-4f89-41d3-9a0c-0305e82c3301", Host: "10.0.0.5", Port: 22,
+		User: "deploy", HostKeyFingerprint: "SHA256:abc", Name: "prod-web-01",
+	}
+	fs := &fakeStore{}
+	p := NewProposer(fs, fakeTargetStore{t: tgt, found: true}, "https://x", time.Now)
+	cfg := ruletypes.RemediationConfig{ExecutionEnabled: true, ProposalTTLSeconds: 1800}
+	_, ok := p.Propose(context.Background(), "org-1", "inc-1", "fp-1",
+		map[string]string{"service.name": "payment"}, docWithApprovedRunbook(), cfg)
+	if !ok {
+		t.Fatal("expected proposal")
+	}
+	if len(fs.created) != 1 {
+		t.Fatalf("want 1 created, got %d", len(fs.created))
+	}
+	got := fs.created[0]
+	if got.TargetID != tgt.ID || got.TargetHost != "10.0.0.5" || got.TargetHostKeyFP != "SHA256:abc" {
+		t.Fatalf("target snapshot not frozen: %+v", got)
+	}
+}
+
+func TestPropose_LocalWhenNoTargetResolved(t *testing.T) {
+	fs := &fakeStore{}
+	p := NewProposer(fs, fakeTargetStore{found: false}, "https://x", time.Now)
+	cfg := ruletypes.RemediationConfig{ExecutionEnabled: true, ProposalTTLSeconds: 1800}
+	_, ok := p.Propose(context.Background(), "org-1", "inc-1", "fp-1",
+		map[string]string{"service.name": "unknown"}, docWithApprovedRunbook(), cfg)
+	if !ok || len(fs.created) != 1 || fs.created[0].TargetID != "" {
+		t.Fatalf("expected local proposal (empty TargetID), created=%+v", fs.created)
 	}
 }

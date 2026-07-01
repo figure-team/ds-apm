@@ -38,7 +38,13 @@ func newTestStore(t *testing.T) *SQLStore {
 			exit_code          INTEGER,
 			output_snippet     TEXT    NOT NULL DEFAULT '',
 			verify_result      TEXT    NOT NULL DEFAULT '',
-			expires_at         TEXT    NOT NULL DEFAULT ''
+			expires_at         TEXT    NOT NULL DEFAULT '',
+			target_id          TEXT    NOT NULL DEFAULT '',
+			target_host        TEXT    NOT NULL DEFAULT '',
+			target_port        INTEGER NOT NULL DEFAULT 0,
+			target_ssh_user    TEXT    NOT NULL DEFAULT '',
+			target_host_key_fp TEXT    NOT NULL DEFAULT '',
+			target_name        TEXT    NOT NULL DEFAULT ''
 		)`,
 		`CREATE INDEX IF NOT EXISTS idx_ds_remediation_org_incident
 			ON ds_remediation_execution (org_id, incident_id)`,

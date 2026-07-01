@@ -36,6 +36,12 @@ type remediationRow struct {
 	OutputSnippet    string        `bun:"output_snippet"`
 	VerifyResult     string        `bun:"verify_result"`
 	ExpiresAt        string        `bun:"expires_at"`
+	TargetID        string `bun:"target_id"`
+	TargetHost      string `bun:"target_host"`
+	TargetPort      int    `bun:"target_port"`
+	TargetUser      string `bun:"target_ssh_user"`
+	TargetHostKeyFP string `bun:"target_host_key_fp"`
+	TargetName      string `bun:"target_name"`
 }
 
 func rowFromDomain(e ruletypes.RemediationExecution) remediationRow {
@@ -59,6 +65,8 @@ func rowFromDomain(e ruletypes.RemediationExecution) remediationRow {
 		OutputSnippet:    e.OutputSnippet,
 		VerifyResult:     e.VerifyResult,
 		ExpiresAt:        e.ExpiresAt,
+		TargetID: e.TargetID, TargetHost: e.TargetHost, TargetPort: e.TargetPort,
+		TargetUser: e.TargetUser, TargetHostKeyFP: e.TargetHostKeyFP, TargetName: e.TargetName,
 	}
 	if e.ExitCode != nil {
 		r.ExitCode = sql.NullInt64{Int64: int64(*e.ExitCode), Valid: true}
@@ -87,6 +95,8 @@ func (r remediationRow) toDomain() ruletypes.RemediationExecution {
 		OutputSnippet:    r.OutputSnippet,
 		VerifyResult:     r.VerifyResult,
 		ExpiresAt:        r.ExpiresAt,
+		TargetID: r.TargetID, TargetHost: r.TargetHost, TargetPort: r.TargetPort,
+		TargetUser: r.TargetUser, TargetHostKeyFP: r.TargetHostKeyFP, TargetName: r.TargetName,
 	}
 	if r.ExitCode.Valid {
 		v := int(r.ExitCode.Int64)

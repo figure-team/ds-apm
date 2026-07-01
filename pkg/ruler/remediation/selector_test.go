@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/SigNoz/signoz/pkg/ruler/remediationstore"
+	"github.com/SigNoz/signoz/pkg/ruler/remediationtargetstore"
 	"github.com/SigNoz/signoz/pkg/types/alertmanagertypes"
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
 )
@@ -143,7 +144,7 @@ func TestSelect_SelectedRunbook_CreatesExecution(t *testing.T) {
 	store := newMemStore()
 	store.cfg = ruletypes.RemediationConfig{ExecutionEnabled: true, ProposalTTLSeconds: 600, MaxConcurrent: 1}
 	fp := newFakeProvider(`{"outcome":"selected","chosenRunbookId":"rb-2","confidence":"high","rationale":"맞음"}`, nil)
-	sel := NewSelector(store, fakeResolver{fp}, "https://x", time.Second, fixedNow, nil)
+	sel := NewSelector(store, nil, fakeResolver{fp}, "https://x", time.Second, fixedNow, nil)
 
 	doc := docWithRunbooks(approvedRB("rb-1", "echo a"), approvedRB("rb-2", "echo b"))
 	ann, ok := sel.Select(context.Background(), "org-1", "inc-1", "fp-1", map[string]string{"ruleId": "R1"}, doc)
@@ -167,7 +168,7 @@ func TestSelect_Fallback_CreatesLLMGeneratedExecution(t *testing.T) {
 	store.cfg = ruletypes.RemediationConfig{ExecutionEnabled: true, ProposalTTLSeconds: 600, MaxConcurrent: 1}
 	resp := `{"outcome":"fallback","confidence":"medium","rationale":"적합 없음","fallbackScript":"kubectl rollout restart deploy/x","fallbackSummary":"재시작"}`
 	fp := newFakeProvider(resp, nil)
-	sel := NewSelector(store, fakeResolver{fp}, "https://x", time.Second, fixedNow, nil)
+	sel := NewSelector(store, nil, fakeResolver{fp}, "https://x", time.Second, fixedNow, nil)
 
 	doc := docWithRunbooks(approvedRB("rb-1", "echo a"))
 	_, ok := sel.Select(context.Background(), "org-1", "inc-1", "fp-1", nil, doc)
@@ -189,7 +190,7 @@ func TestSelect_None_NoExecution(t *testing.T) {
 	store := newMemStore()
 	store.cfg = ruletypes.RemediationConfig{ExecutionEnabled: true, ProposalTTLSeconds: 600, MaxConcurrent: 1}
 	fp := newFakeProvider(`{"outcome":"none","confidence":"low","rationale":"불명"}`, nil)
-	sel := NewSelector(store, fakeResolver{fp}, "https://x", time.Second, fixedNow, nil)
+	sel := NewSelector(store, nil, fakeResolver{fp}, "https://x", time.Second, fixedNow, nil)
 	_, ok := sel.Select(context.Background(), "org-1", "inc-1", "fp-1", nil, docWithRunbooks(approvedRB("rb-1", "echo a")))
 	if ok || store.createCount != 0 {
 		t.Fatalf("none outcome must not create an execution")
@@ -200,7 +201,7 @@ func TestSelect_LLMError_FailOpen(t *testing.T) {
 	store := newMemStore()
 	store.cfg = ruletypes.RemediationConfig{ExecutionEnabled: true, ProposalTTLSeconds: 600, MaxConcurrent: 1}
 	fp := newFakeProvider("", context.DeadlineExceeded)
-	sel := NewSelector(store, fakeResolver{fp}, "https://x", time.Second, fixedNow, nil)
+	sel := NewSelector(store, nil, fakeResolver{fp}, "https://x", time.Second, fixedNow, nil)
 	_, ok := sel.Select(context.Background(), "org-1", "inc-1", "fp-1", nil, docWithRunbooks(approvedRB("rb-1", "echo a")))
 	if ok || store.createCount != 0 {
 		t.Fatalf("LLM error must fail open (no execution)")
@@ -212,7 +213,7 @@ func TestSelect_ExistingActiveProposal_Skips(t *testing.T) {
 	store.cfg = ruletypes.RemediationConfig{ExecutionEnabled: true, ProposalTTLSeconds: 600, MaxConcurrent: 1}
 	store.active = []ruletypes.RemediationExecution{{ID: "x", Status: ruletypes.RemediationStatusProposed}}
 	fp := newFakeProvider(`{"outcome":"selected","chosenRunbookId":"rb-1","confidence":"high","rationale":"x"}`, nil)
-	sel := NewSelector(store, fakeResolver{fp}, "https://x", time.Second, fixedNow, nil)
+	sel := NewSelector(store, nil, fakeResolver{fp}, "https://x", time.Second, fixedNow, nil)
 	_, ok := sel.Select(context.Background(), "org-1", "inc-1", "fp-1", nil, docWithRunbooks(approvedRB("rb-1", "echo a")))
 	if ok || store.createCount != 0 {
 		t.Fatalf("existing active proposal must short-circuit (cache reuse)")
@@ -226,7 +227,7 @@ func TestSelect_ExecutionDisabled_NoOp(t *testing.T) {
 	store := newMemStore()
 	store.cfg = ruletypes.RemediationConfig{ExecutionEnabled: false}
 	fp := newFakeProvider(`{"outcome":"selected","chosenRunbookId":"rb-1","confidence":"high","rationale":"x"}`, nil)
-	sel := NewSelector(store, fakeResolver{fp}, "https://x", time.Second, fixedNow, nil)
+	sel := NewSelector(store, nil, fakeResolver{fp}, "https://x", time.Second, fixedNow, nil)
 	_, ok := sel.Select(context.Background(), "org-1", "inc-1", "fp-1", nil, docWithRunbooks(approvedRB("rb-1", "echo a")))
 	if ok {
 		t.Fatalf("execution disabled must no-op")
@@ -243,7 +244,7 @@ func TestSelect_ZeroApprovedRunbooks_NoLLM(t *testing.T) {
 	store := newMemStore()
 	store.cfg = ruletypes.RemediationConfig{ExecutionEnabled: true, ProposalTTLSeconds: 600, MaxConcurrent: 1}
 	fp := newFakeProvider(`{"outcome":"selected","chosenRunbookId":"rb-1","confidence":"high","rationale":"x"}`, nil)
-	sel := NewSelector(store, fakeResolver{fp}, "https://x", time.Second, fixedNow, nil)
+	sel := NewSelector(store, nil, fakeResolver{fp}, "https://x", time.Second, fixedNow, nil)
 
 	// Build a doc whose runbooks are all non-approved (Status=draft) or have empty scripts.
 	draftRB := ruletypes.Runbook{ID: "rb-draft", Title: "draft", ExecutableScript: "echo a", Status: ruletypes.RunbookStatusDraft, Confidence: 0.9}
@@ -265,3 +266,32 @@ func TestSelect_ZeroApprovedRunbooks_NoLLM(t *testing.T) {
 // Ensure fixedNow is used (suppress "declared and not used" if only referenced
 // in test bodies — Go does not require this but it silences linters).
 var _ func() time.Time = fixedNow
+
+// TestSelector_FreezesTargetSnapshot verifies the Selector applies the same
+// target-freeze behaviour as the Proposer (Task 10): when targetStore resolves
+// a target, the created RemediationExecution snapshots TargetID/TargetHost/
+// TargetPort/TargetUser/TargetHostKeyFP/TargetName. Reuses fakeTargetStore
+// from propose_test.go (same package — must not redeclare it here).
+func TestSelector_FreezesTargetSnapshot(t *testing.T) {
+	store := newMemStore()
+	store.cfg = ruletypes.RemediationConfig{ExecutionEnabled: true, ProposalTTLSeconds: 600, MaxConcurrent: 1}
+	fp := newFakeProvider(`{"outcome":"selected","chosenRunbookId":"rb-1","confidence":"high","rationale":"맞음"}`, nil)
+
+	tgt := ruletypes.RemediationTarget{
+		ID: "3f2504e0-4f89-41d3-9a0c-0305e82c3301", Host: "10.0.0.5", Port: 22,
+		User: "deploy", HostKeyFingerprint: "SHA256:abc", Name: "prod-web-01",
+	}
+	var ts remediationtargetstore.Store = fakeTargetStore{t: tgt, found: true}
+	sel := NewSelector(store, ts, fakeResolver{fp}, "https://x", time.Second, fixedNow, nil)
+
+	doc := docWithRunbooks(approvedRB("rb-1", "echo a"))
+	_, ok := sel.Select(context.Background(), "org-1", "inc-1", "fp-1", map[string]string{"service.name": "payment"}, doc)
+	if !ok {
+		t.Fatalf("expected a proposal")
+	}
+	created := store.lastCreated
+	if created.TargetID != tgt.ID || created.TargetHost != tgt.Host || created.TargetPort != tgt.Port ||
+		created.TargetUser != tgt.User || created.TargetHostKeyFP != tgt.HostKeyFingerprint || created.TargetName != tgt.Name {
+		t.Fatalf("target snapshot not frozen: %+v", created)
+	}
+}

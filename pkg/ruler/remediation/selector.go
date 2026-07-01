@@ -10,6 +10,7 @@ import (
 
 	"github.com/SigNoz/signoz/pkg/ruler/cliaudit"
 	"github.com/SigNoz/signoz/pkg/ruler/remediationstore"
+	"github.com/SigNoz/signoz/pkg/ruler/remediationtargetstore"
 	"github.com/SigNoz/signoz/pkg/types/alertmanagertypes"
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
 )
@@ -32,16 +33,18 @@ type ProviderResolver interface {
 // RemediationExecution. Every failure path is fail-open (returns nil,false) so
 // it never blocks alert delivery — it runs off the dispatch path entirely.
 type Selector struct {
-	store    remediationstore.Store
-	resolver ProviderResolver
-	baseURL  string
-	timeout  time.Duration
-	now      func() time.Time
-	logger   *slog.Logger
+	store       remediationstore.Store
+	targetStore remediationtargetstore.Store // nil = 로컬 전용
+	resolver    ProviderResolver
+	baseURL     string
+	timeout     time.Duration
+	now         func() time.Time
+	logger      *slog.Logger
 }
 
 // NewSelector constructs a Selector. now/logger may be nil.
-func NewSelector(store remediationstore.Store, resolver ProviderResolver, baseURL string, timeout time.Duration, now func() time.Time, logger *slog.Logger) *Selector {
+// targetStore may be nil (local-only mode — no target resolution/freeze).
+func NewSelector(store remediationstore.Store, targetStore remediationtargetstore.Store, resolver ProviderResolver, baseURL string, timeout time.Duration, now func() time.Time, logger *slog.Logger) *Selector {
 	if now == nil {
 		now = time.Now
 	}
@@ -52,12 +55,13 @@ func NewSelector(store remediationstore.Store, resolver ProviderResolver, baseUR
 		timeout = 30 * time.Second
 	}
 	return &Selector{
-		store:    store,
-		resolver: resolver,
-		baseURL:  strings.TrimRight(baseURL, "/"),
-		timeout:  timeout,
-		now:      now,
-		logger:   logger.With(slog.String("component", "ds-apm-remediation-selector")),
+		store:       store,
+		targetStore: targetStore,
+		resolver:    resolver,
+		baseURL:     strings.TrimRight(baseURL, "/"),
+		timeout:     timeout,
+		now:         now,
+		logger:      logger.With(slog.String("component", "ds-apm-remediation-selector")),
 	}
 }
 
@@ -195,6 +199,7 @@ func (s *Selector) createExecution(
 		ProposedAt:         now.Format(time.RFC3339),
 		ExpiresAt:          now.Add(time.Duration(cfg.ProposalTTLSeconds) * time.Second).Format(time.RFC3339),
 	}
+	freezeTargetSnapshot(ctx, s.targetStore, orgID, labels, &e)
 	if err := s.store.Create(ctx, e); err != nil {
 		s.logger.WarnContext(ctx, "selector: create execution failed", slog.String("orgId", orgID), slog.Any("err", err))
 		return nil, false

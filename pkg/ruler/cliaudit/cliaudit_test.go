@@ -67,3 +67,16 @@ func TestLogAppendsJSONLines(t *testing.T) {
 		t.Fatalf("line 1 = %+v", second)
 	}
 }
+
+func TestRecord_TransportTargetOmitemptyAndSerialized(t *testing.T) {
+	// 비어있으면 JSON에서 생략.
+	b, _ := json.Marshal(Record{Via: "remediation-exec", Outcome: "ok"})
+	if strings.Contains(string(b), "transport") || strings.Contains(string(b), "target") {
+		t.Fatalf("empty transport/target must be omitted: %s", b)
+	}
+	// 채우면 직렬화.
+	b2, _ := json.Marshal(Record{Via: "remediation-exec", Outcome: "ok", Transport: "ssh", Target: "10.0.0.5"})
+	if !strings.Contains(string(b2), `"transport":"ssh"`) || !strings.Contains(string(b2), `"target":"10.0.0.5"`) {
+		t.Fatalf("transport/target must serialize: %s", b2)
+	}
+}

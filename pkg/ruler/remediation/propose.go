@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/SigNoz/signoz/pkg/ruler/remediationstore"
+	"github.com/SigNoz/signoz/pkg/ruler/remediationtargetstore"
 	"github.com/SigNoz/signoz/pkg/types/alertmanagertypes"
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
 )
@@ -18,18 +19,20 @@ import (
 // failure returns (nil, false) so the caller (dispatch hook) keeps delivering
 // the alert unchanged.
 type Proposer struct {
-	store   remediationstore.Store
-	baseURL string
-	now     func() time.Time
+	store       remediationstore.Store
+	targetStore remediationtargetstore.Store // nil = 로컬 전용
+	baseURL     string
+	now         func() time.Time
 }
 
 // NewProposer constructs a Proposer. now may be nil (falls back to time.Now).
+// targetStore may be nil (local-only mode — no target resolution/freeze).
 // Trailing slashes on baseURL are trimmed.
-func NewProposer(store remediationstore.Store, baseURL string, now func() time.Time) *Proposer {
+func NewProposer(store remediationstore.Store, targetStore remediationtargetstore.Store, baseURL string, now func() time.Time) *Proposer {
 	if now == nil {
 		now = time.Now
 	}
-	return &Proposer{store: store, baseURL: strings.TrimRight(baseURL, "/"), now: now}
+	return &Proposer{store: store, targetStore: targetStore, baseURL: strings.TrimRight(baseURL, "/"), now: now}
 }
 
 // Propose selects the first approved Runbook from doc, creates a proposed
@@ -70,6 +73,7 @@ func (p *Proposer) Propose(
 		ProposedAt:       now.Format(time.RFC3339),
 		ExpiresAt:        now.Add(time.Duration(cfg.ProposalTTLSeconds) * time.Second).Format(time.RFC3339),
 	}
+	freezeTargetSnapshot(ctx, p.targetStore, orgID, labels, &e)
 	if err := p.store.Create(ctx, e); err != nil {
 		return nil, false // fail-open: never block the alert
 	}

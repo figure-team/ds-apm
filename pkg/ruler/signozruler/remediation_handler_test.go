@@ -2,6 +2,7 @@ package signozruler
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/SigNoz/signoz/pkg/ruler/aiconfigstore/secretbox"
 	"github.com/SigNoz/signoz/pkg/ruler/remediation"
 	"github.com/SigNoz/signoz/pkg/ruler/remediationstore"
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
@@ -181,12 +183,76 @@ func (f *fakeRemediationStore) ListActiveByFingerprint(_ context.Context, _, fin
 	return out, nil
 }
 
+// fakeRemediationTargetStore is a minimal in-memory remediationtargetstore.Store
+// for handler tests. Only Get is exercised by runRemediation's target-load path;
+// the other methods are unused stubs to satisfy the interface.
+type fakeRemediationTargetStore struct {
+	mu    sync.Mutex
+	rows  map[string]ruletypes.RemediationTarget
+	getFn func(orgID, id string) (ruletypes.RemediationTarget, error)
+}
+
+func newFakeRemediationTargetStore() *fakeRemediationTargetStore {
+	return &fakeRemediationTargetStore{rows: map[string]ruletypes.RemediationTarget{}}
+}
+
+func (f *fakeRemediationTargetStore) seed(t ruletypes.RemediationTarget) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.rows[t.ID] = t
+}
+
+func (f *fakeRemediationTargetStore) Create(_ context.Context, _ string, t ruletypes.RemediationTarget) error {
+	f.seed(t)
+	return nil
+}
+
+func (f *fakeRemediationTargetStore) Update(_ context.Context, _ string, t ruletypes.RemediationTarget) error {
+	f.seed(t)
+	return nil
+}
+
+func (f *fakeRemediationTargetStore) Delete(_ context.Context, _, id string) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	delete(f.rows, id)
+	return nil
+}
+
+func (f *fakeRemediationTargetStore) Get(_ context.Context, orgID, id string) (ruletypes.RemediationTarget, error) {
+	if f.getFn != nil {
+		return f.getFn(orgID, id)
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	t, ok := f.rows[id]
+	if !ok {
+		return ruletypes.RemediationTarget{}, sql.ErrNoRows
+	}
+	return t, nil
+}
+
+func (f *fakeRemediationTargetStore) List(_ context.Context, _ string) ([]ruletypes.RemediationTarget, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	out := make([]ruletypes.RemediationTarget, 0, len(f.rows))
+	for _, t := range f.rows {
+		out = append(out, t)
+	}
+	return out, nil
+}
+
+func (f *fakeRemediationTargetStore) Resolve(_ context.Context, _ string, _ map[string]string) (ruletypes.RemediationTarget, error) {
+	return ruletypes.RemediationTarget{}, sql.ErrNoRows
+}
+
 // fakeRunner records the script it was asked to run and signals completion so
 // tests can synchronise on the async execution goroutine.
 type fakeRunner struct {
 	mu         sync.Mutex
 	calls      int
 	lastScript string
+	lastTarget *remediation.RemoteTarget
 	exitCode   int
 	done       chan struct{}
 }
@@ -195,10 +261,11 @@ func newFakeRunner() *fakeRunner {
 	return &fakeRunner{done: make(chan struct{}, 1)}
 }
 
-func (r *fakeRunner) Run(_ context.Context, script string, _ remediation.RunMeta) remediation.ExecResult {
+func (r *fakeRunner) Run(_ context.Context, script string, target *remediation.RemoteTarget, _ remediation.RunMeta) remediation.ExecResult {
 	r.mu.Lock()
 	r.calls++
 	r.lastScript = script
+	r.lastTarget = target
 	exit := r.exitCode
 	r.mu.Unlock()
 	r.done <- struct{}{}
@@ -216,14 +283,30 @@ func (r *fakeRunner) waitDone(t *testing.T) {
 }
 
 // newRemediationHandler builds a handler wired to a fake store + a captured fake
-// runner returned through the newRemediationExecutor factory.
+// runner returned through the newRemediationExecutor factory. It also wires a
+// fake target store (initially empty) and a real (non-insecure) cipher so tests
+// that need remote-target fail-closed behaviour can opt in by seeding targetStore
+// or flipping h.aiCipherInsecure.
 func newRemediationHandler(t *testing.T) (*handler, *fakeRemediationStore, *fakeRunner) {
 	t.Helper()
-	store := newFakeRemediationStore()
-	runner := newFakeRunner()
-	h := &handler{}
-	h.SetRemediationDeps(store, func(time.Duration) RemediationRunner { return runner })
+	h, store, _, runner := newRemediationHandlerWithTargetStore(t)
 	return h, store, runner
+}
+
+// newRemediationHandlerWithTargetStore is like newRemediationHandler but also
+// returns the fake remediationtargetstore.Store so tests can seed/omit targets
+// to exercise the fail-closed target-load path.
+func newRemediationHandlerWithTargetStore(t *testing.T) (*handler, *fakeRemediationStore, *fakeRemediationTargetStore, *fakeRunner) {
+	t.Helper()
+	store := newFakeRemediationStore()
+	targetStore := newFakeRemediationTargetStore()
+	runner := newFakeRunner()
+	h := &handler{
+		aiCipher:         secretbox.PlaintextCipher(),
+		aiCipherInsecure: false,
+	}
+	h.SetRemediationDeps(store, targetStore, func(time.Duration) RemediationRunner { return runner })
+	return h, store, targetStore, runner
 }
 
 // newAuthedReq builds a request carrying SOP test claims (org-scoped) and the
@@ -371,5 +454,84 @@ func TestListRemediations_ScopeOrg(t *testing.T) {
 	}
 	if store.lastFilter.Status != "succeeded" || store.lastFilter.Limit != 50 {
 		t.Fatalf("filter not propagated: %+v", store.lastFilter)
+	}
+}
+
+// TestRunRemediation_FailClosedWhenTargetMissing verifies that a TargetID set
+// on the execution but not resolvable in the target store (not-found) results
+// in a failed terminal transition WITHOUT ever calling the runner — i.e. no
+// silent fallback to local execution (design §3.4 B2 fail-closed).
+func TestRunRemediation_FailClosedWhenTargetMissing(t *testing.T) {
+	h, store, _, runner := newRemediationHandlerWithTargetStore(t)
+	e := ruletypes.RemediationExecution{
+		ID:              "rem-target-missing",
+		OrgID:           testOrgID,
+		Status:          ruletypes.RemediationStatusExecuting,
+		ScriptSnapshot:  "echo hi",
+		TargetID:        "11111111-1111-4111-8111-111111111111",
+		TargetHost:      "10.0.0.5",
+		TargetHostKeyFP: "SHA256:abc",
+	}
+	store.seed(e)
+	// targetStore has no rows seeded → Get returns sql.ErrNoRows.
+
+	h.runRemediation(testOrgID, e, runner, time.Second)
+
+	if runner.calls != 0 {
+		t.Fatalf("runner must NOT be called when target load fails, got %d calls", runner.calls)
+	}
+	got := store.get("rem-target-missing")
+	if got.Status != ruletypes.RemediationStatusFailed {
+		t.Fatalf("want status=failed, got %q (output=%q)", got.Status, got.OutputSnippet)
+	}
+	if got.ExitCode == nil || *got.ExitCode != -1 {
+		t.Fatalf("want exitCode=-1, got %v", got.ExitCode)
+	}
+}
+
+// TestRunRemediation_FailClosedWhenEncryptionInsecure verifies that when the
+// org's cipher is the insecure plaintext fallback (no master key configured),
+// remote-targeted execution is rejected even though Decrypt itself would not
+// error — plaintext credential fallback must not silently enable SSH remote
+// execution (design §3.1/§3.6, Global Constraint C1).
+func TestRunRemediation_FailClosedWhenEncryptionInsecure(t *testing.T) {
+	h, store, targetStore, runner := newRemediationHandlerWithTargetStore(t)
+	h.aiCipherInsecure = true // master key NOT configured
+
+	e := ruletypes.RemediationExecution{
+		ID:              "rem-insecure-cipher",
+		OrgID:           testOrgID,
+		Status:          ruletypes.RemediationStatusExecuting,
+		ScriptSnapshot:  "echo hi",
+		TargetID:        "22222222-2222-4222-8222-222222222222",
+		TargetHost:      "10.0.0.6",
+		TargetHostKeyFP: "SHA256:def",
+	}
+	store.seed(e)
+	// Seed a resolvable target so the ONLY blocking gate is aiCipherInsecure.
+	targetStore.seed(ruletypes.RemediationTarget{
+		ID:                 e.TargetID,
+		OrgID:              testOrgID,
+		Name:               "site-a",
+		Host:               "10.0.0.6",
+		Port:               22,
+		User:               "svc",
+		SealedCredential:   "plaintext-key-pem",
+		CredentialKind:     ruletypes.RemediationCredentialKindPrivateKey,
+		HostKeyFingerprint: "SHA256:def",
+		ServiceSelectors:   []string{"svc-a"},
+	})
+
+	h.runRemediation(testOrgID, e, runner, time.Second)
+
+	if runner.calls != 0 {
+		t.Fatalf("runner must NOT be called when cipher is insecure (plaintext fallback), got %d calls", runner.calls)
+	}
+	got := store.get("rem-insecure-cipher")
+	if got.Status != ruletypes.RemediationStatusFailed {
+		t.Fatalf("want status=failed, got %q (output=%q)", got.Status, got.OutputSnippet)
+	}
+	if got.ExitCode == nil || *got.ExitCode != -1 {
+		t.Fatalf("want exitCode=-1, got %v", got.ExitCode)
 	}
 }

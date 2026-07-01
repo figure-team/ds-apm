@@ -53,6 +53,11 @@ type Record struct {
 	Source string `json:"source,omitempty"`
 	// Fingerprint is the alert fingerprint tied to this invocation, when known.
 	Fingerprint string `json:"fingerprint,omitempty"`
+	// Transport is the remediation execution channel: "local" or "ssh". Empty for
+	// non-remediation records (design §3.4).
+	Transport string `json:"transport,omitempty"`
+	// Target is the remote host when Transport is "ssh". Empty otherwise.
+	Target string `json:"target,omitempty"`
 }
 
 // Logger appends one JSON line per CLI invocation to a file. It is safe for

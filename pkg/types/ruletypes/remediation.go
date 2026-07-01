@@ -63,6 +63,17 @@ type RemediationExecution struct {
 	OutputSnippet    string `json:"outputSnippet,omitempty"`
 	VerifyResult     string `json:"verifyResult,omitempty"`
 	ExpiresAt        string `json:"expiresAt"`
+
+	// --- 타겟 파라미터 스냅샷 (propose 시 프리즈, design §3.2 B1) ---
+	// TargetID 비어있으면 로컬 실행(하위호환). 비어있지 않으면 아래 스냅샷 값으로 SSH 원격 실행.
+	// 실행 시 라이브 인벤토리와 비교하지 않는다(design §3.2 New-1); 라이브에서는
+	// SealedCredential 한 필드만 로드한다.
+	TargetID        string `json:"targetId,omitempty"`
+	TargetHost      string `json:"targetHost,omitempty"`
+	TargetPort      int    `json:"targetPort,omitempty"`
+	TargetUser      string `json:"targetUser,omitempty"`
+	TargetHostKeyFP string `json:"targetHostKeyFp,omitempty"`
+	TargetName      string `json:"targetName,omitempty"`
 }
 
 var allowedRemediationSources = map[string]struct{}{
@@ -173,6 +184,15 @@ func ValidateRemediationExecution(e RemediationExecution) error {
 	pilotRequireNonEmpty(&errs, "expiresAt", e.ExpiresAt)
 
 	pilotAppendSecretLikeStringErrors(&errs, "approvedBy", e.ApprovedBy)
+
+	if strings.TrimSpace(e.TargetID) != "" {
+		if !uuidV4Pattern.MatchString(strings.TrimSpace(e.TargetID)) {
+			errs = append(errs, fmt.Errorf("targetId: must be UUID v4 when set (got %q)", e.TargetID))
+		}
+		// 프리즈 무결성: 원격 실행은 접속 파라미터 스냅샷이 반드시 있어야 한다.
+		pilotRequireNonEmpty(&errs, "targetHost", e.TargetHost)
+		pilotRequireNonEmpty(&errs, "targetHostKeyFp", e.TargetHostKeyFP)
+	}
 
 	return errors.Join(errs...)
 }
