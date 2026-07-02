@@ -1,4 +1,53 @@
-// 시드 플레이스홀더 — 레인 C1이 채운다.
 .remediation-target-settings {
-	// intentionally empty
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-6);
+
+	&__header {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--spacing-6);
+	}
+
+	&__header-text {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-2);
+	}
+
+	&__title {
+		font-size: var(--label-large-500-font-size);
+		font-weight: var(--label-large-500-font-weight);
+		color: var(--l1-foreground);
+		letter-spacing: -0.09px;
+		line-height: var(--line-height-normal);
+		margin: 0;
+	}
+
+	&__subtitle {
+		font-size: var(--paragraph-base-400-font-size);
+		font-weight: var(--paragraph-base-400-font-weight);
+		color: var(--foreground);
+		letter-spacing: -0.07px;
+		line-height: var(--paragraph-base-400-line-height);
+		margin: 0;
+	}
+
+	&__banner {
+		margin: 0;
+	}
+
+	&__table {
+		code {
+			font-family: monospace;
+			font-size: var(--font-size-xs);
+		}
+	}
+
+	&__row-actions {
+		display: flex;
+		gap: var(--spacing-3);
+		align-items: center;
+	}
 }
