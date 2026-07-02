@@ -57,6 +57,14 @@ type Handler interface {
 	GetRemediationConfig(http.ResponseWriter, *http.Request)
 	UpdateRemediationConfig(http.ResponseWriter, *http.Request)
 
+	ListRemediationTargets(http.ResponseWriter, *http.Request)
+	CreateRemediationTarget(http.ResponseWriter, *http.Request)
+	UpdateRemediationTarget(http.ResponseWriter, *http.Request)
+	DeleteRemediationTarget(http.ResponseWriter, *http.Request)
+	KeygenRemediationTarget(http.ResponseWriter, *http.Request)
+	FingerprintRemediationTarget(http.ResponseWriter, *http.Request)
+	TestRemediationTarget(http.ResponseWriter, *http.Request)
+
 	ListDowntimeSchedules(http.ResponseWriter, *http.Request)
 	GetDowntimeScheduleByID(http.ResponseWriter, *http.Request)
 	CreateDowntimeSchedule(http.ResponseWriter, *http.Request)
