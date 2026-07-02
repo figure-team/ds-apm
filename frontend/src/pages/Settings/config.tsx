@@ -14,6 +14,7 @@ import IncidentReportSettings from 'container/IncidentReportSettings/IncidentRep
 import MCPServerSettings from 'container/MCPServerSettings/MCPServerSettings';
 import MySettings from 'container/MySettings';
 import OrganizationSettings from 'container/OrganizationSettings';
+import RemediationTargetSettings from 'container/RemediationTargetSettings/RemediationTargetSettings';
 import RolesSettings from 'container/RolesSettings';
 import RoleDetailsPage from 'container/RolesSettings/RoleDetails';
 import { TFunction } from 'i18next';
@@ -28,6 +29,7 @@ import {
 	Keyboard,
 	Pencil,
 	Plus,
+	ServerCog,
 	Shield,
 	Sparkles,
 	User,
@@ -261,6 +263,21 @@ export const codeRcaSettings = (t: TFunction): RouteTabProps['routes'] => [
 		),
 		route: ROUTES.CODE_RCA_SETTINGS,
 		key: ROUTES.CODE_RCA_SETTINGS,
+	},
+];
+
+export const remediationTargetSettings = (
+	t: TFunction,
+): RouteTabProps['routes'] => [
+	{
+		Component: RemediationTargetSettings,
+		name: (
+			<div className="periscope-tab">
+				<ServerCog size={16} /> {t('routes:remediation_targets').toString()}
+			</div>
+		),
+		route: ROUTES.REMEDIATION_TARGETS_SETTINGS,
+		key: ROUTES.REMEDIATION_TARGETS_SETTINGS,
 	},
 ];
 

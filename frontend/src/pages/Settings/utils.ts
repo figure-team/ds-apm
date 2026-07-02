@@ -18,6 +18,7 @@ import {
 	multiIngestionSettings,
 	mySettings,
 	organizationSettings,
+	remediationTargetSettings,
 	roleDetails,
 	rolesSettings,
 	serviceAccountsSettings,
@@ -73,6 +74,7 @@ export const getRoutes = (
 			...serviceAccountsSettings(t),
 			...rolesSettings(t),
 			...roleDetails(t),
+			...remediationTargetSettings(t), // 자동대응 타겟은 Admin 전용 (스펙 §4.1)
 		);
 	}
 
