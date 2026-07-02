@@ -1,0 +1,27 @@
+.target-form-drawer {
+	&__footer {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+
+		.ant-space {
+			justify-content: flex-end;
+		}
+	}
+
+	&__keygen {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	&__public-key {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	&__credential-mode {
+		margin-bottom: 12px;
+	}
+}
