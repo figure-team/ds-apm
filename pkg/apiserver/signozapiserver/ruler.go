@@ -666,6 +666,107 @@ func (provider *provider) addRulerRoutes(router *mux.Router) error {
 		return err
 	}
 
+	// NOTE: all /remediation/targets routes MUST be registered before the
+	// /remediation/{id} route below — gorilla/mux matches in registration order,
+	// so otherwise GET /remediation/targets would be captured by /{id} with
+	// id="targets" (design §3.1). For the same reason the fixed sub-paths
+	// (targets/keygen, targets/fingerprint, targets/test) are registered before
+	// targets/{targetId}. All targets routes are Admin-only (SSH private keys).
+	if err := router.Handle("/api/v2/ds/remediation/targets", handler.New(provider.authZ.AdminAccess(provider.rulerHandler.ListRemediationTargets), handler.OpenAPIDef{
+		ID:                  "ListRemediationTargets",
+		Tags:                []string{"remediation"},
+		Summary:             "List remediation targets",
+		Description:         "Lists SSH remediation targets (no credential material) plus the encryptionReady flag; admin role required.",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusForbidden, http.StatusUnauthorized},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
+	})).Methods(http.MethodGet).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/remediation/targets", handler.New(provider.authZ.AdminAccess(provider.rulerHandler.CreateRemediationTarget), handler.OpenAPIDef{
+		ID:                  "CreateRemediationTarget",
+		Tags:                []string{"remediation"},
+		Summary:             "Create remediation target",
+		Description:         "Registers an SSH remediation target; the private key is sealed server-side; admin role required.",
+		RequestContentType:  "application/json",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusCreated,
+		ErrorStatusCodes:    []int{http.StatusBadRequest, http.StatusForbidden, http.StatusUnauthorized},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
+	})).Methods(http.MethodPost).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/remediation/targets/keygen", handler.New(provider.authZ.AdminAccess(provider.rulerHandler.KeygenRemediationTarget), handler.OpenAPIDef{
+		ID:                  "KeygenRemediationTarget",
+		Tags:                []string{"remediation"},
+		Summary:             "Generate remediation SSH keypair",
+		Description:         "Generates an ed25519 keypair server-side; returns the OpenSSH public key and the sealed private key blob (plaintext never leaves the server); admin role required.",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusBadRequest, http.StatusForbidden, http.StatusUnauthorized},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
+	})).Methods(http.MethodPost).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/remediation/targets/fingerprint", handler.New(provider.authZ.AdminAccess(provider.rulerHandler.FingerprintRemediationTarget), handler.OpenAPIDef{
+		ID:                  "FingerprintRemediationTarget",
+		Tags:                []string{"remediation"},
+		Summary:             "Collect remediation target host key fingerprint",
+		Description:         "Dials host:port and returns the server host key SHA256 fingerprint for TOFU confirmation; admin role required.",
+		RequestContentType:  "application/json",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusBadRequest, http.StatusForbidden, http.StatusUnauthorized},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
+	})).Methods(http.MethodPost).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/remediation/targets/test", handler.New(provider.authZ.AdminAccess(provider.rulerHandler.TestRemediationTarget), handler.OpenAPIDef{
+		ID:                  "TestRemediationTarget",
+		Tags:                []string{"remediation"},
+		Summary:             "Test remediation target connection",
+		Description:         "Runs `echo ok` against a stored target or a draft connection; a connection failure is reported as 200 with ok:false; admin role required.",
+		RequestContentType:  "application/json",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusBadRequest, http.StatusForbidden, http.StatusUnauthorized},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
+	})).Methods(http.MethodPost).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/remediation/targets/{targetId}", handler.New(provider.authZ.AdminAccess(provider.rulerHandler.UpdateRemediationTarget), handler.OpenAPIDef{
+		ID:                  "UpdateRemediationTarget",
+		Tags:                []string{"remediation"},
+		Summary:             "Update remediation target",
+		Description:         "Updates a remediation target; omitting credential keeps the existing sealed key; admin role required.",
+		RequestContentType:  "application/json",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusBadRequest, http.StatusForbidden, http.StatusUnauthorized, http.StatusNotFound},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
+	})).Methods(http.MethodPut).GetError(); err != nil {
+		return err
+	}
+
+	if err := router.Handle("/api/v2/ds/remediation/targets/{targetId}", handler.New(provider.authZ.AdminAccess(provider.rulerHandler.DeleteRemediationTarget), handler.OpenAPIDef{
+		ID:                  "DeleteRemediationTarget",
+		Tags:                []string{"remediation"},
+		Summary:             "Delete remediation target",
+		Description:         "Deletes a remediation target; admin role required.",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusForbidden, http.StatusUnauthorized},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
+	})).Methods(http.MethodDelete).GetError(); err != nil {
+		return err
+	}
+
 	if err := router.Handle("/api/v2/ds/remediation/{id}", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.GetRemediation), handler.OpenAPIDef{
 		ID:                  "GetRemediation",
 		Tags:                []string{"remediation"},
