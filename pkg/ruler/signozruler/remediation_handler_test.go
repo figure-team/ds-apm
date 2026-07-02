@@ -202,12 +202,23 @@ func (f *fakeRemediationTargetStore) seed(t ruletypes.RemediationTarget) {
 	f.rows[t.ID] = t
 }
 
-func (f *fakeRemediationTargetStore) Create(_ context.Context, _ string, t ruletypes.RemediationTarget) error {
+// Create/Update mirror the real SQL store: they set OrgID then run
+// ValidateRemediationTarget so handler tests exercise the validation→400 and the
+// §3.2 "blank sealedCredential is always rejected" contract.
+func (f *fakeRemediationTargetStore) Create(_ context.Context, orgID string, t ruletypes.RemediationTarget) error {
+	t.OrgID = orgID
+	if err := ruletypes.ValidateRemediationTarget(t); err != nil {
+		return err
+	}
 	f.seed(t)
 	return nil
 }
 
-func (f *fakeRemediationTargetStore) Update(_ context.Context, _ string, t ruletypes.RemediationTarget) error {
+func (f *fakeRemediationTargetStore) Update(_ context.Context, orgID string, t ruletypes.RemediationTarget) error {
+	t.OrgID = orgID
+	if err := ruletypes.ValidateRemediationTarget(t); err != nil {
+		return err
+	}
 	f.seed(t)
 	return nil
 }
