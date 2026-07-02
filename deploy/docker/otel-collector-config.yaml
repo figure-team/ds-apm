@@ -27,7 +27,8 @@ processors:
   batch:
     send_batch_size: 10000
     send_batch_max_size: 11000
-    timeout: 10s
+    # 실시간 알림: ClickHouse flush 주기를 줄여 메트릭이 빨리 쿼리 가능하도록 함 (was 10s)
+    timeout: 5s
   batch/meter:
     send_batch_max_size: 25000
     send_batch_size: 20000
@@ -38,7 +39,9 @@ processors:
     timeout: 2s
   signozspanmetrics/delta:
     metrics_exporter: signozclickhousemetrics
-    metrics_flush_interval: 60s
+    # 실시간 알림: APM(트레이스 파생) 메트릭 - 에러율/지연/RPS - 의 flush 주기.
+    # 이 값이 곧 APM 알림이 볼 수 있는 데이터의 최소 신선도이므로 60s→15s로 단축.
+    metrics_flush_interval: 15s
     latency_histogram_buckets: [100us, 1ms, 2ms, 6ms, 10ms, 50ms, 100ms, 250ms, 500ms, 1000ms, 1400ms, 2000ms, 5s, 10s, 20s, 40s, 60s ]
     dimensions_cache_size: 100000
     aggregation_temporality: AGGREGATION_TEMPORALITY_DELTA

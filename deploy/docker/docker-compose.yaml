@@ -120,6 +120,9 @@ services:
       - SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN=tcp://clickhouse:9000
       - SIGNOZ_SQLSTORE_SQLITE_PATH=/var/lib/signoz/signoz.db
       - SIGNOZ_TOKENIZER_JWT_SECRET=secret
+      # 실시간 알림: 룰이 쿼리하는 데이터의 지연(end = now - EvalDelay). 기본 2m는 너무 보수적.
+      # 적재 신선도(span flush 15s + batch 5s)에 맞춰 30s로 단축. 이보다 작으면 미적재 데이터로 오탐 위험.
+      - SIGNOZ_RULER_EVAL__DELAY=30s
     healthcheck:
       test:
         - CMD
