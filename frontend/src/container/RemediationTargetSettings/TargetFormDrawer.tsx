@@ -391,7 +391,10 @@ function TargetFormDrawer({
 					name="host"
 					rules={[{ required: true, message: 'Host를 입력하세요' }]}
 				>
-					<Input data-testid="target-host" placeholder="10.0.0.5" />
+					<Input
+						data-testid="target-host"
+						placeholder="10.0.0.5 또는 host.example.com"
+					/>
 				</Form.Item>
 				<Form.Item
 					label="Port"
