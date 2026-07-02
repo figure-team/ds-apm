@@ -33,6 +33,7 @@
 	"mcp_server": "MCP Server",
 	"ai_module": "AI Module",
 	"code_rca": "Code RCA",
+	"remediation_targets": "Remediation Targets",
 	"incident_report": "Incident Report",
 	"create_alert_channels": "Create Alert Channel",
 	"edit_alert_channels": "Edit Alert Channel",

@@ -92,6 +92,7 @@ const ROUTES = {
 	MCP_SERVER: '/settings/mcp-server',
 	AI_MODULE_SETTINGS: '/settings/ai-module',
 	CODE_RCA_SETTINGS: '/settings/code-rca',
+	REMEDIATION_TARGETS_SETTINGS: '/settings/remediation-targets',
 	INCIDENT_REPORT_SETTINGS: '/settings/incident-report',
 } as const;
 
