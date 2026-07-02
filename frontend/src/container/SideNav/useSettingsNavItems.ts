@@ -44,6 +44,7 @@ export function useSettingsNavItems(): GatedSettingsSection[] {
 						item.key === ROUTES.ROLE_DETAILS ||
 						item.key === ROUTES.INTEGRATIONS ||
 						item.key === ROUTES.INGESTION_SETTINGS ||
+						item.key === ROUTES.REMEDIATION_TARGETS_SETTINGS ||
 						item.key === ROUTES.ORG_SETTINGS ||
 						item.key === ROUTES.MEMBERS_SETTINGS ||
 						item.key === ROUTES.SERVICE_ACCOUNTS_SETTINGS ||
@@ -80,6 +81,7 @@ export function useSettingsNavItems(): GatedSettingsSection[] {
 						item.key === ROUTES.MEMBERS_SETTINGS ||
 						item.key === ROUTES.SERVICE_ACCOUNTS_SETTINGS ||
 						item.key === ROUTES.INGESTION_SETTINGS ||
+						item.key === ROUTES.REMEDIATION_TARGETS_SETTINGS ||
 						item.key === ROUTES.MCP_SERVER ||
 						item.key === ROUTES.AI_MODULE_SETTINGS ||
 						item.key === ROUTES.CODE_RCA_SETTINGS ||
@@ -108,6 +110,7 @@ export function useSettingsNavItems(): GatedSettingsSection[] {
 						item.key === ROUTES.SERVICE_ACCOUNTS_SETTINGS ||
 						item.key === ROUTES.ROLES_SETTINGS ||
 						item.key === ROUTES.ROLE_DETAILS ||
+						item.key === ROUTES.REMEDIATION_TARGETS_SETTINGS ||
 						item.key === ROUTES.AI_MODULE_SETTINGS ||
 						item.key === ROUTES.CODE_RCA_SETTINGS ||
 						item.key === ROUTES.INCIDENT_REPORT_SETTINGS

@@ -68,6 +68,8 @@ describe('useSettingsNavItems', () => {
 		expect(keys).toContain('code-rca');
 		expect(keys).toContain('incident-report');
 		expect(keys).toContain('account');
+		// Remediation Targets is Admin-only (spec §4.1)
+		expect(keys).toContain('remediation-targets');
 	});
 
 	it('Cloud Viewer: billing and roles are NOT enabled; account IS enabled', () => {
@@ -98,6 +100,8 @@ describe('useSettingsNavItems', () => {
 		expect(keys).toContain('code-rca');
 		expect(keys).toContain('incident-report');
 		expect(keys).not.toContain('billing');
+		// Remediation Targets must NOT open to Editor (spec §4.1)
+		expect(keys).not.toContain('remediation-targets');
 	});
 
 	it('Self-hosted Admin: enables billing, roles, members, service-accounts, integrations, sso, ingestion, mcp-server, ai-module, code-rca, incident-report', () => {
@@ -118,6 +122,8 @@ describe('useSettingsNavItems', () => {
 		expect(keys).toContain('ai-module');
 		expect(keys).toContain('code-rca');
 		expect(keys).toContain('incident-report');
+		// Remediation Targets is Admin-only (spec §4.1)
+		expect(keys).toContain('remediation-targets');
 	});
 
 	it('Self-hosted Editor: enables integrations, ingestion, mcp-server, ai-module, code-rca, incident-report; billing NOT enabled', () => {
@@ -134,6 +140,8 @@ describe('useSettingsNavItems', () => {
 		expect(keys).toContain('code-rca');
 		expect(keys).toContain('incident-report');
 		expect(keys).not.toContain('billing');
+		// Remediation Targets must NOT open to Editor (spec §4.1)
+		expect(keys).not.toContain('remediation-targets');
 	});
 
 	it('Community Admin (all license flags false): enables sso, members, service-accounts, roles, ai-module, code-rca, incident-report; billing and integrations NOT enabled', () => {
@@ -152,6 +160,18 @@ describe('useSettingsNavItems', () => {
 		expect(keys).toContain('incident-report');
 		expect(keys).not.toContain('billing');
 		expect(keys).not.toContain('integrations');
+		// Remediation Targets is Admin-only (spec §4.1)
+		expect(keys).toContain('remediation-targets');
+	});
+
+	it('Community Editor: remediation-targets NOT enabled (Admin-only, spec §4.1)', () => {
+		// all license flags false from beforeEach; community has no isEditor branch
+		mockAppContext.user = { role: 'EDITOR' };
+
+		const { result } = renderHook(() => useSettingsNavItems());
+		const keys = enabledKeys(result.current);
+
+		expect(keys).not.toContain('remediation-targets');
 	});
 
 	it('workSpaceBlock=true: only billing, sso, members, account (and keyboard-shortcuts) are enabled for admin', () => {
