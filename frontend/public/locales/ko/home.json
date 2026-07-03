@@ -134,5 +134,8 @@
 	"noc_c2_alerts_resolved": "마지막 해소: {{age}} · {{service}}",
 	"noc_c2_infra_loading": "호스트 불러오는 중…",
 	"noc_c2_infra_error": "호스트를 불러오지 못했습니다",
-	"noc_c2_infra_empty": "호스트 메트릭 없음"
+	"noc_c2_infra_empty": "호스트 메트릭 없음",
+	"noc_c2_console": "관제 센터",
+	"noc_c2_alerts_title": "활성 알림",
+	"noc_c2_infra_title": "인프라 · 호스트"
 }

@@ -134,5 +134,8 @@
 	"noc_c2_alerts_resolved": "Last resolved: {{age}} · {{service}}",
 	"noc_c2_infra_loading": "Loading hosts…",
 	"noc_c2_infra_error": "Failed to load hosts",
-	"noc_c2_infra_empty": "No host metrics"
+	"noc_c2_infra_empty": "No host metrics",
+	"noc_c2_console": "NOC Console",
+	"noc_c2_alerts_title": "Active alerts",
+	"noc_c2_infra_title": "Infrastructure · Hosts"
 }
