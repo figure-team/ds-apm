@@ -1,1 +1,149 @@
-// Lane C 소유 — WatchCards 스타일 (impl-plan Task 6). 시드는 빈 파티션만 생성.
+// Lane C 소유 — WatchCards 스타일 (impl-plan Task 6). 카드 높이 이상 92px / 정상 84px (§4.2).
+
+.noc-c2-watch {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-height: 0;
+}
+
+.noc-c2-watch-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.noc-c2-watch-title {
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	color: var(--noc-txt);
+}
+
+.noc-c2-watch-overflow {
+	background: var(--noc-crit-soft);
+	border: 1px solid var(--noc-brand-line);
+	color: var(--noc-crit);
+	font-size: 11px;
+	font-weight: 700;
+	padding: 2px 8px;
+	border-radius: 999px;
+	cursor: pointer;
+
+	&:hover {
+		background: var(--noc-brand-soft);
+	}
+}
+
+.noc-c2-watch-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+	gap: 8px;
+	min-height: 0;
+}
+
+.noc-c2-card {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	gap: 8px;
+	height: 84px;
+	padding: 10px 12px;
+	text-align: left;
+	background: var(--noc-panel);
+	border: 1px solid var(--noc-line);
+	border-left: 3px solid var(--noc-c-sec);
+	border-radius: 10px;
+	cursor: pointer;
+	transition: border-color 0.12s ease, background 0.12s ease;
+
+	&:hover {
+		background: var(--noc-panel2);
+	}
+
+	&.noc-crit {
+		height: 92px;
+		border-left-color: var(--noc-crit);
+	}
+	&.noc-warn {
+		height: 92px;
+		border-left-color: var(--noc-warn);
+	}
+	&.noc-ok {
+		border-left-color: var(--noc-ok);
+	}
+}
+
+.noc-c2-card-top {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+
+	.noc-c2-dot {
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		flex: 0 0 auto;
+
+		&.noc-crit {
+			background: var(--noc-crit);
+		}
+		&.noc-warn {
+			background: var(--noc-warn);
+		}
+		&.noc-ok {
+			background: var(--noc-ok);
+		}
+	}
+	.noc-c2-card-name {
+		flex: 1;
+		min-width: 0;
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--noc-txt);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.noc-badge {
+		flex: 0 0 auto;
+		font-size: 10px;
+		font-weight: 700;
+		padding: 1px 6px;
+		border-radius: 4px;
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
+
+		&.noc-crit {
+			background: var(--noc-crit-soft);
+			color: var(--noc-crit);
+		}
+		&.noc-warn {
+			background: var(--noc-warn-soft);
+			color: var(--noc-warn);
+		}
+		&.noc-ok {
+			background: rgba(94, 155, 119, 0.14);
+			color: var(--noc-ok);
+		}
+	}
+}
+
+.noc-c2-card-metrics {
+	display: flex;
+	align-items: baseline;
+	gap: 10px;
+
+	.noc-c2-card-err {
+		font-size: 16px;
+		font-weight: 700;
+		color: var(--noc-txt);
+		font-variant-numeric: tabular-nums;
+	}
+	.noc-c2-card-sub {
+		font-size: 11px;
+		color: var(--noc-txt2);
+		font-variant-numeric: tabular-nums;
+	}
+}
