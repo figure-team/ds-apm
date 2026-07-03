@@ -1,0 +1,135 @@
+// Lane C 소유 — SummaryBand 스타일 (impl-plan Task 5).
+
+.noc-c2-band {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	height: 56px;
+	flex: 0 0 56px;
+	padding: 0 16px;
+	background: var(--noc-panel);
+	border: 1px solid var(--noc-line);
+	border-radius: var(--noc-r);
+	box-shadow: var(--noc-shadow);
+}
+
+.noc-c2-title {
+	font-size: 14px;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	color: var(--noc-txt);
+	white-space: nowrap;
+}
+
+.noc-c2-counters {
+	display: flex;
+	align-items: stretch;
+	gap: 10px;
+}
+
+.noc-c2-counter {
+	display: flex;
+	flex-direction: row;
+	align-items: baseline;
+	gap: 6px;
+	min-width: 0;
+	padding: 5px 12px;
+	border-radius: 8px;
+	background: var(--noc-panel2);
+
+	.noc-c2-counter-val {
+		font-size: 18px;
+		font-weight: 700;
+		line-height: 1.05;
+		font-variant-numeric: tabular-nums;
+	}
+	.noc-c2-counter-lbl {
+		font-size: 11.5px;
+		font-weight: 600;
+		color: var(--noc-txt2);
+	}
+
+	&.noc-c2-crit .noc-c2-counter-val {
+		color: var(--noc-crit);
+	}
+	&.noc-c2-err .noc-c2-counter-val {
+		color: var(--noc-err);
+	}
+	&.noc-c2-warn .noc-c2-counter-val {
+		color: var(--noc-warn);
+	}
+	&.noc-c2-ok .noc-c2-counter-val {
+		color: var(--noc-ok);
+	}
+	&.noc-c2-zero .noc-c2-counter-val {
+		color: var(--noc-txt3);
+	}
+}
+
+.noc-c2-band-spacer {
+	flex: 1;
+	min-width: 0;
+}
+
+.noc-c2-incident {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	max-width: 46%;
+	padding: 6px 14px;
+	border-radius: 8px;
+	background: var(--noc-crit-soft);
+	border: 1px solid var(--noc-brand-line);
+
+	.noc-c2-incident-tag {
+		flex: 0 0 auto;
+		font-size: 11px;
+		font-weight: 700;
+		color: var(--noc-crit);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+	.noc-c2-incident-title {
+		min-width: 0;
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--noc-txt);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.noc-c2-incident-age {
+		flex: 0 0 auto;
+		font-size: 12px;
+		color: var(--noc-txt2);
+		font-variant-numeric: tabular-nums;
+	}
+}
+
+.noc-c2-stable {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 14px;
+	border-radius: 8px;
+	background: var(--noc-panel2);
+
+	.noc-c2-stable-dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: var(--noc-ok);
+		box-shadow: 0 0 0 3px rgba(94, 155, 119, 0.18);
+	}
+	.noc-c2-stable-title {
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--noc-txt);
+		white-space: nowrap;
+	}
+	.noc-c2-stable-since {
+		font-size: 12px;
+		color: var(--noc-txt2);
+		font-variant-numeric: tabular-nums;
+	}
+}

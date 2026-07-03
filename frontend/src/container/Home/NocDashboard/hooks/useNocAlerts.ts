@@ -59,6 +59,8 @@ export interface UseNocAlertsResult {
 	totalCount: number;
 	isLoading: boolean;
 	isError: boolean;
+	/** 최근 해소된 알림 이력 — AlertsPanel 빈 상태용. 계산은 Lane A(impl-plan Task 9 Step 4). */
+	lastResolved?: { age: string; service: string };
 }
 
 export default function useNocAlerts(limit = 6): UseNocAlertsResult {
@@ -96,12 +98,27 @@ export default function useNocAlerts(limit = 6): UseNocAlertsResult {
 			age: relativeAge(t, rule.updatedAt),
 		}));
 
+		// 최근 해소 이력: firing이 아닌 규칙 중 가장 최근 updatedAt (AlertsPanel 빈 상태용).
+		const resolvedRule = [...rules]
+			.filter((r) => r.state !== 'firing')
+			.sort(
+				(a, b) =>
+					new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime(),
+			)[0];
+		const lastResolved = resolvedRule
+			? {
+					age: relativeAge(t, resolvedRule.updatedAt),
+					service: resolvedRule.labels?.service_name ?? resolvedRule.alert ?? '',
+			  }
+			: undefined;
+
 		return {
 			alerts,
 			firingCount,
 			totalCount: rules.length,
 			isLoading,
 			isError,
+			lastResolved,
 		};
 	}, [data, isLoading, isError, limit, t]);
 }
