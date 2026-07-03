@@ -1,1 +1,79 @@
-// Lane D 소유 — InfraPanel 스타일 (impl-plan Task 10). 시드는 빈 파티션만 생성.
+// Lane D 소유 — InfraPanel 스타일 (impl-plan Task 10).
+// 호스트 CPU/MEM 타일 그리드. 상태색(--noc-ok/warn/crit)만 사용, 계열색 미사용.
+
+.noc-root {
+	.noc-c2-infra-grid {
+		height: 100%;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+		grid-auto-rows: min-content;
+		gap: 8px;
+		overflow-y: auto;
+		align-content: start;
+		padding: 2px;
+	}
+	.noc-c2-infra-tile {
+		display: flex;
+		flex-direction: column;
+		gap: 5px;
+		padding: 8px 10px;
+		border-radius: 8px;
+		background: var(--noc-panel2);
+		border: 1px solid var(--noc-line);
+		border-left: 3px solid var(--noc-c-sec);
+
+		&.noc-ok {
+			border-left-color: var(--noc-ok);
+		}
+		&.noc-warn {
+			border-left-color: var(--noc-warn);
+		}
+		&.noc-crit {
+			border-left-color: var(--noc-crit);
+		}
+	}
+	.noc-c2-infra-name {
+		font-size: 11.5px;
+		font-weight: 600;
+		color: var(--noc-txt);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.noc-c2-infra-metrics {
+		display: flex;
+		align-items: baseline;
+		gap: 6px;
+	}
+	.noc-c2-infra-cpu {
+		font-size: 16px;
+		font-weight: 700;
+		color: var(--noc-txt);
+	}
+	.noc-c2-infra-sub {
+		font-size: 10px;
+		color: var(--noc-txt2);
+	}
+	.noc-c2-infra-bar {
+		height: 4px;
+		border-radius: 2px;
+		background: var(--noc-panel3);
+		overflow: hidden;
+	}
+	.noc-c2-infra-fill {
+		display: block;
+		height: 100%;
+		border-radius: 2px;
+		background: var(--noc-c-sec);
+
+		&.noc-ok {
+			background: var(--noc-ok);
+		}
+		&.noc-warn {
+			background: var(--noc-warn);
+		}
+		&.noc-crit {
+			background: var(--noc-crit);
+		}
+	}
+}
