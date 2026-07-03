@@ -46,3 +46,44 @@ export interface NocRca {
 	chips: string[];
 	actions: string[];
 }
+
+// ===== C-2 재구조 (트리아지 + 멀티서비스 트렌드) 계약 타입 =====
+
+export type TrendMetric = 'err' | 'p99' | 'rps';
+
+export interface TrendPoint {
+	t: number; // epoch ms
+	v: number;
+}
+
+export interface TrendSeries {
+	name: string;
+	color: string;
+	points: TrendPoint[];
+	/** true면 대상이었으나 데이터 없음 — 선 생략, 범례 회색 표기 (§6.1) */
+	missing?: boolean;
+}
+
+export interface NocInfraHost {
+	name: string;
+	cpu: number; // percent 0..100 (hosts/list 분수값 100× 정규화 후)
+	mem: number; // percent 0..100
+	health: NocHealth;
+}
+
+export interface NocCounts {
+	critical: number;
+	warning: number;
+	healthy: number;
+	alerts: number;
+}
+
+export interface WatchSelection {
+	services: NocServiceRow[];
+	mode: 'anomaly' | 'watch';
+}
+
+export interface TrendTarget {
+	name: string;
+	color: string;
+}

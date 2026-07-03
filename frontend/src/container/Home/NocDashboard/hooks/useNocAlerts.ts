@@ -59,6 +59,8 @@ export interface UseNocAlertsResult {
 	totalCount: number;
 	isLoading: boolean;
 	isError: boolean;
+	/** 최근 해소된 알림 이력 — AlertsPanel 빈 상태용. 계산은 Lane A(impl-plan Task 9 Step 4). */
+	lastResolved?: { age: string; service: string };
 }
 
 export default function useNocAlerts(limit = 6): UseNocAlertsResult {
