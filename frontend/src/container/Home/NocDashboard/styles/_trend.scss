@@ -1,1 +1,77 @@
 // Lane B 소유 — ServiceTrendChart 스타일 (impl-plan Task 7). 시드는 빈 파티션만 생성.
+
+.noc-c2-trend {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+	background: var(--noc-panel, rgba(255, 255, 255, 0.02));
+	border-radius: 8px;
+	padding: 8px 10px;
+}
+.noc-c2-trend-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+.noc-c2-trend-legend {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+.noc-c2-legend-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 2px 4px;
+
+	&.dim {
+		opacity: 0.35;
+	}
+	&.missing {
+		opacity: 0.6;
+	}
+}
+.noc-c2-legend-swatch {
+	width: 10px;
+	height: 10px;
+	border-radius: 2px;
+}
+.noc-c2-legend-nodata {
+	font-size: 10px;
+	color: var(--noc-c-sec);
+}
+.noc-c2-trend-tabs button {
+	background: none;
+	border: 1px solid transparent;
+	cursor: pointer;
+	padding: 2px 8px;
+	border-radius: 6px;
+
+	&.active {
+		border-color: var(--noc-c-sec);
+	}
+}
+.noc-c2-trend-svg {
+	flex: 1;
+	width: 100%;
+	min-height: 0;
+}
+.noc-c2-threshold {
+	stroke: var(--noc-ok);
+}
+.noc-c2-endlabel {
+	font-size: 11px;
+}
+.noc-c2-trend-msg {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--noc-c-sec);
+}
