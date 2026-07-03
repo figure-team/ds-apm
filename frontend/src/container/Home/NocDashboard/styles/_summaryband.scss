@@ -3,10 +3,10 @@
 .noc-c2-band {
 	display: flex;
 	align-items: center;
-	gap: 18px;
-	height: 64px;
-	flex: 0 0 64px;
-	padding: 0 18px;
+	gap: 16px;
+	height: 56px;
+	flex: 0 0 56px;
+	padding: 0 16px;
 	background: var(--noc-panel);
 	border: 1px solid var(--noc-line);
 	border-radius: var(--noc-r);
@@ -29,26 +29,24 @@
 
 .noc-c2-counter {
 	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	justify-content: center;
-	min-width: 62px;
-	padding: 4px 12px;
+	flex-direction: row;
+	align-items: baseline;
+	gap: 6px;
+	min-width: 0;
+	padding: 5px 12px;
 	border-radius: 8px;
 	background: var(--noc-panel2);
 
 	.noc-c2-counter-val {
-		font-size: 22px;
+		font-size: 18px;
 		font-weight: 700;
 		line-height: 1.05;
 		font-variant-numeric: tabular-nums;
 	}
 	.noc-c2-counter-lbl {
-		font-size: 11px;
+		font-size: 11.5px;
 		font-weight: 600;
 		color: var(--noc-txt2);
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
 	}
 
 	&.noc-c2-crit .noc-c2-counter-val {

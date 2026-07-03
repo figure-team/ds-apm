@@ -679,32 +679,6 @@
 	flex: 0 0 46px;
 }
 
-/* 좌상단 브랜드 (DS-APM 로고 + 서비스명) */
-.noc-root .noc-brand {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	.noc-brand-logo {
-		height: 20px;
-		width: auto;
-		object-fit: contain;
-	}
-	.noc-brand-name {
-		font-size: 15px;
-		font-weight: 800;
-		letter-spacing: -0.02em;
-		color: var(--noc-txt);
-	}
-	.noc-brand-sub {
-		font-size: 12px;
-		font-weight: 600;
-		color: var(--noc-txt2);
-		padding-left: 8px;
-		margin-left: 2px;
-		border-left: 1px solid var(--noc-line2);
-	}
-}
-
 /* 우열 패널 (헤더 + 스크롤 본문) */
 .noc-root .noc-c2-panel {
 	display: flex;

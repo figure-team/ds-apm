@@ -4,9 +4,6 @@ import { Server, Siren } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import ktdsLogoNegativeUrl from '@/assets/Logos/ktds-logo-negative.png';
-import ktdsLogoPositiveUrl from '@/assets/Logos/ktds-logo-positive.png';
-
 import AlertsPanel from './components/AlertsPanel';
 import InfraPanel from './components/InfraPanel';
 import OkStrip from './components/OkStrip';
@@ -65,15 +62,6 @@ export default function NocDashboard(): JSX.Element {
 	return (
 		<div className={`noc-root noc-c2 ${isDarkMode ? 'noc-dark' : 'noc-light'}`}>
 			<div className="noc-toolbar">
-				<div className="noc-brand">
-					<img
-						className="noc-brand-logo"
-						src={isDarkMode ? ktdsLogoNegativeUrl : ktdsLogoPositiveUrl}
-						alt="KT DS"
-					/>
-					<span className="noc-brand-name">DS-APM</span>
-					<span className="noc-brand-sub">{t('noc_c2_console')}</span>
-				</div>
 				<div className="noc-live">
 					<span className="noc-live-pulse" />
 					{t('noc_live_ingesting')}
