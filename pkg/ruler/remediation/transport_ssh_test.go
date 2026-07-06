@@ -251,3 +251,19 @@ func TestSSHTransport_RejectsHostKeyMismatch(t *testing.T) {
 		t.Fatal("must reject connection on host key fingerprint mismatch")
 	}
 }
+
+func TestRemoteExecCommand_WrapsWithRemoteTimeout(t *testing.T) {
+	// 원격 kill 보장(§3.5 B3 해소): timeout이 있으면 SIGKILL 래핑, 없으면 bash -s 폴백.
+	got := remoteExecCommand(5 * time.Minute)
+	want := "sh -c 'if command -v timeout >/dev/null 2>&1; then exec timeout -s KILL 305 bash -s; else exec bash -s; fi'"
+	if got != want {
+		t.Fatalf("remoteExecCommand mismatch:\n got=%q\nwant=%q", got, want)
+	}
+}
+
+func TestRemoteExecCommand_ZeroTimeoutUsesDefault(t *testing.T) {
+	got := remoteExecCommand(0)
+	if !contains(got, "timeout -s KILL 305 ") {
+		t.Fatalf("zero timeout must fall back to DefaultExecTimeout+grace: %q", got)
+	}
+}

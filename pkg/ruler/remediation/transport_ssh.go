@@ -15,6 +15,28 @@ import (
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
 )
 
+// remoteKillGraceSeconds는 원격 자체-kill을 클라이언트 워치독보다 살짝 늦게
+// 잡는 여유다: 결과 판정은 항상 클라이언트 타임아웃이 먼저, 원격 timeout은
+// 프로세스 잔존 방지용 최후 보루.
+const remoteKillGraceSeconds = 5
+
+// remoteExecCommand는 stdin 주입 스크립트를 실행할 원격 exec 명령을 만든다.
+// 타겟에 coreutils/busybox `timeout`이 있으면 (execTimeout+grace)초 후 타겟
+// 스스로 실행 중인 bash를 SIGKILL한다 — 클라이언트의 세션 close는 원격 kill을
+// 보장하지 않는다(design §3.5 B3)는 갭을 닫는다. (자식 프로세스 트리 전체
+// 종료는 timeout 구현에 따라 다르므로 lead bash 종료만 보장한다.) `timeout`이
+// 없는 타겟은 기존 `bash -s` 그대로 폴백(하위호환).
+func remoteExecCommand(execTimeout time.Duration) string {
+	if execTimeout <= 0 {
+		execTimeout = DefaultExecTimeout
+	}
+	secs := int(execTimeout.Seconds()) + remoteKillGraceSeconds
+	return fmt.Sprintf(
+		"sh -c 'if command -v timeout >/dev/null 2>&1; then exec timeout -s KILL %d bash -s; else exec bash -s; fi'",
+		secs,
+	)
+}
+
 // SSHTransport runs a script on a remote target over SSH using a frozen host-key
 // fingerprint for verification and an in-memory private key (design §3.5).
 // InsecureIgnoreHostKey is never used.
@@ -102,10 +124,11 @@ func (s *SSHTransport) Exec(ctx context.Context, script string) (string, int, bo
 	defer close(done)
 
 	// Inject the script via stdin + `bash -s` — avoids re-quoting a multiline
-	// #!/bin/bash script (design §3.5 Medium 10).
+	// #!/bin/bash script (design §3.5 Medium 10). remoteExecCommand が타겟 측
+	// timeout으로 감싼다(§3.5 B3 해소) — stdin 프로토콜은 동일.
 	session.Stdin = strings.NewReader(script)
 	// CombinedOutput runs the command and returns stdout+stderr merged.
-	outBytes, runErr := session.CombinedOutput("bash -s")
+	outBytes, runErr := session.CombinedOutput(remoteExecCommand(s.execTimeout))
 	out := string(outBytes)
 
 	if timedOut.Load() {
