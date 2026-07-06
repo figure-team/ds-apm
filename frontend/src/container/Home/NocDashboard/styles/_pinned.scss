@@ -1,1 +1,111 @@
 // Lane C1 소유 — 고정 패널 스트립 스타일 (impl-plan Task 5). 높이 190px · 4열 그리드.
+// v4 — 사용자 고정 패널 스트립 (목업: 높이 190px, 4열)
+
+.noc-root .noc-c2-pins {
+	flex: 0 0 190px;
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 8px;
+	min-height: 0;
+}
+
+.noc-root .noc-c2-pin-card {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	min-height: 0;
+	background: var(--noc-panel);
+	border: 1px solid var(--noc-line);
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+.noc-root .noc-c2-pin-head {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 10px 4px;
+	font-size: 10.5px;
+	font-weight: 600;
+	color: var(--noc-txt3);
+
+	.noc-c2-pin-ico {
+		color: var(--noc-brand);
+		flex: 0 0 auto;
+	}
+	.noc-c2-pin-src {
+		flex: 1;
+		min-width: 0;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.noc-c2-pin-unpin {
+		flex: 0 0 auto;
+		display: flex;
+		align-items: center;
+		background: none;
+		border: 0;
+		padding: 2px;
+		color: var(--noc-txt3);
+		cursor: pointer;
+		border-radius: 4px;
+
+		&:hover {
+			color: var(--noc-crit);
+			background: var(--noc-panel2);
+		}
+	}
+}
+
+.noc-root .noc-c2-pin-body {
+	flex: 1;
+	min-height: 0;
+	position: relative;
+
+	// GridCard 내부가 100% 높이를 쓰도록
+	> div {
+		height: 100%;
+		width: 100%;
+	}
+}
+
+.noc-root .noc-c2-pin-missing {
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 11.5px;
+	color: var(--noc-txt3);
+}
+
+.noc-root .noc-c2-pin-add {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	font-family: inherit;
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--noc-txt2);
+	background: transparent;
+	border: 1px dashed var(--noc-line2);
+	border-radius: 10px;
+	cursor: pointer;
+	transition: border-color 0.15s ease, color 0.15s ease;
+
+	.noc-c2-pin-add-hint {
+		font-size: 10.5px;
+		font-weight: 500;
+		color: var(--noc-txt3);
+		max-width: 85%;
+		text-align: center;
+	}
+
+	&:hover {
+		border-color: var(--noc-brand-line);
+		color: var(--noc-brand);
+	}
+}
