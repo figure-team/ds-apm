@@ -179,6 +179,16 @@ func (h *handler) runRemediation(orgID string, e ruletypes.RemediationExecution,
 	ctx, cancel := context.WithTimeout(context.Background(), timeout+5*time.Second)
 	defer cancel()
 
+	// 정적 게이트 (fail-closed, 방어 심층화): propose 게이트를 통과 못 했어야 할
+	// 과거 행/우회 스크립트를 실행 직전에 한 번 더 거른다. Runbook 소스는
+	// 사람이 승인한 스크립트이므로 게이트 대상이 아니다.
+	if e.Source == ruletypes.RemediationSourceLLMGenerated {
+		if gateErr := remediation.CheckLLMScript(e.ScriptSnapshot); gateErr != nil {
+			h.failRemediation(ctx, orgID, e.ID, gateErr.Error())
+			return
+		}
+	}
+
 	var target *remediation.RemoteTarget
 	if e.TargetID != "" {
 		// 평문 폴백 거부 (Global Constraint C1 / design §3.1·§3.6): 마스터키 미설정 시

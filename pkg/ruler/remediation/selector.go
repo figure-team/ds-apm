@@ -175,6 +175,14 @@ func (s *Selector) createExecution(
 		source = ruletypes.RemediationSourceRunbook
 		summary = strings.TrimSpace(rb.Title)
 	case ruletypes.RunbookSelectionOutcomeFallback:
+		// 정적 게이트 (fail-closed): 명백히 파괴적인 LLM 스크립트는 승인 카드에
+		// 올리지 않는다. Select 전체의 fail-open 계약(알림 비차단)은 유지 —
+		// 여기서의 거부는 "제안 없음"일 뿐 알림 흐름을 막지 않는다.
+		if gateErr := CheckLLMScript(decision.FallbackScript); gateErr != nil {
+			s.logger.WarnContext(ctx, "selector: fallback script blocked by static gate",
+				slog.String("orgId", orgID), slog.Any("err", gateErr))
+			return nil, false
+		}
 		runbookID = "" // no backing runbook
 		script = decision.FallbackScript
 		source = ruletypes.RemediationSourceLLMGenerated
