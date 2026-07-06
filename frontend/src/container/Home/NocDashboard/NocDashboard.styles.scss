@@ -8,6 +8,9 @@
 @import './styles/okstrip';
 @import './styles/alertspanel';
 @import './styles/infra';
+@import './styles/infrapopover';
+@import './styles/pinned';
+@import './styles/pindrawer';
 
 .noc-root {
 	--noc-brand: var(--bg-robin-500, #d81b2c);
@@ -643,7 +646,7 @@
 	}
 }
 
-/* ===== C-2 재구조 레이아웃 (§3) — 시드 소유, 레인 수정 금지 ===== */
+/* ===== v4 단일 열 레이아웃 — 시드 소유, 레인 수정 금지 ===== */
 .noc-c2 {
 	display: flex;
 	flex-direction: column;
@@ -651,32 +654,37 @@
 	overflow: hidden;
 	gap: 10px;
 }
-.noc-c2-body {
+.noc-c2-main {
 	flex: 1;
-	display: grid;
-	grid-template-columns: 1fr 400px;
-	gap: 10px;
-	min-height: 0; // grid 자식 overflow 방지
-}
-.noc-c2-left {
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
 	min-height: 0;
 }
-.noc-c2-left .noc-trend-wrap {
+.noc-c2-main .noc-trend-wrap {
 	flex: 1;
 	min-height: 0;
 }
-.noc-c2-right {
-	display: grid;
-	grid-template-rows: 52% 48%;
-	gap: 10px;
-	min-height: 0;
+
+/* 이상 시 일시 등장하는 트리아지 카드 — 해소되면 DOM에서 제거됨 */
+.noc-c2-watch-transient {
+	flex: 0 0 auto;
+	animation: noc-watch-in 0.25s ease-out;
 }
-.noc-ok-strip {
-	height: 46px;
-	flex: 0 0 46px;
+@media (prefers-reduced-motion: reduce) {
+	.noc-c2-watch-transient {
+		animation: none;
+	}
+}
+@keyframes noc-watch-in {
+	from {
+		opacity: 0;
+		transform: translateY(-6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 /* 우열 패널 (헤더 + 스크롤 본문) */

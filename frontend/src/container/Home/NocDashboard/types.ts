@@ -1,3 +1,5 @@
+import { Widgets } from 'types/api/dashboard/getAll';
+
 export type NocSeverity = 'critical' | 'error' | 'warning' | 'info';
 
 export type NocHealth = 'healthy' | 'warning' | 'critical';
@@ -86,4 +88,21 @@ export interface WatchSelection {
 export interface TrendTarget {
 	name: string;
 	color: string;
+}
+
+// ===== v4 사용자 고정 패널 =====
+
+export interface NocPinnedRef {
+	dashboardId: string;
+	widgetId: string;
+}
+
+export interface NocPinnedSlot {
+	ref: NocPinnedRef;
+	/** 원본 대시보드 제목 — 카드 캡션용. 대시보드 삭제 시 '' */
+	dashboardTitle: string;
+	/** 쿼리 엔티티 버전 — GridCardGraph version prop */
+	version: string;
+	/** null = 원본 대시보드/위젯이 삭제되었거나 핀 불가로 변경됨 */
+	widget: Widgets | null;
 }

@@ -1,18 +1,19 @@
 import DateTimeSelectionV2 from 'container/TopNav/DateTimeSelectionV2';
 import { useIsDarkMode } from 'hooks/useDarkMode';
-import { Server, Siren } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import AlertsPanel from './components/AlertsPanel';
-import InfraPanel from './components/InfraPanel';
-import OkStrip from './components/OkStrip';
+import FiredAlertsBadge from './components/FiredAlertsBadge';
+import InfraBadge from './components/InfraBadge';
+import PinnedPanels from './components/PinnedPanels';
+import PinPickerDrawer from './components/PinPickerDrawer';
 import ServiceTrendChart from './components/ServiceTrendChart';
 import SummaryBand from './components/SummaryBand';
 import WatchCards from './components/WatchCards';
 import useNocAlerts from './hooks/useNocAlerts';
 import useNocInfra from './hooks/useNocInfra';
 import useNocOverview from './hooks/useNocOverview';
+import useNocPinnedPanels from './hooks/useNocPinnedPanels';
 import useNocTrend from './hooks/useNocTrend';
 import { TrendMetric } from './types';
 import {
@@ -30,14 +31,9 @@ export default function NocDashboard(): JSX.Element {
 	const isDarkMode = useIsDarkMode();
 	const { t } = useTranslation('home');
 	const [metric, setMetric] = useState<TrendMetric>('err');
+	const [pickerOpen, setPickerOpen] = useState(false);
 
-	const {
-		alerts,
-		firingCount,
-		isLoading: alertsLoading,
-		isError: alertsError,
-		lastResolved,
-	} = useNocAlerts();
+	const { alerts, firingCount } = useNocAlerts();
 	const overview = useNocOverview(firingCount);
 	const { services } = overview;
 
@@ -51,13 +47,10 @@ export default function NocDashboard(): JSX.Element {
 
 	const trend = useNocTrend(targets, metric);
 	const infra = useNocInfra();
+	const pinned = useNocPinnedPanels();
 
-	const criticalOverflow = Math.max(0, counts.critical - watch.services.length);
-	const okNames = useMemo(
-		() => services.filter((s) => s.health === 'healthy').map((s) => s.name),
-		[services],
-	);
 	const anomaly = counts.critical > 0 || counts.warning > 0 || counts.alerts > 0;
+	const criticalOverflow = Math.max(0, counts.critical - watch.services.length);
 
 	return (
 		<div className={`noc-root noc-c2 ${isDarkMode ? 'noc-dark' : 'noc-light'}`}>
@@ -77,57 +70,56 @@ export default function NocDashboard(): JSX.Element {
 				</div>
 			</div>
 
-			<SummaryBand counts={counts} incident={incident} />
+			<SummaryBand
+				counts={counts}
+				incident={incident}
+				actions={
+					<>
+						<FiredAlertsBadge count={firingCount} />
+						<InfraBadge
+							hosts={infra.hosts}
+							isLoading={infra.isLoading}
+							isError={infra.isError}
+						/>
+					</>
+				}
+			/>
 
-			<div className="noc-c2-body">
-				<div className="noc-c2-left">
-					<WatchCards
-						services={watch.services}
-						mode={watch.mode}
-						overflowCount={criticalOverflow}
-					/>
-					<div className="noc-trend-wrap">
-						<ServiceTrendChart
-							series={trend.series}
-							metric={metric}
-							onMetricChange={setMetric}
-							thresholdLine={!anomaly ? TREND_WATCH_THRESHOLD : undefined}
-							loading={trend.isLoading}
-							error={trend.isError}
+			<div className="noc-c2-main">
+				{watch.mode === 'anomaly' ? (
+					<div className="noc-c2-watch-transient">
+						<WatchCards
+							services={watch.services}
+							mode="anomaly"
+							overflowCount={criticalOverflow}
 						/>
 					</div>
-					<OkStrip names={okNames} />
+				) : null}
+				<div className="noc-trend-wrap">
+					<ServiceTrendChart
+						series={trend.series}
+						metric={metric}
+						onMetricChange={setMetric}
+						thresholdLine={!anomaly ? TREND_WATCH_THRESHOLD : undefined}
+						loading={trend.isLoading}
+						error={trend.isError}
+					/>
 				</div>
-				<div className="noc-c2-right">
-					<section className="noc-c2-panel">
-						<div className="noc-c2-panel-head">
-							<Siren size={13} />
-							<span>{t('noc_c2_alerts_title')}</span>
-						</div>
-						<div className="noc-c2-panel-body">
-							<AlertsPanel
-								alerts={alerts}
-								isLoading={alertsLoading}
-								isError={alertsError}
-								lastResolved={lastResolved}
-							/>
-						</div>
-					</section>
-					<section className="noc-c2-panel">
-						<div className="noc-c2-panel-head">
-							<Server size={13} />
-							<span>{t('noc_c2_infra_title')}</span>
-						</div>
-						<div className="noc-c2-panel-body">
-							<InfraPanel
-								hosts={infra.hosts}
-								isLoading={infra.isLoading}
-								isError={infra.isError}
-							/>
-						</div>
-					</section>
-				</div>
+				<PinnedPanels
+					slots={pinned.slots}
+					onUnpin={pinned.unpin}
+					onOpenPicker={(): void => setPickerOpen(true)}
+				/>
 			</div>
+
+			<PinPickerDrawer
+				open={pickerOpen}
+				onClose={(): void => setPickerOpen(false)}
+				dashboards={pinned.dashboards}
+				refs={pinned.refs}
+				onPin={pinned.pin}
+				onUnpin={pinned.unpin}
+			/>
 		</div>
 	);
 }

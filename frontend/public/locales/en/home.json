@@ -136,5 +136,15 @@
 	"noc_c2_infra_error": "Failed to load hosts",
 	"noc_c2_infra_empty": "No host metrics",
 	"noc_c2_alerts_title": "Active alerts",
-	"noc_c2_infra_title": "Infrastructure · Hosts"
+	"noc_c2_infra_title": "Infrastructure · Hosts",
+	"noc_c2_fired": "Fired alerts: {{count}}",
+	"noc_c2_infra_badge": "Infra {{count}}",
+	"noc_c2_infra_attn": "{{count}} attention",
+	"noc_c2_pin_add": "Pin a panel",
+	"noc_c2_pin_empty_hint": "Pin dashboard panels to keep them on the home screen",
+	"noc_c2_pin_unpin": "Unpin",
+	"noc_c2_pin_missing": "Source panel not found",
+	"noc_c2_pin_drawer_title": "Pin panels to home",
+	"noc_c2_pin_drawer_hint": "Line, bar and value panels only (panels using variables are excluded · max {{max}})",
+	"noc_c2_pin_drawer_empty": "No pinnable panels yet. Create panels in a dashboard first."
 }

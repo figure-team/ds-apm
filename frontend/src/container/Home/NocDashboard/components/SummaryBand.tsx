@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { NocAlert, NocCounts } from '../types';
@@ -6,6 +7,8 @@ export interface SummaryBandProps {
 	counts: NocCounts;
 	incident: NocAlert | null;
 	stableSince?: string;
+	/** 밴드 우측 배지 영역 (발화 알림·인프라 등) — v4 */
+	actions?: ReactNode;
 }
 
 interface CounterProps {
@@ -27,6 +30,7 @@ export default function SummaryBand({
 	counts,
 	incident,
 	stableSince,
+	actions,
 }: SummaryBandProps): JSX.Element {
 	const { t } = useTranslation('home');
 	const anomaly =
@@ -47,13 +51,9 @@ export default function SummaryBand({
 					tone={counts.warning > 0 ? 'warn' : 'zero'}
 				/>
 				<Counter label={t('noc_c2_healthy')} value={counts.healthy} tone="ok" />
-				<Counter
-					label={t('noc_c2_alerts')}
-					value={counts.alerts}
-					tone={counts.alerts > 0 ? 'err' : 'zero'}
-				/>
 			</div>
 			<div className="noc-c2-band-spacer" />
+			{actions ? <div className="noc-c2-band-actions">{actions}</div> : null}
 			{anomaly && incident ? (
 				<div className="noc-c2-incident">
 					<span className="noc-c2-incident-tag">{t('noc_c2_incident_tag')}</span>

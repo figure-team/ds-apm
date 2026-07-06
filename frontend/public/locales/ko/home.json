@@ -136,5 +136,15 @@
 	"noc_c2_infra_error": "호스트를 불러오지 못했습니다",
 	"noc_c2_infra_empty": "호스트 메트릭 없음",
 	"noc_c2_alerts_title": "활성 알림",
-	"noc_c2_infra_title": "인프라 · 호스트"
+	"noc_c2_infra_title": "인프라 · 호스트",
+	"noc_c2_fired": "발화된 알림 {{count}}건",
+	"noc_c2_infra_badge": "인프라 {{count}}",
+	"noc_c2_infra_attn": "주의 {{count}}",
+	"noc_c2_pin_add": "패널 고정",
+	"noc_c2_pin_empty_hint": "대시보드의 패널을 홈에 고정해 항상 볼 수 있어요",
+	"noc_c2_pin_unpin": "고정 해제",
+	"noc_c2_pin_missing": "원본 패널을 찾을 수 없음",
+	"noc_c2_pin_drawer_title": "홈에 고정할 패널 선택",
+	"noc_c2_pin_drawer_hint": "라인·바·수치 패널만 고정할 수 있어요 (변수 사용 패널 제외 · 최대 {{max}}개)",
+	"noc_c2_pin_drawer_empty": "고정할 수 있는 패널이 없습니다. 대시보드에서 패널을 먼저 만들어 주세요."
 }
