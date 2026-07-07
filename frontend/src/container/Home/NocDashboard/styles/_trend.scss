@@ -84,6 +84,18 @@
 		font-variant-numeric: tabular-nums;
 	}
 }
+.noc-c2-xtick {
+	line {
+		stroke: var(--noc-line);
+		stroke-dasharray: 2 4;
+		opacity: 0.55;
+	}
+	text {
+		fill: var(--noc-txt3);
+		font-size: 10.5px;
+		font-variant-numeric: tabular-nums;
+	}
+}
 .noc-c2-threshold {
 	stroke: var(--noc-ok);
 }

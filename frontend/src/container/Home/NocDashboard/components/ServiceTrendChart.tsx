@@ -5,11 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { TrendMetric, TrendSeries } from '../types';
 import { SERIES_PALETTE_LIGHT } from '../utils/deriveState';
 
-// 우측 여백은 끝점 직접 라벨(서비스명+값) 공간
-const PAD = { top: 14, right: 170, bottom: 10, left: 52 };
+// 우측 여백은 끝점 직접 라벨(서비스명+값) 공간, 하단 여백은 X축 시간 라벨 공간
+const PAD = { top: 14, right: 170, bottom: 28, left: 52 };
 const LABEL_GAP = 15; // 끝점 라벨 최소 세로 간격(px)
 const NAME_MAX = 18; // 라벨 서비스명 최대 길이
 const TICKS = 4; // Y축 눈금 수(구간)
+const X_TICKS = 4; // X축 시간 눈금 수(구간) → 라벨 5개(양끝 포함)
+const SHORT_SPAN_MS = 10 * 60 * 1000; // 이 이하 창이면 초까지 표기
 
 export interface Scale {
 	minT: number;
@@ -44,6 +46,17 @@ function truncName(name: string): string {
 
 function formatValue(v: number, metric: TrendMetric): string {
 	return metric === 'err' ? v.toFixed(1) : String(Math.round(v));
+}
+
+function pad2(n: number): string {
+	return String(n).padStart(2, '0');
+}
+
+// X축 시간 라벨 — 짧은 창(≤10분)은 초까지, 그 외 HH:MM. 로컬 시각(시간 선택기 UTC+9와 일치).
+function formatTime(tms: number, spanMs: number): string {
+	const d = new Date(tms);
+	const hm = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+	return spanMs <= SHORT_SPAN_MS ? `${hm}:${pad2(d.getSeconds())}` : hm;
 }
 
 // 끝점 직접 라벨 세로 스택 — 겹치면 아래로 밀고, 바닥을 넘치면 위로 되민다(§4.3 겹침 자동 회피).
@@ -195,6 +208,23 @@ export default function ServiceTrendChart({
 						</g>
 					);
 				})}
+				{/* X축 시간 눈금 + 세로 그리드 (실데이터 있을 때만) */}
+				{drawable.length > 0
+					? Array.from({ length: X_TICKS + 1 }, (_, k) => {
+							const tms = scale.minT + ((scale.maxT - scale.minT) * k) / X_TICKS;
+							const tx = x(tms);
+							const anchor =
+								k === 0 ? 'start' : k === X_TICKS ? 'end' : 'middle';
+							return (
+								<g key={`xtick-${k}`} className="noc-c2-xtick">
+									<line x1={tx} x2={tx} y1={PAD.top} y2={h - PAD.bottom} />
+									<text x={tx} y={h - PAD.bottom + 16} textAnchor={anchor}>
+										{formatTime(tms, scale.maxT - scale.minT)}
+									</text>
+								</g>
+							);
+					  })
+					: null}
 				{metric === 'err' && thresholdLine !== undefined ? (
 					<line
 						x1={PAD.left}
@@ -218,8 +248,9 @@ export default function ServiceTrendChart({
 						<g key={s.name} opacity={dim ? 0.18 : 1}>
 							<path d={d} fill="none" stroke={colorOf(s, i)} strokeWidth={2} />
 							<circle cx={x(last.t)} cy={y(last.v)} r={3} fill={colorOf(s, i)} />
+							{/* 끝점 라벨은 우측 거터에 세로 스택으로 고정 — 플롯 위 뭉침 방지, 거터 활용 */}
 							<text
-								x={x(last.t) + 8}
+								x={w - PAD.right + 10}
 								y={labelYs[k]}
 								className="noc-c2-endlabel"
 								fill={colorOf(s, i)}
