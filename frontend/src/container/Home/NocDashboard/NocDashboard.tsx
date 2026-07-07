@@ -3,13 +3,13 @@ import { useIsDarkMode } from 'hooks/useDarkMode';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import AnomalyBadge from './components/AnomalyBadge';
 import FiredAlertsBadge from './components/FiredAlertsBadge';
 import InfraBadge from './components/InfraBadge';
 import PinnedPanels from './components/PinnedPanels';
 import PinPickerDrawer from './components/PinPickerDrawer';
 import ServiceTrendChart from './components/ServiceTrendChart';
 import SummaryBand from './components/SummaryBand';
-import WatchCards from './components/WatchCards';
 import useNocAlerts from './hooks/useNocAlerts';
 import useNocInfra from './hooks/useNocInfra';
 import useNocOverview from './hooks/useNocOverview';
@@ -75,6 +75,11 @@ export default function NocDashboard(): JSX.Element {
 				incident={incident}
 				actions={
 					<>
+						<AnomalyBadge
+							services={watch.mode === 'anomaly' ? watch.services : []}
+							count={counts.critical + counts.warning}
+							overflowCount={criticalOverflow}
+						/>
 						<FiredAlertsBadge count={firingCount} />
 						<InfraBadge
 							hosts={infra.hosts}
@@ -86,15 +91,6 @@ export default function NocDashboard(): JSX.Element {
 			/>
 
 			<div className="noc-c2-main">
-				{watch.mode === 'anomaly' ? (
-					<div className="noc-c2-watch-transient">
-						<WatchCards
-							services={watch.services}
-							mode="anomaly"
-							overflowCount={criticalOverflow}
-						/>
-					</div>
-				) : null}
 				<div className="noc-trend-wrap">
 					<ServiceTrendChart
 						series={trend.series}

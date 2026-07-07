@@ -663,24 +663,3 @@
 	flex: 1;
 	min-height: 0;
 }
-
-/* 이상 시 일시 등장하는 트리아지 카드 — 해소되면 DOM에서 제거됨 */
-.noc-c2-watch-transient {
-	flex: 0 0 auto;
-	animation: noc-watch-in 0.25s ease-out;
-}
-@media (prefers-reduced-motion: reduce) {
-	.noc-c2-watch-transient {
-		animation: none;
-	}
-}
-@keyframes noc-watch-in {
-	from {
-		opacity: 0;
-		transform: translateY(-6px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
-}

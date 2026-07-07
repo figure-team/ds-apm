@@ -135,6 +135,7 @@
 	"noc_c2_fired": "발화된 알림 {{count}}건",
 	"noc_c2_infra_badge": "인프라 {{count}}",
 	"noc_c2_infra_attn": "주의 {{count}}",
+	"noc_c2_anom_badge": "이상 서비스 {{count}}",
 	"noc_c2_pin_add": "패널 고정",
 	"noc_c2_pin_empty_hint": "대시보드의 패널을 홈에 고정해 항상 볼 수 있어요",
 	"noc_c2_pin_unpin": "고정 해제",

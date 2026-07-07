@@ -71,9 +71,11 @@ describe('NocDashboard (v4)', () => {
 		expect(screen.queryByText('noc_c2_infra_title')).toBeNull();
 		expect(screen.queryByText('noc_c2_ok_label')).toBeNull();
 		expect(screen.queryByText('noc_c2_watch_normal')).toBeNull();
+		// 평시엔 이상 서비스 배지도 없음
+		expect(screen.queryByText('noc_c2_anom_badge')).toBeNull();
 	});
 
-	it('shows transient anomaly cards only when a service is unhealthy', () => {
+	it('shows anomaly badge (not inline cards) when a service is unhealthy', () => {
 		mockServices.push({
 			name: 'payment-api',
 			health: 'critical',
@@ -82,6 +84,10 @@ describe('NocDashboard (v4)', () => {
 			rps: 10,
 		});
 		render(<NocDashboard />);
-		expect(screen.getByText('noc_c2_watch_anomaly')).toBeInTheDocument();
+		expect(
+			screen.getByRole('button', { name: /noc_c2_anom_badge/ }),
+		).toBeInTheDocument();
+		// 트렌드를 밀어내는 인라인 카드는 렌더되지 않는다 (말풍선 안에만 존재)
+		expect(screen.queryByText('noc_c2_watch_anomaly')).toBeNull();
 	});
 });

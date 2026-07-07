@@ -83,3 +83,39 @@
 		overflow-y: auto;
 	}
 }
+
+// v4.1 — 이상 서비스 배지 + 말풍선 (트렌드를 밀어내던 인라인 카드 대체)
+.noc-root .noc-c2-anom-badge {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-family: inherit;
+	font-size: 12px;
+	font-weight: 700;
+	padding: 4px 12px;
+	border-radius: 999px;
+	border: 1px solid var(--noc-brand-line);
+	color: var(--noc-crit);
+	background: var(--noc-crit-soft);
+	cursor: pointer;
+	white-space: nowrap;
+
+	.noc-c2-anom-caret {
+		font-size: 10px;
+		opacity: 0.8;
+	}
+}
+
+.noc-c2-anom-popover {
+	.ant-popover-inner {
+		background: var(--noc-panel, #141416);
+		border: 1px solid var(--noc-line2, #37373d);
+		border-radius: 12px;
+		box-shadow: 0 18px 48px rgba(0, 0, 0, 0.65);
+	}
+	.noc-c2-anom-pop-body {
+		width: 640px;
+		max-height: 340px;
+		overflow-y: auto;
+	}
+}
