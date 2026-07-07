@@ -98,7 +98,9 @@ function CustomTimePicker({
 	maxTime,
 	isModalTimeSelection = false,
 }: CustomTimePickerProps): JSX.Element {
-	const { t } = useTranslation('common');
+	// ready: common 네임스페이스가 http-backend로 로드 완료됐는지(useSuspense:false).
+	// 아래 라벨 동기화 이펙트가 로드 완료 시점에 재실행되도록 deps로 쓴다.
+	const { t, ready } = useTranslation('common');
 	const [selectedTimePlaceholderValue, setSelectedTimePlaceholderValue] =
 		useState(t('select_enter_time_range').toString());
 
@@ -242,8 +244,10 @@ function CustomTimePicker({
 			setInputValue(value);
 			resetErrorStatus();
 		}
+		// ready를 deps에 포함 — 새로고침 시 common 미로드 상태에서 저장된 i18n 키 원문(time_range.*)이
+		// 로드 완료(false→true) 시점에 올바른 번역으로 재계산되게 한다. ready는 한 번만 뒤집혀 입력 타이핑을 덮지 않는다.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [selectedTime, selectedValue, showLiveLogs]);
+	}, [selectedTime, selectedValue, showLiveLogs, ready]);
 
 	const hide = (): void => {
 		setOpen(false);
