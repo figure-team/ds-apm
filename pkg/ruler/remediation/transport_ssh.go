@@ -124,7 +124,7 @@ func (s *SSHTransport) Exec(ctx context.Context, script string) (string, int, bo
 	defer close(done)
 
 	// Inject the script via stdin + `bash -s` — avoids re-quoting a multiline
-	// #!/bin/bash script (design §3.5 Medium 10). remoteExecCommand が타겟 측
+	// #!/bin/bash script (design §3.5 Medium 10). remoteExecCommand가 타겟 측
 	// timeout으로 감싼다(§3.5 B3 해소) — stdin 프로토콜은 동일.
 	session.Stdin = strings.NewReader(script)
 	// CombinedOutput runs the command and returns stdout+stderr merged.
