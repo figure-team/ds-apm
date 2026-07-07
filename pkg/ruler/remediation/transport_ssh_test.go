@@ -30,6 +30,13 @@ import (
 // string) and runs it via `bash -s` with the channel wired as stdin + combined
 // stdout/stderr, then returns the exit status.
 func startTestSSHD(t *testing.T) (addr, hostKeyFP, clientKeyPEM string, stop func()) {
+	return startTestSSHDWithForcedCommand(t, "")
+}
+
+// startTestSSHDWithForcedCommand는 forced != "" 이면 클라이언트의 exec 요청
+// 명령을 무시하고 forced를 실행한다 — authorized_keys의
+// restrict,command="..." (ForceCommand) 시나리오 재현.
+func startTestSSHDWithForcedCommand(t *testing.T, forced string) (addr, hostKeyFP, clientKeyPEM string, stop func()) {
 	t.Helper()
 
 	// --- host key (ed25519) ---
@@ -96,7 +103,7 @@ func startTestSSHD(t *testing.T) (addr, hostKeyFP, clientKeyPEM string, stop fun
 			}
 			conns = append(conns, nConn)
 			mu.Unlock()
-			go handleTestConn(nConn, cfg)
+			go handleTestConn(nConn, cfg, forced)
 		}
 	}()
 
@@ -121,7 +128,7 @@ type testErr struct{ s string }
 
 func (e *testErr) Error() string { return e.s }
 
-func handleTestConn(nConn net.Conn, cfg *ssh.ServerConfig) {
+func handleTestConn(nConn net.Conn, cfg *ssh.ServerConfig, forced string) {
 	sconn, chans, reqs, err := ssh.NewServerConn(nConn, cfg)
 	if err != nil {
 		_ = nConn.Close()
@@ -139,11 +146,11 @@ func handleTestConn(nConn net.Conn, cfg *ssh.ServerConfig) {
 		if err != nil {
 			continue
 		}
-		go handleTestSession(ch, chReqs)
+		go handleTestSession(ch, chReqs, forced)
 	}
 }
 
-func handleTestSession(ch ssh.Channel, reqs <-chan *ssh.Request) {
+func handleTestSession(ch ssh.Channel, reqs <-chan *ssh.Request, forced string) {
 	for req := range reqs {
 		switch req.Type {
 		case "exec":
@@ -159,8 +166,12 @@ func handleTestSession(ch ssh.Channel, reqs <-chan *ssh.Request) {
 			if req.WantReply {
 				_ = req.Reply(true, nil)
 			}
+			command := payload.Command
+			if forced != "" {
+				command = forced // ForceCommand: 클라이언트 요청 명령 무시
+			}
 			// Run the command with the channel as stdin AND combined stdout/stderr.
-			cmd := exec.Command("bash", "-c", payload.Command)
+			cmd := exec.Command("bash", "-c", command)
 			cmd.Stdin = ch
 			cmd.Stdout = ch
 			cmd.Stderr = ch
@@ -249,6 +260,31 @@ func TestSSHTransport_RejectsHostKeyMismatch(t *testing.T) {
 	}
 	if _, _, _, err := tr.Exec(context.Background(), "echo x"); err == nil {
 		t.Fatal("must reject connection on host key fingerprint mismatch")
+	}
+}
+
+func TestSSHTransport_WorksUnderForcedCommand(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("test sshd runs the exec payload via `bash` server-side")
+	}
+	// deploy/remediation/dsapm-remed-exec와 동일한 핵심 형태(timeout + bash -s).
+	// 서버가 클라이언트 exec 명령을 무시해도 stdin 프로토콜로 스크립트가 도달해
+	// 정상 실행·종료코드 전달이 유지되는지 증명한다.
+	addr, fp, keyPEM, stop := startTestSSHDWithForcedCommand(t, "timeout -s KILL 10 bash -s")
+	defer stop()
+	tg := ruletypes.RemediationTarget{
+		Host: hostOf(addr), Port: mustPort(t, addr), User: "tester", HostKeyFingerprint: fp,
+	}
+	tr, err := newSSHTransport(tg, keyPEM, 5*time.Second, 3*time.Second)
+	if err != nil {
+		t.Fatalf("new: %v", err)
+	}
+	raw, code, timedOut, err := tr.Exec(context.Background(), "#!/bin/bash\necho forced-ok; exit 3")
+	if err != nil || timedOut {
+		t.Fatalf("exec err=%v timedOut=%v", err, timedOut)
+	}
+	if code != 3 || !contains(raw, "forced-ok") {
+		t.Fatalf("want exit 3 + forced-ok, got code=%d raw=%q", code, raw)
 	}
 }
 

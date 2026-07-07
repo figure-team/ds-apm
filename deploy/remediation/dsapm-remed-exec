@@ -1,0 +1,27 @@
+#!/bin/sh
+# DS-APM 자동대응 SSH 강제 명령 래퍼.
+#
+# 타겟의 authorized_keys에서 자동대응 전용 키를 이 래퍼로 제한한다:
+#   restrict,command="/usr/local/bin/dsapm-remed-exec" ssh-ed25519 AAAA... dsapm-remed
+# → 이 키로는 임의 명령/포트포워딩/PTY가 전부 차단되고, 오직 이 래퍼만 돈다.
+#
+# 스크립트 본문은 stdin으로 도착한다(클라이언트의 bash -s 프로토콜).
+# 클라이언트가 요청한 원래 명령은 SSH_ORIGINAL_COMMAND로만 관찰된다(무시).
+
+LOG="${DSAPM_REMED_LOG:-/var/log/dsapm-remed.log}"
+TIMEOUT="${DSAPM_REMED_TIMEOUT:-305}"
+
+# 감사 로그 — 베스트에포트: 로그 실패가 실행을 막지 않는다.
+printf '%s pid=%s user=%s from=%s orig=%s\n' \
+  "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$$" "$(id -un)" \
+  "${SSH_CLIENT%% *}" "${SSH_ORIGINAL_COMMAND:-}" >>"$LOG" 2>/dev/null || true
+
+# 리소스 상한 — 지원 안 되는 항목은 무시.
+ulimit -t "$TIMEOUT" 2>/dev/null || true  # CPU 초
+ulimit -f 1048576 2>/dev/null || true     # 파일 크기(512바이트 블록) ≈ 512MiB
+ulimit -n 256 2>/dev/null || true         # 열린 fd
+ulimit -u 128 2>/dev/null || true         # 프로세스 수
+
+# 벽시계 상한 + 확실한 kill. exec이므로 timeout의 종료코드(스크립트 코드,
+# kill 시 137)가 그대로 SSH exit-status로 전달된다.
+exec timeout -s KILL "$TIMEOUT" bash -s
