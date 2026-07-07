@@ -12,9 +12,12 @@ LOG="${DSAPM_REMED_LOG:-/var/log/dsapm-remed.log}"
 TIMEOUT="${DSAPM_REMED_TIMEOUT:-305}"
 
 # 감사 로그 — 베스트에포트: 로그 실패가 실행을 막지 않는다.
+# SSH_ORIGINAL_COMMAND는 클라이언트가 통제하는 값이라, 개행/캐리지리턴을 공백으로
+# 치환해 위조 로그 라인 삽입(감사 로그 인젝션)을 차단한다.
+orig=$(printf '%s' "${SSH_ORIGINAL_COMMAND:-}" | tr '\n\r' '  ')
 printf '%s pid=%s user=%s from=%s orig=%s\n' \
   "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$$" "$(id -un)" \
-  "${SSH_CLIENT%% *}" "${SSH_ORIGINAL_COMMAND:-}" >>"$LOG" 2>/dev/null || true
+  "${SSH_CLIENT%% *}" "$orig" >>"$LOG" 2>/dev/null || true
 
 # 리소스 상한 — 지원 안 되는 항목은 무시.
 ulimit -t "$TIMEOUT" 2>/dev/null || true  # CPU 초
