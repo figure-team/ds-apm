@@ -35,4 +35,15 @@ describe('SummaryBand', () => {
 		);
 		expect(screen.getByText('noc_c2_stable_title')).toBeInTheDocument();
 	});
+
+	it('renders actions node after spacer', () => {
+		render(
+			<SummaryBand
+				counts={{ critical: 0, warning: 0, healthy: 3, alerts: 0 }}
+				incident={null}
+				actions={<span data-testid="band-actions">A</span>}
+			/>,
+		);
+		expect(screen.getByTestId('band-actions')).toBeInTheDocument();
+	});
 });

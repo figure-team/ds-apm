@@ -5,9 +5,10 @@
 @import './styles/summaryband';
 @import './styles/watchcards';
 @import './styles/trend';
-@import './styles/okstrip';
-@import './styles/alertspanel';
 @import './styles/infra';
+@import './styles/infrapopover';
+@import './styles/pinned';
+@import './styles/pindrawer';
 
 .noc-root {
 	--noc-brand: var(--bg-robin-500, #d81b2c);
@@ -643,7 +644,7 @@
 	}
 }
 
-/* ===== C-2 재구조 레이아웃 (§3) — 시드 소유, 레인 수정 금지 ===== */
+/* ===== v4 단일 열 레이아웃 — 시드 소유, 레인 수정 금지 ===== */
 .noc-c2 {
 	display: flex;
 	flex-direction: column;
@@ -651,65 +652,14 @@
 	overflow: hidden;
 	gap: 10px;
 }
-.noc-c2-body {
+.noc-c2-main {
 	flex: 1;
-	display: grid;
-	grid-template-columns: 1fr 400px;
-	gap: 10px;
-	min-height: 0; // grid 자식 overflow 방지
-}
-.noc-c2-left {
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
 	min-height: 0;
 }
-.noc-c2-left .noc-trend-wrap {
+.noc-c2-main .noc-trend-wrap {
 	flex: 1;
 	min-height: 0;
-}
-.noc-c2-right {
-	display: grid;
-	grid-template-rows: 52% 48%;
-	gap: 10px;
-	min-height: 0;
-}
-.noc-ok-strip {
-	height: 46px;
-	flex: 0 0 46px;
-}
-
-/* 우열 패널 (헤더 + 스크롤 본문) */
-.noc-root .noc-c2-panel {
-	display: flex;
-	flex-direction: column;
-	min-height: 0;
-	background: var(--noc-panel);
-	border: 1px solid var(--noc-line);
-	border-radius: var(--noc-r);
-	box-shadow: var(--noc-shadow);
-	overflow: hidden;
-
-	.noc-c2-panel-head {
-		flex: 0 0 auto;
-		display: flex;
-		align-items: center;
-		gap: 7px;
-		padding: 10px 14px;
-		font-size: 12.5px;
-		font-weight: 700;
-		letter-spacing: -0.01em;
-		color: var(--noc-txt);
-		border-bottom: 1px solid var(--noc-line);
-
-		svg {
-			color: var(--noc-crit);
-		}
-	}
-	.noc-c2-panel-body {
-		flex: 1;
-		min-height: 0;
-		overflow-y: auto;
-		padding: 8px 10px;
-	}
 }

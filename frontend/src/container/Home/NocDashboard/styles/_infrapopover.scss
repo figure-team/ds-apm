@@ -1,0 +1,121 @@
+// Lane A 소유 — 배지(발화 알림·인프라) + 말풍선 오버레이 스타일 (impl-plan Task 1-2).
+// 주의: 팝오버는 body 포탈에 뜨므로 noc CSS 변수엔 기본값 병기 필수 — var(--noc-panel, #141416)
+
+// v4 — 밴드 우측 액션 슬롯 + 발화 알림 배지
+.noc-root .noc-c2-band-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.noc-root .noc-c2-fired {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-family: inherit;
+	font-size: 12px;
+	font-weight: 700;
+	padding: 4px 12px;
+	border-radius: 999px;
+	border: 1px solid var(--noc-brand-line);
+	color: var(--noc-crit);
+	background: var(--noc-crit-soft);
+	cursor: pointer;
+	white-space: nowrap;
+
+	&.noc-c2-fired-quiet {
+		color: var(--noc-txt2);
+		background: var(--noc-panel2);
+		border-color: var(--noc-line);
+	}
+
+	.noc-c2-fired-arrow {
+		font-size: 10px;
+		opacity: 0.8;
+	}
+}
+
+// v4 — 인프라 배지 (레이아웃 불변, Popover는 문서 흐름 밖)
+.noc-root .noc-c2-infra-badge {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-family: inherit;
+	font-size: 12px;
+	font-weight: 700;
+	padding: 4px 12px;
+	border-radius: 999px;
+	cursor: pointer;
+	white-space: nowrap;
+
+	&.noc-c2-infra-calm {
+		color: var(--noc-txt2);
+		background: var(--noc-panel2);
+		border: 1px solid var(--noc-line);
+	}
+	&.noc-c2-infra-warn {
+		color: var(--noc-warn);
+		background: var(--noc-warn-soft);
+		border: 1px solid rgba(194, 150, 56, 0.45);
+	}
+	&.noc-c2-infra-crit {
+		color: var(--noc-crit);
+		background: var(--noc-crit-soft);
+		border: 1px solid var(--noc-brand-line);
+	}
+	.noc-c2-infra-caret {
+		font-size: 10px;
+		opacity: 0.8;
+	}
+}
+
+// 말풍선 본문 — InfraPanel의 노후 grid 스타일 재사용을 위해 폭만 고정
+.noc-c2-infra-popover {
+	.ant-popover-inner {
+		background: var(--noc-panel, #141416);
+		border: 1px solid var(--noc-line2, #37373d);
+		border-radius: 12px;
+		box-shadow: 0 18px 48px rgba(0, 0, 0, 0.65);
+	}
+	.noc-c2-infra-pop-body {
+		width: 560px;
+		max-height: 300px;
+		overflow-y: auto;
+	}
+}
+
+// v4.1 — 이상 서비스 배지 + 말풍선 (트렌드를 밀어내던 인라인 카드 대체)
+.noc-root .noc-c2-anom-badge {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-family: inherit;
+	font-size: 12px;
+	font-weight: 700;
+	padding: 4px 12px;
+	border-radius: 999px;
+	border: 1px solid var(--noc-brand-line);
+	color: var(--noc-crit);
+	background: var(--noc-crit-soft);
+	cursor: pointer;
+	white-space: nowrap;
+
+	.noc-c2-anom-caret {
+		font-size: 10px;
+		opacity: 0.8;
+	}
+}
+
+.noc-c2-anom-popover {
+	.ant-popover-inner {
+		background: var(--noc-panel, #141416);
+		border: 1px solid var(--noc-line2, #37373d);
+		border-radius: 12px;
+		box-shadow: 0 18px 48px rgba(0, 0, 0, 0.65);
+	}
+	.noc-c2-anom-pop-body {
+		width: 640px;
+		max-height: 340px;
+		overflow-y: auto;
+	}
+}
