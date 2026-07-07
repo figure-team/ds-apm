@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/SigNoz/signoz/pkg/types/ruletypes"
 )
 
 func TestExecutor_Success(t *testing.T) {
@@ -83,5 +85,31 @@ func TestExecutorRun_LocalWhenTargetNil(t *testing.T) {
 	res := e.Run(context.Background(), "echo hi", nil, RunMeta{})
 	if res.ExitCode != 0 || !contains(res.Output, "hi") {
 		t.Fatalf("local run failed: %+v", res)
+	}
+}
+
+func TestLocalTransport_AppliesArgvPrefix(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("local transport runs bash")
+	}
+	// 프리픽스가 실제 argv 앞에 붙는지 env 래퍼로 관찰한다.
+	tr := newLocalTransport(5*time.Second, []string{"env", "DSAPM_SBX=1"})
+	out, code, timedOut, err := tr.Exec(context.Background(), `echo "sbx=$DSAPM_SBX"`)
+	if err != nil || timedOut || code != 0 {
+		t.Fatalf("exec: code=%d timedOut=%v err=%v out=%q", code, timedOut, err, out)
+	}
+	if !contains(out, "sbx=1") {
+		t.Fatalf("prefix not applied: %q", out)
+	}
+}
+
+func TestExecutorRun_LLMSandboxUnavailable_FailClosed(t *testing.T) {
+	e := &Executor{timeout: time.Second, probe: fakeProbe(nil, nil, nil)}
+	res := e.Run(context.Background(), "echo hi", nil, RunMeta{Source: ruletypes.RemediationSourceLLMGenerated})
+	if res.ExitCode != -1 {
+		t.Fatalf("want -1, got %d (out=%q)", res.ExitCode, res.Output)
+	}
+	if !strings.Contains(res.Output, "샌드박스") {
+		t.Fatalf("output must explain sandbox failure: %q", res.Output)
 	}
 }

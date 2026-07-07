@@ -57,10 +57,14 @@ WORKDIR /root
 # docker-cli: a restart-type Runbook script (e.g. SOP-AD-001) shells out to
 #   `docker restart <container>` against the host docker.sock mounted into this
 #   container (see docker-compose.local.yaml). musl-native, so no static binary.
+# util-linux: setpriv/prlimit for the local remediation sandbox — llm-generated
+#   scripts are demoted to the non-root `remed` user (fail-closed without it);
+#   runbook scripts get best-effort prlimit resource caps.
 RUN apk update && \
-    apk add --no-cache ca-certificates nodejs npm ripgrep git bash docker-cli && \
+    apk add --no-cache ca-certificates nodejs npm ripgrep git bash docker-cli util-linux && \
     npm install -g @anthropic-ai/claude-code && \
-    rm -rf /var/cache/apk/* /root/.npm
+    rm -rf /var/cache/apk/* /root/.npm && \
+    adduser -D -H -s /sbin/nologin remed
 ENV USE_BUILTIN_RIPGREP=0
 
 COPY --from=go-builder /out/signoz-community ./signoz

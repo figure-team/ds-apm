@@ -58,6 +58,10 @@ type Record struct {
 	Transport string `json:"transport,omitempty"`
 	// Target is the remote host when Transport is "ssh". Empty otherwise.
 	Target string `json:"target,omitempty"`
+	// Sandbox is the local sandbox profile applied to a remediation exec:
+	// "off" | "none" | "prlimit" | "setpriv+prlimit". Empty for ssh transport
+	// (원격 봉쇄는 타겟 측 timeout/ForceCommand가 담당) and non-remediation records.
+	Sandbox string `json:"sandbox,omitempty"`
 }
 
 // Logger appends one JSON line per CLI invocation to a file. It is safe for

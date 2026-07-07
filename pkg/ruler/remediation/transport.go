@@ -17,23 +17,25 @@ type Transport interface {
 }
 
 // LocalTransport runs `bash -c <script>` under process-group containment on the
-// DS-APM host — the pre-remote behaviour, unchanged (design §3.4).
+// DS-APM host — argvPrefix(샌드박스 래퍼)가 있으면 그 아래에서 (design §3.4).
 type LocalTransport struct {
-	timeout time.Duration
+	timeout    time.Duration
+	argvPrefix []string // resolveLocalSandbox가 만든 래퍼; nil이면 bash 직행
 }
 
-func newLocalTransport(timeout time.Duration) *LocalTransport {
+func newLocalTransport(timeout time.Duration, argvPrefix []string) *LocalTransport {
 	if timeout <= 0 {
 		timeout = DefaultExecTimeout
 	}
-	return &LocalTransport{timeout: timeout}
+	return &LocalTransport{timeout: timeout, argvPrefix: argvPrefix}
 }
 
 func (l *LocalTransport) Exec(ctx context.Context, script string) (string, int, bool, error) {
 	runCtx, cancel := context.WithTimeout(ctx, l.timeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(runCtx, "bash", "-c", script)
+	argv := append(append([]string{}, l.argvPrefix...), "bash", "-c", script)
+	cmd := exec.CommandContext(runCtx, argv[0], argv[1:]...)
 	cmd.WaitDelay = defaultWaitDelay
 	configureSubprocess(cmd)
 	cmd.Cancel = func() error { return killProcessTree(cmd) }
