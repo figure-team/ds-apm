@@ -644,7 +644,7 @@
 	}
 }
 
-/* ===== v4 단일 열 레이아웃 — 시드 소유, 레인 수정 금지 ===== */
+/* ===== 좌우 2단(C-2) 레이아웃 — 고정 패널 세로 스크롤 (설계 2026-07-07) ===== */
 .noc-c2 {
 	display: flex;
 	flex-direction: column;
@@ -652,14 +652,39 @@
 	overflow: hidden;
 	gap: 10px;
 }
+/* 넓은 화면: 차트 좌 고정 / 패널 우 스크롤.
+   grid-template-rows: minmax(0, 1fr)는 필수 — 없으면 암묵 auto 행이 오른쪽 열
+   콘텐츠(4패널) 높이만큼 늘어나 overflow-y:auto가 스크롤바를 못 만들고 잘린다. */
 .noc-c2-main {
 	flex: 1;
-	display: flex;
-	flex-direction: column;
+	display: grid;
+	grid-template-columns: 1.1fr 1fr;
+	grid-template-rows: minmax(0, 1fr);
 	gap: 10px;
 	min-height: 0;
 }
 .noc-c2-main .noc-trend-wrap {
-	flex: 1;
 	min-height: 0;
+	min-width: 0;
+}
+
+/* 좁은 화면: 1단 전환 — 스크롤 주체를 오른쪽 열에서 .noc-c2-main으로 승격하고
+   차트를 상단 sticky로 고정. .noc-c2-pins의 열-내부 스크롤은 되돌려(이중 스크롤 방지). */
+@media (max-width: 1100px) {
+	.noc-c2-main {
+		grid-template-columns: 1fr;
+		grid-template-rows: auto 1fr;
+		overflow-y: auto;
+		min-height: 0;
+	}
+	.noc-c2-main .noc-trend-wrap {
+		height: 260px;
+		position: sticky;
+		top: 0;
+		z-index: 2;
+		background: var(--noc-bg);
+	}
+	.noc-root .noc-c2-pins {
+		overflow: visible;
+	}
 }

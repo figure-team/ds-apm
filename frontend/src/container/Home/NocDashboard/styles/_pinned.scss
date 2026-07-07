@@ -1,15 +1,18 @@
-// Lane C1 소유 — 고정 패널 스트립 스타일 (impl-plan Task 5). 높이 190px · 4열 그리드.
-// v4 — 사용자 고정 패널 스트립 (목업: 높이 190px, 4열)
+// 고정 패널 — 좌우 2단(C-2) 오른쪽 열. 세로 스택 + 열-내부 스크롤(설계 2026-07-07).
+// 카드 높이는 유형별 panelDisplayHeight()로 인라인 지정(PinnedPanels.tsx).
 
 .noc-root .noc-c2-pins {
-	flex: 0 0 190px;
-	display: grid;
-	grid-template-columns: repeat(4, 1fr);
+	display: flex;
+	flex-direction: column;
 	gap: 8px;
 	min-height: 0;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding-right: 2px; // 스크롤바 여백
 }
 
 .noc-root .noc-c2-pin-card {
+	flex: 0 0 auto; // 세로 스택에서 인라인 height 그대로 유지(축소 금지)
 	display: flex;
 	flex-direction: column;
 	min-width: 0;
@@ -63,6 +66,9 @@
 	flex: 1;
 	min-height: 0;
 	position: relative;
+	// 카드 내부 세로 스크롤 없음 — 스크롤은 오른쪽 열(.noc-c2-pins) 하나만(이중 스크롤 방지).
+	// 표 컬럼 과다 시 GridCard 자체 렌더가 처리하고, 넘치면 카드 overflow:hidden으로 클립.
+	overflow: hidden;
 
 	// GridCard 내부가 100% 높이를 쓰도록
 	> div {
@@ -81,6 +87,8 @@
 }
 
 .noc-root .noc-c2-pin-add {
+	flex: 0 0 auto; // 세로 스택에서 유형 카드처럼 커지지 않게 고정
+	height: 72px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;

@@ -3,7 +3,7 @@ import { Pin, Plus, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { NocPinnedSlot } from '../types';
-import { PIN_CAP } from '../utils/pinnedPanels';
+import { panelDisplayHeight, PIN_CAP } from '../utils/pinnedPanels';
 
 export interface PinnedPanelsProps {
 	slots: NocPinnedSlot[];
@@ -23,7 +23,15 @@ export default function PinnedPanels({
 	return (
 		<div className="noc-c2-pins">
 			{slots.map((slot) => (
-				<div className="noc-c2-pin-card" key={slot.ref.widgetId}>
+				<div
+					className="noc-c2-pin-card"
+					key={slot.ref.widgetId}
+					style={{
+						height: slot.widget
+							? panelDisplayHeight(slot.widget.panelTypes)
+							: 120,
+					}}
+				>
 					<div className="noc-c2-pin-head">
 						<Pin size={11} className="noc-c2-pin-ico" />
 						<span className="noc-c2-pin-src">{slot.dashboardTitle}</span>

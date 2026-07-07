@@ -4,6 +4,7 @@ import { Dashboard, Widgets } from 'types/api/dashboard/getAll';
 import {
 	isPinnable,
 	listPinnableWidgets,
+	panelDisplayHeight,
 	PIN_CAP,
 	resolvePinnedSlots,
 } from '../pinnedPanels';
@@ -53,21 +54,27 @@ function makeDashboard(
 }
 
 describe('pinnedPanels utils', () => {
-	it('accepts graph/bar/value panels, rejects table/list/row', () => {
+	it('accepts all render panel types (graph/bar/value/table/list/trace/pie/histogram)', () => {
 		const d = makeDashboard('d1', []);
-		expect(isPinnable(d, makeWidget({ panelTypes: PANEL_TYPES.TIME_SERIES }))).toBe(
-			true,
-		);
-		expect(isPinnable(d, makeWidget({ panelTypes: PANEL_TYPES.BAR }))).toBe(true);
-		expect(isPinnable(d, makeWidget({ panelTypes: PANEL_TYPES.VALUE }))).toBe(
-			true,
-		);
-		expect(isPinnable(d, makeWidget({ panelTypes: PANEL_TYPES.TABLE }))).toBe(
-			false,
-		);
-		expect(isPinnable(d, makeWidget({ panelTypes: PANEL_TYPES.LIST }))).toBe(
-			false,
-		);
+		[
+			PANEL_TYPES.TIME_SERIES,
+			PANEL_TYPES.BAR,
+			PANEL_TYPES.VALUE,
+			PANEL_TYPES.TABLE,
+			PANEL_TYPES.LIST,
+			PANEL_TYPES.TRACE,
+			PANEL_TYPES.PIE,
+			PANEL_TYPES.HISTOGRAM,
+		].forEach((panelTypes) => {
+			expect(isPinnable(d, makeWidget({ panelTypes }))).toBe(true);
+		});
+	});
+
+	it('rejects EMPTY_WIDGET (not a render panel type)', () => {
+		const d = makeDashboard('d1', []);
+		expect(
+			isPinnable(d, makeWidget({ panelTypes: PANEL_TYPES.EMPTY_WIDGET })),
+		).toBe(false);
 	});
 
 	it('rejects row entries that have no query (WidgetRow)', () => {
@@ -149,11 +156,24 @@ describe('pinnedPanels utils', () => {
 	});
 
 	it('nulls the widget when it exists but is no longer pinnable', () => {
-		const w = makeWidget({ id: 'w1', panelTypes: PANEL_TYPES.TABLE });
+		// EMPTY_WIDGET은 렌더 대상이 아니라 핀 불가 — TABLE은 이제 핀 가능이므로 예시에서 제외
+		const w = makeWidget({ id: 'w1', panelTypes: PANEL_TYPES.EMPTY_WIDGET });
 		const d = makeDashboard('d1', [w]);
 		const slots = resolvePinnedSlots([d], [{ dashboardId: 'd1', widgetId: 'w1' }]);
 		expect(slots).toHaveLength(1);
 		expect(slots[0].widget).toBeNull();
 		expect(slots[0].dashboardTitle).toBe('dash-d1');
+	});
+
+	it('panelDisplayHeight maps types to natural heights with 220 fallback', () => {
+		expect(panelDisplayHeight(PANEL_TYPES.VALUE)).toBe(120);
+		expect(panelDisplayHeight(PANEL_TYPES.TABLE)).toBe(280);
+		expect(panelDisplayHeight(PANEL_TYPES.LIST)).toBe(280);
+		expect(panelDisplayHeight(PANEL_TYPES.TRACE)).toBe(280);
+		expect(panelDisplayHeight(PANEL_TYPES.TIME_SERIES)).toBe(220);
+		expect(panelDisplayHeight(PANEL_TYPES.BAR)).toBe(220);
+		expect(panelDisplayHeight(PANEL_TYPES.PIE)).toBe(220);
+		expect(panelDisplayHeight(PANEL_TYPES.HISTOGRAM)).toBe(220);
+		expect(panelDisplayHeight(PANEL_TYPES.EMPTY_WIDGET)).toBe(220);
 	});
 });

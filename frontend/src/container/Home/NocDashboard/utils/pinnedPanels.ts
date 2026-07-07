@@ -7,12 +7,39 @@ import { NocPinnedRef, NocPinnedSlot } from '../types';
 
 export const PIN_CAP = 4;
 
-// 핀 가능 패널 유형 — 높이 190px 스트립에 담기는 형태만 (v4 §확정 UX)
+// 핀 가능 패널 유형 — 좌우 2단(C-2) 재구조로 전 유형 허용.
+// 오른쪽 열이 자연 높이로 세로 스크롤하므로 표·리스트·파이·히스토그램·트레이스도 안 찌그러진다.
+// EMPTY_WIDGET만 제외(렌더 대상 아님). $var·row 게이트는 isPinnable에서 별도 유지.
 const PINNABLE_PANELS: PANEL_TYPES[] = [
 	PANEL_TYPES.TIME_SERIES,
 	PANEL_TYPES.BAR,
 	PANEL_TYPES.VALUE,
+	PANEL_TYPES.TABLE,
+	PANEL_TYPES.LIST,
+	PANEL_TYPES.TRACE,
+	PANEL_TYPES.PIE,
+	PANEL_TYPES.HISTOGRAM,
 ];
+
+// 유형별 자연 표시 높이(px) — 오른쪽 열 세로 스택에서 카드 높이로 사용(설계 §2).
+// 큰 숫자(VALUE)는 낮게, 표/리스트/트레이스는 내부 스크롤 여지를 위해 높게.
+export function panelDisplayHeight(panelType: PANEL_TYPES): number {
+	switch (panelType) {
+		case PANEL_TYPES.VALUE:
+			return 120;
+		case PANEL_TYPES.TABLE:
+		case PANEL_TYPES.LIST:
+		case PANEL_TYPES.TRACE:
+			return 280;
+		case PANEL_TYPES.TIME_SERIES:
+		case PANEL_TYPES.BAR:
+		case PANEL_TYPES.PIE:
+		case PANEL_TYPES.HISTOGRAM:
+			return 220;
+		default:
+			return 220;
+	}
+}
 
 function isWidget(w: WidgetRow | Widgets): w is Widgets {
 	return 'query' in w && w.query != null;

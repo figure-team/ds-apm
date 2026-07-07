@@ -52,6 +52,33 @@ describe('PinnedPanels', () => {
 		expect(onOpenPicker).toHaveBeenCalled();
 	});
 
+	it('sizes each card by panel type natural height', () => {
+		render(
+			<PinnedPanels
+				slots={[
+					SLOT, // graph → 220
+					{
+						...SLOT,
+						ref: { dashboardId: 'd1', widgetId: 'w2' },
+						widget: { id: 'w2', panelTypes: 'table' } as never,
+					},
+					{
+						...SLOT,
+						ref: { dashboardId: 'd1', widgetId: 'w3' },
+						widget: { id: 'w3', panelTypes: 'value' } as never,
+					},
+				]}
+				onUnpin={jest.fn()}
+				onOpenPicker={jest.fn()}
+			/>,
+		);
+		const cardOf = (id: string): HTMLElement | null =>
+			screen.getByTestId(`grid-card-${id}`).closest('.noc-c2-pin-card');
+		expect(cardOf('w1')).toHaveStyle({ height: '220px' });
+		expect(cardOf('w2')).toHaveStyle({ height: '280px' });
+		expect(cardOf('w3')).toHaveStyle({ height: '120px' });
+	});
+
 	it('hides add tile when slots are full', () => {
 		render(
 			<PinnedPanels
