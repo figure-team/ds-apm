@@ -7,9 +7,8 @@
 		// 우열 400px 폭 안에 항상 맞도록 2열 고정(minmax 0으로 축소 허용)
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		grid-auto-rows: min-content;
-		gap: 8px;
+		gap: 10px;
 		align-content: start;
-		padding: 2px;
 	}
 	.noc-c2-infra-tile {
 		display: flex;

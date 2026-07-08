@@ -72,6 +72,7 @@
 // 말풍선 본문 — InfraPanel의 노후 grid 스타일 재사용을 위해 폭만 고정
 .noc-c2-infra-popover {
 	.ant-popover-inner {
+		padding: 16px 18px;
 		background: var(--noc-panel, #141416);
 		border: 1px solid var(--noc-line2, #37373d);
 		border-radius: 12px;
@@ -81,6 +82,8 @@
 		width: 560px;
 		max-height: 300px;
 		overflow-y: auto;
+		// 스크롤바가 타일에 붙지 않도록 우측 여백 확보
+		padding-right: 2px;
 	}
 }
 
@@ -108,6 +111,7 @@
 
 .noc-c2-anom-popover {
 	.ant-popover-inner {
+		padding: 16px 18px;
 		background: var(--noc-panel, #141416);
 		border: 1px solid var(--noc-line2, #37373d);
 		border-radius: 12px;
@@ -117,5 +121,7 @@
 		width: 640px;
 		max-height: 340px;
 		overflow-y: auto;
+		// 스크롤바가 카드에 붙지 않도록 우측 여백 확보
+		padding-right: 2px;
 	}
 }
