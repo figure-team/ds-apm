@@ -242,3 +242,6 @@ pyrightconfig.json
 .gstack/
 docs/spec/_ssg-samples/
 /CLAUDE.md
+
+# DS-APM Collector 설치기 실제 값 파일(비번 평문 포함) — .example만 커밋
+docs/guides/otel-collector-vm/dsapm-collector.env
