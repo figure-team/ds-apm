@@ -18,9 +18,6 @@ import { NocHealth, NocKpi, NocServiceRow } from '../types';
 const HEALTHY_ERR_PCT = 1;
 const CRITICAL_ERR_PCT = 5;
 
-// max rows shown in the service health list
-const MAX_SERVICE_ROWS = 12;
-
 function healthFromErr(errPct: number): NocHealth {
 	if (errPct >= CRITICAL_ERR_PCT) {
 		return 'critical';
@@ -138,8 +135,7 @@ export default function useNocOverview(firingCount: number): UseNocOverviewResul
 					errPct: Number.isFinite(s.errorRate) ? s.errorRate : 0,
 					rps: Number.isFinite(s.callRate) ? s.callRate : 0,
 				}))
-				.sort((a, b) => b.rps - a.rps)
-				.slice(0, MAX_SERVICE_ROWS),
+				.sort((a, b) => b.rps - a.rps),
 		[services],
 	);
 
