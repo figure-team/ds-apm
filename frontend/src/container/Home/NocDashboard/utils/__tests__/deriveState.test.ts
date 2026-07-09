@@ -79,6 +79,17 @@ describe('selectTrendTargets', () => {
 		);
 		expect(selectTrendTargets(services)).toHaveLength(7);
 	});
+
+	it('hard-caps at 12 keeping highest-RPS criticals (input is RPS-desc)', () => {
+		const criticals = Array.from({ length: 15 }, (_, i) =>
+			svc({ name: `c${i}`, health: 'critical', rps: 15 - i }),
+		);
+		const r = selectTrendTargets(criticals);
+		expect(r).toHaveLength(12);
+		expect(r.map((t) => t.name)).toEqual(
+			Array.from({ length: 12 }, (_, i) => `c${i}`),
+		);
+	});
 });
 
 describe('pickIncident', () => {

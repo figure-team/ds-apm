@@ -30,6 +30,8 @@ export const SERIES_PALETTE_LIGHT = [
 
 const WATCH_CARD_CAP = 5;
 const TREND_CAP = 7;
+// 서비스 목록 12행 절단 제거 후 트렌드 쿼리 IN 절·차트 계열이 무계가 되지 않도록 하는 절대 상한.
+const TREND_HARD_CAP = 12;
 
 const SEVERITY_RANK: Record<NocSeverity, number> = {
 	critical: 0,
@@ -89,9 +91,13 @@ export function selectTrendTargets(services: NocServiceRow[]): TrendTarget[] {
 			(a, b) => HEALTH_RANK[a.health] - HEALTH_RANK[b.health] || b.rps - a.rps,
 		);
 
-	// critical은 상한과 무관하게 전부 포함, 남는 슬롯을 rest로 채운다.
+	// critical은 TREND_CAP과 무관하게 우선 포함하되 총량은 TREND_HARD_CAP까지.
+	// 입력이 RPS 내림차순이므로 마지막 slice가 곧 "RPS 상위 critical 우선"이다.
 	const remainingSlots = Math.max(0, TREND_CAP - criticals.length);
-	const chosen = [...criticals, ...rest.slice(0, remainingSlots)];
+	const chosen = [...criticals, ...rest.slice(0, remainingSlots)].slice(
+		0,
+		TREND_HARD_CAP,
+	);
 
 	// 엔티티에 색 고정: 선택 순서대로 슬롯 배정.
 	return chosen.map((s, i) => ({
