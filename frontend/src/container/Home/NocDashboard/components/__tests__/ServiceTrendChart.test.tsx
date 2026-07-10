@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react';
 
 import { TrendSeries } from '../../types';
-import ServiceTrendChart, { computeScale } from '../ServiceTrendChart';
+import { computeScale } from '../../utils/trendScale';
+import ServiceTrendChart from '../../ServiceTrendChart';
 
 jest.mock('react-i18next', () => ({
 	useTranslation: () => ({ t: (k: string) => k }),

@@ -66,6 +66,11 @@ export interface TrendSeries {
 	missing?: boolean;
 }
 
+/** 컨테이너가 다크모드 팔레트를 반영해 색을 확정한 표시용 계열 */
+export interface ResolvedTrendSeries extends TrendSeries {
+	resolvedColor: string;
+}
+
 export interface NocInfraHost {
 	name: string;
 	cpu: number; // percent 0..100 (hosts/list 분수값 100× 정규화 후)

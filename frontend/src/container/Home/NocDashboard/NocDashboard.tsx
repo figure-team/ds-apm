@@ -8,13 +8,13 @@ import FiredAlertsBadge from './components/FiredAlertsBadge';
 import InfraBadge from './components/InfraBadge';
 import PinnedPanels from './components/PinnedPanels';
 import PinPickerDrawer from './components/PinPickerDrawer';
-import ServiceTrendChart from './components/ServiceTrendChart';
 import SummaryBand from './components/SummaryBand';
 import useNocAlerts from './hooks/useNocAlerts';
 import useNocInfra from './hooks/useNocInfra';
 import useNocOverview from './hooks/useNocOverview';
 import useNocPinnedPanels from './hooks/useNocPinnedPanels';
 import useNocTrend from './hooks/useNocTrend';
+import ServiceTrendChart from './ServiceTrendChart';
 import { TrendMetric } from './types';
 import {
 	deriveCounts,
