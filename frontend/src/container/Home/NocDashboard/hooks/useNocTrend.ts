@@ -53,6 +53,16 @@ function toMap(r: NormResult | undefined): Map<number, number> {
 	return m;
 }
 
+// 백엔드 v5 응답의 values 순서는 시간순이 보장되지 않는다(실측: 홈 트렌드 실타래 렌더).
+// 선으로 잇기 전에 시간 오름차순 정렬하고, 동일 타임스탬프는 마지막 값을 채택한다.
+export function normalizePoints(points: TrendPoint[]): TrendPoint[] {
+	const byT = new Map<number, number>();
+	points.forEach((p) => byT.set(p.t, p.v));
+	return [...byT.entries()]
+		.sort((a, b) => a[0] - b[0])
+		.map(([t, v]) => ({ t, v }));
+}
+
 export function parseTrendSeries(
 	data: NormPayloadData | undefined,
 	targets: TrendTarget[],
@@ -102,7 +112,7 @@ export function parseTrendSeries(
 		return {
 			name: tg.name,
 			color: tg.color,
-			points,
+			points: normalizePoints(points),
 			missing: !source, // A(rps/err) 또는 C(p99) series 자체가 없으면 missing
 		};
 	});

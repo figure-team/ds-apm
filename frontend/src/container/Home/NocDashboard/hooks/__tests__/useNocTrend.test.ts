@@ -53,4 +53,32 @@ describe('parseTrendSeries', () => {
 		expect(rec.missing).toBe(true);
 		expect(rec.points).toEqual([]);
 	});
+
+	it('unsorted values are sorted by time before drawing (실타래 방지)', () => {
+		const payload = {
+			result: [
+				result('A', 'cart', [
+					[300, '30'],
+					[100, '10'],
+					[200, '20'],
+				]),
+			],
+		};
+		const series = parseTrendSeries(payload, [targets[0]], 'rps', 60);
+		expect(series[0].points.map((p) => p.t)).toEqual([100000, 200000, 300000]);
+	});
+
+	it('duplicate timestamps are deduped, last value wins', () => {
+		const payload = {
+			result: [
+				result('A', 'cart', [
+					[100, '10'],
+					[100, '99'],
+				]),
+			],
+		};
+		const series = parseTrendSeries(payload, [targets[0]], 'rps', 60);
+		expect(series[0].points).toHaveLength(1);
+		expect(series[0].points[0].v).toBeCloseTo(99 / 60, 5);
+	});
 });
