@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+	MouseEvent as ReactMouseEvent,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from 'react';
 
 import { ResolvedTrendSeries, TrendMetric } from '../../types';
 import {
@@ -101,8 +107,68 @@ export default function TrendPlot({
 		h - PAD.bottom - 2,
 	);
 
+	// ---- 크로스헤어: 표시 계열의 타임스탬프 합집합에 스냅 ----
+	const [hoverT, setHoverT] = useState<number | null>(null);
+	const timestamps = useMemo(() => {
+		const set = new Set<number>();
+		drawable.forEach((s) => s.points.forEach((p) => set.add(p.t)));
+		return [...set].sort((a, b) => a - b);
+	}, [drawable]);
+	const valueAt = useMemo(
+		() =>
+			new Map(
+				drawable.map((s) => [s.name, new Map(s.points.map((p) => [p.t, p.v]))]),
+			),
+		[drawable],
+	);
+
+	const handleMove = (e: ReactMouseEvent<HTMLDivElement>): void => {
+		const rect = bodyRef.current?.getBoundingClientRect();
+		if (!rect || timestamps.length === 0) {
+			return;
+		}
+		const px = e.clientX - rect.left;
+		if (px < PAD.left || px > w - PAD.right) {
+			setHoverT(null);
+			return;
+		}
+		let best = timestamps[0];
+		let bestD = Infinity;
+		timestamps.forEach((tt) => {
+			const dist = Math.abs(mapper.x(tt) - px);
+			if (dist < bestD) {
+				bestD = dist;
+				best = tt;
+			}
+		});
+		setHoverT(best);
+	};
+
+	const rows =
+		hoverT === null
+			? []
+			: drawable
+					.map((s) => ({
+						name: s.name,
+						color: s.resolvedColor,
+						v: valueAt.get(s.name)?.get(hoverT),
+					}))
+					.filter(
+						(r): r is { name: string; color: string; v: number } =>
+							r.v !== undefined,
+					)
+					.sort((a, b) => b.v - a.v);
+	const cx = hoverT === null ? 0 : mapper.x(hoverT);
+	// 우측 거터를 침범하면 왼쪽으로 플립
+	const tipLeft = cx + 12 > w - PAD.right - 160 ? cx - 172 : cx + 12;
+
 	return (
-		<div className="noc-c2-trend-body" ref={bodyRef}>
+		<div
+			className="noc-c2-trend-body"
+			ref={bodyRef}
+			onMouseMove={handleMove}
+			onMouseLeave={(): void => setHoverT(null)}
+		>
 			<svg className="noc-c2-trend-svg" width={w} height={h}>
 				{/* Y축 눈금 + 그리드 — 눈금 값·위치는 mapper가 결정(선형/로그 공통) */}
 				{mapper.yTicks().map((tk) => (
@@ -171,7 +237,43 @@ export default function TrendPlot({
 						</g>
 					);
 				})}
+				{hoverT !== null ? (
+					<g>
+						<line
+							className="noc-c2-crosshair"
+							x1={cx}
+							x2={cx}
+							y1={PAD.top}
+							y2={h - PAD.bottom}
+						/>
+						{rows.map((r) => (
+							<circle
+								key={`hover-${r.name}`}
+								cx={cx}
+								cy={mapper.y(r.v)}
+								r={3.5}
+								fill={r.color}
+								stroke="var(--noc-panel)"
+								strokeWidth={1.5}
+							/>
+						))}
+					</g>
+				) : null}
 			</svg>
+			{hoverT !== null && rows.length > 0 ? (
+				<div className="noc-c2-trend-tip" style={{ left: tipLeft, top: 12 }}>
+					<div className="noc-c2-tip-time">
+						{formatTime(hoverT, scale.maxT - scale.minT)}
+					</div>
+					{rows.map((r) => (
+						<div key={`tip-${r.name}`} className="noc-c2-tip-row">
+							<span className="noc-c2-tip-swatch" style={{ background: r.color }} />
+							<span>{truncName(r.name)}</span>
+							<span className="noc-c2-tip-val">{formatValue(r.v, metric)}</span>
+						</div>
+					))}
+				</div>
+			) : null}
 		</div>
 	);
 }

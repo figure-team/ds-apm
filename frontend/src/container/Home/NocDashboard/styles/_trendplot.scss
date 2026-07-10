@@ -1,1 +1,50 @@
-// 레인 B 소유 — TrendPlot(크로스헤어·툴팁) 스타일. 시드는 빈 파티션만 생성.
+// 레인 B 소유 — TrendPlot(크로스헤어·툴팁) 스타일.
+
+.noc-c2-trend-body {
+	position: relative; // 툴팁 오버레이 absolute 기준
+}
+.noc-c2-crosshair {
+	stroke: var(--noc-txt3);
+	stroke-width: 1;
+	stroke-dasharray: 3 3;
+	pointer-events: none;
+}
+.noc-c2-trend-tip {
+	position: absolute;
+	z-index: 3;
+	min-width: 148px;
+	max-width: 200px;
+	background: var(--noc-panel);
+	border: 1px solid var(--noc-line2);
+	border-radius: 8px;
+	box-shadow: var(--noc-shadow);
+	padding: 8px 10px;
+	pointer-events: none;
+	font-size: 11.5px;
+}
+.noc-c2-tip-time {
+	font-weight: 700;
+	color: var(--noc-txt);
+	margin-bottom: 5px;
+	font-variant-numeric: tabular-nums;
+}
+.noc-c2-tip-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	color: var(--noc-txt2);
+	line-height: 1.7;
+
+	.noc-c2-tip-val {
+		margin-left: auto;
+		color: var(--noc-txt);
+		font-variant-numeric: tabular-nums;
+		font-weight: 600;
+	}
+}
+.noc-c2-tip-swatch {
+	width: 8px;
+	height: 8px;
+	border-radius: 2px;
+	flex-shrink: 0;
+}
