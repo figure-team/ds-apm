@@ -38,6 +38,15 @@ type RemediationProposer interface {
 	MaybePropose(ctx context.Context, orgID, incidentID, alertFingerprint string, labels map[string]string, doc ruletypes.SOPDocument) (map[string]string, bool)
 }
 
+// ExecutionLister is the read-only seam the resolved-notification path uses to
+// look up what the remediation pipeline actually ran for an incident (terminal
+// statuses included — unlike the Selector's active-only guardrail query).
+// Implemented by remediationstore.Store. nil-safe: without it the resolved
+// notice still renders, reporting no automated action on record.
+type ExecutionLister interface {
+	ListByIncident(ctx context.Context, orgID, incidentID string) ([]ruletypes.RemediationExecution, error)
+}
+
 // RemediationSelector is the synchronous seam for LLM-backed runbook selection
 // (design §3). Select runs inline on the dispatch path so its proposal — the
 // approve-URL annotations — can ride the SAME outgoing notification. The alert
@@ -70,6 +79,7 @@ type Hook struct {
 	codeRCA        CodeRCATrigger
 	remediation    RemediationProposer
 	selector       RemediationSelector
+	executions     ExecutionLister
 }
 
 // SetCodeRCATrigger injects the CF-11 trigger after construction (the trigger
@@ -86,6 +96,10 @@ func (h *Hook) SetRemediationProposer(p RemediationProposer) { h.remediation = p
 // synchronously (see applyRemediation), so wiring it delays delivery of such
 // alerts until the LLM proposal is ready or its timeout fires.
 func (h *Hook) SetRemediationSelector(sel RemediationSelector) { h.selector = sel }
+
+// SetExecutionLister injects the remediation-execution reader used by
+// ApplyResolved (optional, nil-safe). Mirrors the other post-construction seams.
+func (h *Hook) SetExecutionLister(l ExecutionLister) { h.executions = l }
 
 // New constructs a Hook. logger may be nil — the hook falls back to
 // slog.Default() in that case. timeout ≤ 0 falls back to
@@ -250,6 +264,93 @@ func (h *Hook) Apply(
 	merged = h.applyRemediation(ctx, orgID, incidentID, alertFingerprint, labels, doc, merged)
 
 	return merged
+}
+
+// ApplyResolved builds the resolved-notification annotations for an alert that
+// has stopped firing. Unlike Apply it is fully deterministic — no LLM call, no
+// history write, no code-RCA trigger, no remediation proposal. It assembles
+// facts the system already recorded: the firing metadata (labels), the incident
+// duration, and the remediation execution outcome (via the ExecutionLister).
+//
+// Mirrors Apply's failure contract: every error path returns the input
+// annotations unchanged so the resolved alert still goes out on the channel's
+// default template (which already renders a "✅ 해소" title for non-SOP alerts).
+func (h *Hook) ApplyResolved(
+	ctx context.Context,
+	orgID string,
+	incidentID string,
+	alertFingerprint string,
+	labels map[string]string,
+	annotations map[string]string,
+	startsAt time.Time,
+	endsAt time.Time,
+) map[string]string {
+	if orgID == "" || h.sopStore == nil {
+		return annotations
+	}
+
+	docs, err := h.sopStore.List(ctx, orgID)
+	if err != nil {
+		h.logger.WarnContext(ctx, "ai dispatch hook: list SOPs failed (resolved)",
+			slog.String("orgId", orgID), slog.String("incidentId", incidentID),
+			slog.Any("err", err))
+		return annotations
+	}
+
+	binding, err := ruletypes.PreviewSOPDocumentBinding(docs, ruletypes.SOPBindingPreviewRequest{
+		Labels:      labels,
+		Annotations: annotations,
+	})
+	if err != nil || binding.Status != ruletypes.SOPBindingStatusBound {
+		// Non-SOP alerts keep the channel's default resolved template.
+		// No code-RCA on the unbound branch: the incident is over.
+		return annotations
+	}
+
+	// Remediation outcome lookup is best-effort: a nil lister or store error
+	// degrades to "no automated action on record", never to a dropped notice.
+	var exec *ruletypes.RemediationExecution
+	if h.executions != nil {
+		if list, listErr := h.executions.ListByIncident(ctx, orgID, incidentID); listErr != nil {
+			h.logger.WarnContext(ctx, "ai dispatch hook: list executions failed (resolved)",
+				slog.String("orgId", orgID), slog.String("incidentId", incidentID),
+				slog.Any("err", listErr))
+		} else {
+			// startsAt cutoff: incidentID is the alert fingerprint, so the list
+			// spans every past occurrence of this failure signature — only
+			// executions from THIS occurrence may be reported as its 조치.
+			exec = pickResolvedExecution(list, startsAt)
+		}
+	}
+
+	// The SOP document supplies the runbook title and public metadata. Fetch
+	// failure is tolerated — the notice renders with binding-level fields only.
+	runbookTitle := ""
+	var doc ruletypes.SOPDocument
+	if doc, err = h.sopStore.Get(ctx, orgID, binding.SOPID, binding.Version); err != nil {
+		h.logger.WarnContext(ctx, "ai dispatch hook: get SOP document failed (resolved)",
+			slog.String("orgId", orgID), slog.String("sopId", binding.SOPID),
+			slog.Any("err", err))
+	} else if exec != nil {
+		for _, rb := range doc.Runbooks {
+			if rb.ID == exec.RunbookID {
+				runbookTitle = rb.Title
+				break
+			}
+		}
+	}
+
+	overrides := map[string]string{
+		alertmanagertypes.IncidentAnnotationNotificationBody: buildResolvedBody(
+			labels["alertname"], labels["severity"], startsAt, endsAt, exec, runbookTitle),
+		alertmanagertypes.IncidentAnnotationCustomerUpdate: buildResolvedNotice(binding.Title),
+		alertmanagertypes.IncidentAnnotationSopTitle:       binding.Title,
+		alertmanagertypes.IncidentAnnotationSopVersion:     binding.Version,
+		alertmanagertypes.IncidentAnnotationSopBindingID:   binding.Resolution,
+		alertmanagertypes.IncidentAnnotationSopURL:         doc.DisplayURL,
+		alertmanagertypes.IncidentAnnotationSopSource:      doc.Source.SourceID,
+	}
+	return mergeAnnotations(annotations, overrides)
 }
 
 // lookupPriorIncidents returns up to priorIncidentLimit past occurrences of the

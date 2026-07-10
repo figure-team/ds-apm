@@ -209,7 +209,7 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 
 	// If CommonAnnotations carry an AI-generated notification body, use it
 	// to replace the per-alert Labels/Annotations FactSet blocks (fail-open).
-	notif, aiOK := alertmanagertypes.ResolveSOPBoundNotification(data.CommonAnnotations)
+	notif, aiOK := alertmanagertypes.ResolveSOPBoundNotification(data.Status, data.CommonAnnotations)
 	if aiOK {
 		// AI main body block
 		t.Attachments[0].Content.Body = append(t.Attachments[0].Content.Body, Body{

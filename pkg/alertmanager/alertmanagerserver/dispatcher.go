@@ -660,7 +660,15 @@ func applyAIHook(ctx context.Context, hook *dispatchhook.Hook, orgID string, ale
 	fp := alert.Fingerprint().String()
 
 	// No IncidentAnnotationIncidentID constant exists yet; use fingerprint.
-	merged := hook.Apply(ctx, orgID, fp, fp, labels, annotations)
+	// Resolved alerts take the deterministic resolved-notice path (no LLM, no
+	// remediation proposal) so the notification reports what was fixed and how,
+	// instead of replaying the firing-time SOP body.
+	var merged map[string]string
+	if alert.Resolved() {
+		merged = hook.ApplyResolved(ctx, orgID, fp, fp, labels, annotations, alert.StartsAt, alert.EndsAt)
+	} else {
+		merged = hook.Apply(ctx, orgID, fp, fp, labels, annotations)
+	}
 	if merged == nil {
 		return
 	}

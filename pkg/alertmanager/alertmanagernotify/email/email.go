@@ -218,7 +218,7 @@ func (n *Email) Notify(ctx context.Context, as ...*types.Alert) (bool, error) {
 		data    = notify.GetTemplateData(ctx, n.tmpl, as, n.logger)
 		tmpl    = notify.TmplText(n.tmpl, data, &tmplErr)
 	)
-	aiNotif, aiOK := alertmanagertypes.ResolveSOPBoundNotification(data.CommonAnnotations)
+	aiNotif, aiOK := alertmanagertypes.ResolveSOPBoundNotification(data.Status, data.CommonAnnotations)
 	from := tmpl(n.conf.From)
 	if tmplErr != nil {
 		return false, errors.WrapInternalf(tmplErr, errors.CodeInternal, "execute 'from' template")

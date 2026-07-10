@@ -9,6 +9,7 @@ import (
 func TestResolveSOPBoundNotification(t *testing.T) {
 	cases := []struct {
 		name       string
+		status     string
 		ann        template.KV
 		wantOK     bool
 		wantTitle  string
@@ -40,6 +41,23 @@ func TestResolveSOPBoundNotification(t *testing.T) {
 			wantOK: true, wantTitle: "", wantBody: "body", wantNotice: "",
 		},
 		{
+			name:   "resolved status prefixes title",
+			status: "resolved",
+			ann: template.KV{
+				IncidentAnnotationNotificationBody: "body",
+				IncidentAnnotationSopTitle:         "Shipping 5xx 대응",
+			},
+			wantOK: true, wantTitle: "✅ 해소 · Shipping 5xx 대응", wantBody: "body", wantNotice: "",
+		},
+		{
+			name:   "resolved status with no title keeps title empty",
+			status: "resolved",
+			ann: template.KV{
+				IncidentAnnotationNotificationBody: "body",
+			},
+			wantOK: true, wantTitle: "", wantBody: "body", wantNotice: "",
+		},
+		{
 			name:   "no body -> not ok (gate)",
 			ann:    template.KV{IncidentAnnotationCustomerUpdate: "[안내]"},
 			wantOK: false,
@@ -52,7 +70,7 @@ func TestResolveSOPBoundNotification(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, ok := ResolveSOPBoundNotification(tc.ann)
+			got, ok := ResolveSOPBoundNotification(tc.status, tc.ann)
 			if ok != tc.wantOK {
 				t.Fatalf("ok: want %v got %v", tc.wantOK, ok)
 			}

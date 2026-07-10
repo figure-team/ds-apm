@@ -153,7 +153,7 @@ func (n *Notifier) notifyV1(
 		n.logger.WarnContext(ctx, "Truncated description", slog.Any("key", key), slog.Int("max_runes", maxV1DescriptionLenRunes))
 	}
 
-	if notif, ok := alertmanagertypes.ResolveSOPBoundNotification(data.CommonAnnotations); ok {
+	if notif, ok := alertmanagertypes.ResolveSOPBoundNotification(data.Status, data.CommonAnnotations); ok {
 		if notif.Title != "" {
 			description, _ = notify.TruncateInRunes(notif.Title, maxV1DescriptionLenRunes)
 		}
@@ -227,7 +227,7 @@ func (n *Notifier) notifyV2(
 		n.logger.WarnContext(ctx, "Truncated summary", slog.Any("key", key), slog.Int("max_runes", maxV2SummaryLenRunes))
 	}
 
-	if notif, ok := alertmanagertypes.ResolveSOPBoundNotification(data.CommonAnnotations); ok {
+	if notif, ok := alertmanagertypes.ResolveSOPBoundNotification(data.Status, data.CommonAnnotations); ok {
 		if notif.Title != "" {
 			summary, _ = notify.TruncateInRunes(notif.Title, maxV2SummaryLenRunes)
 		}

@@ -122,7 +122,7 @@ func (n *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error)
 	text := tmplText(n.conf.Text)
 
 	// DS-APM: SOP 바운드 알림이면 채널 템플릿 대신 AI 제목·본문·고객공지로 대체.
-	notif, sopBound := alertmanagertypes.ResolveSOPBoundNotification(data.CommonAnnotations)
+	notif, sopBound := alertmanagertypes.ResolveSOPBoundNotification(data.Status, data.CommonAnnotations)
 	if sopBound {
 		if notif.Title != "" {
 			title, _ = notify.TruncateInRunes(notif.Title, maxTitleLenRunes)

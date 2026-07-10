@@ -520,6 +520,10 @@ func New(
 			store:    remStore,
 		})
 
+		// Resolved-notification path: lets the hook report which remediation
+		// actually ran (and its outcome) when an alert clears.
+		aiDispatchHook.SetExecutionLister(remStore)
+
 		// LLM-backed selector (design §3): supersedes the static first-approved
 		// proposer for SOPs with ≥1 approved Runbook when an org has an LLM
 		// configured. Fail-open + fire-and-forget; the proposer above stays wired
