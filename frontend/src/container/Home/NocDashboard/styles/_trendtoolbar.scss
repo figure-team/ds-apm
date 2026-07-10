@@ -1,1 +1,19 @@
-// 레인 C 소유 — TrendToolbar(로그 토글·지표 도움말) 스타일. 시드는 빈 파티션만 생성.
+// 레인 C 소유 — TrendToolbar(로그 토글·지표 도움말) 스타일.
+
+.noc-c2-trend-tabs .noc-c2-help-btn {
+	border: none;
+	padding: 3px 4px;
+
+	&:hover {
+		color: var(--noc-txt);
+	}
+}
+.noc-c2-help-body p {
+	margin: 0 0 4px;
+	font-size: 11.5px;
+	line-height: 1.5;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}

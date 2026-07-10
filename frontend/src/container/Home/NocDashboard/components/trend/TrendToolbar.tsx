@@ -1,3 +1,5 @@
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { TrendMetric } from '../../types';
@@ -40,6 +42,27 @@ export default function TrendToolbar({
 					{t('noc_c2_log_scale')}
 				</button>
 			) : null}
+			{/* 지표 용어 설명 — NOC 레이아웃에선 getPopupContainer 미지정 시 팝업 위치가 깨진다 */}
+			<Tooltip
+				getPopupContainer={(node): HTMLElement =>
+					(node.parentElement ?? document.body) as HTMLElement
+				}
+				title={
+					<div className="noc-c2-help-body">
+						<p>{t('noc_c2_help_err')}</p>
+						<p>{t('noc_c2_help_p99')}</p>
+						<p>{t('noc_c2_help_rps')}</p>
+					</div>
+				}
+			>
+				<button
+					type="button"
+					className="noc-c2-help-btn"
+					aria-label={t('noc_c2_help_aria')}
+				>
+					<InfoCircleOutlined />
+				</button>
+			</Tooltip>
 		</div>
 	);
 }
