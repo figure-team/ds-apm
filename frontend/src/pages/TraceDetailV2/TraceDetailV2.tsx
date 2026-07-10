@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import {
 	ResizableHandle,
@@ -25,6 +26,7 @@ import './TraceDetailV2.styles.scss';
 
 function TraceDetailsV2(): JSX.Element {
 	const { id: traceId } = useParams<TraceDetailV2URLProps>();
+	const { t } = useTranslation('trace');
 	const urlQuery = useUrlQuery();
 	const [interestedSpanId, setInterestedSpanId] = useState<IInterestedSpan>(
 		() => ({
@@ -94,7 +96,7 @@ function TraceDetailsV2(): JSX.Element {
 					icon={<FlamegraphImg />}
 					className="flamegraph-waterfall-toggle"
 				>
-					Flamegraph
+					{t('flamegraph')}
 				</Button>
 			),
 			key: 'flamegraph',

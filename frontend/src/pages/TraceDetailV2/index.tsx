@@ -3,6 +3,7 @@ import logEvent from 'api/common/logEvent';
 import ROUTES from 'constants/routes';
 import history from 'lib/history';
 import { Compass, Cone, TowerControl } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import TraceDetailsV2 from './TraceDetailV2';
 
@@ -42,11 +43,12 @@ function NewTraceDetail(props: INewTraceDetailProps): JSX.Element {
 }
 
 export default function TraceDetailsPage(): JSX.Element {
+	const { t } = useTranslation('trace');
 	const items = [
 		{
 			label: (
 				<div className="tab-item">
-					<Compass size={16} /> Explorer
+					<Compass size={16} /> {t('tab_explorer')}
 				</div>
 			),
 			key: 'trace-details',
@@ -55,7 +57,7 @@ export default function TraceDetailsPage(): JSX.Element {
 		{
 			label: (
 				<div className="tab-item">
-					<Cone className="funnel-icon" size={16} /> Funnels
+					<Cone className="funnel-icon" size={16} /> {t('tab_funnels')}
 				</div>
 			),
 			key: 'funnels',
@@ -64,7 +66,7 @@ export default function TraceDetailsPage(): JSX.Element {
 		{
 			label: (
 				<div className="tab-item">
-					<TowerControl size={16} /> Views
+					<TowerControl size={16} /> {t('tab_views')}
 				</div>
 			),
 			key: 'saved-views',
