@@ -1,1 +1,11 @@
-// 레인 D 소유 — TrendLegend(숨김 토글) 스타일. 시드는 빈 파티션만 생성.
+// 레인 D 소유 — TrendLegend(숨김 토글) 스타일.
+
+.noc-c2-legend-item.hidden {
+	.noc-c2-legend-name {
+		text-decoration: line-through;
+		opacity: 0.55;
+	}
+	.noc-c2-legend-swatch {
+		opacity: 0.25;
+	}
+}

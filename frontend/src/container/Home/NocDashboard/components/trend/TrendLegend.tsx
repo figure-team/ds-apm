@@ -30,6 +30,7 @@ export default function TrendLegend({
 					className={`noc-c2-legend-item${it.missing ? ' missing' : ''}${
 						it.hidden ? ' hidden' : ''
 					}${hovered && hovered !== it.name ? ' dim' : ''}`}
+					aria-pressed={it.hidden}
 					onMouseEnter={(): void => onHover(it.name)}
 					onMouseLeave={(): void => onHover(null)}
 					onClick={(): void => onToggle(it.name)}
