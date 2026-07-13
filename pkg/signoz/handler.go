@@ -52,6 +52,7 @@ import (
 	"github.com/SigNoz/signoz/pkg/ruler/aihistorystore/sqlaihistorystore"
 	codercarunstore "github.com/SigNoz/signoz/pkg/ruler/coderca/runstore"
 	sqlincidentreporttemplatestore "github.com/SigNoz/signoz/pkg/ruler/incidentreport/sqltemplatestore"
+	"github.com/SigNoz/signoz/pkg/ruler/remediation"
 	"github.com/SigNoz/signoz/pkg/ruler/remediationstore"
 	"github.com/SigNoz/signoz/pkg/ruler/remediationtargetstore"
 	"github.com/SigNoz/signoz/pkg/ruler/signozruler"
@@ -118,6 +119,7 @@ func NewHandlers(
 	remStore remediationstore.Store,
 	remTargetStore remediationtargetstore.Store,
 	newExec func(time.Duration) signozruler.RemediationRunner,
+	remHealthChecker *remediation.HealthChecker,
 ) Handlers {
 	return Handlers{
 		SavedView:               implsavedview.NewHandler(modules.SavedView),
@@ -161,6 +163,7 @@ func NewHandlers(
 			remStore,
 			remTargetStore,
 			newExec,
+			remHealthChecker,
 		),
 	}
 }

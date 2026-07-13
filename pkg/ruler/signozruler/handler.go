@@ -16,6 +16,7 @@ import (
 	"github.com/SigNoz/signoz/pkg/ruler/aiconfigstore/secretbox"
 	codercarunstore "github.com/SigNoz/signoz/pkg/ruler/coderca/runstore"
 	sqltemplatestore "github.com/SigNoz/signoz/pkg/ruler/incidentreport/sqltemplatestore"
+	"github.com/SigNoz/signoz/pkg/ruler/remediation"
 	"github.com/SigNoz/signoz/pkg/ruler/remediationstore"
 	"github.com/SigNoz/signoz/pkg/ruler/remediationtargetstore"
 	"github.com/SigNoz/signoz/pkg/types/authtypes"
@@ -56,6 +57,11 @@ type handler struct {
 	remediationStore       remediationstore.Store
 	remediationTargetStore remediationtargetstore.Store
 	newRemediationExecutor func(timeout time.Duration) RemediationRunner
+	// remediationHealth merges per-target health into the targets list and is
+	// poked after create/update. Concrete pointer on purpose — an interface
+	// here would revive the typed-nil trap; all methods are nil-receiver safe
+	// so nil (unwired) simply reads as fail-open unknown (spec §2.4).
+	remediationHealth *remediation.HealthChecker
 }
 
 // SetRemediationDeps wires the remediation store, target store, and executor
@@ -91,6 +97,7 @@ func NewHandler(
 	remediationStore remediationstore.Store,
 	remediationTargetStore remediationtargetstore.Store,
 	newRemediationExecutor func(time.Duration) RemediationRunner,
+	remediationHealth *remediation.HealthChecker,
 ) ruler.Handler {
 	return &handler{
 		ruler:                  ruler,
@@ -110,6 +117,7 @@ func NewHandler(
 		remediationStore:       remediationStore,
 		remediationTargetStore: remediationTargetStore,
 		newRemediationExecutor: newRemediationExecutor,
+		remediationHealth:      remediationHealth,
 	}
 }
 

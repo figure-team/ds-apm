@@ -737,12 +737,28 @@ func New(
 	verifier := remediation.NewVerifier(remStore, alertStateLookup{am: alertmanager}, time.Now)
 	go verifier.Run(ctx, 30*time.Second, orgLister(orgGetter, providerSettings.Logger))
 
+	// 타겟 헬스체커: 경량 프로브(호스트키 지문 대조)로 전 타겟을 주기 점검해
+	// 설정 페이지 상태 배지를 공급한다. 기본 300초 — 프로브의 none-인증 시도가
+	// 남기는 sshd 'Invalid user' 라인이 fail2ban 기본 임계(5회/10분)를 넘지
+	// 않는 주기다. 10초 미만 설정은 NewHealthChecker가 무시한다(300초로 clamp).
+	//
+	// kill switch: 음수(-1 등)면 체커를 아예 기동하지 않는다. remHealthChecker는
+	// nil로 남고, handler가 nil-safe라 전 타겟이 unknown('확인 중')으로 fail-open
+	// 된다. ⚠️ fail2ban 자해 위험(Global Constraints·Task 7 참조)이 확인되면 이
+	// 값으로 재배포 없이 즉시 정지할 수 있다. 음수는 여기서 걸러야 한다 —
+	// NewHealthChecker에 그냥 넘기면 -1s는 <10s라 300초로 clamp되어 되살아난다.
+	var remHealthChecker *remediation.HealthChecker
+	if healthSecs := envInt("DS_APM_REMEDIATION_HEALTH_INTERVAL_SECONDS"); healthSecs >= 0 {
+		remHealthChecker = remediation.NewHealthChecker(remTargetStore, nil, time.Duration(healthSecs)*time.Second)
+		go remHealthChecker.Run(ctx)
+	}
+
 	// Initialize all handlers for the modules
 	registryHandler := factory.NewHandler(registry)
 	newExec := func(d time.Duration) signozruler.RemediationRunner {
 		return remediation.NewExecutor(d)
 	}
-	handlers := NewHandlers(modules, providerSettings, analytics, querierHandler, licensing, global, flagger, gateway, telemetryMetadataStore, authz, zeus, registryHandler, alertmanager, rulerInstance, sqlstore, storeAware, aiConfigStore, aiCipher, storeAware, runbookDrafter, codercaRepoStore, codercaMapStore, codercaCfgStore, codercaRunStore, insecure, remStore, remTargetStore, newExec)
+	handlers := NewHandlers(modules, providerSettings, analytics, querierHandler, licensing, global, flagger, gateway, telemetryMetadataStore, authz, zeus, registryHandler, alertmanager, rulerInstance, sqlstore, storeAware, aiConfigStore, aiCipher, storeAware, runbookDrafter, codercaRepoStore, codercaMapStore, codercaCfgStore, codercaRunStore, insecure, remStore, remTargetStore, newExec, remHealthChecker)
 
 	// Initialize the API server (after registry so it can access service health)
 	apiserverInstance, err := factory.NewProviderFromNamedMap(

@@ -10,9 +10,11 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"golang.org/x/crypto/ssh"
 
+	"github.com/SigNoz/signoz/pkg/ruler/remediation"
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
 )
 
@@ -330,5 +332,171 @@ func TestRemediationTarget_Handlers_401WithoutClaims(t *testing.T) {
 				t.Fatalf("%s must 401 without claims, got %d", tc.name, rw.Code)
 			}
 		})
+	}
+}
+
+// fakeHealthLister는 remediation.NewHealthChecker의 targetLister를 구조적으로 만족.
+type fakeHealthLister struct{ targets []ruletypes.RemediationTarget }
+
+func (f fakeHealthLister) ListAll(context.Context) ([]ruletypes.RemediationTarget, error) {
+	return f.targets, nil
+}
+
+// 목록 응답 디코딩용 (render.Success 봉투).
+func decodeTargetList(t *testing.T, body string) remediationTargetListResponse {
+	t.Helper()
+	var resp struct {
+		Data remediationTargetListResponse `json:"data"`
+	}
+	if err := json.Unmarshal([]byte(body), &resp); err != nil {
+		t.Fatalf("decode list: %v (body=%s)", err, body)
+	}
+	return resp.Data
+}
+
+func TestRemediationTarget_List_MergesHealth(t *testing.T) {
+	h, _, targetStore, _ := newRemediationHandlerWithTargetStore(t)
+	stored := ruletypes.RemediationTarget{
+		ID: "3f2504e0-4f89-41d3-9a0c-0305e82c3301", OrgID: testOrgID,
+		Name: "site-a", Host: "10.0.0.5", Port: 22, User: "svc",
+		SealedCredential: "c2VhbGVk", CredentialKind: ruletypes.RemediationCredentialKindPrivateKey,
+		HostKeyFingerprint: "SHA256:abc", ServiceSelectors: []string{"svc-a"},
+		CreatedAt: "2026-07-01T00:00:00Z", UpdatedAt: "2026-07-01T00:00:00Z",
+	}
+	targetStore.seed(stored)
+
+	checker := remediation.NewHealthChecker(
+		fakeHealthLister{targets: []ruletypes.RemediationTarget{stored}},
+		func(context.Context, string, int, time.Duration) (string, string, error) {
+			return "SHA256:abc", "ssh-ed25519", nil // 저장 지문과 일치 → healthy
+		},
+		time.Hour,
+	)
+	checker.SweepOnce(context.Background())
+	h.remediationHealth = checker
+
+	rw := httptest.NewRecorder()
+	h.ListRemediationTargets(rw, authedTargetReq(http.MethodGet, "/api/v2/ds/remediation/targets", "", nil))
+	if rw.Code != http.StatusOK {
+		t.Fatalf("want 200, got %d (body=%s)", rw.Code, rw.Body.String())
+	}
+	got := decodeTargetList(t, rw.Body.String())
+	if len(got.Targets) != 1 || got.Targets[0].Health == nil {
+		t.Fatalf("health must be merged into the list response: %+v", got.Targets)
+	}
+	if got.Targets[0].Health.Status != "healthy" {
+		t.Fatalf("status: got %q want healthy", got.Targets[0].Health.Status)
+	}
+	if got.Targets[0].Health.CheckedAt == "" {
+		t.Fatal("checkedAt must be present for a probed target")
+	}
+}
+
+// 체커 미배선(nil)이면 전부 unknown — fail-open (spec §3).
+func TestRemediationTarget_List_NilCheckerUnknown(t *testing.T) {
+	h, _, targetStore, _ := newRemediationHandlerWithTargetStore(t)
+	targetStore.seed(ruletypes.RemediationTarget{
+		ID: "3f2504e0-4f89-41d3-9a0c-0305e82c3301", OrgID: testOrgID,
+		Name: "site-a", Host: "10.0.0.5", Port: 22, User: "svc",
+		SealedCredential: "c2VhbGVk", CredentialKind: ruletypes.RemediationCredentialKindPrivateKey,
+		HostKeyFingerprint: "SHA256:abc", ServiceSelectors: []string{"svc-a"},
+		CreatedAt: "2026-07-01T00:00:00Z", UpdatedAt: "2026-07-01T00:00:00Z",
+	})
+
+	rw := httptest.NewRecorder()
+	h.ListRemediationTargets(rw, authedTargetReq(http.MethodGet, "/api/v2/ds/remediation/targets", "", nil))
+	got := decodeTargetList(t, rw.Body.String())
+	if len(got.Targets) != 1 || got.Targets[0].Health == nil {
+		t.Fatalf("nil checker must still emit health: %+v", got.Targets)
+	}
+	if got.Targets[0].Health.Status != "unknown" {
+		t.Fatalf("nil checker → unknown, got %q", got.Targets[0].Health.Status)
+	}
+	if got.Targets[0].Health.CheckedAt != "" {
+		t.Fatal("unknown must omit checkedAt")
+	}
+}
+
+// 생성 성공 시 Poke가 비동기로 상태를 채운다 (응답은 즉시 201).
+func TestRemediationTarget_Create_PokesChecker(t *testing.T) {
+	h, _, _, _ := newRemediationHandlerWithTargetStore(t)
+	checker := remediation.NewHealthChecker(
+		fakeHealthLister{},
+		func(context.Context, string, int, time.Duration) (string, string, error) {
+			return "SHA256:abc", "ssh-ed25519", nil
+		},
+		time.Hour,
+	)
+	h.remediationHealth = checker
+
+	body := validUpsertBody(t, &remediationCredentialRequest{Kind: "private_key", PrivateKeyPEM: genEd25519PEM(t)})
+	rw := httptest.NewRecorder()
+	h.CreateRemediationTarget(rw, authedTargetReq(http.MethodPost, "/api/v2/ds/remediation/targets", body, nil))
+	if rw.Code != http.StatusCreated {
+		t.Fatalf("want 201, got %d (body=%s)", rw.Code, rw.Body.String())
+	}
+	var created struct {
+		Data remediationTargetWire `json:"data"`
+	}
+	if err := json.Unmarshal(rw.Body.Bytes(), &created); err != nil {
+		t.Fatalf("decode created: %v", err)
+	}
+	deadline := time.Now().Add(2 * time.Second)
+	for {
+		if hlt, ok := checker.Snapshot()[created.Data.ID]; ok {
+			if hlt.Status != remediation.TargetHealthHealthy {
+				t.Fatalf("poked status: got %q", hlt.Status)
+			}
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("Poke result never landed in the checker")
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+}
+
+// 수정 성공 시에도 Poke — 변경된 host/지문 기준으로 즉시 재프로브된다.
+func TestRemediationTarget_Update_PokesChecker(t *testing.T) {
+	h, _, targetStore, _ := newRemediationHandlerWithTargetStore(t)
+	stored := ruletypes.RemediationTarget{
+		ID: "3f2504e0-4f89-41d3-9a0c-0305e82c3301", OrgID: testOrgID,
+		Name: "site-a", Host: "10.0.0.5", Port: 22, User: "svc",
+		SealedCredential: genEd25519PEM(t), CredentialKind: ruletypes.RemediationCredentialKindPrivateKey,
+		HostKeyFingerprint: "SHA256:abc", ServiceSelectors: []string{"svc-a"},
+		CreatedAt: "2026-07-01T00:00:00Z", UpdatedAt: "2026-07-01T00:00:00Z",
+	}
+	targetStore.seed(stored)
+	checker := remediation.NewHealthChecker(
+		fakeHealthLister{},
+		func(context.Context, string, int, time.Duration) (string, string, error) {
+			return "SHA256:abc", "ssh-ed25519", nil
+		},
+		time.Hour,
+	)
+	h.remediationHealth = checker
+
+	// credential 생략 = 기존 키 유지 경로 (spec §3.2와 동일한 기존 계약).
+	body := validUpsertBody(t, nil)
+	rw := httptest.NewRecorder()
+	h.UpdateRemediationTarget(rw, authedTargetReq(
+		http.MethodPut, "/api/v2/ds/remediation/targets/"+stored.ID, body,
+		map[string]string{"targetId": stored.ID},
+	))
+	if rw.Code != http.StatusOK {
+		t.Fatalf("want 200, got %d (body=%s)", rw.Code, rw.Body.String())
+	}
+	deadline := time.Now().Add(2 * time.Second)
+	for {
+		if hlt, ok := checker.Snapshot()[stored.ID]; ok {
+			if hlt.Status != remediation.TargetHealthHealthy {
+				t.Fatalf("poked status: got %q", hlt.Status)
+			}
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("update Poke result never landed in the checker")
+		}
+		time.Sleep(10 * time.Millisecond)
 	}
 }

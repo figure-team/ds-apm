@@ -84,3 +84,30 @@ func TestResolve_NotFoundWhenNoServiceLabel(t *testing.T) {
 		t.Fatal("expected not-found when service.name label absent")
 	}
 }
+
+func TestListAll_ReturnsEveryOrg(t *testing.T) {
+	s := newTestStore(t)
+	ctx := context.Background()
+	a := sampleTarget()
+	b := sampleTarget()
+	b.ID = "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+	b.OrgID = "org-2"
+	b.Name = "prod-db-01"
+	if err := s.Create(ctx, "org-1", a); err != nil {
+		t.Fatalf("create a: %v", err)
+	}
+	if err := s.Create(ctx, "org-2", b); err != nil {
+		t.Fatalf("create b: %v", err)
+	}
+	all, err := s.ListAll(ctx)
+	if err != nil {
+		t.Fatalf("listAll: %v", err)
+	}
+	if len(all) != 2 {
+		t.Fatalf("want 2 targets across orgs, got %d", len(all))
+	}
+	// org_id ASC 정렬 — org-1의 a가 먼저.
+	if all[0].OrgID != "org-1" || all[1].OrgID != "org-2" {
+		t.Fatalf("ordering: got %s, %s", all[0].OrgID, all[1].OrgID)
+	}
+}

@@ -7,6 +7,7 @@ import {
 	deleteRemediationTarget,
 	listRemediationTargets,
 	RemediationTargetWire,
+	TargetHealthWire,
 	testRemediationConnection,
 } from 'api/remediationTargets';
 
@@ -20,6 +21,47 @@ type RowTestState =
 	| { status: 'fail'; error?: string };
 
 const FINGERPRINT_PREVIEW_LEN = 16;
+const REFRESH_INTERVAL_MS = 60_000;
+
+// 헬스 배지 매핑 — unknown/부재는 매핑에 없고 '확인 중' 기본 분기로 처리.
+const HEALTH_BADGE: Partial<
+	Record<
+		TargetHealthWire['status'],
+		{ badge: 'success' | 'error' | 'warning'; text: string }
+	>
+> = {
+	healthy: { badge: 'success', text: '정상' },
+	unreachable: { badge: 'error', text: '연결 불가' },
+	mismatch: { badge: 'warning', text: '호스트키 불일치' },
+};
+
+const MISMATCH_HINT =
+	'저장된 지문과 다릅니다 — 키 로테이션 또는 위변조 의심. 수정 화면에서 지문을 다시 가져와 저장하면 해소됩니다';
+
+function renderHealthBadge(health?: TargetHealthWire): JSX.Element {
+	const meta = health && HEALTH_BADGE[health.status];
+	if (!health || !meta) {
+		return <Badge status="default" text="확인 중" />;
+	}
+	const lines: string[] = [];
+	if (health.status === 'mismatch') {
+		lines.push(MISMATCH_HINT);
+	} else if (health.error) {
+		lines.push(health.error);
+	}
+	if (health.checkedAt) {
+		lines.push(`마지막 확인: ${new Date(health.checkedAt).toLocaleString()}`);
+	}
+	const badge = <Badge status={meta.badge} text={meta.text} />;
+	if (lines.length === 0) {
+		return badge;
+	}
+	return (
+		<Tooltip title={lines.join('\n')}>
+			<span>{badge}</span>
+		</Tooltip>
+	);
+}
 
 function RemediationTargetSettings(): JSX.Element {
 	const { t } = useTranslation(['routes']);
@@ -42,8 +84,10 @@ function RemediationTargetSettings(): JSX.Element {
 		RemediationTargetWire | undefined
 	>(undefined);
 
-	const load = useCallback(async (): Promise<void> => {
-		setLoading(true);
+	const load = useCallback(async (silent = false): Promise<void> => {
+		if (!silent) {
+			setLoading(true);
+		}
 		try {
 			const res = await listRemediationTargets();
 			setTargets(res.targets ?? []);
@@ -51,12 +95,20 @@ function RemediationTargetSettings(): JSX.Element {
 		} catch {
 			// 로드 실패는 조용히 무시 — 개별 작업에서 에러가 드러난다.
 		} finally {
-			setLoading(false);
+			if (!silent) {
+				setLoading(false);
+			}
 		}
 	}, []);
 
 	useEffect(() => {
 		void load();
+		// 백엔드 헬스체커(기본 300초 순회 + 저장 직후 Poke) 결과를 주기 반영.
+		// silent — 매 갱신마다 테이블 스피너가 번쩍이지 않게 한다 (스펙 §4.3).
+		const timer = setInterval(() => {
+			void load(true);
+		}, REFRESH_INTERVAL_MS);
+		return (): void => clearInterval(timer);
 	}, [load]);
 
 	const openCreate = useCallback((): void => {
@@ -169,6 +221,12 @@ function RemediationTargetSettings(): JSX.Element {
 					</Tooltip>
 				);
 			},
+		},
+		{
+			title: '상태',
+			key: 'health',
+			render: (_: unknown, row: RemediationTargetWire): JSX.Element =>
+				renderHealthBadge(row.health),
 		},
 		{
 			title: '마지막 테스트',

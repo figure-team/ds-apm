@@ -1,5 +1,12 @@
 import { GeneratedAPIInstance } from 'api/generatedAPIInstance';
 
+// 백엔드 헬스체커의 타겟별 상태 (list 응답에서만 채워짐, 스펙 §3).
+export interface TargetHealthWire {
+	status: 'healthy' | 'unreachable' | 'mismatch' | 'unknown';
+	checkedAt?: string;
+	error?: string;
+}
+
 // RemediationTargetWire is the read shape of /api/v2/ds/remediation/targets.
 // The sealed credential is never present; hasCredential drives the edit form's
 // "keep existing key" default (design §3.5).
@@ -16,6 +23,8 @@ export interface RemediationTargetWire {
 	hasCredential: boolean;
 	createdAt: string;
 	updatedAt: string;
+	// list 응답 전용; create/update 응답과 구버전 백엔드는 생략.
+	health?: TargetHealthWire;
 }
 
 // Exactly one of privateKeyPEM / sealedPrivateKey must be set (design §3.2).

@@ -117,6 +117,24 @@ func (s *SQLStore) List(ctx context.Context, orgID string) ([]ruletypes.Remediat
 	return out, nil
 }
 
+// ListAll returns every org's targets — the health checker's sweep input
+// (spec §2.3). Deliberately NOT part of remediationtargetstore.Store: adding
+// a method there breaks every fake in other packages; the checker consumes
+// this via its own narrow targetLister interface.
+func (s *SQLStore) ListAll(ctx context.Context) ([]ruletypes.RemediationTarget, error) {
+	var rows []targetRow
+	err := s.sqlstore.BunDB().NewSelect().Model(&rows).
+		OrderExpr("org_id ASC, name ASC").Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]ruletypes.RemediationTarget, len(rows))
+	for i, r := range rows {
+		out[i] = r.toDomain()
+	}
+	return out, nil
+}
+
 // Resolve reads only service.name (design §3.3) and returns the first target
 // (name ASC) whose ServiceSelectors contains that value. not-found otherwise.
 func (s *SQLStore) Resolve(ctx context.Context, orgID string, labels map[string]string) (ruletypes.RemediationTarget, error) {

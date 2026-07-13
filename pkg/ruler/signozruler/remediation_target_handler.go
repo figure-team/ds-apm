@@ -31,18 +31,41 @@ var errRemediationEncryptionNotReady = errors.Newf(errors.TypeInvalidInput, erro
 // carried here (design §3.5); HasCredential is the derived "keeps existing key"
 // hint for the edit form.
 type remediationTargetWire struct {
-	ID                 string   `json:"id"`
-	OrgID              string   `json:"orgId"`
-	Name               string   `json:"name"`
-	Host               string   `json:"host"`
-	Port               int      `json:"port"`
-	User               string   `json:"user"`
-	CredentialKind     string   `json:"credentialKind"`
-	HostKeyFingerprint string   `json:"hostKeyFingerprint"`
-	ServiceSelectors   []string `json:"serviceSelectors"`
-	HasCredential      bool     `json:"hasCredential"`
-	CreatedAt          string   `json:"createdAt"`
-	UpdatedAt          string   `json:"updatedAt"`
+	ID                 string                       `json:"id"`
+	OrgID              string                       `json:"orgId"`
+	Name               string                       `json:"name"`
+	Host               string                       `json:"host"`
+	Port               int                          `json:"port"`
+	User               string                       `json:"user"`
+	CredentialKind     string                       `json:"credentialKind"`
+	HostKeyFingerprint string                       `json:"hostKeyFingerprint"`
+	ServiceSelectors   []string                     `json:"serviceSelectors"`
+	HasCredential      bool                         `json:"hasCredential"`
+	CreatedAt          string                       `json:"createdAt"`
+	UpdatedAt          string                       `json:"updatedAt"`
+	Health             *remediationTargetHealthWire `json:"health,omitempty"`
+}
+
+// remediationTargetHealthWire is the badge payload (spec §3). Only the list
+// response carries it; create/update responses omit it (FE reloads the list).
+type remediationTargetHealthWire struct {
+	Status    string `json:"status"`
+	CheckedAt string `json:"checkedAt,omitempty"`
+	Error     string `json:"error,omitempty"`
+}
+
+// healthWireFor maps a checker snapshot entry to wire form. Missing entry or
+// unknown → bare unknown (checkedAt 생략, spec §3).
+func healthWireFor(snap map[string]remediation.TargetHealth, id string) *remediationTargetHealthWire {
+	hlt, ok := snap[id]
+	if !ok || hlt.Status == remediation.TargetHealthUnknown {
+		return &remediationTargetHealthWire{Status: string(remediation.TargetHealthUnknown)}
+	}
+	w := &remediationTargetHealthWire{Status: string(hlt.Status), Error: hlt.Error}
+	if !hlt.CheckedAt.IsZero() {
+		w.CheckedAt = hlt.CheckedAt.UTC().Format(time.RFC3339)
+	}
+	return w
 }
 
 type remediationTargetListResponse struct {
@@ -192,9 +215,12 @@ func (h *handler) ListRemediationTargets(rw http.ResponseWriter, req *http.Reque
 		render.Error(rw, errors.WrapInternalf(err, errors.CodeInternal, "list remediation targets"))
 		return
 	}
+	snap := h.remediationHealth.Snapshot() // nil 체커 → nil 맵 → 전부 unknown (fail-open)
 	wire := make([]remediationTargetWire, 0, len(targets))
 	for _, t := range targets {
-		wire = append(wire, toRemediationTargetWire(t))
+		w := toRemediationTargetWire(t)
+		w.Health = healthWireFor(snap, t.ID)
+		wire = append(wire, w)
 	}
 	render.Success(rw, http.StatusOK, remediationTargetListResponse{
 		Targets:         wire,
@@ -246,6 +272,7 @@ func (h *handler) CreateRemediationTarget(rw http.ResponseWriter, req *http.Requ
 		render.Error(rw, errors.WrapInvalidInputf(err, errors.CodeInvalidInput, "create remediation target"))
 		return
 	}
+	h.remediationHealth.Poke(target) // 신규 타겟 첫 배지를 즉시 채운다 (fire-and-forget, spec §2.2)
 	render.Success(rw, http.StatusCreated, toRemediationTargetWire(target))
 }
 
@@ -314,6 +341,7 @@ func (h *handler) UpdateRemediationTarget(rw http.ResponseWriter, req *http.Requ
 		render.Error(rw, errors.WrapInvalidInputf(err, errors.CodeInvalidInput, "update remediation target"))
 		return
 	}
+	h.remediationHealth.Poke(target) // 수정된 host/port/지문 기준 즉시 재프로브
 	render.Success(rw, http.StatusOK, toRemediationTargetWire(target))
 }
 

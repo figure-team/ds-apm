@@ -1,4 +1,6 @@
-import { fireEvent, render, screen, waitFor, within } from 'tests/test-utils';
+import { act, fireEvent, render, screen, waitFor, within } from 'tests/test-utils';
+
+import type { TargetHealthWire } from 'api/remediationTargets';
 
 import RemediationTargetSettings from '../RemediationTargetSettings';
 
@@ -41,7 +43,7 @@ const target2 = {
 };
 
 function mockListResponse(
-	targets: typeof target1[],
+	targets: Array<typeof target1 & { health?: TargetHealthWire }>,
 	encryptionReady = true,
 ): void {
 	mockList.mockResolvedValue({ targets, encryptionReady });
@@ -151,5 +153,56 @@ describe('RemediationTargetSettings', () => {
 		fireEvent.click(within(firstRow).getByRole('button', { name: '테스트' }));
 
 		expect(await within(firstRow).findByText('실패')).toBeInTheDocument();
+	});
+
+	// 헬스 배지: 4상태 렌더 (healthy/unreachable/mismatch/부재→확인 중)
+	it('renders a health badge per target state', async () => {
+		mockListResponse([
+			{
+				...target1,
+				health: { status: 'healthy', checkedAt: '2026-07-10T02:00:00Z' },
+			},
+			{
+				...target2,
+				health: {
+					status: 'unreachable',
+					checkedAt: '2026-07-10T02:00:00Z',
+					error: 'dial tcp 10.0.0.2:2222: i/o timeout',
+				},
+			},
+			{
+				...target1,
+				id: 'tgt-3',
+				name: 'cache-01',
+				health: { status: 'mismatch', checkedAt: '2026-07-10T02:00:00Z' },
+			},
+			{ ...target1, id: 'tgt-4', name: 'batch-01' },
+		]);
+		render(<RemediationTargetSettings />);
+
+		expect(await screen.findByText('정상')).toBeInTheDocument();
+		expect(screen.getByText('연결 불가')).toBeInTheDocument();
+		expect(screen.getByText('호스트키 불일치')).toBeInTheDocument();
+		expect(screen.getByText('확인 중')).toBeInTheDocument();
+	});
+
+	// 60초 인터벌 재조회 — 스피너 없이(silent) 목록만 갱신
+	it('silently refreshes the list on the 60s interval', async () => {
+		const setIntervalSpy = jest.spyOn(window, 'setInterval');
+		render(<RemediationTargetSettings />);
+		expect(await screen.findByText('web-01')).toBeInTheDocument();
+		expect(mockList).toHaveBeenCalledTimes(1);
+
+		const call = setIntervalSpy.mock.calls.find(([, ms]) => ms === 60000);
+		expect(call).toBeDefined();
+		const tick = call?.[0] as () => void;
+
+		act(() => {
+			tick();
+		});
+		await waitFor(() => expect(mockList).toHaveBeenCalledTimes(2));
+		// silent: 재조회 중에도 테이블 스피너가 돌지 않는다
+		expect(document.querySelector('.ant-spin-spinning')).toBeNull();
+		setIntervalSpy.mockRestore();
 	});
 });
