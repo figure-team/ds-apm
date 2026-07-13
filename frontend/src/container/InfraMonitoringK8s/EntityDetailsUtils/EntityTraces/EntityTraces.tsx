@@ -196,7 +196,9 @@ function EntityTraces({
 				</div>
 			</div>
 
-			{isError && <ErrorText>{data?.error || 'Something went wrong'}</ErrorText>}
+			{isError && (
+				<ErrorText>{data?.error || t('something_went_wrong')}</ErrorText>
+			)}
 
 			{isLoading && traces.length === 0 && <TracesLoading />}
 

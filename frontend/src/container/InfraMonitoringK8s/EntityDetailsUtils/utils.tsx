@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import { Typography } from 'antd';
 import { PANEL_TYPES } from 'constants/queryBuilder';
@@ -99,14 +100,16 @@ export function EntityDetailsEmptyContainer({
 	view: 'logs' | 'traces' | 'events';
 	category: InfraMonitoringEntity;
 }): React.ReactElement {
-	const label = category.slice(0, category.length);
+	const { t } = useTranslation('infraMonitoring');
 
 	return (
 		<div className="no-logs-found">
 			<Typography.Text type="secondary">
 				<Ghost size={24} color={Color.BG_AMBER_500} />
-				{`No ${view} found for this ${label}
-				in the selected time range.`}
+				{t('entity_empty_state', {
+					view: t(`view_${view}`),
+					entity: t(`entity_${category}`),
+				})}
 			</Typography.Text>
 		</div>
 	);

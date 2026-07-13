@@ -30,7 +30,7 @@ function PodMetrics({
 	clusterName: string;
 	timestamp: string;
 }): JSX.Element {
-	const { t } = useTranslation(['logs', 'common']);
+	const { t } = useTranslation(['logs', 'common', 'infraMonitoring']);
 	const { start, end, verticalLineTimestamp } = useMemo(() => {
 		const logTimestamp = dayjs(timestamp);
 		const now = dayjs();
@@ -151,7 +151,9 @@ function PodMetrics({
 		<Row gutter={24}>
 			{queries.map((query, idx) => (
 				<Col span={12} key={podWidgetInfo[idx].title}>
-					<Typography.Text>{podWidgetInfo[idx].title}</Typography.Text>
+					<Typography.Text>
+						{t(`infraMonitoring:${podWidgetInfo[idx].title}`)}
+					</Typography.Text>
 					<Card bordered className="infra-metrics-card" ref={graphRef}>
 						{renderCardContent(query, idx)}
 					</Card>

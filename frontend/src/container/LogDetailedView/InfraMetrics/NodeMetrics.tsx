@@ -37,7 +37,7 @@ function NodeMetrics({
 	hostName: string;
 	timestamp: string;
 }): JSX.Element {
-	const { t } = useTranslation(['logs', 'common']);
+	const { t } = useTranslation(['logs', 'common', 'infraMonitoring']);
 	const { start, end, verticalLineTimestamp } = useMemo(() => {
 		const logTimestamp = dayjs(timestamp);
 		const now = dayjs();
@@ -168,7 +168,9 @@ function NodeMetrics({
 		<Row gutter={24}>
 			{queries.map((query, idx) => (
 				<Col span={12} key={widgetInfo[idx].title}>
-					<Typography.Text>{widgetInfo[idx].title}</Typography.Text>
+					<Typography.Text>
+						{t(`infraMonitoring:${widgetInfo[idx].title}`)}
+					</Typography.Text>
 					<Card bordered className="infra-metrics-card" ref={graphRef}>
 						{renderCardContent(query, idx)}
 					</Card>

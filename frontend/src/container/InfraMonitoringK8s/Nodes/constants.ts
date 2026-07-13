@@ -34,9 +34,9 @@ export const k8sNodeGetSelectedItemFilters = (
 
 export const k8sNodeDetailsMetadataConfig: K8sDetailsMetadataConfig<K8sNodeData>[] =
 	[
-		{ label: 'Node Name', getValue: (p): string => p.meta.k8s_node_name },
+		{ label: 'meta_node_name', getValue: (p): string => p.meta.k8s_node_name },
 		{
-			label: 'Cluster Name',
+			label: 'meta_cluster_name',
 			getValue: (p): string => p.meta.k8s_cluster_name,
 		},
 	];
@@ -65,43 +65,43 @@ export const k8sNodeGetEntityName = (item: K8sNodeData): string =>
 
 export const nodeWidgetInfo = [
 	{
-		title: 'CPU Usage (cores)',
+		title: 'widget_cpu_usage_cores',
 		yAxisUnit: '',
 	},
 	{
-		title: 'Memory Usage (bytes)',
+		title: 'widget_memory_usage_bytes',
 		yAxisUnit: 'bytes',
 	},
 	{
-		title: 'CPU Usage (%)',
+		title: 'widget_cpu_usage_pct',
 		yAxisUnit: 'percentunit',
 	},
 	{
-		title: 'Memory Usage (%)',
+		title: 'widget_memory_usage_pct',
 		yAxisUnit: 'percentunit',
 	},
 	{
-		title: 'Pods by CPU (top 10)',
+		title: 'widget_pods_by_cpu_top10',
 		yAxisUnit: '',
 	},
 	{
-		title: 'Pods by Memory (top 10)',
+		title: 'widget_pods_by_memory_top10',
 		yAxisUnit: 'bytes',
 	},
 	{
-		title: 'Network error count',
+		title: 'widget_network_errors_count',
 		yAxisUnit: '',
 	},
 	{
-		title: 'Network IO rate',
+		title: 'widget_network_io_rate',
 		yAxisUnit: 'binBps',
 	},
 	{
-		title: 'Filesystem usage (bytes)',
+		title: 'widget_filesystem_usage_bytes',
 		yAxisUnit: 'bytes',
 	},
 	{
-		title: 'Filesystem usage (%)',
+		title: 'widget_filesystem_usage_pct',
 		yAxisUnit: 'percentunit',
 	},
 ];

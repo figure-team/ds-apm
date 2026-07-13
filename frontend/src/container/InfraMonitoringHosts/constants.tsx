@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import { Progress, Tag, Typography } from 'antd';
 import {
@@ -45,23 +46,29 @@ export function getMemoryProgressColor(percent: number): string {
 	return Color.BG_FOREST_500;
 }
 
+function HostStatusTag({ active }: { active: boolean }): JSX.Element {
+	const { t } = useTranslation('infraMonitoring');
+
+	return (
+		<Tag
+			className={`${infraHostsStyles.infraMonitoringTags} ${
+				active ? infraHostsStyles.tagsActive : infraHostsStyles.tagsInactive
+			}`}
+			bordered
+		>
+			{t(active ? 'status_active' : 'status_inactive')}
+		</Tag>
+	);
+}
+
 export const hostDetailsMetadataConfig: K8sDetailsMetadataConfig<HostData>[] = [
 	{
-		label: 'STATUS',
+		label: 'meta_status',
 		getValue: (h): string => (h.active ? 'ACTIVE' : 'INACTIVE'),
-		render: (value, h): React.ReactNode => (
-			<Tag
-				className={`${infraHostsStyles.infraMonitoringTags} ${
-					h.active ? infraHostsStyles.tagsActive : infraHostsStyles.tagsInactive
-				}`}
-				bordered
-			>
-				{value}
-			</Tag>
-		),
+		render: (_value, h): React.ReactNode => <HostStatusTag active={h.active} />,
 	},
 	{
-		label: 'OPERATING SYSTEM',
+		label: 'meta_operating_system',
 		getValue: (h): string => h.os || '-',
 		render: (value): React.ReactNode =>
 			value !== '-' ? (
@@ -73,7 +80,7 @@ export const hostDetailsMetadataConfig: K8sDetailsMetadataConfig<HostData>[] = [
 			),
 	},
 	{
-		label: 'CPU USAGE',
+		label: 'meta_cpu_usage',
 		getValue: (h): number => h.cpu * 100,
 		render: (value): React.ReactNode => (
 			<Progress
@@ -84,7 +91,7 @@ export const hostDetailsMetadataConfig: K8sDetailsMetadataConfig<HostData>[] = [
 		),
 	},
 	{
-		label: 'MEMORY USAGE',
+		label: 'meta_memory_usage',
 		getValue: (h): number => h.memory * 100,
 		render: (value): React.ReactNode => (
 			<Progress

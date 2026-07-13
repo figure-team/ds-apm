@@ -155,15 +155,20 @@ export default function Events({
 	});
 
 	const columns: TableColumnsType<EventDataType> = [
-		{ title: 'Severity', dataIndex: 'severity', key: 'severity', width: 100 },
 		{
-			title: 'Timestamp',
+			title: t('col_severity'),
+			dataIndex: 'severity',
+			key: 'severity',
+			width: 100,
+		},
+		{
+			title: t('col_timestamp'),
 			dataIndex: 'timestamp',
 			width: 200,
 			ellipsis: true,
 			key: 'timestamp',
 		},
-		{ title: 'Body', dataIndex: 'body', key: 'body' },
+		{ title: t('col_body'), dataIndex: 'body', key: 'body' },
 	];
 
 	useEffect(() => {

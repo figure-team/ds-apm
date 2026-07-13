@@ -33,11 +33,11 @@ export const k8sStatefulSetGetSelectedItemFilters = (
 export const k8sStatefulSetDetailsMetadataConfig: K8sDetailsMetadataConfig<K8sStatefulSetsData>[] =
 	[
 		{
-			label: 'Statefulset Name',
+			label: 'meta_statefulset_name',
 			getValue: (p): string => p.meta.k8s_statefulset_name,
 		},
 		{
-			label: 'Namespace Name',
+			label: 'meta_namespace_name',
 			getValue: (p): string => p.meta.k8s_namespace_name,
 		},
 	];
@@ -70,27 +70,27 @@ export const k8sStatefulSetGetEntityName = (
 
 export const statefulSetWidgetInfo = [
 	{
-		title: 'CPU usage, request, limits',
+		title: 'widget_cpu_usage_request_limits',
 		yAxisUnit: '',
 	},
 	{
-		title: 'CPU request, limit util (%)',
+		title: 'widget_cpu_request_limit_util_pct',
 		yAxisUnit: 'percentunit',
 	},
 	{
-		title: 'Memory usage, request, limits',
+		title: 'widget_memory_usage_request_limits',
 		yAxisUnit: 'bytes',
 	},
 	{
-		title: 'Memory request, limit util (%)',
+		title: 'widget_memory_request_limit_util_pct',
 		yAxisUnit: 'percentunit',
 	},
 	{
-		title: 'Network IO',
+		title: 'widget_network_io',
 		yAxisUnit: 'binBps',
 	},
 	{
-		title: 'Network errors count',
+		title: 'widget_network_errors_count',
 		yAxisUnit: '',
 	},
 ];

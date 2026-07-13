@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import { Progress, Table, Tooltip, Typography } from 'antd';
 import type { ColumnsType } from 'antd/lib/table';
@@ -137,6 +138,7 @@ export function EventContents({
 }: {
 	data: Record<string, string> | undefined;
 }): JSX.Element {
+	const { t } = useTranslation('infraMonitoring');
 	const tableData = useMemo(
 		() =>
 			data ? Object.keys(data).map((key) => ({ key, value: data[key] })) : [],
@@ -145,7 +147,7 @@ export function EventContents({
 
 	const columns: ColumnsType<DataType> = [
 		{
-			title: 'Key',
+			title: t('col_key'),
 			dataIndex: 'key',
 			key: 'key',
 			width: 50,
@@ -154,7 +156,7 @@ export function EventContents({
 			render: (field: string): JSX.Element => <FieldRenderer field={field} />,
 		},
 		{
-			title: 'Value',
+			title: t('col_value'),
 			dataIndex: 'value',
 			key: 'value',
 			width: 50,

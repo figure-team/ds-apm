@@ -33,15 +33,15 @@ export const k8sJobGetSelectedItemFilters = (
 export const k8sJobDetailsMetadataConfig: K8sDetailsMetadataConfig<K8sJobsData>[] =
 	[
 		{
-			label: 'Job Name',
+			label: 'meta_job_name',
 			getValue: (p): string => p.meta.k8s_job_name,
 		},
 		{
-			label: 'Cluster Name',
+			label: 'meta_cluster_name',
 			getValue: (p): string => p.meta.k8s_cluster_name,
 		},
 		{
-			label: 'Namespace Name',
+			label: 'meta_namespace_name',
 			getValue: (p): string => p.meta.k8s_namespace_name,
 		},
 	];
@@ -70,19 +70,19 @@ export const k8sJobGetEntityName = (item: K8sJobsData): string =>
 
 export const jobWidgetInfo = [
 	{
-		title: 'CPU usage',
+		title: 'widget_cpu_usage',
 		yAxisUnit: '',
 	},
 	{
-		title: 'Memory usage, request, limits',
+		title: 'widget_memory_usage_request_limits',
 		yAxisUnit: 'bytes',
 	},
 	{
-		title: 'Network IO',
+		title: 'widget_network_io',
 		yAxisUnit: 'binBps',
 	},
 	{
-		title: 'Network errors count',
+		title: 'widget_network_errors_count',
 		yAxisUnit: '',
 	},
 ];

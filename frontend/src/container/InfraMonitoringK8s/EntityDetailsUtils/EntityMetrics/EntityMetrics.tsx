@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { QueryFunctionContext, useQueries, UseQueryResult } from 'react-query';
 import { Card, Col, Row, Skeleton, Typography } from 'antd';
 import cx from 'classnames';
@@ -71,6 +72,7 @@ function EntityMetrics<T>({
 	queryKey,
 	category,
 }: EntityMetricsProps<T>): JSX.Element {
+	const { t } = useTranslation('infraMonitoring');
 	const { featureFlags } = useAppContext();
 	const dotMetricsEnabled =
 		featureFlags?.find((flag) => flag.name === FeatureKeys.DOT_METRICS_ENABLED)
@@ -221,7 +223,7 @@ function EntityMetrics<T>({
 
 		if (query.error) {
 			const errorMessage =
-				(query.error as Error)?.message || 'Something went wrong';
+				(query.error as Error)?.message || t('something_went_wrong');
 			return <div>{errorMessage}</div>;
 		}
 
@@ -266,7 +268,7 @@ function EntityMetrics<T>({
 			<Row gutter={24} className="entity-metrics-container">
 				{queries.map((query, idx) => (
 					<Col ref={setElement(idx)} span={12} key={entityWidgetInfo[idx].title}>
-						<Typography.Text>{entityWidgetInfo[idx].title}</Typography.Text>
+						<Typography.Text>{t(entityWidgetInfo[idx].title)}</Typography.Text>
 						<Card bordered className="entity-metrics-card" ref={graphRef}>
 							{renderCardContent(query, idx)}
 						</Card>

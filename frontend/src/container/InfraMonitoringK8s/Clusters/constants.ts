@@ -31,7 +31,7 @@ export const k8sClusterGetSelectedItemFilters = (
 });
 
 export const k8sClusterDetailsMetadataConfig: K8sDetailsMetadataConfig<K8sClusterData>[] =
-	[{ label: 'Cluster Name', getValue: (p): string => p.meta.k8s_cluster_name }];
+	[{ label: 'meta_cluster_name', getValue: (p): string => p.meta.k8s_cluster_name }];
 
 export const k8sClusterInitialFilters = [QUERY_KEYS.K8S_CLUSTER_NAME];
 
@@ -53,35 +53,35 @@ export const k8sClusterGetEntityName = (item: K8sClusterData): string =>
 
 export const clusterWidgetInfo = [
 	{
-		title: 'CPU Usage, allocatable',
+		title: 'widget_cluster_cpu_usage_allocatable',
 		yAxisUnit: '',
 	},
 	{
-		title: 'Memory Usage, allocatable',
+		title: 'widget_cluster_memory_usage_allocatable',
 		yAxisUnit: 'bytes',
 	},
 	{
-		title: 'Ready Nodes',
+		title: 'widget_cluster_ready_nodes',
 		yAxisUnit: '',
 	},
 	{
-		title: 'NotReady Nodes',
+		title: 'widget_cluster_notready_nodes',
 		yAxisUnit: '',
 	},
 	{
-		title: 'Deployments available and desired',
+		title: 'widget_cluster_deployments_available_desired',
 		yAxisUnit: '',
 	},
 	{
-		title: 'Statefulset pods',
+		title: 'widget_cluster_statefulset_pods',
 		yAxisUnit: '',
 	},
 	{
-		title: 'Daemonset nodes',
+		title: 'widget_cluster_daemonset_nodes',
 		yAxisUnit: '',
 	},
 	{
-		title: 'Jobs',
+		title: 'widget_cluster_jobs',
 		yAxisUnit: '',
 	},
 ];

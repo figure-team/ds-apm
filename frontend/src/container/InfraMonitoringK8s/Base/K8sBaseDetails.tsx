@@ -624,7 +624,7 @@ function K8sBaseDetails<T>({
 			{isEntityLoading && <LoadingContainer />}
 			{isEntityError && (
 				<Typography.Text type="danger">
-					{entityResponse?.error || 'Failed to load entity details'}
+					{entityResponse?.error || t('failed_to_load_entity_details')}
 				</Typography.Text>
 			)}
 			{entity && !isEntityLoading && (
@@ -638,7 +638,7 @@ function K8sBaseDetails<T>({
 										type="secondary"
 										className="entity-details-metadata-label"
 									>
-										{config.label}
+										{t(config.label)}
 									</Typography.Text>
 								))}
 							</div>

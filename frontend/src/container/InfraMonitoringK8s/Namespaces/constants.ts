@@ -35,9 +35,9 @@ export const k8sNamespaceGetSelectedItemFilters = (
 
 export const k8sNamespaceDetailsMetadataConfig: K8sDetailsMetadataConfig<K8sNamespacesData>[] =
 	[
-		{ label: 'Namespace Name', getValue: (p): string => p.namespaceName },
+		{ label: 'meta_namespace_name', getValue: (p): string => p.namespaceName },
 		{
-			label: 'Cluster Name',
+			label: 'meta_cluster_name',
 			getValue: (p): string => p.meta.k8s_cluster_name,
 		},
 	];
@@ -65,43 +65,43 @@ export const k8sNamespaceGetEntityName = (item: K8sNamespacesData): string =>
 
 export const namespaceWidgetInfo = [
 	{
-		title: 'CPU Usage (cores)',
+		title: 'widget_cpu_usage_cores',
 		yAxisUnit: '',
 	},
 	{
-		title: 'Memory Usage (bytes)',
+		title: 'widget_memory_usage_bytes',
 		yAxisUnit: 'bytes',
 	},
 	{
-		title: 'Pods CPU (top 10)',
+		title: 'widget_pods_cpu_top10',
 		yAxisUnit: '',
 	},
 	{
-		title: 'Pods Memory (top 10)',
+		title: 'widget_pods_memory_top10',
 		yAxisUnit: 'bytes',
 	},
 	{
-		title: 'Network rate',
+		title: 'widget_network_rate',
 		yAxisUnit: 'binBps',
 	},
 	{
-		title: 'Network errors',
+		title: 'widget_network_errors',
 		yAxisUnit: '',
 	},
 	{
-		title: 'StatefulSets',
+		title: 'widget_statefulsets',
 		yAxisUnit: '',
 	},
 	{
-		title: 'ReplicaSets',
+		title: 'widget_replicasets',
 		yAxisUnit: '',
 	},
 	{
-		title: 'DaemonSets',
+		title: 'widget_daemonsets',
 		yAxisUnit: '',
 	},
 	{
-		title: 'Deployments',
+		title: 'widget_deployments',
 		yAxisUnit: '',
 	},
 ];

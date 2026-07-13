@@ -258,7 +258,7 @@ describe('EntityEvents', () => {
 		});
 
 		renderEntityEvents();
-		expect(screen.getByText(/No events found for this pods/)).toBeInTheDocument();
+		expect(screen.getByText('entity_empty_state')).toBeInTheDocument();
 	});
 
 	it('renders loader when fetching events', () => {

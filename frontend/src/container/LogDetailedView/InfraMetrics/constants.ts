@@ -2562,35 +2562,35 @@ export const getHostQueryPayload = (
 
 export const podWidgetInfo = [
 	{
-		title: 'CPU usage',
+		title: 'widget_cpu_usage',
 		yAxisUnit: '',
 	},
 	{
-		title: 'Memory Usage',
+		title: 'widget_memory_usage',
 		yAxisUnit: 'bytes',
 	},
 	{
-		title: 'Pod CPU usage [% of Request]',
+		title: 'widget_pod_cpu_usage_of_request',
 		yAxisUnit: 'percent',
 	},
 	{
-		title: 'Pod CPU usage [% of Limit]',
+		title: 'widget_pod_cpu_usage_of_limit',
 		yAxisUnit: 'percent',
 	},
 	{
-		title: 'Pod memory usage [% of Request]',
+		title: 'widget_pod_memory_usage_of_request',
 		yAxisUnit: 'percent',
 	},
 	{
-		title: 'Pod memory usage [% of Limit]',
+		title: 'widget_pod_memory_usage_of_limit',
 		yAxisUnit: 'percent',
 	},
 	{
-		title: 'Pod filesystem usage [%]',
+		title: 'widget_pod_filesystem_usage_pct',
 		yAxisUnit: 'percentunit',
 	},
 	{
-		title: 'Pod network IO',
+		title: 'widget_pod_network_io',
 		yAxisUnit: 'binBps',
 	},
 ];
@@ -2602,34 +2602,34 @@ export const VIEW_TYPES = {
 
 export const nodeWidgetInfo = [
 	{
-		title: 'Node CPU usage',
+		title: 'widget_node_cpu_usage',
 		yAxisUnit: 'percentunit',
 	},
 	{
-		title: 'Node memory usage (WSS)',
+		title: 'widget_node_memory_usage_wss',
 		yAxisUnit: 'percentunit',
 	},
 	{
-		title: 'Node network IO',
+		title: 'widget_node_network_io',
 		yAxisUnit: 'binBps',
 	},
 	{
-		title: 'Node filesystem usage',
+		title: 'widget_node_filesystem_usage',
 		yAxisUnit: 'percentunit',
 	},
 ];
 
 export const hostWidgetInfo = [
-	{ title: 'CPU Usage', yAxisUnit: 'percentunit' },
-	{ title: 'Memory Usage', yAxisUnit: 'bytes' },
-	{ title: 'System Load Average', yAxisUnit: '' },
-	{ title: 'Network usage (bytes)', yAxisUnit: 'bytes' },
-	{ title: 'Network usage (packet/s)', yAxisUnit: 'pps' },
-	{ title: 'Network errors', yAxisUnit: 'short' },
-	{ title: 'Network drops', yAxisUnit: 'short' },
-	{ title: 'Network connections', yAxisUnit: 'short' },
-	{ title: 'System disk io (bytes transferred)', yAxisUnit: 'bytes' },
-	{ title: 'System disk operations/s', yAxisUnit: 'short' },
-	{ title: 'Queue size', yAxisUnit: 'short' },
-	{ title: 'Disk operations time', yAxisUnit: 's' },
+	{ title: 'widget_host_cpu_usage', yAxisUnit: 'percentunit' },
+	{ title: 'widget_memory_usage', yAxisUnit: 'bytes' },
+	{ title: 'widget_system_load_average', yAxisUnit: '' },
+	{ title: 'widget_network_usage_bytes', yAxisUnit: 'bytes' },
+	{ title: 'widget_network_usage_packets', yAxisUnit: 'pps' },
+	{ title: 'widget_network_errors', yAxisUnit: 'short' },
+	{ title: 'widget_network_drops', yAxisUnit: 'short' },
+	{ title: 'widget_network_connections', yAxisUnit: 'short' },
+	{ title: 'widget_system_disk_io_bytes', yAxisUnit: 'bytes' },
+	{ title: 'widget_system_disk_operations', yAxisUnit: 'short' },
+	{ title: 'widget_queue_size', yAxisUnit: 'short' },
+	{ title: 'widget_disk_operations_time', yAxisUnit: 's' },
 ];

@@ -33,15 +33,15 @@ export const k8sVolumeGetSelectedItemFilters = (
 export const k8sVolumeDetailsMetadataConfig: K8sDetailsMetadataConfig<K8sVolumesData>[] =
 	[
 		{
-			label: 'PVC Name',
+			label: 'meta_pvc_name',
 			getValue: (p): string => p.persistentVolumeClaimName,
 		},
 		{
-			label: 'Cluster Name',
+			label: 'meta_cluster_name',
 			getValue: (p): string => p.meta.k8s_cluster_name,
 		},
 		{
-			label: 'Namespace Name',
+			label: 'meta_namespace_name',
 			getValue: (p): string => p.meta.k8s_namespace_name,
 		},
 	];
@@ -73,23 +73,23 @@ export const k8sVolumeGetEntityName = (item: K8sVolumesData): string =>
 
 export const volumeWidgetInfo = [
 	{
-		title: 'Volume available',
+		title: 'widget_volume_available',
 		yAxisUnit: 'bytes',
 	},
 	{
-		title: 'Volume capacity',
+		title: 'widget_volume_capacity',
 		yAxisUnit: 'bytes',
 	},
 	{
-		title: 'Volume inodes used',
+		title: 'widget_volume_inodes_used',
 		yAxisUnit: 'short',
 	},
 	{
-		title: 'Volume inodes',
+		title: 'widget_volume_inodes',
 		yAxisUnit: 'short',
 	},
 	{
-		title: 'Volume inodes free',
+		title: 'widget_volume_inodes_free',
 		yAxisUnit: 'short',
 	},
 ];

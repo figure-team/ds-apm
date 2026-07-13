@@ -11,12 +11,12 @@ import { RowData } from 'lib/query/createTableColumnsFromQuery';
 import { BaseAutocompleteData } from 'types/api/queryBuilder/queryAutocompleteResponse';
 
 const keyToLabelMap: Record<string, string> = {
-	timestamp: 'Timestamp',
-	serviceName: 'Service Name',
-	name: 'Name',
-	durationNano: 'Duration',
-	httpMethod: 'HTTP Method',
-	responseStatusCode: 'Status Code',
+	timestamp: 'col_timestamp',
+	serviceName: 'col_service_name',
+	name: 'col_span_name',
+	durationNano: 'col_duration',
+	httpMethod: 'col_http_method',
+	responseStatusCode: 'col_status_code',
 };
 
 export const getTraceListColumns = (
@@ -25,7 +25,7 @@ export const getTraceListColumns = (
 ): ColumnsType<RowData> => {
 	const columns: ColumnsType<RowData> =
 		selectedColumns.map(({ dataType, key, type }) => ({
-			title: keyToLabelMap[key],
+			title: t(keyToLabelMap[key]).toString(),
 			dataIndex: key,
 			key: `${key}-${dataType}-${type}`,
 			width: 145,

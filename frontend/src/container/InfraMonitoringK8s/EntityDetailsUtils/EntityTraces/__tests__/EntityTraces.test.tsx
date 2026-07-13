@@ -213,8 +213,8 @@ describe('EntityTraces', () => {
 
 	it('should render traces list with data', () => {
 		renderEntityTraces();
-		expect(screen.getByText('Previous')).toBeInTheDocument();
-		expect(screen.getByText('Next')).toBeInTheDocument();
+		expect(screen.getByText('explorer.previous')).toBeInTheDocument();
+		expect(screen.getByText('explorer.next')).toBeInTheDocument();
 		// QB search placeholder is i18n'd; with i18n resources unloaded in tests it emits the raw key.
 		expect(screen.getByText('qb_search_placeholder')).toBeInTheDocument();
 		expect(screen.getByTestId('date-time-selection')).toBeInTheDocument();
@@ -269,14 +269,14 @@ describe('EntityTraces', () => {
 
 	it('shows pagination controls when traces are present', () => {
 		renderEntityTraces();
-		expect(screen.getByText('Previous')).toBeInTheDocument();
-		expect(screen.getByText('Next')).toBeInTheDocument();
+		expect(screen.getByText('explorer.previous')).toBeInTheDocument();
+		expect(screen.getByText('explorer.next')).toBeInTheDocument();
 	});
 
 	it('disables pagination buttons when no more data', () => {
 		renderEntityTraces();
-		const prevButton = screen.getByText('Previous').closest('button');
-		const nextButton = screen.getByText('Next').closest('button');
+		const prevButton = screen.getByText('explorer.previous').closest('button');
+		const nextButton = screen.getByText('explorer.next').closest('button');
 		expect(prevButton).toBeDisabled();
 		expect(nextButton).toBeDisabled();
 	});
