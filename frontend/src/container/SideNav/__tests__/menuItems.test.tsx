@@ -8,7 +8,7 @@ import ROUTES from 'constants/routes';
 describe('settingsNavItemKeyMap', () => {
 	it('maps known item keys to i18n keys', () => {
 		expect(settingsNavItemKeyMap['account']).toBe('routes:account');
-		expect(settingsNavItemKeyMap['workspace']).toBe('routes:workspace');
+		expect(settingsNavItemKeyMap['workspace']).toBe('routes:data_retention');
 		expect(settingsNavItemKeyMap['manage-license']).toBe('settings:manage_license');
 		expect(settingsNavItemKeyMap['keyboard-shortcuts']).toBe(
 			'routes:keyboard_shortcuts',

@@ -657,8 +657,12 @@ function GeneralSettings({
 	return (
 		<div className="general-settings-page settings-shell settings-shell--narrow">
 			<div className="general-settings-header">
-				<span className="general-settings-title">{t('workspace_title')}</span>
-				<span className="general-settings-subtitle">{t('workspace_subtitle')}</span>
+				<span className="general-settings-title">
+					{t('data_retention_title')}
+				</span>
+				<span className="general-settings-subtitle">
+					{t('data_retention_subtitle')}
+				</span>
 			</div>
 
 			{(showCustomDomainSettings || activeLicense?.key) && (

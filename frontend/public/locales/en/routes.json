@@ -1,6 +1,6 @@
 {
 	"general": "General",
-	"workspace": "Workspace",
+	"data_retention": "Data Retention",
 	"account": "Account",
 	"alert_channels": "Alert Channels",
 	"notification_channels": "Notification Channels",

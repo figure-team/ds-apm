@@ -1,6 +1,6 @@
 {
 	"general": "일반",
-	"workspace": "워크스페이스",
+	"data_retention": "데이터 보존",
 	"alert_channels": "알림 채널",
 	"notification_channels": "알림 채널",
 	"sop_documents": "SOP 문서",

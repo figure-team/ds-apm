@@ -12,6 +12,7 @@ import {
 	BugIcon,
 	ChartArea,
 	Cloudy,
+	Database,
 	DraftingCompass,
 	FileKey2,
 	FileText,
@@ -300,8 +301,8 @@ export const settingsNavSections: SettingsNavSection[] = [
 		items: [
 			{
 				key: ROUTES.SETTINGS,
-				label: 'Workspace',
-				icon: <Settings size={16} />,
+				label: 'Data Retention',
+				icon: <Database size={16} />,
 				isEnabled: true,
 				itemKey: 'workspace',
 			},
@@ -505,7 +506,7 @@ export const getHelpSupportDropdownMenuItems = (
 ];
 
 export const settingsNavItemKeyMap: Record<string, string> = {
-	workspace: 'routes:workspace',
+	workspace: 'routes:data_retention',
 	account: 'routes:account',
 	'notification-channels': 'routes:alert_channels',
 	'sop-documents': 'routes:sop_documents',
