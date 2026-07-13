@@ -297,7 +297,8 @@ export const defaultMoreMenuItems: SidebarItem[] = [
 
 export const settingsNavSections: SettingsNavSection[] = [
 	{
-		key: 'general',
+		key: 'data',
+		title: 'Data',
 		items: [
 			{
 				key: ROUTES.SETTINGS,
@@ -307,32 +308,11 @@ export const settingsNavSections: SettingsNavSection[] = [
 				itemKey: 'workspace',
 			},
 			{
-				key: ROUTES.MY_SETTINGS,
-				label: 'Account',
-				icon: <User size={16} />,
-				isEnabled: true,
-				itemKey: 'account',
-			},
-			{
-				key: ROUTES.ALL_CHANNELS,
-				label: 'Notification Channels',
-				icon: <FileKey2 size={16} />,
-				isEnabled: true,
-				itemKey: 'notification-channels',
-			},
-			{
-				key: ROUTES.SOP_DOCUMENTS_SETTINGS,
-				label: 'SOP Documents',
-				icon: <FileText size={16} />,
-				isEnabled: true,
-				itemKey: 'sop-documents',
-			},
-			{
-				key: ROUTES.BILLING,
-				label: 'Billing',
-				icon: <Receipt size={16} />,
+				key: ROUTES.INGESTION_SETTINGS,
+				label: 'Ingestion',
+				icon: <RocketOutlined rotate={45} />,
 				isEnabled: false,
-				itemKey: 'billing',
+				itemKey: 'ingestion',
 			},
 			{
 				key: ROUTES.INTEGRATIONS,
@@ -341,13 +321,12 @@ export const settingsNavSections: SettingsNavSection[] = [
 				isEnabled: false,
 				itemKey: 'integrations',
 			},
-			{
-				key: ROUTES.MCP_SERVER,
-				label: 'MCP Server',
-				icon: <Sparkles size={16} />,
-				isEnabled: false,
-				itemKey: 'mcp-server',
-			},
+		],
+	},
+	{
+		key: 'ai-automation',
+		title: 'AI & Automation',
+		items: [
 			{
 				key: ROUTES.AI_MODULE_SETTINGS,
 				label: 'AI Module',
@@ -377,15 +356,34 @@ export const settingsNavSections: SettingsNavSection[] = [
 				itemKey: 'incident-report',
 			},
 			{
-				key: ROUTES.LIST_LICENSES,
-				label: 'Manage Licenses',
-				icon: <FileKey2 size={16} />,
+				key: ROUTES.SOP_DOCUMENTS_SETTINGS,
+				label: 'SOP Documents',
+				icon: <FileText size={16} />,
+				isEnabled: true,
+				itemKey: 'sop-documents',
+			},
+			{
+				key: ROUTES.MCP_SERVER,
+				label: 'MCP Server',
+				icon: <Sparkles size={16} />,
 				isEnabled: false,
-				itemKey: 'manage-license',
+				itemKey: 'mcp-server',
 			},
 		],
 	},
-
+	{
+		key: 'alerts',
+		title: 'Alerts',
+		items: [
+			{
+				key: ROUTES.ALL_CHANNELS,
+				label: 'Notification Channels',
+				icon: <FileKey2 size={16} />,
+				isEnabled: true,
+				itemKey: 'notification-channels',
+			},
+		],
+	},
 	{
 		key: 'identity-access',
 		title: 'Identity & Access',
@@ -411,13 +409,6 @@ export const settingsNavSections: SettingsNavSection[] = [
 				isEnabled: false,
 				itemKey: 'service-accounts',
 			},
-			{
-				key: ROUTES.INGESTION_SETTINGS,
-				label: 'Ingestion',
-				icon: <RocketOutlined rotate={45} />,
-				isEnabled: false,
-				itemKey: 'ingestion',
-			},
 		],
 	},
 	{
@@ -434,9 +425,37 @@ export const settingsNavSections: SettingsNavSection[] = [
 		],
 	},
 	{
-		key: 'shortcuts',
+		key: 'billing-license',
+		title: 'Billing & License',
+		items: [
+			{
+				key: ROUTES.BILLING,
+				label: 'Billing',
+				icon: <Receipt size={16} />,
+				isEnabled: false,
+				itemKey: 'billing',
+			},
+			{
+				key: ROUTES.LIST_LICENSES,
+				label: 'Manage Licenses',
+				icon: <FileKey2 size={16} />,
+				isEnabled: false,
+				itemKey: 'manage-license',
+			},
+		],
+	},
+	{
+		key: 'personal',
+		title: 'Personal',
 		hasDivider: true,
 		items: [
+			{
+				key: ROUTES.MY_SETTINGS,
+				label: 'Account',
+				icon: <User size={16} />,
+				isEnabled: true,
+				itemKey: 'account',
+			},
 			{
 				key: ROUTES.SHORTCUTS,
 				label: 'Keyboard Shortcuts',
@@ -527,8 +546,13 @@ export const settingsNavItemKeyMap: Record<string, string> = {
 };
 
 export const settingsSectionTitleKeyMap: Record<string, string> = {
+	data: 'routes:section_data',
+	'ai-automation': 'routes:section_ai_automation',
+	alerts: 'routes:section_alerts',
 	'identity-access': 'routes:identity_access',
 	authentication: 'routes:authentication',
+	'billing-license': 'routes:section_billing_license',
+	personal: 'routes:section_personal',
 };
 
 /** Mapping of some newly added routes and their corresponding active sidebar menu key */

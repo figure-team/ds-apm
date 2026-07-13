@@ -64,4 +64,24 @@ describe('SideNav settings group', () => {
 		// After expanding, the account nav item should be visible (i18n mock returns key)
 		expect(screen.getByText('routes:account')).toBeInTheDocument();
 	});
+
+	it('renders section headers, and never a header without items under it', () => {
+		const { container } = render(<SideNav isPinned />, undefined, {
+			role: 'ADMIN',
+			initialRoute: '/',
+		});
+
+		fireEvent.click(screen.getByTestId('settings-group-header'));
+
+		expect(screen.getByText('routes:section_data')).toBeInTheDocument();
+		expect(screen.getByText('routes:section_personal')).toBeInTheDocument();
+
+		const groups = container.querySelectorAll('.settings-nav-group');
+		expect(groups.length).toBeGreaterThan(1);
+		groups.forEach((group) => {
+			// A rendered group always carries a title plus at least one nav item
+			expect(group.querySelector('.settings-nav-group-title')).not.toBeNull();
+			expect(group.children.length).toBeGreaterThan(1);
+		});
+	});
 });

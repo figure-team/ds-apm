@@ -52,6 +52,7 @@ import {
 	helpSupportMenuItem,
 	primaryMenuItems,
 	settingsNavItemKeyMap,
+	settingsSectionTitleKeyMap,
 } from './menuItems';
 import { useSettingsNavItems } from './useSettingsNavItems';
 import NavItem from './NavItem/NavItem';
@@ -843,9 +844,8 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 
 								{!isSettingsMenuCollapsed && (
 									<div className="nav-items-section">
-										{renderNavItems(
-											gatedSettingsSections
-												.flatMap((section) => section.items)
+										{gatedSettingsSections.map((section) => {
+											const items = section.items
 												.filter((i) => i.isEnabled)
 												.map((i) => ({
 													...i,
@@ -853,9 +853,31 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 														settingsNavItemKeyMap[i.itemKey as string] ??
 															(i.label as string),
 													),
-												})),
-											isSettingsItemActive,
-										)}
+												}));
+
+											if (items.length === 0) {
+												return null;
+											}
+
+											const titleKey = settingsSectionTitleKeyMap[section.key];
+
+											return (
+												<div
+													className={cx(
+														'settings-nav-group',
+														section.hasDivider && 'has-divider',
+													)}
+													key={section.key}
+												>
+													{titleKey && (
+														<div className="settings-nav-group-title">
+															{t(titleKey)}
+														</div>
+													)}
+													{renderNavItems(items, isSettingsItemActive)}
+												</div>
+											);
+										})}
 									</div>
 								)}
 							</div>

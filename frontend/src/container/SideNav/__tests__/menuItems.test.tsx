@@ -17,6 +17,12 @@ describe('settingsNavItemKeyMap', () => {
 });
 
 describe('settingsSectionTitleKeyMap', () => {
+	it('maps every section key to an i18n key', () => {
+		settingsNavSections.forEach((section) => {
+			expect(settingsSectionTitleKeyMap[section.key]).toBeDefined();
+		});
+	});
+
 	it('maps section keys to i18n keys', () => {
 		expect(settingsSectionTitleKeyMap['identity-access']).toBe(
 			'routes:identity_access',
@@ -28,9 +34,9 @@ describe('settingsSectionTitleKeyMap', () => {
 });
 
 describe('settingsNavSections', () => {
-	it('includes manage-license item in general section', () => {
-		const general = settingsNavSections.find((s) => s.key === 'general');
-		const manageLicense = general?.items.find(
+	it('includes manage-license item in billing-license section', () => {
+		const billing = settingsNavSections.find((s) => s.key === 'billing-license');
+		const manageLicense = billing?.items.find(
 			(i) => i.itemKey === 'manage-license',
 		);
 		expect(manageLicense).toBeDefined();
@@ -40,9 +46,20 @@ describe('settingsNavSections', () => {
 
 	it('preserves all expected sections', () => {
 		const keys = settingsNavSections.map((s) => s.key);
-		expect(keys).toContain('general');
+		expect(keys).toContain('data');
+		expect(keys).toContain('ai-automation');
+		expect(keys).toContain('alerts');
 		expect(keys).toContain('identity-access');
 		expect(keys).toContain('authentication');
-		expect(keys).toContain('shortcuts');
+		expect(keys).toContain('billing-license');
+		expect(keys).toContain('personal');
+	});
+
+	it('keeps every settings item exactly once across sections', () => {
+		const itemKeys = settingsNavSections.flatMap((s) =>
+			s.items.map((i) => i.itemKey as string),
+		);
+		expect(new Set(itemKeys).size).toBe(itemKeys.length);
+		expect(itemKeys).toHaveLength(18);
 	});
 });

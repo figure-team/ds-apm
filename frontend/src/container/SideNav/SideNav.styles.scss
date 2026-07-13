@@ -357,6 +357,37 @@
 				}
 			}
 
+			.settings-nav-items {
+				.settings-nav-group {
+					display: flex;
+					flex-direction: column;
+
+					& + .settings-nav-group {
+						margin-top: 12px;
+					}
+
+					&.has-divider {
+						margin-top: 12px;
+						padding-top: 12px;
+						border-top: 1px solid var(--l1-border);
+					}
+
+					.settings-nav-group-title {
+						color: var(--l1-foreground);
+						opacity: 0.6;
+						font-family: Inter;
+						font-size: 10px;
+						font-weight: 600;
+						line-height: 16px;
+						letter-spacing: 0.8px;
+						text-transform: uppercase;
+
+						padding: 0 17px;
+						margin-bottom: 4px;
+					}
+				}
+			}
+
 			.more-nav-items {
 				.nav-section-title {
 					cursor: pointer;
