@@ -5,11 +5,19 @@
 .k8SListTable {
 	--k8s-base-list-pagination-offset: 64px;
 
+	// .k8SListTable 은 antd 가 className 을 붙이는 .ant-table-wrapper 그 자체다.
+	// 부모 .listContainer(호스트·K8s 양쪽)가 세로 flex 컨테이너이고 확정 높이를
+	// 가진다는 전제에 의존한다 (.infraContentRow 가 height: calc(100vh - 45px)).
+	// 이게 없으면 wrapper 높이가 콘텐츠 높이로 굳어 안쪽 flex:1 이 전부 무효가 된다.
+	flex: 1;
+	min-height: 0;
+
 	display: flex;
 	flex-direction: column;
 
 	:global(.ant-spin-nested-loading) {
 		flex: 1;
+		min-height: 0;
 		display: flex;
 		flex-direction: column;
 	}
@@ -25,25 +33,24 @@
 
 	:global(.ant-table-container) {
 		flex: 1;
+		min-height: 0;
 		display: flex;
 		flex-direction: column;
 	}
 
-	:global(.ant-table-header) {
-		flex-shrink: 0;
-	}
+	:global(.ant-table) {
+		display: flex;
+		flex-direction: column;
 
-	:global(.ant-table-body) {
 		flex: 1;
 		min-height: 0;
-		overflow: auto !important;
-	}
-
-	:global(.ant-table) {
-		flex: 1;
 		background: var(--l1-background) !important;
 
 		:global(.ant-table-thead > tr > th) {
+			position: sticky;
+			top: 0;
+			z-index: 2;
+
 			padding: 12px;
 			font-weight: 500;
 			font-size: 12px;
@@ -66,6 +73,10 @@
 			}
 		}
 
+		:global(.ant-table-thead > tr > th.ant-table-cell-fix-left) {
+			z-index: 3;
+		}
+
 		:global(.ant-table-cell) {
 			padding: 12px;
 			font-size: 13px;
@@ -78,6 +89,13 @@
 			&:after {
 				display: none;
 			}
+		}
+
+		// antd 는 고정 컬럼 경계를 ::after 그림자로 그리는데, 위 .ant-table-cell 의
+		// &:after { display: none } 이 그것을 죽인다. 고정 셀과 일반 셀의 배경이 같아
+		// 경계가 없으면 스크롤 시 다음 컬럼 글자가 고정 컬럼 밑으로 그냥 사라진다.
+		:global(.ant-table-cell.ant-table-cell-fix-left-last) {
+			border-right: 1px solid var(--l1-border);
 		}
 
 		:global(.progress-container) {
@@ -107,32 +125,20 @@
 			visibility: hidden;
 		}
 
-		:global(.ant-table-cell) {
-			min-width: 180px !important;
-			max-width: 180px !important;
-		}
-
-		:global(.ant-table-cell:first-of-type):not(
-			:global(.ant-table-row-expand-icon-cell)
-		) {
-			min-width: 250px !important;
-			max-width: 250px !important;
-		}
-
-		:global(.ant-table-row-expand-icon-cell) {
-			min-width: 40px !important;
-			max-width: 40px !important;
-		}
-
 		:global(.ant-table-content) {
 			flex: 1;
 			min-height: 0;
 			display: flex;
 			flex-direction: column;
 
+			// rc-table 이 인라인으로 overflow-y: hidden 을 박는다(Table.js:290-293).
+			// 컨테이너를 높이만큼 늘린 지금, 이걸 덮지 않으면 넘치는 행이 잘려 닿을 수 없다.
+			// 가로(overflow-x: auto)는 인라인 그대로 둔다.
+			overflow-y: auto !important;
+
 			&::-webkit-scrollbar {
-				width: 4px;
-				height: 4px;
+				width: 10px;
+				height: 10px;
 			}
 
 			&::-webkit-scrollbar-track {
@@ -140,12 +146,41 @@
 			}
 
 			&::-webkit-scrollbar-thumb {
-				background: var(--accent-primary);
+				background: color-mix(in srgb, var(--l2-foreground) 35%, transparent);
+				border-radius: 6px;
 			}
 
 			&::-webkit-scrollbar-thumb:hover {
-				background: color-mix(var(--accent-primary), transparent 40%);
+				background: color-mix(in srgb, var(--l2-foreground) 55%, transparent);
 			}
+		}
+	}
+
+	// 확장 행의 중첩 <Table> 은 부모 <td> 안에 있어 위의 :global 구조 규칙을 전부 상속한다.
+	// 중첩 표는 높이 제약이 없으므로 flex 체인·세로 스크롤을 되돌린다.
+	// (부모 규칙보다 선택자가 한 단계 이상 길어 특이도가 높다.)
+	:global(.ant-table-expanded-row) {
+		:global(.ant-table) {
+			display: block;
+			flex: none;
+			min-height: auto;
+		}
+
+		:global(.ant-table) :global(.ant-table-container),
+		:global(.ant-table) :global(.ant-table-content) {
+			display: block;
+			flex: none;
+			min-height: auto;
+		}
+
+		:global(.ant-table) :global(.ant-table-content) {
+			overflow-y: hidden !important; // rc-table 인라인 원값 복원
+		}
+
+		// Step 5 의 sticky 헤더도 중첩 표로 샌다. 중첩 표 헤더는 이미 자기 스크롤포트
+		// 맨 위라 눈에 띄는 피해는 없지만, 구조 규칙을 흘려 두지 않는다.
+		:global(.ant-table) :global(.ant-table-thead > tr > th) {
+			position: static;
 		}
 	}
 }

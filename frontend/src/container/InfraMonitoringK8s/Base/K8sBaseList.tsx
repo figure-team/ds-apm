@@ -32,6 +32,11 @@ import {
 	useInfraMonitoringOrderBy,
 } from '../hooks';
 import { usePageSize } from '../utils';
+import {
+	applyColumnDefaults,
+	EXPAND_ICON_COLUMN_WIDTH,
+	getMinTableWidth,
+} from './columnUtils';
 import { K8sEmptyState } from './K8sEmptyState';
 import { K8sExpandedRow } from './K8sExpandedRow';
 import K8sHeader from './K8sHeader';
@@ -296,17 +301,31 @@ export function K8sBaseList<T>({
 
 	const columns = useMemo(
 		() =>
-			tableColumns
-				.filter(
+			applyColumnDefaults(
+				tableColumns.filter(
 					(c) =>
 						!hiddenColumnIdsOnList.includes(c.key?.toString() || '') &&
 						!columnsHidden.includes(c.key?.toString() || ''),
-				)
-				.map(mapDefaultSort),
+				),
+			).map(mapDefaultSort),
 		[columnsHidden, hiddenColumnIdsOnList, mapDefaultSort, tableColumns],
 	);
 
 	const isGroupedByAttribute = groupBy.length > 0;
+
+	const minTableWidth = useMemo(
+		() => getMinTableWidth(columns, isGroupedByAttribute),
+		[columns, isGroupedByAttribute],
+	);
+
+	// 좁은 화면에서 가로 스크롤해도 행을 놓치지 않도록 첫 컬럼을 왼쪽에 고정한다.
+	const columnsWithFixedFirst = useMemo(
+		() =>
+			columns.map((column, index) =>
+				index === 0 ? { ...column, fixed: 'left' as const } : column,
+			),
+		[columns],
+	);
 
 	const expandedRowRender = (record: K8sRenderedRowData): JSX.Element => (
 		<K8sExpandedRow<T>
@@ -399,7 +418,7 @@ export function K8sBaseList<T>({
 			<Table
 				className={styles.k8SListTable}
 				dataSource={showTableLoadingState ? [] : formattedItemsData}
-				columns={columns}
+				columns={columnsWithFixedFirst}
 				pagination={{
 					current: currentPage,
 					pageSize,
@@ -416,7 +435,7 @@ export function K8sBaseList<T>({
 				locale={{
 					emptyText: showTableLoadingState ? null : emptyTableMessage,
 				}}
-				scroll={{ x: true }}
+				scroll={{ x: minTableWidth }}
 				tableLayout="fixed"
 				onChange={handleTableChange}
 				onRow={(
@@ -429,6 +448,8 @@ export function K8sBaseList<T>({
 					expandedRowRender: isGroupedByAttribute ? expandedRowRender : undefined,
 					expandIcon: expandRowIconRenderer,
 					expandedRowKeys,
+					columnWidth: EXPAND_ICON_COLUMN_WIDTH,
+					fixed: 'left',
 				}}
 			/>
 		</>

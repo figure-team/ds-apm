@@ -35,11 +35,11 @@
 	}
 
 	&::-webkit-scrollbar-thumb {
-		background: var(--accent-primary);
+		background: color-mix(in srgb, var(--l2-foreground) 35%, transparent);
 	}
 
 	&::-webkit-scrollbar-thumb:hover {
-		background: colox-mix(var(--accent-primary), var(--bg-vanilla-100), 20%);
+		background: color-mix(in srgb, var(--l2-foreground) 55%, transparent);
 	}
 }
 
@@ -59,11 +59,11 @@
 	}
 
 	&::-webkit-scrollbar-thumb {
-		background: var(--accent-primary);
+		background: color-mix(in srgb, var(--l2-foreground) 35%, transparent);
 	}
 
 	&::-webkit-scrollbar-thumb:hover {
-		background: colox-mix(var(--accent-primary), var(--bg-vanilla-100), 20%);
+		background: color-mix(in srgb, var(--l2-foreground) 55%, transparent);
 	}
 
 	:global(.ant-collapse-header) {
@@ -94,11 +94,11 @@
 		}
 
 		&::-webkit-scrollbar-thumb {
-			background: var(--accent-primary);
+			background: color-mix(in srgb, var(--l2-foreground) 35%, transparent);
 		}
 
 		&::-webkit-scrollbar-thumb:hover {
-			background: colox-mix(var(--accent-primary), var(--bg-vanilla-100), 20%);
+			background: color-mix(in srgb, var(--l2-foreground) 55%, transparent);
 		}
 	}
 }

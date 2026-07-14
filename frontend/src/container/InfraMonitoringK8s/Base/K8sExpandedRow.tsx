@@ -30,6 +30,7 @@ import {
 	useInfraMonitoringSelectedItem,
 } from '../hooks';
 import LoadingContainer from '../LoadingContainer';
+import { applyColumnDefaults } from './columnUtils';
 import { K8sBaseFilters, K8sRenderedRowData } from './types';
 import { useInfraMonitoringTableColumnsForPage } from './useInfraMonitoringTableColumnsStore';
 
@@ -83,10 +84,12 @@ export function K8sExpandedRow<T>({
 
 	const nestedColumns = useMemo(
 		() =>
-			tableColumns.filter(
-				(c) =>
-					!columnsHidden.includes(c.key?.toString() || '') &&
-					!hiddenColumnIdsForNested.includes(c.key?.toString() || ''),
+			applyColumnDefaults(
+				tableColumns.filter(
+					(c) =>
+						!columnsHidden.includes(c.key?.toString() || '') &&
+						!hiddenColumnIdsForNested.includes(c.key?.toString() || ''),
+				),
 			),
 		[tableColumns, columnsHidden, hiddenColumnIdsForNested],
 	);
