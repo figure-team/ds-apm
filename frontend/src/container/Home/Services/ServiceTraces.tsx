@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux'; // old code, TODO: fix this correctly
@@ -20,13 +20,7 @@ import ServicesEmptyState from './ServicesEmptyState';
 
 const homeInterval = 30 * 60 * 1000;
 
-export default function ServiceTraces({
-	onUpdateChecklistDoneItem,
-	loadingUserPreferences,
-}: {
-	onUpdateChecklistDoneItem: (itemKey: string) => void;
-	loadingUserPreferences: boolean;
-}): JSX.Element {
+export default function ServiceTraces(): JSX.Element {
 	const { selectedTime } = useSelector<AppState, GlobalReducer>(
 		(state) => state.globalTime,
 	);
@@ -70,12 +64,6 @@ export default function ServiceTraces({
 		() => sortedServices.slice(0, 5),
 		[sortedServices],
 	);
-
-	useEffect(() => {
-		if (servicesExist && !loadingUserPreferences) {
-			onUpdateChecklistDoneItem('SETUP_SERVICES');
-		}
-	}, [servicesExist, onUpdateChecklistDoneItem, loadingUserPreferences]);
 
 	const handleTimeIntervalChange = useCallback((value: number): void => {
 		const now = new Date();

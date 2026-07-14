@@ -17,13 +17,7 @@ import dialsUrl from '@/assets/Icons/dials.svg';
 
 import { getItemIcon } from '../constants';
 
-export default function Dashboards({
-	onUpdateChecklistDoneItem,
-	loadingUserPreferences,
-}: {
-	onUpdateChecklistDoneItem: (itemKey: string) => void;
-	loadingUserPreferences: boolean;
-}): JSX.Element {
+export default function Dashboards(): JSX.Element {
 	const { safeNavigate } = useSafeNavigate();
 	const { user } = useAppContext();
 	const { t } = useTranslation(['home', 'common']);
@@ -48,12 +42,8 @@ export default function Dashboards({
 			return bUpdateAt - aUpdateAt;
 		});
 
-		if (sortedDashboards.length > 0 && !loadingUserPreferences) {
-			onUpdateChecklistDoneItem('SETUP_DASHBOARDS');
-		}
-
 		setSortedDashboards(sortedDashboards.slice(0, 5));
-	}, [dashboardsList, onUpdateChecklistDoneItem, loadingUserPreferences]);
+	}, [dashboardsList]);
 
 	const emptyStateCard = (): JSX.Element => (
 		<div className="empty-state-container">

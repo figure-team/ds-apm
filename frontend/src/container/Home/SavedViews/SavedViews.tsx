@@ -26,13 +26,7 @@ import floppyDiscUrl from '@/assets/Icons/floppy-disc.svg';
 import { getItemIcon } from '../constants';
 import { ScrollText } from '@signozhq/icons';
 
-export default function SavedViews({
-	onUpdateChecklistDoneItem,
-	loadingUserPreferences,
-}: {
-	onUpdateChecklistDoneItem: (itemKey: string) => void;
-	loadingUserPreferences: boolean;
-}): JSX.Element {
+export default function SavedViews(): JSX.Element {
 	const { user } = useAppContext();
 	const { t } = useTranslation(['home', 'common']);
 	const [selectedEntity, setSelectedEntity] = useState<string>('logs');
@@ -123,12 +117,6 @@ export default function SavedViews({
 			);
 		}
 	};
-
-	useEffect(() => {
-		if (hasSavedViews && !loadingUserPreferences) {
-			onUpdateChecklistDoneItem('SETUP_SAVED_VIEWS');
-		}
-	}, [hasSavedViews, onUpdateChecklistDoneItem, loadingUserPreferences]);
 
 	const footerLink = useMemo(() => {
 		if (selectedEntity === 'logs') {

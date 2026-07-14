@@ -20,13 +20,7 @@ import beaconUrl from '@/assets/Icons/beacon.svg';
 
 import { getItemIcon } from '../constants';
 
-export default function AlertRules({
-	onUpdateChecklistDoneItem,
-	loadingUserPreferences,
-}: {
-	onUpdateChecklistDoneItem: (itemKey: string) => void;
-	loadingUserPreferences: boolean;
-}): JSX.Element {
+export default function AlertRules(): JSX.Element {
 	const isDarkMode = useIsDarkMode();
 	const { user } = useAppContext();
 	const { t } = useTranslation(['home', 'common']);
@@ -67,12 +61,8 @@ export default function AlertRules({
 			);
 		});
 
-		if (sortedRules.length > 0 && !loadingUserPreferences) {
-			onUpdateChecklistDoneItem('SETUP_ALERTS');
-		}
-
 		setSortedAlertRules(sortedRules.slice(0, 5));
-	}, [alerts, onUpdateChecklistDoneItem, loadingUserPreferences]);
+	}, [alerts]);
 
 	const emptyStateCard = (): JSX.Element => (
 		<div className="empty-state-container">

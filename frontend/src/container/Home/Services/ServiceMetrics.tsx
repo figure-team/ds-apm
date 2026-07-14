@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { QueryKey } from 'react-query';
 // eslint-disable-next-line no-restricted-imports
@@ -58,13 +58,7 @@ const ServicesListTable = memo(
 );
 ServicesListTable.displayName = 'ServicesListTable';
 
-function ServiceMetrics({
-	onUpdateChecklistDoneItem,
-	loadingUserPreferences,
-}: {
-	onUpdateChecklistDoneItem: (itemKey: string) => void;
-	loadingUserPreferences: boolean;
-}): JSX.Element {
+function ServiceMetrics(): JSX.Element {
 	const { selectedTime: globalSelectedInterval } = useSelector<
 		AppState,
 		GlobalReducer
@@ -200,12 +194,6 @@ function ServiceMetrics({
 		() => sortedServices.slice(0, 5),
 		[sortedServices],
 	);
-
-	useEffect(() => {
-		if (!loadingUserPreferences && servicesExist) {
-			onUpdateChecklistDoneItem('SETUP_SERVICES');
-		}
-	}, [onUpdateChecklistDoneItem, loadingUserPreferences, servicesExist]);
 
 	const handleRowClick = useCallback(
 		(record: ServicesList, event: React.MouseEvent) => {
