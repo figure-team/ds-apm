@@ -1,0 +1,19 @@
+{
+	"next": "Next",
+	"prev": "Previous",
+	"confirm": "Done",
+	"welcome_title": "Welcome to DS-APM",
+	"welcome_desc": "DS-APM is a unified monitoring platform that provides integrated observability across your services and infrastructure, enabling rapid incident detection and response. We will now guide you through the key features.",
+	"home_title": "Home · NOC Dashboard",
+	"home_desc": "This is the first screen displayed after signing in. You can review service health, key metrics, priority alerts, and trends at a glance.",
+	"alerts_title": "Alerts",
+	"alerts_desc": "This menu allows you to create and manage alert rules. You can review incident and resolution notifications and configure delivery to designated channels.",
+	"dashboards_title": "Dashboards",
+	"dashboards_desc": "Create dashboards that visualize key metrics and share them with your team members.",
+	"more_title": "More Features",
+	"more_desc": "Detailed analysis features such as Services, Logs, Traces, Metrics, and Infra Monitoring are available under the MORE menu.",
+	"settings_title": "Settings",
+	"settings_desc": "This menu manages platform-wide settings, including data retention, AI and automation, notification channels, and your account.",
+	"finish_title": "Guide Complete",
+	"finish_desc": "DS-APM is now ready for use. Please access the features you need from the left menu."
+}

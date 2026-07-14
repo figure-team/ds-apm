@@ -16,6 +16,7 @@ import cx from 'classnames';
 import { FeatureKeys } from 'constants/features';
 import ROUTES from 'constants/routes';
 import { GlobalShortcuts } from 'constants/shortcuts/globalShortcuts';
+import { TOUR_ACTIVE_EVENT } from 'container/OnboardingTour/OnboardingTour';
 import { useKeyboardHotkeys } from 'hooks/hotkeys/useKeyboardHotkeys';
 import { useIsDarkMode } from 'hooks/useDarkMode';
 import { useGetTenantLicense } from 'hooks/useGetTenantLicense';
@@ -116,6 +117,20 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 	const [secondaryMenuItems, setSecondaryMenuItems] = useState<SidebarItem[]>(
 		[],
 	);
+
+	// 온보딩 투어 동안 사이드바를 펼침 상태로 고정한다
+	const [isTourActive, setIsTourActive] = useState(false);
+
+	useEffect(() => {
+		const handleTourActive = (event: Event): void => {
+			setIsTourActive(Boolean((event as CustomEvent).detail));
+		};
+
+		window.addEventListener(TOUR_ACTIVE_EVENT, handleTourActive);
+		return (): void => {
+			window.removeEventListener(TOUR_ACTIVE_EVENT, handleTourActive);
+		};
+	}, []);
 
 	const handleMouseEnter = useCallback(() => {
 		setIsHovered(true);
@@ -527,8 +542,8 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 		[moreMenuItems, activeMenuKey],
 	);
 
-	// Check if sidebar is collapsed (not pinned, not hovered, and no dropdown open)
-	const isCollapsed = !isPinned && !isHovered && !isDropdownOpen;
+	// Check if sidebar is collapsed (not pinned, not hovered, no dropdown open, and no tour running)
+	const isCollapsed = !isPinned && !isHovered && !isDropdownOpen && !isTourActive;
 
 	const renderNavItems = (
 		items: SidebarItem[],
@@ -544,6 +559,7 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 					<NavItem
 						showIcon
 						key={item.key || index}
+						dataTestId={item.itemKey}
 						item={{ ...item, label: translatedLabel }}
 						isActive={
 							getIsActive ? getIsActive(item) : activeMenuKey === item.key

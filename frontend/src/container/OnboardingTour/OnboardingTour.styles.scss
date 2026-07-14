@@ -1,0 +1,18 @@
+/* 타겟 없는 스텝(환영·마무리)을 뷰포트 정중앙에 고정 — rc-tour의 center 정렬 부재 보완 */
+.onboarding-tour.onboarding-tour-step-center {
+	position: fixed !important;
+	top: 50% !important;
+	left: 50% !important;
+	transform: translate(-50%, -50%) !important;
+}
+
+.onboarding-tour {
+	.ant-tour-header .ant-tour-title {
+		font-weight: 600;
+	}
+
+	.ant-tour-description {
+		line-height: 22px;
+		word-break: keep-all;
+	}
+}

@@ -36,6 +36,7 @@ import { LOCALSTORAGE } from 'constants/localStorage';
 import ROUTES from 'constants/routes';
 import { GlobalShortcuts } from 'constants/shortcuts/globalShortcuts';
 import { USER_PREFERENCES } from 'constants/userPreferences';
+import OnboardingTour from 'container/OnboardingTour/OnboardingTour';
 import SideNav from 'container/SideNav';
 import TopNav from 'container/TopNav';
 import dayjs from 'dayjs';
@@ -840,7 +841,10 @@ function AppLayout(props: AppLayoutProps): JSX.Element {
 				)}
 			>
 				{isToDisplayLayout && !renderFullScreen && (
-					<SideNav isPinned={isSideNavPinned} />
+					<>
+						<SideNav isPinned={isSideNavPinned} />
+						<OnboardingTour />
+					</>
 				)}
 				<div
 					className={cx('app-content', {
