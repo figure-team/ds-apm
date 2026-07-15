@@ -5,8 +5,10 @@ import { Button, Modal, Typography } from 'antd';
 import logEvent from 'api/common/logEvent';
 import unInstallIntegration from 'api/Integrations/uninstallIntegration';
 import { SOMETHING_WENT_WRONG } from 'constants/api';
+import useComponentPermission from 'hooks/useComponentPermission';
 import { useNotifications } from 'hooks/useNotifications';
 import { X } from 'lucide-react';
+import { useAppContext } from 'providers/App/App';
 
 import { INTEGRATION_TELEMETRY_EVENTS } from '../constants';
 import { ConnectionStates } from './TestConnection';
@@ -33,6 +35,11 @@ function IntergrationsUninstallBar(
 		removeIntegrationTitle = DEFAULT_REMOVE_INTEGRATION_TITLE,
 	} = props;
 	const { notifications } = useNotifications();
+	const { user } = useAppContext();
+	const [uninstallPermission] = useComponentPermission(
+		['uninstall_integration'],
+		user.role,
+	);
 	const { t } = useTranslation('integrations');
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -74,6 +81,13 @@ function IntergrationsUninstallBar(
 	const handleCancel = (): void => {
 		setIsModalOpen(false);
 	};
+
+	// 뷰어 숨김: 백엔드 /integrations/uninstall이 EditAccess로 막혀 있고,
+	// 여기 숨김은 UX 정합용이다.
+	if (!uninstallPermission) {
+		return <></>;
+	}
+
 	return (
 		<div className="uninstall-integration-bar">
 			<div className="unintall-integration-bar-text">

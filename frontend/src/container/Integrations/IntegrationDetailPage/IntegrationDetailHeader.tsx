@@ -9,8 +9,10 @@ import cx from 'classnames';
 import { SOMETHING_WENT_WRONG } from 'constants/api';
 import { DATE_TIME_FORMATS } from 'constants/dateTimeFormats';
 import dayjs from 'dayjs';
+import useComponentPermission from 'hooks/useComponentPermission';
 import { useNotifications } from 'hooks/useNotifications';
 import { ArrowLeftRight, Cable, Check } from 'lucide-react';
+import { useAppContext } from 'providers/App/App';
 import { IntegrationConnectionStatus } from 'types/api/integrations/types';
 
 import { INTEGRATION_TELEMETRY_EVENTS } from '../constants';
@@ -48,6 +50,11 @@ function IntegrationDetailHeader(
 
 	const { notifications } = useNotifications();
 	const { t } = useTranslation('integrations');
+	const { user } = useAppContext();
+	const [installPermission] = useComponentPermission(
+		['install_integration'],
+		user.role,
+	);
 
 	const showModal = (): void => {
 		setIsModalOpen(true);
@@ -143,32 +150,34 @@ function IntegrationDetailHeader(
 						)}
 					</div>
 				</div>
-				<Button
-					className={cx(
-						'configure-btn',
-						!isConnectionStateNotInstalled && 'test-connection',
-					)}
-					icon={<ArrowLeftRight size={14} />}
-					disabled={isInstallLoading || isLoading}
-					onClick={(): void => {
-						if (connectionState === ConnectionStates.NotInstalled) {
-							logEvent(INTEGRATION_TELEMETRY_EVENTS.INTEGRATIONS_DETAIL_CONNECT, {
-								integration: id,
-							});
-						} else {
-							logEvent(
-								INTEGRATION_TELEMETRY_EVENTS.INTEGRATIONS_DETAIL_TEST_CONNECTION,
-								{
+				{(installPermission || !isConnectionStateNotInstalled) && (
+					<Button
+						className={cx(
+							'configure-btn',
+							!isConnectionStateNotInstalled && 'test-connection',
+						)}
+						icon={<ArrowLeftRight size={14} />}
+						disabled={isInstallLoading || isLoading}
+						onClick={(): void => {
+							if (connectionState === ConnectionStates.NotInstalled) {
+								logEvent(INTEGRATION_TELEMETRY_EVENTS.INTEGRATIONS_DETAIL_CONNECT, {
 									integration: id,
-									connectionStatus: connectionState,
-								},
-							);
-						}
-						showModal();
-					}}
-				>
-					{isConnectionStateNotInstalled ? `Connect ${title}` : `Test Connection`}
-				</Button>
+								});
+							} else {
+								logEvent(
+									INTEGRATION_TELEMETRY_EVENTS.INTEGRATIONS_DETAIL_TEST_CONNECTION,
+									{
+										integration: id,
+										connectionStatus: connectionState,
+									},
+								);
+							}
+							showModal();
+						}}
+					>
+						{isConnectionStateNotInstalled ? `Connect ${title}` : `Test Connection`}
+					</Button>
+				)}
 			</div>
 
 			{connectionState !== ConnectionStates.NotInstalled && (
