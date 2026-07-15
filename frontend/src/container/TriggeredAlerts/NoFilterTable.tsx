@@ -4,6 +4,7 @@ import LabelColumn from 'components/TableRenderer/LabelColumn';
 import { DATE_TIME_FORMATS } from 'constants/dateTimeFormats';
 import AlertStatus from 'container/TriggeredAlerts/TableComponents/AlertStatus';
 import { useTimezone } from 'providers/Timezone';
+import { useTranslation } from 'react-i18next';
 import { Alerts } from 'types/api/alerts/getTriggered';
 
 import { Value } from './Filter';
@@ -18,13 +19,14 @@ function NoFilterTable({
 	allAlerts,
 	selectedFilter,
 }: NoFilterTableProps): JSX.Element {
+	const { t } = useTranslation('alerts');
 	const filteredAlerts = FilterAlerts(allAlerts, selectedFilter);
 	const { formatTimezoneAdjustedTimestamp } = useTimezone();
 
 	// need to add the filter
 	const columns: ColumnsType<Alerts> = [
 		{
-			title: 'Status',
+			title: t('column_status'),
 			dataIndex: 'status',
 			width: 80,
 			key: 'status',
@@ -32,7 +34,7 @@ function NoFilterTable({
 			render: (value): JSX.Element => <AlertStatus severity={value.state} />,
 		},
 		{
-			title: 'Alert Name',
+			title: t('column_alert_name'),
 			dataIndex: 'labels',
 			key: 'alertName',
 			width: 100,
@@ -43,7 +45,7 @@ function NoFilterTable({
 			},
 		},
 		{
-			title: 'Tags',
+			title: t('triggered_column_tags'),
 			dataIndex: 'labels',
 			key: 'tags',
 			width: 100,
@@ -61,7 +63,7 @@ function NoFilterTable({
 			},
 		},
 		{
-			title: 'Severity',
+			title: t('column_severity'),
 			dataIndex: 'labels',
 			key: 'severity',
 			width: 100,
@@ -75,7 +77,7 @@ function NoFilterTable({
 			},
 		},
 		{
-			title: 'Firing Since',
+			title: t('triggered_column_firing_since'),
 			dataIndex: 'startsAt',
 			width: 100,
 			sorter: (a, b): number =>

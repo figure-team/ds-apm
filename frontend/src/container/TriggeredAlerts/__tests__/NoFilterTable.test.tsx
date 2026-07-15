@@ -7,6 +7,10 @@ jest.mock('providers/Timezone', () => ({
 	useTimezone: jest.requireActual('./mockUtils').useMockTimezone,
 }));
 
+jest.mock('react-i18next', () => ({
+	useTranslation: () => ({ t: (k: string) => k }),
+}));
+
 const allAlerts = [
 	createAlert({
 		name: 'Alert B',
@@ -39,11 +43,11 @@ describe('NoFilterTable', () => {
 		const [headerRow, dataRow1, dataRow2, dataRow3] = rows;
 
 		// Verify header row
-		expect(headerRow).toHaveTextContent('Status');
-		expect(headerRow).toHaveTextContent('Alert Name');
-		expect(headerRow).toHaveTextContent('Tags');
-		expect(headerRow).toHaveTextContent('Severity');
-		expect(headerRow).toHaveTextContent('Firing Since');
+		expect(headerRow).toHaveTextContent('column_status');
+		expect(headerRow).toHaveTextContent('column_alert_name');
+		expect(headerRow).toHaveTextContent('triggered_column_tags');
+		expect(headerRow).toHaveTextContent('column_severity');
+		expect(headerRow).toHaveTextContent('triggered_column_firing_since');
 
 		// Verify 1st data row
 		expect(dataRow1).toHaveTextContent('Alert B');
@@ -60,7 +64,7 @@ describe('NoFilterTable', () => {
 
 		const headers = screen.getAllByRole('columnheader');
 		const severityHeader = headers.find((header) =>
-			header.textContent?.includes('Severity'),
+			header.textContent?.includes('column_severity'),
 		);
 
 		expect(severityHeader).toBeInTheDocument();

@@ -7,11 +7,13 @@ import { REACT_QUERY_KEY } from 'constants/reactQueryKeys';
 import useAxiosError from 'hooks/useAxiosError';
 import { isUndefined } from 'lodash-es';
 import { useAppContext } from 'providers/App/App';
+import { useTranslation } from 'react-i18next';
 
 import { Value } from './Filter';
 import TriggerComponent from './TriggeredAlert';
 
 function TriggeredAlerts(): JSX.Element {
+	const { t } = useTranslation('alerts');
 	const [selectedGroup, setSelectedGroup] = useState<Value[]>([]);
 	const [selectedFilter, setSelectedFilter] = useState<Value[]>([]);
 
@@ -65,7 +67,7 @@ function TriggeredAlerts(): JSX.Element {
 	}
 
 	if (alertsResponse.isFetching || alertsResponse?.data?.payload === undefined) {
-		return <Spinner height="75vh" tip="Loading Alerts..." />;
+		return <Spinner height="75vh" tip={t('triggered_loading')} />;
 	}
 
 	return (

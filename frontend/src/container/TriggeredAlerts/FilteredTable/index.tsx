@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import groupBy from 'lodash-es/groupBy';
+import { useTranslation } from 'react-i18next';
 import { Alerts } from 'types/api/alerts/getTriggered';
 
 import { Value } from '../Filter';
@@ -12,6 +13,8 @@ function FilteredTable({
 	allAlerts,
 	selectedFilter,
 }: FilteredTableProps): JSX.Element {
+	const { t } = useTranslation('alerts');
+
 	const allGroupsAlerts = useMemo(
 		() =>
 			groupBy(FilterAlerts(allAlerts, selectedFilter), (obj) =>
@@ -24,11 +27,11 @@ function FilteredTable({
 	const tagsAlerts = Object.values(allGroupsAlerts);
 
 	const headers = [
-		'Status',
-		'Alert Name',
-		'Severity',
-		'Firing Since',
-		'Tags',
+		t('column_status'),
+		t('column_alert_name'),
+		t('column_severity'),
+		t('triggered_column_firing_since'),
+		t('triggered_column_tags'),
 		// 'Actions',
 	];
 
