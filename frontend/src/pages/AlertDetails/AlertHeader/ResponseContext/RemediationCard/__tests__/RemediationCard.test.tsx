@@ -86,4 +86,16 @@ describe('RemediationCard', () => {
 		expect(screen.queryByText('remediation_approve')).not.toBeInTheDocument();
 		expect(screen.queryByText('remediation_reject')).not.toBeInTheDocument();
 	});
+
+	it('renders nothing and skips the API for non-admins', () => {
+		const api = require('api/remediation');
+		const { container } = render(
+			<RemediationCard remediationId="rem-1" />,
+			undefined,
+			{ role: 'VIEWER' },
+		);
+
+		expect(container.firstChild).toBeNull();
+		expect(api.getRemediation).not.toHaveBeenCalled();
+	});
 });

@@ -9,6 +9,8 @@ import {
 } from 'api/remediation';
 import RemediationStatusBadge from 'components/Remediation/RemediationStatusBadge';
 import RemediationResult from 'components/Remediation/RemediationResult';
+import { useAppContext } from 'providers/App/App';
+import { USER_ROLES } from 'types/roles';
 
 import './styles.scss';
 
@@ -28,6 +30,11 @@ interface RemediationCardProps {
 
 function RemediationCard({ remediationId }: RemediationCardProps): JSX.Element | null {
 	const { t } = useTranslation('alerts');
+	const { user } = useAppContext();
+	// Admin-only: GET /remediation/{id}가 관리자 전용이라(RBAC 보완) 비관리자는
+	// 폴링 자체를 걸지 않는다. 미가드 시 403이 catch{}에 삼켜져 카드가 조용히
+	// 사라지는데, 그 대신 의도를 명시적으로 코드화한다.
+	const isAdmin = user.role === USER_ROLES.ADMIN;
 	const [rem, setRem] = useState<RemediationExecution | null>(null);
 	const [busy, setBusy] = useState(false);
 
@@ -38,6 +45,7 @@ function RemediationCard({ remediationId }: RemediationCardProps): JSX.Element |
 	}, [remediationId]);
 
 	useEffect(() => {
+		if (!isAdmin) return undefined;
 		let active = true;
 		let timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -60,7 +68,7 @@ function RemediationCard({ remediationId }: RemediationCardProps): JSX.Element |
 				clearTimeout(timer);
 			}
 		};
-	}, [load]);
+	}, [load, isAdmin]);
 
 	const onApprove = async (): Promise<void> => {
 		// eslint-disable-next-line no-alert
@@ -84,7 +92,7 @@ function RemediationCard({ remediationId }: RemediationCardProps): JSX.Element |
 		}
 	};
 
-	if (!rem) return null;
+	if (!isAdmin || !rem) return null;
 
 	const isProposed = rem.status === 'proposed';
 	// Once the remediation has actually run it carries a result (exit code /
