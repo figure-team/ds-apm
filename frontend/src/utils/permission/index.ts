@@ -20,7 +20,9 @@ export type ComponentTypes =
 	| 'add_panel'
 	| 'page_pipelines'
 	| 'edit_locked_dashboard'
-	| 'add_panel_locked_dashboard';
+	| 'add_panel_locked_dashboard'
+	| 'install_integration'
+	| 'uninstall_integration';
 
 export const componentPermission: Record<ComponentTypes, ROLES[]> = {
 	current_org_settings: ['ADMIN'],
@@ -42,6 +44,8 @@ export const componentPermission: Record<ComponentTypes, ROLES[]> = {
 	page_pipelines: ['ADMIN', 'EDITOR'],
 	edit_locked_dashboard: ['ADMIN', 'AUTHOR'],
 	add_panel_locked_dashboard: ['ADMIN', 'AUTHOR'],
+	install_integration: ['ADMIN', 'EDITOR'],
+	uninstall_integration: ['ADMIN', 'EDITOR'],
 };
 
 export const routePermission: Record<keyof typeof ROUTES, ROLES[]> = {
@@ -138,5 +142,5 @@ export const routePermission: Record<keyof typeof ROUTES, ROLES[]> = {
 	CODE_RCA_SETTINGS: ['ADMIN'],
 	REMEDIATION_TARGETS_SETTINGS: ['ADMIN'],
 	INCIDENT_REPORT_SETTINGS: ['ADMIN'],
-	REMEDIATION_APPROVE: ['ADMIN', 'EDITOR', 'VIEWER'],
+	REMEDIATION_APPROVE: ['ADMIN'],
 };

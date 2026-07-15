@@ -1500,6 +1500,42 @@ describe('PrivateRoute', () => {
 
 			assertStaysOnRoute(ROUTES.GET_STARTED);
 		});
+
+		it('should redirect VIEWER away from /remediation/approve route', async () => {
+			renderPrivateRoute({
+				initialRoute: '/remediation/approve/rem-1',
+				appContext: {
+					isLoggedIn: true,
+					user: createMockUser({ role: USER_ROLES.VIEWER as ROLES }),
+				},
+			});
+
+			await assertRedirectsTo(ROUTES.UN_AUTHORIZED);
+		});
+
+		it('should redirect EDITOR away from /remediation/approve route', async () => {
+			renderPrivateRoute({
+				initialRoute: '/remediation/approve/rem-1',
+				appContext: {
+					isLoggedIn: true,
+					user: createMockUser({ role: USER_ROLES.EDITOR as ROLES }),
+				},
+			});
+
+			await assertRedirectsTo(ROUTES.UN_AUTHORIZED);
+		});
+
+		it('should allow ADMIN to access /remediation/approve route', () => {
+			renderPrivateRoute({
+				initialRoute: '/remediation/approve/rem-1',
+				appContext: {
+					isLoggedIn: true,
+					user: createMockUser({ role: USER_ROLES.ADMIN as ROLES }),
+				},
+			});
+
+			assertRendersChildren();
+		});
 	});
 
 	describe('Edge Cases', () => {
