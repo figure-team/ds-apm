@@ -1,4 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { Alerts } from 'types/api/alerts/getTriggered';
 
 import NoFilterTable from '../NoFilterTable';
 import { createAlert } from './mockUtils';
@@ -35,9 +37,17 @@ const allAlerts = [
 	}),
 ];
 
+function renderTable(alerts: Alerts[]): void {
+	render(
+		<MemoryRouter>
+			<NoFilterTable allAlerts={alerts} selectedFilter={[]} />
+		</MemoryRouter>,
+	);
+}
+
 describe('NoFilterTable', () => {
 	it('should render the no filter table with correct rows', () => {
-		render(<NoFilterTable allAlerts={allAlerts} selectedFilter={[]} />);
+		renderTable(allAlerts);
 		const rows = screen.getAllByRole('row');
 		expect(rows).toHaveLength(4); // 1 header row + 2 data rows
 		const [headerRow, dataRow1, dataRow2, dataRow3] = rows;
@@ -60,7 +70,7 @@ describe('NoFilterTable', () => {
 	});
 
 	it('should sort the table by severity when header is clicked', () => {
-		render(<NoFilterTable allAlerts={allAlerts} selectedFilter={[]} />);
+		renderTable(allAlerts);
 
 		const headers = screen.getAllByRole('columnheader');
 		const severityHeader = headers.find((header) =>
@@ -84,5 +94,33 @@ describe('NoFilterTable', () => {
 			expect(sortedRows[2]).toHaveTextContent('Alert B');
 			expect(sortedRows[3]).toHaveTextContent('Alert C');
 		}
+	});
+
+	it('links alert name to alert history only when ruleId label is non-empty', () => {
+		const alerts = [
+			createAlert({
+				fingerprint: 'with-rule',
+				labels: { alertname: 'Linked Alert', severity: 'warning', ruleId: 'rule-1' },
+			}),
+			createAlert({
+				fingerprint: 'without-rule',
+				labels: { alertname: 'Plain Alert', severity: 'warning' },
+			}),
+			createAlert({
+				fingerprint: 'empty-rule',
+				labels: { alertname: 'Test Notification', severity: 'warning', ruleId: '' },
+			}),
+		];
+
+		renderTable(alerts);
+
+		const link = screen.getByRole('link', { name: 'Linked Alert' });
+		expect(link).toHaveAttribute('href', '/alerts/history?ruleId=rule-1');
+		expect(
+			screen.queryByRole('link', { name: 'Plain Alert' }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole('link', { name: 'Test Notification' }),
+		).not.toBeInTheDocument();
 	});
 });

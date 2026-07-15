@@ -2,9 +2,11 @@ import { TableColumnsType as ColumnsType, Typography } from 'antd';
 import { ResizeTable } from 'components/ResizeTable';
 import LabelColumn from 'components/TableRenderer/LabelColumn';
 import { DATE_TIME_FORMATS } from 'constants/dateTimeFormats';
+import ROUTES from 'constants/routes';
 import AlertStatus from 'container/TriggeredAlerts/TableComponents/AlertStatus';
 import { useTimezone } from 'providers/Timezone';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { Alerts } from 'types/api/alerts/getTriggered';
 
 import { Value } from './Filter';
@@ -41,6 +43,16 @@ function NoFilterTable({
 			sorter: alertNameCompare,
 			render: (data): JSX.Element => {
 				const name = data?.alertname || '';
+				const ruleId = data?.ruleId;
+				if (ruleId) {
+					return (
+						<Link
+							to={`${ROUTES.ALERT_HISTORY}?ruleId=${encodeURIComponent(ruleId)}`}
+						>
+							{name}
+						</Link>
+					);
+				}
 				return <Typography>{name}</Typography>;
 			},
 		},

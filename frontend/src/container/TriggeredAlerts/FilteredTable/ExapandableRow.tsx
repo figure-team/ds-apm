@@ -1,6 +1,8 @@
 import { Tag, Typography } from 'antd';
 import { DATE_TIME_FORMATS } from 'constants/dateTimeFormats';
+import ROUTES from 'constants/routes';
 import { useTimezone } from 'providers/Timezone';
+import { Link } from 'react-router-dom';
 import { Alerts } from 'types/api/alerts/getTriggered';
 
 import Status from '../TableComponents/AlertStatus';
@@ -33,7 +35,17 @@ function ExapandableRow({ allAlerts }: ExapandableRowProps): JSX.Element {
 						</TableCell>
 
 						<TableCell minWidth="90px" overflowX="scroll">
-							<Typography>{labels.alertname || '-'}</Typography>
+							{labels.ruleId ? (
+								<Link
+									to={`${ROUTES.ALERT_HISTORY}?ruleId=${encodeURIComponent(
+										labels.ruleId,
+									)}`}
+								>
+									{labels.alertname || '-'}
+								</Link>
+							) : (
+								<Typography>{labels.alertname || '-'}</Typography>
+							)}
 						</TableCell>
 
 						<TableCell minWidth="90px">
