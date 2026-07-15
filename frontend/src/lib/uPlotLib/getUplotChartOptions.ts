@@ -298,6 +298,9 @@ export const getUPlotChartOptions = ({
 						drag: {
 							x: true,
 							y: true,
+							// 10px 미만 이동은 클릭으로 취급 — 미세 드래그가 수초짜리 줌으로 오인되어
+							// 전역 시간범위를 덮어쓰는 것을 방지
+							dist: 10,
 						},
 						focus: {
 							prox: 30,

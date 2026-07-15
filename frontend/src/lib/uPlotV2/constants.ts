@@ -19,7 +19,8 @@ export const DEFAULT_PLOT_CONFIG: Partial<Options> = {
 };
 
 export const DEFAULT_CURSOR_CONFIG: Cursor = {
-	drag: { setScale: true },
+	// dist: 10px 미만 이동은 클릭으로 취급 — 미세 드래그가 수초짜리 줌으로 오인되는 것을 방지
+	drag: { setScale: true, dist: 10 },
 	points: {
 		one: true,
 		size: (u, seriesIdx) => (u.series[seriesIdx]?.points?.size ?? 0) * 3,

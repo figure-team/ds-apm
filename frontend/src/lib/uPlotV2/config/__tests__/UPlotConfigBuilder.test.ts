@@ -383,6 +383,14 @@ describe('UPlotConfigBuilder', () => {
 		expect(drawHooks.length).toBe(2);
 	});
 
+	it('requires minimum drag distance so clicks are not treated as zoom selection', () => {
+		const builder = new UPlotConfigBuilder({ id: 'widget-123' });
+
+		const config = builder.getConfig();
+
+		expect(config.cursor?.drag?.dist).toBe(10);
+	});
+
 	it('merges cursor configuration with defaults instead of replacing them', () => {
 		const builder = new UPlotConfigBuilder({ id: 'widget-123' });
 

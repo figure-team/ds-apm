@@ -78,6 +78,21 @@ describe('getUPlotChartOptions', () => {
 		expect(options.series[1].points.size).toBe(5);
 	});
 
+	test('should require minimum drag distance so clicks are not treated as zoom selection', () => {
+		const options = getUPlotChartOptions({
+			...inputPropsTimeSeries,
+			enableZoom: true,
+		});
+		expect(options.cursor?.drag?.x).toBe(true);
+		expect(options.cursor?.drag?.y).toBe(true);
+		expect(options.cursor?.drag?.dist).toBe(10);
+	});
+
+	test('should not enable drag selection when zoom is disabled', () => {
+		const options = getUPlotChartOptions(inputPropsTimeSeries);
+		expect(options.cursor?.drag).toBeUndefined();
+	});
+
 	test('should return bar chart as drawStyle for panel type bar', () => {
 		const options = getUPlotChartOptions({
 			...inputPropsTimeSeries,
