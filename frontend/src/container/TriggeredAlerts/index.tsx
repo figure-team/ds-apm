@@ -66,7 +66,7 @@ function TriggeredAlerts(): JSX.Element {
 		);
 	}
 
-	if (alertsResponse.isFetching || alertsResponse?.data?.payload === undefined) {
+	if (alertsResponse.isLoading || alertsResponse?.data?.payload === undefined) {
 		return <Spinner height="75vh" tip={t('triggered_loading')} />;
 	}
 
