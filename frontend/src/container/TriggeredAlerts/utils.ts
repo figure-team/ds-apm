@@ -52,3 +52,43 @@ export const FilterAlerts = (
 
 	return allAlerts.filter((e) => filteredAlerts.has(e.fingerprint));
 };
+
+const SEVERITY_RANK: Record<string, number> = {
+	critical: 0,
+	error: 1,
+	warning: 2,
+	info: 3,
+};
+const UNKNOWN_SEVERITY_RANK = 4;
+
+export const severityCompare = (a: Alerts, b: Alerts): number => {
+	const aSeverity = (a.labels?.severity || '').toLowerCase();
+	const bSeverity = (b.labels?.severity || '').toLowerCase();
+	const aRank = SEVERITY_RANK[aSeverity] ?? UNKNOWN_SEVERITY_RANK;
+	const bRank = SEVERITY_RANK[bSeverity] ?? UNKNOWN_SEVERITY_RANK;
+	if (aRank !== bRank) {
+		return aRank - bRank;
+	}
+	return aSeverity.localeCompare(bSeverity);
+};
+
+const STATUS_RANK: Record<string, number> = {
+	active: 0,
+	suppressed: 1,
+	unprocessed: 2,
+};
+const UNKNOWN_STATUS_RANK = 3;
+
+export const statusCompare = (a: Alerts, b: Alerts): number => {
+	const aState = a.status?.state || '';
+	const bState = b.status?.state || '';
+	const aRank = STATUS_RANK[aState] ?? UNKNOWN_STATUS_RANK;
+	const bRank = STATUS_RANK[bState] ?? UNKNOWN_STATUS_RANK;
+	if (aRank !== bRank) {
+		return aRank - bRank;
+	}
+	return aState.localeCompare(bState);
+};
+
+export const alertNameCompare = (a: Alerts, b: Alerts): number =>
+	(a.labels?.alertname || '').localeCompare(b.labels?.alertname || '');

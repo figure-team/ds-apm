@@ -7,13 +7,12 @@ import { useTimezone } from 'providers/Timezone';
 import { Alerts } from 'types/api/alerts/getTriggered';
 
 import { Value } from './Filter';
-import { FilterAlerts } from './utils';
-
-const severitySorter = (a: Alerts, b: Alerts): number => {
-	const severityLengthOfA = a.labels?.severity?.length || 0;
-	const severityLengthOfB = b.labels?.severity?.length || 0;
-	return severityLengthOfB - severityLengthOfA;
-};
+import {
+	alertNameCompare,
+	FilterAlerts,
+	severityCompare,
+	statusCompare,
+} from './utils';
 
 function NoFilterTable({
 	allAlerts,
@@ -29,7 +28,7 @@ function NoFilterTable({
 			dataIndex: 'status',
 			width: 80,
 			key: 'status',
-			sorter: (a, b): number => severitySorter(a, b),
+			sorter: statusCompare,
 			render: (value): JSX.Element => <AlertStatus severity={value.state} />,
 		},
 		{
@@ -37,9 +36,7 @@ function NoFilterTable({
 			dataIndex: 'labels',
 			key: 'alertName',
 			width: 100,
-			sorter: (a, b): number =>
-				(a.labels?.alertname?.charCodeAt(0) || 0) -
-				(b.labels?.alertname?.charCodeAt(0) || 0),
+			sorter: alertNameCompare,
 			render: (data): JSX.Element => {
 				const name = data?.alertname || '';
 				return <Typography>{name}</Typography>;
@@ -68,7 +65,7 @@ function NoFilterTable({
 			dataIndex: 'labels',
 			key: 'severity',
 			width: 100,
-			sorter: (a, b): number => severitySorter(a, b),
+			sorter: severityCompare,
 			render: (value): JSX.Element => {
 				const objectKeys = Object.keys(value);
 				const withSeverityKey = objectKeys.find((e) => e === 'severity') || '';
