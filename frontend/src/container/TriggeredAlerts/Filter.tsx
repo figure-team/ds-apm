@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Alerts } from 'types/api/alerts/getTriggered';
 
 import { Container, Select } from './styles';
+import { buildFilterOptions } from './utils';
 
 function TextOverflowTooltip({
 	option,
@@ -76,6 +77,10 @@ function Filter({
 		return [...allLabelsSet];
 	}, [allAlerts]);
 
+	const filterOptions = useMemo(() => buildFilterOptions(allAlerts), [
+		allAlerts,
+	]);
+
 	const options = uniqueLabels.map((e) => ({
 		value: e,
 		title: '',
@@ -103,9 +108,13 @@ function Filter({
 				onChange={onChangeSelectedFilterHandler}
 				mode="tags"
 				value={selectedFilter.map((e) => e.value)}
+				showArrow
 				placeholder={t('triggered_filter_placeholder')}
 				tagRender={(props): JSX.Element => getTags(props)}
-				options={[]}
+				options={filterOptions}
+				optionRender={(option): JSX.Element => (
+					<TextOverflowTooltip option={option} />
+				)}
 			/>
 			<Select
 				allowClear

@@ -1,6 +1,7 @@
 import type { Value } from '../Filter';
 import {
 	alertNameCompare,
+	buildFilterOptions,
 	FilterAlerts,
 	severityCompare,
 	statusCompare,
@@ -167,5 +168,41 @@ describe('alertNameCompare', () => {
 		const named = createAlert({ labels: { alertname: 'A' } });
 
 		expect(alertNameCompare(unnamed, named)).toBeLessThan(0);
+	});
+});
+
+describe('buildFilterOptions', () => {
+	it('builds unique sorted key:value options from alert labels', () => {
+		const alerts = [
+			createAlert({ labels: { severity: 'warning', team: 'core' } }),
+			createAlert({ labels: { severity: 'warning', service: 'api' } }),
+		];
+
+		expect(buildFilterOptions(alerts)).toEqual([
+			{ value: 'service:api', title: '' },
+			{ value: 'severity:warning', title: '' },
+			{ value: 'team:core', title: '' },
+		]);
+	});
+
+	it('excludes internal labels and values containing a colon', () => {
+		const alerts = [
+			createAlert({
+				labels: {
+					severity: 'critical',
+					ruleId: 'rule-uuid-1',
+					ruleSource: 'http://host:8080/alerts/edit',
+					endpoint: 'host:443',
+				},
+			}),
+		];
+
+		expect(buildFilterOptions(alerts)).toEqual([
+			{ value: 'severity:critical', title: '' },
+		]);
+	});
+
+	it('returns an empty array when alerts have no labels', () => {
+		expect(buildFilterOptions([createAlert()])).toEqual([]);
 	});
 });

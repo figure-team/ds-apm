@@ -1,6 +1,6 @@
 import { Alerts } from 'types/api/alerts/getTriggered';
 
-import { Value } from './Filter';
+import type { Value } from './Filter';
 
 export const FilterAlerts = (
 	allAlerts: Alerts[],
@@ -92,3 +92,34 @@ export const statusCompare = (a: Alerts, b: Alerts): number => {
 
 export const alertNameCompare = (a: Alerts, b: Alerts): number =>
 	(a.labels?.alertname || '').localeCompare(b.labels?.alertname || '');
+
+// 백엔드가 트리거된 알림에 붙이는 내부 라벨 — 값은
+// pkg/types/ruletypes/labels.go의 AlertRuleIDLabel/RuleSourceLabel과 같아야 한다.
+const EXCLUDED_FILTER_OPTION_KEYS = ['ruleId', 'ruleSource'];
+
+export const buildFilterOptions = (
+	allAlerts: Alerts[],
+): Array<Value & { title: string }> => {
+	const uniqueOptions = new Set<string>();
+
+	allAlerts.forEach((alert) => {
+		Object.entries(alert.labels || {}).forEach(([key, value]) => {
+			if (EXCLUDED_FILTER_OPTION_KEYS.includes(key)) {
+				return;
+			}
+			// FilterAlerts는 split(':') 길이가 정확히 2인 값만 필터로 인정한다 —
+			// ':'가 든 키/값(예: ruleSource URL, host:port)은 선택해도 무시되는
+			// 함정 옵션이 되므로 옵션에서 제외한다.
+			if (key.includes(':') || value.includes(':')) {
+				return;
+			}
+			uniqueOptions.add(`${key}:${value}`);
+		});
+	});
+
+	return [...uniqueOptions]
+		.sort((a, b) => a.localeCompare(b))
+		// title: ''는 그룹 셀렉트 옵션과 동일 — 네이티브 title 툴팁을 꺼서
+		// TextOverflowTooltip과의 이중 툴팁을 막는다.
+		.map((value) => ({ value, title: '' }));
+};
