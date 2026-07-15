@@ -76,6 +76,11 @@
 	input {
 		width: 280px;
 
+		// 좁은 화면에서 시간 선택기 전체 폭을 줄여 툴바 잘림을 방지
+		@media screen and (width <= 1200px) {
+			width: 200px;
+		}
+
 		&::placeholder {
 			color: var(--l1-foreground);
 		}

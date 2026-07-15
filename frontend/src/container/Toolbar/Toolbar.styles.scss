@@ -2,14 +2,19 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: flex-end;
+	// 좁은 화면에서 우측 액션(시간 선택기·쿼리 실행)이 잘리지 않도록 줄바꿈 허용
+	flex-wrap: wrap;
 
 	padding: 0px 8px;
 	gap: 8px;
 
 	.rightActions {
 		margin: 4px 0;
+		margin-left: auto;
 		display: flex;
 		align-items: center;
+		justify-content: flex-end;
+		flex-wrap: wrap;
 		gap: 4px;
 
 		.right-toolbar-actions-container {
@@ -22,22 +27,8 @@
 	.timeRange {
 		display: flex;
 		align-items: center;
+		justify-content: flex-end;
+		flex-wrap: wrap;
 		gap: 8px;
-	}
-}
-
-@media screen and (width <= 1300px) {
-	.toolbar {
-		grid-template-columns: repeat(1, 1fr);
-
-		.timeRange {
-			justify-content: flex-end;
-			padding-right: 0;
-		}
-
-		.rightActions {
-			display: flex;
-			justify-content: flex-end;
-		}
 	}
 }
