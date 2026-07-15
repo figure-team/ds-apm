@@ -280,18 +280,18 @@ func (provider *provider) addRulerRoutes(router *mux.Router) error {
 		return err
 	}
 
-	if err := router.Handle("/api/v2/ds/ai/strategy/preview", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.PreviewAIStrategy), handler.OpenAPIDef{
+	if err := router.Handle("/api/v2/ds/ai/strategy/preview", handler.New(provider.authZ.EditAccess(provider.rulerHandler.PreviewAIStrategy), handler.OpenAPIDef{
 		ID:                  "PreviewAIStrategy",
 		Tags:                []string{"rules"},
 		Summary:             "Preview SOP-grounded AI response strategy",
-		Description:         "This endpoint generates a deterministic SOP-grounded AI response strategy preview from alert labels, redacted evidence refs, and a tenant-scoped SOP document",
+		Description:         "This endpoint generates a deterministic SOP-grounded AI response strategy preview from alert labels, redacted evidence refs, and a tenant-scoped SOP document; editor role required",
 		Request:             new(ruletypes.AIStrategyRequest),
 		RequestContentType:  "application/json",
 		Response:            new(ruletypes.AIStrategy),
 		ResponseContentType: "application/json",
 		SuccessStatusCode:   http.StatusOK,
 		ErrorStatusCodes:    []int{http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
-		SecuritySchemes:     newSecuritySchemes(types.RoleViewer),
+		SecuritySchemes:     newSecuritySchemes(types.RoleEditor),
 	})).Methods(http.MethodPost).GetError(); err != nil {
 		return err
 	}
@@ -412,16 +412,16 @@ func (provider *provider) addRulerRoutes(router *mux.Router) error {
 		return err
 	}
 
-	if err := router.Handle("/api/v2/ds/incident/report", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.GenerateIncidentReport), handler.OpenAPIDef{
+	if err := router.Handle("/api/v2/ds/incident/report", handler.New(provider.authZ.EditAccess(provider.rulerHandler.GenerateIncidentReport), handler.OpenAPIDef{
 		ID:                  "GenerateIncidentReport",
 		Tags:                []string{"incident_report"},
 		Summary:             "Generate incident report",
-		Description:         "Aggregates the incident's CF-2 strategy and CF-11 finding into a Korean-SI 장애보고서, rendered with the org template.",
+		Description:         "Aggregates the incident's CF-2 strategy and CF-11 finding into a Korean-SI 장애보고서, rendered with the org template; editor role required",
 		RequestContentType:  "application/json",
 		ResponseContentType: "application/json",
 		SuccessStatusCode:   http.StatusOK,
 		ErrorStatusCodes:    []int{http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusInternalServerError},
-		SecuritySchemes:     newSecuritySchemes(types.RoleViewer),
+		SecuritySchemes:     newSecuritySchemes(types.RoleEditor),
 	})).Methods(http.MethodPost).GetError(); err != nil {
 		return err
 	}
@@ -767,29 +767,29 @@ func (provider *provider) addRulerRoutes(router *mux.Router) error {
 		return err
 	}
 
-	if err := router.Handle("/api/v2/ds/remediation/{id}", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.GetRemediation), handler.OpenAPIDef{
+	if err := router.Handle("/api/v2/ds/remediation/{id}", handler.New(provider.authZ.AdminAccess(provider.rulerHandler.GetRemediation), handler.OpenAPIDef{
 		ID:                  "GetRemediation",
 		Tags:                []string{"remediation"},
 		Summary:             "Get remediation execution",
-		Description:         "Returns one remediation execution by ID.",
+		Description:         "Returns one remediation execution by ID; admin role required.",
 		Response:            new(ruletypes.RemediationExecution),
 		ResponseContentType: "application/json",
 		SuccessStatusCode:   http.StatusOK,
-		ErrorStatusCodes:    []int{http.StatusUnauthorized, http.StatusNotFound},
-		SecuritySchemes:     newSecuritySchemes(types.RoleViewer),
+		ErrorStatusCodes:    []int{http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
 	})).Methods(http.MethodGet).GetError(); err != nil {
 		return err
 	}
 
-	if err := router.Handle("/api/v2/ds/remediation", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.ListRemediations), handler.OpenAPIDef{
+	if err := router.Handle("/api/v2/ds/remediation", handler.New(provider.authZ.AdminAccess(provider.rulerHandler.ListRemediations), handler.OpenAPIDef{
 		ID:                  "ListRemediations",
 		Tags:                []string{"remediation"},
 		Summary:             "List remediation executions",
-		Description:         "Lists remediation executions, scoped to an incident via the incidentId query param (defaults to proposed executions).",
+		Description:         "Lists remediation executions, scoped to an incident via the incidentId query param (defaults to proposed executions); admin role required.",
 		ResponseContentType: "application/json",
 		SuccessStatusCode:   http.StatusOK,
-		ErrorStatusCodes:    []int{http.StatusUnauthorized},
-		SecuritySchemes:     newSecuritySchemes(types.RoleViewer),
+		ErrorStatusCodes:    []int{http.StatusUnauthorized, http.StatusForbidden},
+		SecuritySchemes:     newSecuritySchemes(types.RoleAdmin),
 	})).Methods(http.MethodGet).GetError(); err != nil {
 		return err
 	}

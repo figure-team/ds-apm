@@ -242,8 +242,10 @@ func (h *handler) runRemediation(orgID string, e ruletypes.RemediationExecution,
 	}
 	exit := res.ExitCode
 	// OPERATOR CONTRACT: Approved runbook scripts must not print secrets to
-	// stdout/stderr — OutputSnippet is stored unredacted and shown to Viewers.
-	// Secret masking is a future extension point.
+	// stdout/stderr — OutputSnippet is stored unredacted. Since the RBAC
+	// hardening, the read surface (GET /remediation*) is admin-only, but the
+	// snippet still sits in plaintext at rest (DB/backups). Secret masking is
+	// a future extension point.
 	_ = h.remediationStore.Transition(ctx, orgID, e.ID, toStatus, remediationstore.TransitionPatch{
 		TerminalAt:    time.Now().UTC().Format(time.RFC3339),
 		ExitCode:      &exit,
