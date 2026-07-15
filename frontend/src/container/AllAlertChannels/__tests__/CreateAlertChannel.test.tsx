@@ -126,7 +126,7 @@ describe('Create Alert Channel', () => {
 
 			await waitFor(() =>
 				expect(errorNotification).toHaveBeenCalledWith({
-					message: 'Error',
+					message: 'common:error',
 					description: 'channel_name_required',
 				}),
 			);
@@ -151,7 +151,7 @@ describe('Create Alert Channel', () => {
 
 			await waitFor(() =>
 				expect(successNotification).toHaveBeenCalledWith({
-					message: 'Success',
+					message: 'common:success',
 					description: 'channel_test_done',
 				}),
 			);

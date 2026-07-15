@@ -77,7 +77,7 @@ describe('useTraceActions Hook User Flow Tests', () => {
 		// Verify clipboard and notification
 		expect(mockSetCopy).toHaveBeenCalledWith('http.method');
 		expect(mockNotifications.success).toHaveBeenCalledWith({
-			message: 'Field name copied to clipboard',
+			message: 'field_name_copied_to_clipboard',
 		});
 	});
 
@@ -90,7 +90,7 @@ describe('useTraceActions Hook User Flow Tests', () => {
 		// Verify clipboard and notification
 		expect(mockSetCopy).toHaveBeenCalledWith('GET');
 		expect(mockNotifications.success).toHaveBeenCalledWith({
-			message: 'Field value copied to clipboard',
+			message: 'field_value_copied_to_clipboard',
 		});
 	});
 
@@ -103,7 +103,7 @@ describe('useTraceActions Hook User Flow Tests', () => {
 		// Verify clipboard contains the exact value passed
 		expect(mockSetCopy).toHaveBeenCalledWith('"quoted_value"');
 		expect(mockNotifications.success).toHaveBeenCalledWith({
-			message: 'Field value copied to clipboard',
+			message: 'field_value_copied_to_clipboard',
 		});
 	});
 

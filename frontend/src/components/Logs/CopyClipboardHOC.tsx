@@ -1,4 +1,5 @@
 import { ReactNode, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCopyToClipboard } from 'react-use';
 import { Popover } from 'antd';
 import { useNotifications } from 'hooks/useNotifications';
@@ -11,18 +12,19 @@ function CopyClipboardHOC({
 }: CopyClipboardHOCProps): JSX.Element {
 	const [value, setCopy] = useCopyToClipboard();
 	const { notifications } = useNotifications();
+	const { t } = useTranslation('logs');
 	useEffect(() => {
 		if (value.value) {
 			const key = entityKey || '';
 
-			const notificationMessage = `${key} copied to clipboard`;
+			const notificationMessage = t('attribute_copied_to_clipboard', { key });
 
 			notifications.success({
 				message: notificationMessage,
 				key: notificationMessage,
 			});
 		}
-	}, [value, notifications, entityKey]);
+	}, [value, notifications, entityKey, t]);
 
 	const onClick = useCallback((): void => {
 		setCopy(textToCopy);

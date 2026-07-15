@@ -237,7 +237,7 @@ describe('Metadata', () => {
 		onSuccessCallback({ status: 200 });
 
 		expect(mockSuccessNotification).toHaveBeenCalledWith({
-			message: 'Metadata updated successfully',
+			message: 'common:metadata_updated_successfully',
 		});
 	});
 

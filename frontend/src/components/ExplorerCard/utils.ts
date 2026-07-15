@@ -7,6 +7,7 @@ import { mapQueryDataFromApi } from 'lib/newQueryBuilder/queryBuilderMappers/map
 import isEqual from 'lodash-es/isEqual';
 import { Query } from 'types/api/queryBuilder/queryBuilderData';
 import { DataSource } from 'types/common/queryBuilder';
+import { i18nText } from 'utils/i18nText';
 
 import {
 	DeleteViewHandlerProps,
@@ -144,7 +145,7 @@ export const saveViewHandler = ({
 					[QueryParams.viewKey]: data.data.data,
 				});
 				notifications.success({
-					message: 'View Saved Successfully',
+					message: i18nText('explorer:view_saved_successfully'),
 				});
 			},
 			onError: (err) => {
@@ -186,7 +187,7 @@ export const deleteViewHandler = ({
 				);
 			}
 			notifications.success({
-				message: 'View Deleted Successfully',
+				message: i18nText('explorer:view_deleted_successfully'),
 			});
 			refetchAllView();
 		},

@@ -34,7 +34,7 @@ function DeleteAlert({
 	});
 
 	const [modal, contextHolder] = Modal.useModal();
-	const { t } = useTranslation('alerts');
+	const { t } = useTranslation(['alerts', 'common']);
 	const { showErrorModal } = useErrorModal();
 
 	const onDeleteHandler = async (id: string): Promise<void> => {
@@ -48,7 +48,7 @@ function DeleteAlert({
 				loading: false,
 			}));
 			notifications.success({
-				message: 'Success',
+				message: t('common:success'),
 			});
 		} catch (error) {
 			setDeleteAlertState((state) => ({

@@ -7,6 +7,7 @@ import { QueryParams } from 'constants/query';
 import ROUTES from 'constants/routes';
 import { mapQueryDataFromApi } from 'lib/newQueryBuilder/queryBuilderMappers/mapQueryDataFromApi';
 import { DataSource } from 'types/common/queryBuilder';
+import { i18nText } from 'utils/i18nText';
 
 import { SaveNewViewHandlerProps } from './types';
 
@@ -51,7 +52,7 @@ export const saveNewViewHandler = ({
 					[QueryParams.viewKey]: data.data.data,
 				});
 				notifications.success({
-					message: 'View Saved Successfully',
+					message: i18nText('explorer:view_saved_successfully'),
 				});
 			},
 			onError: (err) => {

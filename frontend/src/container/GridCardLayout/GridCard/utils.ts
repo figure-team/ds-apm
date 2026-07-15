@@ -11,6 +11,7 @@ import { MetricRangePayloadProps } from 'types/api/metrics/getQueryRange';
 import { TagFilterItem } from 'types/api/queryBuilder/queryBuilderData';
 import { QueryData } from 'types/api/widgets/getQuery';
 import { DataSource } from 'types/common/queryBuilder';
+import { i18nText } from 'utils/i18nText';
 
 import { GraphClickProps } from '../useGraphClickToShowButton';
 import { NavigateToExplorerPagesProps } from '../useNavigateToExplorerPages';
@@ -243,7 +244,7 @@ export const handleGraphClick = async ({
 		graphClick({ xValue, yValue, mouseX, mouseY, metric, queryData, menuItems });
 	} catch (error) {
 		notifications.error({
-			message: 'Failed to process graph click',
+			message: i18nText('common:failed_to_process_graph_click'),
 			description:
 				error instanceof Error ? error.message : 'Unknown error occurred',
 		});

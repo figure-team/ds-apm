@@ -57,7 +57,7 @@ function GeneralSettings({
 	tracesTtlValuesRefetch,
 	logsTtlValuesRefetch,
 }: GeneralSettingsProps): JSX.Element {
-	const { t } = useTranslation(['generalSettings']);
+	const { t } = useTranslation(['generalSettings', 'common']);
 	const [modalMetrics, setModalMetrics] = useState<boolean>(false);
 	const [modalTraces, setModalTraces] = useState<boolean>(false);
 	const [modalLogs, setModalLogs] = useState<boolean>(false);
@@ -194,13 +194,13 @@ function GeneralSettings({
 		(type: TTTLType) => {
 			if (!setRetentionPermission) {
 				notifications.error({
-					message: `Sorry you don't have permission to make these changes`,
+					message: t('common:no_permission_to_make_changes'),
 				});
 				return;
 			}
 			onModalToggleHandler(type);
 		},
-		[setRetentionPermission, notifications],
+		[setRetentionPermission, notifications, t],
 	);
 
 	const s3Enabled = useMemo(
@@ -388,13 +388,13 @@ function GeneralSettings({
 				hasSetTTLFailed = true;
 				if ((error as APIError).getHttpStatusCode() === StatusCodes.CONFLICT) {
 					notifications.error({
-						message: 'Error',
+						message: t('common:error'),
 						description: t('retention_request_race_condition'),
 						placement: 'topRight',
 					});
 				} else {
 					notifications.error({
-						message: 'Error',
+						message: t('common:error'),
 						description: (error as APIError).getErrorMessage(),
 						placement: 'topRight',
 					});
@@ -440,7 +440,7 @@ function GeneralSettings({
 			}
 		} catch (error) {
 			notifications.error({
-				message: 'Error',
+				message: t('common:error'),
 				description: t('retention_failed_message'),
 				placement: 'topRight',
 			});

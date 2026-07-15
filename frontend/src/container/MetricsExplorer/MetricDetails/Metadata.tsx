@@ -43,7 +43,7 @@ function Metadata({
 	isLoadingMetricMetadata,
 	refetchMetricMetadata,
 }: MetadataProps): JSX.Element {
-	const { t } = useTranslation('metricsExplorer');
+	const { t } = useTranslation(['metricsExplorer', 'common']);
 	const [isEditing, setIsEditing] = useState(false);
 
 	const [metricMetadataState, setMetricMetadataState] =
@@ -250,7 +250,7 @@ function Metadata({
 						[MetricsExplorerEventKeys.Modal]: 'metric-details',
 					});
 					notifications.success({
-						message: 'Metadata updated successfully',
+						message: t('common:metadata_updated_successfully'),
 					});
 					setIsEditing(false);
 					invalidateListMetrics(queryClient);

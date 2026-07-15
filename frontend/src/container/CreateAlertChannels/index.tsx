@@ -46,7 +46,7 @@ function CreateAlertChannels({
 	preType = ChannelType.Slack,
 }: CreateAlertChannelsProps): JSX.Element {
 	// init namespace for translations
-	const { t } = useTranslation('channels');
+	const { t } = useTranslation(['channels', 'common']);
 	const { showErrorModal } = useErrorModal();
 
 	const [formInstance] = Form.useForm();
@@ -136,7 +136,7 @@ function CreateAlertChannels({
 	const onSlackHandler = useCallback(async () => {
 		if (!selectedConfig.api_url) {
 			notifications.error({
-				message: 'Error',
+				message: t('common:error'),
 				description: t('webhook_url_required'),
 			});
 			return;
@@ -147,7 +147,7 @@ function CreateAlertChannels({
 		try {
 			await createSlackApi(prepareSlackRequest());
 			notifications.success({
-				message: 'Success',
+				message: t('common:success'),
 				description: t('channel_creation_done'),
 			});
 			history.replace(ROUTES.ALL_CHANNELS);
@@ -179,7 +179,7 @@ function CreateAlertChannels({
 					};
 				} else {
 					notifications.error({
-						message: 'Error',
+						message: t('common:error'),
 						description: t('username_no_password'),
 					});
 				}
@@ -198,7 +198,7 @@ function CreateAlertChannels({
 	const onWebhookHandler = useCallback(async () => {
 		if (!selectedConfig.api_url) {
 			notifications.error({
-				message: 'Error',
+				message: t('common:error'),
 				description: t('webhook_url_required'),
 			});
 			return;
@@ -209,7 +209,7 @@ function CreateAlertChannels({
 			const request = prepareWebhookRequest();
 			await createWebhookApi(request);
 			notifications.success({
-				message: 'Success',
+				message: t('common:success'),
 				description: t('channel_creation_done'),
 			});
 			history.replace(ROUTES.ALL_CHANNELS);
@@ -232,7 +232,7 @@ function CreateAlertChannels({
 		const validationError = ValidatePagerChannel(selectedConfig as PagerChannel);
 		if (validationError !== '') {
 			notifications.error({
-				message: 'Error',
+				message: t('common:error'),
 				description: validationError,
 			});
 			return null;
@@ -262,7 +262,7 @@ function CreateAlertChannels({
 			if (request) {
 				await createPagerApi(request);
 				notifications.success({
-					message: 'Success',
+					message: t('common:success'),
 					description: t('channel_creation_done'),
 				});
 				history.replace(ROUTES.ALL_CHANNELS);
@@ -292,7 +292,7 @@ function CreateAlertChannels({
 	const onOpsgenieHandler = useCallback(async () => {
 		if (!selectedConfig.api_key) {
 			notifications.error({
-				message: 'Error',
+				message: t('common:error'),
 				description: t('api_key_required'),
 			});
 			return;
@@ -302,7 +302,7 @@ function CreateAlertChannels({
 		try {
 			await createOpsgenie(prepareOpsgenieRequest());
 			notifications.success({
-				message: 'Success',
+				message: t('common:success'),
 				description: t('channel_creation_done'),
 			});
 			history.replace(ROUTES.ALL_CHANNELS);
@@ -335,7 +335,7 @@ function CreateAlertChannels({
 	const onEmailHandler = useCallback(async () => {
 		if (!selectedConfig.to) {
 			notifications.error({
-				message: 'Error',
+				message: t('common:error'),
 				description: t('to_required'),
 			});
 			return;
@@ -346,7 +346,7 @@ function CreateAlertChannels({
 			const request = prepareEmailRequest();
 			await createEmail(request);
 			notifications.success({
-				message: 'Success',
+				message: t('common:success'),
 				description: t('channel_creation_done'),
 			});
 			history.replace(ROUTES.ALL_CHANNELS);
@@ -373,7 +373,7 @@ function CreateAlertChannels({
 	const onMsTeamsHandler = useCallback(async () => {
 		if (!selectedConfig.webhook_url) {
 			notifications.error({
-				message: 'Error',
+				message: t('common:error'),
 				description: t('webhook_url_required'),
 			});
 			return;
@@ -384,7 +384,7 @@ function CreateAlertChannels({
 		try {
 			await createMsTeamsApi(prepareMsTeamsRequest());
 			notifications.success({
-				message: 'Success',
+				message: t('common:success'),
 				description: t('channel_creation_done'),
 			});
 			history.replace(ROUTES.ALL_CHANNELS);
@@ -407,7 +407,7 @@ function CreateAlertChannels({
 		async (value: ChannelType) => {
 			if (!selectedConfig.name) {
 				notifications.error({
-					message: 'Error',
+					message: t('common:error'),
 					description: t('channel_name_required'),
 				});
 				return;
@@ -437,7 +437,7 @@ function CreateAlertChannels({
 					});
 				} else {
 					notifications.error({
-						message: 'Error',
+						message: t('common:error'),
 						description: t('selected_channel_invalid'),
 					});
 				}
@@ -490,7 +490,7 @@ function CreateAlertChannels({
 						break;
 					default:
 						notifications.error({
-							message: 'Error',
+							message: t('common:error'),
 							description: t('test_unsupported'),
 						});
 						setTestingState(false);
@@ -498,7 +498,7 @@ function CreateAlertChannels({
 				}
 
 				notifications.success({
-					message: 'Success',
+					message: t('common:success'),
 					description: t('channel_test_done'),
 				});
 				logEvent('Alert Channel: Test notification', {

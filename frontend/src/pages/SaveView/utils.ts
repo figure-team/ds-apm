@@ -8,6 +8,7 @@ import {
 	MetricsExplorerEvents,
 } from 'container/MetricsExplorer/events';
 import { DeleteViewPayloadProps } from 'types/api/saveViews/types';
+import { i18nText } from 'utils/i18nText';
 
 type DeleteViewProps = {
 	deleteViewAsync: UseMutateAsyncFunction<DeleteViewPayloadProps, Error, string>;
@@ -31,7 +32,7 @@ export const deleteViewHandler = ({
 			hideDeleteViewModal();
 			clearSearch();
 			notifications.success({
-				message: 'View Deleted Successfully',
+				message: i18nText('explorer:view_deleted_successfully'),
 			});
 			refetchAllView();
 			logEvent(MetricsExplorerEvents.ViewDeleted, {

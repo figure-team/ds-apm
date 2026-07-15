@@ -31,7 +31,7 @@ function EditRules(): JSX.Element {
 	const { safeNavigate } = useSafeNavigate();
 	const params = useUrlQuery();
 	const ruleId = params.get(QueryParams.ruleId);
-	const { t } = useTranslation('common');
+	const { t } = useTranslation(['common', 'alerts']);
 
 	const isValidRuleId = ruleId !== null && String(ruleId).length !== 0;
 
@@ -59,11 +59,11 @@ function EditRules(): JSX.Element {
 	useEffect(() => {
 		if (!isValidRuleId) {
 			notifications.error({
-				message: 'Rule Id is required',
+				message: t('alerts:rule_id_required'),
 			});
 			safeNavigate(ROUTES.LIST_ALL_ALERT);
 		}
-	}, [isValidRuleId, ruleId, notifications, safeNavigate]);
+	}, [isValidRuleId, ruleId, notifications, safeNavigate, t]);
 
 	const ruleData: RuletypesRuleDTO | undefined = data?.data;
 

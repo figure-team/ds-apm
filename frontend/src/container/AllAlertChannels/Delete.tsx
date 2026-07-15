@@ -7,7 +7,7 @@ import deleteChannel from 'api/channels/delete';
 import APIError from 'types/api/error';
 
 function Delete({ notifications, id }: DeleteProps): JSX.Element {
-	const { t } = useTranslation(['channels']);
+	const { t } = useTranslation(['channels', 'common']);
 	const [loading, setLoading] = useState(false);
 	const queryClient = useQueryClient();
 
@@ -19,7 +19,7 @@ function Delete({ notifications, id }: DeleteProps): JSX.Element {
 			});
 
 			notifications.success({
-				message: 'Success',
+				message: t('common:success'),
 				description: t('channel_delete_success'),
 			});
 			// Invalidate and refetch

@@ -735,7 +735,7 @@ describe('TracesExplorer - ', () => {
 
 		await waitFor(() => {
 			expect(successNotification).toHaveBeenCalledWith({
-				message: 'View Saved Successfully',
+				message: 'explorer:view_saved_successfully',
 			});
 		});
 	}, 15000);

@@ -13,5 +13,8 @@
     "save_changes": "Save changes",
     "label": "Label",
     "edit_view_name_placeholder": "e.g. Crash landing view",
-    "view_updated_successfully": "View Updated Successfully"
+    "view_updated_successfully": "View Updated Successfully",
+    "view_saved_successfully": "View Saved Successfully",
+    "view_deleted_successfully": "View Deleted Successfully",
+    "quick_filters_updated_successfully": "Quick filters updated successfully"
 }

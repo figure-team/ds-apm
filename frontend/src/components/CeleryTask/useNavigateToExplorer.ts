@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { QueryParams } from 'constants/query';
@@ -31,6 +32,7 @@ export function useNavigateToExplorer(): (
 	const { minTime, maxTime } = useSelector<AppState, GlobalReducer>(
 		(state) => state.globalTime,
 	);
+	const { t } = useTranslation('common');
 
 	const prepareQuery = useCallback(
 		(
@@ -119,7 +121,7 @@ export function useNavigateToExplorer(): (
 					})
 					.catch(() => {
 						notifications.error({
-							message: 'Unable to resolve variables',
+							message: t('unable_to_resolve_variables'),
 						});
 					});
 			}
@@ -143,6 +145,7 @@ export function useNavigateToExplorer(): (
 			getUpdatedQuery,
 			dashboardData,
 			notifications,
+			t,
 		],
 	);
 }

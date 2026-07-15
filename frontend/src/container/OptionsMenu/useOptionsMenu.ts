@@ -1,5 +1,6 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueries } from 'react-query';
 import { getKeySuggestions } from 'api/querySuggestions/getKeySuggestions';
 import { TelemetryFieldKey } from 'api/v5/v5';
@@ -57,6 +58,7 @@ const useOptionsMenu = ({
 	initialOptions = {},
 }: UseOptionsMenuProps): UseOptionsMenu => {
 	const { notifications } = useNotifications();
+	const { t } = useTranslation('common');
 	const prefCtx = usePreferenceContext();
 	// TODO: send null to updateColumns and updateFormatting if dataSource is not logs or traces
 	const slice = dataSource === DataSource.TRACES ? prefCtx.traces : prefCtx.logs;
@@ -325,7 +327,7 @@ const useOptionsMenu = ({
 
 			if (!newSelectedColumns?.length && dataSource !== DataSource.LOGS) {
 				notifications.error({
-					message: 'There must be at least one selected column',
+					message: t('at_least_one_column_required'),
 				});
 			} else {
 				const optionsData: OptionsQuery = {
@@ -347,6 +349,7 @@ const useOptionsMenu = ({
 			preferences,
 			handleRedirectWithOptionsData,
 			updateColumns,
+			t,
 		],
 	);
 

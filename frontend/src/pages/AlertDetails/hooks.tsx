@@ -399,6 +399,7 @@ export const useAlertRuleStatusToggle = ({
 } => {
 	const { alertRuleState, setAlertRuleState } = useAlertRule();
 	const { notifications } = useNotifications();
+	const { t } = useTranslation('alerts');
 
 	const queryClient = useQueryClient();
 	const { showErrorModal } = useErrorModal();
@@ -412,9 +413,8 @@ export const useAlertRuleStatusToggle = ({
 				setAlertRuleState(data.data.state);
 				queryClient.refetchQueries([REACT_QUERY_KEY.ALERT_RULE_DETAILS, ruleId]);
 				notifications.success({
-					message: `Alert has been ${
-						data.data.state === 'disabled' ? 'disabled' : 'enabled'
-					}.`,
+					message:
+						data.data.state === 'disabled' ? t('alert_disabled') : t('alert_enabled'),
 				});
 			},
 			onError: (error) => {
@@ -445,6 +445,7 @@ export const useAlertRuleDuplicate = ({
 	handleAlertDuplicate: () => void;
 } => {
 	const { notifications } = useNotifications();
+	const { t } = useTranslation('common');
 
 	const params = useUrlQuery();
 
@@ -459,7 +460,7 @@ export const useAlertRuleDuplicate = ({
 		{
 			onSuccess: async () => {
 				notifications.success({
-					message: `Success`,
+					message: t('success'),
 				});
 
 				const { data: allAlertsData } = await refetch();
@@ -501,6 +502,7 @@ export const useAlertRuleUpdate = ({
 } => {
 	const { notifications } = useNotifications();
 	const { showErrorModal } = useErrorModal();
+	const { t } = useTranslation('alerts');
 
 	const { mutate: updateAlertRule, isLoading } = useMutation(
 		[REACT_QUERY_KEY.UPDATE_ALERT_RULE, alertDetails.id],
@@ -509,7 +511,7 @@ export const useAlertRuleUpdate = ({
 		{
 			onMutate: () => setUpdatedName(intermediateName),
 			onSuccess: () =>
-				notifications.success({ message: 'Alert renamed successfully' }),
+				notifications.success({ message: t('alert_renamed_successfully') }),
 			onError: (error) => {
 				setUpdatedName(alertDetails.alert);
 				showErrorModal(
@@ -538,6 +540,7 @@ export const useAlertRuleDelete = ({
 } => {
 	const { notifications } = useNotifications();
 	const { showErrorModal } = useErrorModal();
+	const { t } = useTranslation('common');
 
 	const { mutate: deleteAlert } = useMutation(
 		[REACT_QUERY_KEY.REMOVE_ALERT_RULE, ruleId],
@@ -545,7 +548,7 @@ export const useAlertRuleDelete = ({
 		{
 			onSuccess: async () => {
 				notifications.success({
-					message: `Success`,
+					message: t('success'),
 				});
 
 				history.push(ROUTES.LIST_ALL_ALERT);

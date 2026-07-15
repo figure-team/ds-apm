@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { patchRulePartial } from 'api/alerts/patchRulePartial';
 import { convertToApiError } from 'api/ErrorResponseHandlerForGeneratedAPIs';
 import type {
@@ -28,6 +29,7 @@ function ToggleAlertState({
 
 	const { notifications } = useNotifications();
 	const { showErrorModal } = useErrorModal();
+	const { t } = useTranslation('common');
 
 	const onToggleHandler = async (
 		id: string,
@@ -61,7 +63,7 @@ function ToggleAlertState({
 				payload: updatedRule,
 			}));
 			notifications.success({
-				message: 'Success',
+				message: t('success'),
 			});
 		} catch (error) {
 			setAPIStatus((state) => ({

@@ -99,7 +99,7 @@ function FormAlertRules({
 	ruleId,
 }: FormAlertRuleProps): JSX.Element {
 	// init namespace for translations
-	const { t } = useTranslation('alerts');
+	const { t } = useTranslation(['alerts', 'common']);
 	const { featureFlags } = useAppContext();
 	const { safeNavigate } = useSafeNavigate();
 	const { selectedTime: globalSelectedInterval } = useSelector<
@@ -401,7 +401,7 @@ function FormAlertRules({
 
 		if (!currentQuery.promql || currentQuery.promql.length === 0) {
 			notifications.error({
-				message: 'Error',
+				message: t('common:error'),
 				description: t('promql_required'),
 			});
 			return false;
@@ -410,7 +410,7 @@ function FormAlertRules({
 		currentQuery.promql.forEach((item) => {
 			if (item.query === '') {
 				notifications.error({
-					message: 'Error',
+					message: t('common:error'),
 					description: t('promql_required'),
 				});
 				retval = false;
@@ -431,7 +431,7 @@ function FormAlertRules({
 			currentQuery.clickhouse_sql.length === 0
 		) {
 			notifications.error({
-				message: 'Error',
+				message: t('common:error'),
 				description: t('chquery_required'),
 			});
 			return false;
@@ -440,7 +440,7 @@ function FormAlertRules({
 		currentQuery.clickhouse_sql.forEach((item) => {
 			if (item.query === '') {
 				notifications.error({
-					message: 'Error',
+					message: t('common:error'),
 					description: t('chquery_required'),
 				});
 				retval = false;
@@ -460,7 +460,7 @@ function FormAlertRules({
 			currentQuery.builder.queryData?.length === 0
 		) {
 			notifications.error({
-				message: 'Error',
+				message: t('common:error'),
 				description: t('condition_required'),
 			});
 			return false;
@@ -472,7 +472,7 @@ function FormAlertRules({
 			!alertDef.condition?.target
 		) {
 			notifications.error({
-				message: 'Error',
+				message: t('common:error'),
 				description: t('target_missing'),
 			});
 			return false;
@@ -572,7 +572,7 @@ function FormAlertRules({
 			};
 
 			notifications.success({
-				message: 'Success',
+				message: t('common:success'),
 				description: logData.statusMessage,
 			});
 
@@ -659,13 +659,13 @@ function FormAlertRules({
 
 			if (response.data?.alertCount === 0) {
 				notifications.error({
-					message: 'Error',
+					message: t('common:error'),
 					description: t('no_alerts_found'),
 				});
 				statusResponse = { status: 'failed', message: t('no_alerts_found') };
 			} else {
 				notifications.success({
-					message: 'Success',
+					message: t('common:success'),
 					description: t('rule_test_fired'),
 				});
 				statusResponse = { status: 'success', message: t('rule_test_fired') };

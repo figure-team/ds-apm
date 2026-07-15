@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import { LOCALSTORAGE } from 'constants/localStorage';
 import { REACT_QUERY_KEY } from 'constants/reactQueryKeys';
@@ -56,6 +57,7 @@ export default function useFunnelConfiguration({
 	showNotifications?: boolean;
 }): UseFunnelConfiguration {
 	const { notifications } = useNotifications();
+	const { t } = useTranslation('trace');
 	const queryClient = useQueryClient();
 	const {
 		steps,
@@ -199,8 +201,8 @@ export default function useFunnelConfiguration({
 					// Show success notification only when requested
 					if (showNotifications) {
 						notifications.success({
-							message: 'Success',
-							description: 'Funnel configuration updated successfully',
+							message: t('funnels.success'),
+							description: t('funnels.configuration_updated'),
 						});
 					}
 				},
@@ -221,7 +223,7 @@ export default function useFunnelConfiguration({
 					// Show error notification only when requested
 					if (showNotifications) {
 						notifications.error({
-							message: 'Failed to update funnel',
+							message: t('funnels.update_failed'),
 							description:
 								error?.message ||
 								'An error occurred while updating the funnel configuration',

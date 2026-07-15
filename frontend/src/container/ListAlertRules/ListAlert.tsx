@@ -157,8 +157,8 @@ function ListAlert({ allAlertRules, refetch }: ListAlertProps): JSX.Element {
 				await createRule(copyAlert);
 
 				notificationsApi.success({
-					message: 'Success',
-					description: 'Alert cloned successfully',
+					message: t('success'),
+					description: t('alerts:alert_cloned_successfully'),
 				});
 
 				const { data: refetchData, status } = await refetch();

@@ -1,4 +1,5 @@
 import { MouseEventHandler, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useCopyToClipboard } from 'react-use';
 import { useNotifications } from 'hooks/useNotifications';
@@ -13,6 +14,7 @@ export const useCopySpanLink = (
 	const { pathname } = useLocation();
 	const [, setCopy] = useCopyToClipboard();
 	const { notifications } = useNotifications();
+	const { t } = useTranslation('common');
 
 	const onSpanCopy: MouseEventHandler<HTMLElement> = useCallback(
 		(event) => {
@@ -33,10 +35,10 @@ export const useCopySpanLink = (
 
 			setCopy(link);
 			notifications.success({
-				message: 'Copied to clipboard',
+				message: t('copied_to_clipboard'),
 			});
 		},
-		[span, urlQuery, pathname, setCopy, notifications],
+		[span, urlQuery, pathname, setCopy, notifications, t],
 	);
 
 	return {

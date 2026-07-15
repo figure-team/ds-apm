@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNotifications } from 'hooks/useNotifications';
 import { useDashboardStore } from 'providers/Dashboard/store/useDashboardStore';
 import { Widgets } from 'types/api/dashboard/getAll';
@@ -123,6 +124,7 @@ function useNavigateToExplorerPages(): (
 }> {
 	const { dashboardData } = useDashboardStore();
 	const { notifications } = useNotifications();
+	const { t } = useTranslation('common');
 
 	return useCallback(
 		async ({ widget, requestData }: NavigateToExplorerPagesProps) => {
@@ -134,7 +136,7 @@ function useNavigateToExplorerPages(): (
 				);
 			} catch (error) {
 				notifications.error({
-					message: 'Error navigating to explorer',
+					message: t('error_navigating_to_explorer'),
 					description:
 						error instanceof Error ? error.message : 'Unknown error occurred',
 				});
@@ -143,7 +145,7 @@ function useNavigateToExplorerPages(): (
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[dashboardData, notifications],
+		[dashboardData, notifications, t],
 	);
 }
 

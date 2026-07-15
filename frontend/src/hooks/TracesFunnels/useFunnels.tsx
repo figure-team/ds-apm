@@ -34,6 +34,7 @@ import {
 import { REACT_QUERY_KEY } from 'constants/reactQueryKeys';
 import { useFunnelContext } from 'pages/TracesFunnels/FunnelContext';
 import { ErrorResponse, SuccessResponse } from 'types/api';
+import { i18nText } from 'utils/i18nText';
 import {
 	CreateFunnelPayload,
 	CreateFunnelResponse,
@@ -107,7 +108,7 @@ export const useUpdateFunnelSteps = (
 
 		onError: (error) => {
 			notification.error({
-				message: 'Failed to update funnel steps',
+				message: i18nText('trace:funnels.steps_update_failed'),
 				description: error.message,
 			});
 		},

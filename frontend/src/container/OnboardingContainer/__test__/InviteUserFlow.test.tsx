@@ -114,7 +114,7 @@ describe('Onboarding invite team member flow', () => {
 
 		await waitFor(() =>
 			expect(successNotification).toHaveBeenCalledWith({
-				message: 'Invite sent successfully',
+				message: 'common:invite_sent_successfully',
 			}),
 		);
 	});

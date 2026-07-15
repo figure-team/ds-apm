@@ -61,7 +61,7 @@ function LabelsInput({
 					} else if (inputState.key.trim()) {
 						if (labels[inputState.key.trim()]) {
 							notifications.error({
-								message: 'Label with this key already exists',
+								message: t('label_key_exists'),
 							});
 							return;
 						}

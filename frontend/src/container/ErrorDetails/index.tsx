@@ -87,7 +87,7 @@ function ErrorDetails(props: ErrorDetailsProps): JSX.Element {
 		try {
 			if (id.length === 0) {
 				notifications.error({
-					message: 'Error Id cannot be empty',
+					message: t('common:error_id_empty'),
 				});
 				return;
 			}

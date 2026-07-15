@@ -379,7 +379,7 @@ function ExplorerOptions({
 			{
 				onSuccess: () => {
 					notifications.success({
-						message: 'View Updated Successfully',
+						message: t('view_updated_successfully'),
 					});
 					refetchAllView();
 				},

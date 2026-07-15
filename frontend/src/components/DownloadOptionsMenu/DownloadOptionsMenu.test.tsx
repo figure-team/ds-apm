@@ -272,9 +272,7 @@ describe.each([
 		fireEvent.click(screen.getByText('Export'));
 
 		await waitFor(() => {
-			expect(message.success).toHaveBeenCalledWith(
-				'Export completed successfully',
-			);
+			expect(message.success).toHaveBeenCalledWith('export_completed');
 		});
 	});
 
@@ -285,9 +283,7 @@ describe.each([
 		fireEvent.click(screen.getByText('Export'));
 
 		await waitFor(() => {
-			expect(message.error).toHaveBeenCalledWith(
-				`Failed to export ${dataSource}. Please try again.`,
-			);
+			expect(message.error).toHaveBeenCalledWith('export_failed');
 		});
 	});
 

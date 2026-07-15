@@ -220,7 +220,7 @@ function LogDetailInner({
 	const handleJSONCopy = (): void => {
 		copyToClipboard(LogJsonData);
 		notifications.success({
-			message: 'Copied to clipboard',
+			message: t('copied_to_clipboard'),
 		});
 	};
 

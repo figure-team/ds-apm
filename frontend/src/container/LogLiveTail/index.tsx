@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { connect, useDispatch, useSelector } from 'react-redux';
 import { green } from '@ant-design/colors';
@@ -53,6 +54,7 @@ function LogLiveTail({ getLogsAggregate }: Props): JSX.Element {
 		(state) => state.globalTime,
 	);
 	const { notifications } = useNotifications();
+	const { t } = useTranslation('common');
 
 	const dispatch = useDispatch<Dispatch<AppActions>>();
 	const handleLiveTail = (toggleState: TLogsLiveTailState): void => {
@@ -128,7 +130,7 @@ function LogLiveTail({ getLogsAggregate }: Props): JSX.Element {
 					payload: false,
 				});
 				notifications.error({
-					message: 'Live tail stopped due to some error.',
+					message: t('live_tail_stopped'),
 				});
 			};
 		}

@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from 'react-query';
 import { useCopyToClipboard } from 'react-use';
 import { getAggregateKeys } from 'api/queryBuilder/getAttributeKeys';
@@ -34,6 +35,7 @@ export const useTraceActions = (): UseTraceActionsReturn => {
 	const queryClient = useQueryClient();
 	const { notifications } = useNotifications();
 	const [, setCopy] = useCopyToClipboard();
+	const { t } = useTranslation('trace');
 
 	const removeExistingFieldFilters = useCallback(
 		(filters: TagFilterItem[], fieldKey: BaseAutocompleteData): TagFilterItem[] =>
@@ -167,20 +169,20 @@ export const useTraceActions = (): UseTraceActionsReturn => {
 		(fieldName: string): void => {
 			setCopy(fieldName);
 			notifications.success({
-				message: 'Field name copied to clipboard',
+				message: t('field_name_copied_to_clipboard'),
 			});
 		},
-		[setCopy, notifications],
+		[setCopy, notifications, t],
 	);
 
 	const onCopyFieldValue = useCallback(
 		(fieldValue: string): void => {
 			setCopy(fieldValue);
 			notifications.success({
-				message: 'Field value copied to clipboard',
+				message: t('field_value_copied_to_clipboard'),
 			});
 		},
-		[setCopy, notifications],
+		[setCopy, notifications, t],
 	);
 
 	return {

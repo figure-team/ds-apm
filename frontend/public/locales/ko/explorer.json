@@ -13,5 +13,8 @@
     "save_changes": "변경 사항 저장",
     "label": "라벨",
     "edit_view_name_placeholder": "예: 자주 사용하는 뷰",
-    "view_updated_successfully": "뷰가 성공적으로 업데이트되었습니다"
+    "view_updated_successfully": "뷰가 성공적으로 업데이트되었습니다",
+    "view_saved_successfully": "뷰가 성공적으로 저장되었습니다",
+    "view_deleted_successfully": "뷰가 성공적으로 삭제되었습니다",
+    "quick_filters_updated_successfully": "빠른 필터가 성공적으로 업데이트되었습니다"
 }

@@ -5,6 +5,7 @@ import {
 	useMemo,
 	useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
@@ -26,6 +27,7 @@ export const useCopyLogLink = (logId?: string): UseCopyLogLink => {
 	const urlQuery = useUrlQuery();
 	const { pathname, search } = useLocation();
 	const [, setCopy] = useCopyToClipboard();
+	const { t } = useTranslation('common');
 
 	const { safeNavigate } = useSafeNavigate();
 
@@ -66,9 +68,9 @@ export const useCopyLogLink = (logId?: string): UseCopyLogLink => {
 
 			setCopy(link);
 
-			toast.success('Copied to clipboard', { position: 'top-right' });
+			toast.success(t('copied_to_clipboard'), { position: 'top-right' });
 		},
-		[logId, urlQuery, minTime, maxTime, pathname, setCopy],
+		[logId, urlQuery, minTime, maxTime, pathname, setCopy, t],
 	);
 
 	const onClearActiveLog = useCallback(() => {

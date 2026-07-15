@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCopyToClipboard } from 'react-use';
 import {
 	DeleteOutlined,
@@ -52,11 +53,12 @@ function ExplorerCard({
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 	const [, setCopyUrl] = useCopyToClipboard();
 	const { notifications } = useNotifications();
+	const { t } = useTranslation(['explorer', 'common']);
 
 	const onCopyUrlHandler = (): void => {
 		setCopyUrl(window.location.href);
 		notifications.success({
-			message: 'Copied to clipboard',
+			message: t('common:copied_to_clipboard'),
 		});
 	};
 
@@ -142,7 +144,7 @@ function ExplorerCard({
 			{
 				onSuccess: () => {
 					notifications.success({
-						message: 'View Updated Successfully',
+						message: t('explorer:view_updated_successfully'),
 					});
 					refetchAllView();
 				},

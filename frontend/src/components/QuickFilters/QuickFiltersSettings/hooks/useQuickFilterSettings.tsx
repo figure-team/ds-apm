@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation } from 'react-query';
 import logEvent from 'api/common/logEvent';
 import updateCustomFiltersAPI from 'api/quickFilters/updateCustomFilters';
@@ -39,6 +40,7 @@ const useQuickFilterSettings = ({
 	const [debouncedInputValue, setDebouncedInputValue] = useState<string>('');
 	const [addedFilters, setAddedFilters] = useState<FilterType[]>(customFilters);
 	const { notifications } = useNotifications();
+	const { t } = useTranslation('explorer');
 
 	const { mutate: updateCustomFilters, isLoading: isUpdatingCustomFilters } =
 		useMutation(updateCustomFiltersAPI, {
@@ -49,7 +51,7 @@ const useQuickFilterSettings = ({
 					addedFilters,
 				});
 				notifications.success({
-					message: 'Quick filters updated successfully',
+					message: t('quick_filters_updated_successfully'),
 					placement: 'bottomRight',
 				});
 			},

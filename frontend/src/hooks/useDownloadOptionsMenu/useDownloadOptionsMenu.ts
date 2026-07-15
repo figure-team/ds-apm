@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { message } from 'antd';
@@ -30,6 +31,7 @@ export function useExportRawData({
 	dataSource,
 }: UseExportRawDataProps): UseExportRawDataReturn {
 	const [isDownloading, setIsDownloading] = useState<boolean>(false);
+	const { t } = useTranslation('common');
 
 	const { stagedQuery } = useQueryBuilder();
 
@@ -89,14 +91,14 @@ export function useExportRawData({
 				});
 
 				await downloadExportData({ format, body: queryPayload });
-				message.success('Export completed successfully');
+				message.success(t('export_completed'));
 			} catch (error) {
-				message.error(`Failed to export ${dataSource}. Please try again.`);
+				message.error(t('export_failed', { dataSource }));
 			} finally {
 				setIsDownloading(false);
 			}
 		},
-		[stagedQuery, globalSelectedInterval, dataSource],
+		[stagedQuery, globalSelectedInterval, dataSource, t],
 	);
 
 	return { isDownloading, handleExportRawData };
