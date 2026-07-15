@@ -243,4 +243,38 @@ describe('SOPDocuments', () => {
 		expect(await screen.findByText('documents_tab')).toBeInTheDocument();
 		expect(screen.getByText('history_tab')).toBeInTheDocument();
 	});
+
+	it('hides the history tab for editors', async () => {
+		render(<SOPDocuments />, undefined, { role: 'EDITOR' });
+
+		expect(await screen.findByText('documents_tab')).toBeInTheDocument();
+		expect(screen.queryByText('history_tab')).not.toBeInTheDocument();
+	});
+
+	it('hides the history tab for viewers', async () => {
+		render(<SOPDocuments />, undefined, { role: 'VIEWER' });
+
+		expect(await screen.findByText('documents_tab')).toBeInTheDocument();
+		expect(screen.queryByText('history_tab')).not.toBeInTheDocument();
+	});
+
+	it('clamps ?tab=history deep links to the documents tab for non-admins', async () => {
+		render(<SOPDocuments />, undefined, {
+			role: 'EDITOR',
+			initialRoute: '/?tab=history',
+		});
+
+		// 빈 패널이 아니라 documents 탭 콘텐츠가 렌더되어야 한다.
+		expect(await screen.findByText('documents_tab')).toBeInTheDocument();
+		expect(screen.queryByText('RemediationHistoryStub')).not.toBeInTheDocument();
+	});
+
+	it('keeps ?tab=history deep links working for admins', async () => {
+		render(<SOPDocuments />, undefined, {
+			role: 'ADMIN',
+			initialRoute: '/?tab=history',
+		});
+
+		expect(await screen.findByText('RemediationHistoryStub')).toBeInTheDocument();
+	});
 });

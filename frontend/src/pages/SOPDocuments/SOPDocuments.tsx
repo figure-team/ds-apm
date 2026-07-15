@@ -17,6 +17,8 @@ import {
 } from 'api/v2/rules/sopDocuments';
 import { useHistory } from 'react-router-dom';
 import useUrlQuery from 'hooks/useUrlQuery';
+import { useAppContext } from 'providers/App/App';
+import { USER_ROLES } from 'types/roles';
 import SopDocumentDetail from './SopDocumentDetail';
 
 import './SOPDocuments.styles.scss';
@@ -65,6 +67,9 @@ function SOPDocuments(): JSX.Element {
 
 	const history = useHistory();
 	const query = useUrlQuery();
+
+	const { user } = useAppContext();
+	const isAdmin = user.role === USER_ROLES.ADMIN;
 
 	const selectedSop = useMemo<{ sopId: string; version: string } | null>(() => {
 		const sopId = query.get('sopId');
@@ -290,7 +295,8 @@ function SOPDocuments(): JSX.Element {
 		[t, openEditDrawer],
 	);
 
-	const activeTab = query.get('tab') === 'history' ? 'history' : 'documents';
+	const activeTab =
+		isAdmin && query.get('tab') === 'history' ? 'history' : 'documents';
 
 	const onTabChange = useCallback(
 		(key: string): void => {
@@ -472,11 +478,15 @@ function SOPDocuments(): JSX.Element {
 						label: t('documents_tab'),
 						children: documentsTab,
 					},
-					{
-						key: 'history',
-						label: t('history_tab'),
-						children: <RemediationHistory />,
-					},
+					...(isAdmin
+						? [
+								{
+									key: 'history',
+									label: t('history_tab'),
+									children: <RemediationHistory />,
+								},
+						  ]
+						: []),
 				]}
 			/>
 		</div>
