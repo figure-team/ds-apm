@@ -12,7 +12,7 @@ export const emptyGraph = {
 		ctx.textBaseline = 'middle';
 		ctx.font = '1.5rem sans-serif';
 		ctx.fillStyle = `${grey.primary}`;
-		ctx.fillText(i18nText('dashboard:no_data'), width / 2, height / 2);
+		ctx.fillText(i18nText('common:no_data'), width / 2, height / 2);
 		ctx.restore();
 	},
 };

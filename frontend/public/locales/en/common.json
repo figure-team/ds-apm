@@ -6,6 +6,7 @@
 	"success": "Success",
 	"error": "Error",
 	"copied_to_clipboard": "Copied to clipboard",
+	"no_data": "No data",
 	"export_completed": "Export completed successfully",
 	"export_failed": "Failed to export {{dataSource}}. Please try again.",
 	"at_least_one_column_required": "There must be at least one selected column",

@@ -7,6 +7,7 @@ import {
 	useImperativeHandle,
 	useRef,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as Sentry from '@sentry/react';
 import { Typography } from 'antd';
 import { ToggleGraphProps } from 'components/Graph/types';
@@ -43,6 +44,7 @@ const Uplot = forwardRef<ToggleGraphProps | undefined, UplotProps>(
 		{ options, data, onDelete, onCreate, resetScales = true },
 		ref,
 	): JSX.Element | null => {
+		const { t } = useTranslation('common');
 		const chartRef = useRef<uPlot | null>(null);
 		const propOptionsRef = useRef(options);
 		const targetRef = useRef<HTMLDivElement>(null);
@@ -173,7 +175,7 @@ const Uplot = forwardRef<ToggleGraphProps | undefined, UplotProps>(
 				<div className="uplot-no-data not-found">
 					<LineChart size={48} strokeWidth={0.5} />
 
-					<Typography>No Data</Typography>
+					<Typography>{t('no_data')}</Typography>
 				</div>
 			);
 		}
@@ -183,7 +185,7 @@ const Uplot = forwardRef<ToggleGraphProps | undefined, UplotProps>(
 				<div className="uplot-graph-container" ref={targetRef}>
 					{data && data[0] && data[0]?.length === 0 ? (
 						<div className="not-found">
-							<Typography>No Data</Typography>
+							<Typography>{t('no_data')}</Typography>
 						</div>
 					) : null}
 				</div>

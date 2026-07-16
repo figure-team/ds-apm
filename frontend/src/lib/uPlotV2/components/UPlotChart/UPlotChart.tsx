@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as Sentry from '@sentry/react';
 import { Typography } from 'antd';
 import { isEqual } from 'lodash-es';
@@ -45,6 +46,7 @@ export default function UPlotChart({
 	children,
 	'data-testid': testId = 'uplot-main-div',
 }: UPlotChartProps): JSX.Element {
+	const { t } = useTranslation('common');
 	const { setPlotContextInitialState } = usePlotContext();
 	const containerRef = useRef<HTMLDivElement>(null);
 	const plotInstanceRef = useRef<uPlot | null>(null);
@@ -183,7 +185,7 @@ export default function UPlotChart({
 				}}
 			>
 				<LineChart size={48} strokeWidth={0.5} />
-				<Typography>No Data</Typography>
+				<Typography>{t('no_data')}</Typography>
 			</div>
 		);
 	}

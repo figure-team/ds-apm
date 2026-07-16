@@ -122,7 +122,7 @@ describe('UPlotChart', () => {
 				{ wrapper: Wrapper },
 			);
 
-			expect(screen.getByText('No Data')).toBeInTheDocument();
+			expect(screen.getByText('no_data')).toBeInTheDocument();
 			expect(screen.queryByTestId('uplot-main-div')).not.toBeInTheDocument();
 		});
 
@@ -138,7 +138,7 @@ describe('UPlotChart', () => {
 			);
 
 			const noDataContainer = screen
-				.getByText('No Data')
+				.getByText('no_data')
 				.closest('.uplot-no-data');
 			expect(noDataContainer).toHaveStyle({ width: '750px', height: '350px' });
 		});
@@ -292,7 +292,7 @@ describe('UPlotChart', () => {
 			expect(onDestroy).toHaveBeenCalledWith(firstInstance);
 			expect(firstInstance.destroy).toHaveBeenCalled();
 			expect(plotRef).toHaveBeenCalledWith(null);
-			expect(screen.getByText('No Data')).toBeInTheDocument();
+			expect(screen.getByText('no_data')).toBeInTheDocument();
 		});
 
 		it('destroys the previous instance before creating a new one on config change', () => {

@@ -9,6 +9,7 @@ import setLocalStorageApi from 'api/browser/localstorage/set';
 import logEvent from 'api/common/logEvent';
 import AppLoading from 'components/AppLoading/AppLoading';
 import { CmdKPalette } from 'components/cmdKPalette/cmdKPalette';
+import LocalizedEmpty from 'components/LocalizedEmpty';
 import NotFound from 'components/NotFound';
 import { ShiftHoldOverlayController } from 'components/ShiftOverlay/ShiftHoldOverlayController';
 import Spinner from 'components/Spinner';
@@ -377,7 +378,13 @@ function App(): JSX.Element {
 
 	return (
 		<Sentry.ErrorBoundary fallback={<ErrorBoundaryFallback />}>
-			<ConfigProvider theme={themeConfig} locale={koKR}>
+			<ConfigProvider
+				theme={themeConfig}
+				locale={koKR}
+				renderEmpty={(componentName): JSX.Element => (
+					<LocalizedEmpty componentName={componentName} />
+				)}
+			>
 				<Router history={history}>
 					<CompatRouter>
 						<CmdKProvider>
