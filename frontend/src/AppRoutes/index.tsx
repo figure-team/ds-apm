@@ -3,6 +3,7 @@ import { Route, Router, Switch } from 'react-router-dom';
 import { CompatRouter } from 'react-router-dom-v5-compat';
 import * as Sentry from '@sentry/react';
 import { ConfigProvider } from 'antd';
+import koKR from 'antd/locale/ko_KR';
 import getLocalStorageApi from 'api/browser/localstorage/get';
 import setLocalStorageApi from 'api/browser/localstorage/set';
 import logEvent from 'api/common/logEvent';
@@ -376,7 +377,7 @@ function App(): JSX.Element {
 
 	return (
 		<Sentry.ErrorBoundary fallback={<ErrorBoundaryFallback />}>
-			<ConfigProvider theme={themeConfig}>
+			<ConfigProvider theme={themeConfig} locale={koKR}>
 				<Router history={history}>
 					<CompatRouter>
 						<CmdKProvider>

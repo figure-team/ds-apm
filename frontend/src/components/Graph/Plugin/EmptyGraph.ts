@@ -1,5 +1,6 @@
 import { grey } from '@ant-design/colors';
 import { Chart } from 'chart.js';
+import { i18nText } from 'utils/i18nText';
 
 export const emptyGraph = {
 	id: 'emptyChart',
@@ -11,7 +12,7 @@ export const emptyGraph = {
 		ctx.textBaseline = 'middle';
 		ctx.font = '1.5rem sans-serif';
 		ctx.fillStyle = `${grey.primary}`;
-		ctx.fillText('No data', width / 2, height / 2);
+		ctx.fillText(i18nText('dashboard:no_data'), width / 2, height / 2);
 		ctx.restore();
 	},
 };
