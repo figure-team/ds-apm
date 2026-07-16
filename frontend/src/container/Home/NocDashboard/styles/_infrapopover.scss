@@ -70,20 +70,23 @@
 }
 
 // 말풍선 본문 — InfraPanel의 노후 grid 스타일 재사용을 위해 폭만 고정
+// !important 필수: MetricsExplorer/Summary.styles.scss의 전역
+// `.ant-popover-inner { padding: 0 !important }`가 패딩을 지워버림
 .noc-c2-infra-popover {
 	.ant-popover-inner {
-		padding: 16px 18px;
+		padding: 18px 20px !important;
 		background: var(--noc-panel, #141416);
 		border: 1px solid var(--noc-line2, #37373d);
 		border-radius: 12px;
-		box-shadow: 0 18px 48px rgba(0, 0, 0, 0.65);
+		box-shadow: var(--noc-pop-shadow, 0 18px 48px rgba(0, 0, 0, 0.45));
 	}
 	.noc-c2-infra-pop-body {
 		width: 560px;
-		max-height: 300px;
+		max-width: calc(100vw - 48px);
+		max-height: 320px;
 		overflow-y: auto;
 		// 스크롤바가 타일에 붙지 않도록 우측 여백 확보
-		padding-right: 2px;
+		padding-right: 4px;
 	}
 }
 
@@ -111,17 +114,19 @@
 
 .noc-c2-anom-popover {
 	.ant-popover-inner {
-		padding: 16px 18px;
+		// 전역 padding 0 !important 무력화 (위 인프라 팝오버 주석 참조)
+		padding: 18px 20px !important;
 		background: var(--noc-panel, #141416);
 		border: 1px solid var(--noc-line2, #37373d);
 		border-radius: 12px;
-		box-shadow: 0 18px 48px rgba(0, 0, 0, 0.65);
+		box-shadow: var(--noc-pop-shadow, 0 18px 48px rgba(0, 0, 0, 0.45));
 	}
 	.noc-c2-anom-pop-body {
 		width: 640px;
-		max-height: 340px;
+		max-width: calc(100vw - 48px);
+		max-height: 360px;
 		overflow-y: auto;
 		// 스크롤바가 카드에 붙지 않도록 우측 여백 확보
-		padding-right: 2px;
+		padding-right: 4px;
 	}
 }
