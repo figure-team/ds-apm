@@ -94,6 +94,7 @@ export default function useNocAlerts(limit = 6): UseNocAlertsResult {
 			title: rule.alert,
 			meta: rule.description?.trim() || (rule.labels?.severity ?? ''),
 			age: relativeAge(t, rule.updatedAt),
+			state: rule.state ?? '',
 		}));
 
 		return {

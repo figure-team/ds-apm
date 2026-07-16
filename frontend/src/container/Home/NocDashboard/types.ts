@@ -25,6 +25,8 @@ export interface NocAlert {
 	title: string;
 	meta: string;
 	age: string;
+	/** 규칙 평가 상태 — 'firing'만 인시던트 밴드 대상 */
+	state: string;
 }
 
 export interface NocServiceRow {

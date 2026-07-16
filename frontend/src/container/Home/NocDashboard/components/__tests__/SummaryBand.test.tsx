@@ -17,6 +17,7 @@ describe('SummaryBand', () => {
 					title: 'DB down',
 					meta: '',
 					age: '5m',
+					state: 'firing',
 				}}
 			/>,
 		);

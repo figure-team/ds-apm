@@ -107,8 +107,11 @@ export function selectTrendTargets(services: NocServiceRow[]): TrendTarget[] {
 }
 
 export function pickIncident(alerts: NocAlert[]): NocAlert | null {
-	const sorted = [...alerts].sort(
-		(a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity],
-	);
+	// 발화 중(firing)인 알림만 인시던트 밴드 대상 — 비발화 규칙이
+	// "진행 중"으로 표시되던 문제 방지. age는 rules 응답에 발화 시각이
+	// 없어 updatedAt 기반 근사치다.
+	const sorted = alerts
+		.filter((a) => a.state === 'firing')
+		.sort((a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity]);
 	return sorted[0] ?? null;
 }

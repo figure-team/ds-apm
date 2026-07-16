@@ -95,10 +95,26 @@ describe('selectTrendTargets', () => {
 describe('pickIncident', () => {
 	it('returns highest-severity firing alert or null', () => {
 		const alerts: NocAlert[] = [
-			{ id: '1', severity: 'warning', title: 'w', meta: '', age: '' },
-			{ id: '2', severity: 'critical', title: 'c', meta: '', age: '' },
+			{ id: '1', severity: 'warning', title: 'w', meta: '', age: '', state: 'firing' },
+			{ id: '2', severity: 'critical', title: 'c', meta: '', age: '', state: 'firing' },
 		];
 		expect(pickIncident(alerts)?.id).toBe('2');
 		expect(pickIncident([])).toBeNull();
+	});
+
+	it('ignores non-firing rules even if severity is higher', () => {
+		const alerts: NocAlert[] = [
+			{ id: '1', severity: 'critical', title: 'c', meta: '', age: '', state: 'inactive' },
+			{ id: '2', severity: 'warning', title: 'w', meta: '', age: '', state: 'firing' },
+		];
+		expect(pickIncident(alerts)?.id).toBe('2');
+	});
+
+	it('returns null when nothing is firing', () => {
+		const alerts: NocAlert[] = [
+			{ id: '1', severity: 'critical', title: 'c', meta: '', age: '15d', state: 'inactive' },
+			{ id: '2', severity: 'error', title: 'e', meta: '', age: '', state: 'disabled' },
+		];
+		expect(pickIncident(alerts)).toBeNull();
 	});
 });
