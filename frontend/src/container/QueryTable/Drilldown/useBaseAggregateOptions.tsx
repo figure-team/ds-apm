@@ -176,8 +176,8 @@ const useBaseAggregateOptions = ({
 	}, [pathname, fieldVariables]);
 
 	const baseAggregateOptionsConfig = useMemo(() => {
+		// aggregateData가 없는 것은 드릴다운 미선택 상태(정상)라 조용히 비운다.
 		if (!aggregateData) {
-			console.warn('aggregateData is null in baseAggregateOptionsConfig');
 			return {};
 		}
 
