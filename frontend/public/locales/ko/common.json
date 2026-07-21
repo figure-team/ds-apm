@@ -192,6 +192,7 @@
 	"qf_http_url": "HTTP URL",
 	"qf_trace_id": "트레이스 ID",
 	"qf_severity_text": "심각도",
+	"severity_none": "심각도 없음",
 	"qf_host_name": "호스트 이름",
 	"qf_os_type": "OS 유형",
 	"qf_k8s_cluster_name": "K8s 클러스터 이름",

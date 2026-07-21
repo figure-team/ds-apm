@@ -192,6 +192,7 @@
 	"qf_http_url": "HTTP URL",
 	"qf_trace_id": "Trace ID",
 	"qf_severity_text": "Severity Text",
+	"severity_none": "No severity",
 	"qf_host_name": "Host Name",
 	"qf_os_type": "OS Type",
 	"qf_k8s_cluster_name": "K8s Cluster Name",

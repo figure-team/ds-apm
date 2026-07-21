@@ -1,5 +1,7 @@
 import { Color } from '@signozhq/design-tokens';
 import { colors } from 'lib/getRandomColor';
+import { QueryData } from 'types/api/widgets/getQuery';
+import { i18nText } from 'utils/i18nText';
 
 // Function to determine if a color is "red-like" based on its RGB values
 export function isRedLike(hex: string): boolean {
@@ -62,6 +64,79 @@ const SEVERITY_VARIANT_COLORS: Record<string, string> = {
 	PANIC: Color.BG_SAKURA_600,
 };
 
+// 수집기·언어 런타임마다 표기가 달라(BG: .NET=Information, Go=info 등) 같은 의미의
+// 심각도가 대소문자·별칭으로 갈라진다. 병합 기준은 대문자 정규형 + 아래 별칭 표.
+const SEVERITY_CANONICAL_ALIASES: Record<string, string> = {
+	TRC: 'TRACE',
+	DBG: 'DEBUG',
+	INFORMATION: 'INFO',
+	WARNING: 'WARN',
+	WRN: 'WARN',
+	ERR: 'ERROR',
+	FAIL: 'ERROR',
+	CRIT: 'CRITICAL',
+};
+
+export const SEVERITY_NONE_LABEL_KEY = 'common:severity_none';
+
+function canonicalSeverityLabel(rawLabel: string): string {
+	const upper = rawLabel.trim().toUpperCase();
+	if (!upper) {
+		return i18nText(SEVERITY_NONE_LABEL_KEY);
+	}
+	return SEVERITY_CANONICAL_ALIASES[upper] || upper;
+}
+
+// severity_text로 그룹핑된 빈도 차트 시리즈를 정규형 기준으로 병합한다.
+// severity_text 라벨이 없는 시리즈(라이브 로그의 단일 count 시리즈 등)는 그대로 통과.
+export function normalizeFrequencyChartData(data: QueryData[]): QueryData[] {
+	const mergedBySeverity = new Map<
+		string,
+		{ series: QueryData; sums: Map<number, number> }
+	>();
+	const result: QueryData[] = [];
+
+	data.forEach((series) => {
+		if (
+			!series.metric ||
+			!Object.prototype.hasOwnProperty.call(series.metric, 'severity_text')
+		) {
+			result.push(series);
+			return;
+		}
+
+		const canonical = canonicalSeverityLabel(series.metric.severity_text || '');
+		const existing = mergedBySeverity.get(canonical);
+		const entry = existing ?? {
+			series: {
+				...series,
+				metric: { ...series.metric, severity_text: canonical },
+			},
+			sums: new Map<number, number>(),
+		};
+		if (!existing) {
+			mergedBySeverity.set(canonical, entry);
+			result.push(entry.series);
+		}
+
+		(series.values || []).forEach(([timestamp, value]) => {
+			const parsed = parseFloat(value);
+			entry.sums.set(
+				timestamp,
+				(entry.sums.get(timestamp) || 0) + (Number.isNaN(parsed) ? 0 : parsed),
+			);
+		});
+	});
+
+	mergedBySeverity.forEach((entry) => {
+		entry.series.values = Array.from(entry.sums.entries())
+			.sort((a, b) => a[0] - b[0])
+			.map(([timestamp, sum]) => [timestamp, String(sum)]);
+	});
+
+	return result;
+}
+
 // Simple function to get severity color for any component
 export function getSeverityColor(severityText: string): string {
 	const variantColor = SEVERITY_VARIANT_COLORS[severityText.trim()];
@@ -78,8 +153,8 @@ export function getColorsForSeverityLabels(
 ): string {
 	const trimmed = label.trim();
 
-	if (!trimmed) {
-		return Color.BG_VANILLA_400; // Default color for empty labels
+	if (!trimmed || trimmed === i18nText(SEVERITY_NONE_LABEL_KEY)) {
+		return Color.BG_VANILLA_400; // Default color for empty/no-severity labels
 	}
 
 	const variantColor = SEVERITY_VARIANT_COLORS[trimmed];

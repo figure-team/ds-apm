@@ -16,7 +16,10 @@ import { AppState } from 'store/reducers';
 import { GlobalReducer } from 'types/reducer/globalTime';
 
 import { LogsExplorerChartProps } from './LogsExplorerChart.interfaces';
-import { getColorsForSeverityLabels } from './utils';
+import {
+	getColorsForSeverityLabels,
+	normalizeFrequencyChartData,
+} from './utils';
 
 import './LogsExplorerChart.styles.scss';
 
@@ -91,12 +94,12 @@ function LogsExplorerChart({
 			getChartData({
 				queryData: [
 					{
-						queryData: data,
+						queryData: isLogsExplorerViews ? normalizeFrequencyChartData(data) : data,
 					},
 				],
 				createDataset: handleCreateDatasets,
 			}),
-		[data, handleCreateDatasets],
+		[data, handleCreateDatasets, isLogsExplorerViews],
 	);
 
 	// Convert nanosecond timestamps to milliseconds for Chart.js
