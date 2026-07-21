@@ -58,7 +58,7 @@ import K8sVolumesList from './Volumes/K8sVolumesList';
 import styles from './InfraMonitoringK8s.module.scss';
 
 export default function InfraMonitoringK8s(): JSX.Element {
-	const { t } = useTranslation('infraMonitoring');
+	const { t } = useTranslation(['infraMonitoring', 'common']);
 	const [showFilters, setShowFilters] = useState(true);
 
 	const [selectedCategory, setSelectedCategory] = useInfraMonitoringCategory();
@@ -137,7 +137,7 @@ export default function InfraMonitoringK8s(): JSX.Element {
 			children: (
 				<QuickFilters
 					source={QuickFiltersSource.INFRA_MONITORING}
-					config={GetPodsQuickFiltersConfig(dotMetricsEnabled)}
+					config={GetPodsQuickFiltersConfig(dotMetricsEnabled, (key): string => t(key))}
 					handleFilterVisibilityChange={handleFilterVisibilityChange}
 					onFilterChange={handleFilterChange}
 				/>
@@ -153,7 +153,7 @@ export default function InfraMonitoringK8s(): JSX.Element {
 			children: (
 				<QuickFilters
 					source={QuickFiltersSource.INFRA_MONITORING}
-					config={GetNodesQuickFiltersConfig(dotMetricsEnabled)}
+					config={GetNodesQuickFiltersConfig(dotMetricsEnabled, (key): string => t(key))}
 					handleFilterVisibilityChange={handleFilterVisibilityChange}
 					onFilterChange={handleFilterChange}
 				/>
@@ -169,7 +169,7 @@ export default function InfraMonitoringK8s(): JSX.Element {
 			children: (
 				<QuickFilters
 					source={QuickFiltersSource.INFRA_MONITORING}
-					config={GetNamespaceQuickFiltersConfig(dotMetricsEnabled)}
+					config={GetNamespaceQuickFiltersConfig(dotMetricsEnabled, (key): string => t(key))}
 					handleFilterVisibilityChange={handleFilterVisibilityChange}
 					onFilterChange={handleFilterChange}
 				/>
@@ -185,7 +185,7 @@ export default function InfraMonitoringK8s(): JSX.Element {
 			children: (
 				<QuickFilters
 					source={QuickFiltersSource.INFRA_MONITORING}
-					config={GetClustersQuickFiltersConfig(dotMetricsEnabled)}
+					config={GetClustersQuickFiltersConfig(dotMetricsEnabled, (key): string => t(key))}
 					handleFilterVisibilityChange={handleFilterVisibilityChange}
 					onFilterChange={handleFilterChange}
 				/>
@@ -201,7 +201,7 @@ export default function InfraMonitoringK8s(): JSX.Element {
 			children: (
 				<QuickFilters
 					source={QuickFiltersSource.INFRA_MONITORING}
-					config={GetDeploymentsQuickFiltersConfig(dotMetricsEnabled)}
+					config={GetDeploymentsQuickFiltersConfig(dotMetricsEnabled, (key): string => t(key))}
 					handleFilterVisibilityChange={handleFilterVisibilityChange}
 					onFilterChange={handleFilterChange}
 				/>
@@ -217,7 +217,7 @@ export default function InfraMonitoringK8s(): JSX.Element {
 			children: (
 				<QuickFilters
 					source={QuickFiltersSource.INFRA_MONITORING}
-					config={GetJobsQuickFiltersConfig(dotMetricsEnabled)}
+					config={GetJobsQuickFiltersConfig(dotMetricsEnabled, (key): string => t(key))}
 					handleFilterVisibilityChange={handleFilterVisibilityChange}
 					onFilterChange={handleFilterChange}
 				/>
@@ -233,7 +233,7 @@ export default function InfraMonitoringK8s(): JSX.Element {
 			children: (
 				<QuickFilters
 					source={QuickFiltersSource.INFRA_MONITORING}
-					config={GetDaemonsetsQuickFiltersConfig(dotMetricsEnabled)}
+					config={GetDaemonsetsQuickFiltersConfig(dotMetricsEnabled, (key): string => t(key))}
 					handleFilterVisibilityChange={handleFilterVisibilityChange}
 					onFilterChange={handleFilterChange}
 				/>
@@ -249,7 +249,7 @@ export default function InfraMonitoringK8s(): JSX.Element {
 			children: (
 				<QuickFilters
 					source={QuickFiltersSource.INFRA_MONITORING}
-					config={GetStatefulsetsQuickFiltersConfig(dotMetricsEnabled)}
+					config={GetStatefulsetsQuickFiltersConfig(dotMetricsEnabled, (key): string => t(key))}
 					handleFilterVisibilityChange={handleFilterVisibilityChange}
 					onFilterChange={handleFilterChange}
 				/>
@@ -265,7 +265,7 @@ export default function InfraMonitoringK8s(): JSX.Element {
 			children: (
 				<QuickFilters
 					source={QuickFiltersSource.INFRA_MONITORING}
-					config={GetVolumesQuickFiltersConfig(dotMetricsEnabled)}
+					config={GetVolumesQuickFiltersConfig(dotMetricsEnabled, (key): string => t(key))}
 					handleFilterVisibilityChange={handleFilterVisibilityChange}
 					onFilterChange={handleFilterChange}
 				/>

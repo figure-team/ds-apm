@@ -90,6 +90,7 @@ export function GetK8sEntityToAggregateAttribute(
 
 export function GetPodsQuickFiltersConfig(
 	dotMetricsEnabled: boolean,
+	translate: (key: string) => string = (key): string => key,
 ): IQuickFiltersConfig[] {
 	const podKey = dotMetricsEnabled ? 'k8s.pod.name' : 'k8s_pod_name';
 	const namespaceKey = dotMetricsEnabled
@@ -119,7 +120,7 @@ export function GetPodsQuickFiltersConfig(
 	return [
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Pod',
+			title: translate('common:qf_pod'),
 			attributeKey: {
 				key: podKey,
 				dataType: DataTypes.String,
@@ -133,7 +134,7 @@ export function GetPodsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Namespace',
+			title: translate('common:qf_namespace'),
 			attributeKey: {
 				key: namespaceKey,
 				dataType: DataTypes.String,
@@ -147,7 +148,7 @@ export function GetPodsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Node',
+			title: translate('common:qf_node'),
 			attributeKey: {
 				key: nodeKey,
 				dataType: DataTypes.String,
@@ -161,7 +162,7 @@ export function GetPodsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Cluster',
+			title: translate('common:qf_cluster'),
 			attributeKey: {
 				key: clusterKey,
 				dataType: DataTypes.String,
@@ -175,7 +176,7 @@ export function GetPodsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Deployment',
+			title: translate('common:qf_deployment'),
 			attributeKey: {
 				key: deploymentKey,
 				dataType: DataTypes.String,
@@ -189,7 +190,7 @@ export function GetPodsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Statefulset',
+			title: translate('common:qf_statefulset'),
 			attributeKey: {
 				key: statefulsetKey,
 				dataType: DataTypes.String,
@@ -203,7 +204,7 @@ export function GetPodsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'DaemonSet',
+			title: translate('common:qf_daemonset'),
 			attributeKey: {
 				key: daemonsetKey,
 				dataType: DataTypes.String,
@@ -217,7 +218,7 @@ export function GetPodsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Job',
+			title: translate('common:qf_job'),
 			attributeKey: {
 				key: jobKey,
 				dataType: DataTypes.String,
@@ -231,7 +232,7 @@ export function GetPodsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Environment',
+			title: translate('common:qf_environment'),
 			attributeKey: {
 				key: environmentKey,
 				dataType: DataTypes.String,
@@ -244,6 +245,7 @@ export function GetPodsQuickFiltersConfig(
 
 export function GetNodesQuickFiltersConfig(
 	dotMetricsEnabled: boolean,
+	translate: (key: string) => string = (key): string => key,
 ): IQuickFiltersConfig[] {
 	// Define attribute keys
 	const nodeKey = dotMetricsEnabled ? 'k8s.node.name' : 'k8s_node_name';
@@ -260,7 +262,7 @@ export function GetNodesQuickFiltersConfig(
 	return [
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Node Name',
+			title: translate('common:qf_node_name'),
 			attributeKey: {
 				key: nodeKey,
 				dataType: DataTypes.String,
@@ -274,7 +276,7 @@ export function GetNodesQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Cluster Name',
+			title: translate('common:qf_cluster_name'),
 			attributeKey: {
 				key: clusterKey,
 				dataType: DataTypes.String,
@@ -288,7 +290,7 @@ export function GetNodesQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Environment',
+			title: translate('common:qf_environment'),
 			attributeKey: {
 				key: environmentKey,
 				dataType: DataTypes.String,
@@ -301,6 +303,7 @@ export function GetNodesQuickFiltersConfig(
 
 export function GetNamespaceQuickFiltersConfig(
 	dotMetricsEnabled: boolean,
+	translate: (key: string) => string = (key): string => key,
 ): IQuickFiltersConfig[] {
 	const namespaceKey = dotMetricsEnabled
 		? 'k8s.namespace.name'
@@ -316,7 +319,7 @@ export function GetNamespaceQuickFiltersConfig(
 	return [
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Namespace Name',
+			title: translate('common:qf_namespace_name'),
 			attributeKey: {
 				key: namespaceKey,
 				dataType: DataTypes.String,
@@ -330,7 +333,7 @@ export function GetNamespaceQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Cluster Name',
+			title: translate('common:qf_cluster_name'),
 			attributeKey: {
 				key: clusterKey,
 				dataType: DataTypes.String,
@@ -344,7 +347,7 @@ export function GetNamespaceQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Environment',
+			title: translate('common:qf_environment'),
 			attributeKey: {
 				key: environmentKey,
 				dataType: DataTypes.String,
@@ -357,6 +360,7 @@ export function GetNamespaceQuickFiltersConfig(
 
 export function GetClustersQuickFiltersConfig(
 	dotMetricsEnabled: boolean,
+	translate: (key: string) => string = (key): string => key,
 ): IQuickFiltersConfig[] {
 	const clusterKey = dotMetricsEnabled ? 'k8s.cluster.name' : 'k8s_cluster_name';
 	const cpuUtilMetric = dotMetricsEnabled
@@ -369,7 +373,7 @@ export function GetClustersQuickFiltersConfig(
 	return [
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Cluster Name',
+			title: translate('common:qf_cluster_name'),
 			attributeKey: {
 				key: clusterKey,
 				dataType: DataTypes.String,
@@ -383,7 +387,7 @@ export function GetClustersQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Environment',
+			title: translate('common:qf_environment'),
 			attributeKey: {
 				key: environmentKey,
 				dataType: DataTypes.String,
@@ -396,6 +400,7 @@ export function GetClustersQuickFiltersConfig(
 
 export function GetContainersQuickFiltersConfig(
 	dotMetricsEnabled: boolean,
+	translate: (key: string) => string = (key): string => key,
 ): IQuickFiltersConfig[] {
 	const containerKey = dotMetricsEnabled
 		? 'k8s.container.name'
@@ -407,7 +412,7 @@ export function GetContainersQuickFiltersConfig(
 	return [
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Container',
+			title: translate('common:qf_container'),
 			attributeKey: {
 				key: containerKey,
 				dataType: DataTypes.String,
@@ -418,7 +423,7 @@ export function GetContainersQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Environment',
+			title: translate('common:qf_environment'),
 			attributeKey: {
 				key: environmentKey,
 				dataType: DataTypes.String,
@@ -431,6 +436,7 @@ export function GetContainersQuickFiltersConfig(
 
 export function GetVolumesQuickFiltersConfig(
 	dotMetricsEnabled: boolean,
+	translate: (key: string) => string = (key): string => key,
 ): IQuickFiltersConfig[] {
 	const pvcKey = dotMetricsEnabled
 		? 'k8s.persistentvolumeclaim.name'
@@ -449,7 +455,7 @@ export function GetVolumesQuickFiltersConfig(
 	return [
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'PVC Volume Claim Name',
+			title: translate('common:qf_pvc_volume_claim_name'),
 			attributeKey: {
 				key: pvcKey,
 				dataType: DataTypes.String,
@@ -463,7 +469,7 @@ export function GetVolumesQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Namespace Name',
+			title: translate('common:qf_namespace_name'),
 			attributeKey: {
 				key: namespaceKey,
 				dataType: DataTypes.String,
@@ -477,7 +483,7 @@ export function GetVolumesQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Cluster Name',
+			title: translate('common:qf_cluster_name'),
 			attributeKey: {
 				key: clusterKey,
 				dataType: DataTypes.String,
@@ -491,7 +497,7 @@ export function GetVolumesQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Environment',
+			title: translate('common:qf_environment'),
 			attributeKey: {
 				key: environmentKey,
 				dataType: DataTypes.String,
@@ -504,6 +510,7 @@ export function GetVolumesQuickFiltersConfig(
 
 export function GetDeploymentsQuickFiltersConfig(
 	dotMetricsEnabled: boolean,
+	translate: (key: string) => string = (key): string => key,
 ): IQuickFiltersConfig[] {
 	const deployKey = dotMetricsEnabled
 		? 'k8s.deployment.name'
@@ -520,7 +527,7 @@ export function GetDeploymentsQuickFiltersConfig(
 	return [
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Deployment Name',
+			title: translate('common:qf_deployment_name'),
 			attributeKey: {
 				key: deployKey,
 				dataType: DataTypes.String,
@@ -534,7 +541,7 @@ export function GetDeploymentsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Namespace Name',
+			title: translate('common:qf_namespace_name'),
 			attributeKey: {
 				key: namespaceKey,
 				dataType: DataTypes.String,
@@ -548,7 +555,7 @@ export function GetDeploymentsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Cluster Name',
+			title: translate('common:qf_cluster_name'),
 			attributeKey: {
 				key: clusterKey,
 				dataType: DataTypes.String,
@@ -562,7 +569,7 @@ export function GetDeploymentsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Environment',
+			title: translate('common:qf_environment'),
 			attributeKey: {
 				key: environmentKey,
 				dataType: DataTypes.String,
@@ -575,6 +582,7 @@ export function GetDeploymentsQuickFiltersConfig(
 
 export function GetStatefulsetsQuickFiltersConfig(
 	dotMetricsEnabled: boolean,
+	translate: (key: string) => string = (key): string => key,
 ): IQuickFiltersConfig[] {
 	const ssKey = dotMetricsEnabled
 		? 'k8s.statefulset.name'
@@ -591,7 +599,7 @@ export function GetStatefulsetsQuickFiltersConfig(
 	return [
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Statefulset Name',
+			title: translate('common:qf_statefulset_name'),
 			attributeKey: {
 				key: ssKey,
 				dataType: DataTypes.String,
@@ -605,7 +613,7 @@ export function GetStatefulsetsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Namespace Name',
+			title: translate('common:qf_namespace_name'),
 			attributeKey: {
 				key: namespaceKey,
 				dataType: DataTypes.String,
@@ -619,7 +627,7 @@ export function GetStatefulsetsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Cluster Name',
+			title: translate('common:qf_cluster_name'),
 			attributeKey: {
 				key: clusterKey,
 				dataType: DataTypes.String,
@@ -633,7 +641,7 @@ export function GetStatefulsetsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Environment',
+			title: translate('common:qf_environment'),
 			attributeKey: {
 				key: environmentKey,
 				dataType: DataTypes.String,
@@ -646,6 +654,7 @@ export function GetStatefulsetsQuickFiltersConfig(
 
 export function GetDaemonsetsQuickFiltersConfig(
 	dotMetricsEnabled: boolean,
+	translate: (key: string) => string = (key): string => key,
 ): IQuickFiltersConfig[] {
 	const nameKey = dotMetricsEnabled
 		? 'k8s.daemonset.name'
@@ -664,7 +673,7 @@ export function GetDaemonsetsQuickFiltersConfig(
 	return [
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'DaemonSet Name',
+			title: translate('common:qf_daemonset_name'),
 			attributeKey: {
 				key: nameKey,
 				dataType: DataTypes.String,
@@ -678,7 +687,7 @@ export function GetDaemonsetsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Namespace Name',
+			title: translate('common:qf_namespace_name'),
 			attributeKey: {
 				key: namespaceKey,
 				dataType: DataTypes.String,
@@ -691,7 +700,7 @@ export function GetDaemonsetsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Cluster Name',
+			title: translate('common:qf_cluster_name'),
 			attributeKey: {
 				key: clusterKey,
 				dataType: DataTypes.String,
@@ -704,7 +713,7 @@ export function GetDaemonsetsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Environment',
+			title: translate('common:qf_environment'),
 			attributeKey: {
 				key: environmentKey,
 				dataType: DataTypes.String,
@@ -717,6 +726,7 @@ export function GetDaemonsetsQuickFiltersConfig(
 
 export function GetJobsQuickFiltersConfig(
 	dotMetricsEnabled: boolean,
+	translate: (key: string) => string = (key): string => key,
 ): IQuickFiltersConfig[] {
 	const nameKey = dotMetricsEnabled ? 'k8s.job.name' : 'k8s_job_name';
 	const namespaceKey = dotMetricsEnabled
@@ -733,7 +743,7 @@ export function GetJobsQuickFiltersConfig(
 	return [
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Job Name',
+			title: translate('common:qf_job_name'),
 			attributeKey: {
 				key: nameKey,
 				dataType: DataTypes.String,
@@ -747,7 +757,7 @@ export function GetJobsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Namespace Name',
+			title: translate('common:qf_namespace_name'),
 			attributeKey: {
 				key: namespaceKey,
 				dataType: DataTypes.String,
@@ -760,7 +770,7 @@ export function GetJobsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Cluster Name',
+			title: translate('common:qf_cluster_name'),
 			attributeKey: {
 				key: clusterKey,
 				dataType: DataTypes.String,
@@ -773,7 +783,7 @@ export function GetJobsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Environment',
+			title: translate('common:qf_environment'),
 			attributeKey: {
 				key: environmentKey,
 				dataType: DataTypes.String,

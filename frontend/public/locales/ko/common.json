@@ -198,5 +198,22 @@
 	"qf_k8s_deployment_name": "K8s 디플로이먼트 이름",
 	"qf_k8s_namespace_name": "K8s 네임스페이스 이름",
 	"qf_k8s_pod_name": "K8s 파드 이름",
-	"qf_k8s_node_name": "K8s 노드 이름"
+	"qf_k8s_node_name": "K8s 노드 이름",
+	"qf_pod": "파드",
+	"qf_namespace": "네임스페이스",
+	"qf_node": "노드",
+	"qf_cluster": "클러스터",
+	"qf_deployment": "디플로이먼트",
+	"qf_statefulset": "스테이트풀셋",
+	"qf_daemonset": "데몬셋",
+	"qf_job": "잡",
+	"qf_container": "컨테이너",
+	"qf_node_name": "노드 이름",
+	"qf_cluster_name": "클러스터 이름",
+	"qf_namespace_name": "네임스페이스 이름",
+	"qf_deployment_name": "디플로이먼트 이름",
+	"qf_statefulset_name": "스테이트풀셋 이름",
+	"qf_daemonset_name": "데몬셋 이름",
+	"qf_job_name": "잡 이름",
+	"qf_pvc_volume_claim_name": "PVC 볼륨 클레임 이름"
 }

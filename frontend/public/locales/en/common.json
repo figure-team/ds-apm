@@ -198,5 +198,22 @@
 	"qf_k8s_deployment_name": "K8s Deployment Name",
 	"qf_k8s_namespace_name": "K8s Namespace Name",
 	"qf_k8s_pod_name": "K8s Pod Name",
-	"qf_k8s_node_name": "K8s Node Name"
+	"qf_k8s_node_name": "K8s Node Name",
+	"qf_pod": "Pod",
+	"qf_namespace": "Namespace",
+	"qf_node": "Node",
+	"qf_cluster": "Cluster",
+	"qf_deployment": "Deployment",
+	"qf_statefulset": "Statefulset",
+	"qf_daemonset": "DaemonSet",
+	"qf_job": "Job",
+	"qf_container": "Container",
+	"qf_node_name": "Node Name",
+	"qf_cluster_name": "Cluster Name",
+	"qf_namespace_name": "Namespace Name",
+	"qf_deployment_name": "Deployment Name",
+	"qf_statefulset_name": "Statefulset Name",
+	"qf_daemonset_name": "DaemonSet Name",
+	"qf_job_name": "Job Name",
+	"qf_pvc_volume_claim_name": "PVC Volume Claim Name"
 }
