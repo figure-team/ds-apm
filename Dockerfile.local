@@ -48,7 +48,7 @@ LABEL maintainer="signoz"
 WORKDIR /root
 
 # ca-certificates: TLS roots for outbound HTTPS (LLM api transport / git fetch).
-# nodejs+npm: runtime for the `claude` CLI (LLM cli transport).
+# nodejs+npm: runtime for the `claude`/`codex` CLIs (LLM cli transport).
 # ripgrep+git: claude-code shells out to these; the bundled musl-incompatible
 #   ripgrep is disabled via USE_BUILTIN_RIPGREP=0 so the system one is used.
 # bash: the auto-remediation executor runs approved Runbook scripts via `bash -c`
@@ -62,7 +62,7 @@ WORKDIR /root
 #   runbook scripts get best-effort prlimit resource caps.
 RUN apk update && \
     apk add --no-cache ca-certificates nodejs npm ripgrep git bash docker-cli util-linux && \
-    npm install -g @anthropic-ai/claude-code && \
+    npm install -g @anthropic-ai/claude-code @openai/codex && \
     rm -rf /var/cache/apk/* /root/.npm && \
     adduser -D -H -s /sbin/nologin remed
 ENV USE_BUILTIN_RIPGREP=0
