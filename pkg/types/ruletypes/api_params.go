@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 	"unicode/utf8"
 
 	"github.com/prometheus/alertmanager/config"
 
 	"github.com/SigNoz/signoz/pkg/errors"
+	"github.com/SigNoz/signoz/pkg/querybuilder"
 	"github.com/SigNoz/signoz/pkg/types"
 	"github.com/SigNoz/signoz/pkg/types/alertmanagertypes"
 	qbtypes "github.com/SigNoz/signoz/pkg/types/querybuildertypes/querybuildertypesv5"
@@ -424,6 +426,9 @@ func (r *PostableRule) Validate() error {
 			if err := cq.Validate(qbtypes.GetValidationOptions(qbtypes.RequestTypeTimeSeries)...); err != nil {
 				errs = append(errs, err)
 			}
+			// 파싱 불가능한 필터 표현식이 저장되면 평가 주기마다 조용히 실패해
+			// 규칙이 영영 발화하지 않는다 — 쓰기 시점에 문법을 검사해 거부한다.
+			errs = append(errs, validateFilterExprSyntax(r.RuleCondition.CompositeQuery.Queries)...)
 		}
 	}
 
@@ -471,6 +476,46 @@ func (r *PostableRule) Validate() error {
 		return errors.WrapInvalidInputf(joined, errors.CodeInvalidInput, "validation failed")
 	}
 	return nil
+}
+
+// validateFilterExprSyntax는 빌더 쿼리 스펙의 filter.expression을 문법 검사한다.
+// 키 존재 등 시맨틱 검증은 스키마 조회가 필요해 여기서는 하지 않는다.
+func validateFilterExprSyntax(queries []qbtypes.QueryEnvelope) []error {
+	var errs []error
+	for _, envelope := range queries {
+		if envelope.Type != qbtypes.QueryTypeBuilder &&
+			envelope.Type != qbtypes.QueryTypeSubQuery {
+			continue
+		}
+		var name, expression string
+		switch spec := envelope.Spec.(type) {
+		case qbtypes.QueryBuilderQuery[qbtypes.TraceAggregation]:
+			name = spec.Name
+			if spec.Filter != nil {
+				expression = spec.Filter.Expression
+			}
+		case qbtypes.QueryBuilderQuery[qbtypes.LogAggregation]:
+			name = spec.Name
+			if spec.Filter != nil {
+				expression = spec.Filter.Expression
+			}
+		case qbtypes.QueryBuilderQuery[qbtypes.MetricAggregation]:
+			name = spec.Name
+			if spec.Filter != nil {
+				expression = spec.Filter.Expression
+			}
+		default:
+			continue
+		}
+		if strings.TrimSpace(expression) == "" {
+			continue
+		}
+		if err := querybuilder.ValidateFilterExprSyntax(expression); err != nil {
+			errs = append(errs, errors.WrapInvalidInputf(err, errors.CodeInvalidInput,
+				"condition.compositeQuery.queries(%s).filter.expression", name))
+		}
+	}
+	return errs
 }
 
 func (r *PostableRule) validateSchemaVersion() []error {
