@@ -26,10 +26,18 @@ $env:GOARCH      = 'amd64'
 # Newer host Go (1.26+) breaks bytedance/sonic v1.14.1 (undefined GoMapIterator),
 # so don't let GOTOOLCHAIN=auto fall through to the local toolchain.
 $env:GOTOOLCHAIN = 'go1.25.7'
+# 버전 미주입 시 사이드바에 <unset>이 노출되므로 Makefile과 같은 -X 주입을 재현한다.
+$version   = (git describe --tags --always --dirty 2>$null); if (-not $version) { $version = 'dev' }
+$hash      = (git rev-parse --short HEAD 2>$null); if (-not $hash) { $hash = 'unknown' }
+$branch    = (git rev-parse --abbrev-ref HEAD 2>$null); if (-not $branch) { $branch = 'unknown' }
+$timestamp = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+$verPkg    = 'github.com/SigNoz/signoz/pkg/version'
+$ldflags   = "-s -w -X $verPkg.variant=community -X $verPkg.version=$version -X $verPkg.hash=$hash -X $verPkg.time=$timestamp -X $verPkg.branch=$branch"
+
 # -v prints each package as it compiles so a long cold build shows progress
 # instead of looking hung (go build is otherwise silent).
 go build -tags timetzdata -v `
-  -ldflags '-s -w -X github.com/SigNoz/signoz/pkg/version.variant=community' `
+  -ldflags $ldflags `
   -o $outBin ./cmd/community
 if ($LASTEXITCODE -ne 0) { throw 'go build failed' }
 
