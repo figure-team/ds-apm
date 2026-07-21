@@ -52,22 +52,22 @@ export const SOP_ANNOTATION_FIELDS: SopAnnotationField[] = [
 	},
 	{
 		key: 'sop_source',
-		label: 'SOP source',
+		label: 'SOP 출처',
 		placeholder: 'confluence, git, notion, manual',
 	},
 	{
 		key: 'sop_title',
-		label: 'SOP title',
+		label: 'SOP 제목',
 		placeholder: 'Payment API 5xx response',
 	},
 	{
 		key: 'sop_version',
-		label: 'SOP version',
+		label: 'SOP 버전',
 		placeholder: '2026-04-20.3',
 	},
 	{
 		key: 'sop_binding_id',
-		label: 'Binding ID',
+		label: '바인딩 ID',
 		placeholder: 'payment-api-prod-critical',
 	},
 ];

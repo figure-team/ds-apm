@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import TanStackTable from 'components/TanStackTableView';
 import { DATE_TIME_FORMATS } from 'constants/dateTimeFormats';
 import { getSanitizedLogBody } from 'container/LogDetailedView/utils';
@@ -24,6 +25,7 @@ export function useLogsTableColumns({
 	appendTo = 'center',
 }: UseLogsTableColumnsProps): TableColumnDef<ILog>[] {
 	const { formatTimezoneAdjustedTimestamp } = useTimezone();
+	const { t } = useTranslation(['common']);
 
 	return useMemo<TableColumnDef<ILog>[]>(() => {
 		const stateIndicatorCol: TableColumnDef<ILog> = {
@@ -64,7 +66,7 @@ export function useLogsTableColumns({
 		)
 			? {
 					id: 'timestamp',
-					header: 'Timestamp',
+					header: t('common:timestamp'),
 					accessorFn: (log): unknown => log.timestamp,
 					width: { default: 170, min: 170 },
 					cell: ({ value }): ReactElement => {
@@ -86,7 +88,7 @@ export function useLogsTableColumns({
 		)
 			? {
 					id: 'body',
-					header: 'Body',
+					header: t('common:body'),
 					accessorFn: (log): string => log.body,
 					canBeHidden: false,
 					width: { default: '100%', min: 300 },
@@ -110,5 +112,5 @@ export function useLogsTableColumns({
 			...(bodyCol ? [bodyCol] : []),
 			...(appendTo === 'end' ? fieldColumns : []),
 		];
-	}, [fields, appendTo, fontSize, formatTimezoneAdjustedTimestamp]);
+	}, [fields, appendTo, fontSize, formatTimezoneAdjustedTimestamp, t]);
 }

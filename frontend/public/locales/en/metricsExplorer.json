@@ -76,5 +76,8 @@
 	"metric": "METRIC",
 	"type": "TYPE",
 	"description": "DESCRIPTION",
-	"unit": "UNIT"
+	"unit": "UNIT",
+	"empty_select_metric": "Select a metric and run a query to see the results",
+	"search_metric_placeholder": "Search for a metric...",
+	"search_meter_metric_placeholder": "Search for a meter metric..."
 }

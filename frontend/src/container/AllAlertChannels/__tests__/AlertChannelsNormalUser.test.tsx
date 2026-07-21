@@ -72,7 +72,7 @@ describe('Alert Channels Settings List page (Normal User)', () => {
 			expect(screen.getByText('Dummy-Channel')).toBeInTheDocument();
 			expect(screen.getAllByText('slack')[0]).toBeInTheDocument();
 			expect(screen.queryByText('column_channel_edit')).not.toBeInTheDocument();
-			expect(screen.queryByText('Delete')).not.toBeInTheDocument();
+			expect(screen.queryByText('common:delete')).not.toBeInTheDocument();
 		});
 	});
 });

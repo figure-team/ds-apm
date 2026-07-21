@@ -394,7 +394,7 @@ describe('Explorer', () => {
 	});
 
 	describe('loading saved views with v5 query format', () => {
-		const EMPTY_STATE_TEXT = 'Select a metric and run a query to see the results';
+		const EMPTY_STATE_TEXT = 'metricsExplorer:empty_select_metric';
 
 		it('should show empty state when no metric is selected', () => {
 			(useSearchParams as jest.Mock).mockReturnValue([

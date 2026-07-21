@@ -17,6 +17,7 @@ import AlertLabels, {
 import AlertState from 'pages/AlertDetails/AlertHeader/AlertState/AlertState';
 import { AlertRuleTimelineTableResponse } from 'types/api/alerts/def';
 import { TagFilter } from 'types/api/queryBuilder/queryBuilderData';
+import { i18nText } from 'utils/i18nText';
 
 const transformLabelsToQbKeys = (
 	labels: AlertRuleTimelineTableResponse['labels'],
@@ -85,7 +86,7 @@ export const timelineTableColumns = ({
 	) => string;
 }): ColumnsType<AlertRuleTimelineTableResponse> => [
 	{
-		title: 'STATE',
+		title: i18nText('alerts:timeline_col_state'),
 		dataIndex: 'state',
 		sorter: true,
 		width: 140,
@@ -107,7 +108,7 @@ export const timelineTableColumns = ({
 		),
 	},
 	{
-		title: 'CREATED AT',
+		title: i18nText('alerts:timeline_col_created_at'),
 		dataIndex: 'unixMilli',
 		width: 200,
 		render: (value): JSX.Element => (
@@ -117,7 +118,7 @@ export const timelineTableColumns = ({
 		),
 	},
 	{
-		title: 'ACTIONS',
+		title: i18nText('alerts:timeline_col_actions'),
 		width: 140,
 		align: 'right',
 		render: (record): JSX.Element => (

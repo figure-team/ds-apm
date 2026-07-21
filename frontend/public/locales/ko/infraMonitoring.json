@@ -42,7 +42,7 @@
 	"learn_how_to_configure": "구성 방법 알아보기 →",
 	"col_cpu_usage": "CPU 사용량",
 	"col_host_group": "HOST 그룹",
-	"col_hostname": "Hostname",
+	"col_hostname": "호스트 이름",
 	"col_iowait": "IO 대기",
 	"col_load_avg": "부하 평균",
 	"col_memory_usage": "Memory 사용량",

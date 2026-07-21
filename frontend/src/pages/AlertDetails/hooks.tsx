@@ -130,7 +130,7 @@ export const useRouteTabUtils = (): { routes: TabRoutes[] } => {
 			name: (
 				<div className="tab-item">
 					<Table size={14} />
-					Overview
+					{t('tab_overview')}
 				</div>
 			),
 			route: getRouteUrl(AlertDetailsTab.OVERVIEW),
@@ -141,7 +141,7 @@ export const useRouteTabUtils = (): { routes: TabRoutes[] } => {
 			name: (
 				<div className="tab-item">
 					<History size={14} />
-					History
+					{t('tab_history')}
 					<BetaTag />
 				</div>
 			),

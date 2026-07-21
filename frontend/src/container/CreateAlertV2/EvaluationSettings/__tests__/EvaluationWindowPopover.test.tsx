@@ -17,7 +17,7 @@ const EVALUATION_WINDOW_CONTENT_LIST_ITEM_CLASS =
 const EVALUATION_WINDOW_DETAILS_TEST_ID = 'evaluation-window-details';
 const ENTER_VALUE_PLACEHOLDER = 'Enter value';
 const EVALUATION_WINDOW_TEXT = 'EVALUATION WINDOW';
-const LAST_5_MINUTES_TEXT = 'Last 5 minutes';
+const LAST_5_MINUTES_TEXT = '최근 5분';
 
 jest.mock('../EvaluationWindowPopover/EvaluationWindowDetails', () => ({
 	__esModule: true,
@@ -50,12 +50,12 @@ describe('EvaluationWindowPopover', () => {
 			expect(screen.getByText(option.label)).toBeInTheDocument();
 		});
 		const rollingItem = screen
-			.getByText('Rolling')
+			.getByText('롤링')
 			.closest(EVALUATION_WINDOW_CONTENT_LIST_ITEM_CLASS) as HTMLElement;
 		expect(rollingItem).toHaveClass('active');
 
 		const cumulativeItem = screen
-			.getByText('Cumulative')
+			.getByText('누적')
 			.closest(EVALUATION_WINDOW_CONTENT_LIST_ITEM_CLASS) as HTMLElement;
 		expect(cumulativeItem).not.toHaveClass('active');
 	});
@@ -74,11 +74,11 @@ describe('EvaluationWindowPopover', () => {
 		});
 
 		const cumulativeItem = screen
-			.getByText('Cumulative')
+			.getByText('누적')
 			.closest(EVALUATION_WINDOW_CONTENT_LIST_ITEM_CLASS) as HTMLElement;
 		expect(cumulativeItem).toHaveClass('active');
 		const rollingItem = screen
-			.getByText('Rolling')
+			.getByText('롤링')
 			.closest(EVALUATION_WINDOW_CONTENT_LIST_ITEM_CLASS) as HTMLElement;
 		expect(rollingItem).not.toHaveClass('active');
 	});
@@ -113,7 +113,7 @@ describe('EvaluationWindowPopover', () => {
 			expect(screen.getByText(option.label)).toBeInTheDocument();
 		});
 		const currentHourItem = screen
-			.getByText('Current hour')
+			.getByText('현재 시간')
 			.closest(EVALUATION_WINDOW_CONTENT_LIST_ITEM_CLASS) as HTMLElement;
 		expect(currentHourItem).toHaveClass('active');
 	});
@@ -188,13 +188,13 @@ describe('EvaluationWindowPopover', () => {
 			);
 
 			const rollingItem = screen
-				.getByText('Rolling')
+				.getByText('롤링')
 				.closest(EVALUATION_WINDOW_CONTENT_LIST_ITEM_CLASS) as HTMLElement;
 			rollingItem?.focus();
 
 			fireEvent.keyDown(rollingItem, { key: 'ArrowDown' });
 			const cumulativeItem = screen
-				.getByText('Cumulative')
+				.getByText('누적')
 				.closest(EVALUATION_WINDOW_CONTENT_LIST_ITEM_CLASS);
 			expect(cumulativeItem).toHaveFocus();
 		});
@@ -208,13 +208,13 @@ describe('EvaluationWindowPopover', () => {
 			);
 
 			const cumulativeItem = screen
-				.getByText('Cumulative')
+				.getByText('누적')
 				.closest(EVALUATION_WINDOW_CONTENT_LIST_ITEM_CLASS) as HTMLElement;
 			cumulativeItem?.focus();
 
 			fireEvent.keyDown(cumulativeItem, { key: 'ArrowUp' });
 			const rollingItem = screen
-				.getByText('Rolling')
+				.getByText('롤링')
 				.closest(EVALUATION_WINDOW_CONTENT_LIST_ITEM_CLASS);
 			expect(rollingItem).toHaveFocus();
 		});
@@ -228,7 +228,7 @@ describe('EvaluationWindowPopover', () => {
 			);
 
 			const rollingItem = screen
-				.getByText('Rolling')
+				.getByText('롤링')
 				.closest(EVALUATION_WINDOW_CONTENT_LIST_ITEM_CLASS) as HTMLElement;
 			rollingItem?.focus();
 
@@ -254,7 +254,7 @@ describe('EvaluationWindowPopover', () => {
 
 			fireEvent.keyDown(timeframeItem, { key: 'ArrowLeft' });
 			const rollingItem = screen
-				.getByText('Rolling')
+				.getByText('롤링')
 				.closest(EVALUATION_WINDOW_CONTENT_LIST_ITEM_CLASS);
 			expect(rollingItem).toHaveFocus();
 		});
@@ -268,7 +268,7 @@ describe('EvaluationWindowPopover', () => {
 			);
 
 			const cumulativeItem = screen
-				.getByText('Cumulative')
+				.getByText('누적')
 				.closest(EVALUATION_WINDOW_CONTENT_LIST_ITEM_CLASS) as HTMLElement;
 			cumulativeItem?.focus();
 
@@ -288,7 +288,7 @@ describe('EvaluationWindowPopover', () => {
 			);
 
 			const cumulativeItem = screen
-				.getByText('Cumulative')
+				.getByText('누적')
 				.closest(EVALUATION_WINDOW_CONTENT_LIST_ITEM_CLASS) as HTMLElement;
 			cumulativeItem?.focus();
 

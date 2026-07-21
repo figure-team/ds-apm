@@ -112,8 +112,8 @@ jest.mock('container/CreateAlertV2/utils', () => ({
 
 const TEST_STRINGS = {
 	ADD_THRESHOLD: 'v2_add_threshold',
-	AT_LEAST_ONCE: 'AT LEAST ONCE',
-	IS_ABOVE: 'ABOVE',
+	AT_LEAST_ONCE: '한 번 이상',
+	IS_ABOVE: '초과',
 } as const;
 
 const createTestQueryClient = (): QueryClient =>

@@ -54,5 +54,6 @@
 	"external_apis": "외부 API",
 	"messaging_queues": "메시지 큐",
 	"service_map": "서비스 맵",
-	"cost_meter": "비용 미터"
+	"cost_meter": "비용 미터",
+	"scroll_for_more": "더 보려면 스크롤"
 }

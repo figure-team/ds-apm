@@ -201,5 +201,6 @@
 		"perm_delete_steps": "You need editor or admin access to delete steps",
 		"perm_replace_steps": "You need editor or admin access to replace steps",
 		"perm_add_steps": "You need editor or admin access to add steps"
-	}
+	},
+	"funnels_subtitle": "Create and manage tracing funnels."
 }

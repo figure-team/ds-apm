@@ -903,7 +903,7 @@ function ExplorerOptions({
 					<div className="view-options">
 						<Select<string, { key: string; value: string }>
 							showSearch
-							placeholder="Select a view"
+							placeholder={t('explorer:select_view')}
 							loading={viewsIsLoading || isRefetching}
 							value={viewName || undefined}
 							onSelect={handleSelect}

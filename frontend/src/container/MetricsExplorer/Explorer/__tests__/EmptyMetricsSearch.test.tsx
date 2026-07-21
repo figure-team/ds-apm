@@ -7,13 +7,13 @@ describe('EmptyMetricsSearch', () => {
 		render(<EmptyMetricsSearch />);
 
 		expect(
-			screen.getByText('Select a metric and run a query to see the results'),
+			screen.getByText('metricsExplorer:empty_select_metric'),
 		).toBeInTheDocument();
 	});
 
 	it('shows no data message when a query returned empty results', () => {
 		render(<EmptyMetricsSearch hasQueryResult />);
 
-		expect(screen.getByText('No data')).toBeInTheDocument();
+		expect(screen.getByText('common:no_data')).toBeInTheDocument();
 	});
 });

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Empty, Typography } from 'antd';
 
 interface EmptyMetricsSearchProps {
@@ -7,14 +8,15 @@ interface EmptyMetricsSearchProps {
 export default function EmptyMetricsSearch({
 	hasQueryResult,
 }: EmptyMetricsSearchProps): JSX.Element {
+	const { t } = useTranslation(['metricsExplorer', 'common']);
 	return (
 		<div className="empty-metrics-search">
 			<Empty
 				description={
 					<Typography.Title level={5}>
 						{hasQueryResult
-							? 'No data'
-							: 'Select a metric and run a query to see the results'}
+							? t('common:no_data')
+							: t('metricsExplorer:empty_select_metric')}
 					</Typography.Title>
 				}
 			/>

@@ -905,7 +905,9 @@ function SideNav({ isPinned }: { isPinned: boolean }): JSX.Element {
 									<ChevronsDown size={16} />
 								</div>
 
-								<div className="scroll-for-more-label">Scroll for more</div>
+								<div className="scroll-for-more-label">
+									{t('routes:scroll_for_more')}
+								</div>
 							</div>
 						</div>
 					</div>

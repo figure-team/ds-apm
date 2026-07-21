@@ -41,7 +41,7 @@ function Delete({ notifications, id }: DeleteProps): JSX.Element {
 			type="link"
 			onClick={onClickHandler}
 		>
-			Delete
+			{t('common:delete')}
 		</Button>
 	);
 }

@@ -569,5 +569,8 @@
 	"remediation_not_found": "유효하지 않거나 만료된 승인 링크입니다.",
 	"remediation_forbidden": "자동대응 실행이 비활성화되어 있거나 권한이 없습니다.",
 	"remediation_too_many": "현재 실행 한도를 초과했습니다. 잠시 후 다시 시도하세요.",
-	"remediation_view_history": "실행 내역에서 보기"
+	"remediation_view_history": "실행 내역에서 보기",
+	"timeline_col_state": "상태",
+	"timeline_col_created_at": "생성 시각",
+	"timeline_col_actions": "동작"
 }

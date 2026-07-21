@@ -22,7 +22,7 @@ describe('EvaluationSettings', () => {
 			screen.getByTestId('condensed-evaluation-settings-container'),
 		).toBeInTheDocument();
 		// Verify that default option is selected
-		expect(screen.getByText('Rolling')).toBeInTheDocument();
-		expect(screen.getByText('Last 5 minutes')).toBeInTheDocument();
+		expect(screen.getByText('롤링')).toBeInTheDocument();
+		expect(screen.getByText('최근 5분')).toBeInTheDocument();
 	});
 });

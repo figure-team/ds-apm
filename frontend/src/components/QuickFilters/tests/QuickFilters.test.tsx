@@ -46,7 +46,8 @@ const ADDED_FILTERS_LABEL = /ADDED FILTERS/i;
 const OTHER_FILTERS_LABEL = /OTHER FILTERS/i;
 const SAVE_CHANGES_TEXT = 'Save changes';
 const DISCARD_TEXT = 'Discard';
-const FILTER_SERVICE_NAME = 'Service Name';
+// i18nText는 jest에서 키를 그대로 반환한다 (utils/i18nText 폴백)
+const FILTER_SERVICE_NAME = 'common:qf_service_name';
 const SETTINGS_ICON_TEST_ID = 'settings-icon';
 const QUERY_NAME = 'Test Query';
 

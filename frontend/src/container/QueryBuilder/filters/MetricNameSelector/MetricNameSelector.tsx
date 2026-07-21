@@ -85,7 +85,7 @@ export const MetricNameSelector = memo(function MetricNameSelector({
 	signalSource,
 	'data-testid': dataTestId,
 }: MetricNameSelectorProps): JSX.Element {
-	const { t } = useTranslation('common');
+	const { t } = useTranslation(['common', 'metricsExplorer']);
 	const currentMetricName =
 		(query.aggregations?.[0] as MetricAggregation)?.metricName ||
 		query.aggregateAttribute?.key ||
@@ -211,10 +211,10 @@ export const MetricNameSelector = memo(function MetricNameSelector({
 
 	const placeholder = useMemo(() => {
 		if (signalSource === 'meter') {
-			return 'Search for a meter metric...';
+			return t('metricsExplorer:search_meter_metric_placeholder');
 		}
-		return 'Search for a metric...';
-	}, [signalSource]);
+		return t('metricsExplorer:search_metric_placeholder');
+	}, [signalSource, t]);
 
 	const handleChange = useCallback((value: string): void => {
 		setInputValue(value);

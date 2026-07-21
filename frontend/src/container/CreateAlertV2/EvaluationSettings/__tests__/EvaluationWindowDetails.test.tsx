@@ -51,7 +51,7 @@ describe('EvaluationWindowDetails', () => {
 			/>,
 		);
 		expect(
-			screen.getByText('Current hour, starting at minute 1 (UTC)'),
+			screen.getByText('현재 시간, 1분부터 (UTC)'),
 		).toBeInTheDocument();
 	});
 

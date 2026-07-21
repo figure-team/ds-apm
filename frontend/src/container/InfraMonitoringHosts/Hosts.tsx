@@ -42,7 +42,7 @@ import { getHostsQuickFiltersConfig } from './utils';
 import styles from './InfraMonitoringHosts.module.scss';
 
 function Hosts(): JSX.Element {
-	const { t } = useTranslation('infraMonitoring');
+	const { t } = useTranslation(['infraMonitoring', 'common']);
 	const [showFilters, setShowFilters] = useState(true);
 	const [, setCurrentPage] = useInfraMonitoringCurrentPage();
 	const [urlFilters, setUrlFilters] = useInfraMonitoringFilters();
@@ -158,7 +158,7 @@ function Hosts(): JSX.Element {
 							</div>
 							<QuickFilters
 								source={QuickFiltersSource.INFRA_MONITORING}
-								config={getHostsQuickFiltersConfig(dotMetricsEnabled)}
+								config={getHostsQuickFiltersConfig(dotMetricsEnabled, (key): string => t(key))}
 								handleFilterVisibilityChange={handleFilterVisibilityChange}
 								onFilterChange={handleQuickFiltersChange}
 							/>

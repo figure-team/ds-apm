@@ -98,7 +98,11 @@ function ServiceMetricTable({
 	const paginationConfig = {
 		defaultPageSize: 10,
 		showTotal: (total: number, range: number[]): string =>
-			`${range[0]}-${range[1]} of ${total} items`,
+			getText('services:pagination_total', {
+				start: range[0],
+				end: range[1],
+				total,
+			}),
 	};
 	return (
 		<div className="service-metric-table-container">

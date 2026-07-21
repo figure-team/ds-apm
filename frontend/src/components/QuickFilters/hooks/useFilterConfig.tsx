@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from 'react-query';
 import getCustomFilters from 'api/quickFilters/getCustomFilters';
 import { REACT_QUERY_KEY } from 'constants/reactQueryKeys';
@@ -23,6 +24,7 @@ const useFilterConfig = ({
 	signal,
 	config,
 }: UseFilterConfigProps): UseFilterConfigReturn => {
+	const { t } = useTranslation(['common']);
 	const {
 		isFetching: isCustomFiltersLoading,
 		data: customFilters = [],
@@ -44,8 +46,11 @@ const useFilterConfig = ({
 	);
 
 	const filterConfig = useMemo(
-		() => getFilterConfig(signal, customFilters, config),
-		[config, customFilters, signal],
+		() =>
+			getFilterConfig(signal, customFilters, config, (key: string): string =>
+				t(key),
+			),
+		[config, customFilters, signal, t],
 	);
 
 	return {

@@ -18,9 +18,9 @@ export const getEvaluationWindowTypeText = (
 ): string => {
 	switch (windowType) {
 		case 'rolling':
-			return 'Rolling';
+			return '롤링';
 		case 'cumulative':
-			return 'Cumulative';
+			return '누적';
 		default:
 			return '';
 	}
@@ -31,11 +31,11 @@ export const getCumulativeWindowTimeframeText = (
 ): string => {
 	switch (evaluationWindow.timeframe) {
 		case CumulativeWindowTimeframes.CURRENT_HOUR:
-			return `Current hour, starting at minute ${evaluationWindow.startingAt.number} (${evaluationWindow.startingAt.timezone})`;
+			return `현재 시간, ${evaluationWindow.startingAt.number}분부터 (${evaluationWindow.startingAt.timezone})`;
 		case CumulativeWindowTimeframes.CURRENT_DAY:
-			return `Current day, starting from ${evaluationWindow.startingAt.time} (${evaluationWindow.startingAt.timezone})`;
+			return `현재 일, ${evaluationWindow.startingAt.time}부터 (${evaluationWindow.startingAt.timezone})`;
 		case CumulativeWindowTimeframes.CURRENT_MONTH:
-			return `Current month, starting from day ${evaluationWindow.startingAt.number} at ${evaluationWindow.startingAt.time} (${evaluationWindow.startingAt.timezone})`;
+			return `현재 월, ${evaluationWindow.startingAt.number}일 ${evaluationWindow.startingAt.time}부터 (${evaluationWindow.startingAt.timezone})`;
 		default:
 			return '';
 	}
@@ -46,19 +46,19 @@ export const getRollingWindowTimeframeText = (
 ): string => {
 	switch (timeframe) {
 		case RollingWindowTimeframes.LAST_5_MINUTES:
-			return 'Last 5 minutes';
+			return '최근 5분';
 		case RollingWindowTimeframes.LAST_10_MINUTES:
-			return 'Last 10 minutes';
+			return '최근 10분';
 		case RollingWindowTimeframes.LAST_15_MINUTES:
-			return 'Last 15 minutes';
+			return '최근 15분';
 		case RollingWindowTimeframes.LAST_30_MINUTES:
-			return 'Last 30 minutes';
+			return '최근 30분';
 		case RollingWindowTimeframes.LAST_1_HOUR:
-			return 'Last 1 hour';
+			return '최근 1시간';
 		case RollingWindowTimeframes.LAST_2_HOURS:
-			return 'Last 2 hours';
+			return '최근 2시간';
 		case RollingWindowTimeframes.LAST_4_HOURS:
-			return 'Last 4 hours';
+			return '최근 4시간';
 		default:
 			return '';
 	}
@@ -67,7 +67,7 @@ export const getRollingWindowTimeframeText = (
 export const getCustomRollingWindowTimeframeText = (
 	evaluationWindow: EvaluationWindowState,
 ): string =>
-	`Last ${evaluationWindow.startingAt.number} ${
+	`최근 ${evaluationWindow.startingAt.number}${
 		ADVANCED_OPTIONS_TIME_UNIT_OPTIONS.find(
 			(option) => option.value === evaluationWindow.startingAt.unit,
 		)?.label

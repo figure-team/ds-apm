@@ -61,7 +61,7 @@ describe('EvaluationCadence', () => {
 			screen.getByTestId(EVALUATION_CADENCE_INPUT_GROUP),
 		).toBeInTheDocument();
 		expect(screen.getByPlaceholderText('v2_enter_time_placeholder')).toHaveValue(1);
-		expect(screen.getByText('Minutes')).toBeInTheDocument();
+		expect(screen.getByText('분')).toBeInTheDocument();
 		// TODO: Uncomment this when add custom schedule button is implemented
 		// expect(screen.getByText(ADD_CUSTOM_SCHEDULE_TEXT)).toBeInTheDocument();
 	});

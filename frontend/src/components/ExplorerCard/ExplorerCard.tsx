@@ -194,7 +194,7 @@ function ExplorerCard({
 											getPopupContainer={popupContainer}
 											loading={isLoading || isRefetching}
 											showSearch
-											placeholder="Select a view"
+											placeholder={t('explorer:select_view')}
 											dropdownStyle={DropDownOverlay}
 											dropdownMatchSelectWidth={false}
 											optionLabelProp="value"

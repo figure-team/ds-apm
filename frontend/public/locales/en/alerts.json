@@ -569,5 +569,8 @@
 	"remediation_not_found": "Invalid or expired approval link.",
 	"remediation_forbidden": "Auto-remediation is disabled or you lack permission.",
 	"remediation_too_many": "Execution limit reached. Please try again shortly.",
-	"remediation_view_history": "View in execution history"
+	"remediation_view_history": "View in execution history",
+	"timeline_col_state": "STATE",
+	"timeline_col_created_at": "CREATED AT",
+	"timeline_col_actions": "ACTIONS"
 }

@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { Button, Popover } from 'antd';
 import logEvent from 'api/common/logEvent';
@@ -23,6 +24,7 @@ function HeaderRightSection({
 	enableFeedback,
 }: HeaderRightSectionProps): JSX.Element | null {
 	const location = useLocation();
+	const { t } = useTranslation(['common']);
 
 	const [openFeedbackModal, setOpenFeedbackModal] = useState(false);
 	const [openShareURLModal, setOpenShareURLModal] = useState(false);
@@ -87,7 +89,7 @@ function HeaderRightSection({
 						icon={<SquarePen size={14} />}
 						onClick={handleOpenFeedbackModal}
 					>
-						Feedback
+						{t('common:feedback')}
 					</Button>
 				</Popover>
 			)}
@@ -133,7 +135,7 @@ function HeaderRightSection({
 						icon={<Globe size={14} />}
 						onClick={handleOpenShareURLModal}
 					>
-						Share
+						{t('common:share')}
 					</Button>
 				</Popover>
 			)}

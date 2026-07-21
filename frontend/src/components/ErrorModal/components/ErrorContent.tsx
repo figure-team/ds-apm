@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import { Button } from 'antd';
 import ErrorIcon from 'assets/Error';
@@ -20,6 +21,7 @@ interface ErrorContentProps {
 }
 
 function ErrorContent({ error, icon }: ErrorContentProps): JSX.Element {
+	const { t } = useTranslation('common');
 	const {
 		url: errorUrl,
 		errors: errorMessages,
@@ -57,7 +59,7 @@ function ErrorContent({ error, icon }: ErrorContentProps): JSX.Element {
 								data-testid="error-docs-button"
 							>
 								<BookOpenText size={14} />
-								Open Docs
+								{t('open_docs')}
 							</Button>
 						</div>
 					)}
@@ -98,7 +100,9 @@ function ErrorContent({ error, icon }: ErrorContentProps): JSX.Element {
 								color={Color.BG_VANILLA_100}
 								className="error-content__scroll-hint-icon"
 							/>
-							<span className="error-content__scroll-hint-text">Scroll for more</span>
+							<span className="error-content__scroll-hint-text">
+								{t('scroll_for_more')}
+							</span>
 						</div>
 					)}
 				</div>

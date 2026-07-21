@@ -1,4 +1,5 @@
 import { ReactNode, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Color } from '@signozhq/design-tokens';
 import { Button, Popover, PopoverProps } from 'antd';
 import ErrorIcon from 'assets/Error';
@@ -14,6 +15,7 @@ interface WarningContentProps {
 }
 
 export function WarningContent({ warning }: WarningContentProps): JSX.Element {
+	const { t } = useTranslation('common');
 	const {
 		url: warningUrl,
 		warnings: warningMessages,
@@ -51,7 +53,7 @@ export function WarningContent({ warning }: WarningContentProps): JSX.Element {
 								data-testid="warning-docs-button"
 							>
 								<BookOpenText size={14} />
-								Open Docs
+								{t('open_docs')}
 							</Button>
 						</div>
 					)}
@@ -95,7 +97,7 @@ export function WarningContent({ warning }: WarningContentProps): JSX.Element {
 								className="warning-content__scroll-hint-icon"
 							/>
 							<span className="warning-content__scroll-hint-text">
-								Scroll for more
+								{t('scroll_for_more')}
 							</span>
 						</div>
 					)}

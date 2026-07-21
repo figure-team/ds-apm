@@ -1,42 +1,42 @@
 import { generateTimezoneData } from 'components/CustomTimePicker/timezoneUtils';
 
 export const EVALUATION_WINDOW_TYPE = [
-	{ label: 'Rolling', value: 'rolling' },
-	{ label: 'Cumulative', value: 'cumulative' },
+	{ label: '롤링', value: 'rolling' },
+	{ label: '누적', value: 'cumulative' },
 ];
 
 export const EVALUATION_WINDOW_TIMEFRAME = {
 	rolling: [
-		{ label: 'Last 5 minutes', value: '5m0s' },
-		{ label: 'Last 10 minutes', value: '10m0s' },
-		{ label: 'Last 15 minutes', value: '15m0s' },
-		{ label: 'Last 30 minutes', value: '30m0s' },
-		{ label: 'Last 1 hour', value: '1h0m0s' },
-		{ label: 'Last 2 hours', value: '2h0m0s' },
-		{ label: 'Last 4 hours', value: '4h0m0s' },
-		{ label: 'Custom', value: 'custom' },
+		{ label: '최근 5분', value: '5m0s' },
+		{ label: '최근 10분', value: '10m0s' },
+		{ label: '최근 15분', value: '15m0s' },
+		{ label: '최근 30분', value: '30m0s' },
+		{ label: '최근 1시간', value: '1h0m0s' },
+		{ label: '최근 2시간', value: '2h0m0s' },
+		{ label: '최근 4시간', value: '4h0m0s' },
+		{ label: '직접 설정', value: 'custom' },
 	],
 	cumulative: [
-		{ label: 'Current hour', value: 'currentHour' },
-		{ label: 'Current day', value: 'currentDay' },
-		{ label: 'Current month', value: 'currentMonth' },
+		{ label: '현재 시간', value: 'currentHour' },
+		{ label: '현재 일', value: 'currentDay' },
+		{ label: '현재 월', value: 'currentMonth' },
 	],
 };
 
 export const EVALUATION_CADENCE_REPEAT_EVERY_OPTIONS = [
-	{ label: 'DAY', value: 'day' },
-	{ label: 'WEEK', value: 'week' },
-	{ label: 'MONTH', value: 'month' },
+	{ label: '일', value: 'day' },
+	{ label: '주', value: 'week' },
+	{ label: '월', value: 'month' },
 ];
 
 export const EVALUATION_CADENCE_REPEAT_EVERY_WEEK_OPTIONS = [
-	{ label: 'SUNDAY', value: 'sunday' },
-	{ label: 'MONDAY', value: 'monday' },
-	{ label: 'TUESDAY', value: 'tuesday' },
-	{ label: 'WEDNESDAY', value: 'wednesday' },
-	{ label: 'THURSDAY', value: 'thursday' },
-	{ label: 'FRIDAY', value: 'friday' },
-	{ label: 'SATURDAY', value: 'saturday' },
+	{ label: '일요일', value: 'sunday' },
+	{ label: '월요일', value: 'monday' },
+	{ label: '화요일', value: 'tuesday' },
+	{ label: '수요일', value: 'wednesday' },
+	{ label: '목요일', value: 'thursday' },
+	{ label: '금요일', value: 'friday' },
+	{ label: '토요일', value: 'saturday' },
 ];
 
 export const EVALUATION_CADENCE_REPEAT_EVERY_MONTH_OPTIONS = Array.from(

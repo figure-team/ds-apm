@@ -1273,7 +1273,7 @@ function QuerySearch({
 				rel="noopener noreferrer"
 				style={{ color: '#1890ff', textDecoration: 'underline' }}
 			>
-				View documentation
+				{t('common:view_documentation')}
 			</a>
 		</div>
 	);
@@ -1282,37 +1282,37 @@ function QuerySearch({
 		<div className="code-mirror-where-clause">
 			{editingMode && (
 				<div className={`context-indicator context-indicator-${editingMode}`}>
-					Currently editing: {renderContextBadge()}
+					{t('common:qb_currently_editing')} {renderContextBadge()}
 					{queryContext?.keyToken && (
 						<span className="triplet-info">
-							Key: <Tag>{queryContext.keyToken}</Tag>
+							{t('common:qb_key')} <Tag>{queryContext.keyToken}</Tag>
 						</span>
 					)}
 					{queryContext?.operatorToken && (
 						<span className="triplet-info">
-							Operator: <Tag>{queryContext.operatorToken}</Tag>
+							{t('common:qb_operator')} <Tag>{queryContext.operatorToken}</Tag>
 						</span>
 					)}
 					{queryContext?.valueToken && (
 						<span className="triplet-info">
-							Value: <Tag>{queryContext.valueToken}</Tag>
+							{t('common:qb_value')} <Tag>{queryContext.valueToken}</Tag>
 						</span>
 					)}
 					{queryContext?.currentPair && (
 						<span className="triplet-info query-pair-info">
-							Current pair: <Tag color={isDarkMode ? 'blue' : '#2563EB'}>{queryContext.currentPair.key}</Tag>
+							{t('common:qb_current_pair')} <Tag color={isDarkMode ? 'blue' : '#2563EB'}>{queryContext.currentPair.key}</Tag>
 							<Tag color={isDarkMode ? 'purple' : '#7C3AED'}>{queryContext.currentPair.operator}</Tag>
 							{queryContext.currentPair.value && (
 								<Tag color={isDarkMode ? 'green' : '#16A34A'}>{queryContext.currentPair.value}</Tag>
 							)}
 							<Tag color={queryContext.currentPair.isComplete ? 'success' : 'warning'}>
-								{queryContext.currentPair.isComplete ? 'Complete' : 'Incomplete'}
+								{queryContext.currentPair.isComplete ? t('common:qb_complete') : t('common:qb_incomplete')}
 							</Tag>
 						</span>
 					)}
 					{queryContext?.queryPairs && queryContext.queryPairs.length > 0 && (
 						<span className="triplet-info">
-							Total pairs: <Tag color={isDarkMode ? 'blue' : '#2563EB'}>{queryContext.queryPairs.length}</Tag>
+							{t('common:qb_total_pairs')} <Tag color={isDarkMode ? 'blue' : '#2563EB'}>{queryContext.queryPairs.length}</Tag>
 						</span>
 					)}
 				</div>

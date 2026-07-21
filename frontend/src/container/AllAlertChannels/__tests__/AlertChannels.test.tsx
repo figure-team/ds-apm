@@ -62,11 +62,11 @@ describe('Alert Channels Settings List page', () => {
 			expect(screen.getByText('Dummy-Channel')).toBeInTheDocument();
 			expect(screen.getAllByText('slack')[0]).toBeInTheDocument();
 			expect(screen.getAllByText('column_channel_edit')[0]).toBeInTheDocument();
-			expect(screen.getAllByText('Delete')[0]).toBeInTheDocument();
+			expect(screen.getAllByText('common:delete')[0]).toBeInTheDocument();
 		});
 
 		it('Should check if clicking on Delete displays Success Toast "Channel Deleted Successfully"', async () => {
-			const deleteButton = screen.getAllByRole('button', { name: 'Delete' })[0];
+			const deleteButton = screen.getAllByRole('button', { name: 'common:delete' })[0];
 			expect(deleteButton).toBeInTheDocument();
 
 			act(() => {

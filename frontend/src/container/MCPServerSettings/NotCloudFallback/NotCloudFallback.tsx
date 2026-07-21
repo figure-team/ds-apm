@@ -20,7 +20,7 @@ function NotCloudFallback(): JSX.Element {
 				<h2 className="not-cloud-fallback__title">{t('fallback_title')}</h2>
 				<p className="not-cloud-fallback__body">{t('fallback_body')}</p>
 				<LearnMore
-					text="View MCP Server docs"
+					text={t('fallback_docs_link')}
 					url={MCP_DOCS_URL}
 					onClick={handleDocsClick}
 				/>

@@ -6,7 +6,7 @@ function Header(): JSX.Element {
 		<div className="traces-funnels-header">
 			<div className="traces-funnels-header-title">{t('tab_funnels')}</div>
 			<div className="traces-funnels-header-subtitle">
-				Create and manage tracing funnels.
+				{t('funnels_subtitle')}
 			</div>
 		</div>
 	);

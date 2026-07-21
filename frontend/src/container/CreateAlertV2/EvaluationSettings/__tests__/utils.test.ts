@@ -69,11 +69,11 @@ describe('utils', () => {
 
 	describe('getEvaluationWindowTypeText', () => {
 		it('should return correct text for rolling window', () => {
-			expect(getEvaluationWindowTypeText('rolling')).toBe('Rolling');
+			expect(getEvaluationWindowTypeText('rolling')).toBe('롤링');
 		});
 
 		it('should return correct text for cumulative window', () => {
-			expect(getEvaluationWindowTypeText('cumulative')).toBe('Cumulative');
+			expect(getEvaluationWindowTypeText('cumulative')).toBe('누적');
 		});
 
 		it('should default to empty string for unknown type', () => {
@@ -91,7 +91,7 @@ describe('utils', () => {
 					windowType: 'cumulative',
 					timeframe: 'currentHour',
 				}),
-			).toBe('Current hour, starting at minute 0 (UTC)');
+			).toBe('현재 시간, 0분부터 (UTC)');
 		});
 
 		it('should return correct text for current day', () => {
@@ -101,7 +101,7 @@ describe('utils', () => {
 					windowType: 'cumulative',
 					timeframe: 'currentDay',
 				}),
-			).toBe('Current day, starting from 00:00:00 (UTC)');
+			).toBe('현재 일, 00:00:00부터 (UTC)');
 		});
 
 		it('should return correct text for current month', () => {
@@ -111,7 +111,7 @@ describe('utils', () => {
 					windowType: 'cumulative',
 					timeframe: 'currentMonth',
 				}),
-			).toBe('Current month, starting from day 0 at 00:00:00 (UTC)');
+			).toBe('현재 월, 0일 00:00:00부터 (UTC)');
 		});
 
 		it('should default to empty string for unknown timeframe', () => {
@@ -129,43 +129,43 @@ describe('utils', () => {
 		it('should return correct text for last 5 minutes', () => {
 			expect(
 				getRollingWindowTimeframeText(RollingWindowTimeframes.LAST_5_MINUTES),
-			).toBe('Last 5 minutes');
+			).toBe('최근 5분');
 		});
 
 		it('should return correct text for last 10 minutes', () => {
 			expect(
 				getRollingWindowTimeframeText(RollingWindowTimeframes.LAST_10_MINUTES),
-			).toBe('Last 10 minutes');
+			).toBe('최근 10분');
 		});
 
 		it('should return correct text for last 15 minutes', () => {
 			expect(
 				getRollingWindowTimeframeText(RollingWindowTimeframes.LAST_15_MINUTES),
-			).toBe('Last 15 minutes');
+			).toBe('최근 15분');
 		});
 
 		it('should return correct text for last 30 minutes', () => {
 			expect(
 				getRollingWindowTimeframeText(RollingWindowTimeframes.LAST_30_MINUTES),
-			).toBe('Last 30 minutes');
+			).toBe('최근 30분');
 		});
 
 		it('should return correct text for last 1 hour', () => {
 			expect(
 				getRollingWindowTimeframeText(RollingWindowTimeframes.LAST_1_HOUR),
-			).toBe('Last 1 hour');
+			).toBe('최근 1시간');
 		});
 
 		it('should return correct text for last 2 hours', () => {
 			expect(
 				getRollingWindowTimeframeText(RollingWindowTimeframes.LAST_2_HOURS),
-			).toBe('Last 2 hours');
+			).toBe('최근 2시간');
 		});
 
 		it('should return correct text for last 4 hours', () => {
 			expect(
 				getRollingWindowTimeframeText(RollingWindowTimeframes.LAST_4_HOURS),
-			).toBe('Last 4 hours');
+			).toBe('최근 4시간');
 		});
 
 		it('should default to Last 5 minutes for unknown timeframe', () => {
@@ -178,7 +178,7 @@ describe('utils', () => {
 	describe('getCustomRollingWindowTimeframeText', () => {
 		it('should return correct text for custom rolling window', () => {
 			expect(getCustomRollingWindowTimeframeText(mockEvaluationWindowState)).toBe(
-				'Last 0 Minutes',
+				'최근 0분',
 			);
 		});
 	});
@@ -199,7 +199,7 @@ describe('utils', () => {
 		});
 
 		it('should call getRollingWindowTimeframeText for rolling window', () => {
-			expect(getTimeframeText(mockEvaluationWindowState)).toBe('Last 5 minutes');
+			expect(getTimeframeText(mockEvaluationWindowState)).toBe('최근 5분');
 		});
 
 		it('should call getCumulativeWindowTimeframeText for cumulative window', () => {
@@ -209,7 +209,7 @@ describe('utils', () => {
 					windowType: 'cumulative',
 					timeframe: 'currentDay',
 				}),
-			).toBe('Current day, starting from 00:00:00 (UTC)');
+			).toBe('현재 일, 00:00:00부터 (UTC)');
 		});
 	});
 

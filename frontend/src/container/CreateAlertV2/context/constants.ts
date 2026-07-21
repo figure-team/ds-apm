@@ -132,68 +132,68 @@ export const INITIAL_EVALUATION_WINDOW_STATE: EvaluationWindowState = {
 };
 
 export const THRESHOLD_OPERATOR_OPTIONS = [
-	{ value: AlertThresholdOperator.IS_ABOVE, label: 'ABOVE' },
-	{ value: AlertThresholdOperator.IS_BELOW, label: 'BELOW' },
-	{ value: AlertThresholdOperator.IS_EQUAL_TO, label: 'EQUAL TO' },
-	{ value: AlertThresholdOperator.IS_NOT_EQUAL_TO, label: 'NOT EQUAL TO' },
+	{ value: AlertThresholdOperator.IS_ABOVE, label: '초과' },
+	{ value: AlertThresholdOperator.IS_BELOW, label: '미만' },
+	{ value: AlertThresholdOperator.IS_EQUAL_TO, label: '같음' },
+	{ value: AlertThresholdOperator.IS_NOT_EQUAL_TO, label: '같지 않음' },
 ];
 
 export const ANOMALY_THRESHOLD_OPERATOR_OPTIONS = [
-	{ value: AlertThresholdOperator.IS_ABOVE, label: 'IS ABOVE' },
-	{ value: AlertThresholdOperator.IS_BELOW, label: 'IS BELOW' },
-	{ value: AlertThresholdOperator.ABOVE_BELOW, label: 'ABOVE/BELOW' },
+	{ value: AlertThresholdOperator.IS_ABOVE, label: '초과' },
+	{ value: AlertThresholdOperator.IS_BELOW, label: '미만' },
+	{ value: AlertThresholdOperator.ABOVE_BELOW, label: '초과/미만' },
 ];
 
 export const THRESHOLD_MATCH_TYPE_OPTIONS = [
-	{ value: AlertThresholdMatchType.AT_LEAST_ONCE, label: 'AT LEAST ONCE' },
-	{ value: AlertThresholdMatchType.ALL_THE_TIME, label: 'ALL THE TIME' },
-	{ value: AlertThresholdMatchType.ON_AVERAGE, label: 'ON AVERAGE' },
-	{ value: AlertThresholdMatchType.IN_TOTAL, label: 'IN TOTAL' },
-	{ value: AlertThresholdMatchType.LAST, label: 'LAST' },
+	{ value: AlertThresholdMatchType.AT_LEAST_ONCE, label: '한 번 이상' },
+	{ value: AlertThresholdMatchType.ALL_THE_TIME, label: '항상' },
+	{ value: AlertThresholdMatchType.ON_AVERAGE, label: '평균' },
+	{ value: AlertThresholdMatchType.IN_TOTAL, label: '합계' },
+	{ value: AlertThresholdMatchType.LAST, label: '마지막' },
 ];
 
 export const ANOMALY_THRESHOLD_MATCH_TYPE_OPTIONS = [
-	{ value: AlertThresholdMatchType.AT_LEAST_ONCE, label: 'AT LEAST ONCE' },
-	{ value: AlertThresholdMatchType.ALL_THE_TIME, label: 'ALL THE TIME' },
+	{ value: AlertThresholdMatchType.AT_LEAST_ONCE, label: '한 번 이상' },
+	{ value: AlertThresholdMatchType.ALL_THE_TIME, label: '항상' },
 ];
 
 export const ANOMALY_TIME_DURATION_OPTIONS = [
-	{ value: TimeDuration.FIVE_MINUTES, label: '5 minutes' },
-	{ value: TimeDuration.TEN_MINUTES, label: '10 minutes' },
-	{ value: TimeDuration.FIFTEEN_MINUTES, label: '15 minutes' },
-	{ value: TimeDuration.ONE_HOUR, label: '1 hour' },
-	{ value: TimeDuration.THREE_HOURS, label: '3 hours' },
-	{ value: TimeDuration.FOUR_HOURS, label: '4 hours' },
-	{ value: TimeDuration.TWENTY_FOUR_HOURS, label: '24 hours' },
+	{ value: TimeDuration.FIVE_MINUTES, label: '5분' },
+	{ value: TimeDuration.TEN_MINUTES, label: '10분' },
+	{ value: TimeDuration.FIFTEEN_MINUTES, label: '15분' },
+	{ value: TimeDuration.ONE_HOUR, label: '1시간' },
+	{ value: TimeDuration.THREE_HOURS, label: '3시간' },
+	{ value: TimeDuration.FOUR_HOURS, label: '4시간' },
+	{ value: TimeDuration.TWENTY_FOUR_HOURS, label: '24시간' },
 ];
 
 export const ANOMALY_ALGORITHM_OPTIONS = [
-	{ value: Algorithm.STANDARD, label: 'Standard' },
+	{ value: Algorithm.STANDARD, label: '표준' },
 ];
 
 export const ANOMALY_SEASONALITY_OPTIONS = [
-	{ value: Seasonality.HOURLY, label: 'Hourly' },
-	{ value: Seasonality.DAILY, label: 'Daily' },
-	{ value: Seasonality.WEEKLY, label: 'Weekly' },
+	{ value: Seasonality.HOURLY, label: '시간별' },
+	{ value: Seasonality.DAILY, label: '일별' },
+	{ value: Seasonality.WEEKLY, label: '주별' },
 ];
 
 export const ADVANCED_OPTIONS_TIME_UNIT_OPTIONS = [
-	{ value: UniversalYAxisUnit.SECONDS, label: 'Seconds' },
-	{ value: UniversalYAxisUnit.MINUTES, label: 'Minutes' },
-	{ value: UniversalYAxisUnit.HOURS, label: 'Hours' },
+	{ value: UniversalYAxisUnit.SECONDS, label: '초' },
+	{ value: UniversalYAxisUnit.MINUTES, label: '분' },
+	{ value: UniversalYAxisUnit.HOURS, label: '시간' },
 ];
 
 export const RE_NOTIFICATION_TIME_UNIT_OPTIONS = [
-	{ value: UniversalYAxisUnit.MINUTES, label: 'Minutes' },
-	{ value: UniversalYAxisUnit.HOURS, label: 'Hours' },
+	{ value: UniversalYAxisUnit.MINUTES, label: '분' },
+	{ value: UniversalYAxisUnit.HOURS, label: '시간' },
 ];
 
 export const NOTIFICATION_MESSAGE_PLACEHOLDER =
-	'This alert is fired when the defined metric (current value: {{$value}}) crosses the threshold ({{$threshold}})';
+	'정의된 메트릭(현재 값: {{$value}})이 임계값({{$threshold}})을 넘으면 발화하는 알림입니다';
 
 export const RE_NOTIFICATION_CONDITION_OPTIONS = [
-	{ value: 'firing', label: 'Firing' },
-	{ value: 'nodata', label: 'No Data' },
+	{ value: 'firing', label: '발화 중' },
+	{ value: 'nodata', label: '데이터 없음' },
 ];
 
 export const INITIAL_NOTIFICATION_SETTINGS_STATE: NotificationSettingsState = {

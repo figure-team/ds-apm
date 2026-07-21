@@ -74,37 +74,9 @@ export const getHostListsQuery = (): HostListPayload => ({
 	orderBy: { columnName: 'cpu', order: 'desc' },
 });
 
-export const HostsQuickFiltersConfig: IQuickFiltersConfig[] = [
-	{
-		type: FiltersType.CHECKBOX,
-		title: 'Host Name',
-		attributeKey: {
-			key: 'host_name',
-			dataType: DataTypes.String,
-			type: 'resource',
-		},
-		aggregateOperator: 'noop',
-		aggregateAttribute: 'system_cpu_load_average_15m',
-		dataSource: DataSource.METRICS,
-		defaultOpen: true,
-	},
-	{
-		type: FiltersType.CHECKBOX,
-		title: 'OS Type',
-		attributeKey: {
-			key: 'os_type',
-			dataType: DataTypes.String,
-			type: 'resource',
-		},
-		aggregateOperator: 'noop',
-		aggregateAttribute: 'system_cpu_load_average_15m',
-		dataSource: DataSource.METRICS,
-		defaultOpen: true,
-	},
-];
-
 export function getHostsQuickFiltersConfig(
 	dotMetricsEnabled: boolean,
+	translate: (key: string) => string = (key): string => key,
 ): IQuickFiltersConfig[] {
 	const hostNameKey = dotMetricsEnabled ? 'host.name' : 'host_name';
 	const osTypeKey = dotMetricsEnabled ? 'os.type' : 'os_type';
@@ -119,7 +91,7 @@ export function getHostsQuickFiltersConfig(
 	return [
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Host Name',
+			title: translate('common:qf_host_name'),
 			attributeKey: {
 				key: hostNameKey,
 				dataType: DataTypes.String,
@@ -132,7 +104,7 @@ export function getHostsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'OS Type',
+			title: translate('common:qf_os_type'),
 			attributeKey: {
 				key: osTypeKey,
 				dataType: DataTypes.String,
@@ -145,7 +117,7 @@ export function getHostsQuickFiltersConfig(
 		},
 		{
 			type: FiltersType.CHECKBOX,
-			title: 'Environment',
+			title: translate('common:qf_environment'),
 			attributeKey: {
 				key: environmentKey,
 				dataType: DataTypes.String,

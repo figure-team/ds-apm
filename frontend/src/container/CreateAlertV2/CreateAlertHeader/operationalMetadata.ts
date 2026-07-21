@@ -9,22 +9,22 @@ export type RequiredOperationalLabel = {
 export const RECOMMENDED_OPERATIONAL_LABELS: RequiredOperationalLabel[] = [
 	{
 		key: 'project_id',
-		label: 'Project ID',
+		label: '프로젝트 ID',
 		description: 'SOP 테넌트 범위 검증·AI 전략 org 선택에 사용. environment와 함께 없으면 SOP 문서 접근이 차단됩니다.',
 	},
 	{
 		key: 'environment',
-		label: 'Environment',
+		label: '환경',
 		description: 'project_id와 함께 SOP 테넌트 정책을 완성합니다. 둘 다 있어야 SOP 연동이 활성화됩니다.',
 	},
 	{
 		key: 'service.name',
-		label: 'Service Name',
+		label: '서비스 이름',
 		description: '알림 발송 payload(Slack·PagerDuty·webhook)에 Service 필드로 포함됩니다.',
 	},
 	{
 		key: 'owner_team',
-		label: 'Owner Team',
+		label: '담당 팀',
 		description: '알림 발송 payload에 Owner team 필드로 포함됩니다.',
 	},
 	// severity는 더 이상 수동 라벨이 아니다: 임계값(threshold) 이름이 곧 severity이며

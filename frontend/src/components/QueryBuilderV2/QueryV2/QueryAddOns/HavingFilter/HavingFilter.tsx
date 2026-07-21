@@ -1,5 +1,6 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { i18nText } from 'utils/i18nText';
 import {
 	autocompletion,
 	closeCompletion,
@@ -345,7 +346,7 @@ function HavingFilter({
 							},
 						]),
 					]}
-					placeholder="Type Having query like count() > 10 ..."
+					placeholder={i18nText('common:qb_having_placeholder')}
 					basicSetup={{
 						lineNumbers: false,
 						autocompletion: true,

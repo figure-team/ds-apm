@@ -88,7 +88,7 @@ describe('TimeSeries', () => {
 		renderTimeSeries({ metricNames: [] });
 
 		expect(
-			screen.getByText('Select a metric and run a query to see the results'),
+			screen.getByText('metricsExplorer:empty_select_metric'),
 		).toBeInTheDocument();
 		expect(screen.queryByText('TimeSeriesView')).not.toBeInTheDocument();
 	});
@@ -102,7 +102,7 @@ describe('TimeSeries', () => {
 
 		expect(screen.getByText('TimeSeriesView')).toBeInTheDocument();
 		expect(
-			screen.queryByText('Select a metric and run a query to see the results'),
+			screen.queryByText('metricsExplorer:empty_select_metric'),
 		).not.toBeInTheDocument();
 	});
 

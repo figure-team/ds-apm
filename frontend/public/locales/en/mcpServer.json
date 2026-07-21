@@ -19,5 +19,6 @@
 	"copy_endpoint_aria": "Copy MCP endpoint",
 	"manual_setup_hint": "Or copy the config below for manual setup.",
 	"fallback_title": "MCP Server is available on DS-APM",
-	"fallback_body": "Users can follow the docs to setup the MCP server against their DS-APM instance."
+	"fallback_body": "Users can follow the docs to setup the MCP server against their DS-APM instance.",
+	"fallback_docs_link": "View MCP Server docs"
 }

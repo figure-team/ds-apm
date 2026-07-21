@@ -54,5 +54,6 @@
 	"external_apis": "External APIs",
 	"messaging_queues": "Messaging Queues",
 	"service_map": "Service Map",
-	"cost_meter": "Cost Meter"
+	"cost_meter": "Cost Meter",
+	"scroll_for_more": "Scroll for more"
 }
