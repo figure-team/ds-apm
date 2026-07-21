@@ -17,6 +17,11 @@ describe('getRouteKey', () => {
 		);
 	});
 
+	it('falls back to SETTINGS for unlisted settings subpaths', () => {
+		expect(getRouteKey('/settings/general')).toBe('SETTINGS');
+		expect(getRouteKey('/settings/sop-documents')).toBe('SOP_DOCUMENTS_SETTINGS');
+	});
+
 	it('falls back to DEFAULT for unknown paths', () => {
 		expect(getRouteKey('/definitely-not-a-route')).toBe('DEFAULT');
 	});

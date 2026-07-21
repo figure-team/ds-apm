@@ -77,5 +77,10 @@
 	"ROLES_SETTINGS": "DS-APM | Roles",
 	"MEMBERS_SETTINGS": "DS-APM | Members",
 	"SERVICE_ACCOUNTS_SETTINGS": "DS-APM | Service Accounts",
-	"MCP_SERVER": "DS-APM | MCP Server"
+	"MCP_SERVER": "DS-APM | MCP Server",
+	"SOP_DOCUMENTS_SETTINGS": "DS-APM | SOP Documents",
+	"AI_MODULE_SETTINGS": "DS-APM | AI Module",
+	"CODE_RCA_SETTINGS": "DS-APM | Code RCA",
+	"REMEDIATION_TARGETS_SETTINGS": "DS-APM | Remediation Targets",
+	"INCIDENT_REPORT_SETTINGS": "DS-APM | Incident Report"
 }

@@ -10,9 +10,17 @@ export function getRouteKey(pathname: string): string {
 
 	// 2순위: 동적 라우트(/services/:servicename 등) 패턴 매칭.
 	// 여러 패턴이 겹치면 ROUTES 정의 순서 우선.
-	const [routeKey] = Object.entries(ROUTES).find(([, value]) =>
+	const matched = Object.entries(ROUTES).find(([, value]) =>
 		matchPath(pathname, { path: value, exact: true, strict: false }),
-	) || ['DEFAULT'];
+	);
+	if (matched) {
+		return matched[0];
+	}
 
-	return routeKey;
+	// 3순위: ROUTES에 없는 설정 하위 경로(/settings/general 등)는 설정 타이틀로 폴백.
+	if (pathname.startsWith('/settings')) {
+		return 'SETTINGS';
+	}
+
+	return 'DEFAULT';
 }
