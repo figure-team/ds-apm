@@ -190,7 +190,7 @@ function RunsTab(): JSX.Element {
 			title: t('run_baseline'),
 			dataIndex: 'baselineCommit',
 			key: 'baselineCommit',
-			render: (val: string): JSX.Element => <code>{val?.slice(0, 8)}</code>,
+			render: (val: string): JSX.Element => <span>{val?.slice(0, 8)}</span>,
 		},
 		{
 			title: t('run_attempts'),

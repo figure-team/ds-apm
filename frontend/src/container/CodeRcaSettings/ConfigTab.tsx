@@ -221,7 +221,7 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 			title: t('repo_baseline'),
 			dataIndex: 'baselineCommit',
 			key: 'baselineCommit',
-			render: (val: string): JSX.Element => <code>{val}</code>,
+			render: (val: string): JSX.Element => <span>{val}</span>,
 		},
 		{
 			title: '',
@@ -254,7 +254,18 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 	const mapColumns: ColumnsType<CodebaseServiceMap> = [
 		{ title: t('map_service'), dataIndex: 'serviceName', key: 'serviceName' },
 		{ title: t('map_repo'), dataIndex: 'repoId', key: 'repoId' },
-		{ title: t('map_subpath'), dataIndex: 'subpath', key: 'subpath' },
+		{
+			title: t('map_artifact_path'),
+			key: 'artifactPath',
+			render: (_: unknown, row: CodebaseServiceMap): JSX.Element => {
+				const path = repos.find((r) => r.repoId === row.repoId)?.artifactPath;
+				return path ? (
+					<span>{path}</span>
+				) : (
+					<Tag color="warning">{t('map_artifact_path_unset')}</Tag>
+				);
+			},
+		},
 		{
 			title: '',
 			key: 'actions',
@@ -419,6 +430,17 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 			<section className="code-rca-settings__card">
 				<h3 className="code-rca-settings__card-title">{t('maps_title')}</h3>
 
+				<Alert
+					type="info"
+					showIcon
+					message={
+						<span style={{ wordBreak: 'keep-all', overflowWrap: 'break-word' }}>
+							{t('maps_export_hint')}
+						</span>
+					}
+					style={{ marginBottom: 12 }}
+				/>
+
 				<Form form={mapForm} layout="inline" style={{ marginBottom: 12 }}>
 					<Form.Item name="serviceName" rules={[{ required: true }]}>
 						<Input placeholder={t('map_service')} disabled={!isAdmin} />
@@ -487,7 +509,11 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 					<Form.Item
 						name="artifactPath"
 						label={t('repo_artifact_path')}
-						tooltip={t('repo_artifact_path_hint')}
+						extra={
+							<span style={{ wordBreak: 'keep-all', overflowWrap: 'break-word' }}>
+								{t('repo_artifact_path_help')}
+							</span>
+						}
 					>
 						<Input placeholder="/srv/m-project" />
 					</Form.Item>
