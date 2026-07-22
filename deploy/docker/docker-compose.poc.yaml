@@ -1,0 +1,202 @@
+version: "3"
+# PoC/고객 반입용 compose. docker-compose.local.yaml과의 차이:
+#   - 표시 이름(컨테이너/네트워크/볼륨/자체 이미지)을 ds-apm-* 로 통일.
+#     compose 서비스 키(signoz, clickhouse, ...)는 컨테이너 간 DNS
+#     (opamp의 ws://signoz:4320, DSN의 tcp://clickhouse:9000)가 참조하므로
+#     바꾸지 않는다. SIGNOZ_* 환경변수·ClickHouse DB명도 코드 식별자라 유지.
+#     signoz/signoz-otel-collector 등 서드파티 이미지 좌표도 pull 경로가
+#     깨지므로 유지한다.
+#   - 개발 장비 전용 마운트(docker.sock, m-project) 없음.
+#   - init-clickhouse가 histogramQuantile 바이너리를 이미 갖고 있으면
+#     다운로드를 건너뛰어 폐쇄망(오프라인)에서도 기동된다.
+x-common: &common
+  networks:
+    - ds-apm-net
+  restart: unless-stopped
+  logging:
+    options:
+      max-size: 50m
+      max-file: "3"
+x-clickhouse-defaults: &clickhouse-defaults
+  !!merge <<: *common
+  image: clickhouse/clickhouse-server:25.5.6
+  tty: true
+  labels:
+    signoz.io/scrape: "true"
+    signoz.io/port: "9363"
+    signoz.io/path: "/metrics"
+  depends_on:
+    init-clickhouse:
+      condition: service_completed_successfully
+    zookeeper-1:
+      condition: service_healthy
+  healthcheck:
+    test:
+      - CMD
+      - wget
+      - --spider
+      - -q
+      - 0.0.0.0:8123/ping
+    interval: 30s
+    timeout: 5s
+    retries: 3
+  ulimits:
+    nproc: 65535
+    nofile:
+      soft: 262144
+      hard: 262144
+  environment:
+    - CLICKHOUSE_SKIP_USER_SETUP=1
+x-zookeeper-defaults: &zookeeper-defaults
+  !!merge <<: *common
+  image: signoz/zookeeper:3.7.1
+  user: root
+  labels:
+    signoz.io/scrape: "true"
+    signoz.io/port: "9141"
+    signoz.io/path: "/metrics"
+  healthcheck:
+    test:
+      - CMD-SHELL
+      - curl -s -m 2 http://localhost:8080/commands/ruok | grep error | grep null
+    interval: 30s
+    timeout: 5s
+    retries: 3
+x-db-depend: &db-depend
+  !!merge <<: *common
+  depends_on:
+    clickhouse:
+      condition: service_healthy
+services:
+  init-clickhouse:
+    !!merge <<: *common
+    image: clickhouse/clickhouse-server:25.5.6
+    container_name: ds-apm-init-clickhouse
+    command:
+      - bash
+      - -c
+      - |
+        if [ -f /var/lib/clickhouse/user_scripts/histogramQuantile ]; then
+          echo "histogramQuantile already present; skipping download"
+          exit 0
+        fi
+        version="v0.0.1"
+        node_os=$$(uname -s | tr '[:upper:]' '[:lower:]')
+        node_arch=$$(uname -m | sed s/aarch64/arm64/ | sed s/x86_64/amd64/)
+        echo "Fetching histogram-binary for $${node_os}/$${node_arch}"
+        cd /tmp
+        wget -O histogram-quantile.tar.gz "https://github.com/SigNoz/signoz/releases/download/histogram-quantile%2F$${version}/histogram-quantile_$${node_os}_$${node_arch}.tar.gz"
+        tar -xvzf histogram-quantile.tar.gz
+        mv histogram-quantile /var/lib/clickhouse/user_scripts/histogramQuantile
+    restart: on-failure
+    volumes:
+      - ../common/clickhouse/user_scripts:/var/lib/clickhouse/user_scripts/
+  zookeeper-1:
+    !!merge <<: *zookeeper-defaults
+    container_name: ds-apm-zookeeper-1
+    volumes:
+      - zookeeper-1:/bitnami/zookeeper
+    environment:
+      - ZOO_SERVER_ID=1
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOO_AUTOPURGE_INTERVAL=1
+      - ZOO_ENABLE_PROMETHEUS_METRICS=yes
+      - ZOO_PROMETHEUS_METRICS_PORT_NUMBER=9141
+  clickhouse:
+    !!merge <<: *clickhouse-defaults
+    container_name: ds-apm-clickhouse
+    volumes:
+      - ../common/clickhouse/config.xml:/etc/clickhouse-server/config.xml
+      - ../common/clickhouse/users.xml:/etc/clickhouse-server/users.xml
+      - ../common/clickhouse/custom-function.xml:/etc/clickhouse-server/custom-function.xml
+      - ../common/clickhouse/user_scripts:/var/lib/clickhouse/user_scripts/
+      - ../common/clickhouse/cluster.xml:/etc/clickhouse-server/config.d/cluster.xml
+      - clickhouse:/var/lib/clickhouse/
+  signoz:
+    !!merge <<: *db-depend
+    build:
+      context: ../../
+      dockerfile: Dockerfile.local
+    image: ds-apm:poc
+    container_name: ds-apm
+    ports:
+      - "8080:8080"
+    volumes:
+      - sqlite:/var/lib/signoz/
+    environment:
+      - SIGNOZ_ALERTMANAGER_PROVIDER=signoz
+      - SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN=tcp://clickhouse:9000
+      - SIGNOZ_SQLSTORE_SQLITE_PATH=/var/lib/signoz/signoz.db
+      - SIGNOZ_TOKENIZER_JWT_SECRET=${SIGNOZ_JWT_SECRET:-secret}
+      # 실시간 알림: 룰이 쿼리하는 데이터의 지연(end = now - EvalDelay). 기본 2m는
+      # 너무 보수적. 적재 신선도(span flush 15s + batch 5s)에 맞춰 30s로 단축.
+      - SIGNOZ_RULER_EVAL__DELAY=30s
+      # UI에서 저장하는 AI 설정(API 키 등)의 암호화 키. .env에서 주입.
+      - DS_APM_AI_CONFIG_ENCRYPTION_KEY=${DS_APM_AI_CONFIG_ENCRYPTION_KEY}
+      # 알림 전송 실패 dead-letter 큐. sqlite 볼륨에 두어 재시작에도 유지.
+      - SIGNOZ_DLQ_PATH=/var/lib/signoz/alert-dlq.jsonl
+      # LLM CLI 호출 감사 로그. 폐쇄망에서 외부 LLM 호출이 실제로 없는지
+      # 증빙할 때 확인: docker exec ds-apm cat /var/lib/signoz/llm-cli.jsonl
+      - DS_APM_LLM_CLI_LOG=/var/lib/signoz/llm-cli.jsonl
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --spider
+        - -q
+        - localhost:8080/api/v1/health
+      interval: 30s
+      timeout: 5s
+      retries: 3
+  otel-collector:
+    !!merge <<: *db-depend
+    image: signoz/signoz-otel-collector:${OTELCOL_TAG:-v0.144.3}
+    container_name: ds-apm-otel-collector
+    entrypoint:
+      - /bin/sh
+    command:
+      - -c
+      - |
+        /signoz-otel-collector migrate sync check &&
+        /signoz-otel-collector --config=/etc/otel-collector-config.yaml --manager-config=/etc/manager-config.yaml --copy-path=/var/tmp/collector-config.yaml
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+      - ../common/signoz/otel-collector-opamp-config.yaml:/etc/manager-config.yaml
+    environment:
+      - OTEL_RESOURCE_ATTRIBUTES=host.name=ds-apm-host,os.type=linux
+      - LOW_CARDINAL_EXCEPTION_GROUPING=false
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN=tcp://clickhouse:9000
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER=cluster
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION=true
+      - SIGNOZ_OTEL_COLLECTOR_TIMEOUT=10m
+    ports:
+      - "4317:4317" # OTLP gRPC receiver
+      - "4318:4318" # OTLP HTTP receiver
+  signoz-telemetrystore-migrator:
+    !!merge <<: *db-depend
+    image: signoz/signoz-otel-collector:${OTELCOL_TAG:-v0.144.3}
+    container_name: ds-apm-migrator
+    environment:
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN=tcp://clickhouse:9000
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER=cluster
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION=true
+      - SIGNOZ_OTEL_COLLECTOR_TIMEOUT=10m
+    entrypoint:
+      - /bin/sh
+    command:
+      - -c
+      - |
+        /signoz-otel-collector migrate bootstrap &&
+        /signoz-otel-collector migrate sync up &&
+        /signoz-otel-collector migrate async up
+    restart: on-failure
+networks:
+  ds-apm-net:
+    name: ds-apm-net
+volumes:
+  clickhouse:
+    name: ds-apm-clickhouse
+  sqlite:
+    name: ds-apm-sqlite
+  zookeeper-1:
+    name: ds-apm-zookeeper-1
