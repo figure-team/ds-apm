@@ -61,7 +61,16 @@
 	"toast_reason_limit": "limit exceeded",
 	"toast_run_enqueued": "Test run queued. Analysis in progress…",
 	"toast_run_failed": "Failed to start the run.",
-	"toast_export_success": "Artifact saved to ds-hub",
+	"toast_export_success": "Sent to ds-navi",
 	"toast_export_failed": "Failed to export the artifact.",
-	"toast_run_detail_load_failed": "Failed to load run detail"
+	"toast_run_detail_load_failed": "Failed to load run detail",
+	"status_all": "All",
+	"status_queued": "Queued",
+	"status_running": "Running",
+	"status_done": "Done",
+	"status_failed": "Failed",
+	"status_timeout": "Timeout",
+	"status_unparseable": "Unparseable",
+	"run_test_button": "Run Test",
+	"export_button": "Send artifact to ds-navi"
 }

@@ -61,7 +61,16 @@
 	"toast_reason_limit": "한도 초과",
 	"toast_run_enqueued": "테스트 실행을 큐에 등록했습니다. 분석 진행 중…",
 	"toast_run_failed": "실행에 실패했습니다.",
-	"toast_export_success": "ds-hub에 산출물을 저장했습니다",
+	"toast_export_success": "ds-navi에 전송 완료",
 	"toast_export_failed": "산출물 전송에 실패했습니다.",
-	"toast_run_detail_load_failed": "실행 상세를 불러오지 못했습니다"
+	"toast_run_detail_load_failed": "실행 상세를 불러오지 못했습니다",
+	"status_all": "전체",
+	"status_queued": "대기",
+	"status_running": "실행 중",
+	"status_done": "완료",
+	"status_failed": "실패",
+	"status_timeout": "시간 초과",
+	"status_unparseable": "파싱 불가",
+	"run_test_button": "테스트 실행",
+	"export_button": "ds-navi에 산출물 전송"
 }

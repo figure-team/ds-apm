@@ -283,9 +283,9 @@ describe('CodeRcaSettings', () => {
 			expect(mockListRuns).toHaveBeenCalled();
 		});
 
-		// status tag for 'done' run should be in the DOM
+		// status tag for 'done' run should be in the DOM (i18n mock returns the key)
 		await waitFor(() => {
-			expect(screen.getByText('done')).toBeInTheDocument();
+			expect(screen.getByText('status_done')).toBeInTheDocument();
 		});
 	});
 
@@ -298,7 +298,7 @@ describe('CodeRcaSettings', () => {
 		fireEvent.click(runsTab);
 
 		// wait for run row
-		const statusTag = await screen.findByText('done');
+		const statusTag = await screen.findByText('status_done');
 		// click the row (the tag is inside the row)
 		fireEvent.click(statusTag.closest('tr') ?? statusTag);
 
@@ -322,10 +322,10 @@ describe('CodeRcaSettings', () => {
 		render(<CodeRcaSettings />);
 
 		fireEvent.click(await screen.findByText('tab_runs'));
-		const statusTag = await screen.findByText('done');
+		const statusTag = await screen.findByText('status_done');
 		fireEvent.click(statusTag.closest('tr') ?? statusTag);
 
-		const btn = await screen.findByText('ds-navi에 산출물 전송');
+		const btn = await screen.findByText('export_button');
 		fireEvent.click(btn);
 
 		await waitFor(() => {
@@ -345,12 +345,12 @@ describe('CodeRcaSettings', () => {
 		render(<CodeRcaSettings />);
 
 		fireEvent.click(await screen.findByText('tab_runs'));
-		const statusTag = await screen.findByText('failed');
+		const statusTag = await screen.findByText('status_failed');
 		fireEvent.click(statusTag.closest('tr') ?? statusTag);
 
 		await waitFor(() => {
 			expect(mockGetRun).toHaveBeenCalledWith('run-1');
 		});
-		expect(screen.queryByText('ds-navi에 산출물 전송')).toBeNull();
+		expect(screen.queryByText('export_button')).toBeNull();
 	});
 });

@@ -15,14 +15,14 @@ import {
 import { MarkdownRenderer } from 'components/MarkdownRenderer/MarkdownRenderer';
 import { Bug, Info, Send, ShieldAlert, Wrench } from 'lucide-react';
 
-const STATUS_OPTIONS = [
-	{ value: '', label: 'All' },
-	{ value: 'queued', label: 'queued' },
-	{ value: 'running', label: 'running' },
-	{ value: 'done', label: 'done' },
-	{ value: 'failed', label: 'failed' },
-	{ value: 'timeout', label: 'timeout' },
-	{ value: 'unparseable', label: 'unparseable' },
+const STATUS_VALUES = [
+	'',
+	'queued',
+	'running',
+	'done',
+	'failed',
+	'timeout',
+	'unparseable',
 ];
 
 function statusColor(status: CodeRcaRunStatus): string {
@@ -183,7 +183,7 @@ function RunsTab(): JSX.Element {
 			dataIndex: 'status',
 			key: 'status',
 			render: (val: CodeRcaRunStatus): JSX.Element => (
-				<Tag color={statusColor(val)}>{val}</Tag>
+				<Tag color={statusColor(val)}>{t(`status_${val}`, val)}</Tag>
 			),
 		},
 		{
@@ -218,14 +218,17 @@ function RunsTab(): JSX.Element {
 					onPressEnter={handleTestRun}
 				/>
 				<Button type="primary" loading={enqueuing} onClick={handleTestRun}>
-					테스트 실행
+					{t('run_test_button')}
 				</Button>
 				<span style={{ flex: 1 }} />
 				<label>{t('runs_filter_status')}</label>
 				<Select
 					value={statusFilter}
 					onChange={setStatusFilter}
-					options={STATUS_OPTIONS}
+					options={STATUS_VALUES.map((v) => ({
+						value: v,
+						label: v ? t(`status_${v}`, v) : t('status_all'),
+					}))}
 					style={{ width: 160 }}
 				/>
 				<Button onClick={fetchRuns}>{t('runs_refresh')}</Button>
@@ -254,26 +257,28 @@ function RunsTab(): JSX.Element {
 					<div className="code-rca-drawer__title">
 						<span className="code-rca-drawer__title-svc">{detail?.service ?? ''}</span>
 						{detail && (
-							<Tag color={statusColor(detail.status)}>{detail.status}</Tag>
+							<Tag color={statusColor(detail.status)}>
+								{t(`status_${detail.status}`, detail.status)}
+							</Tag>
 						)}
 					</div>
+				}
+				extra={
+					detail?.status === 'done' ? (
+						<Button
+							type="primary"
+							icon={<Send size={14} />}
+							loading={exporting}
+							onClick={handleExport}
+						>
+							{t('export_button')}
+						</Button>
+					) : null
 				}
 			>
 				<Spin spinning={loadingDetail}>
 					{detail && (
 						<div className="code-rca-report">
-							{detail.status === 'done' && (
-								<Button
-									type="primary"
-									icon={<Send size={14} />}
-									loading={exporting}
-									onClick={handleExport}
-									style={{ marginBottom: 12 }}
-								>
-									ds-navi에 산출물 전송
-								</Button>
-							)}
-
 							{detail.status === 'done' && (
 								<div className="code-rca-report__hitl">
 									<ShieldAlert size={15} />
