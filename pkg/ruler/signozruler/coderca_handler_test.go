@@ -549,7 +549,7 @@ func exportReq(t *testing.T, runID string) *http.Request {
 
 // TestExportCodeRCARun verifies the ds-hub export endpoint: a done run whose
 // service maps to an enabled repo with an artifactPath is rendered to
-// <artifactPath>/ds-hub/<date>_rca_<service>.md; non-done runs, unmapped
+// <artifactPath>/ds-hub/<date>_<time>_rca_<service>.md; non-done runs, unmapped
 // services, disabled repos and missing artifactPath are rejected with 400.
 func TestExportCodeRCARun(t *testing.T) {
 	h, ss := newCodercaTestHandler(t)

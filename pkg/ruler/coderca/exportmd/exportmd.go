@@ -34,11 +34,12 @@ func sanitizeService(s string) string {
 	return s
 }
 
-// Filename returns "<YYYY-MM-DD>_rca_<service>.md"; the date is the run's
-// creation time in KST.
+// Filename returns "<YYYY-MM-DD>_<HHmmss>_rca_<service>.md"; the timestamp is
+// the run's creation time in KST. Including 시분초 keeps same-day re-exports of
+// the same service from overwriting each other.
 func Filename(service string, createdAtUnix int64) string {
-	date := time.Unix(createdAtUnix, 0).In(kst).Format("2006-01-02")
-	return fmt.Sprintf("%s_rca_%s.md", date, sanitizeService(service))
+	stamp := time.Unix(createdAtUnix, 0).In(kst).Format("2006-01-02_150405")
+	return fmt.Sprintf("%s_rca_%s.md", stamp, sanitizeService(service))
 }
 
 // Build renders YAML frontmatter (runId/service/createdAt/confidence/
@@ -68,7 +69,9 @@ func Build(d runstore.RunDetail) string {
 }
 
 // Write renders the artifact into <artifactRoot>/ds-hub/, creating the folder
-// when missing and overwriting a same-name file. Returns the written path.
+// when missing. Re-exporting the same run overwrites its file (identical
+// createdAt → identical name); runs created at different times never collide.
+// Returns the written path.
 func Write(artifactRoot string, d runstore.RunDetail) (string, error) {
 	dir := filepath.Join(artifactRoot, dirName)
 	if err := os.MkdirAll(dir, 0o755); err != nil {

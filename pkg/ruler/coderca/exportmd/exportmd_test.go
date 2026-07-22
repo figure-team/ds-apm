@@ -28,12 +28,16 @@ func sampleDetail() runstore.RunDetail {
 }
 
 func TestFilename(t *testing.T) {
+	// 1784692800 = 2026-07-22 04:00:00 UTC = 13:00:00 KST.
 	got := Filename("payment-api", 1784692800)
-	if !strings.HasSuffix(got, "_rca_payment-api.md") {
-		t.Fatalf("filename suffix: %q", got)
+	if want := "2026-07-22_130000_rca_payment-api.md"; got != want {
+		t.Fatalf("filename: got %q want %q", got, want)
 	}
-	if !strings.HasPrefix(got, "2026-") {
-		t.Fatalf("filename date prefix: %q", got)
+}
+
+func TestFilenameDiffersPerSecond(t *testing.T) {
+	if a, b := Filename("svc", 1784692800), Filename("svc", 1784692801); a == b {
+		t.Fatalf("same-day different-time filenames must differ: %q", a)
 	}
 }
 
@@ -105,7 +109,7 @@ func TestWriteCreatesDsHubAndOverwrites(t *testing.T) {
 		t.Fatal(err)
 	}
 	if p1 != p2 {
-		t.Fatalf("same-day same-service must overwrite: %q vs %q", p1, p2)
+		t.Fatalf("same run (same createdAt) must overwrite: %q vs %q", p1, p2)
 	}
 	b, err := os.ReadFile(p2)
 	if err != nil {
@@ -113,5 +117,17 @@ func TestWriteCreatesDsHubAndOverwrites(t *testing.T) {
 	}
 	if !strings.Contains(string(b), "수정된 원인") {
 		t.Fatal("overwrite did not take effect")
+	}
+
+	d.CreatedAt++
+	p3, err := Write(root, d)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p3 == p1 {
+		t.Fatalf("different createdAt must not collide: %q", p3)
+	}
+	if _, err := os.Stat(p1); err != nil {
+		t.Fatalf("earlier export must survive later export: %v", err)
 	}
 }
