@@ -25,6 +25,8 @@
 	"credential_unchanged_hint": "Leave blank to keep the existing credential",
 	"credential_saved": "Credential saved",
 	"repo_enabled": "Enabled",
+	"repo_artifact_path": "Artifact path (local root)",
+	"repo_artifact_path_hint": "Absolute path reachable by the ds-apm server. RCA artifacts are written under <path>/ds-hub/.",
 	"repo_last_sync": "Last Sync",
 	"repo_baseline": "Baseline Commit",
 	"repo_delete_confirm": "Delete this repository connection?",
@@ -50,5 +52,16 @@
 	"run_limitations": "Limitations",
 	"run_failure_reason": "Failure Reason",
 	"run_hitl_notice": "This is an AI-generated suggestion. A human must review it before applying.",
-	"run_empty": "No analysis history"
+	"run_empty": "No analysis history",
+	"toast_runs_load_failed": "Failed to load runs",
+	"toast_run_done": "Code RCA analysis complete ({{status}})",
+	"toast_run_ended": "Code RCA analysis ended: {{status}}",
+	"toast_service_required": "Enter a service name (e.g. payment-api)",
+	"toast_run_rejected": "Run rejected: {{reason}}",
+	"toast_reason_limit": "limit exceeded",
+	"toast_run_enqueued": "Test run queued. Analysis in progress…",
+	"toast_run_failed": "Failed to start the run.",
+	"toast_export_success": "Artifact saved to ds-hub",
+	"toast_export_failed": "Failed to export the artifact.",
+	"toast_run_detail_load_failed": "Failed to load run detail"
 }

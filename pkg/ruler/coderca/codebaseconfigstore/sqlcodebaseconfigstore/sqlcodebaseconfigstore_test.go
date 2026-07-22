@@ -29,6 +29,7 @@ func applyCodebaseRepoDDL(ctx context.Context, ss sqlstore.SQLStore) error {
 			baseline_commit        TEXT      NOT NULL DEFAULT '',
 			last_sync_at           TEXT      NOT NULL DEFAULT '',
 			last_sync_status       TEXT      NOT NULL DEFAULT '',
+			artifact_path          TEXT      NOT NULL DEFAULT '',
 			PRIMARY KEY (org_id, repo_id)
 		)`)
 	return err

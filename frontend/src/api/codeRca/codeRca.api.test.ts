@@ -9,6 +9,7 @@
  *
  * These tests feed the real envelope shape and assert the clients unwrap it.
  */
+import exportRun from './exportRun';
 import getConfig from './getConfig';
 import getRun from './getRun';
 import listRepos from './listRepos';
@@ -16,10 +17,12 @@ import listRuns from './listRuns';
 import listServiceMaps from './listServiceMaps';
 
 const mockGet = jest.fn();
+const mockPost = jest.fn();
 
 jest.mock('api', () => ({
 	ApiV2Instance: {
 		get: (...args: unknown[]): unknown => mockGet(...args),
+		post: (...args: unknown[]): unknown => mockPost(...args),
 	},
 }));
 
@@ -78,5 +81,14 @@ describe('codeRca read clients unwrap the render.Success { status, data } envelo
 
 		expect(mockGet).toHaveBeenCalledWith('/ds/coderca/runs/run-1');
 		expect(res.data).toEqual({ runId: 'run-1', rootCause: 'npe' });
+	});
+
+	it('exportRun posts to the export endpoint and unwraps the path', async () => {
+		mockPost.mockResolvedValue(envelope({ path: '/srv/m-project/ds-hub/x.md' }));
+
+		const res = await exportRun('run-1');
+
+		expect(mockPost).toHaveBeenCalledWith('/ds/coderca/runs/run-1/export');
+		expect(res.data).toEqual({ path: '/srv/m-project/ds-hub/x.md' });
 	});
 });

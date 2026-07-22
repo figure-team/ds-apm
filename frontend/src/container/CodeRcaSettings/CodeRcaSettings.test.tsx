@@ -13,6 +13,7 @@ const mockUpsertServiceMap = jest.fn();
 const mockDeleteServiceMap = jest.fn();
 const mockListRuns = jest.fn();
 const mockGetRun = jest.fn();
+const mockExportRun = jest.fn();
 
 const mockToastSuccess = jest.fn();
 const mockToastError = jest.fn();
@@ -57,12 +58,26 @@ jest.mock('api/codeRca/getRun', () => ({
 	__esModule: true,
 	default: (...args: unknown[]): unknown => mockGetRun(...args),
 }));
+jest.mock('api/codeRca/exportRun', () => ({
+	__esModule: true,
+	default: (...args: unknown[]): unknown => mockExportRun(...args),
+}));
 jest.mock('@signozhq/ui', () => ({
 	...jest.requireActual('@signozhq/ui'),
 	toast: {
 		success: (...args: unknown[]): unknown => mockToastSuccess(...args),
 		error: (...args: unknown[]): unknown => mockToastError(...args),
 	},
+}));
+// react-markdown은 ESM-only라 jest 변환 없이 로드가 깨진다(RunsTab →
+// MarkdownRenderer 체인). 본문 텍스트만 그대로 렌더하는 스텁으로 대체.
+jest.mock('components/MarkdownRenderer/MarkdownRenderer', () => ({
+	__esModule: true,
+	MarkdownRenderer: ({
+		markdownContent,
+	}: {
+		markdownContent: string;
+	}): JSX.Element => <div>{markdownContent}</div>,
 }));
 
 // ── Default fixture data ───────────────────────────────────────────────────
@@ -201,9 +216,13 @@ describe('CodeRcaSettings', () => {
 		const dialog = screen.getByRole('dialog');
 		const allInputs = dialog.querySelectorAll('input');
 
-		// Order in the form: repoId (text), gitUrl (text), defaultBranch (text), credential (password)
-		// Switch is a button not an input, so inputs are: repoId, gitUrl, defaultBranch, credential
-		const [repoIdInput, gitUrlInput, branchInput, credInput] = Array.from(allInputs);
+		// Order in the form: repoId (text), gitUrl (text), defaultBranch (text),
+		// artifactPath (text), credential (password)
+		// Switch is a button not an input, so inputs are:
+		// repoId, gitUrl, defaultBranch, artifactPath, credential
+		const [repoIdInput, gitUrlInput, branchInput, , credInput] = Array.from(
+			allInputs,
+		);
 
 		fireEvent.change(repoIdInput, { target: { value: 'new-repo' } });
 		fireEvent.change(gitUrlInput, { target: { value: 'https://github.com/org/new' } });
@@ -295,5 +314,43 @@ describe('CodeRcaSettings', () => {
 
 		// run_hitl_notice key rendered
 		expect(screen.getByText('run_hitl_notice')).toBeInTheDocument();
+	});
+
+	// Case 6: done run 드로어 → 전송 버튼 노출, 클릭 시 exportRun 호출 + 성공 토스트
+	it('shows the export button for a done run and calls exportRun on click', async () => {
+		mockExportRun.mockResolvedValue({ data: { path: '/srv/m/ds-hub/x.md' } });
+		render(<CodeRcaSettings />);
+
+		fireEvent.click(await screen.findByText('tab_runs'));
+		const statusTag = await screen.findByText('done');
+		fireEvent.click(statusTag.closest('tr') ?? statusTag);
+
+		const btn = await screen.findByText('ds-navi에 산출물 전송');
+		fireEvent.click(btn);
+
+		await waitFor(() => {
+			expect(mockExportRun).toHaveBeenCalledWith('run-1');
+			expect(mockToastSuccess).toHaveBeenCalled();
+		});
+	});
+
+	// Case 7: 비-done run 드로어 → 전송 버튼 미노출
+	it('hides the export button for a non-done run', async () => {
+		mockListRuns.mockResolvedValue({
+			data: [{ ...defaultRun, status: 'failed' }],
+		});
+		mockGetRun.mockResolvedValue({
+			data: { ...defaultRunDetail, status: 'failed' },
+		});
+		render(<CodeRcaSettings />);
+
+		fireEvent.click(await screen.findByText('tab_runs'));
+		const statusTag = await screen.findByText('failed');
+		fireEvent.click(statusTag.closest('tr') ?? statusTag);
+
+		await waitFor(() => {
+			expect(mockGetRun).toHaveBeenCalledWith('run-1');
+		});
+		expect(screen.queryByText('ds-navi에 산출물 전송')).toBeNull();
 	});
 });

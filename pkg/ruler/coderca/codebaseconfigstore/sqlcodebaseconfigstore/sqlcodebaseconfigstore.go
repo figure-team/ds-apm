@@ -35,6 +35,7 @@ func (s *codebaseRepoStore) Upsert(ctx context.Context, repo ruletypes.CodebaseR
 			Set("default_branch = EXCLUDED.default_branch").
 			Set("credential_ciphertext = EXCLUDED.credential_ciphertext").
 			Set("enabled = EXCLUDED.enabled").
+			Set("artifact_path = EXCLUDED.artifact_path").
 			Set("branch_name = EXCLUDED.branch_name").
 			Set("fetched = EXCLUDED.fetched").
 			Set("baseline_commit = EXCLUDED.baseline_commit").

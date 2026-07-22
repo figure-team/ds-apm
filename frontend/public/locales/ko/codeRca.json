@@ -25,6 +25,8 @@
 	"credential_unchanged_hint": "비워두면 기존 자격증명이 유지됩니다",
 	"credential_saved": "자격증명 저장됨",
 	"repo_enabled": "사용",
+	"repo_artifact_path": "산출물 경로(로컬 루트)",
+	"repo_artifact_path_hint": "ds-apm 서버가 접근 가능한 절대 경로. 이 경로 아래 ds-hub/ 폴더에 RCA 산출물이 저장됩니다.",
 	"repo_last_sync": "마지막 동기화",
 	"repo_baseline": "기준 커밋",
 	"repo_delete_confirm": "이 저장소 연결을 삭제할까요?",
@@ -50,5 +52,16 @@
 	"run_limitations": "한계",
 	"run_failure_reason": "실패 사유",
 	"run_hitl_notice": "AI가 생성한 제안입니다. 적용 전 반드시 사람이 검토해야 합니다.",
-	"run_empty": "분석 이력이 없습니다"
+	"run_empty": "분석 이력이 없습니다",
+	"toast_runs_load_failed": "분석 이력을 불러오지 못했습니다",
+	"toast_run_done": "코드 RCA 분석 완료 ({{status}})",
+	"toast_run_ended": "코드 RCA 분석 종료: {{status}}",
+	"toast_service_required": "서비스 이름을 입력하세요 (예: payment-api)",
+	"toast_run_rejected": "실행이 거부되었습니다: {{reason}}",
+	"toast_reason_limit": "한도 초과",
+	"toast_run_enqueued": "테스트 실행을 큐에 등록했습니다. 분석 진행 중…",
+	"toast_run_failed": "실행에 실패했습니다.",
+	"toast_export_success": "ds-hub에 산출물을 저장했습니다",
+	"toast_export_failed": "산출물 전송에 실패했습니다.",
+	"toast_run_detail_load_failed": "실행 상세를 불러오지 못했습니다"
 }

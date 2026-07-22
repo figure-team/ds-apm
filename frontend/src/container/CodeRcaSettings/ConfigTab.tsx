@@ -112,6 +112,7 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 				defaultBranch: row.defaultBranch,
 				credential: '',
 				enabled: row.enabled,
+				artifactPath: row.artifactPath,
 			});
 			setRepoModalOpen(true);
 		},
@@ -135,6 +136,7 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 				defaultBranch: values.defaultBranch,
 				credential,
 				enabled: values.enabled ?? true,
+				artifactPath: (values.artifactPath ?? '').trim(),
 				branchName: editingRepo?.branchName ?? '',
 				fetched: editingRepo?.fetched ?? false,
 				baselineCommit: editingRepo?.baselineCommit ?? '',
@@ -422,7 +424,13 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 						<Input placeholder={t('map_service')} disabled={!isAdmin} />
 					</Form.Item>
 					<Form.Item name="repoId" rules={[{ required: true }]}>
-						<Input placeholder={t('map_repo')} disabled={!isAdmin} />
+						<Select
+							placeholder={t('map_repo')}
+							disabled={!isAdmin}
+							style={{ width: 200 }}
+							showSearch
+							options={repos.map((r) => ({ value: r.repoId, label: r.repoId }))}
+						/>
 					</Form.Item>
 					<Form.Item name="subpath">
 						<Input placeholder={t('map_subpath')} disabled={!isAdmin} />
@@ -475,6 +483,13 @@ function ConfigTab({ isAdmin }: Props): JSX.Element {
 						rules={[{ required: true }]}
 					>
 						<Input />
+					</Form.Item>
+					<Form.Item
+						name="artifactPath"
+						label={t('repo_artifact_path')}
+						tooltip={t('repo_artifact_path_hint')}
+					>
+						<Input placeholder="/srv/m-project" />
 					</Form.Item>
 					<Form.Item
 						name="credential"

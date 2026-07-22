@@ -9,6 +9,8 @@ import (
 	"github.com/SigNoz/signoz/pkg/errors"
 	"github.com/SigNoz/signoz/pkg/http/binding"
 	"github.com/SigNoz/signoz/pkg/http/render"
+	"github.com/SigNoz/signoz/pkg/ruler/coderca"
+	"github.com/SigNoz/signoz/pkg/ruler/coderca/exportmd"
 	codercarunstore "github.com/SigNoz/signoz/pkg/ruler/coderca/runstore"
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
 	"github.com/gorilla/mux"
@@ -396,4 +398,79 @@ func (handler *handler) EnqueueCodeRCARun(rw http.ResponseWriter, req *http.Requ
 		"runId":    res.RunID,
 		"reason":   string(res.Reason),
 	})
+}
+
+// ExportCodeRCARun handles POST /api/v2/ds/coderca/runs/{runId}/export.
+// Renders a done run as a markdown artifact and writes it under the mapped
+// repo's artifactPath (<root>/ds-hub/) for hand-off to ds-navi.
+func (handler *handler) ExportCodeRCARun(rw http.ResponseWriter, req *http.Request) {
+	orgID, err := extractOrgID(req.Context())
+	if err != nil {
+		render.Error(rw, err)
+		return
+	}
+	if orgID == "" {
+		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
+		return
+	}
+
+	runID := strings.TrimSpace(mux.Vars(req)["runId"])
+	if runID == "" {
+		http.Error(rw, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	run, err := handler.codercaRunStore.GetRun(req.Context(), orgID, runID)
+	if errors.Is(err, codercarunstore.ErrRunNotFound) {
+		render.Error(rw, errors.NewNotFoundf(errors.CodeNotFound, "coderca run was not found"))
+		return
+	}
+	if err != nil {
+		render.Error(rw, errors.WrapInternalf(err, errors.CodeInternal, "fetch coderca run"))
+		return
+	}
+	if run.Status != coderca.RunStatusDone {
+		render.Error(rw, errors.Newf(errors.TypeInvalidInput, errors.CodeInvalidInput,
+			"완료(done)된 실행만 내보낼 수 있습니다 (현재 상태: %s)", run.Status))
+		return
+	}
+
+	mappings, err := handler.codebaseMapStore.List(req.Context(), orgID)
+	if err != nil {
+		render.Error(rw, errors.WrapInternalf(err, errors.CodeInternal, "list codebase service maps"))
+		return
+	}
+	m, ok := coderca.ResolveServiceRepo(mappings, orgID, run.Service)
+	if !ok {
+		render.Error(rw, errors.Newf(errors.TypeInvalidInput, errors.CodeInvalidInput,
+			"서비스에 매핑된 저장소가 없습니다: %s", run.Service))
+		return
+	}
+	repo, err := handler.codebaseRepoStore.Get(req.Context(), orgID, m.RepoID, handler.aiCipher.DecryptFunc())
+	if errors.Is(err, ruletypes.ErrCodebaseRepoNotFound) {
+		render.Error(rw, errors.Newf(errors.TypeInvalidInput, errors.CodeInvalidInput,
+			"서비스에 매핑된 저장소가 없습니다: %s", run.Service))
+		return
+	}
+	if err != nil {
+		render.Error(rw, errors.WrapInternalf(err, errors.CodeInternal, "fetch codebase repo"))
+		return
+	}
+	if !repo.Enabled {
+		render.Error(rw, errors.Newf(errors.TypeInvalidInput, errors.CodeInvalidInput,
+			"서비스에 매핑된 저장소가 비활성화되어 있습니다: %s", m.RepoID))
+		return
+	}
+	if strings.TrimSpace(repo.ArtifactPath) == "" {
+		render.Error(rw, errors.Newf(errors.TypeInvalidInput, errors.CodeInvalidInput,
+			"저장소에 산출물 경로(artifactPath)가 설정되지 않았습니다: %s", m.RepoID))
+		return
+	}
+
+	path, err := exportmd.Write(strings.TrimSpace(repo.ArtifactPath), run)
+	if err != nil {
+		render.Error(rw, errors.WrapInternalf(err, errors.CodeInternal, "write RCA export artifact"))
+		return
+	}
+	render.Success(rw, http.StatusOK, map[string]string{"path": path})
 }

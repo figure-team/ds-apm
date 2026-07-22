@@ -546,6 +546,19 @@ func (provider *provider) addRulerRoutes(router *mux.Router) error {
 		return err
 	}
 
+	if err := router.Handle("/api/v2/ds/coderca/runs/{runId}/export", handler.New(provider.authZ.EditAccess(provider.rulerHandler.ExportCodeRCARun), handler.OpenAPIDef{
+		ID:                  "ExportCodeRCARun",
+		Tags:                []string{"coderca"},
+		Summary:             "Export code RCA run to ds-hub",
+		Description:         "Renders a done code-RCA run as a markdown artifact and writes it under the mapped repo's artifactPath (<root>/ds-hub/) for ds-navi hand-off.",
+		ResponseContentType: "application/json",
+		SuccessStatusCode:   http.StatusOK,
+		ErrorStatusCodes:    []int{http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound, http.StatusInternalServerError},
+		SecuritySchemes:     newSecuritySchemes(types.RoleEditor),
+	})).Methods(http.MethodPost).GetError(); err != nil {
+		return err
+	}
+
 	if err := router.Handle("/api/v2/ds/sop/documents/{sopId}/versions/{version}/runbooks", handler.New(provider.authZ.ViewAccess(provider.rulerHandler.ListRunbooks), handler.OpenAPIDef{
 		ID:                  "ListRunbooks",
 		Tags:                []string{"rules"},

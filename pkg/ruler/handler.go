@@ -38,6 +38,7 @@ type Handler interface {
 	ListCodeRCARuns(http.ResponseWriter, *http.Request)
 	GetCodeRCARun(http.ResponseWriter, *http.Request)
 	EnqueueCodeRCARun(http.ResponseWriter, *http.Request)
+	ExportCodeRCARun(http.ResponseWriter, *http.Request)
 
 	GetIncidentReportTemplate(http.ResponseWriter, *http.Request)
 	UpdateIncidentReportTemplate(http.ResponseWriter, *http.Request)

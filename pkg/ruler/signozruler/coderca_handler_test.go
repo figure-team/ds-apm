@@ -6,11 +6,13 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/SigNoz/signoz/pkg/ruler/aiconfigstore/secretbox"
+	"github.com/SigNoz/signoz/pkg/ruler/coderca"
 	codercacfgstore "github.com/SigNoz/signoz/pkg/ruler/coderca/codebaseconfigstore/sqlcodebasercaconfigstore"
 	coderepostore "github.com/SigNoz/signoz/pkg/ruler/coderca/codebaseconfigstore/sqlcodebaseconfigstore"
 	codemapstore "github.com/SigNoz/signoz/pkg/ruler/coderca/codebaseconfigstore/sqlcodebaseservicemapstore"
@@ -41,6 +43,7 @@ func applyCodercaDDL(ctx context.Context, ss sqlstore.SQLStore) error {
 			baseline_commit        TEXT      NOT NULL DEFAULT '',
 			last_sync_at           TEXT      NOT NULL DEFAULT '',
 			last_sync_status       TEXT      NOT NULL DEFAULT '',
+			artifact_path          TEXT      NOT NULL DEFAULT '',
 			PRIMARY KEY (org_id, repo_id)
 		)`,
 		`CREATE TABLE ds_codebase_service_map (
@@ -488,4 +491,159 @@ func TestRunsListAndDetail(t *testing.T) {
 	crossRW := httptest.NewRecorder()
 	h.GetCodeRCARun(crossRW, crossReq)
 	require.Equal(t, http.StatusNotFound, crossRW.Code, "cross-org run must return 404, not leak existence")
+}
+
+// seedCodercaRun admits, claims and finalizes one run for the test org and
+// returns its runID. status is the terminal status ("done", "failed", ...).
+func seedCodercaRun(t *testing.T, store *codercarunstore.Store, service, dedupKey string, status coderca.RunStatus) string {
+	t.Helper()
+	ctx := context.Background()
+	now := time.Unix(1_700_000_000, 0)
+
+	admit, err := store.Admit(ctx, codercarunstore.AdmitParams{
+		OrgID:          codercaTestOrgID,
+		Service:        service,
+		DedupKey:       dedupKey,
+		Now:            now,
+		CooldownWindow: 6 * time.Hour,
+		MaxRunsPerDay:  100,
+		MaxQueueDepth:  100,
+	})
+	require.NoError(t, err)
+	require.True(t, admit.Admitted)
+
+	claim, err := store.ClaimNext(ctx, codercarunstore.ClaimParams{
+		Scope:         "global",
+		ClaimedBy:     "worker-1",
+		Now:           now,
+		LeaseTTL:      time.Hour,
+		MaxConcurrent: 1,
+	})
+	require.NoError(t, err)
+	require.True(t, claim.Claimed)
+	require.Equal(t, admit.RunID, claim.RunID)
+
+	finalized, err := store.Finalize(ctx, codercarunstore.FinalizeParams{
+		Scope:          "global",
+		RunID:          claim.RunID,
+		LeaseToken:     claim.LeaseToken,
+		Status:         status,
+		Now:            now.Add(time.Minute),
+		BaselineCommit: "deadbeef",
+		RootCause:      "null pointer in payment handler",
+		ProposedFix:    "add nil check",
+		Confidence:     "high",
+		Limitations:    "limited trace window",
+	})
+	require.NoError(t, err)
+	require.True(t, finalized)
+	return admit.RunID
+}
+
+// exportReq builds the POST …/runs/{runId}/export request with claims + mux var.
+func exportReq(t *testing.T, runID string) *http.Request {
+	t.Helper()
+	req := codercaReq(t, http.MethodPost, "/api/v2/ds/coderca/runs/"+runID+"/export", "")
+	return muxSetVar(req, "runId", runID)
+}
+
+// TestExportCodeRCARun verifies the ds-hub export endpoint: a done run whose
+// service maps to an enabled repo with an artifactPath is rendered to
+// <artifactPath>/ds-hub/<date>_rca_<service>.md; non-done runs, unmapped
+// services, disabled repos and missing artifactPath are rejected with 400.
+func TestExportCodeRCARun(t *testing.T) {
+	h, ss := newCodercaTestHandler(t)
+	ctx := context.Background()
+	store := codercarunstore.New(ss)
+
+	artifactRoot := t.TempDir()
+	require.NoError(t, h.codebaseRepoStore.Upsert(ctx, ruletypes.CodebaseRepo{
+		OrgID:        codercaTestOrgID,
+		RepoID:       "repo-pay",
+		GitURL:       "https://github.com/acme/payments.git",
+		Enabled:      true,
+		ArtifactPath: artifactRoot,
+	}, h.aiCipher.EncryptFunc()))
+	require.NoError(t, h.codebaseMapStore.Upsert(ctx, ruletypes.CodebaseServiceMap{
+		OrgID:       codercaTestOrgID,
+		ServiceName: "payments",
+		RepoID:      "repo-pay",
+	}))
+
+	t.Run("done run exports the markdown artifact", func(t *testing.T) {
+		runID := seedCodercaRun(t, store, "payments", "k-exp-1", "done")
+
+		rw := httptest.NewRecorder()
+		h.ExportCodeRCARun(rw, exportReq(t, runID))
+		require.Equal(t, http.StatusOK, rw.Code, "body=%s", rw.Body.String())
+
+		var resp struct {
+			Data struct {
+				Path string `json:"path"`
+			} `json:"data"`
+		}
+		require.NoError(t, json.Unmarshal(rw.Body.Bytes(), &resp))
+		require.NotEmpty(t, resp.Data.Path)
+
+		content, err := os.ReadFile(resp.Data.Path)
+		require.NoError(t, err)
+		require.Contains(t, string(content), "## 근본 원인")
+		require.Contains(t, string(content), "null pointer in payment handler")
+		require.Contains(t, string(content), "runId: "+runID)
+	})
+
+	t.Run("non-done run is rejected", func(t *testing.T) {
+		runID := seedCodercaRun(t, store, "payments", "k-exp-2", "failed")
+
+		rw := httptest.NewRecorder()
+		h.ExportCodeRCARun(rw, exportReq(t, runID))
+		require.Equal(t, http.StatusBadRequest, rw.Code, "body=%s", rw.Body.String())
+	})
+
+	t.Run("unmapped service is rejected", func(t *testing.T) {
+		runID := seedCodercaRun(t, store, "orphan", "k-exp-3", "done")
+
+		rw := httptest.NewRecorder()
+		h.ExportCodeRCARun(rw, exportReq(t, runID))
+		require.Equal(t, http.StatusBadRequest, rw.Code, "body=%s", rw.Body.String())
+	})
+
+	t.Run("repo without artifactPath is rejected", func(t *testing.T) {
+		require.NoError(t, h.codebaseRepoStore.Upsert(ctx, ruletypes.CodebaseRepo{
+			OrgID:   codercaTestOrgID,
+			RepoID:  "repo-nopath",
+			GitURL:  "https://github.com/acme/nopath.git",
+			Enabled: true,
+		}, h.aiCipher.EncryptFunc()))
+		require.NoError(t, h.codebaseMapStore.Upsert(ctx, ruletypes.CodebaseServiceMap{
+			OrgID:       codercaTestOrgID,
+			ServiceName: "nopath-svc",
+			RepoID:      "repo-nopath",
+		}))
+		runID := seedCodercaRun(t, store, "nopath-svc", "k-exp-4", "done")
+
+		rw := httptest.NewRecorder()
+		h.ExportCodeRCARun(rw, exportReq(t, runID))
+		require.Equal(t, http.StatusBadRequest, rw.Code, "body=%s", rw.Body.String())
+	})
+
+	t.Run("disabled repo is rejected", func(t *testing.T) {
+		require.NoError(t, h.codebaseRepoStore.Upsert(ctx, ruletypes.CodebaseRepo{
+			OrgID:        codercaTestOrgID,
+			RepoID:       "repo-off",
+			GitURL:       "https://github.com/acme/off.git",
+			Enabled:      false,
+			ArtifactPath: artifactRoot,
+		}, h.aiCipher.EncryptFunc()))
+		require.NoError(t, h.codebaseMapStore.Upsert(ctx, ruletypes.CodebaseServiceMap{
+			OrgID:       codercaTestOrgID,
+			ServiceName: "off-svc",
+			RepoID:      "repo-off",
+		}))
+		runID := seedCodercaRun(t, store, "off-svc", "k-exp-5", "done")
+
+		rw := httptest.NewRecorder()
+		h.ExportCodeRCARun(rw, exportReq(t, runID))
+		require.Equal(t, http.StatusBadRequest, rw.Code, "body=%s", rw.Body.String())
+	})
 }

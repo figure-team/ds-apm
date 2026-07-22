@@ -6,13 +6,14 @@ import type { ColumnsType } from 'antd/es/table';
 import listRuns from 'api/codeRca/listRuns';
 import getRun from 'api/codeRca/getRun';
 import enqueueRun from 'api/codeRca/enqueueRun';
+import exportRun from 'api/codeRca/exportRun';
 import {
 	CodeRcaRunDetail,
 	CodeRcaRunStatus,
 	CodeRcaRunSummary,
 } from 'api/codeRca/types';
 import { MarkdownRenderer } from 'components/MarkdownRenderer/MarkdownRenderer';
-import { Bug, Info, ShieldAlert, Wrench } from 'lucide-react';
+import { Bug, Info, Send, ShieldAlert, Wrench } from 'lucide-react';
 
 const STATUS_OPTIONS = [
 	{ value: '', label: 'All' },
@@ -54,6 +55,7 @@ function RunsTab(): JSX.Element {
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const [detail, setDetail] = useState<CodeRcaRunDetail | null>(null);
 	const [loadingDetail, setLoadingDetail] = useState(false);
+	const [exporting, setExporting] = useState(false);
 	const [testService, setTestService] = useState('');
 	const [enqueuing, setEnqueuing] = useState(false);
 
@@ -62,9 +64,9 @@ function RunsTab(): JSX.Element {
 			const res = await listRuns(statusFilter ? { status: statusFilter } : {});
 			setRuns(res.data);
 		} catch {
-			toast.error('Failed to load runs');
+			toast.error(t('toast_runs_load_failed'));
 		}
-	}, [statusFilter]);
+	}, [statusFilter, t]);
 
 	// Poll a manually-enqueued run until it reaches a terminal state, refreshing
 	// the list so the user watches it progress queued → running → done.
@@ -79,8 +81,9 @@ function RunsTab(): JSX.Element {
 					void fetchRuns();
 					if (['done', 'failed', 'timeout', 'unparseable'].includes(st)) {
 						clearInterval(iv);
-						if (st === 'done') toast.success(`코드 RCA 분석 완료 (${st})`);
-						else toast.error(`코드 RCA 분석 종료: ${st}`);
+						if (st === 'done')
+							toast.success(t('toast_run_done', { status: st }));
+						else toast.error(t('toast_run_ended', { status: st }));
 					}
 				} catch {
 					// keep polling
@@ -88,38 +91,63 @@ function RunsTab(): JSX.Element {
 				if (tries > 48) clearInterval(iv);
 			}, 5000);
 		},
-		[fetchRuns],
+		[fetchRuns, t],
 	);
 
 	const handleTestRun = useCallback(async (): Promise<void> => {
 		const svc = testService.trim();
 		if (!svc) {
-			toast.error('서비스 이름을 입력하세요 (예: payment-api)');
+			toast.error(t('toast_service_required'));
 			return;
 		}
 		setEnqueuing(true);
 		try {
 			const res = await enqueueRun(svc);
 			if (!res.admitted) {
-				toast.error(`실행이 거부되었습니다: ${res.reason || '한도 초과'}`);
+				toast.error(
+					t('toast_run_rejected', {
+						reason: res.reason || t('toast_reason_limit'),
+					}),
+				);
 				return;
 			}
-			toast.success('테스트 실행을 큐에 등록했습니다. 분석 진행 중…');
+			toast.success(t('toast_run_enqueued'));
 			void fetchRuns();
 			pollRun(res.runId);
 		} catch (e) {
 			toast.error(
 				(e as { response?: { data?: { error?: { message?: string } } } })?.response
-					?.data?.error?.message ?? '실행에 실패했습니다.',
+					?.data?.error?.message ?? t('toast_run_failed'),
 			);
 		} finally {
 			setEnqueuing(false);
 		}
-	}, [testService, fetchRuns, pollRun]);
+	}, [testService, fetchRuns, pollRun, t]);
 
 	useEffect(() => {
 		void fetchRuns();
 	}, [fetchRuns]);
+
+	const handleExport = useCallback(async (): Promise<void> => {
+		if (!detail) return;
+		setExporting(true);
+		try {
+			const res = await exportRun(detail.runId);
+			// 경로 전체를 제목에 넣으면 줄바꿈되는데, @signozhq/ui 토스트 제목은
+			// height 20px 고정이라 넘친 줄이 박스 밖으로 겹쳐 보인다. 경로는
+			// 높이 제한이 없는 description으로 내린다.
+			toast.success(t('toast_export_success'), {
+				description: res.data.path,
+			});
+		} catch (e) {
+			toast.error(
+				(e as { response?: { data?: { error?: { message?: string } } } })?.response
+					?.data?.error?.message ?? t('toast_export_failed'),
+			);
+		} finally {
+			setExporting(false);
+		}
+	}, [detail, t]);
 
 	const handleRowClick = useCallback(
 		async (row: CodeRcaRunSummary): Promise<void> => {
@@ -130,12 +158,12 @@ function RunsTab(): JSX.Element {
 				const res = await getRun(row.runId);
 				setDetail(res.data);
 			} catch {
-				toast.error('Failed to load run detail');
+				toast.error(t('toast_run_detail_load_failed'));
 			} finally {
 				setLoadingDetail(false);
 			}
 		},
-		[],
+		[t],
 	);
 
 	const columns: ColumnsType<CodeRcaRunSummary> = [
@@ -234,6 +262,18 @@ function RunsTab(): JSX.Element {
 				<Spin spinning={loadingDetail}>
 					{detail && (
 						<div className="code-rca-report">
+							{detail.status === 'done' && (
+								<Button
+									type="primary"
+									icon={<Send size={14} />}
+									loading={exporting}
+									onClick={handleExport}
+									style={{ marginBottom: 12 }}
+								>
+									ds-navi에 산출물 전송
+								</Button>
+							)}
+
 							{detail.status === 'done' && (
 								<div className="code-rca-report__hitl">
 									<ShieldAlert size={15} />

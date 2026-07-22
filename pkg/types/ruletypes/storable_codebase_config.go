@@ -19,6 +19,7 @@ type StorableCodebaseRepo struct {
 	DefaultBranch        string `bun:"default_branch,notnull,default:'',type:text"`
 	CredentialCiphertext string `bun:"credential_ciphertext,notnull,default:'',type:text"`
 	Enabled              bool   `bun:"enabled,notnull,default:false,type:boolean"`
+	ArtifactPath         string `bun:"artifact_path,notnull,default:'',type:text"`
 	BranchName           string `bun:"branch_name,notnull,default:'',type:text"`
 	Fetched              bool   `bun:"fetched,notnull,default:false,type:boolean"`
 	BaselineCommit       string `bun:"baseline_commit,notnull,default:'',type:text"`
@@ -48,6 +49,7 @@ func FromDomainCodebaseRepo(repo CodebaseRepo, encrypt func(string) (string, err
 		DefaultBranch:        repo.DefaultBranch,
 		CredentialCiphertext: credCT,
 		Enabled:              repo.Enabled,
+		ArtifactPath:         repo.ArtifactPath,
 		BranchName:           repo.BranchName,
 		Fetched:              repo.Fetched,
 		BaselineCommit:       repo.BaselineCommit,
@@ -73,6 +75,7 @@ func (s *StorableCodebaseRepo) ToDomain(decrypt func(string) (string, error)) (C
 		DefaultBranch:   s.DefaultBranch,
 		Credential:      cred,
 		Enabled:         s.Enabled,
+		ArtifactPath:    s.ArtifactPath,
 		BranchName:      s.BranchName,
 		Fetched:         s.Fetched,
 		BaselineCommit:  s.BaselineCommit,

@@ -2,6 +2,7 @@ package ruletypes
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 )
 
@@ -22,6 +23,10 @@ type CodebaseRepo struct {
 	// in-process only; encrypted at rest; never serialized to clients.
 	Credential string `json:"credential"`
 	Enabled    bool   `json:"enabled"`
+	// ArtifactPath is the local filesystem root of the operated project.
+	// When set, RCA exports are written under <ArtifactPath>/ds-hub/ for
+	// hand-off to ds-navi. Empty = export disabled for this repo.
+	ArtifactPath string `json:"artifactPath"`
 
 	// Source state — managed by the source-state manager, surfaced read-only
 	// in the UI (design §8).
@@ -67,6 +72,10 @@ func ValidateCodebaseRepo(repo CodebaseRepo, encryptionAvailable bool) error {
 	// Fail-closed: refuse to persist a credential when encryption is unavailable.
 	if repo.Credential != "" && !encryptionAvailable {
 		errs = append(errs, "credential: encryption is not configured (DS_APM_AI_CONFIG_ENCRYPTION_KEY); refusing to store a git credential in plaintext")
+	}
+
+	if ap := strings.TrimSpace(repo.ArtifactPath); ap != "" && !filepath.IsAbs(ap) {
+		errs = append(errs, fmt.Sprintf("artifactPath: %q must be an absolute path", repo.ArtifactPath))
 	}
 
 	if len(errs) == 0 {

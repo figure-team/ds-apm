@@ -1,6 +1,9 @@
 package ruletypes
 
-import "testing"
+import (
+	"path/filepath"
+	"testing"
+)
 
 func validRepo() CodebaseRepo {
 	return CodebaseRepo{
@@ -97,5 +100,28 @@ func TestValidateCodebaseRepo(t *testing.T) {
 				t.Errorf("ValidateCodebaseRepo() = %v, want nil", err)
 			}
 		})
+	}
+}
+
+func TestValidateCodebaseRepoArtifactPath(t *testing.T) {
+	base := validRepo()
+
+	base.ArtifactPath = "relative/path"
+	if err := ValidateCodebaseRepo(base, true); err == nil {
+		t.Fatal("relative artifactPath must be rejected")
+	}
+
+	base.ArtifactPath = ""
+	if err := ValidateCodebaseRepo(base, true); err != nil {
+		t.Fatalf("empty artifactPath must be allowed: %v", err)
+	}
+
+	abs, err := filepath.Abs(".")
+	if err != nil {
+		t.Fatal(err)
+	}
+	base.ArtifactPath = abs
+	if err := ValidateCodebaseRepo(base, true); err != nil {
+		t.Fatalf("absolute artifactPath must pass: %v", err)
 	}
 }
