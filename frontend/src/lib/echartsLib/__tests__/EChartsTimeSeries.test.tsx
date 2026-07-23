@@ -68,7 +68,7 @@ describe('EChartsTimeSeries', () => {
 		expect(screen.getByTestId('legend')).toBeInTheDocument();
 	});
 
-	it('단일 시리즈 hover 시 TimeSeriesTooltip이 실제로 마운트되고 값이 표시된다 (리뷰 Critical #1 회귀 테스트)', () => {
+	it('단일 시리즈 hover 시 TimeSeriesTooltip이 실제로 마운트되고 값이 표시된다 (리뷰 Critical #1 회귀 테스트)', async () => {
 		renderChart();
 
 		const initMock = echarts.init as jest.Mock;
@@ -116,9 +116,9 @@ describe('EChartsTimeSeries', () => {
 		// 헤더의 activeItem(단일 시리즈 값)이 실제로 렌더되어야 한다.
 		// seriesIndex가 계속 null로 고정되면(리뷰 Critical #1) activeItem이 항상
 		// null이라 이 testid 자체가 DOM에 존재하지 않는다.
+		// mousePos는 rAF 스로틀로 다음 프레임에 반영되므로 findBy로 폴링한다.
 		const expectedValueText = getToolTipValue(1, '', undefined);
-		expect(screen.getByTestId('uplot-tooltip-pinned-content')).toHaveTextContent(
-			expectedValueText,
-		);
+		const content = await screen.findByTestId('uplot-tooltip-pinned-content');
+		expect(content).toHaveTextContent(expectedValueText);
 	});
 });

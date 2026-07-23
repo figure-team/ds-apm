@@ -182,4 +182,37 @@ describe('buildTimeSeriesOption', () => {
 			seoulXAxis.axisLabel.formatter(sampleMs),
 		);
 	});
+
+	// spanGaps 매핑 (echarts connectNulls는 all-or-nothing)
+
+	it('⑦ spanGaps 미지정(기본 true)이면 connectNulls는 true', () => {
+		const { option } = buildTimeSeriesOption(baseArgs);
+		const series = (option as { series: Array<{ connectNulls: boolean }> })
+			.series;
+		expect(series[0].connectNulls).toBe(true);
+	});
+
+	it('⑧ spanGaps=false면 connectNulls는 false (모든 갭에서 끊김)', () => {
+		const { option } = buildTimeSeriesOption({
+			...baseArgs,
+			widget: { ...baseWidget, spanGaps: false } as never,
+		});
+		const series = (option as { series: Array<{ connectNulls: boolean }> })
+			.series;
+		expect(series[0].connectNulls).toBe(false);
+	});
+
+	it('⑨ spanGaps 숫자면 임계 초과 시간 갭에 null 브레이크가 삽입되고 connectNulls는 false', () => {
+		// 갭 30 > 임계 10 → 중간 지점에 null 삽입 → 포인트 2개→3개
+		const { option } = buildTimeSeriesOption({
+			...baseArgs,
+			widget: { ...baseWidget, spanGaps: 10 } as never,
+		});
+		const series = (option as {
+			series: Array<{ connectNulls: boolean; data: Array<[number, number | null]> }>;
+		}).series;
+		expect(series[0].connectNulls).toBe(false);
+		expect(series[0].data).toHaveLength(3);
+		expect(series[0].data.some(([, v]) => v === null)).toBe(true);
+	});
 });

@@ -9,7 +9,10 @@ import { getLegend } from 'lib/dashboard/getQueryResults';
 import { convertValue } from 'lib/getConvertedValue';
 import getLabelName from 'lib/getLabelName';
 import { LineInterpolation, LineStyle } from 'lib/uPlotV2/config/types';
-import { isInvalidPlotValue } from 'lib/uPlotV2/utils/dataUtils';
+import {
+	insertLargeGapNullsIntoAlignedData,
+	isInvalidPlotValue,
+} from 'lib/uPlotV2/utils/dataUtils';
 import type uPlot from 'uplot';
 import { Widgets } from 'types/api/dashboard/getAll';
 import { MetricRangePayloadProps } from 'types/api/metrics/getQueryRange';
@@ -131,8 +134,23 @@ export function buildTimeSeriesOption({
 	visibilityMap,
 }: BuildArgs): { option: EChartsOption; seriesLabels: string[] } {
 	const seriesLabels = resolveSeriesLabels(apiResponse, currentQuery);
-	const timestamps = (chartData[0] ?? []) as number[];
 	const markLine = buildMarkLine(widget);
+
+	// spanGaps 매핑 — echarts connectNulls는 all-or-nothing이라 uPlot의 숫자
+	// 임계값(갭 크기 ≤ N만 연결)을 그대로 표현할 수 없다. uPlot 경로와 동일하게
+	// 큰 시간 갭에 null 브레이크를 삽입(insertLargeGapNullsIntoAlignedData)해
+	// "긴 갭을 가로지르는 오해성 직선"을 막고, connectNulls는 boolean true일 때만
+	// 전체 연결한다(false·숫자는 실측/삽입 null에서 끊음). 작은 갭 과분리는 감수.
+	const spanGaps = widget.spanGaps ?? true;
+	const effectiveData =
+		typeof spanGaps === 'number'
+			? insertLargeGapNullsIntoAlignedData(
+					chartData,
+					seriesLabels.map(() => ({ spanGaps })),
+			  )
+			: chartData;
+	const connectNulls = spanGaps === true;
+	const timestamps = (effectiveData[0] ?? []) as number[];
 
 	// 리뷰 반영: uPlot 경로(prepareUPlotConfig)가 반영하는 위젯 옵션과 패리티
 	const interpolation = widget.lineInterpolation || LineInterpolation.Spline;
@@ -157,7 +175,7 @@ export function buildTimeSeriesOption({
 				widget.customLegendColors ?? {},
 				isDarkMode,
 			);
-			const values = (chartData[seriesIndex] ?? []) as (number | null)[];
+			const values = (effectiveData[seriesIndex] ?? []) as (number | null)[];
 			// 유효 포인트 1개 시리즈는 라인이 안 그려져 사라지므로 심볼 강제
 			// (uPlot 경로의 DrawStyle.Points 강제 대응)
 			const validCount = values.filter((v) => !isInvalidPlotValue(v)).length;
@@ -183,7 +201,7 @@ export function buildTimeSeriesOption({
 					lineStyle: { width: MOCKUP_TUNING.emphasisLineWidth },
 				},
 				blur: { lineStyle: { opacity: MOCKUP_TUNING.blurOpacity } },
-				connectNulls: Boolean(widget.spanGaps ?? true),
+				connectNulls,
 				areaStyle: MOCKUP_TUNING.areaGradient
 					? {
 							color: {
@@ -221,8 +239,6 @@ export function buildTimeSeriesOption({
 		animationDurationUpdate: MOCKUP_TUNING.updateDurationMs,
 		animationEasing: 'cubicOut',
 		grid: { left: 8, right: 8, top: 12, bottom: 8, containLabel: true },
-		// 범례 UI는 React Legend가 담당 — 시리즈 토글 액션용으로만 숨김 등록
-		legend: { show: false, data: seriesLabels },
 		xAxis: {
 			type: 'time',
 			min: minTimeScale !== undefined ? minTimeScale * SEC_TO_MS : undefined,

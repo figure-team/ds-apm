@@ -211,6 +211,16 @@ export default function EChartsTimeSeries({
 	const chartDataRef = useRef(chartData);
 	chartDataRef.current = chartData;
 
+	// mousemove는 고빈도라 매 이벤트 setMousePos 시 리렌더가 잦다. rAF로 프레임당
+	// 1회만 반영하고, 핀 상태에선 Positioner가 좌표를 무시하므로 갱신 자체를 건너뛴다.
+	// 리스너는 handleInstanceReady 클로저에 고정되므로 최신 핀 상태는 ref로 읽는다.
+	const pinnedRef = useRef(false);
+	pinnedRef.current = hover.pinned;
+	const mouseRafRef = useRef<number | null>(null);
+	const pendingMouseRef = useRef<{ clientX: number; clientY: number } | null>(
+		null,
+	);
+
 	const reducedMotion = useMemo(
 		() =>
 			typeof window !== 'undefined' &&
@@ -342,19 +352,42 @@ export default function EChartsTimeSeries({
 			const dataIndex = resolveHoverDataIndex(info, timestamps);
 			setHover((prev) => (prev.pinned ? prev : { ...prev, dataIndex }));
 		});
-		// 툴팁 배치용 마우스 추적 — 이동마다 리렌더되므로 성능 문제가
-		// 보이면(Task 12 실측) rAF 스로틀로 보완
+		// 툴팁 배치용 마우스 추적 — rAF로 프레임당 1회만 반영(고빈도 리렌더 방지).
+		// 핀 상태에선 Positioner가 좌표를 무시하므로 갱신 자체를 건너뛴다.
 		instance.getZr().on('mousemove', (e: { event?: MouseEvent }): void => {
 			const native = e.event;
-			if (!native) {
+			if (!native || pinnedRef.current) {
 				return;
 			}
-			setMousePos({ clientX: native.clientX, clientY: native.clientY });
+			pendingMouseRef.current = {
+				clientX: native.clientX,
+				clientY: native.clientY,
+			};
+			if (mouseRafRef.current !== null) {
+				return;
+			}
+			mouseRafRef.current = requestAnimationFrame(() => {
+				mouseRafRef.current = null;
+				if (pendingMouseRef.current) {
+					setMousePos(pendingMouseRef.current);
+				}
+			});
 		});
 		instance.getZr().on('globalout', (): void => {
 			setHover((prev) => (prev.pinned ? prev : { ...prev, dataIndex: null }));
 		});
 	}, []);
+
+	// 언마운트 시 대기 중인 mousemove rAF 취소 (해제 후 setState 방지)
+	useEffect(
+		() => (): void => {
+			if (mouseRafRef.current !== null) {
+				cancelAnimationFrame(mouseRafRef.current);
+				mouseRafRef.current = null;
+			}
+		},
+		[],
+	);
 
 	// TimeSeriesTooltip 재사용을 위한 uPlot 심 (스펙 §4 툴팁 결정)
 	// cursor.idx가 타임스탬프 헤더의 출처이므로 hover.dataIndex를 주입한다 (리뷰 반영)

@@ -4,20 +4,18 @@ import {
 	AxisPointerComponent,
 	GraphicComponent,
 	GridComponent,
-	// 범례 UI는 기존 React Legend를 쓴다. 시리즈 show/hide는 option 재빌드
-	// 방식(리뷰 반영)이라 legend 액션은 쓰지 않지만, option에 legend(show:false)
-	// 키가 있으므로 컴포넌트 등록은 유지한다
-	LegendComponent,
 	MarkLineComponent,
 } from 'echarts/components';
 import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 
+// 범례 UI는 기존 React Legend가 담당하고 시리즈 show/hide는 option 재빌드로
+// 처리하므로 echarts LegendComponent는 등록하지 않는다(번들 절감). 시리즈 강조는
+// highlight/downplay(코어 액션)라 LegendComponent가 필요 없다.
 echarts.use([
 	LineChart,
 	GridComponent,
 	MarkLineComponent,
-	LegendComponent,
 	AxisPointerComponent,
 	GraphicComponent,
 	CanvasRenderer,
