@@ -32,6 +32,7 @@ interface BuildArgs {
 	minTimeScale?: number;
 	maxTimeScale?: number;
 	timezone?: Timezone;
+	/** seriesIndex(uPlot 규약 1..n) → 표시 여부. false는 option에서 제외 */
 	visibilityMap?: Record<number, boolean>;
 }
 
@@ -189,5 +190,9 @@ export function buildBarOption({
 		series,
 	};
 
+	// echarts의 실제 SeriesOption 등은 등록된 컴포넌트 조합에 따라 매우 큰
+	// 유니온 타입이라 인라인 리터럴을 바로 EChartsOption으로 선언하면 불필요한
+	// 초과 프로퍼티 검사에 걸린다. 여기서 한 번만 캐스팅해 계약(반환 타입)은
+	// 유지하면서 내부 구현은 구조적으로 느슨하게 둔다.
 	return { option: option as EChartsOption, seriesLabels };
 }

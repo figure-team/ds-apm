@@ -90,6 +90,41 @@ describe('buildBarOption', () => {
 		expect(series[0].itemStyle.borderRadius).toEqual([r, r, 0, 0]);
 	});
 
+	it('스택 + 중간 시리즈 숨김: 최상단 라운드는 원래 최상단(index2)에 유지, 하단(index0)은 각짐', () => {
+		const threeSeriesApiResponse = {
+			data: {
+				result: [
+					{ metric: { __name__: 'a' }, queryName: 'A', legend: '', values: [[1700000000, '10'], [1700000030, '20']] },
+					{ metric: { __name__: 'b' }, queryName: 'B', legend: '', values: [[1700000000, '1'], [1700000030, '2']] },
+					{ metric: { __name__: 'c' }, queryName: 'C', legend: '', values: [[1700000000, '3'], [1700000030, '4']] },
+				],
+				resultType: 'matrix',
+			},
+		} as never;
+		const threeSeriesChartData = [
+			[1700000000, 1700000030],
+			[10, 20],
+			[1, 2],
+			[3, 4],
+		] as never;
+		const widget = { ...baseWidget, stackedBarChart: true };
+		const series = seriesOf(
+			buildBarOption({
+				...baseArgs,
+				widget: widget as never,
+				apiResponse: threeSeriesApiResponse,
+				chartData: threeSeriesChartData,
+				visibilityMap: { 2: false }, // 중간(index1, seriesIndex2) 숨김
+			}).option,
+		);
+		const r = BAR_MOCKUP_TUNING.borderRadius;
+		expect(series).toHaveLength(2);
+		expect(series[0].id.startsWith('0:')).toBe(true);
+		expect(series[1].id.startsWith('2:')).toBe(true);
+		expect(series[0].itemStyle.borderRadius).toEqual([0, 0, 0, 0]); // 하단(index0)
+		expect(series[1].itemStyle.borderRadius).toEqual([r, r, 0, 0]); // 원래 최상단(index2)
+	});
+
 	it('시안 A 상하 그라데이션 채움(colorStops alphaTop/Bottom)', () => {
 		const series = seriesOf(buildBarOption(baseArgs).option);
 		const stops = series[0].itemStyle.color.colorStops;

@@ -515,7 +515,7 @@ export default function EChartsCartesian({
 							isDarkMode={isDarkMode}
 							onError={onEngineError}
 							onInstanceReady={handleInstanceReady}
-							data-testid="echarts-timeseries"
+							data-testid="echarts-cartesian"
 						/>
 						{hover.dataIndex !== null && (
 							<EChartsTooltipPositioner position={mousePos} isPinned={hover.pinned}>

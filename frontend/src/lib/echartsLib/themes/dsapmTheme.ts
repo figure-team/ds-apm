@@ -25,7 +25,7 @@ export const BAR_MOCKUP_TUNING = {
 	staggerMs: 6, // 포인트 인덱스당 진입 지연
 	seriesStaggerMs: 80, // 시리즈당 진입 지연
 	blurOpacity: 0.25,
-};
+} as const;
 
 export const DSAPM_THEME_DARK = 'dsapm-dark';
 export const DSAPM_THEME_LIGHT = 'dsapm-light';

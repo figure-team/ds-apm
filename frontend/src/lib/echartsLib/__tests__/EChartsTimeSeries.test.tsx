@@ -64,7 +64,7 @@ function renderChart(): void {
 describe('EChartsTimeSeries', () => {
 	it('차트 컨테이너와 범례가 함께 렌더된다', () => {
 		renderChart();
-		expect(screen.getByTestId('echarts-timeseries')).toBeInTheDocument();
+		expect(screen.getByTestId('echarts-cartesian')).toBeInTheDocument();
 		expect(screen.getByTestId('legend')).toBeInTheDocument();
 	});
 
