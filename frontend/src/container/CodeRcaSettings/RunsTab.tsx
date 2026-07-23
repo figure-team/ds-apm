@@ -14,6 +14,7 @@ import {
 } from 'api/codeRca/types';
 import { MarkdownRenderer } from 'components/MarkdownRenderer/MarkdownRenderer';
 import { Bug, Info, Send, ShieldAlert, Wrench } from 'lucide-react';
+import { getApiErrorMessage } from 'utils/errorUtils';
 
 const STATUS_VALUES = [
 	'',
@@ -115,10 +116,7 @@ function RunsTab(): JSX.Element {
 			void fetchRuns();
 			pollRun(res.runId);
 		} catch (e) {
-			toast.error(
-				(e as { response?: { data?: { error?: { message?: string } } } })?.response
-					?.data?.error?.message ?? t('toast_run_failed'),
-			);
+			toast.error(getApiErrorMessage(e, t('toast_run_failed')));
 		} finally {
 			setEnqueuing(false);
 		}
@@ -140,10 +138,7 @@ function RunsTab(): JSX.Element {
 				description: res.data.path,
 			});
 		} catch (e) {
-			toast.error(
-				(e as { response?: { data?: { error?: { message?: string } } } })?.response
-					?.data?.error?.message ?? t('toast_export_failed'),
-			);
+			toast.error(getApiErrorMessage(e, t('toast_export_failed')));
 		} finally {
 			setExporting(false);
 		}

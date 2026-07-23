@@ -7,6 +7,7 @@ import getTemplate from 'api/incidentReport/getTemplate';
 import updateTemplate from 'api/incidentReport/updateTemplate';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { getApiErrorMessage } from 'utils/errorUtils';
 
 const { TextArea } = Input;
 
@@ -42,10 +43,7 @@ function IncidentReportSettings(): JSX.Element {
 			setIsDefault(res.isDefault);
 			toast.success(t('toast_template_saved'));
 		} catch (e) {
-			toast.error(
-				(e as { response?: { data?: { error?: { message?: string } } } })?.response
-					?.data?.error?.message ?? t('toast_template_save_failed'),
-			);
+			toast.error(getApiErrorMessage(e, t('toast_template_save_failed')));
 		} finally {
 			setSavingTpl(false);
 		}
@@ -81,10 +79,7 @@ function IncidentReportSettings(): JSX.Element {
 			});
 			setMarkdown(res.markdown);
 		} catch (e) {
-			toast.error(
-				(e as { response?: { data?: { error?: { message?: string } } } })?.response
-					?.data?.error?.message ?? t('toast_generate_failed'),
-			);
+			toast.error(getApiErrorMessage(e, t('toast_generate_failed')));
 		} finally {
 			setGenerating(false);
 		}

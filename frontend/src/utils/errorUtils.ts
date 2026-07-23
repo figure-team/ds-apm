@@ -74,3 +74,15 @@ export const retryOn429 = (failureCount: number, error: unknown): boolean => {
 	}
 	return false;
 };
+
+/**
+ * Extracts the backend error message from a rejected API call's error object,
+ * falling back to a caller-supplied string when the nested message is absent.
+ * Uses nullish coalescing so an intentional empty-string message is preserved.
+ */
+export function getApiErrorMessage(error: unknown, fallback: string): string {
+	return (
+		(error as { response?: { data?: { error?: { message?: string } } } })?.response
+			?.data?.error?.message ?? fallback
+	);
+}

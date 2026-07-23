@@ -1,4 +1,8 @@
-import { getHttpStatusCode, isRetryableError } from '../errorUtils';
+import {
+	getApiErrorMessage,
+	getHttpStatusCode,
+	isRetryableError,
+} from '../errorUtils';
 
 // Mock APIError class
 class MockAPIError {
@@ -45,6 +49,24 @@ describe('errorUtils', () => {
 		it('should return true for errors without status code (default to retryable)', () => {
 			const errorWithoutStatus = { message: 'Network error' };
 			expect(isRetryableError(errorWithoutStatus)).toBe(true);
+		});
+	});
+
+	describe('getApiErrorMessage', () => {
+		it('extracts nested API error message', () => {
+			const err = { response: { data: { error: { message: 'boom' } } } };
+			expect(getApiErrorMessage(err, 'fallback')).toBe('boom');
+		});
+
+		it('returns fallback when message is absent', () => {
+			expect(getApiErrorMessage({}, 'fallback')).toBe('fallback');
+			expect(getApiErrorMessage(undefined, 'fallback')).toBe('fallback');
+			expect(getApiErrorMessage({ response: {} }, 'fallback')).toBe('fallback');
+		});
+
+		it('preserves empty-string message (nullish, not falsy)', () => {
+			const err = { response: { data: { error: { message: '' } } } };
+			expect(getApiErrorMessage(err, 'fallback')).toBe('');
 		});
 	});
 });
