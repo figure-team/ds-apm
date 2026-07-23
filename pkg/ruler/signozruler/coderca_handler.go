@@ -138,17 +138,15 @@ func (handler *handler) UpsertCodebaseRepo(rw http.ResponseWriter, req *http.Req
 	incoming.ContractVersion = ruletypes.CodebaseRepoContractVersion
 
 	// APIKeyPlaceholder sentinel: preserve the existing stored credential.
-	if incoming.Credential == APIKeyPlaceholder {
-		existing, getErr := handler.codebaseRepoStore.Get(req.Context(), orgID, incoming.RepoID, handler.aiCipher.DecryptFunc())
-		if getErr == nil {
-			incoming.Credential = existing.Credential
-		} else if errors.Is(getErr, ruletypes.ErrCodebaseRepoNotFound) {
-			incoming.Credential = ""
-		} else {
-			render.Error(rw, errors.WrapInternalf(getErr, errors.CodeInternal, "fetch existing codebase repo for credential preservation"))
-			return
-		}
+	cred, getErr := preserveSecret(incoming.Credential, func() (string, error) {
+		e, err := handler.codebaseRepoStore.Get(req.Context(), orgID, incoming.RepoID, handler.aiCipher.DecryptFunc())
+		return e.Credential, err
+	}, func(err error) bool { return errors.Is(err, ruletypes.ErrCodebaseRepoNotFound) })
+	if getErr != nil {
+		render.Error(rw, errors.WrapInternalf(getErr, errors.CodeInternal, "fetch existing codebase repo for credential preservation"))
+		return
 	}
+	incoming.Credential = cred
 
 	encryptionAvailable := !handler.aiCipherInsecure
 	if err := ruletypes.ValidateCodebaseRepo(incoming, encryptionAvailable); err != nil {

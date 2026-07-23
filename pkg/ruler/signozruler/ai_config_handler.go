@@ -24,6 +24,25 @@ type aiGeneratorRebuilder interface {
 	GeneratorFor(cfg ruletypes.AIConfig) (ruletypes.AIStrategyGenerator, error)
 }
 
+// preserveSecret returns incoming unchanged unless it equals the
+// APIKeyPlaceholder sentinel, in which case it returns the existing secret
+// from fetch(). A not-found existing record (per isNotFound) yields "".
+// The raw fetch error is returned so the caller can wrap it with its own
+// site-specific message.
+func preserveSecret(incoming string, fetch func() (string, error), isNotFound func(error) bool) (string, error) {
+	if incoming != APIKeyPlaceholder {
+		return incoming, nil
+	}
+	existing, err := fetch()
+	if err != nil {
+		if isNotFound(err) {
+			return "", nil
+		}
+		return "", err
+	}
+	return existing, nil
+}
+
 // GetAIConfig handles GET /api/v2/ds/ai/config.
 // Returns the current AI config for the request's org. The apiKey field is
 // scrubbed in the response: replaced with APIKeyPlaceholder when a key is set,
@@ -94,33 +113,26 @@ func (h *handler) UpdateAIConfig(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Handle APIKeyPlaceholder: preserve existing key.
-	if incoming.APIKey == APIKeyPlaceholder {
-		existing, getErr := h.aiConfigStore.Get(req.Context(), orgID, h.aiCipher.DecryptFunc())
-		if getErr != nil && !errors.Is(getErr, ruletypes.ErrAIConfigNotFound) {
-			render.Error(rw, errors.WrapInternalf(getErr, errors.CodeInternal, "fetch existing AI config for key preservation"))
-			return
-		}
-		if getErr == nil {
-			incoming.APIKey = existing.APIKey
-		} else {
-			// No existing config; treat placeholder as empty key.
-			incoming.APIKey = ""
-		}
+	key, getErr := preserveSecret(incoming.APIKey, func() (string, error) {
+		e, err := h.aiConfigStore.Get(req.Context(), orgID, h.aiCipher.DecryptFunc())
+		return e.APIKey, err
+	}, func(err error) bool { return errors.Is(err, ruletypes.ErrAIConfigNotFound) })
+	if getErr != nil {
+		render.Error(rw, errors.WrapInternalf(getErr, errors.CodeInternal, "fetch existing AI config for key preservation"))
+		return
 	}
+	incoming.APIKey = key
 
 	// Handle placeholder for OAuthToken: preserve existing token.
-	if incoming.OAuthToken == APIKeyPlaceholder {
-		existing, getErr := h.aiConfigStore.Get(req.Context(), orgID, h.aiCipher.DecryptFunc())
-		if getErr != nil && !errors.Is(getErr, ruletypes.ErrAIConfigNotFound) {
-			render.Error(rw, errors.WrapInternalf(getErr, errors.CodeInternal, "fetch existing AI config for token preservation"))
-			return
-		}
-		if getErr == nil {
-			incoming.OAuthToken = existing.OAuthToken
-		} else {
-			incoming.OAuthToken = ""
-		}
+	token, getErr := preserveSecret(incoming.OAuthToken, func() (string, error) {
+		e, err := h.aiConfigStore.Get(req.Context(), orgID, h.aiCipher.DecryptFunc())
+		return e.OAuthToken, err
+	}, func(err error) bool { return errors.Is(err, ruletypes.ErrAIConfigNotFound) })
+	if getErr != nil {
+		render.Error(rw, errors.WrapInternalf(getErr, errors.CodeInternal, "fetch existing AI config for token preservation"))
+		return
 	}
+	incoming.OAuthToken = token
 
 	if err := h.aiConfigStore.Upsert(req.Context(), incoming, h.aiCipher.EncryptFunc()); err != nil {
 		render.Error(rw, errors.WrapInternalf(err, errors.CodeInternal, "upsert AI config"))
