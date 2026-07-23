@@ -4,7 +4,7 @@ import { isUndefined } from 'lodash-es';
 import { MetricRangePayloadProps } from 'types/api/metrics/getQueryRange';
 import { QueryData } from 'types/api/widgets/getQuery';
 
-import { normalizePlotValue } from './dataUtils';
+import { normalizePlotValue } from 'lib/uPlotV2/utils/dataUtils';
 import { generateColor } from './generateColor';
 
 function getXAxisTimestamps(seriesList: QueryData[]): number[] {
