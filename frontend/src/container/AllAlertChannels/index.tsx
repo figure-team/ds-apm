@@ -74,7 +74,7 @@ function ChannelListTab(): JSX.Element {
 					<Tooltip
 						title={
 							!addNewChannelPermission
-								? 'Ask an admin to create alert channel'
+								? t('tooltip_admin_create_channel')
 								: undefined
 						}
 					>
@@ -94,23 +94,25 @@ function ChannelListTab(): JSX.Element {
 	);
 }
 
-const TAB_ITEMS = [
-	{
-		key: 'channels',
-		label: '채널 목록',
-		children: <ChannelListTab />,
-	},
-	{
-		key: 'dlq',
-		label: '전송 실패 내역',
-		children: <DLQFailures />,
-	},
-];
-
 function AlertChannels(): JSX.Element {
+	const { t } = useTranslation(['channels']);
+
+	const tabItems = [
+		{
+			key: 'channels',
+			label: t('tab_channel_list'),
+			children: <ChannelListTab />,
+		},
+		{
+			key: 'dlq',
+			label: t('tab_dlq'),
+			children: <DLQFailures />,
+		},
+	];
+
 	return (
 		<div className="settings-shell">
-			<Tabs items={TAB_ITEMS} defaultActiveKey="channels" />
+			<Tabs items={tabItems} defaultActiveKey="channels" />
 		</div>
 	);
 }

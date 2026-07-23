@@ -6,10 +6,12 @@ import generateReport from 'api/incidentReport/generateReport';
 import getTemplate from 'api/incidentReport/getTemplate';
 import updateTemplate from 'api/incidentReport/updateTemplate';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const { TextArea } = Input;
 
 function IncidentReportSettings(): JSX.Element {
+	const { t } = useTranslation(['incident_report']);
 	const [template, setTemplate] = useState('');
 	const [isDefault, setIsDefault] = useState(true);
 	const [loadingTpl, setLoadingTpl] = useState(true);
@@ -28,8 +30,9 @@ function IncidentReportSettings(): JSX.Element {
 				setTemplate(res.template);
 				setIsDefault(res.isDefault);
 			})
-			.catch(() => toast.error('템플릿을 불러오지 못했습니다.'))
+			.catch(() => toast.error(t('toast_template_load_failed')))
 			.finally(() => setLoadingTpl(false));
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const handleSaveTemplate = async (): Promise<void> => {
@@ -37,11 +40,11 @@ function IncidentReportSettings(): JSX.Element {
 		try {
 			const res = await updateTemplate(template);
 			setIsDefault(res.isDefault);
-			toast.success('보고서 양식을 저장했습니다.');
+			toast.success(t('toast_template_saved'));
 		} catch (e) {
 			toast.error(
 				(e as { response?: { data?: { error?: { message?: string } } } })?.response
-					?.data?.error?.message ?? '양식 저장에 실패했습니다.',
+					?.data?.error?.message ?? t('toast_template_save_failed'),
 			);
 		} finally {
 			setSavingTpl(false);
@@ -55,9 +58,9 @@ function IncidentReportSettings(): JSX.Element {
 			const res = await getTemplate();
 			setTemplate(res.template);
 			setIsDefault(res.isDefault);
-			toast.success('기본 양식으로 초기화했습니다.');
+			toast.success(t('toast_template_reset_done'));
 		} catch {
-			toast.error('초기화에 실패했습니다.');
+			toast.error(t('toast_template_reset_failed'));
 		} finally {
 			setSavingTpl(false);
 		}
@@ -65,7 +68,7 @@ function IncidentReportSettings(): JSX.Element {
 
 	const handleGenerate = async (): Promise<void> => {
 		if (!incidentId.trim()) {
-			toast.error('인시던트 ID를 입력하세요.');
+			toast.error(t('toast_incident_id_required'));
 			return;
 		}
 		setGenerating(true);
@@ -80,7 +83,7 @@ function IncidentReportSettings(): JSX.Element {
 		} catch (e) {
 			toast.error(
 				(e as { response?: { data?: { error?: { message?: string } } } })?.response
-					?.data?.error?.message ?? '보고서 생성에 실패했습니다.',
+					?.data?.error?.message ?? t('toast_generate_failed'),
 			);
 		} finally {
 			setGenerating(false);
@@ -90,23 +93,25 @@ function IncidentReportSettings(): JSX.Element {
 	return (
 		<div className="incident-report-settings settings-shell settings-shell--narrow">
 			<header className="incident-report-settings__header">
-				<h1 className="incident-report-settings__header-title">장애보고서</h1>
+				<h1 className="incident-report-settings__header-title">
+					{t('header_title')}
+				</h1>
 				<p className="incident-report-settings__header-subtitle">
-					CF-2 대응 전략과 CF-11 코드 RCA 결과를 집약해 한국 SI 양식의 장애보고서를
-					생성합니다. 조직별 양식(Go text/template)을 관리하고, 인시던트별로 보고서를
-					뽑을 수 있습니다.
+					{t('header_subtitle')}
 				</p>
 			</header>
 
 			<section className="incident-report-settings__block">
 				<Typography.Title level={5}>
-					보고서 양식 템플릿{' '}
+					{t('section_template_title')}{' '}
 					{isDefault && (
-						<Typography.Text type="secondary">(기본 양식 사용 중)</Typography.Text>
+						<Typography.Text type="secondary">
+							{t('label_default_in_use')}
+						</Typography.Text>
 					)}
 				</Typography.Title>
 				<Typography.Paragraph type="secondary">
-					{`{{.Title}}, {{.RootCause}}, {{range .Hypotheses}} 등 보고서 데이터를 Go text/template 문법으로 배치합니다. {{ph .Field}}는 값이 비면 "확인 중"으로 표시합니다.`}
+					{t('template_help')}
 				</Typography.Paragraph>
 				<TextArea
 					value={template}
@@ -122,19 +127,21 @@ function IncidentReportSettings(): JSX.Element {
 						onClick={handleSaveTemplate}
 						disabled={loadingTpl}
 					>
-						양식 저장
+						{t('btn_save_template')}
 					</Button>
 					<Button onClick={handleResetTemplate} disabled={loadingTpl || savingTpl}>
-						기본 양식으로 초기화
+						{t('btn_reset_template')}
 					</Button>
 				</div>
 			</section>
 
 			<section className="incident-report-settings__block">
-				<Typography.Title level={5}>보고서 생성</Typography.Title>
+				<Typography.Title level={5}>
+					{t('section_generate_title')}
+				</Typography.Title>
 				<div className="incident-report-settings__form">
 					<label htmlFor="ir-incident-id">
-						<span>인시던트 ID *</span>
+						<span>{t('field_incident_id')} *</span>
 						<Input
 							id="ir-incident-id"
 							value={incidentId}
@@ -143,7 +150,7 @@ function IncidentReportSettings(): JSX.Element {
 						/>
 					</label>
 					<label htmlFor="ir-service">
-						<span>서비스</span>
+						<span>{t('field_service')}</span>
 						<Input
 							id="ir-service"
 							value={service}
@@ -152,7 +159,7 @@ function IncidentReportSettings(): JSX.Element {
 						/>
 					</label>
 					<label htmlFor="ir-fingerprint">
-						<span>알람 fingerprint</span>
+						<span>{t('field_fingerprint')}</span>
 						<Input
 							id="ir-fingerprint"
 							value={alertFingerprint}
@@ -161,7 +168,7 @@ function IncidentReportSettings(): JSX.Element {
 						/>
 					</label>
 					<label htmlFor="ir-severity">
-						<span>심각도</span>
+						<span>{t('field_severity')}</span>
 						<Input
 							id="ir-severity"
 							value={severity}
@@ -172,18 +179,18 @@ function IncidentReportSettings(): JSX.Element {
 				</div>
 				<div className="incident-report-settings__actions">
 					<Button type="primary" loading={generating} onClick={handleGenerate}>
-						보고서 생성
+						{t('btn_generate')}
 					</Button>
 					{markdown && (
 						<Button
 							onClick={(): void => {
 								navigator.clipboard.writeText(markdown).then(
-									() => toast.success('복사했습니다.'),
-									() => toast.error('복사 실패'),
+									() => toast.success(t('toast_copy_done')),
+									() => toast.error(t('toast_copy_failed')),
 								);
 							}}
 						>
-							마크다운 복사
+							{t('btn_copy_markdown')}
 						</Button>
 					)}
 				</div>

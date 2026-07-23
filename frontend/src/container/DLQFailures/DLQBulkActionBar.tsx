@@ -1,4 +1,5 @@
 import { Button, Space, Typography } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 interface DLQBulkActionBarProps {
 	selectedCount: number;
@@ -13,6 +14,8 @@ export function DLQBulkActionBar({
 	onReplay,
 	onClear,
 }: DLQBulkActionBarProps): JSX.Element | null {
+	const { t } = useTranslation(['channels']);
+
 	if (selectedCount === 0) return null;
 
 	return (
@@ -27,12 +30,14 @@ export function DLQBulkActionBar({
 				gap: 12,
 			}}
 		>
-			<Typography.Text>{selectedCount}개 선택됨</Typography.Text>
+			<Typography.Text>
+				{t('dlq_selected_count', { selected: selectedCount })}
+			</Typography.Text>
 			<Space>
 				<Button type="primary" loading={loading} onClick={onReplay}>
-					↩ 재전송
+					{t('dlq_btn_replay')}
 				</Button>
-				<Button onClick={onClear}>선택 해제</Button>
+				<Button onClick={onClear}>{t('dlq_btn_clear_selection')}</Button>
 			</Space>
 		</div>
 	);

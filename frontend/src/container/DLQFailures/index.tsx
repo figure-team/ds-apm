@@ -4,6 +4,7 @@ import replayDLQEntries from 'api/dlq/replayDLQEntries';
 import Spinner from 'components/Spinner';
 import { useNotifications } from 'hooks/useNotifications';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { DLQEntry, GetDLQEntriesParams } from 'types/api/dlq';
 
@@ -15,6 +16,7 @@ import { DLQTable } from './DLQTable';
 const DLQ_ENTRIES_KEY = 'dlqEntries';
 
 function DLQFailures(): JSX.Element {
+	const { t } = useTranslation(['channels']);
 	const { notifications } = useNotifications();
 	const queryClient = useQueryClient();
 
@@ -36,18 +38,22 @@ function DLQFailures(): JSX.Element {
 		{
 			onSuccess: (result) => {
 				notifications.success({
-					message: `재전송 완료: ${result.replayed}건 성공, ${result.skipped}건 skip, ${result.failed}건 실패`,
+					message: t('dlq_replay_result', {
+						replayed: result.replayed,
+						skipped: result.skipped,
+						failed: result.failed,
+					}),
 				});
 				setSelectedKeys([]);
 				void queryClient.invalidateQueries([DLQ_ENTRIES_KEY]);
 			},
 			onError: () => {
-				notifications.error({ message: '재전송 요청이 실패했습니다.' });
+				notifications.error({ message: t('dlq_replay_failed') });
 			},
 		},
 	);
 
-	if (isLoading) return <Spinner tip="전송 실패 내역 로딩 중..." height="60vh" />;
+	if (isLoading) return <Spinner tip={t('dlq_loading')} height="60vh" />;
 
 	if (error) {
 		return <Typography.Text type="danger">{error.message}</Typography.Text>;

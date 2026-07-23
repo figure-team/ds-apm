@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { Alert, Badge, Button, Empty, Modal, Table, Tag, Tooltip } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import type { TFunction } from 'i18next';
 import {
 	deleteRemediationTarget,
 	listRemediationTargets,
@@ -27,32 +28,36 @@ const REFRESH_INTERVAL_MS = 60_000;
 const HEALTH_BADGE: Partial<
 	Record<
 		TargetHealthWire['status'],
-		{ badge: 'success' | 'error' | 'warning'; text: string }
+		{ badge: 'success' | 'error' | 'warning'; textKey: string }
 	>
 > = {
-	healthy: { badge: 'success', text: '정상' },
-	unreachable: { badge: 'error', text: '연결 불가' },
-	mismatch: { badge: 'warning', text: '호스트키 불일치' },
+	healthy: { badge: 'success', textKey: 'health_healthy' },
+	unreachable: { badge: 'error', textKey: 'health_unreachable' },
+	mismatch: { badge: 'warning', textKey: 'health_mismatch' },
 };
 
-const MISMATCH_HINT =
-	'저장된 지문과 다릅니다 — 키 로테이션 또는 위변조 의심. 수정 화면에서 지문을 다시 가져와 저장하면 해소됩니다';
-
-function renderHealthBadge(health?: TargetHealthWire): JSX.Element {
+function renderHealthBadge(
+	t: TFunction,
+	health?: TargetHealthWire,
+): JSX.Element {
 	const meta = health && HEALTH_BADGE[health.status];
 	if (!health || !meta) {
-		return <Badge status="default" text="확인 중" />;
+		return <Badge status="default" text={t('health_checking').toString()} />;
 	}
 	const lines: string[] = [];
 	if (health.status === 'mismatch') {
-		lines.push(MISMATCH_HINT);
+		lines.push(t('health_mismatch_hint').toString());
 	} else if (health.error) {
 		lines.push(health.error);
 	}
 	if (health.checkedAt) {
-		lines.push(`마지막 확인: ${new Date(health.checkedAt).toLocaleString()}`);
+		lines.push(
+			t('health_last_checked', {
+				time: new Date(health.checkedAt).toLocaleString(),
+			}).toString(),
+		);
 	}
-	const badge = <Badge status={meta.badge} text={meta.text} />;
+	const badge = <Badge status={meta.badge} text={t(meta.textKey).toString()} />;
 	if (lines.length === 0) {
 		return badge;
 	}
@@ -64,7 +69,7 @@ function renderHealthBadge(health?: TargetHealthWire): JSX.Element {
 }
 
 function RemediationTargetSettings(): JSX.Element {
-	const { t } = useTranslation(['routes']);
+	const { t } = useTranslation(['remediation_targets', 'routes']);
 	const [modal, contextHolder] = Modal.useModal();
 
 	const [targets, setTargets] = useState<RemediationTargetWire[]>([]);
@@ -158,16 +163,16 @@ function RemediationTargetSettings(): JSX.Element {
 	const confirmDelete = useCallback(
 		(row: RemediationTargetWire): void => {
 			modal.confirm({
-				title: '자동대응 타겟 삭제',
-				content: `'${row.name}' 타겟을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`,
+				title: t('delete_modal_title'),
+				content: t('delete_modal_content', { name: row.name }),
 				icon: (
 					<ExclamationCircleOutlined
 						style={{ color: 'var(--danger-background)' }}
 					/>
 				),
-				okText: '삭제',
+				okText: t('btn_delete'),
 				okButtonProps: { danger: true },
-				cancelText: '취소',
+				cancelText: t('btn_cancel'),
 				centered: true,
 				onOk: async (): Promise<void> => {
 					await deleteRemediationTarget(row.id);
@@ -175,12 +180,12 @@ function RemediationTargetSettings(): JSX.Element {
 				},
 			});
 		},
-		[modal, load],
+		[modal, load, t],
 	);
 
 	const columns: ColumnsType<RemediationTargetWire> = [
 		{
-			title: '이름',
+			title: t('col_name'),
 			dataIndex: 'name',
 			key: 'name',
 		},
@@ -196,7 +201,7 @@ function RemediationTargetSettings(): JSX.Element {
 			key: 'user',
 		},
 		{
-			title: '서비스 셀렉터',
+			title: t('col_service_selectors'),
 			key: 'serviceSelectors',
 			render: (_: unknown, row: RemediationTargetWire): JSX.Element => (
 				<>
@@ -207,7 +212,7 @@ function RemediationTargetSettings(): JSX.Element {
 			),
 		},
 		{
-			title: '지문',
+			title: t('col_fingerprint'),
 			key: 'fingerprint',
 			render: (_: unknown, row: RemediationTargetWire): JSX.Element => {
 				const fp = row.hostKeyFingerprint ?? '';
@@ -223,31 +228,31 @@ function RemediationTargetSettings(): JSX.Element {
 			},
 		},
 		{
-			title: '상태',
+			title: t('col_status'),
 			key: 'health',
 			render: (_: unknown, row: RemediationTargetWire): JSX.Element =>
-				renderHealthBadge(row.health),
+				renderHealthBadge(t, row.health),
 		},
 		{
-			title: '마지막 테스트',
+			title: t('col_last_test'),
 			key: 'lastTest',
 			render: (_: unknown, row: RemediationTargetWire): JSX.Element => {
 				const result = testResults[row.id];
 				if (!result) {
-					return <Badge status="default" text="미실행" />;
+					return <Badge status="default" text={t('test_not_run')} />;
 				}
 				if (result.status === 'success') {
-					return <Badge status="success" text="성공" />;
+					return <Badge status="success" text={t('test_success')} />;
 				}
 				return (
 					<Tooltip title={result.error}>
-						<Badge status="error" text="실패" />
+						<Badge status="error" text={t('test_fail')} />
 					</Tooltip>
 				);
 			},
 		},
 		{
-			title: '작업',
+			title: t('col_actions'),
 			key: 'actions',
 			render: (_: unknown, row: RemediationTargetWire): JSX.Element => (
 				<div className="remediation-target-settings__row-actions">
@@ -258,17 +263,17 @@ function RemediationTargetSettings(): JSX.Element {
 							void runRowTest(row);
 						}}
 					>
-						테스트
+						{t('btn_row_test')}
 					</Button>
 					<Button size="small" onClick={(): void => openEdit(row)}>
-						수정
+						{t('btn_edit')}
 					</Button>
 					<Button
 						size="small"
 						danger
 						onClick={(): void => confirmDelete(row)}
 					>
-						삭제
+						{t('btn_delete')}
 					</Button>
 				</div>
 			),
@@ -283,7 +288,7 @@ function RemediationTargetSettings(): JSX.Element {
 						{t('routes:remediation_targets')}
 					</h1>
 					<p className="remediation-target-settings__subtitle">
-						SSH 원격 자동대응을 실행할 대상 서버를 등록하고 연결을 테스트합니다.
+						{t('page_subtitle')}
 					</p>
 				</div>
 				<Button
@@ -291,7 +296,7 @@ function RemediationTargetSettings(): JSX.Element {
 					onClick={openCreate}
 					disabled={!encryptionReady}
 				>
-					타겟 추가
+					{t('btn_add_target')}
 				</Button>
 			</header>
 
@@ -300,7 +305,7 @@ function RemediationTargetSettings(): JSX.Element {
 					type="warning"
 					showIcon
 					className="remediation-target-settings__banner"
-					message="암호화 마스터키가 설정되지 않아 원격 타겟을 등록할 수 없습니다 (DS_APM_AI_CONFIG_ENCRYPTION_KEY)"
+					message={t('banner_no_master_key')}
 				/>
 			)}
 
@@ -316,7 +321,7 @@ function RemediationTargetSettings(): JSX.Element {
 					emptyText: (
 						<Empty
 							image={Empty.PRESENTED_IMAGE_SIMPLE}
-							description="등록된 타겟이 없습니다"
+							description={t('empty_no_targets')}
 						/>
 					),
 				}}

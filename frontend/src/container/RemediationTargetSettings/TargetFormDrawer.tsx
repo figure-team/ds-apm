@@ -31,10 +31,12 @@ import { useQueryService } from 'hooks/useQueryService';
 import { useNotifications } from 'hooks/useNotifications';
 import { useCopyToClipboard } from 'hooks/useCopyToClipboard';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line no-restricted-imports
 import { useSelector } from 'react-redux';
 import { AppState } from 'store/reducers';
 import { GlobalReducer } from 'types/reducer/globalTime';
+import { i18nText } from 'utils/i18nText';
 
 // props 계약은 레인 간 인터페이스로 시드에 고정 — 변경은 오케스트레이터 승인 필요
 // (plans/2026-07-02-remtgt-parallel-orchestration.md). 구현은 레인 C2 담당.
@@ -66,7 +68,7 @@ function errorMessage(err: unknown): string {
 	return (
 		maybe?.response?.data?.error?.message ||
 		maybe?.message ||
-		'요청을 처리하지 못했습니다'
+		i18nText('remediation_targets:error_request_failed')
 	);
 }
 
@@ -78,6 +80,7 @@ function TargetFormDrawer({
 	onClose,
 	onSaved,
 }: TargetFormDrawerProps): JSX.Element {
+	const { t } = useTranslation(['remediation_targets']);
 	const [form] = Form.useForm<TargetFormValues>();
 	const { notifications } = useNotifications();
 	const { copyToClipboard, isCopied } = useCopyToClipboard();
@@ -251,7 +254,7 @@ function TargetFormDrawer({
 	const credentialTabs = [
 		{
 			key: 'generate',
-			label: '키 생성',
+			label: t('tab_keygen'),
 			children: (
 				<div className="target-form-drawer__keygen">
 					<Button
@@ -260,19 +263,16 @@ function TargetFormDrawer({
 						loading={keygenLoading}
 						onClick={handleKeygen}
 					>
-						키 생성
+						{t('btn_keygen')}
 					</Button>
 					{!encryptionReady && (
 						<Typography.Text type="warning">
-							암호화 마스터키가 설정되지 않아 키를 생성할 수 없습니다
-							(DS_APM_AI_CONFIG_ENCRYPTION_KEY)
+							{t('keygen_no_master_key')}
 						</Typography.Text>
 					)}
 					{publicKey && (
 						<div className="target-form-drawer__public-key">
-							<Typography.Text>
-								이 공개키를 대상 서버의 ~/.ssh/authorized_keys에 추가하세요
-							</Typography.Text>
+							<Typography.Text>{t('public_key_hint')}</Typography.Text>
 							<Input.TextArea
 								data-testid="public-key"
 								value={publicKey}
@@ -284,7 +284,7 @@ function TargetFormDrawer({
 								icon={<CopyOutlined />}
 								onClick={(): void => copyToClipboard(publicKey)}
 							>
-								{isCopied ? '복사됨' : '공개키 복사'}
+								{isCopied ? t('btn_copied') : t('btn_copy_public_key')}
 							</Button>
 						</div>
 					)}
@@ -293,7 +293,7 @@ function TargetFormDrawer({
 		},
 		{
 			key: 'paste',
-			label: 'PEM 붙여넣기',
+			label: t('tab_paste_pem'),
 			children: (
 				<Input.TextArea
 					data-testid="pem-textarea"
@@ -309,7 +309,7 @@ function TargetFormDrawer({
 	return (
 		<Drawer
 			className="target-form-drawer"
-			title={mode === 'edit' ? '자동대응 타겟 수정' : '자동대응 타겟 추가'}
+			title={mode === 'edit' ? t('drawer_title_edit') : t('drawer_title_create')}
 			open={open}
 			onClose={onClose}
 			width={560}
@@ -322,34 +322,36 @@ function TargetFormDrawer({
 								data-testid="test-result-success"
 								type="success"
 								showIcon
-								message="연결 성공 (echo ok)"
+								message={t('test_success_message')}
 							/>
 						) : (
 							<Alert
 								data-testid="test-result-error"
 								type="error"
 								showIcon
-								message="연결 실패"
+								message={t('test_fail_message')}
 								description={testResult.error || testResult.output}
 							/>
 						))}
 					{missingCredential && mode === 'create' && (
 						<Typography.Text type="secondary">
-							키를 생성하거나 PEM을 입력하세요
+							{t('hint_provide_credential')}
 						</Typography.Text>
 					)}
 					<Space>
 						<Button data-testid="cancel-btn" onClick={onClose}>
-							취소
+							{t('btn_cancel')}
 						</Button>
-						<Tooltip title={!fingerprint ? '먼저 지문을 가져오세요' : ''}>
+						<Tooltip
+							title={!fingerprint ? t('tooltip_fetch_fingerprint_first') : ''}
+						>
 							<Button
 								data-testid="test-connection-btn"
 								disabled={!fingerprint || testing}
 								loading={testing}
 								onClick={handleTest}
 							>
-								연결 테스트
+								{t('btn_test_connection')}
 							</Button>
 						</Tooltip>
 						<Button
@@ -359,7 +361,7 @@ function TargetFormDrawer({
 							loading={submitting}
 							onClick={(): void => form.submit()}
 						>
-							저장
+							{t('btn_save')}
 						</Button>
 					</Space>
 				</div>
@@ -380,26 +382,26 @@ function TargetFormDrawer({
 				onFinish={handleSave}
 			>
 				<Form.Item
-					label="이름"
+					label={t('field_name')}
 					name="name"
-					rules={[{ required: true, message: '이름을 입력하세요' }]}
+					rules={[{ required: true, message: t('rule_name_required') }]}
 				>
 					<Input data-testid="target-name" placeholder="prod-web-01" />
 				</Form.Item>
 				<Form.Item
 					label="Host"
 					name="host"
-					rules={[{ required: true, message: 'Host를 입력하세요' }]}
+					rules={[{ required: true, message: t('rule_host_required') }]}
 				>
 					<Input
 						data-testid="target-host"
-						placeholder="10.0.0.5 또는 host.example.com"
+						placeholder={t('placeholder_host')}
 					/>
 				</Form.Item>
 				<Form.Item
 					label="Port"
 					name="port"
-					rules={[{ required: true, message: 'Port를 입력하세요' }]}
+					rules={[{ required: true, message: t('rule_port_required') }]}
 				>
 					<InputNumber
 						data-testid="target-port"
@@ -411,32 +413,32 @@ function TargetFormDrawer({
 				<Form.Item
 					label="User"
 					name="user"
-					rules={[{ required: true, message: 'User를 입력하세요' }]}
+					rules={[{ required: true, message: t('rule_user_required') }]}
 				>
 					<Input data-testid="target-user" placeholder="deploy" />
 				</Form.Item>
 				<Form.Item
-					label="서비스 셀렉터"
+					label={t('field_service_selectors')}
 					name="serviceSelectors"
 					rules={[
 						{
 							required: true,
 							type: 'array',
 							min: 1,
-							message: '서비스 셀렉터를 하나 이상 지정하세요',
+							message: t('rule_service_selectors_min'),
 						},
 					]}
 				>
 					<Select
 						data-testid="target-services"
 						mode="tags"
-						placeholder="서비스명 선택 또는 입력"
+						placeholder={t('placeholder_service_selectors')}
 						options={serviceOptions}
 						tokenSeparators={[',']}
 					/>
 				</Form.Item>
 
-				<Form.Item label="호스트키 지문">
+				<Form.Item label={t('field_host_key_fingerprint')}>
 					<Space.Compact style={{ width: '100%' }}>
 						<Input
 							data-testid="target-fingerprint"
@@ -451,7 +453,7 @@ function TargetFormDrawer({
 							loading={fetchingFingerprint}
 							onClick={handleFetchFingerprint}
 						>
-							지문 가져오기
+							{t('btn_fetch_fingerprint')}
 						</Button>
 					</Space.Compact>
 					{fingerprintError && (
@@ -461,7 +463,7 @@ function TargetFormDrawer({
 					)}
 				</Form.Item>
 
-				<Form.Item label="자격증명">
+				<Form.Item label={t('field_credential')}>
 					{mode === 'edit' && (
 						<Radio.Group
 							className="target-form-drawer__credential-mode"
@@ -471,10 +473,10 @@ function TargetFormDrawer({
 							}
 						>
 							<Radio.Button value="keep" data-testid="keep-existing-key">
-								기존 키 유지
+								{t('radio_keep_key')}
 							</Radio.Button>
 							<Radio.Button value="replace" data-testid="replace-key">
-								키 교체
+								{t('radio_replace_key')}
 							</Radio.Button>
 						</Radio.Group>
 					)}

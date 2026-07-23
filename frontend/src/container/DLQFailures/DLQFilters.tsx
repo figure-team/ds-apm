@@ -1,4 +1,5 @@
 import { Select, Space } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { DLQEntry, DLQStatus, GetDLQEntriesParams } from 'types/api/dlq';
 
 interface DLQFiltersProps {
@@ -7,20 +8,22 @@ interface DLQFiltersProps {
 	onChange: (filters: GetDLQEntriesParams) => void;
 }
 
-const STATUS_OPTIONS = [
-	{ value: '', label: '전체 상태' },
-	{ value: 'pending', label: '대기중' },
-	{ value: 'replayed', label: '재전송됨' },
-	{ value: 'replay_failed', label: '재전송 실패' },
-];
-
 export function DLQFilters({
 	entries,
 	filters,
 	onChange,
 }: DLQFiltersProps): JSX.Element {
+	const { t } = useTranslation(['channels']);
+
+	const statusOptions = [
+		{ value: '', label: t('dlq_filter_all_status') },
+		{ value: 'pending', label: t('dlq_status_pending') },
+		{ value: 'replayed', label: t('dlq_status_replayed') },
+		{ value: 'replay_failed', label: t('dlq_status_replay_failed') },
+	];
+
 	const channelOptions = [
-		{ value: '', label: '전체 채널' },
+		{ value: '', label: t('dlq_filter_all_channels') },
 		...Array.from(new Set(entries.map((e) => e.channel))).map((ch) => ({
 			value: ch,
 			label: ch,
@@ -38,7 +41,7 @@ export function DLQFilters({
 			<Select
 				style={{ width: 160 }}
 				value={filters.status ?? ''}
-				options={STATUS_OPTIONS}
+				options={statusOptions}
 				onChange={(val): void =>
 					onChange({ ...filters, status: (val as DLQStatus) || undefined })
 				}

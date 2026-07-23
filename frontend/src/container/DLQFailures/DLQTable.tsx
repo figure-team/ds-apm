@@ -1,6 +1,7 @@
 import type { TableProps } from 'antd';
 import { Button, Table, Tag, Tooltip } from 'antd';
 import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
 import { DLQEntry, DLQStatus } from 'types/api/dlq';
 
 const STATUS_COLOR: Record<DLQStatus, string> = {
@@ -9,10 +10,10 @@ const STATUS_COLOR: Record<DLQStatus, string> = {
 	replay_failed: 'red',
 };
 
-const STATUS_LABEL: Record<DLQStatus, string> = {
-	pending: '대기중',
-	replayed: '재전송됨',
-	replay_failed: '재전송 실패',
+const STATUS_LABEL_KEY: Record<DLQStatus, string> = {
+	pending: 'dlq_status_pending',
+	replayed: 'dlq_status_replayed',
+	replay_failed: 'dlq_status_replay_failed',
 };
 
 interface DLQTableProps {
@@ -28,6 +29,7 @@ export function DLQTable({
 	onSelectionChange,
 	onViewPayload,
 }: DLQTableProps): JSX.Element {
+	const { t } = useTranslation(['channels']);
 	const columns: TableProps<DLQEntry>['columns'] = [
 		{
 			title: 'Alert ID',
@@ -40,37 +42,37 @@ export function DLQTable({
 			),
 		},
 		{
-			title: '채널',
+			title: t('dlq_column_channel'),
 			dataIndex: 'channel',
 			key: 'channel',
 			render: (ch: string): JSX.Element => <Tag>{ch}</Tag>,
 		},
 		{
-			title: '실패 이유',
+			title: t('dlq_column_reason'),
 			dataIndex: 'reason',
 			key: 'reason',
 			ellipsis: true,
 		},
 		{
-			title: '실패 시각',
+			title: t('dlq_column_failed_at'),
 			dataIndex: 'failed_at',
 			key: 'failed_at',
 			render: (t: string): string => dayjs(t).format('YYYY-MM-DD HH:mm:ss'),
 		},
 		{
-			title: '상태',
+			title: t('dlq_column_status'),
 			dataIndex: 'status',
 			key: 'status',
 			render: (s: DLQStatus): JSX.Element => (
-				<Tag color={STATUS_COLOR[s]}>{STATUS_LABEL[s]}</Tag>
+				<Tag color={STATUS_COLOR[s]}>{t(STATUS_LABEL_KEY[s])}</Tag>
 			),
 		},
 		{
-			title: '페이로드',
+			title: t('dlq_column_payload'),
 			key: 'payload',
 			render: (_: unknown, record: DLQEntry): JSX.Element => (
 				<Button size="small" onClick={(): void => onViewPayload(record.payload)}>
-					보기
+					{t('dlq_btn_view')}
 				</Button>
 			),
 		},

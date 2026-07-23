@@ -1,5 +1,6 @@
 import { CopyOutlined } from '@ant-design/icons';
 import { Button, Drawer, Typography } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 interface DLQPayloadDrawerProps {
 	payload: string | null; // base64
@@ -10,19 +11,21 @@ export function DLQPayloadDrawer({
 	payload,
 	onClose,
 }: DLQPayloadDrawerProps): JSX.Element {
+	const { t } = useTranslation(['channels']);
+
 	let decoded = '';
 	if (payload) {
 		try {
 			const raw = atob(payload);
 			decoded = JSON.stringify(JSON.parse(raw), null, 2);
 		} catch {
-			decoded = '(페이로드 파싱 실패)';
+			decoded = t('dlq_payload_parse_failed');
 		}
 	}
 
 	return (
 		<Drawer
-			title="Alert Payload"
+			title={t('dlq_drawer_title')}
 			open={payload !== null}
 			onClose={onClose}
 			width={560}
@@ -33,7 +36,7 @@ export function DLQPayloadDrawer({
 						void navigator.clipboard.writeText(decoded);
 					}}
 				>
-					복사
+					{t('dlq_btn_copy')}
 				</Button>
 			}
 		>

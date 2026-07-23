@@ -70,8 +70,8 @@ describe('DLQFailures', () => {
 			fireEvent.click(checkboxes[1]);
 		});
 
-		expect(screen.getByText(/1개 선택됨/)).toBeInTheDocument();
-		expect(screen.getByText('↩ 재전송')).toBeInTheDocument();
+		expect(screen.getByText('dlq_selected_count')).toBeInTheDocument();
+		expect(screen.getByText('dlq_btn_replay')).toBeInTheDocument();
 	});
 
 	it('재전송 버튼 클릭 시 replayDLQEntries를 호출한다', async () => {
@@ -87,7 +87,7 @@ describe('DLQFailures', () => {
 		});
 
 		await act(async () => {
-			fireEvent.click(screen.getByText('↩ 재전송'));
+			fireEvent.click(screen.getByText('dlq_btn_replay'));
 		});
 
 		await waitFor(() => {
@@ -103,13 +103,13 @@ describe('DLQFailures', () => {
 			expect(screen.getByText('abc123def456')).toBeInTheDocument();
 		});
 
-		const viewButtons = screen.getAllByText('보기');
+		const viewButtons = screen.getAllByText('dlq_btn_view');
 		await act(async () => {
 			fireEvent.click(viewButtons[0]);
 		});
 
 		await waitFor(() => {
-			expect(screen.getByText('Alert Payload')).toBeInTheDocument();
+			expect(screen.getByText('dlq_drawer_title')).toBeInTheDocument();
 		});
 	});
 });
@@ -120,8 +120,8 @@ describe('AllAlertChannels with Tabs', () => {
 		render(<AlertChannels />);
 
 		await waitFor(() => {
-			expect(screen.getByText('채널 목록')).toBeInTheDocument();
-			expect(screen.getByText('전송 실패 내역')).toBeInTheDocument();
+			expect(screen.getByText('tab_channel_list')).toBeInTheDocument();
+			expect(screen.getByText('tab_dlq')).toBeInTheDocument();
 		});
 	});
 });

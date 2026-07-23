@@ -73,9 +73,7 @@ describe('RemediationTargetSettings', () => {
 		mockListResponse([]);
 		render(<RemediationTargetSettings />);
 
-		expect(
-			await screen.findByText('등록된 타겟이 없습니다'),
-		).toBeInTheDocument();
+		expect(await screen.findByText('empty_no_targets')).toBeInTheDocument();
 	});
 
 	// encryptionReady=false → 배너 + 추가 버튼 disabled
@@ -84,11 +82,11 @@ describe('RemediationTargetSettings', () => {
 		render(<RemediationTargetSettings />);
 
 		expect(
-			await screen.findByText(
-				'암호화 마스터키가 설정되지 않아 원격 타겟을 등록할 수 없습니다 (DS_APM_AI_CONFIG_ENCRYPTION_KEY)',
-			),
+			await screen.findByText('banner_no_master_key'),
 		).toBeInTheDocument();
-		expect(screen.getByRole('button', { name: '타겟 추가' })).toBeDisabled();
+		expect(
+			screen.getByRole('button', { name: 'btn_add_target' }),
+		).toBeDisabled();
 	});
 
 	// encryptionReady=true → 배너 없음 + 추가 버튼 enabled
@@ -96,12 +94,10 @@ describe('RemediationTargetSettings', () => {
 		render(<RemediationTargetSettings />);
 
 		await screen.findByText('web-01');
+		expect(screen.queryByText('banner_no_master_key')).not.toBeInTheDocument();
 		expect(
-			screen.queryByText(
-				'암호화 마스터키가 설정되지 않아 원격 타겟을 등록할 수 없습니다 (DS_APM_AI_CONFIG_ENCRYPTION_KEY)',
-			),
-		).not.toBeInTheDocument();
-		expect(screen.getByRole('button', { name: '타겟 추가' })).toBeEnabled();
+			screen.getByRole('button', { name: 'btn_add_target' }),
+		).toBeEnabled();
 	});
 
 	// 삭제: 삭제 버튼 → 확인 모달 → confirm 시 deleteRemediationTarget 호출 + refetch
@@ -110,11 +106,12 @@ describe('RemediationTargetSettings', () => {
 
 		await screen.findByText('web-01');
 		const firstRow = screen.getByText('web-01').closest('tr') as HTMLElement;
-		fireEvent.click(within(firstRow).getByRole('button', { name: '삭제' }));
+		fireEvent.click(within(firstRow).getByRole('button', { name: 'btn_delete' }));
 
 		const dialog = await screen.findByRole('dialog');
-		expect(within(dialog).getByText(/web-01/)).toBeInTheDocument();
-		fireEvent.click(within(dialog).getByRole('button', { name: '삭제' }));
+		// 전역 t mock은 키를 그대로 반환하므로 interpolation된 이름 대신 키를 확인한다.
+		expect(within(dialog).getByText('delete_modal_content')).toBeInTheDocument();
+		fireEvent.click(within(dialog).getByRole('button', { name: 'btn_delete' }));
 
 		await waitFor(() => {
 			expect(mockDelete).toHaveBeenCalledWith('tgt-1');
@@ -131,12 +128,14 @@ describe('RemediationTargetSettings', () => {
 
 		await screen.findByText('web-01');
 		const firstRow = screen.getByText('web-01').closest('tr') as HTMLElement;
-		fireEvent.click(within(firstRow).getByRole('button', { name: '테스트' }));
+		fireEvent.click(
+			within(firstRow).getByRole('button', { name: 'btn_row_test' }),
+		);
 
 		await waitFor(() => {
 			expect(mockTest).toHaveBeenCalledWith({ targetId: 'tgt-1' });
 		});
-		expect(await within(firstRow).findByText('성공')).toBeInTheDocument();
+		expect(await within(firstRow).findByText('test_success')).toBeInTheDocument();
 	});
 
 	// 행 테스트 실패: 실패 배지 표시
@@ -150,9 +149,11 @@ describe('RemediationTargetSettings', () => {
 
 		await screen.findByText('web-01');
 		const firstRow = screen.getByText('web-01').closest('tr') as HTMLElement;
-		fireEvent.click(within(firstRow).getByRole('button', { name: '테스트' }));
+		fireEvent.click(
+			within(firstRow).getByRole('button', { name: 'btn_row_test' }),
+		);
 
-		expect(await within(firstRow).findByText('실패')).toBeInTheDocument();
+		expect(await within(firstRow).findByText('test_fail')).toBeInTheDocument();
 	});
 
 	// 헬스 배지: 4상태 렌더 (healthy/unreachable/mismatch/부재→확인 중)
@@ -180,10 +181,10 @@ describe('RemediationTargetSettings', () => {
 		]);
 		render(<RemediationTargetSettings />);
 
-		expect(await screen.findByText('정상')).toBeInTheDocument();
-		expect(screen.getByText('연결 불가')).toBeInTheDocument();
-		expect(screen.getByText('호스트키 불일치')).toBeInTheDocument();
-		expect(screen.getByText('확인 중')).toBeInTheDocument();
+		expect(await screen.findByText('health_healthy')).toBeInTheDocument();
+		expect(screen.getByText('health_unreachable')).toBeInTheDocument();
+		expect(screen.getByText('health_mismatch')).toBeInTheDocument();
+		expect(screen.getByText('health_checking')).toBeInTheDocument();
 	});
 
 	// 60초 인터벌 재조회 — 스피너 없이(silent) 목록만 갱신
