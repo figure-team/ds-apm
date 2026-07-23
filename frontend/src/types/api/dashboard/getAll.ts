@@ -148,6 +148,7 @@ export interface Widgets extends IBaseWidget {
 	renderColumnCell?: QueryTableProps['renderColumnCell'];
 	customColTitles?: Record<string, string>;
 	hiddenColumns?: string[];
+	chartEngine?: 'echarts' | 'uplot';
 }
 
 export interface PromQLWidgets extends IBaseWidget {
