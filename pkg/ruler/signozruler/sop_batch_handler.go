@@ -4,20 +4,15 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/SigNoz/signoz/pkg/errors"
 	"github.com/SigNoz/signoz/pkg/http/binding"
 	"github.com/SigNoz/signoz/pkg/http/render"
 	"github.com/SigNoz/signoz/pkg/types/ruletypes"
 )
 
 func (handler *handler) CreateSOPDocumentBatch(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 

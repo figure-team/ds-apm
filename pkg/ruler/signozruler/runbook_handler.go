@@ -73,13 +73,9 @@ func hasAdminRole(_ context.Context) bool { return true } //nolint:unparam
 
 // ListRunbooks handles GET /api/v2/ds/sop/documents/{sopId}/versions/{version}/runbooks?status=
 func (h *handler) ListRunbooks(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 	vars := mux.Vars(req)
@@ -106,13 +102,9 @@ func (h *handler) ListRunbooks(rw http.ResponseWriter, req *http.Request) {
 
 // GetRunbook handles GET /.../runbooks/{runbookId}
 func (h *handler) GetRunbook(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 	vars := mux.Vars(req)
@@ -132,13 +124,9 @@ func (h *handler) GetRunbook(rw http.ResponseWriter, req *http.Request) {
 
 // CreateRunbook handles POST /.../runbooks — editor+ required.
 func (h *handler) CreateRunbook(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 	if !hasEditorRole(req.Context()) {
@@ -176,13 +164,9 @@ func (h *handler) CreateRunbook(rw http.ResponseWriter, req *http.Request) {
 
 // UpdateRunbook handles PUT /.../runbooks/{runbookId} — editor+ required.
 func (h *handler) UpdateRunbook(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 	if !hasEditorRole(req.Context()) {
@@ -239,13 +223,9 @@ func (h *handler) UpdateRunbook(rw http.ResponseWriter, req *http.Request) {
 
 // DeleteRunbook handles DELETE /.../runbooks/{runbookId} — admin only.
 func (h *handler) DeleteRunbook(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 	if !hasAdminRole(req.Context()) {
@@ -268,13 +248,9 @@ func (h *handler) DeleteRunbook(rw http.ResponseWriter, req *http.Request) {
 // DraftRunbook handles POST /api/v2/ds/runbooks/draft — editor+ required.
 // Preview only: the draft is returned but never persisted.
 func (h *handler) DraftRunbook(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 	if !hasEditorRole(req.Context()) {

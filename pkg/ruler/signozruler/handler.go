@@ -569,13 +569,9 @@ func (handler *handler) GetPilotSOPSourceHealth(rw http.ResponseWriter, req *htt
 }
 
 func (handler *handler) CreateSOPDocument(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -600,13 +596,9 @@ func (handler *handler) CreateSOPDocument(rw http.ResponseWriter, req *http.Requ
 }
 
 func (handler *handler) ListSOPDocuments(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -619,13 +611,9 @@ func (handler *handler) ListSOPDocuments(rw http.ResponseWriter, req *http.Reque
 }
 
 func (handler *handler) GetSOPDocument(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -648,13 +636,9 @@ func (handler *handler) GetSOPDocument(rw http.ResponseWriter, req *http.Request
 }
 
 func (handler *handler) FetchSOPDocumentVersion(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -679,13 +663,9 @@ func (handler *handler) FetchSOPDocumentVersion(rw http.ResponseWriter, req *htt
 }
 
 func (handler *handler) PreviewSOPDocumentBinding(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -716,13 +696,9 @@ func (handler *handler) PreviewSOPDocumentBinding(rw http.ResponseWriter, req *h
 }
 
 func (handler *handler) PreviewAIStrategy(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -754,13 +730,9 @@ func (handler *handler) PreviewAIStrategy(rw http.ResponseWriter, req *http.Requ
 }
 
 func (handler *handler) GetLatestAIStrategyHistory(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 

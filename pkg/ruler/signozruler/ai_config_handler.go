@@ -48,13 +48,9 @@ func preserveSecret(incoming string, fetch func() (string, error), isNotFound fu
 // scrubbed in the response: replaced with APIKeyPlaceholder when a key is set,
 // or left empty when no key has been stored.
 func (h *handler) GetAIConfig(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -83,13 +79,9 @@ func (h *handler) GetAIConfig(rw http.ResponseWriter, req *http.Request) {
 // existing key is preserved; otherwise the incoming plaintext is stored
 // (encrypted via the configured cipher).
 func (h *handler) UpdateAIConfig(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -157,13 +149,9 @@ func (h *handler) UpdateAIConfig(rw http.ResponseWriter, req *http.Request) {
 //
 // Does NOT mutate stored config.
 func (h *handler) TestAIConfig(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 

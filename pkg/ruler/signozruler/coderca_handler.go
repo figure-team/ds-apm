@@ -21,13 +21,9 @@ import (
 // defaults are returned with 200 so the UI always has a well-typed object.
 // The config carries no secrets, so no scrubbing is needed.
 func (handler *handler) GetCodebaseRCAConfig(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -47,13 +43,9 @@ func (handler *handler) GetCodebaseRCAConfig(rw http.ResponseWriter, req *http.R
 // Validates and upserts the per-org config. OrgID and contractVersion are
 // forced from the server side, not trusted from the body.
 func (handler *handler) UpdateCodebaseRCAConfig(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -89,13 +81,9 @@ func (handler *handler) UpdateCodebaseRCAConfig(rw http.ResponseWriter, req *htt
 // credential is replaced with the APIKeyPlaceholder sentinel so plaintext is
 // never serialized to clients (design AC).
 func (handler *handler) ListCodebaseRepos(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -116,13 +104,9 @@ func (handler *handler) ListCodebaseRepos(rw http.ResponseWriter, req *http.Requ
 // When encryption is unavailable, a non-empty credential is rejected
 // fail-closed by ValidateCodebaseRepo.
 func (handler *handler) UpsertCodebaseRepo(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -165,13 +149,9 @@ func (handler *handler) UpsertCodebaseRepo(rw http.ResponseWriter, req *http.Req
 // DeleteCodebaseRepo handles DELETE /api/v2/ds/coderca/repos/{repoId}.
 // Idempotent: deleting a non-existent repo returns 204.
 func (handler *handler) DeleteCodebaseRepo(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -191,13 +171,9 @@ func (handler *handler) DeleteCodebaseRepo(rw http.ResponseWriter, req *http.Req
 // ListCodebaseServiceMaps handles GET /api/v2/ds/coderca/service-maps.
 // Mappings carry no secrets, so the org's list is returned as-is.
 func (handler *handler) ListCodebaseServiceMaps(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -214,13 +190,9 @@ func (handler *handler) ListCodebaseServiceMaps(rw http.ResponseWriter, req *htt
 // forced from claims. CodebaseServiceMap has no Validate func, so basic
 // non-empty checks on serviceName/repoId are enforced here.
 func (handler *handler) UpsertCodebaseServiceMap(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -253,13 +225,9 @@ func (handler *handler) UpsertCodebaseServiceMap(rw http.ResponseWriter, req *ht
 // DeleteCodebaseServiceMap handles DELETE /api/v2/ds/coderca/service-maps/{serviceName}.
 // Idempotent: deleting a non-existent mapping returns 204.
 func (handler *handler) DeleteCodebaseServiceMap(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -279,13 +247,9 @@ func (handler *handler) DeleteCodebaseServiceMap(rw http.ResponseWriter, req *ht
 // ListCodeRCARuns handles GET /api/v2/ds/coderca/runs?status=&service=&limit=&offset=.
 // Returns the org's run history (newest first), filtered by the query params.
 func (handler *handler) ListCodeRCARuns(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -310,13 +274,9 @@ func (handler *handler) ListCodeRCARuns(rw http.ResponseWriter, req *http.Reques
 // Returns one run with its persisted RCA report. Tenant-isolated: a run
 // belonging to another org returns a typed 404 (existence is not leaked).
 func (handler *handler) GetCodeRCARun(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -344,13 +304,9 @@ func (handler *handler) GetCodeRCARun(rw http.ResponseWriter, req *http.Request)
 // the same admission path (cooldown/quota/queue-depth still apply) and picked up
 // by the worker; the client polls GET /coderca/runs/{runId} for the result.
 func (handler *handler) EnqueueCodeRCARun(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
@@ -402,13 +358,9 @@ func (handler *handler) EnqueueCodeRCARun(rw http.ResponseWriter, req *http.Requ
 // Renders a done run as a markdown artifact and writes it under the mapped
 // repo's artifactPath (<root>/ds-hub/) for hand-off to ds-navi.
 func (handler *handler) ExportCodeRCARun(rw http.ResponseWriter, req *http.Request) {
-	orgID, err := extractOrgID(req.Context())
+	orgID, err := requireOrg(req)
 	if err != nil {
 		render.Error(rw, err)
-		return
-	}
-	if orgID == "" {
-		render.Error(rw, errors.Newf(errors.TypeUnauthenticated, errors.CodeUnauthenticated, "missing org id in claims"))
 		return
 	}
 
