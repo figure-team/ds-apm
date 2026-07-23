@@ -1,5 +1,5 @@
 // echarts 트리셰이킹 단일 진입점 — 여기 외 다른 파일에서 'echarts'를 직접 임포트하지 않는다
-import { LineChart } from 'echarts/charts';
+import { BarChart, LineChart } from 'echarts/charts';
 import {
 	AxisPointerComponent,
 	GraphicComponent,
@@ -14,6 +14,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 // highlight/downplay(코어 액션)라 LegendComponent가 필요 없다.
 echarts.use([
 	LineChart,
+	BarChart,
 	GridComponent,
 	MarkLineComponent,
 	AxisPointerComponent,

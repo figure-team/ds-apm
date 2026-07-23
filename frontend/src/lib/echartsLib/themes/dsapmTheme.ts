@@ -14,6 +14,19 @@ export const MOCKUP_TUNING = {
 	blurOpacity: 0.2,
 } as const;
 
+// 막대 시안 A 채택 파라미터 (목업 게이트 2026-07-23) — 라인 MOCKUP_TUNING과 같은 위치에 모음
+export const BAR_MOCKUP_TUNING = {
+	areaAlphaTop: 'ff', // 그라데이션 상단(불투명)
+	areaAlphaBottom: '55', // 그라데이션 하단
+	borderRadius: 4, // 상단 모서리 반경(px)
+	barMaxWidth: 22,
+	entryDurationMs: 600,
+	updateDurationMs: 300,
+	staggerMs: 6, // 포인트 인덱스당 진입 지연
+	seriesStaggerMs: 80, // 시리즈당 진입 지연
+	blurOpacity: 0.25,
+};
+
 export const DSAPM_THEME_DARK = 'dsapm-dark';
 export const DSAPM_THEME_LIGHT = 'dsapm-light';
 
