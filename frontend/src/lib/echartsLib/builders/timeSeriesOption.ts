@@ -26,7 +26,7 @@ import { getSeriesColor, MOCKUP_TUNING } from '../themes/dsapmTheme';
 dayjs.extend(utcPlugin);
 dayjs.extend(timezonePlugin);
 
-const SEC_TO_MS = 1000;
+export const SEC_TO_MS = 1000;
 
 interface BuildArgs {
 	widget: Widgets;
@@ -76,7 +76,7 @@ interface LineSeriesItem {
 }
 
 /** uPlot 경로(prepareUPlotConfig)와 동일한 규칙으로 시리즈 라벨을 만든다 */
-function resolveSeriesLabels(
+export function resolveSeriesLabels(
 	apiResponse: MetricRangePayloadProps | undefined,
 	currentQuery: Query | undefined,
 ): string[] {
@@ -91,7 +91,7 @@ function resolveSeriesLabels(
 	});
 }
 
-function buildMarkLine(widget: Widgets): Record<string, unknown> | undefined {
+export function buildMarkLine(widget: Widgets): Record<string, unknown> | undefined {
 	const thresholds = widget.thresholds ?? [];
 	const data = thresholds
 		.map((t) => {
