@@ -110,6 +110,7 @@ type WidgetLike = {
 	decimalPrecision: number;
 	legendPosition: LegendPosition;
 	mergeAllActiveQueries: boolean;
+	chartEngine: 'echarts' | 'uplot';
 };
 
 function createWidget(overrides: Partial<WidgetLike> = {}): WidgetLike {
@@ -119,6 +120,9 @@ function createWidget(overrides: Partial<WidgetLike> = {}): WidgetLike {
 		decimalPrecision: 2,
 		legendPosition: LegendPosition.BOTTOM,
 		mergeAllActiveQueries: false,
+		// 이 스위트는 uPlot Histogram 목을 통해 prop 전달을 검증한다 —
+		// 엔진 오버라이드로 uPlot 경로에 고정(2b Task5: 기본 엔진은 echarts)
+		chartEngine: 'uplot',
 		...overrides,
 	};
 }
