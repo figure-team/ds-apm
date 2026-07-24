@@ -13,12 +13,16 @@ import { MetricRangePayloadProps } from 'types/api/metrics/getQueryRange';
 import { Query } from 'types/api/queryBuilder/queryBuilderData';
 
 import EChartsPlotContextProvider from '../context/EChartsPlotContextProvider';
-import { EChartsOption, EChartsType } from '../echartsCore';
+import { EChartsOption } from '../echartsCore';
 import {
 	DRAG_CLICK_DIST_PX,
 	EChartsClickInfo,
 	useEChartsEvents,
 } from '../hooks/useEChartsEvents';
+import {
+	AxisPointerEventInfo,
+	useEChartsHoverPin,
+} from '../hooks/useEChartsHoverPin';
 import { getSeriesColor } from '../themes/dsapmTheme';
 import { buildUPlotShim } from '../utils/uplotShim';
 import EChartsTooltipPositioner from './EChartsTooltipPositioner';
@@ -57,14 +61,7 @@ export interface EChartsCartesianProps {
 }
 
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
-// uPlot 경로 패리티: 핀은 호버 중 'p' 키 (DEFAULT_PIN_TOOLTIP_KEY — 클릭은 메뉴 전용)
-const PIN_TOOLTIP_KEY = 'p';
 const MS_PER_SEC = 1000;
-
-interface HoverState {
-	dataIndex: number | null;
-	pinned: boolean;
-}
 
 /** timestamps(초, 오름차순)에서 targetSec에 가장 가까운 인덱스 */
 function nearestIndex(timestamps: number[], targetSec: number): number {
@@ -147,12 +144,6 @@ function resolveSingleVisibleSeriesIndex(
 	return found;
 }
 
-/** echarts 'updateAxisPointer' 이벤트 페이로드 — axisTrigger.js의 outputPayload 형태 */
-interface AxisPointerEventInfo {
-	dataIndex?: number;
-	axesInfo?: Array<{ axisDim: string; value?: number }>;
-}
-
 /**
  * updateAxisPointer 이벤트에서 hover dataIndex를 추출한다.
  *
@@ -204,34 +195,8 @@ export default function EChartsCartesian({
 	buildOption,
 	clickMode,
 }: EChartsCartesianProps): JSX.Element {
-	const [chart, setChart] = useState<EChartsType | null>(null);
-	const [hover, setHover] = useState<HoverState>({
-		dataIndex: null,
-		pinned: false,
-	});
 	// 리뷰 반영: 표시 상태(단일 소스는 Provider) — option 재빌드·심 show·클릭 특정에 사용
 	const [visibilityMap, setVisibilityMap] = useState<Record<number, boolean>>({});
-	// 리뷰 반영: 툴팁 배치용 마우스 좌표 (EChartsTooltipPositioner 입력)
-	const [mousePos, setMousePos] = useState<{
-		clientX: number;
-		clientY: number;
-	} | null>(null);
-
-	// handleInstanceReady는 인스턴스 생성 시 한 번만 호출되므로(EChartsView init
-	// effect가 isDarkMode에만 의존) 그 안의 리스너가 최신 chartData를 읽으려면
-	// ref가 필요하다(클로저 고정 방지)
-	const chartDataRef = useRef(chartData);
-	chartDataRef.current = chartData;
-
-	// mousemove는 고빈도라 매 이벤트 setMousePos 시 리렌더가 잦다. rAF로 프레임당
-	// 1회만 반영하고, 핀 상태에선 Positioner가 좌표를 무시하므로 갱신 자체를 건너뛴다.
-	// 리스너는 handleInstanceReady 클로저에 고정되므로 최신 핀 상태는 ref로 읽는다.
-	const pinnedRef = useRef(false);
-	pinnedRef.current = hover.pinned;
-	const mouseRafRef = useRef<number | null>(null);
-	const pendingMouseRef = useRef<{ clientX: number; clientY: number } | null>(
-		null,
-	);
 
 	const reducedMotion = useMemo(
 		() =>
@@ -256,6 +221,20 @@ export default function EChartsCartesian({
 			})),
 		[seriesLabels, widget.customLegendColors, isDarkMode, visibilityMap],
 	);
+
+	// 라인/막대: axisPointer x값(ms) → 최근접 타임스탬프 인덱스 (2a 동작 그대로)
+	const resolveIndex = useCallback(
+		(info: AxisPointerEventInfo): number | null =>
+			resolveHoverDataIndex(info, (chartData[0] ?? []) as number[]),
+		[chartData],
+	);
+	const {
+		chart,
+		hover,
+		mousePos,
+		dismissTooltip,
+		handleInstanceReady,
+	} = useEChartsHoverPin({ canPinTooltip, resolveIndex });
 
 	// 리뷰 반영 — 클릭은 10-인자 OnClickPluginOpts 계약으로 재구성해야 컨텍스트
 	// 메뉴가 열린다(usePanelContextMenu는 queryData.queryName 없으면 메뉴를 안 연다)
@@ -386,83 +365,6 @@ export default function EChartsCartesian({
 			chart.off('click', handler);
 		};
 	}, [chart, clickMode, handleBarClick]);
-
-	const dismissTooltip = useCallback(
-		(): void => setHover({ dataIndex: null, pinned: false }),
-		[],
-	);
-
-	// 리뷰 반영 — 핀은 uPlot 경로 패리티대로 호버 중 'p' 키(클릭은 메뉴 전용).
-	// Esc는 재사용 중인 TooltipFooter(uPlot 경로 컴포넌트, 무수정 재사용)가
-	// "Press P or Esc to unpin" 힌트를 그대로 렌더하므로 해제 전용으로 패리티 유지.
-	useEffect(() => {
-		if (!canPinTooltip) {
-			return undefined;
-		}
-		const onKeyDown = (e: KeyboardEvent): void => {
-			if (e.key === 'Escape') {
-				setHover((prev) => (prev.pinned ? { ...prev, pinned: false } : prev));
-				return;
-			}
-			// uPlot 경로 패리티(TooltipPlugin.tsx:310) — 대소문자 무시 비교
-			if (e.key.toLowerCase() !== PIN_TOOLTIP_KEY) {
-				return;
-			}
-			setHover((prev) =>
-				prev.dataIndex === null && !prev.pinned
-					? prev
-					: { ...prev, pinned: !prev.pinned },
-			);
-		};
-		window.addEventListener('keydown', onKeyDown);
-		return (): void => window.removeEventListener('keydown', onKeyDown);
-	}, [canPinTooltip]);
-
-	// 툴팁 상태: axisPointer 이벤트 → dataIndex 추적 (핀 상태에선 갱신 정지)
-	const handleInstanceReady = useCallback((instance: EChartsType): void => {
-		setChart(instance);
-		instance.on('updateAxisPointer', (e: unknown): void => {
-			const info = e as AxisPointerEventInfo;
-			const timestamps = (chartDataRef.current[0] ?? []) as number[];
-			const dataIndex = resolveHoverDataIndex(info, timestamps);
-			setHover((prev) => (prev.pinned ? prev : { ...prev, dataIndex }));
-		});
-		// 툴팁 배치용 마우스 추적 — rAF로 프레임당 1회만 반영(고빈도 리렌더 방지).
-		// 핀 상태에선 Positioner가 좌표를 무시하므로 갱신 자체를 건너뛴다.
-		instance.getZr().on('mousemove', (e: { event?: MouseEvent }): void => {
-			const native = e.event;
-			if (!native || pinnedRef.current) {
-				return;
-			}
-			pendingMouseRef.current = {
-				clientX: native.clientX,
-				clientY: native.clientY,
-			};
-			if (mouseRafRef.current !== null) {
-				return;
-			}
-			mouseRafRef.current = requestAnimationFrame(() => {
-				mouseRafRef.current = null;
-				if (pendingMouseRef.current) {
-					setMousePos(pendingMouseRef.current);
-				}
-			});
-		});
-		instance.getZr().on('globalout', (): void => {
-			setHover((prev) => (prev.pinned ? prev : { ...prev, dataIndex: null }));
-		});
-	}, []);
-
-	// 언마운트 시 대기 중인 mousemove rAF 취소 (해제 후 setState 방지)
-	useEffect(
-		() => (): void => {
-			if (mouseRafRef.current !== null) {
-				cancelAnimationFrame(mouseRafRef.current);
-				mouseRafRef.current = null;
-			}
-		},
-		[],
-	);
 
 	// TimeSeriesTooltip 재사용을 위한 uPlot 심 (스펙 §4 툴팁 결정)
 	// cursor.idx가 타임스탬프 헤더의 출처이므로 hover.dataIndex를 주입한다 (리뷰 반영)
