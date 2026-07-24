@@ -18,9 +18,6 @@ export default function Home(): JSX.Element {
 	const { t } = useTranslation('home');
 	const { user } = useAppContext();
 	const {
-		isLogsIngestionActive,
-		isTracesIngestionActive,
-		isMetricsIngestionActive,
 		isAnyIngestionActive,
 		showNocDashboard,
 		isLogsLoading,
@@ -64,9 +61,6 @@ export default function Home(): JSX.Element {
 					<NocDashboard />
 				) : (
 					<OnboardingHome
-						isLogsIngestionActive={isLogsIngestionActive}
-						isTracesIngestionActive={isTracesIngestionActive}
-						isMetricsIngestionActive={isMetricsIngestionActive}
 						isAnyIngestionActive={isAnyIngestionActive}
 						isLogsLoading={isLogsLoading}
 						isTracesLoading={isTracesLoading}

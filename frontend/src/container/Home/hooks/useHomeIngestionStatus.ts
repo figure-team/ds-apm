@@ -11,10 +11,6 @@ import { isIngestionActive } from 'utils/app';
 
 const homeInterval = 30 * 60 * 1000;
 
-// Toggle: render the NOC/control-center dashboard once telemetry is flowing.
-// New workspaces (no data yet) keep the onboarding checklist experience.
-const USE_NOC_HOME = true;
-
 export interface HomeIngestionStatus {
 	isLogsIngestionActive: boolean;
 	isTracesIngestionActive: boolean;
@@ -27,8 +23,9 @@ export interface HomeIngestionStatus {
 
 /**
  * Detects which telemetry signals have started flowing so the home page can
- * choose between the NOC dashboard and the onboarding checklist. Each flag
- * latches on: once a signal is seen it stays active for the session.
+ * choose between the NOC dashboard (any signal active) and the onboarding home
+ * (no data yet). Each flag latches on: once a signal is seen it stays active
+ * for the session.
  */
 export default function useHomeIngestionStatus(): HomeIngestionStatus {
 	const [startTime, setStartTime] = useState<number | null>(null);
@@ -131,7 +128,7 @@ export default function useHomeIngestionStatus(): HomeIngestionStatus {
 		isTracesIngestionActive,
 		isMetricsIngestionActive,
 		isAnyIngestionActive,
-		showNocDashboard: USE_NOC_HOME && isAnyIngestionActive,
+		showNocDashboard: isAnyIngestionActive,
 		isLogsLoading,
 		isTracesLoading,
 	};
