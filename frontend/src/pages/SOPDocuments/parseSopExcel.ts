@@ -1,10 +1,18 @@
-import * as XLSX from 'xlsx';
 import SHA256 from 'crypto-js/sha256';
 import {
 	SOP_DOCUMENT_CONTRACT_VERSION,
 	type SopApprovalStatus,
 	type SopDocument,
 } from 'api/v2/rules/sopDocuments';
+import {
+	downloadExcelTemplate,
+	parseExcelFile,
+} from 'components/BulkUpload/parseExcelFile';
+import {
+	type BulkParseResult,
+	type BulkRowBase,
+	summarizeBulkRows,
+} from 'components/BulkUpload/types';
 
 const REQUIRED_COLUMNS = [
 	'sop_id',
@@ -23,19 +31,9 @@ const ALLOWED_APPROVAL_STATUSES: SopApprovalStatus[] = [
 	'disabled',
 ];
 
-export type ParsedSopRow = {
-	rowIndex: number;
-	valid: boolean;
-	error?: string;
-	document?: SopDocument;
-	raw: Record<string, string>;
-};
+export type ParsedSopRow = BulkRowBase & { document?: SopDocument };
 
-export type ParseSopExcelResult = {
-	rows: ParsedSopRow[];
-	validCount: number;
-	errorCount: number;
-};
+export type ParseSopExcelResult = BulkParseResult<ParsedSopRow>;
 
 function parseTags(value: string): string[] {
 	if (!value) return [];
@@ -118,49 +116,11 @@ export function parseSopRows(rows: Record<string, string>[]): ParseSopExcelResul
 		return { rowIndex: idx + 2, valid: true, document, raw: row };
 	});
 
-	return {
-		rows: parsed,
-		validCount: parsed.filter((r) => r.valid).length,
-		errorCount: parsed.filter((r) => !r.valid).length,
-	};
+	return summarizeBulkRows(parsed);
 }
 
 export function parseSopExcel(file: File): Promise<ParseSopExcelResult> {
-	return new Promise((resolve, reject) => {
-		const reader = new FileReader();
-		reader.onload = (e): void => {
-			try {
-				const data = e.target?.result;
-				const workbook = XLSX.read(data, { type: 'binary' });
-				const sheetName = workbook.SheetNames[0];
-				const sheet = workbook.Sheets[sheetName];
-				const rows = XLSX.utils.sheet_to_json<Record<string, string>>(sheet, {
-					raw: false,
-				});
-
-				if (rows.length === 0) {
-					resolve({ rows: [], validCount: 0, errorCount: 0 });
-					return;
-				}
-
-				const missingColumns = REQUIRED_COLUMNS.filter(
-					(col) => !(col in rows[0]),
-				);
-				if (missingColumns.length > 0) {
-					reject(
-						new Error(`필수 컬럼 누락: ${missingColumns.join(', ')}`),
-					);
-					return;
-				}
-
-				resolve(parseSopRows(rows));
-			} catch (err) {
-				reject(err instanceof Error ? err : new Error('파일 파싱 실패'));
-			}
-		};
-		reader.onerror = (): void => reject(new Error('파일 읽기 실패'));
-		reader.readAsBinaryString(file);
-	});
+	return parseExcelFile(file, REQUIRED_COLUMNS, parseSopRows);
 }
 
 export function downloadSopExcelTemplate(): void {
@@ -197,24 +157,15 @@ export function downloadSopExcelTemplate(): void {
 		'안녕하세요. {서비스}에서 {증상} 확인됩니다. {확인 요청 항목} 확인 부탁드립니다.',
 	];
 
-	const wb = XLSX.utils.book_new();
-	const ws = XLSX.utils.aoa_to_sheet([headers, example]);
-	ws['!cols'] = [
-		{ wch: 20 }, // sop_id
-		{ wch: 35 }, // title
-		{ wch: 15 }, // version
-		{ wch: 20 }, // owner_team
-		{ wch: 18 }, // approval_status
-		{ wch: 30 }, // source_id
-		{ wch: 20 }, // project_ids
-		{ wch: 15 }, // environments
-		{ wch: 40 }, // display_url
-		{ wch: 25 }, // tags
-		{ wch: 25 }, // service_account_profile
-		{ wch: 60 }, // body_markdown
-		{ wch: 45 }, // customer_update_template
-		{ wch: 45 }, // vendor_request_template
-	];
-	XLSX.utils.book_append_sheet(wb, ws, 'SOP Template');
-	XLSX.writeFile(wb, 'sop-template.xlsx');
+	downloadExcelTemplate({
+		headers,
+		exampleRows: [example],
+		// headers와 같은 순서: sop_id, title, version, owner_team, approval_status,
+		// source_id, project_ids, environments, display_url, tags,
+		// service_account_profile, body_markdown, customer_update_template,
+		// vendor_request_template
+		columnWidths: [20, 35, 15, 20, 18, 30, 20, 15, 40, 25, 25, 60, 45, 45],
+		sheetName: 'SOP Template',
+		fileName: 'sop-template.xlsx',
+	});
 }

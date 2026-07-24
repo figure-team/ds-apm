@@ -1,4 +1,12 @@
-import * as XLSX from 'xlsx';
+import {
+	downloadExcelTemplate,
+	parseExcelFile,
+} from 'components/BulkUpload/parseExcelFile';
+import {
+	type BulkParseResult,
+	type BulkRowBase,
+	summarizeBulkRows,
+} from 'components/BulkUpload/types';
 
 import type { Runbook, RunbookStatus } from './types';
 
@@ -7,19 +15,9 @@ const REQUIRED_COLUMNS = ['title', 'executable_script'] as const;
 // 일괄 업로드는 신규 등록이므로 deprecated는 허용하지 않는다.
 const ALLOWED_STATUSES: RunbookStatus[] = ['draft', 'approved'];
 
-export type ParsedRunbookRow = {
-	rowIndex: number;
-	valid: boolean;
-	error?: string;
-	runbook?: Partial<Runbook>;
-	raw: Record<string, string>;
-};
+export type ParsedRunbookRow = BulkRowBase & { runbook?: Partial<Runbook> };
 
-export type ParseRunbookExcelResult = {
-	rows: ParsedRunbookRow[];
-	validCount: number;
-	errorCount: number;
-};
+export type ParseRunbookExcelResult = BulkParseResult<ParsedRunbookRow>;
 
 export function parseRunbookRows(
 	rows: Record<string, string>[],
@@ -58,47 +56,11 @@ export function parseRunbookRows(
 		return { rowIndex: idx + 2, valid: true, runbook, raw: row };
 	});
 
-	return {
-		rows: parsed,
-		validCount: parsed.filter((r) => r.valid).length,
-		errorCount: parsed.filter((r) => !r.valid).length,
-	};
+	return summarizeBulkRows(parsed);
 }
 
 export function parseRunbookExcel(file: File): Promise<ParseRunbookExcelResult> {
-	return new Promise((resolve, reject) => {
-		const reader = new FileReader();
-		reader.onload = (e): void => {
-			try {
-				const data = e.target?.result;
-				const workbook = XLSX.read(data, { type: 'binary' });
-				const sheetName = workbook.SheetNames[0];
-				const sheet = workbook.Sheets[sheetName];
-				const rows = XLSX.utils.sheet_to_json<Record<string, string>>(sheet, {
-					raw: false,
-				});
-
-				if (rows.length === 0) {
-					resolve({ rows: [], validCount: 0, errorCount: 0 });
-					return;
-				}
-
-				const missingColumns = REQUIRED_COLUMNS.filter(
-					(col) => !(col in rows[0]),
-				);
-				if (missingColumns.length > 0) {
-					reject(new Error(`필수 컬럼 누락: ${missingColumns.join(', ')}`));
-					return;
-				}
-
-				resolve(parseRunbookRows(rows));
-			} catch (err) {
-				reject(err instanceof Error ? err : new Error('파일 파싱 실패'));
-			}
-		};
-		reader.onerror = (): void => reject(new Error('파일 읽기 실패'));
-		reader.readAsBinaryString(file);
-	});
+	return parseExcelFile(file, REQUIRED_COLUMNS, parseRunbookRows);
 }
 
 export function downloadRunbookExcelTemplate(): void {
@@ -118,14 +80,12 @@ export function downloadRunbookExcelTemplate(): void {
 		],
 	];
 
-	const wb = XLSX.utils.book_new();
-	const ws = XLSX.utils.aoa_to_sheet([headers, ...examples]);
-	ws['!cols'] = [
-		{ wch: 30 }, // title
-		{ wch: 45 }, // description
-		{ wch: 70 }, // executable_script
-		{ wch: 12 }, // status
-	];
-	XLSX.utils.book_append_sheet(wb, ws, 'Runbook Template');
-	XLSX.writeFile(wb, 'runbook-template.xlsx');
+	downloadExcelTemplate({
+		headers,
+		exampleRows: examples,
+		// headers와 같은 순서: title, description, executable_script, status
+		columnWidths: [30, 45, 70, 12],
+		sheetName: 'Runbook Template',
+		fileName: 'runbook-template.xlsx',
+	});
 }
