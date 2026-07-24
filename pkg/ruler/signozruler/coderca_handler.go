@@ -356,7 +356,7 @@ func (handler *handler) EnqueueCodeRCARun(rw http.ResponseWriter, req *http.Requ
 
 // ExportCodeRCARun handles POST /api/v2/ds/coderca/runs/{runId}/export.
 // Renders a done run as a markdown artifact and writes it under the mapped
-// repo's artifactPath (<root>/ds-hub/) for hand-off to ds-navi.
+// repo's artifactPath (<root>/ds-hub/issues/) for hand-off to ds-navi.
 func (handler *handler) ExportCodeRCARun(rw http.ResponseWriter, req *http.Request) {
 	orgID, err := requireOrg(req)
 	if err != nil {

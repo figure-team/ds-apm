@@ -26,7 +26,7 @@
 	"credential_saved": "Credential saved",
 	"repo_enabled": "Enabled",
 	"repo_artifact_path": "Artifact path (local root)",
-	"repo_artifact_path_help": "When exporting to ds-navi, md artifacts are saved under the ds-hub folder in this path. Enter an absolute path reachable by the ds-apm server. For container deployments, bind-mount the host path into the container at the same path.",
+	"repo_artifact_path_help": "When exporting to ds-navi, md artifacts are saved under the ds-hub/issues folder in this path. Enter an absolute path reachable by the ds-apm server. For container deployments, bind-mount the host path into the container at the same path.",
 	"repo_last_sync": "Last Sync",
 	"repo_baseline": "Baseline Commit",
 	"repo_delete_confirm": "Delete this repository connection?",

@@ -26,7 +26,7 @@
 	"credential_saved": "자격증명 저장됨",
 	"repo_enabled": "사용",
 	"repo_artifact_path": "산출물 경로(로컬 루트)",
-	"repo_artifact_path_help": "ds-navi로 전송하면 이 경로 아래 ds-hub 폴더에 md 산출물이 저장됩니다. ds-apm 서버가 접근 가능한 절대 경로를 입력하세요. 컨테이너로 배포한 경우에는 호스트 경로를 컨테이너에 동일 경로로 볼륨 마운트해야 합니다.",
+	"repo_artifact_path_help": "ds-navi로 전송하면 이 경로 아래 ds-hub/issues 폴더에 md 산출물이 저장됩니다. ds-apm 서버가 접근 가능한 절대 경로를 입력하세요. 컨테이너로 배포한 경우에는 호스트 경로를 컨테이너에 동일 경로로 볼륨 마운트해야 합니다.",
 	"repo_last_sync": "마지막 동기화",
 	"repo_baseline": "기준 커밋",
 	"repo_delete_confirm": "이 저장소 연결을 삭제할까요?",

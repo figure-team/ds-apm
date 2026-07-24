@@ -91,7 +91,7 @@ func TestBuildOmitsEmptyLimitations(t *testing.T) {
 	}
 }
 
-func TestWriteCreatesDsHubAndOverwrites(t *testing.T) {
+func TestWriteCreatesDsHubIssuesAndOverwrites(t *testing.T) {
 	root := t.TempDir()
 	d := sampleDetail()
 
@@ -99,7 +99,7 @@ func TestWriteCreatesDsHubAndOverwrites(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if filepath.Dir(p1) != filepath.Join(root, "ds-hub") {
+	if filepath.Dir(p1) != filepath.Join(root, "ds-hub", "issues") {
 		t.Fatalf("wrong dir: %q", p1)
 	}
 

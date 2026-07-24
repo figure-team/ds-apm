@@ -19,7 +19,7 @@ export interface CodebaseRepo {
 	defaultBranch: string;
 	credential: string; // '<unchanged>' 센티널 = 저장된 자격증명 유지
 	enabled: boolean;
-	// 운영 프로젝트 로컬 루트. 설정 시 <경로>/ds-hub/에 RCA 산출물 저장.
+	// 운영 프로젝트 로컬 루트. 설정 시 <경로>/ds-hub/issues/에 RCA 산출물 저장.
 	artifactPath: string;
 	branchName: string;
 	fetched: boolean;
